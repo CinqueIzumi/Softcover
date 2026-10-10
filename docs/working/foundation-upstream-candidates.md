@@ -35,6 +35,8 @@ resolving. `foundation.local=true` remains available as an inner-loop switch (`i
    F18/F20/F21 and adoption.
 2. **Wire the foundation's own `detektCheck` into its `check`** — it is registered but attached to
    nothing, so the foundation does not gate on the config it ships.
+3. **`RhaydusTheme` should provide `LocalHaptics` itself** — today it defaults to `NoOpHaptics` and nothing
+   provides it, so Softcover provides it in `SoftcoverTheme`.
 
 Agent, hook and session-loop changes to port into the `rhaydus-kotlin` plugin are tracked separately in
 [`foundation-token-hygiene.md`](foundation-token-hygiene.md).

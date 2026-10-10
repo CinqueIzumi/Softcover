@@ -16,7 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
@@ -48,7 +48,7 @@ internal fun FocusReadingPanel(
     coverWidth: Dp,
     modifier: Modifier = Modifier,
 ) {
-    val haptics = rememberHaptics()
+    val haptics = LocalHaptics.current
     val isPaused = active.session.isPaused
 
     val elapsed = rememberSessionElapsed(active = active)

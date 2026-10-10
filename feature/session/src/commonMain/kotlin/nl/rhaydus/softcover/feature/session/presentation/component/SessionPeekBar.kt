@@ -31,7 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.component.DesktopTooltip
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.divider.Divider
@@ -106,7 +106,7 @@ private fun SessionPeekBarContent(
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
 ) {
-    val haptics = rememberHaptics()
+    val haptics = LocalHaptics.current
 
     val elapsed = rememberSessionElapsed(active = active)
 

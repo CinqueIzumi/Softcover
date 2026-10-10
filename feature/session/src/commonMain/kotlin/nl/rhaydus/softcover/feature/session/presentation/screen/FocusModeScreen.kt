@@ -11,7 +11,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
@@ -40,7 +40,7 @@ object FocusModeScreen : Screen {
         val active by controller.activeSession.collectAsStateWithLifecycle()
         val screenModel = koinScreenModel<FocusModeScreenModel>()
         val state by screenModel.state.collectAsStateWithLifecycle()
-        val haptics = rememberHaptics()
+        val haptics = LocalHaptics.current
 
         ObserveAsEvents(flow = screenModel.events) { event ->
             when (event) {

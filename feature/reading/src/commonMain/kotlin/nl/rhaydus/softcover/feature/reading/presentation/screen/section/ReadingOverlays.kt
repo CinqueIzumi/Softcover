@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.screen.section
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
@@ -42,7 +42,7 @@ internal fun ReadingOverlays(
     runAction: (ReadingAction) -> Unit,
     controller: MarkAsReadController,
 ) {
-    val haptics = rememberHaptics()
+    val haptics = LocalHaptics.current
 
     val progressSheet = state.progressSheet
 

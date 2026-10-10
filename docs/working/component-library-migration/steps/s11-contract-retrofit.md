@@ -19,7 +19,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-1z | Turn `UiModelBuiltInRender` on; add it to `component-contract.md` § 7.4 and the intro's gate count, drop R10's "once the sweep enables it" | S11-1b–e | [x] |
 | S11-2 | R11 holdouts | — | [x] |
 | S11-3 | `TopBarSurface`, the `ShareCardPalette` fold, the final § 7.4a check | S11-1, S11-2 | [x] |
-| S11-5 | Provide `LocalHaptics` at the theme root; one way of reading haptics | — | [ ] |
+| S11-5 | Provide `LocalHaptics` at the theme root; one way of reading haptics | — | [x] |
 | S11-6 | Haptic vocabulary: `commit` for milestones only, fired after the outcome, `reject` on failure | S11-5 | [ ] |
 | S11-9 | Explore search keeps its results while a refresh runs | SL-15c | [ ] |
 | S11-11 | Numbers that change render through `StatNumber` | S11-2 | [ ] |

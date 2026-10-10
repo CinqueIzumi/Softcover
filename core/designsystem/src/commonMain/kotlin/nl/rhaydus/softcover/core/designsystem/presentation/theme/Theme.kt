@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import nl.rhaydus.designsystem.editorial.EditorialTheme
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.theme.RhaydusTheme
 
 /**
@@ -158,6 +160,7 @@ fun SoftcoverTheme(
             CompositionLocalProvider(
                 LocalEditorialTypography provides defaultEditorialTypography(),
                 LocalDarkTheme provides darkTheme,
+                LocalHaptics provides rememberHaptics(),
                 content = content,
             )
         }

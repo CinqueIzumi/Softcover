@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
@@ -24,7 +24,7 @@ internal fun VersionFooter(
     onSecretUnlocked: () -> Unit,
 ) {
     val tapCounter = remember { SecretTapCounter() }
-    val haptics = rememberHaptics()
+    val haptics = LocalHaptics.current
 
     Divider(
         center = DividerCenter.Label(text = versionLabel),

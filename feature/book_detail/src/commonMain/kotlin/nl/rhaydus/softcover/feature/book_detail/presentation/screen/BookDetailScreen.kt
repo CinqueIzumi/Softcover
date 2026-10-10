@@ -9,7 +9,7 @@ import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -68,7 +68,7 @@ class BookDetailScreen(
 
         val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 
-        val haptics = rememberHaptics()
+        val haptics = LocalHaptics.current
 
         val uriHandler = LocalUriHandler.current
 

@@ -15,6 +15,7 @@ class SoftcoverRuleSetProvider : RuleSetProvider {
                 RawSpacingDp(config),
                 RawCornerDp(config),
                 UiModelBuiltInRender(config),
+                RememberHapticsOutsideTheme(config),
             ),
         )
     }

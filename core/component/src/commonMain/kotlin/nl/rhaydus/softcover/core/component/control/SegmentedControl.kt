@@ -35,7 +35,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
@@ -77,7 +77,7 @@ private fun <K> TrackSegments(
     onEvent: (SegmentedControlEvent<K>) -> Unit,
     modifier: Modifier,
 ) {
-    val haptics = rememberHaptics()
+    val haptics = LocalHaptics.current
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -166,7 +166,7 @@ private fun <K> ProseSegments(
     onEvent: (SegmentedControlEvent<K>) -> Unit,
     modifier: Modifier,
 ) {
-    val haptics = rememberHaptics()
+    val haptics = LocalHaptics.current
 
     Row(
         verticalAlignment = Alignment.CenterVertically,

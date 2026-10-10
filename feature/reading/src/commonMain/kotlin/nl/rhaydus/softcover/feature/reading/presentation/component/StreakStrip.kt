@@ -24,7 +24,7 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import nl.rhaydus.common.currentLocalDate
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
@@ -49,7 +49,7 @@ internal fun StreakStrip(
     onEvent: (StreakStripEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val haptics = rememberHaptics()
+    val haptics = LocalHaptics.current
 
     val litColor = MaterialTheme.colorScheme.primary
     val trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f)

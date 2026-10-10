@@ -5,6 +5,9 @@ softcover:
     active: true
   RawCornerDp:
     active: true
+  RememberHapticsOutsideTheme:
+    active: true
+    excludes: ['**/core/designsystem/presentation/theme/Theme.kt']
   UiModelBuiltInRender:
     active: true
     excludes: ['**/*Previews.kt', '**/gallery/**', '**/src/debug/**', '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**']

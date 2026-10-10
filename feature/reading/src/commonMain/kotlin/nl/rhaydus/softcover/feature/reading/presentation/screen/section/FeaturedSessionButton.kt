@@ -11,7 +11,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.state.skeletonMask
@@ -33,7 +33,7 @@ internal fun FeaturedSessionButton(
     val controller = koinInject<ActiveSessionController>()
     val navigator = LocalNavigator.currentOrThrow
     val appNavigator = koinInject<AppNavigator>()
-    val haptics = rememberHaptics()
+    val haptics = LocalHaptics.current
     val active by controller.activeSession.collectAsStateWithLifecycle()
 
     val currentBook by rememberUpdatedState(book)

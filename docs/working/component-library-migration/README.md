@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-3 done, uncommitted. R10 now rules the composition-only-value edge (one model per outcome on the `UiState`, the render picks; book detail's `topBar` / `overMediaTopBar` already comply, no code change). `ShareCard`'s surface and content colours resolve in one `when`. § 7.4a holds only its four standing exceptions; no `@ModelBuiltInComposition` in production. PF-4/7 wait for S12-4.
-- **Next:** commit S11-3, then S11-5 per `steps/s11-contract-retrofit.md` § S11-5.
+- **State:** S11-5 done, uncommitted. `SoftcoverTheme` provides `LocalHaptics provides rememberHaptics()`; every app reader uses `LocalHaptics.current`. New app-local detekt rule `RememberHapticsOutsideTheme` (import-based; `ForbiddenMethodCall` cannot resolve foundation symbols) gates it, rule-scoped exclude for `Theme.kt`. PF-4/7 wait for S12-4.
+- **Next:** commit S11-5, then S11-6 per `steps/s11-contract-retrofit.md` § S11-6 (haptic vocabulary).
 - **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21, after the last Kotlin edit: `:core:component:compileKotlinJvm` and `styleCheck` passed. No reviewer pass (one-file Kotlin fold plus docs).
-- **Uncommitted:** all of S11-3 (`ShareCard.kt`, `component-contract.md`, the S11 step file, this block).
+- **Verification:** JBR 21, after the last edit: touched modules compile, `styleCheck` passed; the rule fired on a probe import; `RememberHapticsOutsideThemeTest` (6) passed; AAA 6/6/6; glom check clean. Reviewer: looks good, no blockers.
+- **Uncommitted:** all of S11-5 (Theme.kt, 12 call sites, the rule + test + provider + `softcover-rules.yml`, `code-style.md`, `platform-helpers.md`, `foundation-upstream-candidates.md`, the S11 step file, this block).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

@@ -10,7 +10,7 @@
 
 ### Haptics helper
 
-The single entry point for haptic feedback. Exposes eight semantic cases. No ad-hoc haptics — never call `performHapticFeedback` from a call site; always go through the helper. The "no mixed icon families" rule (§2.6) has a sibling here.
+The single entry point for haptic feedback. Exposes eight semantic cases. Call sites read it with `LocalHaptics.current`, which `SoftcoverTheme` provides once; `rememberHaptics()` is called nowhere else. No ad-hoc haptics — never call `performHapticFeedback` from a call site; always go through the helper. The "no mixed icon families" rule (§2.6) has a sibling here.
 
 - **commit** — a user-triggered action succeeded (mark-as-read, save, confirm). Celebratory in texture; reserved for commit-class actions, never navigation taps.
 - **reject** — an optimistic mutation rolled back, or an action refused. Pair with the shake-on-error visual (§2.5).

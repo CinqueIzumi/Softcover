@@ -36,7 +36,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.shakeOnError
@@ -131,7 +131,7 @@ object MotionDebugScreen : Screen {
 
     @Composable
     private fun HapticsSection(header: SectionHeaderUiModel.Label) {
-        val haptics = rememberHaptics()
+        val haptics = LocalHaptics.current
 
         SectionHeader(model = header)
 

@@ -34,7 +34,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.secondsToHm
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
@@ -71,7 +71,7 @@ internal fun ShelveControlCard(
 
     val status = book?.status
     val mutationFailed = book != null && book.id in state.failedMutationBookIds
-    val haptics = rememberHaptics()
+    val haptics = LocalHaptics.current
 
     Box(
         modifier = Modifier
