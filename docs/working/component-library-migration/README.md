@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-16 built and reviewed (no findings): `haptics.select()` fires in `SheetRow`, `PreviewTileFrame` and `SettingsSelectableRow` when not already selected, in `ToggleRow` on every toggle, and in `Chip` on every click of a `Tonal` / `Choice` tone; `ToggleRow`'s `Switch` shares the row's interaction source. Not yet felt on device. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
-- **Next:** S11-17 Phase 1 in `steps/s11-contract-retrofit.md` § S11-17.
+- **State:** S11-17 committed: new `SelectionCheck` pops its check in `SheetRow` and `SettingsSelectableRow`; `SheetRow` ink, the `PreviewTileFrame` ring and label, and the settings title animate on `defaultEffectsSpec`; the glyph `Toggle` crossfades and pops on fill. Not yet seen on device. S11-16's ticks not yet felt on device. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
+- **Next:** S11-18 Phase 1 in `steps/s11-contract-retrofit.md` § S11-18.
 - **Open questions:** none. Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm`, `:feature:settings:compileKotlinJvm`, `checkModuleGraph`, `projectHealth` (both), `ktlintCheck`, `styleCheck` pass after S11-16; close-out grep found no glommed closers. No tests (no logic).
-- **Uncommitted:** S11-16 (five Kotlin files, step file, this `## Now`).
+- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm`, `:feature:settings:compileKotlinJvm`, `checkModuleGraph`, `projectHealth` (both), `ktlintCheck`, `styleCheck` pass after S11-17; close-out grep found no glommed closers. No tests (no logic).
+- **Uncommitted:** none.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

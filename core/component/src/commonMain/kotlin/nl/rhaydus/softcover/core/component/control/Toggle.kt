@@ -1,6 +1,11 @@
 package nl.rhaydus.softcover.core.component.control
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -61,10 +66,7 @@ fun Toggle(
         label = "IconToggleTint",
     )
     val interactionSource = remember { MutableInteractionSource() }
-    val icon = drawableIconResource(
-        icon = if (model.checked) model.on else model.off,
-        contentDescription = model.description,
-    )
+    val motionScheme = MaterialTheme.motionScheme
 
     DesktopTooltip(text = model.description) {
         Box(
@@ -88,12 +90,35 @@ fun Toggle(
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                painter = icon.getIconPainter(),
-                contentDescription = icon.contentDescription,
-                tint = tint,
-                modifier = Modifier.size(iconSize),
-            )
+            AnimatedContent(
+                targetState = model.checked,
+                transitionSpec = {
+                    if (targetState) {
+                        val pop = scaleIn(
+                            initialScale = 0.6f,
+                            animationSpec = motionScheme.defaultSpatialSpec(),
+                        ) + fadeIn(animationSpec = motionScheme.fastEffectsSpec())
+
+                        pop togetherWith fadeOut(animationSpec = motionScheme.fastEffectsSpec())
+                    } else {
+                        fadeIn(animationSpec = motionScheme.fastEffectsSpec()) togetherWith
+                            fadeOut(animationSpec = motionScheme.fastEffectsSpec())
+                    }
+                },
+                label = "ToggleGlyph",
+            ) { checked ->
+                val icon = drawableIconResource(
+                    icon = if (checked) model.on else model.off,
+                    contentDescription = model.description,
+                )
+
+                Icon(
+                    painter = icon.getIconPainter(),
+                    contentDescription = icon.contentDescription,
+                    tint = tint,
+                    modifier = Modifier.size(iconSize),
+                )
+            }
         }
     }
 }

@@ -29,6 +29,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.selection.SelectionCheck
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 
@@ -128,6 +129,32 @@ internal val primitiveEntries: ImmutableList<GalleryEntry> = persistentListOf(
             selectionMarkFixture(
                 backdrop = SelectionMarkBackdrop.Surface,
                 selected = false,
+            ),
+        ),
+    ),
+    GalleryEntry(
+        name = "SelectionCheck",
+        family = GalleryFamily.SELECTION,
+        blurb = "An accent check that pops in when selected and keeps its space when not, " +
+            "for a sheet row or a settings choice row.",
+        fixtures = persistentListOf(
+            GalleryFixture(
+                label = "Selected",
+                render = { modifier ->
+                    SelectionCheck(
+                        selected = true,
+                        modifier = modifier,
+                    )
+                },
+            ),
+            GalleryFixture(
+                label = "Unselected",
+                render = { modifier ->
+                    SelectionCheck(
+                        selected = false,
+                        modifier = modifier,
+                    )
+                },
             ),
         ),
     ),

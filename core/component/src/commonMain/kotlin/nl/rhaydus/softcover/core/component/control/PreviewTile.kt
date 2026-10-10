@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.core.component.control
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,11 +59,27 @@ internal fun PreviewTileFrame(
     val haptics = LocalHaptics.current
     val interactionSource = remember { MutableInteractionSource() }
 
-    val accentColor = if (selected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.outlineVariant
-    }
+    val motionScheme = MaterialTheme.motionScheme
+    val accentColor by animateColorAsState(
+        targetValue = if (selected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.outlineVariant
+        },
+        animationSpec = motionScheme.defaultEffectsSpec<Color>(),
+    )
+    val borderWidth by animateDpAsState(
+        targetValue = if (selected) 2.dp else 1.dp,
+        animationSpec = motionScheme.defaultEffectsSpec<Dp>(),
+    )
+    val labelColor by animateColorAsState(
+        targetValue = if (selected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
+        animationSpec = motionScheme.defaultEffectsSpec<Color>(),
+    )
 
     Column(
         modifier = modifier
@@ -87,7 +106,7 @@ internal fun PreviewTileFrame(
                 .aspectRatio(TILE_ASPECT_RATIO)
                 .clip(Corners.lg)
                 .border(
-                    width = if (selected) 2.dp else 1.dp,
+                    width = borderWidth,
                     color = accentColor,
                     shape = Corners.lg,
                 ),
@@ -99,11 +118,7 @@ internal fun PreviewTileFrame(
         SoftcoverText(
             text = label,
             style = MaterialTheme.editorialTypography.titleSmall,
-            color = if (selected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
+            color = labelColor,
             textAlign = TextAlign.Center,
         )
     }

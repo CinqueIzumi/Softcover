@@ -59,7 +59,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Deadline badge / cover overlay / summary line** — `core:component/badge` + `deadline` — deadline marks.
 - **Revealed when present** — `core:component/state` — expands a row vertically while its value is non-null.
 - **Unreleased badge** — `core:component/badge` — `Primary` tone; resolved in `core:uibinding` `release/`.
-- **Selection mark** — `core:component/selection` — selected-state circle mark for a cover, row or edition card.
+- **Selection mark / check** — `core:component/selection` — circle mark for a cover or card; space-keeping check for rows.
 - **Reorder lift** — `core:component/reorder` — `Modifier.reorderLift`: the one drag-to-reorder lift.
 - **Mark-as-read celebration** — `core:component/celebration` — mark-as-read particle burst.
 - **Search results pagination** (feature-owned) — [detail](components/states-feedback.md#search-results-pagination) — append-on-scroll paging.

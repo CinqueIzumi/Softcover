@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.component.sheet
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,8 +11,10 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -22,8 +24,8 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.selection.SelectionCheck
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -58,11 +60,14 @@ internal fun <K> SheetRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            val ink = if (model.selected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            }
+            val ink by animateColorAsState(
+                targetValue = if (model.selected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
+                animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>(),
+            )
 
             if (model.leadingIcon != null) {
                 val leadingIcon = drawableIconResource(
@@ -96,24 +101,7 @@ internal fun <K> SheetRow(
                 )
             }
 
-            Box(
-                modifier = Modifier.size(18.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (model.selected) {
-                    val check = drawableIconResource(
-                        icon = SoftcoverIcon.Check,
-                        contentDescription = "",
-                    )
-
-                    Icon(
-                        painter = check.getIconPainter(),
-                        contentDescription = check.contentDescription,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(18.dp),
-                    )
-                }
-            }
+            SelectionCheck(selected = model.selected)
         }
     }
 }

@@ -30,7 +30,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-14 | Cover selection animates | SL-15a, S11-42 | [x] |
 | S11-15 | One reorder lift treatment | S11-6 | [x] |
 | S11-16 | Selectable controls fire `select`; `ToggleRow` shares its interaction source | S11-6 | [x] |
-| S11-17 | Selection states animate with motion-scheme specs | SL-15a | [ ] |
+| S11-17 | Selection states animate with motion-scheme specs | SL-15a | [x] |
 | S11-18 | `SheetScaffold` footer: no haptic of its own, spinner on the running button | S11-6 | [ ] |
 | S11-19 | The progress sheet plays its dismiss on submit | — | [ ] |
 | S11-20 | Every sheet host leaves on `Dismissed` | S11-19 | [ ] |
@@ -58,13 +58,14 @@ primitives among them), and every premium-feel sub-step has landed.
 
 ## Approved shape
 
-S11-16:
-- `haptics.select()` fires inside the component just before its event, only when the press changes something; no new types, helpers or model fields. No tests (no logic), no fixture or Gallery change.
-- `SheetRow` and `PreviewTileFrame`: in the `selectable` click, only when not already selected; the event still goes out unchanged.
-- `ToggleRow`: in `onValueChange`, always; its `interactionSource` also goes to the display-only `Switch`, so the thumb grows on a row press.
-- `SettingsSelectableRow` (feature-local): wraps `onClick`, only when not already selected.
-- `Chip`: on every click of a selectable tone (`Tonal`, `Choice`), so the active sort chip's direction flip ticks; no other tone fires.
-- The glyph `Toggle` stays silent: its bookmark is S11-25; its other uses fire from their save's outcome event.
+S11-17:
+- `Chip` is already on motion-scheme specs (S11-42); no change.
+- New public data-free primitive `SelectionCheck(selected, modifier, size = 18.dp)` in `:core:component` package `selection`: a `size` box that keeps its space; the primary `Check` pops in via `AnimatedVisibility` (`scaleIn(defaultSpatialSpec) + fadeIn(fastEffectsSpec)`; out `scaleOut + fadeOut` on `fastEffectsSpec`). Gallery entry with selected and unselected fixtures.
+- `SheetRow`: `ink` animates on `defaultEffectsSpec`; the check becomes `SelectionCheck`.
+- `PreviewTileFrame`: ring colour, ring width (1→2 dp, `animateDpAsState`) and label colour animate on `defaultEffectsSpec`.
+- `SettingsSelectableRow` (feature-local): title colour animates on `defaultEffectsSpec`; the check becomes `SelectionCheck(size = 24.dp)`.
+- Glyph `Toggle`: the icon swap is an `AnimatedContent` on `checked`; filling enters with `scaleIn(initialScale ≈ 0.6, defaultSpatialSpec) + fadeIn(fastEffectsSpec)`, emptying is a plain fade on `fastEffectsSpec`. Container and tint unchanged.
+- Scheme specs only, so reduced motion snaps with no branch. No model fields or helpers beyond `SelectionCheck`; no tests (no logic). `ToggleRow`'s `Switch` untouched.
 
 ## R10 edges
 
@@ -205,6 +206,9 @@ buttons do.
 
 A host that navigates away on a sheet click or a `closeRequested` write removes the sheet mid-animation.
 Sweep every `SheetScaffold` and `AdaptiveModalSheet` host: each leaves on `SheetScaffoldEvent.Dismissed`.
+A host torn down by the sheet's own selection drops it the same way: the Explore genre sheet
+(`BecauseYouReadGenreControl`, likely `BecauseYouReadSection`'s early return while the rail reloads) and the
+Library shelf sheet (`LibraryShelvesSheet`, cause untraced) vanish on a pick instead of sliding down.
 
 ### S11-21 — Panel sheets animate
 
