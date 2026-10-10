@@ -228,12 +228,14 @@ Filed but not yet implemented in the foundation.
 
 - **Type:** enhancement
 - **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.component.AdaptiveModalSheet`)
-- **Status:** **Open.** The panel form (expanded width) is a bare `Dialog`: no enter or exit animation, an
-  instant dismiss, a 1 dp outline and no elevation, while the compact bottom sheet animates both ways.
-- **Impact in the app:** every sheet on tablet and desktop (share, verdict, lists, re-auth, unknown ISBN)
-  appears and vanishes in one frame.
-- **What to build:** scale and fade the panel in, fade the scrim, and play the exit before
-  `onDismissRequest` (Esc included), all gated by `playDecorativeMotion()`; give the panel elevation.
+- **Status:** **Open — built locally first.** The panel form (expanded width) is a bare `Dialog`: no enter
+  or exit animation, an instant dismiss, a 1 dp outline and no elevation, while the compact bottom sheet
+  animates both ways. Softcover's `:core:component` `sheet/AdaptiveModalSheet` (same signature) delegates
+  compact widths to the foundation and renders an animated panel itself on expanded widths.
+- **What to build:** move the local panel into the foundation unchanged in behaviour (scale and fade in,
+  a fading scrim, the exit played before `onDismissRequest` for outside tap, back, Esc and
+  `LocalModalSheetDismiss`, specs from the motion scheme, `shadowElevation` 6 dp instead of the outline),
+  release, swap Softcover's imports back and delete the local copy.
 
 ### F36 — Desktop share-card capture reports a cancel as a failure and hides the clipboard copy
 

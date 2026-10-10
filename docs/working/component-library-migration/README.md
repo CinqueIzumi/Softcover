@@ -14,12 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-20 done and ticked (sheet hosts leave on `Dismissed`; Choose lists' "Create a new list" is the scaffold's secondary footer button; Hero field placeholder centred). Device-checked on Medium_Phone, reviewed, no blockers. "Show N titles" waits on F42; PF-4/7 wait for S12-4.
-- **Also done:** Settings → Library tabs' foot action is a full-width `TEXT` `RhaydusButton` "Create a new list" ending the list (`NewListFootAction` inlined and deleted; `patterns/settings.md` updated). Reviewed clean; device-checked on Medium_Phone.
-- **Next:** S11-21 (`steps/s11-contract-retrofit.md` § S11-21).
-- **Open questions:** Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21. `styleCheck`, `checkDocBudgets`, `:app:installDebug` passed after the last Kotlin edit; `ChooseListsMapperTest` and `:core:component` host tests green; close-out gate (glom grep, AAA markers) clean.
-- **Uncommitted:** nothing; S11-20 committed.
+- **State:** S11-21 built app-local (`:core:component` `sheet/AdaptiveModalSheet` + `ScrimlessDialog` expect/actual; F35 marked built locally first), reference docs updated, reviewed with fixes applied, desktop-checked by the user and ticked. "Show N titles" waits on F42; PF-4/7 wait for S12-4.
+- **Next:** S11-22, field errors on the field (`steps/s11-contract-retrofit.md` § S11-22).
+- **Open questions:** none.
+- **Accepted:** deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
+- **Verification:** JBR 21. `styleCheck`, `ktlintCheck`, `checkModuleGraph`, `checkDocBudgets`, `:core:component:projectHealth`, JVM / Android / iOS-simulator compiles of `:core:component`, `:feature:lists` and `:desktopApp` passed; glom grep clean. No tests (composition only).
+- **Uncommitted:** all of S11-21 (Kotlin, reference docs, tracker docs).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

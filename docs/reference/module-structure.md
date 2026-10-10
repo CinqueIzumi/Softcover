@@ -137,7 +137,7 @@ component/
 + selection/   SelectionMark  SelectionMarkBackdrop
 + share/       ShareCard  ShareCardUiModel
 +              one file per card body (Book and ReadingUpdate share one)
-+ sheet/       LoadingSheet  LoadingSheetUiModel  LoadingSheetEvent
++ sheet/       AdaptiveModalSheet  LoadingSheet  LoadingSheetUiModel  LoadingSheetEvent
 +              SheetScaffold(+UiModel, +Event, +Layout)  SheetHeaderUiModel/Trailing
 +              SheetFooterUiModel/Button/Layout  SheetRowUiModel, SheetRowEvent
 +              SheetRowGroup(+UiModel), which owns selectableGroup() for the radio rows

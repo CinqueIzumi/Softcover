@@ -34,7 +34,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-18 | `SheetScaffold` footer: no haptic of its own, spinner on the running button | S11-6 | [x] |
 | S11-19 | The progress sheet plays its dismiss on submit | — | [x] |
 | S11-20 | Every sheet host leaves on `Dismissed` | S11-19 | [x] |
-| S11-21 | Panel-form `AdaptiveModalSheet` animates in and out, with elevation | SL-15a | [ ] |
+| S11-21 | Panel-form `AdaptiveModalSheet` animates in and out, with elevation | SL-15a | [x] |
 | S11-22 | `TextFieldUiModel` error state: outline, shake and `reject` | S11-6 | [ ] |
 | S11-23 | `StepperCircle`: press scale, a tick per step, accelerating auto-repeat | S11-6 | [ ] |
 | S11-24 | Progress-sheet tab body crossfades with a size transform | SL-15a | [ ] |
@@ -79,6 +79,13 @@ S11-20 (rule: a sheet tap records the outcome and starts the hide; the host clos
 - `LibraryShelvesSheet` pick: switch first, then slide. `SheetRowGroupUiModel.dismissesSheet` (default true); the shelves group sets false; the host snaps the pager, awaits a drawn frame, then sets `closeRequested` (the pick's frame drop landed in the hide's first frames).
 - Explore genre pick goes straight from content to the masked skeleton: the section's show / loading / hidden decision is one derived value, consistent with its `set`.
 - Tests: every changed action, via test-writer.
+
+S11-21 (built app-local first; F35 moves it upstream):
+- `:core:component` `sheet/AdaptiveModalSheet`, same name and signature as the foundation's; `SheetScaffold` and `CreateListScreen` swap their import.
+- Compact / medium width delegates to the foundation `AdaptiveModalSheet` (its sheet form); expanded renders a local panel providing the foundation `LocalModalSheetForm` (PANEL) and `LocalModalSheetDismiss`.
+- Panel scales ~0.92→1 and fades; an own full-window scrim fades (platform dim off); specs from `MaterialTheme.motionScheme` only.
+- Outside tap, back, Esc and `LocalModalSheetDismiss` all play the exit, then `onDismissRequest` once.
+- `shadowElevation = 6.dp`, the 1 dp outline dropped. No new models; no tests (composition only).
 
 ## R10 edges
 
