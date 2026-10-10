@@ -9,11 +9,11 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVaria
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ActionScope
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.milliseconds
 
 internal data class OnQueryChangeAction(
     val newQuery: String,
-    val searchDelay: Duration = 1.seconds,
+    val searchDelay: Duration = 400.milliseconds,
 ) : ExploreAction {
     override suspend fun execute(
         dependencies: ExploreDependencies,
@@ -34,6 +34,7 @@ internal data class OnQueryChangeAction(
             it.copy(
                 searchText = newQuery,
                 isLoading = true,
+                loadingMoreQueriedBooks = false,
                 searchError = null,
                 // A keystroke always supersedes a mood browse, whether it starts a new text
                 // search or (on the empty string above) returns to the feed.

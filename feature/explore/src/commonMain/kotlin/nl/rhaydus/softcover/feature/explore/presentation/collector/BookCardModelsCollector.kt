@@ -84,18 +84,13 @@ internal class BookCardModelsCollector : ExploreCollector {
                             standIns = UP_NEXT_STAND_IN_CARDS,
                             map = Book::toUpNextCard,
                         ),
-                        searchResults = if (snapshot.isLoading) {
-                            BookCardSet.standIns(SEARCH_RESULT_STAND_IN_CARDS)
-                        } else {
-                            snapshot.queriedBooks.map { book ->
-                                book.toSearchResultCard(
-                                    cover = book.toCoverUiModel(
-                                        variant = CoverVariant.Flat,
-                                        shareTransition = true,
-                                    ),
-                                ) to book
-                            }.toBookCardSet()
-                        },
+                        searchResults = snapshot.queriedBooks.toCardSet(
+                            loading = snapshot.isLoading,
+                            coverVariant = CoverVariant.Flat,
+                            coverSurface = null,
+                            standIns = SEARCH_RESULT_STAND_IN_CARDS,
+                            map = { book, cover, _ -> book.toSearchResultCard(cover) },
+                        ),
                     )
                 }
             }
@@ -105,10 +100,10 @@ internal class BookCardModelsCollector : ExploreCollector {
 private inline fun List<Book>.toCardSet(
     loading: Boolean,
     coverVariant: CoverVariant,
-    coverSurface: String,
-    overlays: Map<Int, CoverOverlayUiModel>,
+    coverSurface: String?,
     standIns: ImmutableList<BookCardUiModel>,
-    map: (Book, CoverUiModel?, CoverOverlayUiModel?) -> BookCardUiModel,
+    overlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
+    map: (Book, CoverUiModel, CoverOverlayUiModel?) -> BookCardUiModel,
 ): BookCardSet<Book> = if (loading && isEmpty()) {
     BookCardSet.standIns(standIns)
 } else {

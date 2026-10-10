@@ -264,4 +264,67 @@ class ExploreScreenUiStateTest {
             result shouldBe false
         }
     }
+
+    @Nested
+    inner class IsRefreshingSearchResults {
+        @Test
+        fun `loading with real cards is true`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(
+                isLoading = true,
+                searchResults = BookCardSet.standIns(persistentListOf(BookCardUiModel.previews.values.first().copy(isLoading = false))),
+            )
+
+            // ----- Act -----
+            val result = state.isRefreshingSearchResults
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `loading with stand-in cards is false`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(
+                isLoading = true,
+                searchResults = BookCardSet.standIns(persistentListOf(BookCardUiModel.previews.values.first().copy(isLoading = true))),
+            )
+
+            // ----- Act -----
+            val result = state.isRefreshingSearchResults
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `loading with no cards is false`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(
+                isLoading = true,
+                searchResults = BookCardSet.empty(),
+            )
+
+            // ----- Act -----
+            val result = state.isRefreshingSearchResults
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `not loading with real cards is false`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(
+                isLoading = false,
+                searchResults = BookCardSet.standIns(persistentListOf(BookCardUiModel.previews.values.first().copy(isLoading = false))),
+            )
+
+            // ----- Act -----
+            val result = state.isRefreshingSearchResults
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+    }
 }

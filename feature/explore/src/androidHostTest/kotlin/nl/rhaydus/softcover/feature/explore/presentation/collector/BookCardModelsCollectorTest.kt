@@ -325,7 +325,59 @@ class BookCardModelsCollectorTest {
             }
 
         @Test
-        fun `emits six loading search stand-ins while a search is loading`() = runTest(UnconfinedTestDispatcher()) {
+        fun `emits six loading search stand-ins while a search is loading with no results on screen`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launch {
+                    BookCardModelsCollector().onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    queriedBooks = emptyList(),
+                    isLoading = true,
+                )
+
+                // ----- Assert -----
+                val cards = stateFlow.value.searchResults.cards
+                cards shouldHaveSize 6
+                cards.all { it.isLoading } shouldBe true
+                cards.map { it.key }.distinct() shouldHaveSize 6
+                job.cancel()
+            }
+
+        @Test
+        fun `keeps the mapped search cards instead of stand-ins while a refresh is loading`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launch {
+                    BookCardModelsCollector().onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    queriedBooks = listOf(book(id = 1), book(id = 2)),
+                    isLoading = true,
+                )
+
+                // ----- Assert -----
+                val cards = stateFlow.value.searchResults.cards
+                cards.map { it.key } shouldBe listOf(
+                    BookCardKey.Book(bookId = 1),
+                    BookCardKey.Book(bookId = 2),
+                )
+                cards.none { it.isLoading } shouldBe true
+                job.cancel()
+            }
+
+        @Test
+        fun `emits the mapped search cards when not loading`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val job = launch {
                 BookCardModelsCollector().onLaunch(
@@ -336,15 +388,14 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                queriedBooks = listOf(book(id = 1)),
-                isLoading = true,
+                queriedBooks = listOf(book(id = 7)),
+                isLoading = false,
             )
 
             // ----- Assert -----
             val cards = stateFlow.value.searchResults.cards
-            cards shouldHaveSize 6
-            cards.all { it.isLoading } shouldBe true
-            cards.map { it.key }.distinct() shouldHaveSize 6
+            cards.map { it.key } shouldBe listOf(BookCardKey.Book(bookId = 7))
+            cards.none { it.isLoading } shouldBe true
             job.cancel()
         }
 

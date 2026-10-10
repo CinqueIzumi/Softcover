@@ -52,6 +52,11 @@ internal fun DesktopSearchResults(
 
             Spacer(modifier = Modifier.height(Spacing.md))
 
+            ScrollToTopWhenResultsReplacedEffect(
+                state = state,
+                scrollToTop = { searchResultsGridState.scrollToItem(0) },
+            )
+
             LoadMoreSearchResultsEffect(
                 state = state,
                 lastVisibleIndex = { searchResultsGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index },
@@ -67,7 +72,9 @@ internal fun DesktopSearchResults(
                 LazyVerticalGrid(
                     state = searchResultsGridState,
                     columns = GridCells.Adaptive(minSize = 380.dp),
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .dimWhileRefreshing(state.isRefreshingSearchResults),
                     contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.xl),
                     verticalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -76,6 +83,7 @@ internal fun DesktopSearchResults(
                         BookCard(
                             model = card,
                             onEvent = onSearchResultEvent,
+                            modifier = searchResultItemModifier(),
                         )
                     }
 

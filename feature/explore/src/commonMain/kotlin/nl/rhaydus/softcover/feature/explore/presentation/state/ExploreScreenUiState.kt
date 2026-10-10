@@ -7,6 +7,7 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -49,12 +50,13 @@ internal data class ExploreScreenUiState(
     val trending: BookCardSet<Book> = BookCardSet.standIns(TRENDING_STAND_IN_CARDS),
     val becauseYouRead: BookCardSet<Book> = BookCardSet.standIns(BECAUSE_YOU_READ_STAND_IN_CARDS),
     val upNext: BookCardSet<Book> = BookCardSet.standIns(UP_NEXT_STAND_IN_CARDS),
-    // Loading stand-ins while a search runs or its first result's cover is pending.
+    // Loading stand-ins until the first search lands; a later search keeps the previous results
+    // up until its own arrive.
     val searchResults: BookCardSet<Book> = BookCardSet.standIns(SEARCH_RESULT_STAND_IN_CARDS),
     // The Typesense `search` endpoint returns no total hit count, so `queriedBooksHasMore` is a
     // "maybe more" signal derived from whether the last fetched page came back full, not an
     // authoritative total. `loadingMoreQueriedBooks` is
-    // the append-spinner flag, kept separate from `isLoading` (the full-screen/replace spinner) so
+    // the append-spinner flag, kept separate from `isLoading` (a page-1 search) so
     // the UI can tell an initial search from a "load more" tail fetch.
     val queriedBooksHasMore: Boolean = true,
     val loadingMoreQueriedBooks: Boolean = false,
@@ -141,6 +143,9 @@ internal data class ExploreScreenUiState(
             searchFocused -> ExploreSearchPhase.FOCUS
             else -> ExploreSearchPhase.FEED
         }
+
+    val isRefreshingSearchResults: Boolean
+        get() = isLoading && searchResults.cards.isNotEmpty() && searchResults.cards.none(BookCardUiModel::isLoading)
 
     val showsNoSearchResults: Boolean
         get() = searchPhase == ExploreSearchPhase.RESULTS &&

@@ -107,6 +107,34 @@ class OnQueryChangeActionTest {
         }
 
         @Test
+        fun `a non-empty query drops a pending load-more spinner`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(loadingMoreQueriedBooks = true)
+
+            coEvery {
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
+            } returns Result.success(Unit)
+
+            val action = OnQueryChangeAction(
+                newQuery = "kotlin",
+                searchDelay = 1_000_000.milliseconds,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.loadingMoreQueriedBooks shouldBe false
+        }
+
+        @Test
         fun `stops loading once the search for a non-empty query succeeds`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)

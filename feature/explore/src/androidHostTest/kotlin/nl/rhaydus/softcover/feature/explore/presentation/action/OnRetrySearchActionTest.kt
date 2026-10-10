@@ -98,6 +98,37 @@ class OnRetrySearchActionTest {
         }
 
         @Test
+        fun `drops a pending load-more spinner before executing the search`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(
+                searchText = "dune",
+                loadingMoreQueriedBooks = true,
+            )
+
+            var stateAtSearchTime: ExploreScreenUiState? = null
+
+            coEvery {
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
+            } answers {
+                stateAtSearchTime = stateFlow.value
+                Result.success(Unit)
+            }
+
+            // ----- Act -----
+            OnRetrySearchAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateAtSearchTime.shouldNotBeNull().loadingMoreQueriedBooks shouldBe false
+        }
+
+        @Test
         fun `searches the current searchText and tracks the new queryJob`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)

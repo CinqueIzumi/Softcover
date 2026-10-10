@@ -140,6 +140,37 @@ class OnMoodChipClickActionTest {
         }
 
         @Test
+        fun `drops a pending load-more spinner while the mood search runs`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(loadingMoreQueriedBooks = true)
+            val gate = CompletableDeferred<Unit>()
+
+            coEvery {
+                searchByMoodUseCase(mood = mood)
+            } coAnswers {
+                gate.await()
+                Result.success(Unit)
+            }
+
+            val action = OnMoodChipClickAction(mood = mood)
+
+            // ----- Act -----
+            val job = launch {
+                action.execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.loadingMoreQueriedBooks shouldBe false
+
+            gate.complete(Unit)
+            job.join()
+        }
+
+        @Test
         fun `sets searchError and isLoading false when the mood search fails`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)

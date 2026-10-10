@@ -1,19 +1,29 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import nl.rhaydus.designsystem.component.InlineErrorState
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -29,6 +39,8 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFrom
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRetrySearchAction
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SEARCH_RESULTS_LOAD_MORE_THRESHOLD
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
+
+private const val REFRESHING_RESULTS_ALPHA = 0.5f
 
 internal val ExploreScreenUiState.showsSearchStandIns: Boolean
     get() = searchResults.cards.any(BookCardUiModel::isLoading)
@@ -128,6 +140,67 @@ internal fun LoadMoreSearchResultsEffect(
                 }
             }
     }
+}
+
+/**
+ * Keyed on the first real card rather than on `isLoading`: the loading flag can fall before the new
+ * results reach state, which would scroll the old list.
+ */
+@Composable
+internal fun ScrollToTopWhenResultsReplacedEffect(
+    state: ExploreScreenUiState,
+    scrollToTop: suspend () -> Unit,
+) {
+    val headKey = state.searchResults.cards
+        .firstOrNull()
+        ?.takeUnless(BookCardUiModel::isLoading)
+        ?.key
+    var previousHeadKey by remember { mutableStateOf(headKey) }
+
+    LaunchedEffect(headKey) {
+        if (headKey != null && previousHeadKey != null && headKey != previousHeadKey) {
+            scrollToTop()
+        }
+
+        previousHeadKey = headKey
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun Modifier.dimWhileRefreshing(refreshing: Boolean): Modifier {
+    val playMotion = playDecorativeMotion()
+    val target = if (refreshing) REFRESHING_RESULTS_ALPHA else 1f
+    val alpha by animateFloatAsState(
+        targetValue = target,
+        animationSpec = if (playMotion) MaterialTheme.motionScheme.defaultEffectsSpec() else snap(),
+    )
+
+    return graphicsLayer { this.alpha = alpha }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun LazyItemScope.searchResultItemModifier(): Modifier {
+    if (playDecorativeMotion().not()) return Modifier
+
+    return Modifier.animateItem(
+        fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+        fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+    )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun LazyGridItemScope.searchResultItemModifier(): Modifier {
+    if (playDecorativeMotion().not()) return Modifier
+
+    return Modifier.animateItem(
+        fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+        fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+    )
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

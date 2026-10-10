@@ -440,7 +440,7 @@ class SearchRemoteDataSourceImplTest {
         }
 
         @Test
-        fun `replaces queriedBooks when a fresh search starts`() = runTest {
+        fun `keeps the previous queriedBooks until a fresh search lands and then replaces them`() = runTest {
             // ----- Arrange -----
             stubIdsQuery(
                 name = "first",
@@ -478,10 +478,45 @@ class SearchRemoteDataSourceImplTest {
                     page = 1,
                 )
 
-                awaitItem() shouldBe emptyList()
                 awaitItem().map { it.id } shouldBe listOf(2)
                 cancelAndIgnoreRemainingEvents()
             }
+        }
+
+        @Test
+        fun `writes an empty queriedBooks on a page one search with no match, replacing the old list`() = runTest {
+            // ----- Arrange -----
+            stubIdsQuery(
+                name = "first",
+                page = 1,
+                ids = listOf(1),
+            )
+            stubBooksQuery(
+                ids = listOf(1),
+                books = listOf(stubBookEntry(book = stubBook(id = 1))),
+            )
+            dataSource.searchForName(
+                name = "first",
+                userId = 1,
+                sortMode = ExploreSortMode.RELEVANCE,
+                page = 1,
+            )
+            stubIdsQuery(
+                name = "nothing",
+                page = 1,
+                ids = emptyList(),
+            )
+
+            // ----- Act -----
+            dataSource.searchForName(
+                name = "nothing",
+                userId = 1,
+                sortMode = ExploreSortMode.RELEVANCE,
+                page = 1,
+            )
+
+            // ----- Assert -----
+            dataSource.queriedBooks.first() shouldBe emptyList()
         }
     }
 
@@ -582,7 +617,7 @@ class SearchRemoteDataSourceImplTest {
         }
 
         @Test
-        fun `replaces queriedBooks when a fresh search starts`() = runTest {
+        fun `keeps the previous queriedBooks until a fresh search lands and then replaces them`() = runTest {
             // ----- Arrange -----
             stubMoodQuery(
                 mood = mood,
@@ -608,7 +643,6 @@ class SearchRemoteDataSourceImplTest {
                     page = 1,
                 )
 
-                awaitItem() shouldBe emptyList()
                 awaitItem().map { it.id } shouldBe listOf(2)
                 cancelAndIgnoreRemainingEvents()
             }
@@ -640,6 +674,34 @@ class SearchRemoteDataSourceImplTest {
                 awaitItem() shouldBe false
                 cancelAndIgnoreRemainingEvents()
             }
+        }
+
+        @Test
+        fun `writes an empty queriedBooks when a page one mood search returns no rows`() = runTest {
+            // ----- Arrange -----
+            stubMoodQuery(
+                mood = mood,
+                page = 1,
+                rows = listOf(stubMoodBookRow(book = stubBook(id = 1))),
+            )
+            dataSource.searchByMood(
+                mood = mood,
+                page = 1,
+            )
+            stubMoodQuery(
+                mood = mood,
+                page = 1,
+                rows = emptyList(),
+            )
+
+            // ----- Act -----
+            dataSource.searchByMood(
+                mood = mood,
+                page = 1,
+            )
+
+            // ----- Assert -----
+            dataSource.queriedBooks.first() shouldBe emptyList()
         }
     }
 

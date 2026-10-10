@@ -40,6 +40,7 @@ internal data class OnSortModeChangeAction(val mode: ExploreSortMode) : ExploreA
         scope.setState {
             it.copy(
                 isLoading = true,
+                loadingMoreQueriedBooks = false,
                 searchError = null,
                 queriedBooksHasMore = true,
             )

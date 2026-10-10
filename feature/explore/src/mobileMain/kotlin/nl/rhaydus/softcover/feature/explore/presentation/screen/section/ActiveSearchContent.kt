@@ -47,6 +47,11 @@ internal fun ActiveSearchContent(
 
             val resultsListState = rememberLazyListState()
 
+            ScrollToTopWhenResultsReplacedEffect(
+                state = state,
+                scrollToTop = { resultsListState.scrollToItem(0) },
+            )
+
             LoadMoreSearchResultsEffect(
                 state = state,
                 lastVisibleIndex = { resultsListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index },
@@ -58,13 +63,15 @@ internal fun ActiveSearchContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(horizontal = Spacing.gutter),
+                    .padding(horizontal = Spacing.gutter)
+                    .dimWhileRefreshing(state.isRefreshingSearchResults),
                 contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
             ) {
                 items(state.searchResults.cards, key = { it.key.lazyKey }) { card ->
                     BookCard(
                         model = card,
                         onEvent = onSearchResultEvent,
+                        modifier = searchResultItemModifier(),
                     )
                 }
 

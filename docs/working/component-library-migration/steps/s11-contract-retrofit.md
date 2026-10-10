@@ -22,7 +22,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-5 | Provide `LocalHaptics` at the theme root; one way of reading haptics | — | [x] |
 | S11-6 | Haptic vocabulary: `commit` for milestones only, fired after the outcome, `reject` on failure | S11-5 | [x] |
 | S11-41 | Outcome haptics on the remaining mutations and failure paths | S11-6 | [x] |
-| S11-9 | Explore search keeps its results while a refresh runs | SL-15c | [ ] |
+| S11-9 | Explore search keeps its results while a refresh runs | SL-15c | [x] |
 | S11-11 | Numbers that change render through `StatNumber` | S11-2 | [ ] |
 | S11-12 | The `StatNumber` count-up starts when the mask clears | SL-15c, S11-11 | [ ] |
 | S11-13 | Charts grow, morph and slide | SL-15a | [ ] |

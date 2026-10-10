@@ -208,6 +208,44 @@ class OnSortModeChangeActionTest {
         }
 
         @Test
+        fun `drops a pending load-more spinner while the re-run search is in flight`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(
+                sortMode = ExploreSortMode.RELEVANCE,
+                searchText = "dune",
+                loadingMoreQueriedBooks = true,
+            )
+            val gate = CompletableDeferred<Unit>()
+
+            coEvery {
+                searchForNameUseCase(
+                    name = "dune",
+                    sortMode = ExploreSortMode.POPULARITY,
+                )
+            } coAnswers {
+                gate.await()
+                Result.success(Unit)
+            }
+
+            val action = OnSortModeChangeAction(mode = ExploreSortMode.POPULARITY)
+
+            // ----- Act -----
+            val job = launch {
+                action.execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.loadingMoreQueriedBooks shouldBe false
+
+            gate.complete(Unit)
+            job.join()
+        }
+
+        @Test
         fun `sets searchError and stops loading when the re-run search fails`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)

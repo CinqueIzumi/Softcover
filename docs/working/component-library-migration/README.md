@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-41 done, uncommitted. The remaining mutations send TOAD success/failure events; screens fire `select` / `reject`, `commit` on onboarding sign-in. book_detail uses one `MutationSucceededEvent` beside `MutationFailedEvent`; reading has `VerdictSavedEvent` / `VerdictSaveFailedEvent`; scan reuses its existing events; `OnboardingScreen` gained `ObserveAsEvents`. PF-4/7 wait for S12-4.
-- **Next:** commit S11-41 on the user's go, then S11-9 per `steps/s11-contract-retrofit.md` § S11-9: Explore search keeps its old results while a refresh runs and crossfades to the new ones.
+- **State:** S11-9 done, uncommitted. Explore search keeps its old results while a refresh runs: the data source replaces page 1 when the response lands (a no-match writes empty); stand-ins show only when loading with nothing on screen; the list dims (`dimWhileRefreshing`); items fade and slide via `animateItem` with motion-scheme specs; `ScrollToTopWhenResultsReplacedEffect` scrolls to the top when the first real card's key changes. Search-starting actions clear `loadingMoreQueriedBooks`. Debounce is 400 ms (user-approved). PF-4/7 wait for S12-4.
+- **Next:** commit S11-9 on the user's go, then S11-11 per `steps/s11-contract-retrofit.md` § S11-11: numbers that change render through `StatNumber`.
 - **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21 (detekt fails on JDK 26), after the last edit: `styleCheck` passed; every touched action test class passed; AAA markers complete; glom and `!!` check clean. Reviewer: looks good, no blockers.
-- **Uncommitted:** S11-41 code and tests under `feature/`, its checkbox, this `## Now` block.
+- **Verification:** JBR 21 (detekt fails on JDK 26), after the last edit: compile and `styleCheck` passed; explore data source, collector, UiState and action tests passed; AAA markers complete; glom and `!!` check clean. Reviewer: two rounds, all findings fixed; the duplicated `searchResultItemModifier` overloads stay (reviewer: acceptable).
+- **Uncommitted:** S11-9 code and tests under `feature/explore/`, its checkbox, this `## Now` block.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:
