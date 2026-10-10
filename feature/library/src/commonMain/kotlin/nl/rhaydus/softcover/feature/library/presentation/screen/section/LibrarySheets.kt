@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen.section
 
 import androidx.compose.runtime.Composable
-import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
@@ -29,8 +28,6 @@ internal fun LibrarySheets(
     runAction: (LibraryAction) -> Unit,
     onCreateNewListClick: () -> Unit,
 ) {
-    val haptics = LocalHaptics.current
-
     if (state.isArrangeSheetExpanded && currentTabId != null) {
         LibraryArrangeSheet(
             state = state,
@@ -68,8 +65,6 @@ internal fun LibrarySheets(
             onEvent = { event ->
                 when (event) {
                     SheetScaffoldEvent.PrimaryClicked -> {
-                        haptics.commit()
-
                         runAction(OnBulkRemoveFromLibraryAction())
                     }
 
@@ -91,8 +86,6 @@ internal fun LibrarySheets(
             onEvent = { event ->
                 when (event) {
                     is ChooseListsEvent.MembershipToggled -> {
-                        haptics.commit()
-
                         runAction(
                             OnBulkToggleListMembershipAction(
                                 listId = event.listId,

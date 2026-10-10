@@ -22,11 +22,17 @@ internal class OnMarkBookAsReadingClickAction(private val book: Book) : BookDeta
             dependencies.markBookAsReadingUseCase(
                 book = book,
                 editionId = editionId,
-            ).onFailure { error ->
-                AppLog.e("$error")
+            )
+                .onSuccess {
+                    scope.sendEvent(BookDetailEvent.ShelfChangedEvent())
+                }
+                .onFailure { error ->
+                    AppLog.e("$error")
 
-                scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
-            }
+                    scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
+
+                    scope.sendEvent(BookDetailEvent.MutationFailedEvent())
+                }
         }
 
         scope.setLocalVariables {

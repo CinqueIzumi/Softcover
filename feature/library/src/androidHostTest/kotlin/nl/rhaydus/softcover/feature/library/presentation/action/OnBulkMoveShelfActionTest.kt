@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -33,6 +34,7 @@ class OnBulkMoveShelfActionTest {
     private lateinit var markBookAsReadingUseCase: MarkBookAsReadingUseCase
     private lateinit var markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
+    private lateinit var eventChannel: Channel<LibraryEvent>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     private val tabKey = "status-3"
@@ -42,11 +44,12 @@ class OnBulkMoveShelfActionTest {
         markBookAsReadUseCase = mockk(relaxed = true)
         markBookAsReadingUseCase = mockk(relaxed = true)
         markBookAsWantToReadUseCase = mockk(relaxed = true)
+        eventChannel = Channel(Channel.BUFFERED)
         stateFlow = MutableStateFlow(LibraryUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
 
         mockkObject(SnackBarManager)
@@ -263,6 +266,61 @@ class OnBulkMoveShelfActionTest {
             stateFlow.value.isBulkMoveMenuExpanded shouldBe false
             stateFlow.value.bulkActionInProgress shouldBe false
             coVerify(exactly = 0) { markBookAsReadUseCase(book = any()) }
+        }
+
+        @Test
+        fun `zero failures sends BulkMoveAppliedEvent`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1),
+                booksByTab = mapOf(tabKey to listOf(book)),
+            )
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(status = UserBookStatus.READ).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.BulkMoveAppliedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `any failed book sends BulkMoveFailedEvent and not BulkMoveAppliedEvent`() = runTest {
+            // ----- Arrange -----
+            val failingBook = buildBook(id = 1)
+            val okBook = buildBook(id = 2)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1, 2),
+                booksByTab = mapOf(tabKey to listOf(failingBook, okBook)),
+            )
+
+            coEvery {
+                markBookAsReadUseCase(book = failingBook)
+            } returns Result.failure(RuntimeException("boom"))
+            coEvery {
+                markBookAsReadUseCase(book = okBook)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+            every {
+                SnackBarManager.showSnackbar(title = any())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(status = UserBookStatus.READ).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.BulkMoveFailedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }
 }

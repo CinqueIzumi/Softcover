@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import nl.rhaydus.designsystem.haptics.Haptics
 import nl.rhaydus.designsystem.nav.NavPulse
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
@@ -20,7 +19,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 
 /**
  * Drives the "mark as read" celebration shared by both platform layouts: it owns the slide-out
- * animation state, the confetti [burst], and the haptic + bottom-bar pulse, so the
+ * animation state, the confetti [burst], and the bottom-bar pulse, so the
  * `mobileMain` and `jvmMain` `ReadingScreenLayout` actuals only wire it to their own chrome.
  * Obtain one via [rememberMarkAsReadController].
  */
@@ -28,7 +27,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 internal class MarkAsReadController(
     private val slideDistancePx: Float,
     private val playMotion: Boolean,
-    private val haptics: Haptics,
     private val navPulse: NavPulse,
     private val runAction: (ReadingAction) -> Unit,
 ) {
@@ -72,7 +70,6 @@ internal class MarkAsReadController(
     ) {
         if (slidingBookId != null) return
 
-        haptics.commit()
         celebrate()
         explicitBurstFired = true
         navPulse.pulse(LibraryNavPulseKey)

@@ -29,12 +29,15 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.ScreenTransition
 import kotlinx.coroutines.flow.combine
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.component.callout.Banner
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
 import nl.rhaydus.softcover.core.presentation.navigation.CreateListPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.SessionOutcome
 import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListSheet
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 import nl.rhaydus.softcover.orchestration.presentation.screenmodel.RootScreenModel
@@ -49,6 +52,18 @@ internal object RootScreen : Screen {
         val state by screenModel.state.collectAsStateWithLifecycle()
 
         val activeSessionController = koinInject<ActiveSessionController>()
+
+        val haptics = LocalHaptics.current
+
+        ObserveAsEvents(flow = activeSessionController.outcomes) { outcome ->
+            when (outcome) {
+                SessionOutcome.Started,
+                SessionOutcome.Stopped -> haptics.select()
+
+                SessionOutcome.StartFailed,
+                SessionOutcome.StopFailed -> haptics.reject()
+            }
+        }
 
         // Hosted here, above the root Navigator, rather than inside BottomBarScreen: a pushed
         // full-screen surface (book detail on compact/medium, LibraryVisibilitySettings) replaces

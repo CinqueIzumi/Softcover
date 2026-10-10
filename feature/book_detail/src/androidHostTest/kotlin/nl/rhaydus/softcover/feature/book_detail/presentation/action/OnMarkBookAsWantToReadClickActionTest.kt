@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.Test
 class OnMarkBookAsWantToReadClickActionTest {
     private lateinit var markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase
     private lateinit var dependencies: BookDetailDependencies
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -34,12 +36,13 @@ class OnMarkBookAsWantToReadClickActionTest {
     @BeforeEach
     fun setUp() {
         markBookAsWantToReadUseCase = mockk()
+        eventChannel = Channel(Channel.BUFFERED)
         stateFlow = MutableStateFlow(BookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -236,6 +239,58 @@ class OnMarkBookAsWantToReadClickActionTest {
                     editionId = null,
                 )
             }
+        }
+
+        @Test
+        fun `sends ShelfChangedEvent when use case succeeds`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(id = 42)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsWantToReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnMarkBookAsWantToReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<BookDetailEvent.ShelfChangedEvent>()
+        }
+
+        @Test
+        fun `sends MutationFailedEvent when use case fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(id = 42)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsWantToReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
+            } returns Result.failure(RuntimeException("api error"))
+
+            val action = OnMarkBookAsWantToReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
     }
 }

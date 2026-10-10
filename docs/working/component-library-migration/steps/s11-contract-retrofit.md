@@ -20,7 +20,8 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-2 | R11 holdouts | — | [x] |
 | S11-3 | `TopBarSurface`, the `ShareCardPalette` fold, the final § 7.4a check | S11-1, S11-2 | [x] |
 | S11-5 | Provide `LocalHaptics` at the theme root; one way of reading haptics | — | [x] |
-| S11-6 | Haptic vocabulary: `commit` for milestones only, fired after the outcome, `reject` on failure | S11-5 | [ ] |
+| S11-6 | Haptic vocabulary: `commit` for milestones only, fired after the outcome, `reject` on failure | S11-5 | [x] |
+| S11-41 | Outcome haptics on the remaining mutations and failure paths | S11-6 | [ ] |
 | S11-9 | Explore search keeps its results while a refresh runs | SL-15c | [ ] |
 | S11-11 | Numbers that change render through `StatNumber` | S11-2 | [ ] |
 | S11-12 | The `StatNumber` count-up starts when the mask clears | SL-15c, S11-11 | [ ] |
@@ -29,7 +30,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-15 | One reorder lift treatment | S11-6 | [ ] |
 | S11-16 | Selectable controls fire `select`; `ToggleRow` shares its interaction source | S11-6 | [ ] |
 | S11-17 | Selection states animate with motion-scheme specs | SL-15a | [ ] |
-| S11-18 | `SheetScaffold` footer: `commit` on a data commit, spinner on the running button | S11-6 | [ ] |
+| S11-18 | `SheetScaffold` footer: no haptic of its own, spinner on the running button | S11-6 | [ ] |
 | S11-19 | The progress sheet plays its dismiss on submit | — | [ ] |
 | S11-20 | Every sheet host leaves on `Dismissed` | S11-19 | [ ] |
 | S11-21 | Panel-form `AdaptiveModalSheet` animates in and out, with elevation | SL-15a | [ ] |
@@ -68,7 +69,7 @@ edge by R10's one-model-per-outcome rule.
 - Fold `ShareCardPalette`'s two parallel colour `when`s into a per-variant lookup.
 - Run the final `component-contract.md` § 7.4a check: no remaining exception rows.
 
-## S11-5 to S11-40 — Premium feel
+## S11-5 to S11-41 — Premium feel
 
 Approved in the premium-feel triage. The app keeps today's UI until these land, so each one is a
 deliberate change the S12 walkthrough expects. Rules for every sub-step:
@@ -94,6 +95,26 @@ the app.
 outcome is known; `threshold` fires on session start and stop. Keep `commit` for finishing a book,
 creating a list and a session recap. Use `select` for routine changes and nothing on Remove. Fire after
 the outcome, and `reject` on failure.
+
+### S11-41 — Outcome haptics everywhere else
+
+Each action below sends a success / failure event; the screen fires `select` / `reject` from it.
+
+- Rating and review saved (`OnSaveVerdictAction`, book detail and reading).
+- Edition switched (`OnNewEditionSaveClickAction`, `OnUpdateToScannedEditionClickAction`).
+- Deadline set (`OnDeadlinePickedAction`); clearing it stays silent.
+- List toggled on book detail (`OnToggleListMembershipAction`).
+- Owned flag (`OnEditionOwnedToggleAction`).
+- Want to Read from Explore (`OnAddBookToLibraryClickAction`).
+- Barcode scan (`BarcodeScannerScreen`): `select` on a resolved ISBN; `reject` on an invalid one or a
+  failed lookup or add.
+- `reject` only: tag save rolled back (`UserTagActionSupport`), list reorder or ranked toggle rolled
+  back (`OnReorderListBooksAction`, `OnSetListRankedAction`), library tab visibility save failed
+  (`OnSaveLibraryVisibilityAction`), log-out failed (`OnLogOutClickAction`).
+- Onboarding (`OnApiKeySaveClickAction`): `commit` on sign-in, `reject` on a rejected key.
+
+Stays silent: star rating (`StarRatingInput` already ticks), refresh and sync completion, every
+remove, delete, undo, unblock and dismiss, draft-only sheet edits, per-tag and shelf-reorder success.
 
 ### S11-9 — Search keeps its results
 
@@ -145,9 +166,9 @@ pops when it fills.
 
 ### S11-18 — Sheet footer commit
 
-`SheetScaffold`'s footer gives no haptic on a data commit such as saving a rating, and a secondary
-button's busy state spins the primary. A primary button that commits data fires one `commit`; the
-spinner goes on the button that is running and fades in.
+A secondary button's busy state spins `SheetScaffold`'s primary. The spinner goes on the button that
+is running and fades in. The footer fires no haptic of its own; the screen fires the outcome haptic
+from the save's event, so saving a rating gets `select`.
 
 ### S11-19 — Progress sheet dismiss
 
@@ -235,7 +256,7 @@ bytes downloaded and show a determinate bar, on Android and desktop.
 ### S11-33 — Explore pull-to-refresh
 
 Explore (`EditorialContent`) uses a Material `IndicatorBox` with no tick. Move it onto
-`PullToRefreshEyebrow`.
+`PullToRefreshEyebrow`, which brings the `threshold` tick the other refresh hosts fire.
 
 ### S11-34 — Re-tap the current tab
 

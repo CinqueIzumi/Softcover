@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -33,6 +34,7 @@ class OnBulkToggleListMembershipActionTest {
     private lateinit var removeBookFromListUseCase: RemoveBookFromListUseCase
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
+    private lateinit var eventChannel: Channel<LibraryEvent>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     private val listId = 5
@@ -51,11 +53,12 @@ class OnBulkToggleListMembershipActionTest {
                 mock.removeBookFromListUseCase
             } returns removeBookFromListUseCase
         }
+        eventChannel = Channel(Channel.BUFFERED)
         stateFlow = MutableStateFlow(LibraryUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
 
         mockkObject(SnackBarManager)
@@ -388,6 +391,58 @@ class OnBulkToggleListMembershipActionTest {
             coVerify(exactly = 1) {
                 SnackBarManager.showSnackbar(title = "Couldn't add 1 book to \"Favourites\" — try again.")
             }
+        }
+
+        @Test
+        fun `a fully successful toggle sends ListMembershipChangedEvent`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWith(
+                list = stubList(),
+                selected = listOf(stubBook(id = 1)),
+            )
+
+            // ----- Act -----
+            OnBulkToggleListMembershipAction(
+                listId = listId,
+                currentMembership = ListMembership.NONE,
+            ).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ListMembershipChangedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `a failed toggle sends ListMembershipChangeFailedEvent and not ListMembershipChangedEvent`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWith(
+                list = stubList(),
+                selected = listOf(stubBook(id = 1)),
+            )
+
+            coEvery {
+                addBookToListUseCase(
+                    listId = any(),
+                    bookId = any(),
+                    edition = any(),
+                )
+            } returns Result.failure(IllegalStateException("boom"))
+
+            // ----- Act -----
+            OnBulkToggleListMembershipAction(
+                listId = listId,
+                currentMembership = ListMembership.NONE,
+            ).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ListMembershipChangeFailedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }
 }

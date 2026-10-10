@@ -8,4 +8,10 @@ internal sealed interface BookDetailEvent : UiEvent {
     data class OpenExternalLinkEvent(val url: String) : BookDetailEvent
 
     class RefreshDetailBookEvent : BookDetailEvent
+
+    class ShelfChangedEvent : BookDetailEvent
+
+    class ProgressUpdatedEvent : BookDetailEvent
+
+    class MutationFailedEvent : BookDetailEvent
 }

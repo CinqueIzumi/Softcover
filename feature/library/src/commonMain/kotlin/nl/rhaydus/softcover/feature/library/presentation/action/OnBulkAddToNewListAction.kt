@@ -73,6 +73,8 @@ internal class OnBulkAddToNewListAction(
             SnackBarManager.showSnackbar(
                 title = "Couldn't add $failureCount $noun to “$listName” — try again.",
             )
+
+            scope.sendEvent(LibraryEvent.NewListBooksAddFailedEvent())
         }
     }
 }

@@ -161,8 +161,6 @@ internal fun FocusReadingPanel(
                     contentDescription = "",
                 ),
                 onClick = {
-                    haptics.threshold()
-
                     onStop()
                 },
                 modifier = Modifier

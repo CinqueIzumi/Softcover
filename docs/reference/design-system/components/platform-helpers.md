@@ -12,9 +12,11 @@
 
 The single entry point for haptic feedback. Exposes eight semantic cases. Call sites read it with `LocalHaptics.current`, which `SoftcoverTheme` provides once; `rememberHaptics()` is called nowhere else. No ad-hoc haptics — never call `performHapticFeedback` from a call site; always go through the helper. The "no mixed icon families" rule (§2.6) has a sibling here.
 
-- **commit** — a user-triggered action succeeded (mark-as-read, save, confirm). Celebratory in texture; reserved for commit-class actions, never navigation taps.
-- **reject** — an optimistic mutation rolled back, or an action refused. Pair with the shake-on-error visual (§2.5).
-- **select** — a soft tick on neutral selection: shelf chip toggle to a non-read state, segmented switch in a sheet, tab change in a carousel filter. Distinct from *commit* (which celebrates) and *reject* (which rolls back).
+Outcome haptics (*commit*, *select* after a change, *reject*) fire from the action's success or failure `UiEvent`, never from the click handler. Remove fires none.
+
+- **commit** — a milestone succeeded: finishing a book, creating a list, signing in. Celebratory in texture; never a routine save.
+- **reject** — a mutation failed or rolled back, or an action was refused. Pair with the shake-on-error visual (§2.5).
+- **select** — a soft tick on a routine change that succeeded (a shelf move, a progress update, a list toggle, a session start or stop) or on a neutral selection (a segmented switch, a selection toggle). Distinct from *commit* (which celebrates) and *reject* (which rolls back).
 - **threshold** — a single firm tap when the user crosses a meaningful boundary: pull-to-refresh trigger point, drag-to-reorder pickup, long-press peek activation. No celebratory texture.
 - **tickle** — a per-integer tick during a slider or picker drag. Each integer crossing on the rating control or progress page-number input fires one tick.
 - **lift** — drag-to-reorder pickup. Says the item has left the page; pair with the visual lift.

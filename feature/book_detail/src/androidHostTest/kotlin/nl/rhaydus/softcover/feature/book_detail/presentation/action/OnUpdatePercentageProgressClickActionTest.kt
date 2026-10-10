@@ -564,5 +564,61 @@ class OnUpdatePercentageProgressClickActionTest {
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe true
         }
+
+        @Test
+        fun `sends ProgressUpdatedEvent when use case returns NoChange`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(currentEditionPages = 300)
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                )
+            } returns Result.success(ShelfMutationOutcome.NoChange)
+
+            val action = OnUpdatePercentageProgressClickAction(newPercentage = "100")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<BookDetailEvent.ProgressUpdatedEvent>()
+        }
+
+        @Test
+        fun `sends MutationFailedEvent when use case fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(currentEditionPages = 300)
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                )
+            } returns Result.failure(RuntimeException("api error"))
+
+            val action = OnUpdatePercentageProgressClickAction(newPercentage = "100")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
+        }
     }
 }

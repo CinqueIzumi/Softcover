@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Test
 class OnBulkAddToNewListActionTest {
     private lateinit var addBookToListUseCase: AddBookToListUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
+    private lateinit var eventChannel: Channel<LibraryEvent>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     private val tabKey = "status-3"
@@ -38,11 +40,12 @@ class OnBulkAddToNewListActionTest {
     @BeforeEach
     fun setUp() {
         addBookToListUseCase = mockk(relaxed = true)
+        eventChannel = Channel(Channel.BUFFERED)
         stateFlow = MutableStateFlow(LibraryUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
 
         mockkObject(SnackBarManager)
@@ -271,6 +274,67 @@ class OnBulkAddToNewListActionTest {
                     title = match { title -> title.contains(listName) },
                 )
             }
+        }
+
+        @Test
+        fun `successful adds send no event`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1),
+                booksByTab = mapOf(tabKey to listOf(book)),
+            )
+
+            coEvery {
+                addBookToListUseCase(
+                    listId = any(),
+                    bookId = any(),
+                    edition = any(),
+                )
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            OnBulkAddToNewListAction(
+                listId = listId,
+                listName = listName,
+            ).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `a failed add sends NewListBooksAddFailedEvent`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1),
+                booksByTab = mapOf(tabKey to listOf(book)),
+            )
+
+            coEvery {
+                addBookToListUseCase(
+                    listId = any(),
+                    bookId = any(),
+                    edition = any(),
+                )
+            } returns Result.failure(RuntimeException("server error"))
+
+            // ----- Act -----
+            OnBulkAddToNewListAction(
+                listId = listId,
+                listName = listName,
+            ).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.NewListBooksAddFailedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }
 }

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -333,6 +334,32 @@ class OnMarkBookAsReadClickActionTest {
                     actionAt = null,
                 )
             }
+        }
+
+        @Test
+        fun `sends MutationFailedEvent when use case fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
+            } returns Result.failure(RuntimeException("api error"))
+
+            val action = OnMarkBookAsReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
     }
 }

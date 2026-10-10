@@ -1,11 +1,14 @@
 package nl.rhaydus.softcover.orchestration.session
 
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -23,6 +26,8 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.ResumeReadingSessionUse
 import nl.rhaydus.softcover.core.personal.domain.usecase.StartReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StopReadingSessionUseCase
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.ReadingSessionLauncher
+import nl.rhaydus.softcover.core.presentation.session.SessionOutcome
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -40,7 +45,10 @@ class ActiveSessionControllerImplTest {
     private lateinit var resumeReadingSessionUseCase: ResumeReadingSessionUseCase
     private lateinit var recordBookProgressUseCase: RecordBookProgressUseCase
 
-    private fun buildController(testScope: TestScope): ActiveSessionController {
+    private fun buildController(
+        testScope: TestScope,
+        readingSessionLauncher: ReadingSessionLauncher = mockk(relaxed = true),
+    ): ActiveSessionController {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
 
         // backgroundScope is cancelled automatically when runTest exits, so the eager
@@ -63,7 +71,7 @@ class ActiveSessionControllerImplTest {
                 io = dispatcher,
                 default = dispatcher,
             ),
-            readingSessionLauncher = mockk(relaxed = true),
+            readingSessionLauncher = readingSessionLauncher,
         )
     }
 
@@ -352,6 +360,168 @@ class ActiveSessionControllerImplTest {
             // ----- Assert -----
             pendingAfterRequest shouldBe true
             controller.pendingFocusMode.value shouldBe false
+        }
+    }
+
+    @Nested
+    inner class Outcomes {
+        private fun collectOutcomes(
+            testScope: TestScope,
+            controller: ActiveSessionController,
+        ): List<SessionOutcome> {
+            val emitted = mutableListOf<SessionOutcome>()
+
+            testScope.backgroundScope.launch(UnconfinedTestDispatcher(testScope.testScheduler)) {
+                controller.outcomes.collect { emitted.add(it) }
+            }
+
+            return emitted
+        }
+
+        @Test
+        fun `start emits Started when the use case succeeds`() = runTest {
+            // ----- Arrange -----
+            val controller = buildController(this)
+            val emitted = collectOutcomes(
+                testScope = this,
+                controller = controller,
+            )
+
+            coEvery {
+                startReadingSessionUseCase(
+                    any(),
+                    any(),
+                    any(),
+                )
+            } returns 1L
+
+            // ----- Act -----
+            controller.start(stubBook())
+
+            // ----- Assert -----
+            emitted.shouldContainExactly(SessionOutcome.Started)
+        }
+
+        @Test
+        fun `start emits StartFailed when the use case throws`() = runTest {
+            // ----- Arrange -----
+            val controller = buildController(this)
+            val emitted = collectOutcomes(
+                testScope = this,
+                controller = controller,
+            )
+
+            coEvery {
+                startReadingSessionUseCase(
+                    any(),
+                    any(),
+                    any(),
+                )
+            } throws IllegalStateException("boom")
+
+            // ----- Act -----
+            controller.start(stubBook())
+
+            // ----- Assert -----
+            emitted.shouldContainExactly(SessionOutcome.StartFailed)
+        }
+
+        @Test
+        fun `start emits StartFailed and not Started when the launcher throws`() = runTest {
+            // ----- Arrange -----
+            val launcher = mockk<ReadingSessionLauncher>()
+            val controller = buildController(
+                testScope = this,
+                readingSessionLauncher = launcher,
+            )
+            val emitted = collectOutcomes(
+                testScope = this,
+                controller = controller,
+            )
+
+            coEvery {
+                startReadingSessionUseCase(
+                    any(),
+                    any(),
+                    any(),
+                )
+            } returns 1L
+            every {
+                launcher.start()
+            } throws IllegalStateException("boom")
+
+            // ----- Act -----
+            controller.start(stubBook())
+
+            // ----- Assert -----
+            emitted.shouldContainExactly(SessionOutcome.StartFailed)
+        }
+
+        @Test
+        fun `stop emits Stopped when the use case succeeds`() = runTest {
+            // ----- Arrange -----
+            val controller = buildController(this)
+            val emitted = collectOutcomes(
+                testScope = this,
+                controller = controller,
+            )
+
+            booksFlow.value = listOf(stubBook(id = 42))
+            sessionFlow.value = stubSession(
+                id = 3L,
+                bookId = 42,
+            )
+
+            // ----- Act -----
+            controller.stop()
+
+            // ----- Assert -----
+            emitted.shouldContainExactly(SessionOutcome.Stopped)
+        }
+
+        @Test
+        fun `stop emits StopFailed when the use case throws`() = runTest {
+            // ----- Arrange -----
+            val controller = buildController(this)
+            val emitted = collectOutcomes(
+                testScope = this,
+                controller = controller,
+            )
+
+            booksFlow.value = listOf(stubBook(id = 42))
+            sessionFlow.value = stubSession(
+                id = 3L,
+                bookId = 42,
+            )
+            coEvery {
+                stopReadingSessionUseCase(
+                    any(),
+                    any(),
+                    any(),
+                )
+            } throws IllegalStateException("boom")
+
+            // ----- Act -----
+            controller.stop()
+
+            // ----- Assert -----
+            emitted.shouldContainExactly(SessionOutcome.StopFailed)
+        }
+
+        @Test
+        fun `stop emits nothing when no session is active`() = runTest {
+            // ----- Arrange -----
+            val controller = buildController(this)
+            val emitted = collectOutcomes(
+                testScope = this,
+                controller = controller,
+            )
+
+            // ----- Act -----
+            controller.stop()
+
+            // ----- Assert -----
+            emitted.shouldContainExactly()
         }
     }
 }

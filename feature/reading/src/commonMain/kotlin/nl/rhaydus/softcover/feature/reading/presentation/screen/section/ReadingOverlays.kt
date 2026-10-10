@@ -85,11 +85,8 @@ internal fun ReadingOverlays(
                     )
 
                     ProgressSheetEvent.MarkAsReadRequested -> {
-                        // Routes through the same controller the row/hero "mark as read" affordances used
-                        // to drive directly, so the sheet-triggered path keeps the full commit choreography
-                        // (haptic, burst, bottom-bar pulse, and — when motion is enabled — the "slide to
-                        // shelf" follow-through, §2.5) rather than only the haptic + burst a bare dispatch
-                        // would give it. The picked backdate travels with it, same as the progress tabs.
+                        // Routes through the controller rather than dispatching directly, so the sheet path
+                        // gets the same burst, bottom-bar pulse and "slide to shelf" as the row and hero.
                         controller.requestMarkAsRead(
                             book = updatingBook,
                             actionAt = state.readAt.toActionAt(),
@@ -118,8 +115,9 @@ internal fun ReadingOverlays(
     LaunchedEffect(verdictBook?.id) {
         if (verdictBook == null) return@LaunchedEffect
 
+        haptics.commit()
+
         if (controller.consumeExplicitBurstFired().not()) {
-            haptics.commit()
             controller.celebrate()
         }
     }

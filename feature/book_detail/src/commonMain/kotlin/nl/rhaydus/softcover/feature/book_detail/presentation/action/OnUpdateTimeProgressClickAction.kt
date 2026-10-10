@@ -54,6 +54,8 @@ internal data class OnUpdateTimeProgressClickAction(
                     // full duration on an already-read book returns NoChange and must stay silent.
                     if (outcome == ShelfMutationOutcome.Applied) {
                         scope.sendEvent(BookDetailEvent.BookMarkedAsReadEvent())
+                    } else {
+                        scope.sendEvent(BookDetailEvent.ProgressUpdatedEvent())
                     }
                 }
                 .onFailure { error ->
@@ -62,6 +64,8 @@ internal data class OnUpdateTimeProgressClickAction(
                     scope.setState {
                         it.copy(failedMutationBookIds = it.failedMutationBookIds + bookToUpdate.id)
                     }
+
+                    scope.sendEvent(BookDetailEvent.MutationFailedEvent())
                 }
         }
 

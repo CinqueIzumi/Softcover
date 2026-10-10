@@ -11,6 +11,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -23,6 +25,7 @@ import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetc
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToNewListAction
+import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import org.koin.compose.koinInject
@@ -41,6 +44,19 @@ object LibraryScreen : Screen {
 
         val state by screenModel.state.collectAsStateWithLifecycle()
         val localState by screenModel.localState.collectAsStateWithLifecycle()
+
+        val haptics = LocalHaptics.current
+
+        ObserveAsEvents(flow = screenModel.events) { event ->
+            when (event) {
+                is LibraryEvent.BulkMoveAppliedEvent,
+                is LibraryEvent.ListMembershipChangedEvent -> haptics.select()
+
+                is LibraryEvent.BulkMoveFailedEvent,
+                is LibraryEvent.ListMembershipChangeFailedEvent,
+                is LibraryEvent.NewListBooksAddFailedEvent -> haptics.reject()
+            }
+        }
 
         val prefetcher = rememberBookDetailPrefetcher()
 

@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen.section
 
 import androidx.compose.runtime.Composable
-import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveMenuExpandedChangeAction
@@ -17,8 +16,6 @@ internal fun LibrarySelectionHeader(
     isMoveMenuExpanded: Boolean,
     runAction: (LibraryAction) -> Unit,
 ) {
-    val haptics = LocalHaptics.current
-
     SelectionHeader(
         selectedCount = selectedCount,
         pills = pills,
@@ -28,8 +25,6 @@ internal fun LibrarySelectionHeader(
             runAction(OnBulkMoveMenuExpandedChangeAction(expanded = expanded))
         },
         onMoveShelf = { status ->
-            haptics.commit()
-
             runAction(OnBulkMoveShelfAction(status = status))
         },
         onAddToListClick = {

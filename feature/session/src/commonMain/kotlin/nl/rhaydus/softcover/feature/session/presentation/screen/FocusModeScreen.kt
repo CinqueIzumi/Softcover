@@ -44,7 +44,7 @@ object FocusModeScreen : Screen {
 
         ObserveAsEvents(flow = screenModel.events) { event ->
             when (event) {
-                is FocusModeEvent.PageCommittedEvent -> haptics.commit()
+                is FocusModeEvent.PageCommittedEvent -> haptics.select()
             }
         }
 

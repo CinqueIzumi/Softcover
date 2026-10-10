@@ -300,5 +300,59 @@ class OnUpdatePageProgressClickActionTest {
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe true
         }
+
+        @Test
+        fun `sends ProgressUpdatedEvent when use case returns NoChange`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                )
+            } returns Result.success(ShelfMutationOutcome.NoChange)
+
+            val action = OnUpdatePageProgressClickAction(newPage = "100")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<BookDetailEvent.ProgressUpdatedEvent>()
+        }
+
+        @Test
+        fun `sends MutationFailedEvent when use case fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                )
+            } returns Result.failure(RuntimeException("api error"))
+
+            val action = OnUpdatePageProgressClickAction(newPage = "100")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
+        }
     }
 }

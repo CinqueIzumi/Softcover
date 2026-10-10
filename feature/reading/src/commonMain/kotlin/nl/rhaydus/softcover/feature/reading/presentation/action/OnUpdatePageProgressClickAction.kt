@@ -41,6 +41,8 @@ internal data class OnUpdatePageProgressClickAction(
                                 verdictPromptBook = bookToUpdate,
                             )
                         }
+                    } else {
+                        scope.sendEvent(ReadingScreenEvent.ProgressUpdatedEvent())
                     }
                 }
                 .onFailure { error ->
@@ -49,6 +51,8 @@ internal data class OnUpdatePageProgressClickAction(
                     scope.setState {
                         it.copy(failedMutationBookIds = it.failedMutationBookIds + bookToUpdate.id)
                     }
+
+                    scope.sendEvent(ReadingScreenEvent.ProgressUpdateFailedEvent())
                 }
         }
 

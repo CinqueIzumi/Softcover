@@ -11,7 +11,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.state.skeletonMask
@@ -33,10 +32,11 @@ internal fun FeaturedSessionButton(
     val controller = koinInject<ActiveSessionController>()
     val navigator = LocalNavigator.currentOrThrow
     val appNavigator = koinInject<AppNavigator>()
-    val haptics = LocalHaptics.current
     val active by controller.activeSession.collectAsStateWithLifecycle()
 
     val currentBook by rememberUpdatedState(book)
+
+    val isSessionActiveForBook = isLoading.not() && active?.book?.id == book.id
 
     // The lock-screen surface is a plain notification, so it needs POST_NOTIFICATIONS (Android
     // 13+). Ask at the natural moment — the first session start — then start regardless of the
@@ -46,7 +46,7 @@ internal fun FeaturedSessionButton(
     )
 
     when {
-        isLoading.not() && active?.book?.id == book.id -> {
+        isSessionActiveForBook -> {
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             // Kept tonal (rather than the idle state's outlined pill) so the active-session state
@@ -83,8 +83,6 @@ internal fun FeaturedSessionButton(
                 ),
                 onClick = {
                     if (isLoading.not()) {
-                        haptics.threshold()
-
                         sessionPermissionRequester.request()
                     }
                 },

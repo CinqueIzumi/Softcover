@@ -189,8 +189,6 @@ private fun SessionPeekBarContent(
                 DesktopTooltip(text = "Stop") {
                     IconButton(
                         onClick = {
-                            haptics.threshold()
-
                             onStop()
                         },
                     ) {

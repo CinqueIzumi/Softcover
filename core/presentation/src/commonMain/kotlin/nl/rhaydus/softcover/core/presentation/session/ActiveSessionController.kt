@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.presentation.session
 
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import nl.rhaydus.softcover.core.domain.model.Book
 
@@ -23,6 +24,8 @@ interface ActiveSessionController {
      * — still routes into Focus Mode once the navigator is ready.
      */
     val pendingFocusMode: StateFlow<Boolean>
+
+    val outcomes: SharedFlow<SessionOutcome>
 
     fun start(book: Book)
 

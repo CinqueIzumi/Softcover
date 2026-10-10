@@ -138,11 +138,11 @@ object MotionDebugScreen : Screen {
         Spacer(modifier = Modifier.height(Spacing.md))
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            HapticRow(label = "commit", description = "Successful save / mark-as-read") { haptics.commit() }
+            HapticRow(label = "commit", description = "Finishing a book, creating a list, session recap") { haptics.commit() }
 
             HapticRow(label = "reject", description = "Mutation rolled back") { haptics.reject() }
 
-            HapticRow(label = "select", description = "Neutral chip / segment toggle") { haptics.select() }
+            HapticRow(label = "select", description = "Routine change, chip / segment toggle") { haptics.select() }
 
             HapticRow(label = "threshold", description = "Pull-to-refresh trigger, peek activation") { haptics.threshold() }
 

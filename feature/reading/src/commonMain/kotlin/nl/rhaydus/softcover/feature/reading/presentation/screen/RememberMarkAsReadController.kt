@@ -7,7 +7,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.nav.NavPulse
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -19,7 +18,6 @@ internal fun rememberMarkAsReadController(
     books: List<Book>,
     runAction: (ReadingAction) -> Unit,
 ): MarkAsReadController {
-    val haptics = LocalHaptics.current
     val playMotion = playDecorativeMotion()
     val density = LocalDensity.current
     val slideDistancePx = remember(density) { with(density) { 96.dp.toPx() } }
@@ -28,11 +26,10 @@ internal fun rememberMarkAsReadController(
     val currentBooks by rememberUpdatedState(books)
     val currentRunAction by rememberUpdatedState(runAction)
 
-    val controller = remember(slideDistancePx, playMotion, haptics, navPulse) {
+    val controller = remember(slideDistancePx, playMotion, navPulse) {
         MarkAsReadController(
             slideDistancePx = slideDistancePx,
             playMotion = playMotion,
-            haptics = haptics,
             navPulse = navPulse,
             runAction = { currentRunAction(it) },
         )

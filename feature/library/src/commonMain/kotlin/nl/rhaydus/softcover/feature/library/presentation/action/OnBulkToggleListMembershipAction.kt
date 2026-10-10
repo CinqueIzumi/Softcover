@@ -105,6 +105,10 @@ internal class OnBulkToggleListMembershipAction(
             SnackBarManager.showSnackbar(
                 title = "Couldn't $verb $failureCount $noun $preposition \"${list.name}\" — try again.",
             )
+
+            scope.sendEvent(LibraryEvent.ListMembershipChangeFailedEvent())
+        } else {
+            scope.sendEvent(LibraryEvent.ListMembershipChangedEvent())
         }
     }
 }
