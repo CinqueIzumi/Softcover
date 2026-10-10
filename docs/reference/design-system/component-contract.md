@@ -164,6 +164,10 @@ TopBar(model = state.topBar)
 - **One model per identity unless it varies by surface.** A collector building per-item models keeps one map
   keyed by identity; a cover carries a per-rail shared-element key and needs one map per rail, a badge with
   no surface-scoped data needs exactly one.
+- **A model chosen by a value only composition has arrives once per outcome.** For scroll position, a window
+  size class or a `CompositionLocal`, the `UiState` carries one model per outcome and the render picks one; it
+  never builds or `.copy`s a model from the signal. Book detail's mobile bar holds `topBar` (`Opaque`, titled)
+  and `overMediaTopBar` (`OverMedia`, untitled) and picks by whether the hero has scrolled away.
 - **Library-owned copy arrives through a seam.** Copy a component owns and resolves from its own
   `composeResources` (the offline banner and offline screen) is exposed as the `OfflineCopy` interface
   (`state/`), whose methods are `suspend` and return the models. `ResourceOfflineCopy` is the default
@@ -174,7 +178,7 @@ TopBar(model = state.topBar)
   by path. A `*UiState` member may look up models the collectors stored but never builds one; a constructor,
   `.copy` or model-returning call in a member or getter that returns a model is reported. A reducer that
   returns the `UiState` itself (`withName`) is not. A recorded § 7.4a exception carries
-  `@ModelBuiltInComposition(reason)`, never `@Suppress`. A model that depends on a value only composition has (scroll position, window size class, a `CompositionLocal`) is unsettled.
+  `@ModelBuiltInComposition(reason)`, never `@Suppress`.
 
 **R11 — The signature is the model, the event lambda and the modifier. Nothing else.** Anything a call site
 would otherwise pass — a `TextStyle`, a `Color`, `maxLines`, an autosize spec, a particle count, a

@@ -18,7 +18,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-1e | Item 4's sheet bodies the gate misses, swept with their owners | S11-1a | [x] |
 | S11-1z | Turn `UiModelBuiltInRender` on; add it to `component-contract.md` § 7.4 and the intro's gate count, drop R10's "once the sweep enables it" | S11-1b–e | [x] |
 | S11-2 | R11 holdouts | — | [x] |
-| S11-3 | `TopBarSurface`, the `ShareCardPalette` fold, the final § 7.4a check | S11-1, S11-2 | [ ] |
+| S11-3 | `TopBarSurface`, the `ShareCardPalette` fold, the final § 7.4a check | S11-1, S11-2 | [x] |
 | S11-5 | Provide `LocalHaptics` at the theme root; one way of reading haptics | — | [ ] |
 | S11-6 | Haptic vocabulary: `commit` for milestones only, fired after the outcome, `reject` on failure | S11-5 | [ ] |
 | S11-9 | Explore search keeps its results while a refresh runs | SL-15c | [ ] |
@@ -58,8 +58,8 @@ primitives among them), and every premium-feel sub-step has landed.
 
 S11 settles the three R10 edges `component-contract.md` names. One stays open on purpose, as a recorded
 exception rather than a holdout: the preview fixtures / Component Gallery, which construct models by
-definition. The library-owned-copy edge is already settled by the `OfflineCopy` seam. The third, a model that depends on a value only composition has (scroll position, window
-size class, a `CompositionLocal`), is decided in S11-3 through `TopBarSurface`.
+definition. The library-owned-copy edge is settled by the `OfflineCopy` seam; the composition-only-value
+edge by R10's one-model-per-outcome rule.
 
 ## S11-3 — `TopBarSurface`, `ShareCardPalette`, final check
 

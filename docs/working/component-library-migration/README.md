@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-2 done, uncommitted: R11 has no holdouts. `RichText` (`RichTextVariant`, `RichTextEvent.Tapped`; CommunityReview owns its Show more/less), `StatNumber` (`StatNumberVariant` Standard/Average; `StatTile` passes its face to an internal body), `CoverlessTitleCover(CoverUiModel)`, `MarkAsReadBurst(MarkAsReadBurstUiModel)` (edge-triggered; book detail holds it on `BookDetailUiState` via `OnCelebrateMarkedAsReadAction`, reading on `MarkAsReadController`). Accepted UI delta: the community-review skeleton mask now covers the Show more toggle. PF-4/7 wait for S12-4.
-- **Next:** commit S11-2, then S11-3 per `steps/s11-contract-retrofit.md` § S11-3.
+- **State:** S11-3 done, uncommitted. R10 now rules the composition-only-value edge (one model per outcome on the `UiState`, the render picks; book detail's `topBar` / `overMediaTopBar` already comply, no code change). `ShareCard`'s surface and content colours resolve in one `when`. § 7.4a holds only its four standing exceptions; no `@ModelBuiltInComposition` in production. PF-4/7 wait for S12-4.
+- **Next:** commit S11-3, then S11-5 per `steps/s11-contract-retrofit.md` § S11-5.
 - **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21, after the last Kotlin edit: `styleCheck`, `assembleDebug` and `testAndroidHostTest` for `:core:component`, `:core:uibinding`, `:feature:profile`, `:feature:book_detail`, `:feature:reading` passed; glom check clean; AAA check clean. One `softcover-reviewer` pass; its four findings fixed.
-- **Uncommitted:** all of S11-2.
+- **Verification:** JBR 21, after the last Kotlin edit: `:core:component:compileKotlinJvm` and `styleCheck` passed. No reviewer pass (one-file Kotlin fold plus docs).
+- **Uncommitted:** all of S11-3 (`ShareCard.kt`, `component-contract.md`, the S11 step file, this block).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

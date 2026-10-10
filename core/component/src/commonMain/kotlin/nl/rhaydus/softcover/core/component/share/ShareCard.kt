@@ -47,22 +47,14 @@ fun ShareCard(
     model: ShareCardUiModel,
     modifier: Modifier = Modifier,
 ) {
-    val surfaceColor = when (model) {
+    val (surfaceColor, contentColor) = when (model) {
         is StatShareCardUiModel,
-        is ReadingLifeShareCardUiModel -> MaterialTheme.colorScheme.primary
-        is BookShareCardUiModel,
-        is ReadingUpdateShareCardUiModel,
-        is QuoteShareCardUiModel,
-        is YearRecapShareCardUiModel -> MaterialTheme.colorScheme.surface
-    }
+        is ReadingLifeShareCardUiModel -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
 
-    val contentColor = when (model) {
-        is StatShareCardUiModel,
-        is ReadingLifeShareCardUiModel -> MaterialTheme.colorScheme.onPrimary
         is BookShareCardUiModel,
         is ReadingUpdateShareCardUiModel,
         is QuoteShareCardUiModel,
-        is YearRecapShareCardUiModel -> MaterialTheme.colorScheme.onSurface
+        is YearRecapShareCardUiModel -> MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
     }
 
     val sizeModifier = when (model) {
