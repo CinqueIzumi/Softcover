@@ -61,7 +61,6 @@ internal actual fun BookDetailScreenLayout(
     onCoverClick: () -> Unit,
     onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
-    celebrationKey: Int,
 ) {
     val showOfflinePlaceholder =
         isOnline.not() && state.book == null && state.loadingBookDetails.not()
@@ -108,14 +107,12 @@ internal actual fun BookDetailScreenLayout(
                         TwoColumnContent(
                             state = state,
                             runAction = runAction,
-                            celebrationKey = celebrationKey,
                             onCoverClick = onCoverClick,
                         )
                     } else {
                         SingleColumnContent(
                             state = state,
                             runAction = runAction,
-                            celebrationKey = celebrationKey,
                             onCoverClick = onCoverClick,
                         )
                     }
@@ -135,7 +132,6 @@ internal actual fun BookDetailScreenLayout(
 private fun TwoColumnContent(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
-    celebrationKey: Int,
     onCoverClick: () -> Unit,
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
@@ -157,7 +153,6 @@ private fun TwoColumnContent(
                 state = state,
                 runAction = runAction,
                 dateStyle = state.dateStyle,
-                celebrationKey = celebrationKey,
             )
 
             state.scanEditionCallout?.let { scanEditionCallout ->
@@ -223,7 +218,6 @@ private fun NarrativeColumn(
 private fun SingleColumnContent(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
-    celebrationKey: Int,
     onCoverClick: () -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -237,7 +231,6 @@ private fun SingleColumnContent(
             bookDetailItems(
                 state = state,
                 runAction = runAction,
-                celebrationKey = celebrationKey,
                 onCoverClick = onCoverClick,
             )
         }

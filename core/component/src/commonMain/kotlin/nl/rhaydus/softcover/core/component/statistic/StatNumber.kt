@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,10 +20,12 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private const val TABULAR_NUMS = "tnum"
 private const val PULSE_DURATION_MS = 220
@@ -40,18 +43,37 @@ private const val PULSE_DURATION_MS = 220
  * with the number's own content colour so the tick reads against any surface — including a
  * `primary`-filled hero card, where that colour is `onPrimary` — a quiet ledger tick that makes a
  * count feel earned rather than rolled. Suppressed under reduced motion.
- *
- * It takes the `Text`-shaped render parameters after the model, the same way `RichText` does: a
- * number is type, and which face it is set in belongs to the surface rather than to the datum.
- * [style] / [autoSize] as loose parameters are an exception to components
- * taking only their model, event lambda and modifier, not a pattern to copy.
  */
 @Composable
 fun StatNumber(
     model: StatNumberUiModel,
-    style: TextStyle,
     modifier: Modifier = Modifier,
-    autoSize: TextAutoSize? = null,
+) {
+    val typography = MaterialTheme.editorialTypography
+
+    val style = when (model.variant) {
+        StatNumberVariant.Standard -> typography.statLarge
+
+        StatNumberVariant.Average -> typography.statLarge.copy(
+            fontSize = 52.sp,
+            lineHeight = 52.sp,
+        )
+    }
+
+    StatNumber(
+        model = model,
+        style = style,
+        autoSize = null,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun StatNumber(
+    model: StatNumberUiModel,
+    style: TextStyle,
+    autoSize: TextAutoSize?,
+    modifier: Modifier = Modifier,
 ) {
     val playMotion = playDecorativeMotion()
 

@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 @Immutable
 data class RichTextUiModel(
     val paragraphs: ImmutableList<RichTextParagraph>,
+    val variant: RichTextVariant = RichTextVariant.Body,
 ) {
     companion object : UiModelPreviews<RichTextUiModel> {
         val EMPTY = RichTextUiModel(paragraphs = persistentListOf())

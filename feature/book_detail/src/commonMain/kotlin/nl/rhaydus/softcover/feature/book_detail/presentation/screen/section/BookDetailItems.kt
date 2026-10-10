@@ -33,7 +33,6 @@ internal fun LazyListScope.lensItems(
 internal fun LazyListScope.bookDetailItems(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
-    celebrationKey: Int,
     onCoverClick: () -> Unit,
 ) {
     item {
@@ -51,7 +50,6 @@ internal fun LazyListScope.bookDetailItems(
             state = state,
             runAction = runAction,
             dateStyle = state.dateStyle,
-            celebrationKey = celebrationKey,
         )
     }
 

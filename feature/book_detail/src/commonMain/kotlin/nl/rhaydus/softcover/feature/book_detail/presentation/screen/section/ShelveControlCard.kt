@@ -63,7 +63,6 @@ internal fun ShelveControlCard(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
     dateStyle: DateStyle,
-    celebrationKey: Int,
 ) {
     val book = state.book
     val isLoading = state.loadingBookDetails && book == null
@@ -142,7 +141,7 @@ internal fun ShelveControlCard(
                         selected = status == BookStatus.Read,
                         isLoading = isLoading,
                         onClick = { book?.let { runAction(OnMarkBookAsReadClickAction(book = it)) } },
-                        celebrationKey = celebrationKey,
+                        celebrationKey = state.markAsReadBurst.triggerKey,
                         trailingStatus = book?.let {
                             readStatusDateTrailing(
                                 book = it,
@@ -155,7 +154,7 @@ internal fun ShelveControlCard(
         }
 
         MarkAsReadBurst(
-            triggerKey = celebrationKey,
+            model = state.markAsReadBurst,
             modifier = Modifier.matchParentSize(),
         )
     }

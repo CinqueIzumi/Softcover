@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.component.richtext.RichTextVariant
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReviewer
@@ -135,6 +136,18 @@ class BookReviewUiModelMapperTest {
             model.id shouldBe 12
             model.isLoading shouldBe false
             model.isSpoilerGated shouldBe true
+        }
+
+        @Test
+        fun `tags the review body as a community review`() {
+            // ----- Arrange -----
+            val review = review()
+
+            // ----- Act -----
+            val model = review.toBookReviewUiModel()
+
+            // ----- Assert -----
+            model.body.variant shouldBe RichTextVariant.CommunityReview
         }
     }
 }

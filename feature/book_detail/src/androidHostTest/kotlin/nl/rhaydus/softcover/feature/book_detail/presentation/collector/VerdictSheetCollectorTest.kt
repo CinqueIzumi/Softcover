@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.richtext.RichTextVariant
 import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
@@ -142,7 +143,7 @@ class VerdictSheetCollectorTest {
             // ----- Assert -----
             stateFlow.value.verdictSheet shouldBe book.toVerdictSheetUiModel(
                 context = VerdictSheetContext.EDIT,
-                review = reviewDocument.toRichTextUiModel(),
+                review = reviewDocument.toRichTextUiModel(variant = RichTextVariant.Verdict),
                 cover = cover,
             )
         }

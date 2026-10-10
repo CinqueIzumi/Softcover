@@ -7,7 +7,11 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
@@ -24,23 +28,23 @@ import kotlin.random.Random
  * sibling in a `Box` and sets [modifier] to `Modifier.matchParentSize()` (or a fixed footprint) —
  * particles travel outward from the centre of that footprint.
  *
- * The burst replays whenever [triggerKey] changes to a non-zero value, including on repeat commits;
- * `0` means nothing has been committed yet, so it never fires on first composition. Suppressed when
- * the user has disabled system animations. [scale] sets the particle count and duration.
+ * The burst plays each time [MarkAsReadBurstUiModel.triggerKey] changes after first composition; the key
+ * it first composes with never plays, so returning to a screen does not replay an old celebration.
+ * Suppressed when the user has disabled system animations. [MarkAsReadBurstUiModel.scale] sets the
+ * particle count and duration.
  *
  * Pair every trigger with a single `commit` haptic so the visual and haptic land together — read is
  * deliberately the only shelf-status change with this celebration; no other transition should reuse it.
  */
 @Composable
 fun MarkAsReadBurst(
-    triggerKey: Int,
+    model: MarkAsReadBurstUiModel,
     modifier: Modifier = Modifier,
-    scale: MarkAsReadBurstScale = MarkAsReadBurstScale.Card,
 ) {
     val particleCount: Int
     val durationMillis: Int
 
-    when (scale) {
+    when (model.scale) {
         MarkAsReadBurstScale.Card -> {
             particleCount = 16
             durationMillis = 800
@@ -58,8 +62,14 @@ fun MarkAsReadBurst(
 
     val progress = remember { Animatable(initialValue = 0f) }
 
-    LaunchedEffect(triggerKey) {
-        if (triggerKey == 0 || playMotion.not()) return@LaunchedEffect
+    var lastPlayedKey by rememberSaveable { mutableIntStateOf(model.triggerKey) }
+
+    LaunchedEffect(model.triggerKey) {
+        if (model.triggerKey == lastPlayedKey) return@LaunchedEffect
+
+        lastPlayedKey = model.triggerKey
+
+        if (playMotion.not()) return@LaunchedEffect
 
         progress.snapTo(targetValue = 0f)
         progress.animateTo(

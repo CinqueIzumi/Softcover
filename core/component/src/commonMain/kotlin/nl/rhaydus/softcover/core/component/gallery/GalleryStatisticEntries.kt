@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.component.gallery
 
-import androidx.compose.material3.MaterialTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.chart.ColumnChart
@@ -109,7 +108,6 @@ internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
         content = { model, modifier ->
             StatNumber(
                 model = model,
-                style = MaterialTheme.typography.headlineLarge,
                 modifier = modifier,
             )
         },

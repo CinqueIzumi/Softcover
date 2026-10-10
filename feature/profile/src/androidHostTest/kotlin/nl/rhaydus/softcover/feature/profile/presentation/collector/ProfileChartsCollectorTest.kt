@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
@@ -229,6 +230,7 @@ class ProfileChartsCollectorTest {
                 stateFlow.value.ratingsAverage shouldBe ratingsAverageUiModel(ratings)
                 stateFlow.value.ratingsChart.isLoading shouldBe false
                 stateFlow.value.ratingsAverage.isLoading shouldBe false
+                stateFlow.value.ratingsAverage.variant shouldBe StatNumberVariant.Average
                 job.cancel()
             }
 

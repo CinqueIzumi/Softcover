@@ -55,9 +55,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
  */
 @Composable
 internal fun CoverlessTitleCover(
-    title: String,
+    model: CoverUiModel,
     modifier: Modifier = Modifier,
 ) {
+    val title = model.coverlessTitle.orEmpty()
     val trimmedTitle = title.trim()
     val initial = trimmedTitle.firstOrNull()?.uppercase().orEmpty()
 

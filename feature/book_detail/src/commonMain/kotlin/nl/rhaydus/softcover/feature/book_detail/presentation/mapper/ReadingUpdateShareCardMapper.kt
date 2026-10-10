@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.richtext.RichTextVariant
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -59,7 +60,9 @@ internal fun Book.toReadingUpdateShareCardUiModel(
             author = resolvedAuthor,
             tags = resolvedTags,
             ratingStars = currentUserBook.rating?.takeIf { it > 0.0 },
-            review = currentUserBook.reviewDocument?.takeUnless { it.isBlank() }?.toRichTextUiModel(),
+            review = currentUserBook.reviewDocument
+                ?.takeUnless { it.isBlank() }
+                ?.toRichTextUiModel(variant = RichTextVariant.ShareCard),
         )
 
         BookStatus.Reading -> ReadingUpdateShareCardUiModel.Reading(

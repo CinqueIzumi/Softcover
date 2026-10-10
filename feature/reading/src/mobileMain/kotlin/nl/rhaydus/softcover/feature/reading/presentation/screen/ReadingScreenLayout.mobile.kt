@@ -27,7 +27,6 @@ import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
-import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -133,9 +132,8 @@ internal actual fun ReadingScreenLayout(
         }
 
         MarkAsReadBurst(
-            triggerKey = controller.celebrationKey,
+            model = controller.burst,
             modifier = Modifier.fillMaxSize(),
-            scale = MarkAsReadBurstScale.Screen,
         )
     }
 }

@@ -13,7 +13,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,8 +27,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-
-private const val VERDICT_BLOCK_REVIEW_COLLAPSED_LINES = 8
 
 /**
  * The book-page "Your verdict" card. Read-only — tapping anywhere on the card (or the "Edit" link, once
@@ -133,12 +130,7 @@ private fun FilledVerdict(
         if (review != null) {
             RichText(
                 model = review,
-                style = MaterialTheme.editorialTypography.bodyLarge.copy(
-                    fontStyle = FontStyle.Normal,
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = VERDICT_BLOCK_REVIEW_COLLAPSED_LINES,
-                onClick = onEditClick,
+                onEvent = { onEditClick() },
             )
 
             if (model.hasSpoilers) {

@@ -45,7 +45,6 @@ internal actual fun BookDetailScreenLayout(
     onCoverClick: () -> Unit,
     onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
-    celebrationKey: Int,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val lazyListState = rememberLazyListState()
@@ -93,7 +92,6 @@ internal actual fun BookDetailScreenLayout(
             bookDetailItems(
                 state = state,
                 runAction = runAction,
-                celebrationKey = celebrationKey,
                 onCoverClick = onCoverClick,
             )
 
@@ -157,7 +155,6 @@ private fun BookDetailScreenReadingPreview() {
                 onCoverClick = {},
                 onCreateNewListClick = {},
                 isOnline = true,
-                celebrationKey = 0,
             )
         }
     }
@@ -187,7 +184,6 @@ private fun BookDetailScreenNonePreview() {
                 onCoverClick = {},
                 onCreateNewListClick = {},
                 isOnline = true,
-                celebrationKey = 0,
             )
         }
     }
@@ -217,7 +213,6 @@ private fun BookDetailScreenDnfPreview() {
                 onCoverClick = {},
                 onCreateNewListClick = {},
                 isOnline = true,
-                celebrationKey = 0,
             )
         }
     }
@@ -247,7 +242,6 @@ private fun BookDetailScreenWantToReadPreview() {
                 onCoverClick = {},
                 onCreateNewListClick = {},
                 isOnline = true,
-                celebrationKey = 0,
             )
         }
     }
@@ -277,7 +271,6 @@ private fun BookDetailScreenReadPreview() {
                 onCoverClick = {},
                 onCreateNewListClick = {},
                 isOnline = true,
-                celebrationKey = 0,
             )
         }
     }

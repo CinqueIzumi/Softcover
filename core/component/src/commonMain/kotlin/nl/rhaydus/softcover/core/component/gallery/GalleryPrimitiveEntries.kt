@@ -13,6 +13,8 @@ import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.cover.CoverlessTitleCover
 import nl.rhaydus.softcover.core.component.deadline.DeadlineRow
 import nl.rhaydus.softcover.core.component.deadline.DeadlineRowUiModel
@@ -95,7 +97,11 @@ internal val primitiveEntries: ImmutableList<GalleryEntry> = persistentListOf(
                 modifier = modifier.width(96.dp),
             ) {
                 CoverlessTitleCover(
-                    title = "Piranesi",
+                    model = CoverUiModel(
+                        source = null,
+                        coverlessTitle = "Piranesi",
+                        variant = CoverVariant.Shelf,
+                    ),
                     modifier = Modifier.width(96.dp),
                 )
             }

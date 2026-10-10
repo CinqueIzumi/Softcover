@@ -86,10 +86,6 @@ private fun RatingsAverageRow(
         Row(verticalAlignment = Alignment.Bottom) {
             StatNumber(
                 model = average,
-                style = MaterialTheme.editorialTypography.statLarge.copy(
-                    fontSize = 52.sp,
-                    lineHeight = 52.sp,
-                ),
             )
 
             SoftcoverText(

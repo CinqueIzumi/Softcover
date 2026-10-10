@@ -2,9 +2,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
@@ -24,6 +21,7 @@ import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnCelebrateMarkedAsReadAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenVerdictSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
@@ -74,8 +72,6 @@ class BookDetailScreen(
 
         val uriHandler = LocalUriHandler.current
 
-        var celebrationKey by remember { mutableIntStateOf(0) }
-
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
                 is BookDetailEvent.RefreshDetailBookEvent -> {
@@ -90,7 +86,7 @@ class BookDetailScreen(
 
                 is BookDetailEvent.BookMarkedAsReadEvent -> {
                     haptics.commit()
-                    celebrationKey++
+                    screenModel.runAction(action = OnCelebrateMarkedAsReadAction())
 
                     screenModel.runAction(
                         action = OnOpenVerdictSheetAction(context = VerdictSheetContext.FINISHED),
@@ -136,7 +132,6 @@ class BookDetailScreen(
                 screenModel.runAction(OnDismissChooseListsSheetAction())
             },
             isOnline = isOnline,
-            celebrationKey = celebrationKey,
         )
     }
 }
@@ -157,5 +152,4 @@ internal expect fun BookDetailScreenLayout(
     onCoverClick: () -> Unit,
     onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
-    celebrationKey: Int,
 )

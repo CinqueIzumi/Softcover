@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.component.chart.ColumnUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 
@@ -82,6 +83,7 @@ internal fun ratingsAverageUiModel(ratings: RatingsDistribution?): StatNumberUiM
     value = ratings?.average ?: 0.0,
     format = StatNumberFormat.Decimal,
     isLoading = ratings == null,
+    variant = StatNumberVariant.Average,
 )
 
 /**

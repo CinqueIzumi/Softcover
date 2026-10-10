@@ -14,10 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-1 done. `UiModelBuiltInRender` is active and green repo-wide with no `@Suppress` or baseline; `*UiState` members may look up stored models but never build one (containers and wrappers included). Swept: choose-lists chip, share sheet (capture state hoisted to hosts via `ShareCaptureState`), verdict draft (hoisted via `VerdictDraftReducer`), library per-tab lookups and filter sheet model, profile preview fixtures, explore genre control, streak strip/sheet, unknown-ISBN sheet, edition and tag-editor sheets, stored `topBar`. Also fixed: Row `BookCard` rules now sit under the skeleton mask (bare dividers on cold start). PF-4/7 wait for S12-4.
-- **Next:** S11-2, R11 holdouts (`RichText`, `StatNumber`, `ClickableText`, `MarkAsReadBurst`, `CoverlessTitleCover`).
-- **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).- **Verification:** JBR 21: `styleCheck` (rule active), `checkModuleGraph`, `checkDocBudgets`, every `testAndroidHostTest` and `:detekt-rules:test` green; two `softcover-reviewer` passes, findings fixed.
-- **Uncommitted:** all of S11-1b–1z and the divider fix.
+- **State:** S11-2 done, uncommitted: R11 has no holdouts. `RichText` (`RichTextVariant`, `RichTextEvent.Tapped`; CommunityReview owns its Show more/less), `StatNumber` (`StatNumberVariant` Standard/Average; `StatTile` passes its face to an internal body), `CoverlessTitleCover(CoverUiModel)`, `MarkAsReadBurst(MarkAsReadBurstUiModel)` (edge-triggered; book detail holds it on `BookDetailUiState` via `OnCelebrateMarkedAsReadAction`, reading on `MarkAsReadController`). Accepted UI delta: the community-review skeleton mask now covers the Show more toggle. PF-4/7 wait for S12-4.
+- **Next:** commit S11-2, then S11-3 per `steps/s11-contract-retrofit.md` § S11-3.
+- **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
+- **Verification:** JBR 21, after the last Kotlin edit: `styleCheck`, `assembleDebug` and `testAndroidHostTest` for `:core:component`, `:core:uibinding`, `:feature:profile`, `:feature:book_detail`, `:feature:reading` passed; glom check clean; AAA check clean. One `softcover-reviewer` pass; its four findings fixed.
+- **Uncommitted:** all of S11-2.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

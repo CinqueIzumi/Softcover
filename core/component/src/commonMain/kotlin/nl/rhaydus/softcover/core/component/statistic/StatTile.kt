@@ -129,6 +129,7 @@ private fun StandardTile(
             StatNumber(
                 model = model.stat,
                 style = typography.statLarge,
+                autoSize = null,
             )
 
             SoftcoverText(
@@ -172,6 +173,7 @@ private fun CompactTile(
                 StatNumber(
                     model = model.stat,
                     style = typography.headlineMedium,
+                    autoSize = null,
                 )
 
                 Spacer(modifier = Modifier.width(Spacing.xs))

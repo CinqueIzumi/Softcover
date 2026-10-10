@@ -131,7 +131,7 @@ fun Cover(
             if (model.isLoading) {
                 CoverShimmer()
             } else {
-                CoverFallback(coverlessFallback = coverlessFallback)
+                CoverFallback(model = model)
             }
         }
 
@@ -147,7 +147,7 @@ fun Cover(
             request = request,
             imageModifier = imageModifier,
             contentDescription = contentDescription,
-            coverlessFallback = coverlessFallback,
+            model = model,
         )
     }
 }
@@ -157,7 +157,7 @@ private fun CoverImage(
     request: ImageRequest,
     imageModifier: Modifier,
     contentDescription: String?,
-    coverlessFallback: String?,
+    model: CoverUiModel,
 ) {
     var settled by remember { mutableStateOf<Painter?>(null) }
     val previous = remember(request) { settled }
@@ -183,7 +183,7 @@ private fun CoverImage(
     }
 
     if (state is AsyncImagePainter.State.Error) {
-        CoverFallback(coverlessFallback = coverlessFallback)
+        CoverFallback(model = model)
 
         return
     }
@@ -225,9 +225,9 @@ private fun CoverImage(
 }
 
 @Composable
-private fun CoverFallback(coverlessFallback: String?) {
-    if (coverlessFallback != null) {
-        CoverlessTitleCover(title = coverlessFallback)
+private fun CoverFallback(model: CoverUiModel) {
+    if (model.coverlessTitle.isNullOrBlank().not()) {
+        CoverlessTitleCover(model = model)
     } else {
         Box(modifier = Modifier.fillMaxSize())
     }

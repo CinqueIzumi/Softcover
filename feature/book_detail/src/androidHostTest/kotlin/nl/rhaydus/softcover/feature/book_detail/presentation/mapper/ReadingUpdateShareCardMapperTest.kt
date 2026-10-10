@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.richtext.RichTextParagraph
 import nl.rhaydus.softcover.core.component.richtext.RichTextRun
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.richtext.RichTextVariant
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -486,6 +487,7 @@ class ReadingUpdateShareCardMapperTest {
                         ),
                     ),
                 ),
+                variant = RichTextVariant.ShareCard,
             )
         }
 
@@ -512,6 +514,7 @@ class ReadingUpdateShareCardMapperTest {
                 paragraphs = persistentListOf(
                     RichTextParagraph(runs = persistentListOf(RichTextRun(text = "A great read"))),
                 ),
+                variant = RichTextVariant.ShareCard,
             )
         }
 

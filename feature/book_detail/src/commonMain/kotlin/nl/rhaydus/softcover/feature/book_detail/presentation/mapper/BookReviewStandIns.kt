@@ -5,6 +5,7 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.richtext.RichTextParagraph
 import nl.rhaydus.softcover.core.component.richtext.RichTextRun
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.richtext.RichTextVariant
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 
 private const val STAND_IN_BODY =
@@ -17,6 +18,7 @@ private val STAND_IN_REVIEW = BookReviewUiModel(
         paragraphs = persistentListOf(
             RichTextParagraph(runs = persistentListOf(RichTextRun(text = STAND_IN_BODY))),
         ),
+        variant = RichTextVariant.CommunityReview,
     ),
     isSpoilerGated = false,
     rating = ratingBadge(label = "4.0"),

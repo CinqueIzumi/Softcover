@@ -22,7 +22,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.bookCardStaggeredEntry
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
-import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
@@ -117,9 +116,8 @@ internal actual fun ReadingScreenLayout(
         }
 
         MarkAsReadBurst(
-            triggerKey = controller.celebrationKey,
+            model = controller.burst,
             modifier = Modifier.fillMaxSize(),
-            scale = MarkAsReadBurstScale.Screen,
         )
     }
 }

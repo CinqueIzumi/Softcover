@@ -11,6 +11,8 @@ import nl.rhaydus.softcover.core.component.button.PillButtonContent
 import nl.rhaydus.softcover.core.component.button.PillButtonTone
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
@@ -56,6 +58,11 @@ internal data class BookDetailUiState(
 
     val loadingBookDetails: Boolean = true,
     val book: Book? = null,
+
+    val markAsReadBurst: MarkAsReadBurstUiModel = MarkAsReadBurstUiModel(
+        triggerKey = 0,
+        scale = MarkAsReadBurstScale.Card,
+    ),
 
     /**
      * Opaque and titled with the book. Desktop's bar, mobile's bar once the hero has scrolled away,

@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.richtext.RichTextVariant
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
@@ -139,7 +140,7 @@ class VerdictReviewCollectorTest {
             // ----- Assert -----
             stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Filled(
                 rating = 4.5,
-                review = reviewDocument.toRichTextUiModel(),
+                review = reviewDocument.toRichTextUiModel(variant = RichTextVariant.Verdict),
                 hasSpoilers = true,
             )
         }
@@ -179,7 +180,7 @@ class VerdictReviewCollectorTest {
             // ----- Assert -----
             stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Filled(
                 rating = null,
-                review = reviewDocument.toRichTextUiModel(),
+                review = reviewDocument.toRichTextUiModel(variant = RichTextVariant.Verdict),
                 hasSpoilers = false,
             )
         }
@@ -202,7 +203,7 @@ class VerdictReviewCollectorTest {
             // ----- Assert -----
             stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Filled(
                 rating = null,
-                review = reviewDocument.toRichTextUiModel(),
+                review = reviewDocument.toRichTextUiModel(variant = RichTextVariant.Verdict),
                 hasSpoilers = false,
             )
         }

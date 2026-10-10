@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.richtext.RichTextVariant
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
@@ -27,7 +28,9 @@ internal class VerdictReviewCollector : BookDetailCollector {
             .distinctUntilChanged()
             .collectLatest { userBook ->
                 val rating = userBook?.rating?.takeIf { it > 0.0 }
-                val review = userBook?.reviewDocument?.takeUnless { it.isBlank() }?.toRichTextUiModel()
+                val review = userBook?.reviewDocument
+                    ?.takeUnless { it.isBlank() }
+                    ?.toRichTextUiModel(variant = RichTextVariant.Verdict)
 
                 scope.setState {
                     it.copy(

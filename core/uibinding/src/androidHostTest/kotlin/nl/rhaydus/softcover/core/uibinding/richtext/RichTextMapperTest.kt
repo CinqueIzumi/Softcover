@@ -5,6 +5,7 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.richtext.RichTextParagraph
 import nl.rhaydus.softcover.core.component.richtext.RichTextRun
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.richtext.RichTextVariant
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
@@ -12,6 +13,39 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class RichTextMapperTest {
+    @Nested
+    inner class Variant {
+        @Test
+        fun `passes the requested variant through to the model`() {
+            // ----- Arrange -----
+            val document = ReviewDocument.EMPTY
+
+            // ----- Act -----
+            val result = document.toRichTextUiModel(variant = RichTextVariant.Verdict)
+
+            // ----- Assert -----
+            result.variant shouldBe RichTextVariant.Verdict
+        }
+
+        @Test
+        fun `keeps the paragraphs when a variant is given`() {
+            // ----- Arrange -----
+            val document = ReviewDocument(
+                paragraphs = listOf(
+                    ReviewParagraph(
+                        runs = listOf(ReviewRun(text = "hello")),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = document.toRichTextUiModel(variant = RichTextVariant.ShareCard)
+
+            // ----- Assert -----
+            result.paragraphs.single().runs.single() shouldBe RichTextRun(text = "hello")
+        }
+    }
+
     @Nested
     inner class RoundTrip {
         @Test

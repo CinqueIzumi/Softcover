@@ -41,6 +41,8 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
@@ -205,7 +207,14 @@ object MotionDebugScreen : Screen {
 
     @Composable
     private fun MarkAsReadBurstSection(header: SectionHeaderUiModel.Label) {
-        var triggerKey by remember { mutableIntStateOf(0) }
+        var burst by remember {
+            mutableStateOf(
+                MarkAsReadBurstUiModel(
+                    triggerKey = 0,
+                    scale = MarkAsReadBurstScale.Card,
+                ),
+            )
+        }
 
         SectionHeader(model = header)
 
@@ -226,7 +235,7 @@ object MotionDebugScreen : Screen {
             ) {}
 
             MarkAsReadBurst(
-                triggerKey = triggerKey,
+                model = burst,
                 modifier = Modifier.size(160.dp),
             )
 
@@ -234,7 +243,7 @@ object MotionDebugScreen : Screen {
                 label = "Fire burst",
                 style = ButtonStyle.TONAL,
                 size = ButtonSize.S,
-                onClick = { triggerKey += 1 },
+                onClick = { burst = burst.next() },
             )
         }
     }
@@ -305,8 +314,9 @@ object MotionDebugScreen : Screen {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 StatNumber(
-                    model = remember(value) { StatNumberUiModel(value = value.toDouble()) },
-                    style = MaterialTheme.editorialTypography.statHero,
+                    model = remember(value) {
+                        StatNumberUiModel(value = value.toDouble())
+                    },
                 )
 
                 RhaydusButton(

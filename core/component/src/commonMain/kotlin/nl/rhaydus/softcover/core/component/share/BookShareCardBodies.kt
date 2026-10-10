@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -139,12 +138,6 @@ internal fun ReadingUpdateShareCardBody(model: ReadingUpdateShareCardUiModel) {
 
                     RichText(
                         model = model.review,
-                        style = MaterialTheme.editorialTypography.body.copy(
-                            fontStyle = FontStyle.Normal,
-                            textAlign = TextAlign.Center,
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 5,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

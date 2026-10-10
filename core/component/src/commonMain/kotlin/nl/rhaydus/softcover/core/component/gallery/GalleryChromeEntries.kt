@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.divider.DividerInk
@@ -247,7 +248,10 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
                 label = "Card",
                 render = { modifier ->
                     MarkAsReadBurst(
-                        triggerKey = 1,
+                        model = MarkAsReadBurstUiModel(
+                            triggerKey = 1,
+                            scale = MarkAsReadBurstScale.Card,
+                        ),
                         modifier = modifier.size(160.dp),
                     )
                 },
@@ -256,9 +260,11 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
                 label = "Screen",
                 render = { modifier ->
                     MarkAsReadBurst(
-                        triggerKey = 1,
+                        model = MarkAsReadBurstUiModel(
+                            triggerKey = 1,
+                            scale = MarkAsReadBurstScale.Screen,
+                        ),
                         modifier = modifier.size(160.dp),
-                        scale = MarkAsReadBurstScale.Screen,
                     )
                 },
             ),

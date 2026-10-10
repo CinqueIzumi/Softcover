@@ -16,6 +16,7 @@ data class StatNumberUiModel(
     val value: Double,
     val format: StatNumberFormat = StatNumberFormat.Grouped,
     val isLoading: Boolean = false,
+    val variant: StatNumberVariant = StatNumberVariant.Standard,
 ) {
     companion object : UiModelPreviews<StatNumberUiModel> {
         override val previews: ImmutableMap<String, StatNumberUiModel> = persistentMapOf(

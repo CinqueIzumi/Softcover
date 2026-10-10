@@ -4,6 +4,7 @@ import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.richtext.RichTextParagraph
 import nl.rhaydus.softcover.core.component.richtext.RichTextRun
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.richtext.RichTextVariant
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
@@ -15,7 +16,9 @@ import nl.rhaydus.softcover.core.domain.model.ReviewRun
  * it lands with two consumers already: `feature:book_detail`'s verdict block and share sheet, and
  * `feature:reading`'s verdict sheet.
  */
-fun ReviewDocument.toRichTextUiModel(): RichTextUiModel = RichTextUiModel(
+fun ReviewDocument.toRichTextUiModel(
+    variant: RichTextVariant = RichTextVariant.Body,
+): RichTextUiModel = RichTextUiModel(
     paragraphs = paragraphs.map { paragraph ->
         RichTextParagraph(
             runs = paragraph.runs.map { run ->
@@ -28,6 +31,7 @@ fun ReviewDocument.toRichTextUiModel(): RichTextUiModel = RichTextUiModel(
             }.toImmutableList(),
         )
     }.toImmutableList(),
+    variant = variant,
 )
 
 /**

@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
+import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import org.junit.jupiter.api.Nested
@@ -136,6 +137,7 @@ class RatingsHistogramMapperTest {
 
             // ----- Assert -----
             result.isLoading shouldBe true
+            result.variant shouldBe StatNumberVariant.Average
         }
 
         @Test
@@ -150,6 +152,7 @@ class RatingsHistogramMapperTest {
             result.isLoading shouldBe false
             result.value shouldBe 4.2
             result.format shouldBe StatNumberFormat.Decimal
+            result.variant shouldBe StatNumberVariant.Average
         }
     }
 

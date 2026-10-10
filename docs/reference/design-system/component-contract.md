@@ -6,8 +6,8 @@ Every component in `:core:component` is driven by a **UI model**. This contract 
 signature looks like, what its model may hold, and where the domain → UI mapping lives.
 
 It is normative. A component that does not satisfy R1–R12 does not belong in `:core:component`; three of the
-rules are build gates (§ 7.4), and the standing exceptions are in § 7.4a. R10 is satisfied by the whole
-app; R11 still has holdouts, and it says what that means for new code. Why the rules exist is in § 7.7, which
+rules are build gates (§ 7.4), and the standing exceptions are in § 7.4a. R10 and R11 are satisfied by the whole
+app. Why the rules exist is in § 7.7, which
 is optional reading.
 
 > **Read `share/` before writing a new component.** `ShareCard` is the reference implementation (§ 7.3).
@@ -197,11 +197,6 @@ RichText(model = state.review)          // model.variant decides the face and th
   `WindowInsets` the component pads inside its own container (`Banner(windowInsets = …)`), or a hoisted
   mutable state object shared with the scaffold (`TopAppBarScrollBehavior`). The test: could it be serialised with
   the rest of the model? A `TextStyle` could, a `ScrollState` could not.
-- **Not yet satisfied by the whole library.** Fixed in the same S11 retrofit as R10. Current holdouts:
-  `RichText` (`style`, `color`, `maxLines`, `overflow`, `onClick`, `onTextLayout`), `StatNumber` (`style`,
-  `color`, `autoSize`, `maxLines`), `MarkAsReadBurst` (`color`,
-  `secondaryColor`), `CoverlessTitleCover` (`title`).
-  Write new components to R11; an existing signature is not licence.
 
 **R12 — Loading is the component's own state, never a separate skeleton.** A component that renders data
 the screen may not have yet takes `isLoading` (on the model, or as a parameter on a data-free primitive)

@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,10 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -42,8 +37,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAc
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-
-private const val REVIEW_COLLAPSED_LINES = 8
 
 /**
  * "Voices" (The Book lens): section-opener bar + eyebrow, the headline from
@@ -148,30 +141,10 @@ private fun ReviewCard(
                         SoftcoverText(text = "Show spoiler")
                     }
                 } else {
-                    var expanded by rememberSaveable(review.id) { mutableStateOf(false) }
-                    var hasOverflow by rememberSaveable(review.id) { mutableStateOf(false) }
-
                     RichText(
                         model = review.body,
-                        style = MaterialTheme.editorialTypography.review,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = if (expanded) Int.MAX_VALUE else REVIEW_COLLAPSED_LINES,
                         modifier = Modifier.skeletonMask(visible = review.isLoading),
-                        onTextLayout = { layout ->
-                            if (expanded.not() && layout.hasVisualOverflow) {
-                                hasOverflow = true
-                            }
-                        },
                     )
-
-                    if (hasOverflow) {
-                        TextButton(
-                            onClick = { expanded = expanded.not() },
-                            contentPadding = PaddingValues(horizontal = 0.dp),
-                        ) {
-                            SoftcoverText(text = if (expanded) "Show less" else "Show more")
-                        }
-                    }
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.md))
