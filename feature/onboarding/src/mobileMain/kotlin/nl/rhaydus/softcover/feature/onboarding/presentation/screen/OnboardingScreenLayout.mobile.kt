@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.feature.onboarding.presentation.screen
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -45,7 +43,6 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -160,8 +157,7 @@ private fun OnboardingTopBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val playMotion = playDecorativeMotion()
-        val fadeSpec = if (playMotion) tween<Float>(durationMillis = 220) else snap()
+        val fadeSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
 
         AnimatedContent(
             targetState = header,

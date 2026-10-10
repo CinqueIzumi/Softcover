@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.component.chart
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,14 +22,13 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.FadeThroughText
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Motion
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
 
 @Composable
 fun ColumnChart(
@@ -38,7 +36,6 @@ fun ColumnChart(
     modifier: Modifier = Modifier,
 ) {
     val shape = Corners.xxs
-    val playMotion = playDecorativeMotion()
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -51,13 +48,13 @@ fun ColumnChart(
             // Loading holds the animation at zero so the real bars grow from the baseline once it ends.
             val grownHeight = animateFloatAsState(
                 targetValue = if (model.isLoading) 0f else targetHeight,
-                animationSpec = if (playMotion) Motion.valueChange else snap(),
+                animationSpec = MaterialTheme.motion.valueChange,
                 label = "ColumnChartHeight",
             )
 
             val toneColor = animateColorAsState(
                 targetValue = column.tone.color(colors = MaterialTheme.colorScheme),
-                animationSpec = if (playMotion) MaterialTheme.motionScheme.defaultEffectsSpec() else snap(),
+                animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
                 label = "ColumnChartTone",
             )
 

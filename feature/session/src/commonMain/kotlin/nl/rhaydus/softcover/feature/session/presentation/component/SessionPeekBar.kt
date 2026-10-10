@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.feature.session.presentation.component
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -32,7 +30,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -61,7 +58,6 @@ fun SessionPeekBar(
     modifier: Modifier = Modifier,
     flush: Boolean = false,
 ) {
-    val playMotion = playDecorativeMotion()
     val controller = koinInject<ActiveSessionController>()
     val navigator = LocalNavigator.currentOrThrow
     val active by controller.activeSession.collectAsStateWithLifecycle()
@@ -72,16 +68,14 @@ fun SessionPeekBar(
 
     AnimatedVisibility(
         visible = active != null,
-        enter = if (playMotion) {
-            slideInVertically(initialOffsetY = { it }) + fadeIn()
-        } else {
-            EnterTransition.None
-        },
-        exit = if (playMotion) {
-            slideOutVertically(targetOffsetY = { it }) + fadeOut()
-        } else {
-            ExitTransition.None
-        },
+        enter = slideInVertically(
+            animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+            initialOffsetY = { it },
+        ) + fadeIn(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
+        exit = slideOutVertically(
+            animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+            targetOffsetY = { it },
+        ) + fadeOut(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
         modifier = modifier,
     ) {
         lastActive?.let { session ->

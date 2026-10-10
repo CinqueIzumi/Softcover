@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import nl.rhaydus.designsystem.component.InlineErrorState
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -169,11 +167,10 @@ internal fun ScrollToTopWhenResultsReplacedEffect(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun Modifier.dimWhileRefreshing(refreshing: Boolean): Modifier {
-    val playMotion = playDecorativeMotion()
     val target = if (refreshing) REFRESHING_RESULTS_ALPHA else 1f
     val alpha by animateFloatAsState(
         targetValue = target,
-        animationSpec = if (playMotion) MaterialTheme.motionScheme.defaultEffectsSpec() else snap(),
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
     )
 
     return graphicsLayer { this.alpha = alpha }
@@ -182,8 +179,6 @@ internal fun Modifier.dimWhileRefreshing(refreshing: Boolean): Modifier {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun LazyItemScope.searchResultItemModifier(): Modifier {
-    if (playDecorativeMotion().not()) return Modifier
-
     return Modifier.animateItem(
         fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
@@ -194,8 +189,6 @@ internal fun LazyItemScope.searchResultItemModifier(): Modifier {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun LazyGridItemScope.searchResultItemModifier(): Modifier {
-    if (playDecorativeMotion().not()) return Modifier
-
     return Modifier.animateItem(
         fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),

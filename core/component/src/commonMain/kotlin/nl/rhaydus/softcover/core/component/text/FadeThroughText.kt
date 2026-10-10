@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.core.component.text
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.snap
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 
 /**
  * A [SoftcoverText] that fades out and back in on the new [text] when it changes between two loaded
@@ -32,7 +30,7 @@ fun FadeThroughText(
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
 ) {
-    val spec = if (playDecorativeMotion()) MaterialTheme.motionScheme.defaultEffectsSpec<Float>() else snap()
+    val spec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
 
     var shown by remember { mutableStateOf(text) }
     var settled by remember { mutableStateOf(isLoading.not()) }

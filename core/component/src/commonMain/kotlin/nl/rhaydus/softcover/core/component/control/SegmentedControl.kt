@@ -2,8 +2,6 @@ package nl.rhaydus.softcover.core.component.control
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -38,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
@@ -105,8 +102,7 @@ private fun <K> RowScope.TrackSegment(
     isSelected: Boolean,
     onSelect: () -> Unit,
 ) {
-    val playMotion = playDecorativeMotion()
-    val colorSpec = if (playMotion) tween<Color>(durationMillis = 220) else snap()
+    val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
 
     val scheme = MaterialTheme.colorScheme
 
@@ -123,8 +119,8 @@ private fun <K> RowScope.TrackSegment(
     )
 
     // A segment flips enabled the instant its data lands; an un-animated alpha snap would read as a
-    // flash amid everything else settling, so it rides the same tween/snap gate as the selection.
-    val floatSpec = if (playMotion) tween<Float>(durationMillis = 220) else snap()
+    // flash amid everything else settling, so it rides the same spec as the selection.
+    val floatSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
     val disabledAlpha by animateFloatAsState(
         targetValue = if (option.enabled) 1f else DISABLED_ALPHA,
         animationSpec = floatSpec,
@@ -221,8 +217,7 @@ private fun ProseWord(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val scheme = MaterialTheme.colorScheme
-    val playMotion = playDecorativeMotion()
-    val colorSpec = if (playMotion) tween<Color>(durationMillis = 220) else snap()
+    val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
     val wordColor by animateColorAsState(
         targetValue = if (isSelected) scheme.primary else scheme.onSurfaceVariant.copy(alpha = 0.55f),
         animationSpec = colorSpec,
@@ -235,7 +230,7 @@ private fun ProseWord(
     )
     val disabledAlpha by animateFloatAsState(
         targetValue = if (enabled) 1f else DISABLED_ALPHA,
-        animationSpec = if (playMotion) tween<Float>(durationMillis = 220) else snap(),
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "ProseWordEnabledAlpha",
     )
 

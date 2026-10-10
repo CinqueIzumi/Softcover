@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -32,8 +31,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
  * slot, at 16dp vertical / 4dp horizontal padding with a 4dp title→secondary gap and a 16dp gap before
  * [trailing]. [interactionSource] doubles as the row's selectability switch: `null` renders no press
  * treatment (the Copyable menu row); non-null drives `pointerHandCursor()` + `pressScale` + an animated
- * `surfaceContainer` wash gated on `playDecorativeMotion()`, wrapping the caller's [semantics] modifier
- * (`selectable` / `clickable`, built against the same [interactionSource]).
+ * `surfaceContainer` wash, and wraps the caller's [semantics] modifier (`selectable` / `clickable`,
+ * built against the same [interactionSource]).
  * [selectionContainer] wraps [title] for the row whose only affordance is copying its text.
  */
 @Composable
@@ -51,14 +50,14 @@ internal fun SettingsRow(
 ) {
     val interactionModifier = if (interactionSource != null) {
         val isPressed by interactionSource.collectIsPressedAsState()
-        val playMotion = playDecorativeMotion()
 
         val rowBackground by animateColorAsState(
-            targetValue = if (isPressed && playMotion) {
+            targetValue = if (isPressed) {
                 MaterialTheme.colorScheme.surfaceContainer
             } else {
                 Color.Transparent
             },
+            animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
             label = "settingsRowPress",
         )
 

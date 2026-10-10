@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.core.component.chart
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,12 +17,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import kotlin.math.roundToInt
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Motion
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
-import kotlin.math.roundToInt
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
 
 @Composable
 fun RankedBars(
@@ -31,7 +29,6 @@ fun RankedBars(
     modifier: Modifier = Modifier,
 ) {
     val shape = Corners.xxs
-    val playMotion = playDecorativeMotion()
 
     Column(
         modifier = modifier,
@@ -41,7 +38,7 @@ fun RankedBars(
             key(if (model.isLoading) index else row.label) {
                 val fillPercent = animateFloatAsState(
                     targetValue = if (model.isLoading || row.fraction <= 0f) 0f else row.fraction.coerceIn(0.015f..1f) * 100f,
-                    animationSpec = if (playMotion) Motion.valueChange else snap(),
+                    animationSpec = MaterialTheme.motion.valueChange,
                     label = "RankedBarsFill",
                 )
 

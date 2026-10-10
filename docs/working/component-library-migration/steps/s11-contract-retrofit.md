@@ -26,7 +26,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-11 | Numbers that change render through `StatNumber` | S11-2 | [x] |
 | S11-12 | The `StatNumber` count-up is slow enough to read | SL-15c, S11-11 | [x] |
 | S11-13 | Charts grow, morph and slide | SL-15a | [x] |
-| S11-42 | Reduced motion resolves once at the theme root; call sites stop branching on it | S11-13 | [ ] |
+| S11-42 | Reduced motion resolves once at the theme root; call sites stop branching on it | S11-13 | [x] |
 | S11-14 | Cover selection animates | SL-15a, S11-42 | [ ] |
 | S11-15 | One reorder lift treatment | S11-6 | [ ] |
 | S11-16 | Selectable controls fire `select`; `ToggleRow` shares its interaction source | S11-6 | [ ] |
@@ -58,32 +58,15 @@ primitives among them), and every premium-feel sub-step has landed.
 
 ## Approved shape
 
-S11-13:
-- `Motion.countUp` is renamed `Motion.valueChange`, the spring every shown value settles on (numbers and chart geometry); `StatNumber`, foundations §2.5 and the F43 entry follow. Charts use it for every size change: it settles in ~0.9 s with no overshoot, so no bar or segment ever shows more than its share, and the bars arrive with the `StatNumber`s beside them.
-- No UI model or public API change. All bars move together, no stagger. Reduced motion (`playDecorativeMotion()` false) snaps everything.
-- `ColumnChart`: bar heights animate. On loading → loaded the real bars grow from the baseline (the placeholders' height is not reused, so they drop away as the real bars rise). On a later change (Books/Pages) each column, matched by index, morphs to its new height; the value text crossfades and the tone colour animates when the peak moves.
-- `RankedBars`: fills grow from the start edge on load and animate on change.
-- `ProportionChart`: on load the stack sweeps in left to right with a reveal clip (animating weights from zero shows no motion). On a change, segments are matched by label; a departing segment shrinks to zero width before it leaves, the rest slide to their new widths; the departing legend row collapses and the shares crossfade.
-- Feature captions crossfade: `YearColumnHistorySection`'s caption on Books/Pages, and `AuthorRepresentationSection`'s captions on "hide untagged".
-- `components/statistics.md` gets one motion line per chart. No tests (animation timing, no logic).
-
-S11-12:
-- A named count-up spec, one soft critically damped spring settling in ~0.8–1 s, defined once in a new motion file beside `Spacing.kt` / `Corners.kt` in `:core:designsystem` `theme/`; `StatNumber`'s `animateFloatAsState` reads it in place of the default `spring()`. Reduced motion still snaps.
-- The spec is logged in `foundation-upstream-candidates.md` as a foundation motion-token candidate.
-
-S11-11:
-- `StatNumberUiModel` gains `prefix: String = ""` and `suffix: StatNumberSuffix? = null` (`Fixed(text)` | `Plural(one, other)`, picked by the displayed integer); the phrase stays one tabular `SoftcoverText`, only the digits move; the stand-in is prefix + digit stand-in + suffix.
-- `StatNumberFormat.Duration` renders seconds as h:m, for audiobook positions.
-- New variants, one per face: `Hero` (`statHero`), `Headline` (`headlineSmall`), `BodyStrong` (`bodyMedium` Medium), `Body`, `BodySmall`, `Label` (`labelSmall`); ink stays `LocalContentColor`.
-- The hairline pulse is removed entirely; the existing default spring stays (it matches `ProgressBar`'s); KDoc says "springs".
-- Reading `FeaturedProgressUiModel`: `percent` (`Headline`, "%") and `pageLead` (`BodyStrong`, "Page " or `Duration`) become `StatNumberUiModel`; the faded tail stays text beside it; built in `toFeaturedProgress`.
-- Book detail `InProgressUiModel.percent` becomes `StatNumberUiModel` (`Hero`, "%"); built in `toInProgress`.
-- `ShelveControlCard`'s `readingTrailingStatus` leaves composition: a collector-built `BookDetailUiState` field of two `StatNumberUiModel`s (percent "%", position " · p. " or `Duration`), `Label`.
-- `StreakStripUiModel.runningLabel: String?` becomes `running: StatNumberUiModel?` (`BodySmall`, `Plural(" day running", " days running")`); built in `streakStripFor`.
-- `SelectionHeader`'s loose `selectedCount: Int` becomes `LibraryUiState.selectionCount: StatNumberUiModel` (`Headline`, " selected").
-- `PageMastheadUiModel.subtitle` becomes a sealed subtitle: `Text(String)` | `Counts(titles, pages?)`; the mobile `MastheadHeader` takes it in place of `subtitle` + `isSubtitleLoading`; built in `MastheadSnapshot.subtitleFor`.
-- "Show N titles" waits for foundation F42 (a `RhaydusButton` content slot); it stays plain text until then.
-- Gallery fixtures for prefix, `Plural`, `Duration` and loading; the `components.md` index line updated.
+S11-42:
+- The theme root is the app's: `SoftcoverTheme` calls `playDecorativeMotion()` once and passes `RhaydusTheme` (which already takes `motionScheme`) either `MotionScheme.expressive()` or `ReducedMotionScheme`, an internal object in `:core:designsystem` `theme/` whose six specs are all `snap()`. No foundation change.
+- `Motion` becomes `@Immutable class Motion(val valueChange: FiniteAnimationSpec<Float>)` with a full and a reduced instance, provided through internal `LocalMotion` and read as `MaterialTheme.motion` (the `editorialTypography` pattern).
+- Spec branches (`if (playMotion) spec else snap()`) read the spec directly: the three charts, `Chip`, `SegmentedControl`, `Toggle`, `TextFieldPill`, `TopBar`, `FadeThroughText`, `StatNumber`, Explore's dimmed results, `LensContent`, onboarding.
+- `EnterTransition.None` / `ExitTransition.None` branches go; transitions pass scheme specs explicitly (a bare `expandVertically()` uses its own spring): `Banner`, `WhenReadRow`, `RevealedWhenPresent`, `ExternalLinksSection`, `TagsSection`, the `ProportionChart` legend, `TextFieldPill`, `SessionPeekBar`, `TagEditorCollection`, Explore's `animateItem`.
+- Hand-written tweens move onto scheme specs: `tween(220)` in `Chip`, `SegmentedControl`, `Toggle`, `LensContent`, onboarding → `defaultEffectsSpec()`; `ShelveControlCard`'s and `VerdictSheet`'s tweens → the nearest scheme spec.
+- Press and drag washes (`ToggleRow`, `SettingsRow`, `ReorderableRow`) show under reduced motion too, snapping in: feedback, not motion.
+- `playDecorativeMotion()` stays only where an effect is skipped outright: mark-as-read burst, quote glyph sway, skeleton shimmer, book-card hand-over, cover shared element and image crossfade, `MarkAsReadController`'s slide-out, `ShelveControlCard`'s celebration, `ProgressBar`'s reveal; the bottom-bar tab transition keeps its branch until S11-32.
+- `foundations.md`'s motion line names `MaterialTheme.motion`; F43 is updated and the reduced scheme logged as a foundation candidate. No tests (constants, no logic).
 
 ## R10 edges
 

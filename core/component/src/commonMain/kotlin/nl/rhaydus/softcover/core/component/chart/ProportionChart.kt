@@ -1,12 +1,9 @@
 package nl.rhaydus.softcover.core.component.chart
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -34,12 +31,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.state.clippedSkeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Motion
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
 
 @Composable
 fun ProportionChart(
@@ -47,8 +43,7 @@ fun ProportionChart(
     modifier: Modifier = Modifier,
 ) {
     val barShape = Corners.sm
-    val playMotion = playDecorativeMotion()
-    val sizeSpec: FiniteAnimationSpec<Float> = if (playMotion) Motion.valueChange else snap()
+    val sizeSpec: FiniteAnimationSpec<Float> = MaterialTheme.motion.valueChange
 
     val retention = remember {
         SegmentRetention(
@@ -115,18 +110,10 @@ fun ProportionChart(
 
                 AnimatedVisibility(
                     visibleState = visibleState,
-                    enter = if (playMotion) {
-                        expandVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()) +
-                            fadeIn(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec())
-                    } else {
-                        EnterTransition.None
-                    },
-                    exit = if (playMotion) {
-                        shrinkVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()) +
-                            fadeOut(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec())
-                    } else {
-                        ExitTransition.None
-                    },
+                    enter = expandVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()) +
+                        fadeIn(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
+                    exit = shrinkVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()) +
+                        fadeOut(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
                 ) {
                     Column {
                         Divider()

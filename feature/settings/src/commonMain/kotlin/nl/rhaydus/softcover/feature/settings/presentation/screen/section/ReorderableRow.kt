@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.control.Toggle
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -44,7 +43,7 @@ private const val HIDDEN_ROW_ALPHA = 0.52f
  * list), an italic tabular count line, and a trailing eye toggle when [LibraryTabEntry.canHide]. There
  * is no per-row click target — only the grip (drag) and the eye (visibility) are interactive — so the
  * row's own "press wash" reflects [isDragging] rather than a tap, matching the design system's
- * settings-row press-wash convention (an `animateColorAsState` gated by [playDecorativeMotion]).
+ * settings-row press-wash convention (an `animateColorAsState` on the theme's effects spec).
  */
 @Composable
 internal fun ReorderableRow(
@@ -54,14 +53,14 @@ internal fun ReorderableRow(
     modifier: Modifier = Modifier,
 ) {
     val hidden = entry.visibilityToggle?.checked == false
-    val playMotion = playDecorativeMotion()
 
     val rowBackground by animateColorAsState(
-        targetValue = if (isDragging && playMotion) {
+        targetValue = if (isDragging) {
             MaterialTheme.colorScheme.surfaceContainer
         } else {
             Color.Transparent
         },
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "libraryTabRowWash",
     )
 

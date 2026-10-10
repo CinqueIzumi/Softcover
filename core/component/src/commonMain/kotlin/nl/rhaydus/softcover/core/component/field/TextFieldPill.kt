@@ -1,10 +1,7 @@
 package nl.rhaydus.softcover.core.component.field
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.snap
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -33,7 +30,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
@@ -48,7 +44,6 @@ internal fun PillTextField(
     focusRequester: FocusRequester,
     modifier: Modifier = Modifier,
 ) {
-    val playMotion = playDecorativeMotion()
     val height = when (variant.size) {
         TextFieldPillSize.Compact -> 42.dp
         TextFieldPillSize.Regular -> 48.dp
@@ -74,7 +69,7 @@ internal fun PillTextField(
     // Eased alongside the pill's own fade so the field's edge does not jump when the pill leaves.
     val endPadding: Dp by animateDpAsState(
         targetValue = if (variant.trailing == null) horizontalPadding else Spacing.xs,
-        animationSpec = if (playMotion) MaterialTheme.motionScheme.fastSpatialSpec() else snap(),
+        animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
     )
 
     TextFieldInput(
@@ -127,24 +122,16 @@ internal fun PillTextField(
 
                 AnimatedVisibility(
                     visible = variant.trailing != null,
-                    enter = if (playMotion) {
-                        fadeIn(animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()) +
-                            scaleIn(
-                                animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
-                                initialScale = 0.9f,
-                            )
-                    } else {
-                        EnterTransition.None
-                    },
-                    exit = if (playMotion) {
-                        fadeOut(animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()) +
-                            scaleOut(
-                                animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
-                                targetScale = 0.9f,
-                            )
-                    } else {
-                        ExitTransition.None
-                    },
+                    enter = fadeIn(animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()) +
+                        scaleIn(
+                            animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+                            initialScale = 0.9f,
+                        ),
+                    exit = fadeOut(animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()) +
+                        scaleOut(
+                            animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+                            targetScale = 0.9f,
+                        ),
                 ) {
                     (variant.trailing ?: retainedTrailing)?.let { trailing ->
                         PillButton(

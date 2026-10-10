@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.component.callout
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
@@ -21,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -44,7 +41,6 @@ fun Banner(
     modifier: Modifier = Modifier,
     windowInsets: WindowInsets = WindowInsets(0),
 ) {
-    val playMotion = playDecorativeMotion()
     val scheme = MaterialTheme.colorScheme
     val editorial = model.variant == BannerVariant.Editorial
     val container = if (editorial) scheme.primaryContainer else scheme.errorContainer
@@ -52,8 +48,8 @@ fun Banner(
 
     AnimatedVisibility(
         visible = model.visible,
-        enter = if (playMotion) expandVertically() else EnterTransition.None,
-        exit = if (playMotion) shrinkVertically() else ExitTransition.None,
+        enter = expandVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()),
+        exit = shrinkVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()),
         modifier = modifier,
     ) {
         Row(

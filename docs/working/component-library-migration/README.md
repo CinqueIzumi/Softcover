@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-13 built and reviewed, not committed: `Motion.countUp` → `Motion.valueChange`; the three charts grow, morph and slide; new `FadeThroughText` (`core/component` `text/`) fades captions and chart values; `SegmentRetention` (internal, `chart/`) tracks entering / departing stack segments. S11-42 (one reduced-motion switch at the theme root) added, ordered before S11-14. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
-- **Next:** the user commits S11-13 (or asks to), and checks it on device: the Profile charts on load, Books/Pages, and "hide untagged" on then off. Then S11-42 Phase 1 in `steps/s11-contract-retrofit.md` § S11-42, first checking whether the theme root is the app's or the foundation's.
+- **State:** S11-42 committed: `SoftcoverTheme` resolves reduced motion once, passing `RhaydusTheme` `MotionScheme.expressive()` or the new snapping `ReducedMotionScheme`, and providing `Motion.Full` / `Motion.Reduced` read as `MaterialTheme.motion`. Call sites read specs and never branch; `playDecorativeMotion()` stays only where an effect is skipped outright (and the bottom-bar tab transition, until S11-32). Press / drag washes now show under reduced motion, snapping in. F44 logged. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
+- **Next:** S11-14 Phase 1 in `steps/s11-contract-retrofit.md` § S11-14.
 - **Open questions:** none. Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component` / `:feature:profile` compile and `styleCheck` passed after the last edit; glom check clean on production and test files; `SegmentRetentionTest` 9/9 pass. Reviewer round 2 findings all fixed. Not yet seen on device.
-- **Uncommitted:** all of S11-13 (implementer staged its files; the docs pass, the test and `docs/working` edits are unstaged).
+- **Verification:** JBR 21 (detekt fails on JDK 26). All touched modules compile (onboarding Android too), `checkModuleGraph`, `ktlintCheck`, `styleCheck` pass; no glommed closers; reviewer's stale KDoc / doc lines fixed, `styleCheck` re-passed. No tests (constants only).
+- **Uncommitted:** nothing.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

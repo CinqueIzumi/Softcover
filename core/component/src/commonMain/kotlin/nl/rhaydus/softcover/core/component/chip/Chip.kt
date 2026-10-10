@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.component.chip
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,7 +36,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -78,8 +75,7 @@ private fun ChipScaffold(
     onEvent: (ChipEvent) -> Unit,
     modifier: Modifier,
 ) {
-    val playMotion = playDecorativeMotion()
-    val colorSpec = if (playMotion) tween<Color>(durationMillis = 220) else snap()
+    val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
     val container by animateColorAsState(
         targetValue = style.container,
         animationSpec = colorSpec,

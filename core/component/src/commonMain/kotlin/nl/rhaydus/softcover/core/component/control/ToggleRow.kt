@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -40,13 +39,13 @@ fun <K> ToggleRow(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val playMotion = playDecorativeMotion()
     val wash by animateColorAsState(
-        targetValue = if (isPressed && playMotion) {
+        targetValue = if (isPressed) {
             MaterialTheme.colorScheme.surfaceContainer
         } else {
             Color.Transparent
         },
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "ToggleRowWash",
     )
 

@@ -14,10 +14,9 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.common.secondsToHm
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Motion
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
 
 private const val TABULAR_NUMS = "tnum"
 
@@ -74,15 +73,13 @@ internal fun StatNumber(
     autoSize: TextAutoSize?,
     modifier: Modifier = Modifier,
 ) {
-    val playMotion = playDecorativeMotion()
-
     val animated by animateFloatAsState(
         targetValue = if (model.isLoading) 0f else model.value.toFloat(),
-        animationSpec = Motion.valueChange,
+        animationSpec = MaterialTheme.motion.valueChange,
         label = "StatNumber",
     )
 
-    val displayValue = if (playMotion) animated.toDouble() else model.value
+    val displayValue = animated.toDouble()
 
     SoftcoverText(
         text = remember(displayValue, model) { model.textAt(displayValue) },

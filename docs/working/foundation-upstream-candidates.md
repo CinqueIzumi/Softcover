@@ -304,9 +304,17 @@ Filed but not yet implemented in the foundation.
 
 - **Type:** enhancement
 - **Home:** `nl.rhaydus:designsystem-core`
-- **Status:** **Open.** Softcover defines `Motion.valueChange` itself: a slow, no-bounce spring (critically damped, `StiffnessVeryLow`) that count-ups and chart geometry share.
+- **Status:** **Open.** Softcover defines `Motion.valueChange` itself: a slow, no-bounce spring (critically damped, `StiffnessVeryLow`) that count-ups and chart geometry share. `Motion` is theme-provided: `SoftcoverTheme` supplies a full and a snapping instance, read through `MaterialTheme.motion`.
 - **Impact in the app:** the default spring settles 0 to 24,092 in about 250 ms, too fast to read as a count.
 - **What to build:** a named slow, no-bounce value-change spring alongside the scheme's specs. Once adopted, drop the app-local one.
+
+### F44 — `RhaydusTheme` should resolve reduced motion itself
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Open.** `SoftcoverTheme` calls `playDecorativeMotion()` once and passes `RhaydusTheme` either `MotionScheme.expressive()` or a scheme whose six specs all `snap()`.
+- **Impact in the app:** without it every app repeats that choice, and a call site that reads a scheme spec still animates under reduced motion.
+- **What to build:** `RhaydusTheme` provides a snapping `MotionScheme` itself when reduced motion is on, so `motionScheme` parameters default to the right scheme. Once adopted, drop the app-local `ReducedMotionScheme`.
 
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 

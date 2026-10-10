@@ -1,9 +1,6 @@
 package nl.rhaydus.softcover.core.component.verdict
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -38,11 +35,12 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.designsystem.component.StarRatingInput
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
@@ -60,7 +58,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
-import kotlin.math.roundToInt
 
 private val VERDICT_CAPTIONS = listOf(
     "A hard finish.",
@@ -226,16 +223,17 @@ fun VerdictSheet(
 
 /**
  * The score line ("YOUR {score} / 10" — or the pre-rating prompt) and the editorial verdict caption
- * beneath it, crossfading with a slight rise on every rating change (~0.3s, [playDecorativeMotion]-
- * gated). [rating] is the draft rating, so this tweens as the reader changes the stars.
+ * beneath it, crossfading with a slight rise on every rating change. [rating] is the draft rating, so
+ * this animates as the reader changes the stars.
  */
 @Composable
 private fun VerdictScoreAndCaption(
     rating: Double?,
     modifier: Modifier = Modifier,
 ) {
-    val playMotion = playDecorativeMotion()
     val score = verdictScoreOf(rating = rating)
+    val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
 
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -244,16 +242,10 @@ private fun VerdictScoreAndCaption(
         AnimatedContent(
             targetState = score,
             transitionSpec = {
-                if (playMotion) {
-                    (
-                        fadeIn(animationSpec = tween(durationMillis = 300)) +
-                            slideInVertically(
-                                animationSpec = tween(durationMillis = 300),
-                            ) { height -> height / 4 }
-                        ).togetherWith(fadeOut(animationSpec = tween(durationMillis = 300)))
-                } else {
-                    EnterTransition.None togetherWith ExitTransition.None
-                }
+                (
+                    fadeIn(animationSpec = effectsSpec) +
+                        slideInVertically(animationSpec = spatialSpec) { height -> height / 4 }
+                    ).togetherWith(fadeOut(animationSpec = effectsSpec))
             },
             label = "VerdictScoreCaption",
         ) { animatedScore ->

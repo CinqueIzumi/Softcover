@@ -1,17 +1,40 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.theme
 
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 
 /**
  * The motion specs the app owns because the expressive `MotionScheme` has none for them.
+ * [SoftcoverTheme] provides [Full] or [Reduced], read through [MaterialTheme.motion].
  */
-object Motion {
-    /** A critically damped spring slow enough to follow a value as it changes; settles in about 0.9 s without overshoot. */
-    val valueChange: SpringSpec<Float> = spring(
-        dampingRatio = Spring.DampingRatioNoBouncy,
-        stiffness = Spring.StiffnessVeryLow,
-        visibilityThreshold = 0.01f,
-    )
+@Immutable
+class Motion internal constructor(
+    /** A spec slow enough to follow a value as it changes; the full one settles in about 0.9 s without overshoot. */
+    val valueChange: FiniteAnimationSpec<Float>,
+) {
+    internal companion object {
+        val Full = Motion(
+            valueChange = spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessVeryLow,
+                visibilityThreshold = 0.01f,
+            ),
+        )
+
+        val Reduced = Motion(valueChange = snap())
+    }
 }
+
+internal val LocalMotion = staticCompositionLocalOf { Motion.Full }
+
+val MaterialTheme.motion: Motion
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalMotion.current

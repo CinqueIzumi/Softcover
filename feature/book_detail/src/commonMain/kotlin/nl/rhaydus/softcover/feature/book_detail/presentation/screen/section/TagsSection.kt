@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -17,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -54,11 +52,10 @@ internal fun TagsSection(
     // "Actionable inline banner" precedent, so no skeleton is reserved for it. What DOES need
     // fixing is the pop itself: appearing mid-column with no transition shoves Find it / Voices
     // down in a single frame, so the reveal rides the standard vertical-reveal register instead.
-    val playMotion = playDecorativeMotion()
-
     AnimatedVisibility(
         visible = hasContent,
-        enter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None,
+        enter = expandVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()) +
+            fadeIn(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
         exit = ExitTransition.None,
     ) {
         Column(modifier = Modifier.padding(horizontal = Spacing.gutter)) {

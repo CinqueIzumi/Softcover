@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.component.control
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -24,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
@@ -52,8 +49,7 @@ fun Toggle(
         model.checked -> scheme.primary
         else -> scheme.outline
     }
-    val playMotion = playDecorativeMotion()
-    val colorSpec = if (playMotion) tween<Color>(durationMillis = 220) else snap()
+    val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
     val container by animateColorAsState(
         targetValue = targetContainer,
         animationSpec = colorSpec,

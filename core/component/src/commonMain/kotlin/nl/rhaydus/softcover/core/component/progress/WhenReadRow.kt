@@ -1,21 +1,19 @@
 package nl.rhaydus.softcover.core.component.progress
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 
@@ -31,7 +29,6 @@ internal fun WhenReadRow(
     model: WhenReadUiModel,
     onEvent: (ProgressSheetEvent) -> Unit,
 ) {
-    val playMotion = playDecorativeMotion()
     var expanded by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -59,8 +56,10 @@ internal fun WhenReadRow(
 
         AnimatedVisibility(
             visible = expanded && model.chip.selected,
-            enter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None,
-            exit = if (playMotion) shrinkVertically() + fadeOut() else ExitTransition.None,
+            enter = expandVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()) +
+                fadeIn(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
+            exit = shrinkVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()) +
+                fadeOut(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
         ) {
             WhenReadEditor(
                 model = model,

@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -11,10 +10,10 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -38,11 +37,10 @@ internal fun ExternalLinksSection(
     // (§5 "Book-detail lens-section reveal") instead of popping and shoving Voices down.
     // `AnimatedVisibility` must stay composed across the null→non-null flip for the enter transition
     // to play at all, so this reads `links` inside the content slot rather than guard-returning early.
-    val playMotion = playDecorativeMotion()
-
     AnimatedVisibility(
         visible = links != null,
-        enter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None,
+        enter = expandVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()) +
+            fadeIn(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
         exit = ExitTransition.None,
     ) {
         links?.let { knownLinks ->

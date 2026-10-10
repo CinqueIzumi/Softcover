@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -190,6 +189,8 @@ private fun ShelveRow(
     val unselectedContent = MaterialTheme.colorScheme.onSurfaceVariant
 
     val playMotion = playDecorativeMotion()
+    val wipeSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val celebrationSpec = MaterialTheme.motionScheme.slowEffectsSpec<Float>()
 
     var settledSelected by remember { mutableStateOf(selected) }
     var wasLoading by remember { mutableStateOf(isLoading) }
@@ -207,16 +208,10 @@ private fun ShelveRow(
 
         if (selected == settledSelected) return@LaunchedEffect
 
-        if (playMotion.not()) {
-            wipe.snapTo(targetValue = 1f)
-            settledSelected = selected
-            return@LaunchedEffect
-        }
-
         wipe.snapTo(targetValue = 0f)
         wipe.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = 180),
+            animationSpec = wipeSpec,
         )
         settledSelected = selected
     }
@@ -226,7 +221,7 @@ private fun ShelveRow(
 
     val contentColor by animateColorAsState(
         targetValue = if (selected) selectedContent else unselectedContent,
-        animationSpec = if (wasLoading) snap() else tween(durationMillis = 180),
+        animationSpec = if (wasLoading) snap() else MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "ShelfChipContent",
     )
 
@@ -240,7 +235,7 @@ private fun ShelveRow(
         celebration.snapTo(targetValue = 0f)
         celebration.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = 400),
+            animationSpec = celebrationSpec,
         )
     }
 

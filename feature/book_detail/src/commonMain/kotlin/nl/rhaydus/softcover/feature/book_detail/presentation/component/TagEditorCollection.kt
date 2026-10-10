@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.component
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.fadeIn
@@ -26,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
@@ -134,11 +132,10 @@ private fun EditorTagChip(
     isNewlyAdded: Boolean,
     onEvent: (ChipEvent) -> Unit,
 ) {
-    val playMotion = playDecorativeMotion()
     val density = LocalDensity.current
 
     val visibleState = remember {
-        MutableTransitionState(initialState = (isNewlyAdded && playMotion).not())
+        MutableTransitionState(initialState = isNewlyAdded.not())
     }
 
     LaunchedEffect(Unit) {
@@ -147,14 +144,10 @@ private fun EditorTagChip(
 
     AnimatedVisibility(
         visibleState = visibleState,
-        enter = if (playMotion) {
-            fadeIn(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()) +
-                slideInVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()) {
-                    with(density) { 3.dp.roundToPx() }
-                }
-        } else {
-            EnterTransition.None
-        },
+        enter = fadeIn(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()) +
+            slideInVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()) {
+                with(density) { 3.dp.roundToPx() }
+            },
         exit = ExitTransition.None,
     ) {
         Chip(

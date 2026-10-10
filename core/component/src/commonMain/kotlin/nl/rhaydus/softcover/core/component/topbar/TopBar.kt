@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.component.topbar
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.chrome.overMediaIconButtonColors
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -46,7 +43,6 @@ fun TopBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
     actions: @Composable RowScope.(IconButtonColors) -> Unit = {},
 ) {
-    val playMotion = playDecorativeMotion()
     val scheme = MaterialTheme.colorScheme
 
     val containerColor by animateColorAsState(
@@ -54,7 +50,7 @@ fun TopBar(
             TopBarSurface.Opaque -> scheme.surface
             TopBarSurface.OverMedia -> Color.Transparent
         },
-        animationSpec = if (playMotion) spring() else snap(),
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "TopBarContainer",
     )
 
