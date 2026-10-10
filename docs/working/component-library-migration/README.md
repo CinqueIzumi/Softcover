@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-15 committed: `Modifier.reorderLift(isDragging, outset)` (`core:component/reorder`) lifts dragged items in `BookList`, `EditionList` and the settings tab rows (scale 1.04, `surfaceContainer` plate, 8 dp shadow); library items pass an 8 dp plate outset, and the library grid takes its gutter as `contentPadding` so outer columns don't clip it. `tickle` per slot crossed; a dropped settings row settles its residual offset, cancelled when a new drag starts. Seen on device. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
-- **Next:** S11-16 Phase 1 in `steps/s11-contract-retrofit.md` § S11-16.
+- **State:** S11-16 built and reviewed (no findings): `haptics.select()` fires in `SheetRow`, `PreviewTileFrame` and `SettingsSelectableRow` when not already selected, in `ToggleRow` on every toggle, and in `Chip` on every click of a `Tonal` / `Choice` tone; `ToggleRow`'s `Switch` shares the row's interaction source. Not yet felt on device. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
+- **Next:** S11-17 Phase 1 in `steps/s11-contract-retrofit.md` § S11-17.
 - **Open questions:** none. Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck` pass after the S11-15 review fixes; no glommed closers. No tests (no logic).
-- **Uncommitted:** nothing.
+- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm`, `:feature:settings:compileKotlinJvm`, `checkModuleGraph`, `projectHealth` (both), `ktlintCheck`, `styleCheck` pass after S11-16; close-out grep found no glommed closers. No tests (no logic).
+- **Uncommitted:** S11-16 (five Kotlin files, step file, this `## Now`).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

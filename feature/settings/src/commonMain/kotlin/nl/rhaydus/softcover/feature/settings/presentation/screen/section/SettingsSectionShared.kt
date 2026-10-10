@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -28,6 +29,7 @@ internal fun SettingsSelectableRow(
     model: SettingsChoiceRowUiModel<*>,
     onClick: () -> Unit,
 ) {
+    val haptics = LocalHaptics.current
     val interactionSource = remember { MutableInteractionSource() }
 
     SettingsRow(
@@ -61,7 +63,13 @@ internal fun SettingsSelectableRow(
             interactionSource = interactionSource,
             indication = null,
             role = Role.RadioButton,
-            onClick = onClick,
+            onClick = {
+                if (model.selected.not()) {
+                    haptics.select()
+                }
+
+                onClick()
+            },
         ),
     )
 }

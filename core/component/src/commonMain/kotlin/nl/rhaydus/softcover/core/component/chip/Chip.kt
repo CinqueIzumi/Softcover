@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
@@ -75,6 +76,7 @@ private fun ChipScaffold(
     onEvent: (ChipEvent) -> Unit,
     modifier: Modifier,
 ) {
+    val haptics = LocalHaptics.current
     val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
     val container by animateColorAsState(
         targetValue = style.container,
@@ -101,6 +103,10 @@ private fun ChipScaffold(
         )
         .then(if (selectable) Modifier.semantics { selected = model.selected } else Modifier)
         .chipInteraction(interaction = model.interaction) {
+            if (selectable) {
+                haptics.select()
+            }
+
             onEvent(ChipEvent.Clicked(key = model.key))
         }
         .then(

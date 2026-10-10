@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -52,6 +53,7 @@ internal fun PreviewTileFrame(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    val haptics = LocalHaptics.current
     val interactionSource = remember { MutableInteractionSource() }
 
     val accentColor = if (selected) {
@@ -69,7 +71,13 @@ internal fun PreviewTileFrame(
                 interactionSource = interactionSource,
                 indication = null,
                 role = Role.RadioButton,
-                onClick = onClick,
+                onClick = {
+                    if (selected.not()) {
+                        haptics.select()
+                    }
+
+                    onClick()
+                },
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

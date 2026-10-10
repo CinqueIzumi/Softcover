@@ -19,6 +19,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -33,6 +34,8 @@ internal fun <K> SheetRow(
     onEvent: (SheetRowEvent<K>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val haptics = LocalHaptics.current
+
     Column(modifier = modifier) {
         Divider()
 
@@ -43,7 +46,13 @@ internal fun <K> SheetRow(
                 .selectable(
                     selected = model.selected,
                     role = Role.RadioButton,
-                    onClick = { onEvent(SheetRowEvent.Selected(key = model.key)) },
+                    onClick = {
+                        if (model.selected.not()) {
+                            haptics.select()
+                        }
+
+                        onEvent(SheetRowEvent.Selected(key = model.key))
+                    },
                 )
                 .padding(vertical = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,

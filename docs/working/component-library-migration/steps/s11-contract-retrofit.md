@@ -29,7 +29,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-42 | Reduced motion resolves once at the theme root; call sites stop branching on it | S11-13 | [x] |
 | S11-14 | Cover selection animates | SL-15a, S11-42 | [x] |
 | S11-15 | One reorder lift treatment | S11-6 | [x] |
-| S11-16 | Selectable controls fire `select`; `ToggleRow` shares its interaction source | S11-6 | [ ] |
+| S11-16 | Selectable controls fire `select`; `ToggleRow` shares its interaction source | S11-6 | [x] |
 | S11-17 | Selection states animate with motion-scheme specs | SL-15a | [ ] |
 | S11-18 | `SheetScaffold` footer: no haptic of its own, spinner on the running button | S11-6 | [ ] |
 | S11-19 | The progress sheet plays its dismiss on submit | — | [ ] |
@@ -58,12 +58,13 @@ primitives among them), and every premium-feel sub-step has landed.
 
 ## Approved shape
 
-S11-15:
-- One `@Composable fun Modifier.reorderLift(isDragging: Boolean)` in new `:core:component` package `reorder` (`ReorderLift.kt`); no model, the drag state is composition-only.
-- Dragged: scale 1→1.04 on `defaultSpatialSpec()` (settles on drop); a `Corners.md` plate in `surfaceContainer` plus ~8 dp shadow, both fading on `slowEffectsSpec()`.
-- Library `BookList` and `EditionList` read `isDragging` from `ReorderableItem` and lift the card; cover-only grids hide the plate behind the cover. `tickle` fires per slot crossed in the reorder callback.
-- Settings: `reorderLift` replaces `ReorderableRow`'s wash and the 0.95 alpha; the grip still turns primary. Slot shifts move on `defaultSpatialSpec()`; `tickle` fires on each hover-target change; the dropped row animates its residual offset to zero.
-- Scheme specs only, so reduced motion snaps with no branch. No tests (no logic), no Gallery entry (a modifier). Fallback if text cards look cramped on the plate: scale + shadow only on library items.
+S11-16:
+- `haptics.select()` fires inside the component just before its event, only when the press changes something; no new types, helpers or model fields. No tests (no logic), no fixture or Gallery change.
+- `SheetRow` and `PreviewTileFrame`: in the `selectable` click, only when not already selected; the event still goes out unchanged.
+- `ToggleRow`: in `onValueChange`, always; its `interactionSource` also goes to the display-only `Switch`, so the thumb grows on a row press.
+- `SettingsSelectableRow` (feature-local): wraps `onClick`, only when not already selected.
+- `Chip`: on every click of a selectable tone (`Tonal`, `Choice`), so the active sort chip's direction flip ticks; no other tone fires.
+- The glyph `Toggle` stays silent: its bookmark is S11-25; its other uses fire from their save's outcome event.
 
 ## R10 edges
 

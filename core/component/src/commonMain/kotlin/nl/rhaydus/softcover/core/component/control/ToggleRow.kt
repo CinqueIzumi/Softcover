@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -37,6 +38,7 @@ fun <K> ToggleRow(
     onEvent: (ToggleEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val haptics = LocalHaptics.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val wash by animateColorAsState(
@@ -60,6 +62,7 @@ fun <K> ToggleRow(
                 enabled = model.enabled,
                 role = Role.Switch,
                 onValueChange = { checked ->
+                    haptics.select()
                     onEvent(ToggleEvent.Toggled(checked = checked))
                 },
             )
@@ -97,6 +100,7 @@ fun <K> ToggleRow(
             checked = model.checked,
             onCheckedChange = null,
             enabled = model.enabled,
+            interactionSource = interactionSource,
         )
     }
 }
