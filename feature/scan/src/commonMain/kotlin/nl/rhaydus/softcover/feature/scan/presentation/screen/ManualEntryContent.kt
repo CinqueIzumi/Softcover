@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 
 /**
  * The manual ISBN-entry form, shared by the mobile scanner (reached via "Enter ISBN manually") and the
@@ -34,7 +35,7 @@ internal fun ManualEntryContent(
     isAddingBook: Boolean,
     header: SectionHeaderUiModel,
     onFieldEvent: (TextFieldEvent) -> Unit,
-    onIsbnSubmit: (String) -> Unit,
+    onIsbnSubmit: (String, IsbnOrigin) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -45,7 +46,10 @@ internal fun ManualEntryContent(
         if (canSubmit) {
             keyboardController?.hide()
 
-            onIsbnSubmit(field.text)
+            onIsbnSubmit(
+                field.text,
+                IsbnOrigin.Manual,
+            )
         }
     }
 
@@ -66,7 +70,8 @@ internal fun ManualEntryContent(
                     is TextFieldEvent.Submitted -> submit()
 
                     is TextFieldEvent.ValueChanged,
-                    is TextFieldEvent.TrailingClicked -> onFieldEvent(event)
+                    is TextFieldEvent.TrailingClicked,
+                    is TextFieldEvent.ShakeEnded -> onFieldEvent(event)
                 }
             },
         )

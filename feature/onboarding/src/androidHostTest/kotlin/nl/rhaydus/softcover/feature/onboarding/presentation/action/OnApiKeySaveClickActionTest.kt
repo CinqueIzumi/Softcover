@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.field.TextFieldError
 import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
@@ -256,7 +257,7 @@ class OnApiKeySaveClickActionTest {
         }
 
         @Test
-        fun `rolls back and does not initialize the account when updateApiKeyUseCase fails with InvalidTokenException`() = runTest {
+        fun `flags the field and does not initialize the account when updateApiKeyUseCase fails with InvalidTokenException`() = runTest {
             // ----- Arrange -----
             stateFlow.value = stateWithApiKey(text = "my-key")
             dependencies = stubDependencies(this)
@@ -274,16 +275,16 @@ class OnApiKeySaveClickActionTest {
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
             stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe true
             stateFlow.value.loadingSheet.progress shouldBe 0f
-            stateFlow.value.submissionError shouldBe "That API key wasn't accepted. Double-check it and try again."
+            stateFlow.value.apiKeyField.error shouldBe TextFieldError(message = REJECTED_KEY_MESSAGE)
+            stateFlow.value.submissionError shouldBe null
             coVerify(exactly = 0) {
                 initializeUserIdAndBooksUseCase()
             }
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.ApiKeyRejectedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
-        fun `shows the invalid key message when initializeUserIdAndBooksUseCase fails with InvalidTokenException`() = runTest {
+        fun `flags the field and sends no rejected event when initialize fails with InvalidTokenException`() = runTest {
             // ----- Arrange -----
             stateFlow.value = stateWithApiKey(text = "my-key")
             dependencies = stubDependencies(this)
@@ -298,8 +299,8 @@ class OnApiKeySaveClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.submissionError shouldBe "That API key wasn't accepted. Double-check it and try again."
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.ApiKeyRejectedEvent>()
+            stateFlow.value.apiKeyField.error shouldBe TextFieldError(message = REJECTED_KEY_MESSAGE)
+            stateFlow.value.submissionError shouldBe null
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
@@ -326,5 +327,50 @@ class OnApiKeySaveClickActionTest {
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.ApiKeyRejectedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
+
+        @Test
+        fun `flags the field when resetUserDataUseCase fails with InvalidTokenException`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWithApiKey(text = "my-key")
+            dependencies = stubDependencies(this)
+            stubUseCases(reset = Result.failure(InvalidTokenException()))
+
+            val action = OnApiKeySaveClickAction
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.apiKeyField.error shouldBe TextFieldError(message = REJECTED_KEY_MESSAGE)
+            stateFlow.value.submissionError shouldBe null
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `leaves the field error untouched and sends the rejected event for a non-token failure`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWithApiKey(text = "my-key")
+            dependencies = stubDependencies(this)
+            stubUseCases(update = Result.failure(RuntimeException("boom")))
+
+            val action = OnApiKeySaveClickAction
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.apiKeyField.error shouldBe null
+            stateFlow.value.submissionError.shouldNotBeNull()
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.ApiKeyRejectedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
     }
 }
+
+private const val REJECTED_KEY_MESSAGE = "That API key wasn't accepted. Double-check it and try again."

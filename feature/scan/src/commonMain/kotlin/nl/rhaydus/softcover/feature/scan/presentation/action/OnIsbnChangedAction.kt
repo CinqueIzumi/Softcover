@@ -13,6 +13,13 @@ internal class OnIsbnChangedAction(
         dependencies: ScanDependencies,
         scope: ActionScope<ScanUiState, ScanEvent, LocalScanVariables>,
     ) {
-        scope.setState { it.copy(isbnField = it.isbnField.copy(text = text)) }
+        scope.setState {
+            it.copy(
+                isbnField = it.isbnField.copy(
+                    text = text,
+                    error = null,
+                ),
+            )
+        }
     }
 }

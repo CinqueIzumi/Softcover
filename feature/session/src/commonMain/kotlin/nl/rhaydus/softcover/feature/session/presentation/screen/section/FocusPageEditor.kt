@@ -10,12 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
 import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
+import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
 import nl.rhaydus.softcover.feature.session.presentation.action.OnPageDraftChangedAction
 import nl.rhaydus.softcover.feature.session.presentation.action.OnPageFocusGainedAction
 import nl.rhaydus.softcover.feature.session.presentation.action.OnPageFocusLostAction
+import nl.rhaydus.softcover.feature.session.presentation.action.OnPageShakeEndedAction
 import nl.rhaydus.softcover.feature.session.presentation.state.FocusPageEditorUiModel
 
 /**
@@ -29,6 +31,7 @@ import nl.rhaydus.softcover.feature.session.presentation.state.FocusPageEditorUi
 internal fun FocusPageEditor(
     pageEditor: FocusPageEditorUiModel,
     pageDraft: TextFieldValue,
+    pageDraftRejected: Boolean,
     runAction: (FocusModeAction) -> Unit,
 ) {
     if (pageEditor.isEditable.not()) {
@@ -51,6 +54,10 @@ internal fun FocusPageEditor(
             onValueChange = { runAction(OnPageDraftChangedAction(newValue = it)) },
             onFocusReset = { runAction(OnPageFocusLostAction) },
             onFocusGained = { runAction(OnPageFocusGainedAction) },
+            modifier = Modifier.shakeOnError(
+                trigger = pageDraftRejected,
+                onShakeEnd = { runAction(OnPageShakeEndedAction) },
+            ),
         )
     }
 

@@ -43,7 +43,8 @@ internal fun ReAuthSheet(
                         is TextFieldEvent.ValueChanged -> onEvent(ReAuthSheetEvent.ApiKeyChanged(event.text))
 
                         is TextFieldEvent.Submitted,
-                        is TextFieldEvent.TrailingClicked -> Unit
+                        is TextFieldEvent.TrailingClicked,
+                        is TextFieldEvent.ShakeEnded -> Unit
                     }
                 },
             )

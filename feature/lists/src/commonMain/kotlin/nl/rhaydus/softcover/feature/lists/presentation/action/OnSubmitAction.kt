@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.lists.presentation.action
 
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.field.TextFieldError
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.feature.lists.presentation.event.CreateListEvent
 import nl.rhaydus.softcover.feature.lists.presentation.screenmodel.CreateListDependencies
@@ -43,12 +44,19 @@ internal class OnSubmitAction : CreateListAction {
 
             scope.setState { it.withSubmitting(submitting = false) }
 
-            val event: CreateListEvent = when (error) {
-                is ListNameTakenException -> CreateListEvent.ListNameTakenEvent(name = error.name)
-                else -> CreateListEvent.ListCreationFailedEvent()
+            if (error is ListNameTakenException) {
+                scope.setState {
+                    it.copy(
+                        nameField = it.nameField.copy(
+                            error = TextFieldError(
+                                message = "You already have a list called “${error.name}”. Pick another name.",
+                            ),
+                        ),
+                    )
+                }
+            } else {
+                scope.sendEvent(event = CreateListEvent.ListCreationFailedEvent())
             }
-
-            scope.sendEvent(event = event)
         }
     }
 }

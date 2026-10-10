@@ -18,7 +18,12 @@ internal data object OnPageFocusLostAction : FocusModeAction {
     ) {
         scope.setLocalVariables { it.copy(isFirstFocusEvent = true) }
 
-        scope.setState { it.copy(pageDraft = it.pageDraft.copy(selection = TextRange.Zero)) }
+        scope.setState {
+            it.copy(
+                pageDraft = it.pageDraft.copy(selection = TextRange.Zero),
+                pageDraftRejected = false,
+            )
+        }
 
         val storedPage = dependencies.activeSessionController.activeSession.value
             ?.book

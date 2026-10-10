@@ -520,7 +520,7 @@ class ListsRemoteDataSourceImplTest {
 
             every {
                 insertList.errors
-            } returns listOf("Name has already been taken")
+            } returns "Name has already been taken"
 
             // ----- Act & Assert -----
             val thrown = shouldThrow<ListNameTakenException> {
@@ -547,7 +547,7 @@ class ListsRemoteDataSourceImplTest {
 
             every {
                 insertList.errors
-            } returns listOf("NAME HAS ALREADY BEEN TAKEN")
+            } returns "NAME HAS ALREADY BEEN TAKEN"
 
             // ----- Act & Assert -----
             val thrown = shouldThrow<ListNameTakenException> {
@@ -574,7 +574,7 @@ class ListsRemoteDataSourceImplTest {
 
             every {
                 insertList.errors
-            } returns listOf(serverError)
+            } returns serverError
 
             // ----- Act & Assert -----
             val thrown = shouldThrow<Exception> {
@@ -582,6 +582,48 @@ class ListsRemoteDataSourceImplTest {
             }
 
             thrown.message.shouldNotBeNull() shouldContain serverError
+        }
+
+        @Test
+        fun `treats blank errors string as no error and returns the list`() = runTest {
+            // ----- Arrange -----
+            val expectedBookList = stubBookList()
+            val mutationData = mockk<CreateListMutation.Data>()
+            val insertList = mockk<CreateListMutation.Data.Insert_list>()
+            val listEntry = mockk<CreateListMutation.Data.Insert_list.List>()
+            val listFragment = mockk<ListFragment>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<CreateListMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.insert_list
+            } returns insertList
+
+            every {
+                insertList.errors
+            } returns "   "
+
+            every {
+                insertList.list
+            } returns listEntry
+
+            with(CreateListMutation.Data.Insert_list.List.Companion) {
+                every {
+                    listEntry.listFragment()
+                } returns listFragment
+            }
+
+            every {
+                listFragment.toBookList()
+            } returns expectedBookList
+
+            // ----- Act -----
+            val result = dataSource.createList(name = "Sci-Fi")
+
+            // ----- Assert -----
+            result shouldBe expectedBookList
         }
 
         @Test
@@ -1029,6 +1071,51 @@ class ListsRemoteDataSourceImplTest {
         }
 
         @Test
+        fun `treats blank errors string as no error and returns the list`() = runTest {
+            // ----- Arrange -----
+            val expectedBookList = stubBookList()
+            val mutationData = mockk<UpdateListMutation.Data>()
+            val listResponse = mockk<UpdateListMutation.Data.ListResponse>()
+            val listEntry = mockk<UpdateListMutation.Data.ListResponse.List>()
+            val listFragment = mockk<ListFragment>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateListMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.listResponse
+            } returns listResponse
+
+            every {
+                listResponse.errors
+            } returns ""
+
+            every {
+                listResponse.list
+            } returns listEntry
+
+            with(UpdateListMutation.Data.ListResponse.List.Companion) {
+                every {
+                    listEntry.listFragment()
+                } returns listFragment
+            }
+
+            every {
+                listFragment.toBookList()
+            } returns expectedBookList
+
+            // ----- Act -----
+            val result = dataSource.setListRanked(
+                listId = 1,
+                ranked = true,
+            )
+
+            // ----- Assert -----
+            result shouldBe expectedBookList
+        }
+
+        @Test
         fun `throws when response errors field is non-blank`() = runTest {
             // ----- Arrange -----
             val mutationData = mockk<UpdateListMutation.Data>()
@@ -1044,15 +1131,17 @@ class ListsRemoteDataSourceImplTest {
 
             every {
                 listResponse.errors
-            } returns listOf("Something went wrong")
+            } returns "Something went wrong"
 
             // ----- Act & Assert -----
-            shouldThrow<Exception> {
+            val thrown = shouldThrow<Exception> {
                 dataSource.setListRanked(
                     listId = 1,
                     ranked = true,
                 )
             }
+
+            thrown.message.shouldNotBeNull() shouldContain "Something went wrong"
         }
 
         @Test

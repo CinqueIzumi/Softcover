@@ -15,9 +15,11 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.IsbnLookupResult
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
+import nl.rhaydus.softcover.core.component.field.TextFieldError
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
+import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import nl.rhaydus.softcover.feature.scan.presentation.state.UnknownIsbnSheetUiModel
@@ -75,7 +77,10 @@ class OnIsbnSubmittedActionTest {
             stateFlow.value = ScanUiState(isResolving = true)
             val dependencies = stubDependencies(this)
             val stateBefore = stateFlow.value
-            val action = OnIsbnSubmittedAction(isbn = "9780451524935")
+            val action = OnIsbnSubmittedAction(
+                isbn = "9780451524935",
+                origin = IsbnOrigin.Camera,
+            )
 
             // ----- Act -----
             action.execute(
@@ -103,7 +108,10 @@ class OnIsbnSubmittedActionTest {
                 Result.success(IsbnLookupResult.InvalidIsbn)
             }
 
-            val action = OnIsbnSubmittedAction(isbn = "9780451524935")
+            val action = OnIsbnSubmittedAction(
+                isbn = "9780451524935",
+                origin = IsbnOrigin.Camera,
+            )
 
             // ----- Act -----
             action.execute(
@@ -131,7 +139,10 @@ class OnIsbnSubmittedActionTest {
                 ),
             )
 
-            val action = OnIsbnSubmittedAction(isbn = "9780451524935")
+            val action = OnIsbnSubmittedAction(
+                isbn = "9780451524935",
+                origin = IsbnOrigin.Camera,
+            )
 
             // ----- Act -----
             action.execute(
@@ -158,7 +169,10 @@ class OnIsbnSubmittedActionTest {
                 resolveBookByIsbnUseCase(isbn = normalizedIsbn)
             } returns Result.success(IsbnLookupResult.UnknownEdition(normalizedIsbn = normalizedIsbn))
 
-            val action = OnIsbnSubmittedAction(isbn = normalizedIsbn)
+            val action = OnIsbnSubmittedAction(
+                isbn = normalizedIsbn,
+                origin = IsbnOrigin.Camera,
+            )
 
             // ----- Act -----
             action.execute(
@@ -175,7 +189,7 @@ class OnIsbnSubmittedActionTest {
         }
 
         @Test
-        fun `sets isResolving to false and sends InvalidIsbnEvent when result is InvalidIsbn`() = runTest {
+        fun `sets isResolving to false and sends InvalidIsbnEvent without a field error for a camera InvalidIsbn`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
 
@@ -183,7 +197,10 @@ class OnIsbnSubmittedActionTest {
                 resolveBookByIsbnUseCase(isbn = "not-a-valid-isbn")
             } returns Result.success(IsbnLookupResult.InvalidIsbn)
 
-            val action = OnIsbnSubmittedAction(isbn = "not-a-valid-isbn")
+            val action = OnIsbnSubmittedAction(
+                isbn = "not-a-valid-isbn",
+                origin = IsbnOrigin.Camera,
+            )
 
             // ----- Act -----
             action.execute(
@@ -193,8 +210,36 @@ class OnIsbnSubmittedActionTest {
 
             // ----- Assert -----
             stateFlow.value.isResolving shouldBe false
+            stateFlow.value.isbnField.error.shouldBeNull()
 
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ScanEvent.InvalidIsbnEvent>()
+        }
+
+        @Test
+        fun `sets a shaking field error and sends no event when result is InvalidIsbn from manual entry`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                resolveBookByIsbnUseCase(isbn = "not-a-valid-isbn")
+            } returns Result.success(IsbnLookupResult.InvalidIsbn)
+
+            val action = OnIsbnSubmittedAction(
+                isbn = "not-a-valid-isbn",
+                origin = IsbnOrigin.Manual,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isResolving shouldBe false
+            stateFlow.value.isbnField.error shouldBe TextFieldError(message = "That doesn't look like a valid ISBN.")
+            stateFlow.value.isbnField.error.shouldNotBeNull().shaking shouldBe true
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
 
         @Test
@@ -211,7 +256,10 @@ class OnIsbnSubmittedActionTest {
                 resolveBookByIsbnUseCase(isbn = any())
             } returns Result.failure(RuntimeException("network error"))
 
-            val action = OnIsbnSubmittedAction(isbn = "9780000000001")
+            val action = OnIsbnSubmittedAction(
+                isbn = "9780000000001",
+                origin = IsbnOrigin.Camera,
+            )
 
             // ----- Act -----
             action.execute(

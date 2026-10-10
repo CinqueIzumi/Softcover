@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.lists.presentation.action
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
@@ -196,7 +197,7 @@ class OnSubmitActionTest {
         }
 
         @Test
-        fun `sends ListNameTakenEvent, unlocks the field and keeps the text when the name is taken`() = runTest {
+        fun `shows a shaking field error, unlocks the field and sends no event when the name is taken`() = runTest {
             // ----- Arrange -----
             stateFlow.value = CreateListUiState().withName(newName = "Summer")
 
@@ -214,9 +215,12 @@ class OnSubmitActionTest {
             )
 
             // ----- Assert -----
-            val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<CreateListEvent.ListNameTakenEvent>()
-            event.name shouldBe "Summer"
+            val error = stateFlow.value.nameField.error
+            error.shouldNotBeNull()
+            error.message shouldBe "You already have a list called “Summer”. Pick another name."
+            error.shaking shouldBe true
+            eventChannel.tryReceive().getOrNull() shouldBe null
+            stateFlow.value.isSubmitting shouldBe false
             stateFlow.value.nameField.enabled shouldBe true
             stateFlow.value.nameField.text shouldBe "Summer"
         }

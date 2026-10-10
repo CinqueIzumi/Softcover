@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
 /**
@@ -31,7 +32,7 @@ internal actual fun BarcodeScannerScreenLayout(
     state: ScanUiState,
     manualMode: Boolean,
     cameraGranted: Boolean,
-    onIsbnSubmit: (String) -> Unit,
+    onIsbnSubmit: (String, IsbnOrigin) -> Unit,
     onIsbnFieldEvent: (TextFieldEvent) -> Unit,
     onEnterManually: () -> Unit,
     onNavigateBack: () -> Unit,

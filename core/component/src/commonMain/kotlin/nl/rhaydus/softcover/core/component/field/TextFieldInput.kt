@@ -35,7 +35,13 @@ internal fun TextFieldInput(
         onValueChange = model.onTextChange(onEvent),
         enabled = model.enabled,
         singleLine = true,
-        textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface.forEnabled(model.enabled)),
+        textStyle = textStyle.copy(
+            color = if (model.error != null && model.variant is TextFieldVariant.Hero) {
+                MaterialTheme.colorScheme.error
+            } else {
+                MaterialTheme.colorScheme.onSurface.forEnabled(model.enabled)
+            },
+        ),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         keyboardOptions = model.keyboardOptions(),
         keyboardActions = model.keyboardActions(onEvent),

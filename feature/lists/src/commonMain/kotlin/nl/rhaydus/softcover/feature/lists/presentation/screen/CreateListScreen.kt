@@ -61,14 +61,6 @@ internal class CreateListScreen(
                         dismiss()
                     }
 
-                    is CreateListEvent.ListNameTakenEvent -> {
-                        haptics.reject()
-
-                        SnackBarManager.showSnackbar(
-                            title = "You already have a list called “${event.name}”. Pick another name.",
-                        )
-                    }
-
                     is CreateListEvent.ListCreationFailedEvent -> {
                         haptics.reject()
 

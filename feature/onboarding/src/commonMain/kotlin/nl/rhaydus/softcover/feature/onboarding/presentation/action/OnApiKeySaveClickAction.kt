@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.onboarding.presentation.action
 
+import nl.rhaydus.softcover.core.component.field.TextFieldError
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.presentation.error.toUserMessage
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
@@ -16,6 +17,8 @@ internal data object OnApiKeySaveClickAction : OnboardingAction {
         if (scope.currentState.saveApiKeyButtonEnabled.not()) return
 
         fun stopLoading(error: Throwable) {
+            val rejectedKey = error is InvalidTokenException
+
             scope.setState {
                 it.copy(
                     saveApiKeyButtonEnabled = it.apiKeyField.text.isNotBlank(),
@@ -23,11 +26,16 @@ internal data object OnApiKeySaveClickAction : OnboardingAction {
                         scaffold = it.loadingSheet.scaffold.copy(closeRequested = true),
                         progress = 0f,
                     ),
-                    submissionError = mapError(error),
+                    apiKeyField = if (rejectedKey) {
+                        it.apiKeyField.copy(error = TextFieldError(message = REJECTED_KEY_MESSAGE))
+                    } else {
+                        it.apiKeyField
+                    },
+                    submissionError = if (rejectedKey) null else mapError(error),
                 )
             }
 
-            scope.sendEvent(event = OnboardingEvent.ApiKeyRejectedEvent())
+            if (rejectedKey.not()) scope.sendEvent(event = OnboardingEvent.ApiKeyRejectedEvent())
         }
 
         scope.setState {
@@ -70,8 +78,8 @@ internal data object OnApiKeySaveClickAction : OnboardingAction {
         }
     }
 
-    private fun mapError(error: Throwable): String = when (error) {
-        is InvalidTokenException -> "That API key wasn't accepted. Double-check it and try again."
-        else -> error.toUserMessage() ?: "Something went wrong setting up your account. Please try again."
-    }
+    private const val REJECTED_KEY_MESSAGE = "That API key wasn't accepted. Double-check it and try again."
+
+    private fun mapError(error: Throwable): String =
+        error.toUserMessage() ?: "Something went wrong setting up your account. Please try again."
 }

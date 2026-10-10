@@ -29,6 +29,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.lists.presentation.action.CreateListAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnNameChangedAction
+import nl.rhaydus.softcover.feature.lists.presentation.action.OnNameShakeEndedAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnPrivacySelectedAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnSubmitAction
 import nl.rhaydus.softcover.feature.lists.presentation.state.CreateListUiState
@@ -92,6 +93,8 @@ internal fun CreateListSheetContent(
                     is TextFieldEvent.Submitted -> submit()
 
                     is TextFieldEvent.TrailingClicked -> Unit
+
+                    is TextFieldEvent.ShakeEnded -> runAction(OnNameShakeEndedAction)
                 }
             },
         )

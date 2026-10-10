@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnConfirmedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnDismissedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnChangedAction
+import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnShakeEndedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnSubmittedAction
 import nl.rhaydus.softcover.feature.scan.presentation.component.UnknownIsbnSheet
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
@@ -28,6 +29,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.permission.isCameraAvailab
 import nl.rhaydus.softcover.feature.scan.presentation.permission.isCameraPermissionGranted
 import nl.rhaydus.softcover.feature.scan.presentation.permission.rememberCameraPermissionRequester
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanScreenModel
+import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import org.koin.compose.koinInject
 
@@ -110,13 +112,22 @@ class BarcodeScannerScreen : Screen {
             state = state,
             manualMode = manualMode,
             cameraGranted = cameraGranted,
-            onIsbnSubmit = { isbn -> screenModel.runAction(OnIsbnSubmittedAction(isbn = isbn)) },
+            onIsbnSubmit = { isbn, origin ->
+                screenModel.runAction(
+                    OnIsbnSubmittedAction(
+                        isbn = isbn,
+                        origin = origin,
+                    ),
+                )
+            },
             onIsbnFieldEvent = { event ->
                 when (event) {
                     is TextFieldEvent.ValueChanged -> screenModel.runAction(OnIsbnChangedAction(text = event.text))
 
                     is TextFieldEvent.Submitted,
                     is TextFieldEvent.TrailingClicked -> Unit
+
+                    is TextFieldEvent.ShakeEnded -> screenModel.runAction(OnIsbnShakeEndedAction)
                 }
             },
             onEnterManually = { manualMode = true },
@@ -143,7 +154,7 @@ internal expect fun BarcodeScannerScreenLayout(
     state: ScanUiState,
     manualMode: Boolean,
     cameraGranted: Boolean,
-    onIsbnSubmit: (String) -> Unit,
+    onIsbnSubmit: (String, IsbnOrigin) -> Unit,
     onIsbnFieldEvent: (TextFieldEvent) -> Unit,
     onEnterManually: () -> Unit,
     onNavigateBack: () -> Unit,

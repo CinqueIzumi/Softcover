@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.scan.presentation.component.BarcodeScanner
+import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -27,7 +28,7 @@ internal actual fun BarcodeScannerScreenLayout(
     state: ScanUiState,
     manualMode: Boolean,
     cameraGranted: Boolean,
-    onIsbnSubmit: (String) -> Unit,
+    onIsbnSubmit: (String, IsbnOrigin) -> Unit,
     onIsbnFieldEvent: (TextFieldEvent) -> Unit,
     onEnterManually: () -> Unit,
     onNavigateBack: () -> Unit,
@@ -84,7 +85,7 @@ internal actual fun BarcodeScannerScreenLayout(
 @Composable
 private fun ScannerContent(
     cameraPaused: Boolean,
-    onIsbnSubmit: (String) -> Unit,
+    onIsbnSubmit: (String, IsbnOrigin) -> Unit,
     onEnterManually: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -97,7 +98,12 @@ private fun ScannerContent(
             }
         } else {
             BarcodeScanner(
-                onIsbnDetected = onIsbnSubmit,
+                onIsbnDetected = { isbn ->
+                    onIsbnSubmit(
+                        isbn,
+                        IsbnOrigin.Camera,
+                    )
+                },
                 modifier = Modifier.fillMaxSize(),
             )
         }

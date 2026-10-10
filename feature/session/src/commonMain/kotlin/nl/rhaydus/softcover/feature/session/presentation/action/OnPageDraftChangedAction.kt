@@ -7,11 +7,11 @@ import nl.rhaydus.softcover.feature.session.presentation.screenmodel.FocusModeDe
 import nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState
 import nl.rhaydus.softcover.feature.session.presentation.state.LocalFocusModeVariables
 import nl.rhaydus.toad.ActionScope
-import kotlin.math.min
 
 /**
- * Applies the field's raw edit to the draft: digits are clamped to the page count, a non-numeric edit
- * clears the text, and the first callback after focus returns only restores the field's selection.
+ * Applies the field's raw edit to the draft: a number above the page count is rejected and leaves the
+ * draft as it was, a non-numeric edit clears the text, and the first callback after focus returns only
+ * restores the field's selection.
  */
 internal class OnPageDraftChangedAction(
     private val newValue: TextFieldValue,
@@ -57,15 +57,12 @@ internal class OnPageDraftChangedAction(
             return
         }
 
-        scope.setState {
-            it.copy(
-                pageDraft = newValue.copy(
-                    text = min(
-                        newNumber,
-                        totalPages,
-                    ).toString(),
-                ),
-            )
+        if (newNumber > totalPages) {
+            scope.setState { it.copy(pageDraftRejected = true) }
+
+            return
         }
+
+        scope.setState { it.copy(pageDraft = newValue) }
     }
 }

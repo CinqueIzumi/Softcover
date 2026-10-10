@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
@@ -42,7 +44,6 @@ internal fun PillTextField(
     variant: TextFieldVariant.Pill,
     onEvent: (TextFieldEvent) -> Unit,
     focusRequester: FocusRequester,
-    modifier: Modifier = Modifier,
 ) {
     val height = when (variant.size) {
         TextFieldPillSize.Compact -> 42.dp
@@ -77,11 +78,21 @@ internal fun PillTextField(
         textStyle = textStyle,
         onEvent = onEvent,
         focusRequester = focusRequester,
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .height(height)
             .clip(Corners.pill)
-            .background(container),
+            .background(container)
+            .conditional(
+                condition = model.error != null,
+                ifTrue = {
+                    Modifier.border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.error,
+                        shape = Corners.pill,
+                    )
+                },
+            ),
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier

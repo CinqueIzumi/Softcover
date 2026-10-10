@@ -25,7 +25,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Button** — [detail](components/buttons-controls.md#button) — five styles/sizes; filled is one primary per region.
 - **Pill button** — `core:component/button` — action pill or icon-only circle in five tones.
 - **Toggle** — `core:component/control` — two-state control: filled or bare icon toggle, or a display-only switch inside a row that owns the tap.
-- **Text field** — `core:component/field` — single-line input as a tonal pill, the Material outlined box, a display-size hero, or a centred numeral.
+- **Text field** — `core:component/field` — pill, outlined, hero or numeral input; `TextFieldError` adds error ink, an animated message and a shake.
 - **Segmented control** — `core:component/control` — one-of-N choice as a pill track or as words in a sentence.
 - **Split button** — [detail](components/buttons-controls.md#split-button) — primary action with a chevron menu of variants.
 - **Theme preview tile** — `core:component/control` — mini-page theme choice.

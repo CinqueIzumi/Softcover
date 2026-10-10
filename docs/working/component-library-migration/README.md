@@ -14,12 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-21 built app-local (`:core:component` `sheet/AdaptiveModalSheet` + `ScrimlessDialog` expect/actual; F35 marked built locally first), reference docs updated, reviewed with fixes applied, desktop-checked by the user and ticked. "Show N titles" waits on F42; PF-4/7 wait for S12-4.
-- **Next:** S11-22, field errors on the field (`steps/s11-contract-retrofit.md` § S11-22).
-- **Open questions:** none.
-- **Accepted:** deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21. `styleCheck`, `ktlintCheck`, `checkModuleGraph`, `checkDocBudgets`, `:core:component:projectHealth`, JVM / Android / iOS-simulator compiles of `:core:component`, `:feature:lists` and `:desktopApp` passed; glom grep clean. No tests (composition only).
-- **Uncommitted:** all of S11-21 (Kotlin, reference docs, tracker docs).
+- **State:** S11-22 done and signed off after the user's full device run. #275 tracks S11 only at stage level, so no sub-step box there. F42 / S12-4 waits unchanged.
+- **Next:** S11-23 (`StepperCircle`: press scale, a tick per step, accelerating auto-repeat); read its step-file section first.
+- **Then:** the remaining open S11 sub-steps in table order.
+- **Open questions:** none. `upsert_book` may share the mismatch (probing writes to the account).
+- **Verification:** JBR 21 after the last Kotlin edit: `styleCheck`, `:feature:session:testAndroidHostTest`, `:app:assembleDebug` passed; earlier all-module compiles, `assembleDebug`, desktop, `checkModuleGraph`, core lists/book/network + plugin tests. Reviewer: no blockers (KDoc wraps fixed).
+- **Uncommitted:** S11-22 Kotlin (`:core:component` `field/`, `progress/`; `:core:designsystem` theme error families; book_detail, library, orchestration; onboarding, lists, scan, session + tests); `:apollo-schema-corrections` + wiring; `schema.graphqls`; `ListsRemoteDataSource` + test; `components.md`, `module-structure.md`, `foundations.md`; tracker docs.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:
@@ -86,6 +86,8 @@ every sub-step's Verify.
 - Loading follows `component-contract.md` R12; SL retrofits the existing surfaces.
 - Every step builds the simplest shape: no style tables, single-variant fields or one-caller layers.
 - A step spanning several sessions splits into sub-steps, one session each, in the step file's `## Sub-steps`.
+- Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost its ellipsis.
+- Accepted gate gaps: `softcover:` typos, dp in branches / vals / model fields, `Foo.Default` reads, `iosMain`.
 ## Baseline
 
 Measured 2026-08-21, `release/3.2.0` @ `ada51050`.

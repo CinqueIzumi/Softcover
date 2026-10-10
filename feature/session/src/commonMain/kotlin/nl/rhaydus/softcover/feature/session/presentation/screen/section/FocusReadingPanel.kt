@@ -124,6 +124,7 @@ internal fun FocusReadingPanel(
             FocusPageEditor(
                 pageEditor = pageEditor,
                 pageDraft = state.pageDraft,
+                pageDraftRejected = state.pageDraftRejected,
                 runAction = runAction,
             )
         }

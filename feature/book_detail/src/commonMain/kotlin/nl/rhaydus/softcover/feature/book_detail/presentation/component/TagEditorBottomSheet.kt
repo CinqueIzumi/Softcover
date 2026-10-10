@@ -39,6 +39,8 @@ internal fun TagEditorBottomSheet(
 
             is TextFieldEvent.Submitted,
             is TextFieldEvent.TrailingClicked -> onEvent(TagEditorSheetEvent.DraftSubmitted)
+
+            is TextFieldEvent.ShakeEnded -> Unit
         }
     }
 

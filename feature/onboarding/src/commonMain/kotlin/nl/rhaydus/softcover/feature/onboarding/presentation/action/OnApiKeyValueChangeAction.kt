@@ -13,7 +13,10 @@ internal data class OnApiKeyValueChangeAction(val newValue: String) : Onboarding
     ) {
         scope.setState {
             it.copy(
-                apiKeyField = it.apiKeyField.copy(text = newValue),
+                apiKeyField = it.apiKeyField.copy(
+                    text = newValue,
+                    error = null,
+                ),
                 saveApiKeyButtonEnabled = newValue.isNotBlank() && it.loadingSheet.isLoading.not(),
                 submissionError = null,
             )

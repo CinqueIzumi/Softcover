@@ -93,7 +93,8 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
                 )
 
                 is TextFieldEvent.Submitted,
-                is TextFieldEvent.TrailingClicked -> Unit
+                is TextFieldEvent.TrailingClicked,
+                is TextFieldEvent.ShakeEnded -> Unit
             }
         }
     }

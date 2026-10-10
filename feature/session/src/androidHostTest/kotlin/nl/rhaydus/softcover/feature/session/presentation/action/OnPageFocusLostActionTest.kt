@@ -185,5 +185,21 @@ class OnPageFocusLostActionTest {
             localVariablesFlow.value.isFirstFocusEvent shouldBe true
             stateFlow.value.pageDraft.selection shouldBe TextRange.Zero
         }
+
+        @Test
+        fun `clears a previously rejected page draft`() = runTest {
+            // ----- Arrange -----
+            typeDraft("10")
+            stateFlow.value = stateFlow.value.copy(pageDraftRejected = true)
+
+            // ----- Act -----
+            OnPageFocusLostAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.pageDraftRejected shouldBe false
+        }
     }
 }

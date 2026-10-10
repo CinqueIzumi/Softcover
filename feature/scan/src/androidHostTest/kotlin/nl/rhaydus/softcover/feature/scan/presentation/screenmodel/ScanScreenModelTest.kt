@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnSubmittedAction
 import nl.rhaydus.softcover.feature.scan.presentation.collector.IsbnFieldCollector
 import nl.rhaydus.softcover.feature.scan.presentation.collector.UnknownIsbnSheetCollector
+import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -65,7 +66,11 @@ class ScanScreenModelTest {
             val screenModel = createScreenModel(resolveBookByIsbnUseCase)
 
             // ----- Act -----
-            screenModel.runAction(OnIsbnSubmittedAction(isbn = "9780451524935"))
+            val action = OnIsbnSubmittedAction(
+                isbn = "9780451524935",
+                origin = IsbnOrigin.Camera,
+            )
+            screenModel.runAction(action)
             val enabledWhileResolving = screenModel.state.value.isbnField.enabled
             pending.complete(Result.success(IsbnLookupResult.InvalidIsbn))
 

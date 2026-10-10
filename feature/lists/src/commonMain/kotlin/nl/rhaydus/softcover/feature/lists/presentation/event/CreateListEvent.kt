@@ -9,8 +9,4 @@ internal sealed interface CreateListEvent : UiEvent {
     ) : CreateListEvent
 
     class ListCreationFailedEvent : CreateListEvent
-
-    data class ListNameTakenEvent(
-        val name: String,
-    ) : CreateListEvent
 }

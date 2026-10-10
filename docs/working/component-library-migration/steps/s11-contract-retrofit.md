@@ -35,7 +35,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-19 | The progress sheet plays its dismiss on submit | — | [x] |
 | S11-20 | Every sheet host leaves on `Dismissed` | S11-19 | [x] |
 | S11-21 | Panel-form `AdaptiveModalSheet` animates in and out, with elevation | SL-15a | [x] |
-| S11-22 | `TextFieldUiModel` error state: outline, shake and `reject` | S11-6 | [ ] |
+| S11-22 | `TextFieldUiModel` error state: outline, shake and `reject` | S11-6 | [x] |
 | S11-23 | `StepperCircle`: press scale, a tick per step, accelerating auto-repeat | S11-6 | [ ] |
 | S11-24 | Progress-sheet tab body crossfades with a size transform | SL-15a | [ ] |
 | S11-25 | Add-to-list: bookmark, chip and spinner animate; `select` fires | S11-6 | [ ] |
@@ -54,6 +54,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-38 | The full-screen cover grows out of the hero | S11-36 | [ ] |
 | S11-39 | Shared title and rating keys into book detail | S11-36 | [ ] |
 | S11-40 | Predictive back drives the push/pop transition | S11-36–S11-39 | [ ] |
+| S11-43 | A snackbar raised while a sheet is open draws above the sheet, not under it | — | [ ] |
 | S11-C | Convergence pass over the family (family-procedure.md § Phase 3) | all | [ ] |
 
 ## Approved shape
@@ -86,6 +87,17 @@ S11-21 (built app-local first; F35 moves it upstream):
 - Panel scales ~0.92→1 and fades; an own full-window scrim fades (platform dim off); specs from `MaterialTheme.motionScheme` only.
 - Outside tap, back, Esc and `LocalModalSheetDismiss` all play the exit, then `onDismissRequest` once.
 - `shadowElevation = 6.dp`, the 1 dp outline dropped. No new models; no tests (composition only).
+
+S11-22 (`shakeOnError` fires `reject` itself; screens drop their own `reject` for these errors):
+- `TextFieldUiModel.error: TextFieldError? = null`; `TextFieldError(message, shaking = true)` in `field/`; `TextFieldEvent.ShakeEnded(key)` clears `shaking`; the feature's value-change action clears `error`.
+- `TextField` wraps the variant body in a `Column` with `shakeOnError` and an error line below (`bodySmall`, `error` ink, `Spacing.xs`, polite live region, `error()` semantics).
+- Outlined: M3 `isError`. Pill: 1 dp `error` border. Hero and Numeral: `error` ink, centred line. Fixtures: Pill / Outlined / Hero error.
+- Onboarding: `InvalidTokenException` goes on the field; other failures keep `InlineErrorState`, and `ApiKeyRejectedEvent` only for them.
+- Lists: name taken goes on the field; `ListNameTakenEvent`, its snackbar and `reject` go.
+- Scan: `OnIsbnSubmittedAction` learns its origin; manual entry gets the field error, camera keeps `InvalidIsbnEvent` and its snackbar.
+- Focus Mode: a page past the end is rejected (the draft keeps its last valid value, so a typo never commits the last page and finishes the book); `pageDraftRejected` + `OnPageShakeEndedAction`; `FocusPageEditor` shakes `HeroStatNumberField`. The progress-sheet page clamp goes to S11-24.
+- No mapper, no helpers. Tests: the changed actions in onboarding, lists, scan, session.
+- Every palette owns an `ErrorFamily` (tones 20/30/40/70/86) in `PaletteColors`, distinct from its accents and AA against its surfaces; built and reviewed.
 
 ## R10 edges
 
@@ -241,7 +253,7 @@ Esc plays the same exit; add elevation. The foundation part is F35 in
 ### S11-22 — Field errors on the field
 
 A rejected API key (`OnApiKeySaveClickAction`), a taken list name (`CreateListSheetContent`), a page past
-the end (`OnPageDraftChangedAction`, which silently clamps 9999 to the page count) and an invalid ISBN
+the end (`OnPageDraftChangedAction`) and an invalid ISBN
 (the barcode scanner) only raise a snackbar, because `TextFieldUiModel` has no error hook. Add an error
 state to the field model with an outline and a shake (`shakeOnError`), which brings `reject`.
 
@@ -253,7 +265,7 @@ long-press auto-repeat that speeds up.
 ### S11-24 — Progress-sheet tabs
 
 `UpdateProgressBottomSheet` switches its tab body with a plain `when`, so the sheet height jumps.
-Crossfade the body with a size transform.
+Crossfade the body with a size transform. The page tab rejects a past-the-end page with a shake, as Focus Mode does.
 
 ### S11-25 — Add to list
 

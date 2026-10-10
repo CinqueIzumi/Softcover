@@ -16,6 +16,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
  * [TextFieldVariant.Outlined] shows it once the label has floated.
  * @property autoFocus Requests focus when the field enters composition and whenever it flips from false to true.
  * @property submittable Offers Done on the keyboard and sends [TextFieldEvent.Submitted] when it is pressed.
+ * @property error Marks the field invalid; the feature clears it when the user edits the value. A `shaking` error plays one
+ * shake, and stays `shaking` until the feature handles [TextFieldEvent.ShakeEnded].
  * There is no loading state: a field holds user input, so a field that must not be edited yet is built with `enabled = false`.
  */
 @Immutable
@@ -27,6 +29,7 @@ data class TextFieldUiModel(
     val enabled: Boolean = true,
     val autoFocus: Boolean = false,
     val submittable: Boolean = false,
+    val error: TextFieldError? = null,
 ) {
     companion object : UiModelPreviews<TextFieldUiModel> {
         override val previews: ImmutableMap<String, TextFieldUiModel> = persistentMapOf(
@@ -115,6 +118,30 @@ data class TextFieldUiModel(
                 placeholder = "0",
                 variant = TextFieldVariant.Numeral(charCount = 2),
                 enabled = false,
+            ),
+            "Pill, error" to TextFieldUiModel(
+                key = "pill-error",
+                text = "slow burn",
+                placeholder = "Name a tag…",
+                variant = TextFieldVariant.Pill(leadingIcon = SoftcoverIcon.Edit),
+                error = TextFieldError(message = "You already have that tag."),
+            ),
+            "Outlined, error" to TextFieldUiModel(
+                key = "outlined-error",
+                text = "12345",
+                placeholder = "e.g. 9780374710781",
+                variant = TextFieldVariant.Outlined(
+                    label = "ISBN",
+                    numeric = true,
+                ),
+                error = TextFieldError(message = "That doesn't look like a valid ISBN."),
+            ),
+            "Hero, error" to TextFieldUiModel(
+                key = "hero-error",
+                text = "Summer reads",
+                placeholder = "Summer reads",
+                variant = TextFieldVariant.Hero,
+                error = TextFieldError(message = "You already have a list called “Summer reads”."),
             ),
             "Numeral" to TextFieldUiModel(
                 key = "numeral",

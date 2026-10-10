@@ -43,6 +43,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyPasteAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveClickAction
+import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyShakeEndedAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyValueChangeAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
@@ -129,6 +130,8 @@ internal fun ApiKeyEntryContent(
                     is TextFieldEvent.Submitted -> runAction(OnApiKeySaveClickAction)
 
                     is TextFieldEvent.TrailingClicked -> Unit
+
+                    is TextFieldEvent.ShakeEnded -> runAction(OnApiKeyShakeEndedAction)
                 }
             },
         )

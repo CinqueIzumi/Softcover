@@ -19,7 +19,6 @@ internal fun OutlinedTextFieldBody(
     variant: TextFieldVariant.Outlined,
     onEvent: (TextFieldEvent) -> Unit,
     focusRequester: FocusRequester,
-    modifier: Modifier = Modifier,
 ) {
     OutlinedTextField(
         value = model.text,
@@ -34,6 +33,7 @@ internal fun OutlinedTextFieldBody(
             )
         },
         enabled = model.enabled,
+        isError = model.error != null,
         singleLine = true,
         shape = Corners.sm,
         keyboardOptions = model.keyboardOptions(),
@@ -42,7 +42,7 @@ internal fun OutlinedTextFieldBody(
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             focusedContainerColor = MaterialTheme.colorScheme.surface,
         ),
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .focusRequester(focusRequester)
             .then(

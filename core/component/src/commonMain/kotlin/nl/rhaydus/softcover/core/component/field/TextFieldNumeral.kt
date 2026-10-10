@@ -31,7 +31,6 @@ internal fun NumeralTextField(
     variant: TextFieldVariant.Numeral,
     onEvent: (TextFieldEvent) -> Unit,
     focusRequester: FocusRequester,
-    modifier: Modifier = Modifier,
 ) {
     val textStyle = MaterialTheme.editorialTypography.headlineMedium
     val density = LocalDensity.current
@@ -69,7 +68,11 @@ internal fun NumeralTextField(
         enabled = model.enabled,
         singleLine = true,
         textStyle = textStyle.copy(
-            color = MaterialTheme.colorScheme.onSurface.forEnabled(model.enabled),
+            color = if (model.error != null) {
+                MaterialTheme.colorScheme.error
+            } else {
+                MaterialTheme.colorScheme.onSurface.forEnabled(model.enabled)
+            },
             textAlign = TextAlign.Center,
         ),
         cursorBrush = SolidColor(value = MaterialTheme.colorScheme.primary),
@@ -91,7 +94,7 @@ internal fun NumeralTextField(
                 innerTextField()
             }
         },
-        modifier = modifier
+        modifier = Modifier
             .width(width)
             .focusRequester(focusRequester)
             .semantics { contentDescription = model.placeholder }

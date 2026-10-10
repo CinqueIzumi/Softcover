@@ -2,8 +2,10 @@ package nl.rhaydus.softcover.feature.scan.presentation.action
 
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.IsbnLookupResult
+import nl.rhaydus.softcover.core.component.field.TextFieldError
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
+import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import nl.rhaydus.softcover.feature.scan.presentation.state.UnknownIsbnSheetUiModel
@@ -12,6 +14,7 @@ import nl.rhaydus.toad.ActionScope
 
 internal class OnIsbnSubmittedAction(
     val isbn: String,
+    val origin: IsbnOrigin,
 ) : ScanAction {
     override suspend fun execute(
         dependencies: ScanDependencies,
@@ -48,9 +51,22 @@ internal class OnIsbnSubmittedAction(
                     }
 
                     is IsbnLookupResult.InvalidIsbn -> {
-                        scope.setState { it.copy(isResolving = false) }
+                        when (origin) {
+                            IsbnOrigin.Manual -> scope.setState {
+                                it.copy(
+                                    isResolving = false,
+                                    isbnField = it.isbnField.copy(
+                                        error = TextFieldError(message = INVALID_ISBN_MESSAGE),
+                                    ),
+                                )
+                            }
 
-                        scope.sendEvent(event = ScanEvent.InvalidIsbnEvent())
+                            IsbnOrigin.Camera -> {
+                                scope.setState { it.copy(isResolving = false) }
+
+                                scope.sendEvent(event = ScanEvent.InvalidIsbnEvent())
+                            }
+                        }
                     }
                 }
             }
@@ -64,5 +80,9 @@ internal class OnIsbnSubmittedAction(
 
                 scope.sendEvent(event = ScanEvent.ResolutionFailedEvent())
             }
+    }
+
+    private companion object {
+        const val INVALID_ISBN_MESSAGE = "That doesn't look like a valid ISBN."
     }
 }

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.field.TextFieldError
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
@@ -118,6 +119,26 @@ class OnApiKeyValueChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value.saveApiKeyButtonEnabled shouldBe false
+        }
+
+        @Test
+        fun `clears a previous field error when the text changes`() = runTest {
+            // ----- Arrange -----
+            val base = stateWithApiKey(text = "old-key")
+            stateFlow.value = base.copy(
+                apiKeyField = base.apiKeyField.copy(error = TextFieldError(message = "rejected")),
+            )
+            dependencies = stubDependencies(this)
+            val action = OnApiKeyValueChangeAction(newValue = "new-key")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.apiKeyField.error shouldBe null
         }
     }
 }

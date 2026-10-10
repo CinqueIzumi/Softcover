@@ -9,4 +9,6 @@ sealed interface TextFieldEvent {
     data class Submitted(val key: String) : TextFieldEvent
 
     data class TrailingClicked(val key: String) : TextFieldEvent
+
+    data class ShakeEnded(val key: String) : TextFieldEvent
 }

@@ -39,6 +39,7 @@ if (foundationLocal) {
 include(":app")
 include(":desktopApp")
 include(":detekt-rules")
+include(":apollo-schema-corrections")
 include(":orchestration")
 include(":core:domain")
 include(":core:database")

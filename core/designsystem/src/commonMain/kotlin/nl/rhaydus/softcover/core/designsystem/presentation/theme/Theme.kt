@@ -17,8 +17,8 @@ import nl.rhaydus.designsystem.theme.RhaydusTheme
 
 /**
  * The light half of one [SpinePalette]: the palette's three accent families over the palette's own
- * paper. Every slot but the error family and the scrim comes from the palette, which is why swapping
- * one repaints the page and not only its accents — see [NeutralFamily] for the tone-to-slot map.
+ * paper. Every slot but the scrim comes from the palette, which is why swapping one repaints the
+ * page and not only its accents — see [NeutralFamily] for the tone-to-slot map.
  */
 private fun lightSchemeFor(palette: PaletteColors) = lightColorScheme(
     primary = palette.primary.tone40,
@@ -34,10 +34,10 @@ private fun lightSchemeFor(palette: PaletteColors) = lightColorScheme(
     tertiaryContainer = palette.tertiary.tone90,
     onTertiaryContainer = palette.tertiary.tone30,
     inversePrimary = palette.primary.tone80,
-    error = errorLight,
-    onError = onErrorLight,
-    errorContainer = errorContainerLight,
-    onErrorContainer = onErrorContainerLight,
+    error = palette.error.tone40,
+    onError = palette.neutral.tone100,
+    errorContainer = palette.error.tone86,
+    onErrorContainer = palette.error.tone30,
     scrim = scrimLight,
     background = palette.neutral.tone98,
     onBackground = palette.neutral.tone10,
@@ -73,10 +73,10 @@ private fun darkSchemeFor(palette: PaletteColors) = darkColorScheme(
     tertiaryContainer = palette.tertiary.tone30,
     onTertiaryContainer = palette.tertiary.tone90,
     inversePrimary = palette.primary.tone40,
-    error = errorDark,
-    onError = onErrorDark,
-    errorContainer = errorContainerDark,
-    onErrorContainer = onErrorContainerDark,
+    error = palette.error.tone70,
+    onError = palette.error.tone20,
+    errorContainer = palette.error.tone30,
+    onErrorContainer = palette.error.tone86,
     scrim = scrimDark,
     background = palette.neutral.tone6,
     onBackground = palette.neutral.tone90,

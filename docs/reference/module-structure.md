@@ -121,7 +121,7 @@ component/
 + dialog/      SoftcoverDatePickerDialog  DatePickerUiModel  DatePickerEvent
 +              PickerDates (internal)
 + divider/     Divider  VerticalDivider  DividerInk  DividerCenter
-+ field/       TextField  TextFieldUiModel/Variant/Keyboard/Event
++ field/       TextField  TextFieldUiModel/Variant/Keyboard/Event/Error
 + gallery/     GalleryRegistry  GalleryEntry  GalleryFamily
 +              GalleryFixture  UiModelPreviews
 + header/      SectionHeader  PageMasthead  PageMastheadSubtitle

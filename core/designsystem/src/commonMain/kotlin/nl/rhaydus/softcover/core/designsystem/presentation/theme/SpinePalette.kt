@@ -4,8 +4,7 @@ package nl.rhaydus.softcover.core.designsystem.presentation.theme
  * Which curated look the app is painted in — the "spine colour". A palette is a **whole look, not an
  * accent swap**: it carries its own paper (page, cards, hairlines) as well as its own ink (the
  * primary / secondary / tertiary families), so choosing one retints every surface rather than only
- * the accents. The error family, the scrim, and the app's fixed printed inks are the only colours
- * that stay put.
+ * the accents. The scrim and the app's fixed printed inks are the only colours that stay put.
  *
  * This is the design system's own palette **token** — the thing a hex table is keyed by and a
  * component selects a scheme with. It deliberately does not know how the reader's choice is stored:

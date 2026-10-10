@@ -20,7 +20,12 @@ internal data class CreateListUiState(
     val canSubmit: Boolean
         get() = name.trim().isNotEmpty() && isSubmitting.not()
 
-    fun withName(newName: String): CreateListUiState = copy(nameField = nameField.copy(text = newName))
+    fun withName(newName: String): CreateListUiState = copy(
+        nameField = nameField.copy(
+            text = newName,
+            error = null,
+        ),
+    )
 
     fun withSubmitting(submitting: Boolean): CreateListUiState = copy(
         isSubmitting = submitting,

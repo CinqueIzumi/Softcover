@@ -95,7 +95,45 @@ class OnPageDraftChangedActionTest {
         }
 
         @Test
-        fun `clamps a number above the page count to the page count`() = runTest {
+        fun `leaves the draft text and selection as they were for a number above the page count`() = runTest {
+            // ----- Arrange -----
+            startSession(totalPages = 300)
+            val original = draft(
+                text = "10",
+                selection = TextRange(
+                    start = 1,
+                    end = 2,
+                ),
+            )
+            stateFlow.value = FocusModeUiState(pageDraft = original)
+
+            // ----- Act -----
+            change(
+                draft(
+                    text = "9999",
+                    selection = TextRange(4),
+                ),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.pageDraft shouldBe original
+        }
+
+        @Test
+        fun `accepts a number equal to the page count as typed`() = runTest {
+            // ----- Arrange -----
+            startSession(totalPages = 300)
+            stateFlow.value = FocusModeUiState(pageDraft = draft("10"))
+
+            // ----- Act -----
+            change(draft("300"))
+
+            // ----- Assert -----
+            stateFlow.value.pageDraft.text shouldBe "300"
+        }
+
+        @Test
+        fun `flags the draft as rejected when the number is above the page count`() = runTest {
             // ----- Arrange -----
             startSession(totalPages = 300)
             stateFlow.value = FocusModeUiState(pageDraft = draft("10"))
@@ -104,7 +142,50 @@ class OnPageDraftChangedActionTest {
             change(draft("9999"))
 
             // ----- Assert -----
-            stateFlow.value.pageDraft.text shouldBe "300"
+            stateFlow.value.pageDraftRejected shouldBe true
+        }
+
+        @Test
+        fun `does not flag the draft as rejected for a number within the page count`() = runTest {
+            // ----- Arrange -----
+            startSession(totalPages = 300)
+            stateFlow.value = FocusModeUiState(pageDraft = draft("10"))
+
+            // ----- Act -----
+            change(draft("300"))
+
+            // ----- Assert -----
+            stateFlow.value.pageDraftRejected shouldBe false
+        }
+
+        @Test
+        fun `keeps the draft flagged as rejected after a later in-range edit`() = runTest {
+            // ----- Arrange -----
+            startSession(totalPages = 300)
+            stateFlow.value = FocusModeUiState(
+                pageDraft = draft("300"),
+                pageDraftRejected = true,
+            )
+
+            // ----- Act -----
+            change(draft("120"))
+
+            // ----- Assert -----
+            stateFlow.value.pageDraftRejected shouldBe true
+        }
+
+        @Test
+        fun `does not flag the draft as rejected for an emptied or non-numeric edit`() = runTest {
+            // ----- Arrange -----
+            startSession(totalPages = 300)
+            stateFlow.value = FocusModeUiState(pageDraft = draft("10"))
+
+            // ----- Act -----
+            change(draft(""))
+            change(draft("1a"))
+
+            // ----- Assert -----
+            stateFlow.value.pageDraftRejected shouldBe false
         }
 
         @Test

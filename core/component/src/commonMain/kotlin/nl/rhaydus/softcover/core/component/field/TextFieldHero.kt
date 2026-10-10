@@ -36,7 +36,6 @@ internal fun HeroTextField(
     model: TextFieldUiModel,
     onEvent: (TextFieldEvent) -> Unit,
     focusRequester: FocusRequester,
-    modifier: Modifier = Modifier,
 ) {
     val heroStyle = MaterialTheme.editorialTypography.display
     val textMeasurer = rememberTextMeasurer()
@@ -46,7 +45,7 @@ internal fun HeroTextField(
 
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .height(with(density) { lineHeight.toDp() }),
     ) {
