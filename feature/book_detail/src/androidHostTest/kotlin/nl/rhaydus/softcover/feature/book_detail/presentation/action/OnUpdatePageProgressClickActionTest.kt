@@ -82,7 +82,7 @@ class OnUpdatePageProgressClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `hides the update progress sheet after execution`() = runTest {
+        fun `leaves the update progress sheet open for its own dismiss`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
             stateFlow.value = BookDetailUiState(
@@ -100,7 +100,7 @@ class OnUpdatePageProgressClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showUpdateProgressSheet shouldBe false
+            stateFlow.value.showUpdateProgressSheet shouldBe true
         }
 
         @Test

@@ -24,6 +24,7 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -33,11 +34,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
@@ -112,18 +118,24 @@ internal fun SheetScaffoldContent(
             onEvent = onEvent,
         )
 
-        if (model.layout != SheetLayout.Scrolling) {
+        CompositionLocalProvider(LocalModalSheetDismiss provides chrome::dismiss) {
             Column(
                 modifier = Modifier
-                    .weight(
-                        weight = 1f,
-                        fill = false,
+                    .fillMaxWidth()
+                    .then(
+                        if (model.layout != SheetLayout.Scrolling) {
+                            Modifier.weight(
+                                weight = 1f,
+                                fill = false,
+                            )
+                        } else {
+                            Modifier
+                        },
                     )
-                    .then(if (model.layout == SheetLayout.Pinned) Modifier.verticalScroll(state = scrollState) else Modifier),
+                    .then(if (model.layout == SheetLayout.Pinned) Modifier.verticalScroll(state = scrollState) else Modifier)
+                    .blockInput(enabled = chrome.unlocked.not()),
                 content = content,
             )
-        } else {
-            content()
         }
 
         if (model.footer != null) {
@@ -144,6 +156,19 @@ internal fun SheetScaffoldContent(
             )
         }
     }
+}
+
+private fun Modifier.blockInput(enabled: Boolean): Modifier = if (enabled) {
+    onPreviewKeyEvent { true }
+        .pointerInput(Unit) {
+            awaitPointerEventScope {
+                while (true) {
+                    awaitPointerEvent(PointerEventPass.Initial).changes.forEach(PointerInputChange::consume)
+                }
+            }
+        }
+} else {
+    this
 }
 
 @Composable

@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-18 committed: `SheetFooterButton.running` puts the fading spinner on the running button; `SheetScaffoldUiModel.busy` is derived from it; the share card's secondary keeps "Save to gallery" while saving. Sheet spinners seen on Medium_Phone. Haptic half needed no change. S11-17's `SheetRow` part can't be seen on device until S11-20. S11-16's ticks not yet felt on device. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
+- **State:** S11-18 committed (`dec796ca`): the spinner sits on the running sheet footer button; `SheetScaffoldUiModel.busy` derives from `SheetFooterButton.running`. Seen on Medium_Phone. Page-level (non-sheet) buttons have no spinner, out of scope. The Medium_Phone build still carries the removed 3 s test delays; reinstall before the next device check. S11-17's `SheetRow` part can't be seen on device until S11-20. S11-16's ticks not yet felt on device. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
 - **Next:** S11-19 Phase 1 in `steps/s11-contract-retrofit.md` § S11-19.
 - **Open questions:** none. Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm`, `:feature:settings:compileKotlinJvm`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck` pass after S11-18, plus the other touched modules' compiles, `checkDocBudgets` and their `testAndroidHostTest` suites; glom grep clean. Test changes: `OnDismissDiscardSheetActionTest` setup moved to `discardSheetScaffold(saving = true)`; `ShareCaptureStateTest`, profile `OnShareCaptureEventActionTest` and `ProfileShareCaptureTest` assert `secondary.running` instead of the old saving label (re-run, 22 pass).
-- **Uncommitted:** none.
+- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm`, `:feature:settings:compileKotlinJvm`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck`, `checkDocBudgets` and the touched modules' compiles and `testAndroidHostTest` suites pass after S11-18's last Kotlin edit; close-out grep found no glommed closers and every changed test has its AAA markers.
+- **Uncommitted:** this `## Now` block only.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

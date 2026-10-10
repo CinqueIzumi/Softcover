@@ -72,12 +72,5 @@ internal data class OnUpdateTimeProgressClickAction(
         scope.setLocalVariables {
             it.copy(bookMutationJobs = it.bookMutationJobs + (bookToUpdate.id to job))
         }
-
-        scope.setState {
-            it.copy(
-                showUpdateProgressSheet = false,
-                progressTimeDraft = null,
-            )
-        }
     }
 }

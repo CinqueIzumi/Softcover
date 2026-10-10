@@ -91,8 +91,6 @@ internal fun ReadingOverlays(
                             book = updatingBook,
                             actionAt = state.readAt.toActionAt(),
                         )
-
-                        runAction(DismissProgressSheetAction)
                     }
 
                     is ProgressSheetEvent.WhenReadShifted -> runAction(OnWhenReadShiftedAction(minutes = event.minutes))

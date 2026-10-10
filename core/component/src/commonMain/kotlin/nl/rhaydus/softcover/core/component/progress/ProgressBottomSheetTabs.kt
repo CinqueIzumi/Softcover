@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
 import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
@@ -278,13 +279,18 @@ private fun ColumnScope.SteppedNumberContent(
     )
 }
 
-/** The suffix line and bar (only when [suffix] is set) above the "Update progress" action every tab ends with. */
+/**
+ * The suffix line and bar (only when [suffix] is set) above the "Update progress" action every tab ends
+ * with. The action submits, then dismisses the sheet through its animated hide.
+ */
 @Composable
 private fun ColumnScope.ProgressSheetFooter(
     suffix: String?,
     fraction: Float,
     onSubmit: () -> Unit,
 ) {
+    val dismiss = LocalModalSheetDismiss.current
+
     if (suffix != null) {
         Spacer(modifier = Modifier.height(Spacing.xs))
 
@@ -299,7 +305,11 @@ private fun ColumnScope.ProgressSheetFooter(
 
     RhaydusButton(
         label = "Update progress",
-        onClick = onSubmit,
+        onClick = {
+            onSubmit()
+
+            dismiss()
+        },
         modifier = Modifier.fillMaxWidth(),
         style = ButtonStyle.FILLED,
         size = ButtonSize.M,

@@ -58,12 +58,13 @@ primitives among them), and every premium-feel sub-step has landed.
 
 ## Approved shape
 
-S11-18:
-- Haptics already meet the scope: the footer fires none; rating saves fire `select` / `reject` from their outcome events (Reading and book detail). No change.
-- `SheetFooterButton` gains `running: Boolean = false`; `SheetScaffoldUiModel.busy` becomes a read-only property, true while any footer button is running. Its three reads (outside/back dismiss, `canDismiss`, button enablement) stay as they are.
-- The five setters mark the running button: share card (Share while sharing, Save to gallery while saving), bulk Remove, unknown-ISBN Add, settings discard Save (`leaveAfterSave`), Re-authenticate.
-- The spinner shows on `button.running`, fading in and out on `fastEffectsSpec`, with the "Loading" state on that button. Fill-width buttons keep it at the trailing edge; the wrap-width Inline secondary crossfades its label out and a centred spinner in, keeping its width.
-- Previews: "Busy" becomes a running primary; new "Inline, secondary running". No tests.
+S11-19:
+- `SheetScaffoldContent` re-provides `LocalModalSheetDismiss` to its body as the chrome's guarded close (once only, honours `canDismiss`, sets `dismissStarted`). No new API.
+- Scaffold-wide: while a dismiss plays, the body takes no taps, like the footer's `unlocked`.
+- `UpdateProgressBottomSheet`: "Update progress" (all three tabs) and "Mark as read" emit their event, then call `LocalModalSheetDismiss`. `MarkAsReadRequested` KDoc: the sheet dismisses itself.
+- Both hosts (Reading and book detail): page / percentage / time submit actions stop writing the visibility flag and `bookToUpdate`; `MarkAsReadRequested` branches drop their dismiss action; `Dismissed` is the only close. The time draft now clears after a submit too.
+- `sheet-scaffold.md`: one line on the body's guarded dismiss and the tap lock.
+- No new types. Tests: the submit action tests in both features, via test-writer.
 
 ## R10 edges
 
@@ -196,7 +197,7 @@ from the save's event, so saving a rating gets `select`.
 ### S11-19 — Progress sheet dismiss
 
 Save and "Mark as read" (`OnUpdatePageProgressClickAction`, the percentage and time variants,
-`ReadingOverlays`) clear `showProgressSheet`, so the host removes the sheet before its animated `hide()`
+`ReadingOverlays`, and their book detail twins) clear the sheet's flag, so the host removes the sheet before its animated `hide()`
 runs. Submitting plays the dismiss before the host clears its state, the way `dismissesSheet` footer
 buttons do.
 

@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
@@ -95,7 +96,7 @@ class OnUpdateTimeProgressClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `discards the time draft once the entered time is submitted`() = runTest {
+        fun `leaves the time draft for the host to dismiss once the entered time is submitted`() = runTest {
             // ----- Arrange -----
             stateFlow.value = BookDetailUiState(
                 book = stubBookWithAudioSeconds(audioSeconds = 7200),
@@ -121,11 +122,11 @@ class OnUpdateTimeProgressClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.progressTimeDraft shouldBe null
+            stateFlow.value.progressTimeDraft.shouldNotBeNull()
         }
 
         @Test
-        fun `hides the update progress sheet after execution`() = runTest {
+        fun `leaves the update progress sheet open for its own dismiss`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithAudioSeconds(audioSeconds = 7200)
             stateFlow.value = BookDetailUiState(
@@ -147,7 +148,7 @@ class OnUpdateTimeProgressClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showUpdateProgressSheet shouldBe false
+            stateFlow.value.showUpdateProgressSheet shouldBe true
         }
 
         @Test

@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
@@ -35,7 +36,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
  * before inventing a new "edit a single number on a book" surface.
  *
  * "Mark as read" is a standard secondary action present on every progress sheet: an outlined button
- * below the tab content's own filled "Update progress" action.
+ * below the tab content's own filled "Update progress" action. Both actions emit their event and then
+ * dismiss the sheet through its animated hide; the host only records the result and clears its flag on
+ * [ProgressSheetEvent.Dismissed].
  */
 @Composable
 fun UpdateProgressBottomSheet(
@@ -73,6 +76,8 @@ private fun ProgressBottomSheetContent(
     val activeTab = model.tabs.selected
 
     val focusManager = LocalFocusManager.current
+
+    val dismiss = LocalModalSheetDismiss.current
 
     Column(
         modifier = Modifier
@@ -132,7 +137,11 @@ private fun ProgressBottomSheetContent(
                 icon = SoftcoverIcon.Check,
                 contentDescription = "",
             ),
-            onClick = { onEvent(ProgressSheetEvent.MarkAsReadRequested) },
+            onClick = {
+                onEvent(ProgressSheetEvent.MarkAsReadRequested)
+
+                dismiss()
+            },
             modifier = Modifier.fillMaxWidth(),
         )
     }

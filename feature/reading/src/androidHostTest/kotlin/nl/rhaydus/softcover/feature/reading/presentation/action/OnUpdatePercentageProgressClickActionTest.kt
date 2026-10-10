@@ -143,7 +143,7 @@ class OnUpdatePercentageProgressClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `closes the sheet and clears bookToUpdate after recording`() = runTest {
+        fun `leaves the sheet open for its own dismiss after recording`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithCurrentEditionPages(pages = 300)
             stateFlow.value = ReadingScreenUiState(
@@ -160,8 +160,8 @@ class OnUpdatePercentageProgressClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showProgressSheet shouldBe false
-            stateFlow.value.bookToUpdate shouldBe null
+            stateFlow.value.showProgressSheet shouldBe true
+            stateFlow.value.bookToUpdate shouldBe book
         }
 
         @Test
@@ -263,7 +263,7 @@ class OnUpdatePercentageProgressClickActionTest {
         }
 
         @Test
-        fun `closes the sheet without recording when the book has no current edition`() = runTest {
+        fun `records nothing and leaves the state alone when the book has no current edition`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>().also { b ->
                 every {
@@ -294,8 +294,8 @@ class OnUpdatePercentageProgressClickActionTest {
                     any(),
                 )
             }
-            stateFlow.value.showProgressSheet shouldBe false
-            stateFlow.value.bookToUpdate shouldBe null
+            stateFlow.value.showProgressSheet shouldBe true
+            stateFlow.value.bookToUpdate shouldBe book
         }
 
         @Test

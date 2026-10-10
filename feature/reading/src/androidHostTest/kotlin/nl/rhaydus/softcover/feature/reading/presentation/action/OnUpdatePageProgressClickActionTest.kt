@@ -87,7 +87,7 @@ class OnUpdatePageProgressClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `records the parsed page with the backdated actionAt and closes the sheet`() = runTest {
+        fun `records the parsed page with the backdated actionAt and leaves the sheet open for its own dismiss`() = runTest {
             // ----- Arrange -----
             val readAt = LocalDateTime(
                 2026,
@@ -130,8 +130,8 @@ class OnUpdatePageProgressClickActionTest {
                     actionAt = readAt.toActionAt(),
                 )
             }
-            stateFlow.value.showProgressSheet shouldBe false
-            stateFlow.value.bookToUpdate shouldBe null
+            stateFlow.value.showProgressSheet shouldBe true
+            stateFlow.value.bookToUpdate shouldBe book
         }
 
         @Test

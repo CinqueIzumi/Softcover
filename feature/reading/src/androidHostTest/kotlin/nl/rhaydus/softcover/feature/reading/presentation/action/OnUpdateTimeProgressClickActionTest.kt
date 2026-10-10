@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -102,7 +103,7 @@ class OnUpdateTimeProgressClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `closes the sheet and discards the time draft once the entered time is submitted`() = runTest {
+        fun `leaves the sheet and time draft for the host to dismiss once the entered time is submitted`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = stubBookWithAudioSeconds(audioSeconds = 7200),
@@ -129,9 +130,9 @@ class OnUpdateTimeProgressClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.progressTimeDraft shouldBe null
-            stateFlow.value.showProgressSheet shouldBe false
-            stateFlow.value.bookToUpdate shouldBe null
+            stateFlow.value.progressTimeDraft.shouldNotBeNull()
+            stateFlow.value.showProgressSheet shouldBe true
+            stateFlow.value.bookToUpdate.shouldNotBeNull()
         }
 
         @Test

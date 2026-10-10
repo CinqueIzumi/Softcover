@@ -27,15 +27,7 @@ internal data class OnUpdatePercentageProgressClickAction(
             1.0,
         )
 
-        val edition = bookToUpdate.currentEdition ?: run {
-            scope.setState {
-                it.copy(
-                    showProgressSheet = false,
-                    bookToUpdate = null,
-                )
-            }
-            return
-        }
+        val edition = bookToUpdate.currentEdition ?: return
         val isAudiobook = edition.isAudiobook
 
         val newPage: Int? = if (isAudiobook) {
@@ -87,13 +79,6 @@ internal data class OnUpdatePercentageProgressClickAction(
 
         scope.setLocalVariables {
             it.copy(bookMutationJobs = it.bookMutationJobs + (bookToUpdate.id to job))
-        }
-
-        scope.setState {
-            it.copy(
-                showProgressSheet = false,
-                bookToUpdate = null,
-            )
         }
     }
 }
