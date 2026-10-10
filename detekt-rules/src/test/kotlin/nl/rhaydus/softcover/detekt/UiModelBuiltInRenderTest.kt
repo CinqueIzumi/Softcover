@@ -19,6 +19,11 @@ class UiModelBuiltInRenderTest {
         HEADER + body,
     )
 
+    private fun lintOutsideProject(body: String) = rule.compileAndLintWithContext(
+        wrapper.env,
+        header("com.example.sample") + body,
+    )
+
     @Nested
     inner class ReportedInRender {
         @Test
@@ -232,10 +237,325 @@ class UiModelBuiltInRenderTest {
             // ----- Assert -----
             findings shouldHaveSize 1
         }
+
+        @Test
+        fun `reports a copy of a model read from a UiState property`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(val model: FooUiModel)
+
+            @Composable
+            fun Screen(state: FooUiState) {
+                state.model.copy(n = 2)
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings shouldHaveSize 1
+        }
+
+        @Test
+        fun `reports a top-level function taking a UiState and returning a UI model`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(val n: Int)
+
+            fun mastheadFor(state: FooUiState) = FooUiModel(state.n)
+
+            @Composable
+            fun Screen(state: FooUiState) {
+                mastheadFor(state)
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings shouldHaveSize 1
+        }
+
+        @Test
+        fun `reports a UiState computed getter that builds a UI model`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(val n: Int) {
+                val masthead: FooUiModel
+                    get() = FooUiModel(n)
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings shouldHaveSize 1
+        }
+
+        @Test
+        fun `reports a UiState member function that copies a stored model`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(val model: FooUiModel) {
+                fun bumped(n: Int): FooUiModel = model.copy(n = n)
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings shouldHaveSize 1
+        }
+
+        @Test
+        fun `reports a UiState member function that calls a project function returning a UI model`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(val n: Int) {
+                fun masthead(): FooUiModel = n.toFooUiModel()
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings shouldHaveSize 1
+        }
+
+        @Test
+        fun `reports a UiState member function that builds a UI model`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(val n: Int) {
+                fun mastheadFor(tabId: Int) = FooUiModel(n + tabId)
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings shouldHaveSize 1
+        }
+
+        @Test
+        fun `reports a UiState member function returning a list of UI models it builds`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(val n: Int) {
+                fun mastheads(): List<FooUiModel> = listOf(FooUiModel(n))
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings shouldHaveSize 1
+        }
+
+        @Test
+        fun `reports a UiState member function returning a project wrapper of UI models it builds`() {
+            // ----- Arrange -----
+            val code = """
+            data class FooChips(val chips: List<FooUiModel>)
+
+            class FooUiState(val n: Int) {
+                fun chips(): FooChips = FooChips(listOf(FooUiModel(n)))
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings shouldHaveSize 1
+        }
+
+        @Test
+        fun `reports a UiState member function returning a pair holding a UI model it builds`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(val n: Int) {
+                fun masthead(): Pair<FooUiModel, String> = FooUiModel(n) to "title"
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings shouldHaveSize 1
+        }
     }
 
     @Nested
     inner class NotReported {
+        @Test
+        fun `does not report a UiState member function returning stored UI models from a map lookup`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(val stored: Map<Int, List<FooUiModel>>) {
+                fun mastheads(id: Int): List<FooUiModel> = stored.getValue(id)
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings.shouldBeEmpty()
+        }
+
+        @Test
+        fun `does not report a UiState member function returning a stored wrapper with an empty default`() {
+            // ----- Arrange -----
+            val code = """
+            data class FooChips(val chips: List<FooUiModel>)
+
+            class FooUiState(val stored: Map<Int, FooChips>) {
+                fun chips(id: Int): FooChips = stored[id] ?: FooChips(emptyList())
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings.shouldBeEmpty()
+        }
+
+        @Test
+        fun `does not report a member call on a UiState outside the project package`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(val n: Int) {
+                fun mastheadFor(tabId: Int) = FooUiModel(n + tabId)
+            }
+
+            @Composable
+            fun Screen(state: FooUiState, tabId: Int) {
+                state.mastheadFor(tabId)
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintOutsideProject(code)
+
+            // ----- Assert -----
+            findings.shouldBeEmpty()
+        }
+
+        @Test
+        fun `does not report a UiState member function returning a stored UI model`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(
+                val models: Map<Int, FooUiModel>,
+                val fallback: FooUiModel,
+            ) {
+                fun mastheadFor(tabId: Int): FooUiModel = models[tabId] ?: fallback
+            }
+
+            @Composable
+            fun Screen(state: FooUiState, tabId: Int) {
+                state.mastheadFor(tabId)
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings.shouldBeEmpty()
+        }
+
+        @Test
+        fun `does not report a constructor-parameter default in a UiState`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(val model: FooUiModel = FooUiModel(0))
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings.shouldBeEmpty()
+        }
+
+        @Test
+        fun `does not report a stored initializer in a UiState`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState {
+                val model: FooUiModel = FooUiModel(0)
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings.shouldBeEmpty()
+        }
+
+        @Test
+        fun `does not report a companion val in a UiState`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState {
+                companion object {
+                    val Empty = FooUiModel(0)
+                }
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings.shouldBeEmpty()
+        }
+
+        @Test
+        fun `does not report a UiState member annotated ModelBuiltInComposition`() {
+            // ----- Arrange -----
+            val code = """
+            class FooUiState(val n: Int) {
+                @ModelBuiltInComposition(reason = "derived locally")
+                fun masthead(): FooUiModel = FooUiModel(n)
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings.shouldBeEmpty()
+        }
+
+        @Test
+        fun `does not report a UiState reducer that copies a model`() {
+            // ----- Arrange -----
+            val code = """
+            data class FooUiState(val model: FooUiModel) {
+                fun withN(n: Int): FooUiState = copy(model = model.copy(n = n))
+            }
+            """.trimIndent()
+
+            // ----- Act -----
+            val findings = lintWithTypes(code)
+
+            // ----- Assert -----
+            findings.shouldBeEmpty()
+        }
+
         @Test
         fun `does not report a library call returning a UI model from a map`() {
             // ----- Arrange -----
@@ -398,8 +718,8 @@ class UiModelBuiltInRenderTest {
     companion object {
         private lateinit var wrapper: KotlinCoreEnvironmentWrapper
 
-        private val HEADER = """
-            package nl.rhaydus.sample
+        private fun header(packageName: String) = """
+            package $packageName
 
             annotation class Composable
             annotation class Preview
@@ -415,6 +735,8 @@ class UiModelBuiltInRenderTest {
             fun Int.toFooUiModel() = FooUiModel(this)
 
         """.trimIndent() + "\n"
+
+        private val HEADER = header("nl.rhaydus.sample")
 
         @BeforeAll
         @JvmStatic

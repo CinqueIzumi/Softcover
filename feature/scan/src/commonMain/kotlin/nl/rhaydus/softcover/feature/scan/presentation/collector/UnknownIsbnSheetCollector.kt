@@ -20,14 +20,20 @@ internal class UnknownIsbnSheetCollector : ScanCollector {
             .distinctUntilChanged()
             .collectLatest { (isAdding, closeRequested) ->
                 scope.setState {
-                    // Keep the footer as it was while the sheet hides, instead of flashing back to idle.
-                    val sheet = if (closeRequested) {
-                        it.unknownIsbnSheet.copy(closeRequested = true)
-                    } else {
-                        unknownIsbnSheetScaffoldFor(isAdding = isAdding)
-                    }
+                    val current = it.unknownIsbnSheet
 
-                    it.copy(unknownIsbnSheet = sheet)
+                    if (current == null) {
+                        it
+                    } else {
+                        // Keep the footer as it was while the sheet hides, instead of flashing back to idle.
+                        val scaffold = if (closeRequested) {
+                            current.scaffold.copy(closeRequested = true)
+                        } else {
+                            unknownIsbnSheetScaffoldFor(isAdding = isAdding)
+                        }
+
+                        it.copy(unknownIsbnSheet = current.copy(scaffold = scaffold))
+                    }
                 }
             }
     }

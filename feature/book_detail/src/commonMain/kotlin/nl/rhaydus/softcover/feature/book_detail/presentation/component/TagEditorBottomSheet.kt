@@ -6,25 +6,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
-import nl.rhaydus.softcover.core.component.chip.ChipSet
-import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
-import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
-import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
-import nl.rhaydus.softcover.core.domain.model.TagCategory
-import nl.rhaydus.softcover.core.domain.model.UserTag
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagEditorChipGroup
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.TagEditorSheetEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.TagEditorSheetUiModel
 
 /**
  * The canonical surface for managing the user's own tags on a book (§3.5 modal sheet). The user picks
  * a category and names a tag — there is no search step, as the upsert reuses an existing tag of that
  * name or mints a new one server-side. Tags already on the book render below, grouped by category like
  * a contents page, each removable and with a per-tag spoiler flag. Every change is committed immediately
- * by the caller — the sheet is a dumb renderer that reports intents through its callbacks.
+ * by the caller.
  *
  * Only the top action and header are pinned; the add block and the collection share **one** scroll
  * region below them. That is what lets the suggestion cloud reveal the user's entire vocabulary for
@@ -35,65 +29,56 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagEditor
  */
 @Composable
 internal fun TagEditorBottomSheet(
-    model: SheetScaffoldUiModel,
-    userTagEditorGroups: List<UserTagEditorChipGroup>,
-    emptyState: EmptyStateUiModel,
-    newlyAddedTagKey: String?,
-    categoryChips: List<ChipUiModel>,
-    suggestions: ChipSet<UserTag>,
-    selectedCategory: TagCategory,
-    namingField: TextFieldUiModel,
-    onCategorySelected: (TagCategory) -> Unit,
-    onDraftChange: (String) -> Unit,
-    onAddTag: (String, TagCategory) -> Unit,
-    onSuggestionSelected: (UserTag) -> Unit,
-    onTagChipEvent: (ChipEvent) -> Unit,
-    onDismissRequest: () -> Unit,
+    model: TagEditorSheetUiModel,
+    onEvent: (TagEditorSheetEvent) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val commitDraft = {
-        onAddTag(
-            namingField.text,
-            selectedCategory,
-        )
-    }
-
     val onNamingFieldEvent: (TextFieldEvent) -> Unit = { event ->
         when (event) {
-            is TextFieldEvent.ValueChanged -> onDraftChange(event.text)
+            is TextFieldEvent.ValueChanged -> onEvent(TagEditorSheetEvent.DraftChanged(text = event.text))
 
             is TextFieldEvent.Submitted,
-            is TextFieldEvent.TrailingClicked -> commitDraft()
+            is TextFieldEvent.TrailingClicked -> onEvent(TagEditorSheetEvent.DraftSubmitted)
         }
     }
 
     val onCategoryChipEvent: (ChipEvent) -> Unit = { event ->
-        if (event is ChipEvent.Clicked) onCategorySelected(TagCategory.fromName(event.key))
+        if (event is ChipEvent.Clicked) onEvent(TagEditorSheetEvent.CategorySelected(categoryKey = event.key))
     }
 
     val onSuggestionChipEvent: (ChipEvent) -> Unit = { event ->
-        if (event is ChipEvent.Clicked) {
-            suggestions[event.key]?.let(onSuggestionSelected)
+        if (event is ChipEvent.Clicked) onEvent(TagEditorSheetEvent.SuggestionSelected(chipKey = event.key))
+    }
+
+    val onTagChipEvent: (ChipEvent) -> Unit = { event ->
+        when (event) {
+            is ChipEvent.Dismissed -> onEvent(TagEditorSheetEvent.TagRemoved(chipKey = event.key))
+
+            is ChipEvent.SpoilerToggled -> onEvent(TagEditorSheetEvent.TagSpoilerToggled(chipKey = event.key))
+
+            is ChipEvent.Clicked -> Unit
         }
     }
 
     SheetScaffold(
-        model = model,
+        model = model.scaffold,
         onEvent = { event ->
             when (event) {
-                SheetScaffoldEvent.Dismissed -> onDismissRequest()
+                SheetScaffoldEvent.Dismissed -> onEvent(TagEditorSheetEvent.Dismissed)
 
                 SheetScaffoldEvent.PrimaryClicked,
                 SheetScaffoldEvent.SecondaryClicked,
                 SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
+        modifier = modifier,
     ) {
         Column {
             TagEditorAddBlock(
-                selectedCategory = selectedCategory,
-                categoryChips = categoryChips,
-                namingField = namingField,
-                suggestionChips = suggestions.chips,
+                selectedCategoryKey = model.selectedCategoryKey,
+                categoryChips = model.categoryChips,
+                namingField = model.namingField,
+                suggestionChips = model.suggestionChips,
                 onCategoryChipEvent = onCategoryChipEvent,
                 onNamingFieldEvent = onNamingFieldEvent,
                 onSuggestionChipEvent = onSuggestionChipEvent,
@@ -101,9 +86,9 @@ internal fun TagEditorBottomSheet(
             )
 
             TagEditorCollection(
-                groups = userTagEditorGroups,
-                emptyState = emptyState,
-                newlyAddedTagKey = newlyAddedTagKey,
+                groups = model.groups,
+                emptyState = model.emptyState,
+                newlyAddedTagKey = model.newlyAddedTagKey,
                 onEvent = onTagChipEvent,
                 modifier = Modifier
                     .fillMaxWidth()

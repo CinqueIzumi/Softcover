@@ -36,13 +36,9 @@ internal fun DiscoverySections(
     }
 
     BecauseYouReadSection(
-        genre = state.becauseYouReadGenre,
         header = state.becauseYouReadHeader,
-        genreOptions = state.becauseYouReadGenreOptions,
-        genreSheet = state.becauseYouReadGenreSheet,
-        genreGroup = state.becauseYouReadGenreGroup,
+        genreControl = state.becauseYouReadGenreControl,
         set = state.becauseYouRead,
-        isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
         onBookClick = onBookClick,
         runAction = runAction,
     ) { onCardEvent ->

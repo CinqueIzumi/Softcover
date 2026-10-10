@@ -34,6 +34,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.Book
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.bookDetailItems
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.topBarFor
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -148,6 +149,7 @@ private fun BookDetailScreenReadingPreview() {
             BookDetailScreenLayout(
                 state = BookDetailUiState(
                     book = book,
+                    topBar = topBarFor(book = book),
                     loadingBookDetails = true,
                 ),
                 runAction = {},
@@ -177,6 +179,7 @@ private fun BookDetailScreenNonePreview() {
             BookDetailScreenLayout(
                 state = BookDetailUiState(
                     book = book,
+                    topBar = topBarFor(book = book),
                     loadingBookDetails = false,
                 ),
                 runAction = {},
@@ -206,6 +209,7 @@ private fun BookDetailScreenDnfPreview() {
             BookDetailScreenLayout(
                 state = BookDetailUiState(
                     book = book,
+                    topBar = topBarFor(book = book),
                     loadingBookDetails = false,
                 ),
                 runAction = {},
@@ -235,6 +239,7 @@ private fun BookDetailScreenWantToReadPreview() {
             BookDetailScreenLayout(
                 state = BookDetailUiState(
                     book = book,
+                    topBar = topBarFor(book = book),
                     loadingBookDetails = false,
                 ),
                 runAction = {},
@@ -264,6 +269,7 @@ private fun BookDetailScreenReadPreview() {
             BookDetailScreenLayout(
                 state = BookDetailUiState(
                     book = book,
+                    topBar = topBarFor(book = book),
                     loadingBookDetails = false,
                 ),
                 runAction = {},

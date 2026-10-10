@@ -400,11 +400,11 @@ class TagChipModelsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(userTags = userTags)
 
                 // ----- Assert -----
-                stateFlow.value.userTagEditorGroups.map { it.category } shouldBe listOf(
-                    TagCategory.GENRE,
-                    TagCategory.MOOD,
-                    TagCategory.CONTENT_WARNING,
-                    TagCategory.OTHER,
+                stateFlow.value.userTagEditorGroups.map { it.label } shouldBe listOf(
+                    TagCategory.GENRE.label,
+                    TagCategory.MOOD.label,
+                    TagCategory.CONTENT_WARNING.label,
+                    TagCategory.OTHER.label,
                 )
                 job.cancel()
             }
@@ -431,7 +431,7 @@ class TagChipModelsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(userTags = userTags)
 
                 // ----- Assert -----
-                stateFlow.value.userTagEditorGroups.map { it.category } shouldBe listOf(TagCategory.GENRE)
+                stateFlow.value.userTagEditorGroups.map { it.label } shouldBe listOf(TagCategory.GENRE.label)
                 job.cancel()
             }
 

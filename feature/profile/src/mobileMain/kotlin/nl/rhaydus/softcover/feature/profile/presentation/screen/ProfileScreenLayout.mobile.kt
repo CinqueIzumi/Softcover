@@ -24,17 +24,13 @@ import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
-import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnShareSheetOpenAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicChartUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderChartUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AccountFootSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileIdentity
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileReadingLife
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileShareButton
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileSheets
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingLifePreview
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,7 +41,6 @@ internal actual fun ProfileScreenLayout(
     onNavigateUp: () -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
 ) {
-    var showShareSheet by remember { mutableStateOf(false) }
     var showLogOutConfirm by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -59,8 +54,8 @@ internal actual fun ProfileScreenLayout(
                 },
                 actions = {
                     ProfileShareButton(
-                        onClick = { showShareSheet = true },
-                        enabled = state.readingLifeShareCard != null,
+                        onClick = { runAction(OnShareSheetOpenAction()) },
+                        enabled = state.shareSheet != null,
                     )
                 },
             )
@@ -85,7 +80,7 @@ internal actual fun ProfileScreenLayout(
             ProfileReadingLife(
                 state = state,
                 runAction = runAction,
-                onShareClick = { showShareSheet = true },
+                onShareClick = { runAction(OnShareSheetOpenAction()) },
                 onBookCardEvent = onBookCardEvent,
             )
 
@@ -101,9 +96,7 @@ internal actual fun ProfileScreenLayout(
 
     ProfileSheets(
         state = state,
-        showShareSheet = showShareSheet,
         showLogOutConfirm = showLogOutConfirm,
-        onShareDismiss = { showShareSheet = false },
         onLogOutDismiss = { showLogOutConfirm = false },
         runAction = runAction,
     )
@@ -134,25 +127,3 @@ private fun ProfileScreenDarkPreview() {
         )
     }
 }
-
-private val PreviewReadingLife = profileReadingLifePreview()
-
-private val ProfileScreenPreviewState = ProfileUiState(
-    isLoading = false,
-    userProfileData = UserProfileData(
-        profileImageUrl = "",
-        name = "Elena Marchetti",
-        username = "elenam",
-        bio = "Mostly literary fiction, the occasional doorstop fantasy.",
-        booksRead = 214,
-        totalPagesRead = 128_406,
-        averageRating = 4.2,
-        readingStreak = 31,
-    ),
-    readingLife = PreviewReadingLife,
-    authorDemographics = PreviewReadingLife.authorDemographics,
-    genreRanking = genreRankingUiModel(PreviewReadingLife.genres),
-    genderChart = genderChartUiModel(PreviewReadingLife.authorDemographics.genderSlices),
-    bipocChart = demographicChartUiModel(PreviewReadingLife.authorDemographics.bipocBreakdown),
-    lgbtqChart = demographicChartUiModel(PreviewReadingLife.authorDemographics.lgbtqBreakdown),
-)

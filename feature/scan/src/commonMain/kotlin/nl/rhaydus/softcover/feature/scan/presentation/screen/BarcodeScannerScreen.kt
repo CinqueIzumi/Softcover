@@ -81,9 +81,12 @@ class BarcodeScannerScreen : Screen {
                     )
                 }
 
-                is ScanEvent.InvalidIsbnEvent -> SnackBarManager.showSnackbar(title = "That doesn't look like a valid ISBN.")
-                is ScanEvent.ResolutionFailedEvent -> SnackBarManager.showSnackbar(title = "Couldn't look that up — try again.")
-                is ScanEvent.AddBookFailedEvent -> SnackBarManager.showSnackbar(title = "Couldn't add it — try again.")
+                is ScanEvent.InvalidIsbnEvent ->
+                    SnackBarManager.showSnackbar(title = "That doesn't look like a valid ISBN.")
+                is ScanEvent.ResolutionFailedEvent ->
+                    SnackBarManager.showSnackbar(title = "Couldn't look that up — try again.")
+                is ScanEvent.AddBookFailedEvent ->
+                    SnackBarManager.showSnackbar(title = "Couldn't add it — try again.")
             }
         }
 
@@ -104,10 +107,9 @@ class BarcodeScannerScreen : Screen {
             onNavigateBack = navigator::pop,
         )
 
-        state.unknownIsbn?.let { unknownIsbn ->
+        state.unknownIsbnSheet?.let { unknownIsbnSheet ->
             UnknownIsbnSheet(
-                isbn = unknownIsbn,
-                model = state.unknownIsbnSheet,
+                model = unknownIsbnSheet,
                 onConfirm = { screenModel.runAction(OnAddUnknownIsbnConfirmedAction()) },
                 onDismiss = { screenModel.runAction(OnAddUnknownIsbnDismissedAction()) },
             )

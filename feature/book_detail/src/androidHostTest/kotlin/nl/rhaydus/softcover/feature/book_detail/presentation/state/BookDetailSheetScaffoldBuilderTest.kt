@@ -273,9 +273,9 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            book.scaffold.header.section.descriptionText().shouldNotBeNull() shouldContain "Dune"
-            update.scaffold.header.section.descriptionText().shouldNotBeNull() shouldContain "Dune"
-            book.scaffold.header.section.descriptionText() shouldNotBe update.scaffold.header.section.descriptionText()
+            book.sheet.scaffold.header.section.descriptionText().shouldNotBeNull() shouldContain "Dune"
+            update.sheet.scaffold.header.section.descriptionText().shouldNotBeNull() shouldContain "Dune"
+            book.sheet.scaffold.header.section.descriptionText() shouldNotBe update.sheet.scaffold.header.section.descriptionText()
         }
 
         @Test

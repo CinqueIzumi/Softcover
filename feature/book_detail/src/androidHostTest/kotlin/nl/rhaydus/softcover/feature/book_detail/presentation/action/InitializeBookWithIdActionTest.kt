@@ -71,6 +71,9 @@ class InitializeBookWithIdActionTest {
         every {
             this@mockk.editions
         } returns editions
+        every {
+            this@mockk.title
+        } returns "Piranesi"
     }
 
     @Nested
@@ -100,6 +103,7 @@ class InitializeBookWithIdActionTest {
 
             // ----- Assert -----
             stateFlow.value.book shouldBe expectedBook
+            stateFlow.value.topBar.title shouldBe "Piranesi"
             stateFlow.value.loadingBookDetails shouldBe false
             stateFlow.value.editions shouldBe expectedEditions
             localVariablesFlow.value.editionsLoadedForBookId shouldBe bookId

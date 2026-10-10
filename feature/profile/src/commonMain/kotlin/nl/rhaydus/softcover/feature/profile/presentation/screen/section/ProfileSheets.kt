@@ -10,19 +10,16 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 @Composable
 internal fun ProfileSheets(
     state: ProfileUiState,
-    showShareSheet: Boolean,
     showLogOutConfirm: Boolean,
-    onShareDismiss: () -> Unit,
     onLogOutDismiss: () -> Unit,
     runAction: (ProfileAction) -> Unit,
 ) {
-    val shareContent = state.readingLifeShareCard
+    val shareSheet = state.shareSheet
 
-    if (showShareSheet && shareContent != null) {
+    if (state.isShareSheetVisible && shareSheet != null) {
         ProfileShareBottomSheet(
-            model = shareContent,
-            scaffold = state.shareSheetScaffold,
-            onDismissRequest = onShareDismiss,
+            model = shareSheet,
+            runAction = runAction,
         )
     }
 

@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.core.uibinding.verdict.carryingDraftOf
 import nl.rhaydus.softcover.core.uibinding.verdict.toVerdictSheetUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -15,6 +16,8 @@ import nl.rhaydus.toad.ActionScope
 /**
  * Maps the book the verdict prompt is open for, with its review, and its verdict cover to the sheet's UI
  * model off the composition (R9), where the two converge.
+ *
+ * A rebuild keeps the draft the reader has already edited.
  *
  * Deriving it here means `verdictSheet` is null exactly when `verdictPromptBook` is, without the
  * actions that clear the prompt having to remember the model too. Reading only ever raises the prompt
@@ -38,11 +41,13 @@ internal class VerdictSheetCollector : ReadingCollector {
 
                 scope.setState {
                     it.copy(
-                        verdictSheet = book?.toVerdictSheetUiModel(
-                            context = VerdictSheetContext.FINISHED,
-                            review = book.userBook?.reviewDocument?.toRichTextUiModel(),
-                            cover = snapshot.cover,
-                        ),
+                        verdictSheet = book
+                            ?.toVerdictSheetUiModel(
+                                context = VerdictSheetContext.FINISHED,
+                                review = book.userBook?.reviewDocument?.toRichTextUiModel(),
+                                cover = snapshot.cover,
+                            )
+                            ?.carryingDraftOf(previous = it.verdictSheet),
                     )
                 }
             }

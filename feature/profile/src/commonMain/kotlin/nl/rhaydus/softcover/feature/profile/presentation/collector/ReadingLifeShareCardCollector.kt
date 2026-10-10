@@ -8,12 +8,9 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.toReadingLifeSha
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.state.profileShareSheetFor
 import nl.rhaydus.toad.ActionScope
 
-/**
- * The sole writer of [ProfileUiState.readingLifeShareCard]: it maps the held reading life and profile
- * together, so the card is null until both have arrived and follows whichever emits next.
- */
 internal class ReadingLifeShareCardCollector : ProfileCollector {
     override suspend fun onLaunch(
         scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>,
@@ -29,7 +26,17 @@ internal class ReadingLifeShareCardCollector : ProfileCollector {
                     null
                 }
 
-                scope.setState { it.copy(readingLifeShareCard = card) }
+                scope.setState {
+                    it.copy(
+                        shareSheet = card?.let { shareCard ->
+                            profileShareSheetFor(
+                                card = shareCard,
+                                progress = it.shareCapture.progress,
+                                closeRequested = it.shareCapture.closeRequested,
+                            )
+                        },
+                    )
+                }
             }
     }
 }

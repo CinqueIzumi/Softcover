@@ -1,17 +1,22 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
+import nl.rhaydus.softcover.feature.book_detail.presentation.editionSheetWithQuery
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -88,7 +93,7 @@ class EditionSheetCollectorTest {
                 launchCollector()
 
                 // ----- Assert -----
-                stateFlow.value.editionSheet shouldBe editionSheetScaffoldFor(
+                stateFlow.value.editionSheet.shouldNotBeNull().scaffold shouldBe editionSheetScaffoldFor(
                     bookTitle = "Dune",
                     currentEdition = current,
                     selectedEdition = current,
@@ -113,7 +118,7 @@ class EditionSheetCollectorTest {
             stateFlow.value = stateFlow.value.copy(selectedEditionId = other.id)
 
             // ----- Assert -----
-            stateFlow.value.editionSheet shouldBe editionSheetScaffoldFor(
+            stateFlow.value.editionSheet.shouldNotBeNull().scaffold shouldBe editionSheetScaffoldFor(
                 bookTitle = "Dune",
                 currentEdition = current,
                 selectedEdition = other,
@@ -139,7 +144,7 @@ class EditionSheetCollectorTest {
             stateFlow.value = stateFlow.value.copy(loadingEditions = true)
 
             // ----- Assert -----
-            stateFlow.value.editionSheet shouldBe editionSheetScaffoldFor(
+            stateFlow.value.editionSheet.shouldNotBeNull().scaffold shouldBe editionSheetScaffoldFor(
                 bookTitle = "Dune",
                 currentEdition = current,
                 selectedEdition = other,
@@ -162,6 +167,69 @@ class EditionSheetCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.editionSheet.shouldBeNull()
+        }
+
+        @Test
+        fun `carries the cards, count header and search query from state into editionSheet`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val current = buildEdition(id = 1)
+                val cards = persistentListOf(mockk<BookCardUiModel>())
+                val countHeader = SectionHeaderUiModel.Label(eyebrow = "1 EDITIONS")
+                stateFlow.value = BookDetailUiState(
+                    book = offShelfBook("Dune"),
+                    previewEdition = current,
+                    editions = listOf(current),
+                    editionCards = cards,
+                    editionCountHeader = countHeader,
+                    editionSheet = editionSheetWithQuery(query = "penguin"),
+                )
+
+                // ----- Act -----
+                launchCollector()
+
+                // ----- Assert -----
+                val sheet = stateFlow.value.editionSheet.shouldNotBeNull()
+                sheet.cards shouldBe cards
+                sheet.countHeader shouldBe countHeader
+                sheet.searchQuery shouldBe "penguin"
+            }
+
+        @Test
+        fun `follows the search query as it changes`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val current = buildEdition(id = 1)
+            stateFlow.value = BookDetailUiState(
+                book = offShelfBook("Dune"),
+                previewEdition = current,
+                editions = listOf(current),
+            )
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(editionSheet = editionSheetWithQuery(query = "978"))
+
+            // ----- Assert -----
+            stateFlow.value.editionSheet.shouldNotBeNull().searchQuery shouldBe "978"
+        }
+
+        @Test
+        fun `shows search and empty-state copy once the sheet is built`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val current = buildEdition(id = 1)
+            stateFlow.value = BookDetailUiState(
+                book = offShelfBook("Dune"),
+                previewEdition = current,
+                editions = listOf(current),
+            )
+
+            // ----- Act -----
+            launchCollector()
+
+            // ----- Assert -----
+            val sheet = stateFlow.value.editionSheet.shouldNotBeNull()
+            sheet.searchPlaceholder.isNotBlank() shouldBe true
+            sheet.emptyMessage.isNotBlank() shouldBe true
         }
     }
 }

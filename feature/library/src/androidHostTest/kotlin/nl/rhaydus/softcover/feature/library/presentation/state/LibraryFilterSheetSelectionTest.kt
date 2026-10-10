@@ -334,5 +334,254 @@ class LibraryFilterSheetSelectionTest {
             // ----- Assert -----
             selection.clearAllEnabled shouldBe false
         }
+
+        @Test
+        fun `isEmpty is true when no facet has chips`() {
+            // ----- Arrange -----
+            val chips = LibraryFilterChips()
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = chips,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            selection.isEmpty shouldBe true
+        }
+
+        @Test
+        fun `showOwnershipFormat is true and isEmpty false when only the ownership facet has chips`() {
+            // ----- Arrange -----
+            val chips = LibraryFilterChips(
+                ownershipChips = listOf(
+                    ChipUiModel(
+                        key = "k",
+                        label = "Label",
+                    ) to LibraryFilterValue.Owned(owned = true),
+                ).toChipSet(),
+            )
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = chips,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            selection.showOwnershipFormat shouldBe true
+            selection.isEmpty shouldBe false
+        }
+
+        @Test
+        fun `showOwnershipFormat is true and isEmpty false when only the format facet has chips`() {
+            // ----- Arrange -----
+            val chips = LibraryFilterChips(
+                formatChips = listOf(
+                    ChipUiModel(
+                        key = "k",
+                        label = "Label",
+                    ) to LibraryFilterValue.Format(value = "Hardcover"),
+                ).toChipSet(),
+            )
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = chips,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            selection.showOwnershipFormat shouldBe true
+            selection.isEmpty shouldBe false
+        }
+
+        @Test
+        fun `showReleaseYear is true and isEmpty false when only the releaseYear facet has chips`() {
+            // ----- Arrange -----
+            val chips = LibraryFilterChips(
+                releaseYearChips = listOf(
+                    ChipUiModel(
+                        key = "k",
+                        label = "Label",
+                    ) to LibraryFilterValue.ReleaseYear(year = 2020),
+                ).toChipSet(),
+            )
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = chips,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            selection.showReleaseYear shouldBe true
+            selection.isEmpty shouldBe false
+        }
+
+        @Test
+        fun `showReadYear is true and isEmpty false when only the readYear facet has chips`() {
+            // ----- Arrange -----
+            val chips = LibraryFilterChips(
+                readYearChips = listOf(
+                    ChipUiModel(
+                        key = "k",
+                        label = "Label",
+                    ) to LibraryFilterValue.ReadYear(year = 2021),
+                ).toChipSet(),
+            )
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = chips,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            selection.showReadYear shouldBe true
+            selection.isEmpty shouldBe false
+        }
+
+        @Test
+        fun `showTags is true and isEmpty false when only the tag facet has chips`() {
+            // ----- Arrange -----
+            val chips = LibraryFilterChips(
+                tagChips = listOf(
+                    ChipUiModel(
+                        key = "k",
+                        label = "Label",
+                    ) to LibraryFilterValue.Tag(tag = tagFiction),
+                ).toChipSet(),
+            )
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = chips,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            selection.showTags shouldBe true
+            selection.isEmpty shouldBe false
+        }
+
+        @Test
+        fun `showRating is true and isEmpty false when only the rating facet has chips`() {
+            // ----- Arrange -----
+            val chips = LibraryFilterChips(
+                ratingChips = listOf(
+                    ChipUiModel(
+                        key = "k",
+                        label = "Label",
+                    ) to LibraryFilterValue.RatingMin(threshold = 4.0),
+                ).toChipSet(),
+            )
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = chips,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            selection.showRating shouldBe true
+            selection.isEmpty shouldBe false
+        }
+
+        @Test
+        fun `every show flag is false when no facet has chips`() {
+            // ----- Arrange -----
+            val chips = LibraryFilterChips()
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = chips,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            listOf(
+                selection.showOwnershipFormat,
+                selection.showReleaseYear,
+                selection.showReadYear,
+                selection.showTags,
+                selection.showRating,
+            ) shouldBe List(5) { false }
+        }
+
+        @Test
+        fun `only the facets with chips show when others are empty`() {
+            // ----- Arrange -----
+            val chips = LibraryFilterChips(
+                ratingChips = listOf(
+                    ChipUiModel(
+                        key = "k",
+                        label = "Label",
+                    ) to LibraryFilterValue.RatingMin(threshold = 4.0),
+                ).toChipSet(),
+            )
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = chips,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            listOf(
+                selection.showOwnershipFormat,
+                selection.showReleaseYear,
+                selection.showReadYear,
+                selection.showTags,
+                selection.showRating,
+            ) shouldBe listOf(false, false, false, false, true)
+        }
+
+        @Test
+        fun `showTags stays true and isEmpty false when the tag search narrows the chips to none`() {
+            // ----- Arrange -----
+            val chips = LibraryFilterChips(
+                tagChips = listOf(
+                    ChipUiModel(
+                        key = "k",
+                        label = "Label",
+                    ) to LibraryFilterValue.Tag(tag = tagFiction),
+                ).toChipSet(),
+            )
+            val draft = LibraryFilterDraft(
+                tabId = LibraryTab.All.id,
+                tagSearch = "zzz",
+            )
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = chips,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            selection.tagChips shouldBe emptyList()
+            selection.showTags shouldBe true
+            selection.isEmpty shouldBe false
+        }
     }
 }

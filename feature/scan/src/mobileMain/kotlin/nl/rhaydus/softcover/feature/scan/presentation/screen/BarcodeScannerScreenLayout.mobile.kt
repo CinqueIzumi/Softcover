@@ -64,7 +64,7 @@ internal actual fun BarcodeScannerScreenLayout(
                 )
 
                 cameraGranted -> ScannerContent(
-                    cameraPaused = state.isResolving || state.unknownIsbn != null,
+                    cameraPaused = state.isResolving || state.unknownIsbnSheet != null,
                     onIsbnSubmit = onIsbnSubmit,
                     onEnterManually = onEnterManually,
                 )

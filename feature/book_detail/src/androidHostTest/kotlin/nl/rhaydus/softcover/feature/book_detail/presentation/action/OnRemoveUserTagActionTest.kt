@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -94,7 +95,13 @@ class OnRemoveUserTagActionTest {
                 )
             } returns Result.success(serverResponse)
 
-            val action = OnRemoveUserTagAction(tag = tagToRemove)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = mapOf("chip" to tagToRemove),
+
+            )
+
+            val action = OnRemoveUserTagAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -131,7 +138,13 @@ class OnRemoveUserTagActionTest {
                 )
             } returns Result.success(serverResponse)
 
-            val action = OnRemoveUserTagAction(tag = genreTag)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = mapOf("chip" to genreTag),
+
+            )
+
+            val action = OnRemoveUserTagAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -168,7 +181,13 @@ class OnRemoveUserTagActionTest {
                 )
             } returns Result.failure(RuntimeException("server error"))
 
-            val action = OnRemoveUserTagAction(tag = tagToRemove)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = mapOf("chip" to tagToRemove),
+
+            )
+
+            val action = OnRemoveUserTagAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -193,7 +212,10 @@ class OnRemoveUserTagActionTest {
                 userTags = listOf(tag),
             )
             val initialTags = stateFlow.value.userTags
-            val action = OnRemoveUserTagAction(tag = tag)
+            stateFlow.value = stateFlow.value.copy(
+                userTagByEditorChipKey = mapOf("chip" to tag),
+            )
+            val action = OnRemoveUserTagAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -203,6 +225,37 @@ class OnRemoveUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe initialTags
+        }
+
+        @Test
+        fun `does nothing when the chip key matches no user tag`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            val tag = UserTag(
+                name = "fantasy",
+                category = TagCategory.GENRE,
+            )
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(id = 1),
+                userTags = listOf(tag),
+                userTagByEditorChipKey = mapOf("chip" to tag),
+            )
+            val action = OnRemoveUserTagAction(chipKey = "unknown")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.userTags shouldBe listOf(tag)
+            coVerify(exactly = 0) {
+                saveUserTagsUseCase(
+                    any(),
+                    any(),
+                )
+            }
         }
     }
 }

@@ -7,7 +7,8 @@ import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.ShareCaptureState
+import nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
@@ -33,7 +34,11 @@ import nl.rhaydus.toad.UiState
 internal data class ProfileUiState(
     val userProfileData: UserProfileData? = null,
     val readingLife: ReadingLife? = null,
-    val readingLifeShareCard: ReadingLifeShareCardUiModel? = null,
+
+    /** `null` until the reading life and profile have both loaded. */
+    val shareSheet: ShareCardSheetUiModel? = null,
+    val isShareSheetVisible: Boolean = false,
+    val shareCapture: ShareCaptureState = ShareCaptureState(),
     val recentlyLoved: BookCardSet<LovedBook> = BookCardSet.standIns(RECENTLY_LOVED_STAND_IN_CARDS),
     val hideUntaggedAuthors: Boolean = false,
 
@@ -94,7 +99,6 @@ internal data class ProfileUiState(
     ),
     val ratingsHistogramHeader: SectionHeaderUiModel = RatingBand.NEW_READER.toRatingsHistogramHeader(),
     val ratingsHistogramCaption: String = RatingBand.NEW_READER.toRatingsHistogramCaption(),
-    val shareSheetScaffold: SheetScaffoldUiModel = profileShareSheetScaffold(),
     val logOutSheetScaffold: SheetScaffoldUiModel = logOutSheetScaffold(),
 
     /** Both bars carry no title — the page's own masthead names it. */

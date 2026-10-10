@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.control.SegmentedControl
 import nl.rhaydus.softcover.core.component.control.SegmentedControlEvent
 import nl.rhaydus.softcover.core.component.share.ShareCardSheetContent
+import nl.rhaydus.softcover.core.component.share.ShareCardSheetEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetUiModel
 
@@ -15,10 +16,14 @@ internal fun ShareBookBottomSheet(
     onEvent: (ShareSheetEvent) -> Unit,
 ) {
     ShareCardSheetContent(
-        card = model.card,
-        scaffold = model.scaffold,
-        displayName = model.displayName,
-        onDismissRequest = { onEvent(ShareSheetEvent.Dismissed) },
+        model = model.sheet,
+        onEvent = { event ->
+            when (event) {
+                ShareCardSheetEvent.Dismissed -> onEvent(ShareSheetEvent.Dismissed)
+
+                else -> onEvent(ShareSheetEvent.CaptureReported(captureEvent = event))
+            }
+        },
         aboveCard = {
             if (model.variantToggle != null) {
                 SegmentedControl(

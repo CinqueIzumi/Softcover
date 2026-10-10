@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.component
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.currentStreakLength
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 

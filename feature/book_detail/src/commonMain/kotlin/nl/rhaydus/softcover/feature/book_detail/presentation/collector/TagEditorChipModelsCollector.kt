@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -43,7 +44,7 @@ internal class TagEditorChipModelsCollector : BookDetailCollector {
                         label = category.label,
                         selected = category == snapshot.selectedCategory,
                     )
-                }
+                }.toImmutableList()
 
                 val suggestionChips = snapshot.suggestions.map { it.toChipUiModel() to it }.toChipSet()
 

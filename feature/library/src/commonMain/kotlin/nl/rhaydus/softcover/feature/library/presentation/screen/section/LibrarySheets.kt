@@ -7,14 +7,19 @@ import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnApplyFiltersAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveFromLibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkToggleListMembershipAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftChipToggledAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftClearAllAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftTagSearchChangedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryArrangeSheet
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetEvent
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 @Composable
@@ -38,11 +43,21 @@ internal fun LibrarySheets(
 
     if (state.isFilterSheetExpanded && currentTabId != null) {
         LibraryFilterSheet(
-            tabId = currentTabId,
-            state = state,
-            runAction = runAction,
-            onDismissRequest = {
-                runAction(OnFilterSheetExpandedChangeAction(expanded = false))
+            model = state.filterSheet,
+            onEvent = { event ->
+                when (event) {
+                    LibraryFilterSheetEvent.ApplyClicked -> runAction(OnApplyFiltersAction())
+
+                    LibraryFilterSheetEvent.ClearAllClicked -> runAction(OnFilterDraftClearAllAction())
+
+                    LibraryFilterSheetEvent.Dismissed -> runAction(OnFilterSheetExpandedChangeAction(expanded = false))
+
+                    is LibraryFilterSheetEvent.ChipToggled -> runAction(OnFilterDraftChipToggledAction(key = event.key))
+
+                    is LibraryFilterSheetEvent.TagSearchChanged -> runAction(
+                        OnFilterDraftTagSearchChangedAction(query = event.query),
+                    )
+                }
             },
         )
     }

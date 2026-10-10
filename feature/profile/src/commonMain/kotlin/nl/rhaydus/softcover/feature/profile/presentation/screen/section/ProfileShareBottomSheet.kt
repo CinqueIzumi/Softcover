@@ -1,23 +1,26 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen.section
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCardSheetContent
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.share.ShareCardSheetEvent
+import nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnShareCaptureEventAction
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnShareSheetDismissAction
+import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 
 @Composable
 internal fun ProfileShareBottomSheet(
-    model: ReadingLifeShareCardUiModel,
-    scaffold: SheetScaffoldUiModel,
-    onDismissRequest: () -> Unit,
+    model: ShareCardSheetUiModel,
+    runAction: (ProfileAction) -> Unit,
 ) {
     ShareCardSheetContent(
-        card = model,
-        scaffold = scaffold,
-        displayName = "${model.readerName}-reading-life",
-        onDismissRequest = onDismissRequest,
-        previewMaxWidth = 240.dp,
-        previewMaxHeight = 420.dp,
+        model = model,
+        onEvent = { event ->
+            when (event) {
+                ShareCardSheetEvent.Dismissed -> runAction(OnShareSheetDismissAction())
+
+                else -> runAction(OnShareCaptureEventAction(captureEvent = event))
+            }
+        },
     )
 }

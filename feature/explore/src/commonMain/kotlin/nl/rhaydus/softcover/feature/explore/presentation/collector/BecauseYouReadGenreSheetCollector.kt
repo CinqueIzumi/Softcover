@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
+import nl.rhaydus.softcover.feature.explore.presentation.model.becauseYouReadGenreLabelFor
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -19,9 +20,13 @@ internal class BecauseYouReadGenreSheetCollector : ExploreCollector {
         dependencies: ExploreDependencies,
     ) {
         scope.state
-            .map { it.becauseYouReadGenre to it.becauseYouReadGenreOptions }
+            .map { Triple(
+                    it.becauseYouReadGenre,
+                    it.becauseYouReadGenreOptions,
+                    it.loadingBecauseYouReadBooks && it.becauseYouReadBooks.isEmpty(),
+                ) }
             .distinctUntilChanged()
-            .collectLatest { (genre, options) ->
+            .collectLatest { (genre, options, isLoading) ->
                 val rows = becauseYouReadGenreRowsFor(
                     genre = genre,
                     options = options,
@@ -29,8 +34,14 @@ internal class BecauseYouReadGenreSheetCollector : ExploreCollector {
 
                 scope.setState {
                     it.copy(
-                        becauseYouReadGenreGroup = SheetRowGroupUiModel(
-                            rows = rows,
+                        becauseYouReadGenreControl = it.becauseYouReadGenreControl.copy(
+                            label = becauseYouReadGenreLabelFor(genre),
+                            visible = genre != null,
+                            isLoading = isLoading,
+                            hasOptions = options.isNotEmpty(),
+                            genreGroup = SheetRowGroupUiModel(
+                                rows = rows,
+                            ),
                         ),
                     )
                 }

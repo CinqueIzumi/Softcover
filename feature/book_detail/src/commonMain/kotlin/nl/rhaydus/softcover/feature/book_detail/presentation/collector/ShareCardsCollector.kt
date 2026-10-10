@@ -72,6 +72,8 @@ internal class ShareCardsCollector : BookDetailCollector {
                             bookTitle = book.title,
                             variant = variant,
                             hasUpdateCard = updateCard != null,
+                            progress = it.shareCapture.progress,
+                            closeRequested = it.shareCapture.closeRequested,
                         ),
                     )
                 }

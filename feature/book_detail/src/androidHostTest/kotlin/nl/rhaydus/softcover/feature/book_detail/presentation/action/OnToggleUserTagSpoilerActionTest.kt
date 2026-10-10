@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -91,7 +92,13 @@ class OnToggleUserTagSpoilerActionTest {
                 )
             } returns Result.success(listOf(toggled))
 
-            val action = OnToggleUserTagSpoilerAction(tag = tag)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = mapOf("chip" to tag),
+
+            )
+
+            val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -130,7 +137,13 @@ class OnToggleUserTagSpoilerActionTest {
                 )
             } returns Result.success(serverResponse)
 
-            val action = OnToggleUserTagSpoilerAction(tag = targetTag)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = mapOf("chip" to targetTag),
+
+            )
+
+            val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -168,7 +181,13 @@ class OnToggleUserTagSpoilerActionTest {
                 )
             } returns Result.success(serverCanonical)
 
-            val action = OnToggleUserTagSpoilerAction(tag = tag)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = mapOf("chip" to tag),
+
+            )
+
+            val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -202,7 +221,13 @@ class OnToggleUserTagSpoilerActionTest {
                 )
             } returns Result.failure(RuntimeException("network error"))
 
-            val action = OnToggleUserTagSpoilerAction(tag = tag)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = mapOf("chip" to tag),
+
+            )
+
+            val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -228,7 +253,10 @@ class OnToggleUserTagSpoilerActionTest {
                 userTags = listOf(tag),
             )
             val initialTags = stateFlow.value.userTags
-            val action = OnToggleUserTagSpoilerAction(tag = tag)
+            stateFlow.value = stateFlow.value.copy(
+                userTagByEditorChipKey = mapOf("chip" to tag),
+            )
+            val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -238,6 +266,37 @@ class OnToggleUserTagSpoilerActionTest {
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe initialTags
+        }
+
+        @Test
+        fun `does nothing when the chip key matches no user tag`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            val tag = UserTag(
+                name = "fantasy",
+                category = TagCategory.GENRE,
+            )
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(id = 1),
+                userTags = listOf(tag),
+                userTagByEditorChipKey = mapOf("chip" to tag),
+            )
+            val action = OnToggleUserTagSpoilerAction(chipKey = "unknown")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.userTags shouldBe listOf(tag)
+            coVerify(exactly = 0) {
+                saveUserTagsUseCase(
+                    any(),
+                    any(),
+                )
+            }
         }
     }
 }

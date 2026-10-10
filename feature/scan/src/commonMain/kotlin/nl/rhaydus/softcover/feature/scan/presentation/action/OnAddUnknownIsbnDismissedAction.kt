@@ -15,7 +15,7 @@ internal class OnAddUnknownIsbnDismissedAction : ScanAction {
 
         scope.setState {
             it.copy(
-                unknownIsbn = null,
+                unknownIsbnSheet = null,
                 isUnknownIsbnCloseRequested = false,
             )
         }

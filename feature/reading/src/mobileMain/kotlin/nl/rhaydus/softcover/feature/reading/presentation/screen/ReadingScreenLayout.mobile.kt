@@ -17,10 +17,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.datetime.DateTimeUnit
@@ -41,8 +37,10 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowStreakSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakStripFor
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.toPickUpNextCard
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingBooksColumn
@@ -66,8 +64,6 @@ internal actual fun ReadingScreenLayout(
         books = state.books,
         runAction = runAction,
     )
-
-    var showStreakSheet by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -106,7 +102,7 @@ internal actual fun ReadingScreenLayout(
                             ) {
                                 ReadingMasthead(
                                     state = state,
-                                    onExpandStreak = { showStreakSheet = true },
+                                    onExpandStreak = { runAction(OnShowStreakSheetClickAction) },
                                     pullToRefreshState = pullToRefreshState,
                                 )
                             }
@@ -120,8 +116,8 @@ internal actual fun ReadingScreenLayout(
                             trendingHeader = state.trendingHeader,
                             emptyState = state.emptyCurrentlyReading,
                             streakEnabled = state.streakEnabled,
-                            recentReadingActivity = state.recentReadingActivity,
-                            onExpandStreak = { showStreakSheet = true },
+                            streakStrip = state.streakStrip,
+                            onExpandStreak = { runAction(OnShowStreakSheetClickAction) },
                             onBookClick = onBookClick,
                             onNavigateToSearch = onNavigateToSearch,
                         )
@@ -132,8 +128,6 @@ internal actual fun ReadingScreenLayout(
                     state = state,
                     runAction = runAction,
                     controller = controller,
-                    showStreakSheet = showStreakSheet,
-                    onDismissStreakSheet = { showStreakSheet = false },
                 )
             }
         }
@@ -369,7 +363,7 @@ private fun ReadingScreenWithStreakStripPreview() {
             state = ReadingScreenUiState(
                 books = previewBooks,
                 isLoading = false,
-                recentReadingActivity = previewReadingActivity(),
+                streakStrip = streakStripFor(activity = previewReadingActivity()),
             ),
             runAction = {},
             onBookClick = {},

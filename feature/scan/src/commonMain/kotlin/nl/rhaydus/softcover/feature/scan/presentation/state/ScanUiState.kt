@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.scan.presentation.state
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.toad.UiState
 
@@ -11,7 +10,6 @@ private const val SCAN_TITLE = "Scan a barcode"
 
 internal data class ScanUiState(
     val isResolving: Boolean = false,
-    val unknownIsbn: String? = null,
     val isAddingBook: Boolean = false,
 
     /**
@@ -29,7 +27,7 @@ internal data class ScanUiState(
 
     /** Asks the shown unknown-ISBN sheet to hide; cleared by its `Dismissed` event. */
     val isUnknownIsbnCloseRequested: Boolean = false,
-    val unknownIsbnSheet: SheetScaffoldUiModel = unknownIsbnSheetScaffoldFor(isAdding = false),
+    val unknownIsbnSheet: UnknownIsbnSheetUiModel? = null,
     val manualEntryHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "By ISBN",
         headline = "Enter the ISBN.",

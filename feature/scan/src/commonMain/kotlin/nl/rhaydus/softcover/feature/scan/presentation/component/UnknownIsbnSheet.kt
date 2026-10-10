@@ -12,22 +12,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.feature.scan.presentation.state.UnknownIsbnSheetUiModel
 
 @Composable
 internal fun UnknownIsbnSheet(
-    isbn: String,
-    model: SheetScaffoldUiModel,
+    model: UnknownIsbnSheetUiModel,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     SheetScaffold(
-        model = model,
+        model = model.scaffold,
         modifier = modifier,
         onEvent = { event ->
             when (event) {
@@ -52,7 +51,7 @@ internal fun UnknownIsbnSheet(
                     contentAlignment = Alignment.Center,
                 ) {
                     SoftcoverText(
-                        text = isbn,
+                        text = model.isbn,
                         // Wider tracking so the digit string reads as a scannable code, not prose.
                         style = MaterialTheme.editorialTypography.titleLarge.copy(letterSpacing = 2.sp),
                         color = MaterialTheme.colorScheme.onSurface,

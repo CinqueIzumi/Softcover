@@ -14,7 +14,12 @@ internal class ReadingReadinessCollector : ReadingCollector {
     ) {
         scope.state.first { it.isFirstLoadReady() }
 
-        scope.setState { it.copy(isLoading = false) }
+        scope.setState {
+            it.copy(
+                isLoading = false,
+                streakStrip = it.streakStrip.copy(isLoading = false),
+            )
+        }
     }
 }
 

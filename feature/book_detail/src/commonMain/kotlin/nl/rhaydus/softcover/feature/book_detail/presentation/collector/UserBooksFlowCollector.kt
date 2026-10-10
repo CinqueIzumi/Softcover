@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.withBook
 import nl.rhaydus.toad.ActionScope
 
 internal class UserBooksFlowCollector : BookDetailCollector {
@@ -27,7 +28,7 @@ internal class UserBooksFlowCollector : BookDetailCollector {
             scope.setState { state ->
                 val currentBook = state.book ?: return@setState state
 
-                state.copy(book = currentBook.overlay(localBook))
+                state.withBook(book = currentBook.overlay(localBook))
             }
         }
     }

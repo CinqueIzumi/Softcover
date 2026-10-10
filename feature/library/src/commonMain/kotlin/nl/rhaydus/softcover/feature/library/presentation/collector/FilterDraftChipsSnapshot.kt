@@ -14,7 +14,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.libraryPreviewCou
 /**
  * The state slice the Filter sheet's resolved chip models are derived from. [compute] gates on
  * `distinctUntilChanged` upstream in `FilterDraftChipsCollector`, so its output
- * (`filterSheetSelection`) is deliberately absent from this bundle. Carries [libraryPreviewCount]'s
+ * (`filterSheet.selection`) is deliberately absent from this bundle. Carries [libraryPreviewCount]'s
  * wider inputs (search, sort, editions) so [resultCount] never drifts from what committing the draft
  * would actually show.
  */

@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.core.uibinding.verdict
 
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.collections.immutable.toImmutableMap
 import nl.rhaydus.softcover.core.component.chip.ChipFace
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
@@ -8,6 +10,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextMarkType
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.richtext.documentToEditorBuffer
 import nl.rhaydus.softcover.core.component.richtext.isBlank
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
@@ -55,6 +58,8 @@ fun Book.toVerdictSheetUiModel(
         )
     }
 
+    val buffer = documentToEditorBuffer(document = review ?: RichTextUiModel.EMPTY)
+
     return VerdictSheetUiModel(
         scaffold = SheetScaffoldUiModel(
             header = SheetHeaderUiModel(
@@ -78,8 +83,12 @@ fun Book.toVerdictSheetUiModel(
             ),
             layout = SheetLayout.Pinned,
         ),
-        initialRating = userBook?.rating?.takeIf { it > 0.0 },
-        initialReview = review ?: RichTextUiModel.EMPTY,
+        rating = userBook?.rating?.takeIf { it > 0.0 },
+        review = TextFieldValue(
+            text = buffer.text,
+            selection = TextRange(buffer.text.length),
+        ),
+        marks = buffer.marks,
         spoilers = ToggleRowUiModel(
             key = "spoilers",
             title = "Contains spoilers",
@@ -103,5 +112,5 @@ fun Book.toVerdictSheetUiModel(
                 )
             }
             .toImmutableMap(),
-    )
+    ).withToolbarState()
 }

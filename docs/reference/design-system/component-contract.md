@@ -5,9 +5,9 @@
 Every component in `:core:component` is driven by a **UI model**. This contract fixes what a component's
 signature looks like, what its model may hold, and where the domain → UI mapping lives.
 
-It is normative. A component that does not satisfy R1–R12 does not belong in `:core:component`; two of the
-rules are build gates (§ 7.4), and the standing exceptions are in § 7.4a. R10 and R11 are not yet
-satisfied by the whole app; each says what that means for new code. Why the rules exist is in § 7.7, which
+It is normative. A component that does not satisfy R1–R12 does not belong in `:core:component`; three of the
+rules are build gates (§ 7.4), and the standing exceptions are in § 7.4a. R10 is satisfied by the whole
+app; R11 still has holdouts, and it says what that means for new code. Why the rules exist is in § 7.7, which
 is optional reading.
 
 > **Read `share/` before writing a new component.** `ShareCard` is the reference implementation (§ 7.3).
@@ -170,10 +170,11 @@ TopBar(model = state.topBar)
   implementation, bound once in `presentationModule` (`:core:component` itself uses no DI). A collector
   reads it from its `Dependencies` and puts the result on the `UiState`, so the render never builds the
   model and a collector test can substitute the copy.
-- **Gated by `softcover:UiModelBuiltInRender` once the sweep enables it.** Preview fixtures, the gallery and
-  debug screens are excluded by path. A recorded § 7.4a exception carries `@ModelBuiltInComposition(reason)`,
-  never `@Suppress`. Until the gate is on, do not take an existing call site as precedent. A model that depends
-  on a value only composition has (scroll position, window size class, a `CompositionLocal`) is unsettled.
+- **Gated by `softcover:UiModelBuiltInRender`.** Preview fixtures, the gallery and debug screens are excluded
+  by path. A `*UiState` member may look up models the collectors stored but never builds one; a constructor,
+  `.copy` or model-returning call in a member or getter that returns a model is reported. A reducer that
+  returns the `UiState` itself (`withName`) is not. A recorded § 7.4a exception carries
+  `@ModelBuiltInComposition(reason)`, never `@Suppress`. A model that depends on a value only composition has (scroll position, window size class, a `CompositionLocal`) is unsettled.
 
 **R11 — The signature is the model, the event lambda and the modifier. Nothing else.** Anything a call site
 would otherwise pass — a `TextStyle`, a `Color`, `maxLines`, an autosize spec, a particle count, a
@@ -243,6 +244,7 @@ add a "gallery mode" parameter.
 
 ### 7.4 What the build enforces
 
+- **detekt `softcover:UiModelBuiltInRender`** (R10) fails on a UI model built in composition.
 - **`checkModuleGraph`** fails if `:core:component` declares a dependency on anything but
   `:core:designsystem`, or on Koin / Voyager / Apollo coordinates.
 - **detekt `ForbiddenImport`**, scoped to `**/core/component/**`, fails on an import of `org.koin.**`,

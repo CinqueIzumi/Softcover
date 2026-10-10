@@ -10,6 +10,8 @@ import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
+import nl.rhaydus.softcover.feature.scan.presentation.state.UnknownIsbnSheetUiModel
+import nl.rhaydus.softcover.feature.scan.presentation.state.unknownIsbnSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -36,10 +38,13 @@ class OnAddUnknownIsbnDismissedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `clears unknownIsbn and the pending close request so the sheet can open again`() = runTest {
+        fun `clears the unknown isbn sheet and the pending close request so the sheet can open again`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(
-                unknownIsbn = "9780451524935",
+                unknownIsbnSheet = UnknownIsbnSheetUiModel(
+                    isbn = "9780451524935",
+                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
+                ),
                 isUnknownIsbnCloseRequested = true,
             )
             val action = OnAddUnknownIsbnDismissedAction()
@@ -51,7 +56,7 @@ class OnAddUnknownIsbnDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.unknownIsbn.shouldBeNull()
+            stateFlow.value.unknownIsbnSheet.shouldBeNull()
             stateFlow.value.isUnknownIsbnCloseRequested shouldBe false
             eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
@@ -60,7 +65,10 @@ class OnAddUnknownIsbnDismissedActionTest {
         fun `leaves state unchanged and sends no event while a book is being added`() = runTest {
             // ----- Arrange -----
             val addingState = ScanUiState(
-                unknownIsbn = "9780451524935",
+                unknownIsbnSheet = UnknownIsbnSheetUiModel(
+                    isbn = "9780451524935",
+                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
+                ),
                 isAddingBook = true,
             )
             stateFlow.value = addingState

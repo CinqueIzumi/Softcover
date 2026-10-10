@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -8,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.share.ShareCaptureProgress
+import nl.rhaydus.softcover.core.component.share.ShareCaptureState
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
@@ -76,7 +79,7 @@ class ReadingLifeShareCardCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.readingLifeShareCard.shouldBeNull()
+            stateFlow.value.shareSheet.shouldBeNull()
             job.cancel()
         }
 
@@ -95,7 +98,7 @@ class ReadingLifeShareCardCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.readingLifeShareCard.shouldBeNull()
+            stateFlow.value.shareSheet.shouldBeNull()
             job.cancel()
         }
 
@@ -119,7 +122,7 @@ class ReadingLifeShareCardCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.readingLifeShareCard shouldBe readingLife.toReadingLifeShareCardUiModel(profile)
+            stateFlow.value.shareSheet.shouldNotBeNull().card shouldBe readingLife.toReadingLifeShareCardUiModel(profile)
             job.cancel()
         }
 
@@ -141,7 +144,7 @@ class ReadingLifeShareCardCollectorTest {
             stateFlow.value = stateFlow.value.copy(userProfileData = profile)
 
             // ----- Assert -----
-            stateFlow.value.readingLifeShareCard shouldBe readingLife.toReadingLifeShareCardUiModel(profile)
+            stateFlow.value.shareSheet.shouldNotBeNull().card shouldBe readingLife.toReadingLifeShareCardUiModel(profile)
             job.cancel()
         }
 
@@ -164,7 +167,63 @@ class ReadingLifeShareCardCollectorTest {
             stateFlow.value = stateFlow.value.copy(readingLife = null)
 
             // ----- Assert -----
-            stateFlow.value.readingLifeShareCard.shouldBeNull()
+            stateFlow.value.shareSheet.shouldBeNull()
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the capture progress and close request when the profile changes mid-capture`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ProfileUiState(
+                readingLife = buildReadingLife(),
+                userProfileData = buildProfileData(),
+                shareCapture = ShareCaptureState(
+                    progress = ShareCaptureProgress.Sharing,
+                    closeRequested = true,
+                ),
+            )
+            val collector = ReadingLifeShareCardCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = mockk<ProfileDependencies>(relaxed = true),
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(userProfileData = buildProfileData(name = "John Roe"))
+
+            // ----- Assert -----
+            val sheet = stateFlow.value.shareSheet.shouldNotBeNull()
+            sheet.displayName shouldBe "John Roe-reading-life"
+            sheet.scaffold.busy shouldBe true
+            sheet.scaffold.closeRequested shouldBe true
+            stateFlow.value.shareCapture shouldBe ShareCaptureState(
+                ShareCaptureProgress.Sharing,
+                true,
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `names the sheet after the reader`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ProfileUiState(
+                readingLife = buildReadingLife(),
+                userProfileData = buildProfileData(name = "Jane Doe"),
+            )
+            val collector = ReadingLifeShareCardCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = mockk<ProfileDependencies>(relaxed = true),
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet.shouldNotBeNull().displayName shouldBe "Jane Doe-reading-life"
             job.cancel()
         }
     }

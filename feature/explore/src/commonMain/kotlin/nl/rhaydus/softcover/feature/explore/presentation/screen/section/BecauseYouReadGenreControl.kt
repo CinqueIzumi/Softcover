@@ -5,10 +5,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,8 +22,8 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnBecauseYouReadGenreSelectedAction
+import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreControlEvent
+import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreControlUiModel
 
 /**
  * The "because you read {genre}" picker: a compact `"Genre · {genre}"` label with a trailing chevron that
@@ -35,35 +31,31 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnBecauseYouRead
  */
 @Composable
 internal fun BecauseYouReadGenreControl(
-    genre: String,
-    options: List<String>,
-    sheet: SheetScaffoldUiModel,
-    genreGroup: SheetRowGroupUiModel<String?>,
-    runAction: (ExploreAction) -> Unit,
+    model: BecauseYouReadGenreControlUiModel,
+    onEvent: (BecauseYouReadGenreControlEvent) -> Unit,
     modifier: Modifier = Modifier,
-    isLoading: Boolean = false,
 ) {
-    if (isLoading.not() && options.isEmpty()) return
-
-    var sheetVisible by remember { mutableStateOf(false) }
+    if (model.isLoading.not() && model.hasOptions.not()) return
 
     Row(
         modifier = modifier
             .then(
-                if (isLoading) {
+                if (model.isLoading) {
                     Modifier
                 } else {
                     Modifier
                         .pointerHandCursor()
-                        .pressScaleClickable(onClick = { sheetVisible = true })
+                        .pressScaleClickable(
+                            onClick = { onEvent(BecauseYouReadGenreControlEvent.Opened) },
+                        )
                 },
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         SoftcoverText(
-            text = "Genre · $genre".uppercase(),
-            isLoading = isLoading,
-            standIn = "Genre · $genre".uppercase(),
+            text = model.label,
+            isLoading = model.isLoading,
+            standIn = model.label,
             style = MaterialTheme.editorialTypography.eyebrowSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
@@ -84,16 +76,15 @@ internal fun BecauseYouReadGenreControl(
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .size(16.dp)
-                .skeletonMask(visible = isLoading),
+                .skeletonMask(visible = model.isLoading),
         )
     }
 
-    if (sheetVisible) {
+    if (model.sheetVisible) {
         BecauseYouReadGenreSheet(
-            sheet = sheet,
-            genreGroup = genreGroup,
-            runAction = runAction,
-            onDismissRequest = { sheetVisible = false },
+            sheet = model.sheet,
+            genreGroup = model.genreGroup,
+            onEvent = onEvent,
         )
     }
 }
@@ -102,14 +93,13 @@ internal fun BecauseYouReadGenreControl(
 private fun BecauseYouReadGenreSheet(
     sheet: SheetScaffoldUiModel,
     genreGroup: SheetRowGroupUiModel<String?>,
-    runAction: (ExploreAction) -> Unit,
-    onDismissRequest: () -> Unit,
+    onEvent: (BecauseYouReadGenreControlEvent) -> Unit,
 ) {
     SheetScaffold(
         model = sheet,
         onEvent = { event ->
             when (event) {
-                SheetScaffoldEvent.Dismissed -> onDismissRequest()
+                SheetScaffoldEvent.Dismissed -> onEvent(BecauseYouReadGenreControlEvent.Dismissed)
 
                 SheetScaffoldEvent.PrimaryClicked,
                 SheetScaffoldEvent.SecondaryClicked,
@@ -121,7 +111,9 @@ private fun BecauseYouReadGenreSheet(
             model = genreGroup,
             onEvent = { event ->
                 when (event) {
-                    is SheetRowEvent.Selected -> runAction(OnBecauseYouReadGenreSelectedAction(genre = event.key))
+                    is SheetRowEvent.Selected -> onEvent(
+                        BecauseYouReadGenreControlEvent.GenreSelected(genre = event.key),
+                    )
                 }
             },
         )

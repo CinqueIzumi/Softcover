@@ -43,15 +43,17 @@ internal class FilterDraftChipsCollector : LibraryCollector {
 
                 scope.setState { state ->
                     state.copy(
-                        filterSheetSelection = selection,
-                        filterSheet = if (selection == null) {
-                            state.filterSheet
-                        } else {
-                            filterSheetScaffoldFor(
-                                resultCount = selection.resultCount,
-                                filtersActive = selection.clearAllEnabled,
-                            )
-                        },
+                        filterSheet = state.filterSheet.copy(
+                            scaffold = if (selection == null) {
+                                state.filterSheet.scaffold
+                            } else {
+                                filterSheetScaffoldFor(
+                                    resultCount = selection.resultCount,
+                                    filtersActive = selection.clearAllEnabled,
+                                )
+                            },
+                            selection = selection,
+                        ),
                     )
                 }
             }

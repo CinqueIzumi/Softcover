@@ -51,7 +51,9 @@ class OnFilterSheetExpandedChangeActionTest {
                         totalPages = 0,
                     ),
                 ),
-                tagSearchField = initial.tagSearchField.copy(text = "stale"),
+                filterSheet = initial.filterSheet.copy(
+                    tagSearchField = initial.filterSheet.tagSearchField.copy(text = "stale"),
+                ),
             )
 
             // ----- Act -----
@@ -66,11 +68,11 @@ class OnFilterSheetExpandedChangeActionTest {
                 tabId = selectedTabId,
                 filters = committedFilters,
             )
-            stateFlow.value.filterSheet shouldBe filterSheetScaffoldFor(
+            stateFlow.value.filterSheet.scaffold shouldBe filterSheetScaffoldFor(
                 resultCount = 11,
                 filtersActive = true,
             )
-            stateFlow.value.tagSearchField.text shouldBe ""
+            stateFlow.value.filterSheet.tagSearchField.text shouldBe ""
         }
 
         @Test
@@ -85,7 +87,7 @@ class OnFilterSheetExpandedChangeActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.filterSheet shouldBe filterSheetScaffoldFor(
+            stateFlow.value.filterSheet.scaffold shouldBe filterSheetScaffoldFor(
                 resultCount = 0,
                 filtersActive = false,
             )
@@ -101,13 +103,15 @@ class OnFilterSheetExpandedChangeActionTest {
             val initial = LibraryUiState()
             stateFlow.value = initial.copy(
                 isFilterSheetExpanded = true,
-                filterSheet = existingSheet,
+                filterSheet = initial.filterSheet.copy(
+                    scaffold = existingSheet,
+                    tagSearchField = initial.filterSheet.tagSearchField.copy(text = "kotlin"),
+                ),
                 filterDraft = LibraryFilterDraft(
                     tabId = "list-42",
                     filters = LibraryFilters(formats = setOf("ebook")),
                     tagSearch = "kotlin",
                 ),
-                tagSearchField = initial.tagSearchField.copy(text = "kotlin"),
             )
 
             // ----- Act -----
@@ -119,8 +123,8 @@ class OnFilterSheetExpandedChangeActionTest {
             // ----- Assert -----
             stateFlow.value.isFilterSheetExpanded shouldBe false
             stateFlow.value.filterDraft shouldBe null
-            stateFlow.value.tagSearchField.text shouldBe ""
-            stateFlow.value.filterSheet shouldBe existingSheet
+            stateFlow.value.filterSheet.tagSearchField.text shouldBe ""
+            stateFlow.value.filterSheet.scaffold shouldBe existingSheet
         }
     }
 }

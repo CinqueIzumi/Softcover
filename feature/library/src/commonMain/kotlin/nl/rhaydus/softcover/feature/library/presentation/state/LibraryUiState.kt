@@ -8,7 +8,6 @@ import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
-import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -125,11 +124,6 @@ internal data class LibraryUiState(
     val filtersByTab: Map<String, LibraryFilters> = emptyMap(),
     val isFilterSheetExpanded: Boolean = false,
 
-    val filterSheet: SheetScaffoldUiModel = filterSheetScaffoldFor(
-        resultCount = 0,
-        filtersActive = false,
-    ),
-
     /**
      * The Filter sheet's uncommitted draft — seeded by `OnFilterSheetExpandedChangeAction` on open,
      * mutated by draft-edit actions, cleared on close, committed by `OnApplyFiltersAction`. Null
@@ -137,14 +131,15 @@ internal data class LibraryUiState(
      */
     val filterDraft: LibraryFilterDraft? = null,
 
-    /**
-     * The Filter sheet's resolved facet chips, mapped by `FilterDraftChipsCollector` off
-     * [filterDraft]. Null whenever the sheet is closed.
-     */
-    val filterSheetSelection: LibraryFilterSheetSelection? = null,
-
-    /** The Filter sheet's tag search pill, written with [filterDraft]'s `tagSearch` by the draft actions. */
-    val tagSearchField: TextFieldUiModel = tagSearchFieldFor(query = ""),
+    /** The Filter sheet; its `selection` is `null` whenever the sheet is closed. */
+    val filterSheet: LibraryFilterSheetUiModel = LibraryFilterSheetUiModel(
+        scaffold = filterSheetScaffoldFor(
+            resultCount = 0,
+            filtersActive = false,
+        ),
+        selection = null,
+        tagSearchField = tagSearchFieldFor(query = ""),
+    ),
 
     /**
      * Filter picker options per tab, precomputed off the main thread by `FilterOptionsCollector`

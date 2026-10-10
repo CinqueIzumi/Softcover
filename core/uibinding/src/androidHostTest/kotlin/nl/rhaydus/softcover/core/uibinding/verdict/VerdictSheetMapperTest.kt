@@ -142,7 +142,7 @@ class VerdictSheetMapperTest {
     @Nested
     inner class InitialVerdict {
         @Test
-        fun `positive rating seeds initialRating`() {
+        fun `positive rating seeds rating`() {
             // ----- Arrange -----
             val rated = book.copy(userBook = book.userBook?.copy(rating = 4.5))
 
@@ -154,7 +154,7 @@ class VerdictSheetMapperTest {
             )
 
             // ----- Assert -----
-            result.initialRating shouldBe 4.5
+            result.rating shouldBe 4.5
         }
 
         @Test
@@ -170,11 +170,11 @@ class VerdictSheetMapperTest {
             )
 
             // ----- Assert -----
-            result.initialRating.shouldBeNull()
+            result.rating.shouldBeNull()
         }
 
         @Test
-        fun `null rating and missing userBook leave initialRating null`() {
+        fun `null rating and missing userBook leave rating null`() {
             // ----- Arrange -----
             val noUserBook = book.copy(userBook = null)
 
@@ -186,7 +186,7 @@ class VerdictSheetMapperTest {
             )
 
             // ----- Assert -----
-            result.initialRating.shouldBeNull()
+            result.rating.shouldBeNull()
             result.spoilers.checked shouldBe false
         }
 
@@ -225,8 +225,8 @@ class VerdictSheetMapperTest {
             )
 
             // ----- Assert -----
-            empty.initialReview shouldBe RichTextUiModel.EMPTY
-            given.initialReview shouldBe review
+            empty.draftReview() shouldBe RichTextUiModel.EMPTY
+            given.draftReview() shouldBe review
         }
     }
 

@@ -22,9 +22,10 @@ import nl.rhaydus.softcover.core.component.state.EmptyStateEvent
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripEvent
+import nl.rhaydus.softcover.feature.reading.presentation.state.StreakStripUiModel
 
 @Composable
 internal fun EmptyCurrentlyReadingScreen(
@@ -35,7 +36,7 @@ internal fun EmptyCurrentlyReadingScreen(
     pickUpNext: BookCardSet<Book> = BookCardSet.empty(),
     trendingTileCover: CoverUiModel? = null,
     streakEnabled: Boolean = false,
-    recentReadingActivity: List<ReadingDayActivity> = emptyList(),
+    streakStrip: StreakStripUiModel,
     onExpandStreak: () -> Unit = {},
     onBookClick: (Book) -> Unit = {},
     onNavigateToSearch: () -> Unit,
@@ -79,12 +80,16 @@ internal fun EmptyCurrentlyReadingScreen(
         // When the streak is enabled we show the full 21-day grid even with zero days
         // read (all-unlit), inviting a brand-new reader to start a streak; isNotEmpty()
         // only suppresses the brief pre-load window before activity data arrives.
-        if (streakEnabled && recentReadingActivity.isNotEmpty()) {
+        if (streakEnabled && streakStrip.days.isNotEmpty()) {
             Spacer(modifier = Modifier.height(Spacing.section))
 
             StreakStrip(
-                activity = recentReadingActivity,
-                onClick = onExpandStreak,
+                model = streakStrip,
+                onEvent = { event ->
+                    when (event) {
+                        StreakStripEvent.Clicked -> onExpandStreak()
+                    }
+                },
             )
         }
 

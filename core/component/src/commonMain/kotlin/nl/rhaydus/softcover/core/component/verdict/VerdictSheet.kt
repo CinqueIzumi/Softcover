@@ -21,10 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,12 +31,10 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -50,17 +45,11 @@ import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
-import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.richtext.RichTextMark
 import nl.rhaydus.softcover.core.component.richtext.RichTextMarkType
-import nl.rhaydus.softcover.core.component.richtext.applyEditToMarks
-import nl.rhaydus.softcover.core.component.richtext.documentToEditorBuffer
-import nl.rhaydus.softcover.core.component.richtext.editorBufferToDocument
-import nl.rhaydus.softcover.core.component.richtext.isRangeMarked
-import nl.rhaydus.softcover.core.component.richtext.toggleMark
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -93,10 +82,9 @@ private val VERDICT_CAPTIONS = listOf(
  * The header and the footer are pinned around a body that scrolls itself, so the primary action is
  * never buried below the fold, however much review text or how tall the keyboard pushes the content.
  *
- * Rating and review are held as a **local draft**, seeded once from the model's `initial*` fields.
- * [StarRatingInput] only updates the draft; nothing reaches [onEvent] until the reader taps Save
- * ([VerdictSheetEvent.Saved]), so leaving with just a rating, just a review, or neither is always
- * possible.
+ * The rating, review and spoiler flag are a draft the host holds in [model]: every edit leaves as a
+ * [VerdictDraftEvent] and comes back as a new model. Nothing is committed until [VerdictSheetEvent.Saved],
+ * so leaving with just a rating, just a review, or neither is always possible.
  */
 @Composable
 fun VerdictSheet(
@@ -104,22 +92,7 @@ fun VerdictSheet(
     onEvent: (VerdictSheetEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val initialBuffer = remember { documentToEditorBuffer(document = model.initialReview) }
-
-    var textFieldValue by remember {
-        mutableStateOf(
-            TextFieldValue(
-                text = initialBuffer.text,
-                selection = TextRange(initialBuffer.text.length),
-            ),
-        )
-    }
-
-    var marks by remember { mutableStateOf(initialBuffer.marks) }
-
-    var spoilersChecked by remember { mutableStateOf(model.spoilers.checked) }
-
-    var draftRating by remember { mutableStateOf(model.initialRating) }
+    val marks = model.marks
 
     val spoilerHighlight: Color = MaterialTheme.colorScheme.spoilerEditorHighlight
 
@@ -138,27 +111,11 @@ fun VerdictSheet(
         }
     }
 
-    val spoilersRow = remember(model.spoilers, spoilersChecked) { model.spoilers.copy(checked = spoilersChecked) }
-
-    val selection = textFieldValue.selection
-    val hasSelection: Boolean = selection.collapsed.not()
-    val selectionStart: Int = selection.min
-    val selectionEnd: Int = selection.max
-
     SheetScaffold(
         model = model.scaffold,
         onEvent = { event ->
             when (event) {
-                SheetScaffoldEvent.PrimaryClicked -> onEvent(
-                    VerdictSheetEvent.Saved(
-                        rating = draftRating,
-                        review = editorBufferToDocument(
-                            text = textFieldValue.text,
-                            marks = marks,
-                        ),
-                        hasSpoilers = spoilersChecked,
-                    ),
-                )
+                SheetScaffoldEvent.PrimaryClicked -> onEvent(VerdictSheetEvent.Saved)
 
                 SheetScaffoldEvent.SecondaryClicked -> onEvent(VerdictSheetEvent.DeleteRequested)
 
@@ -175,8 +132,8 @@ fun VerdictSheet(
                 contentAlignment = Alignment.Center,
             ) {
                 StarRatingInput(
-                    rating = draftRating,
-                    onRatingChange = { draftRating = it },
+                    rating = model.rating,
+                    onRatingChange = { onEvent(VerdictDraftEvent.RatingChanged(rating = it)) },
                     starIcon = drawableIconResource(
                         icon = SoftcoverIcon.StarFilled,
                         contentDescription = "",
@@ -188,7 +145,7 @@ fun VerdictSheet(
 
             Spacer(modifier = Modifier.height(Spacing.md))
 
-            VerdictScoreAndCaption(rating = draftRating)
+            VerdictScoreAndCaption(rating = model.rating)
 
             Spacer(modifier = Modifier.height(Spacing.xxl))
 
@@ -202,18 +159,8 @@ fun VerdictSheet(
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             BasicTextField(
-                value = textFieldValue,
-                onValueChange = { updated ->
-                    if (updated.text != textFieldValue.text) {
-                        marks = applyEditToMarks(
-                            marks = marks,
-                            oldText = textFieldValue.text,
-                            newText = updated.text,
-                        )
-                    }
-
-                    textFieldValue = updated
-                },
+                value = model.review,
+                onValueChange = { onEvent(VerdictDraftEvent.ReviewEdited(value = it)) },
                 textStyle = MaterialTheme.editorialTypography.body.copy(
                     color = onSurfaceColor,
                     fontStyle = FontStyle.Normal,
@@ -233,7 +180,7 @@ fun VerdictSheet(
                                 vertical = Spacing.sm,
                             ),
                     ) {
-                        if (textFieldValue.text.isEmpty()) {
+                        if (model.review.text.isEmpty()) {
                             SoftcoverText(
                                 text = "What stayed with you? A line is plenty.",
                                 style = MaterialTheme.editorialTypography.body.copy(
@@ -252,25 +199,7 @@ fun VerdictSheet(
 
             MarkToolbar(
                 chips = model.markChips,
-                activeMarks = RichTextMarkType.entries
-                    .filter { type ->
-                        isRangeMarked(
-                            marks = marks,
-                            start = selectionStart,
-                            end = selectionEnd,
-                            type = type,
-                        )
-                    }
-                    .toSet(),
-                enabled = hasSelection,
-                onMarkToggled = { mark ->
-                    marks = toggleMark(
-                        marks = marks,
-                        start = selectionStart,
-                        end = selectionEnd,
-                        type = mark,
-                    )
-                },
+                onMarkToggled = { mark -> onEvent(VerdictDraftEvent.MarkToggled(mark = mark)) },
             )
 
             Spacer(modifier = Modifier.height(Spacing.xs))
@@ -284,10 +213,10 @@ fun VerdictSheet(
             Spacer(modifier = Modifier.height(Spacing.xl))
 
             ToggleRow(
-                model = spoilersRow,
+                model = model.spoilers,
                 onEvent = { event ->
                     when (event) {
-                        is ToggleEvent.Toggled -> spoilersChecked = event.checked
+                        is ToggleEvent.Toggled -> onEvent(VerdictDraftEvent.SpoilersToggled(checked = event.checked))
                     }
                 },
             )
@@ -298,7 +227,7 @@ fun VerdictSheet(
 /**
  * The score line ("YOUR {score} / 10" — or the pre-rating prompt) and the editorial verdict caption
  * beneath it, crossfading with a slight rise on every rating change (~0.3s, [playDecorativeMotion]-
- * gated). [rating] is the sheet's local draft, so this tweens live as the reader drags across the stars.
+ * gated). [rating] is the draft rating, so this tweens as the reader changes the stars.
  */
 @Composable
 private fun VerdictScoreAndCaption(
@@ -404,24 +333,15 @@ private fun buildEditorAnnotatedString(
     }
 }
 
-/**
- * One chip per mark, each selected while the whole selection already carries that mark. The row is inert
- * while [enabled] is false.
- */
 @Composable
 private fun MarkToolbar(
     chips: ImmutableMap<RichTextMarkType, ChipUiModel>,
-    activeMarks: Set<RichTextMarkType>,
-    enabled: Boolean,
     onMarkToggled: (RichTextMarkType) -> Unit,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
         chips.forEach { (mark, chip) ->
             Chip(
-                model = chip.copy(
-                    selected = mark in activeMarks,
-                    interaction = if (enabled) ChipInteraction.Clickable else ChipInteraction.Disabled,
-                ),
+                model = chip,
                 onEvent = { event ->
                     if (event is ChipEvent.Clicked) {
                         onMarkToggled(mark)

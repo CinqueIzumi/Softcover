@@ -7,7 +7,10 @@ import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.share.ShareCaptureProgress
+import nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.withShareCapture
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
@@ -71,14 +74,21 @@ internal fun shareSheetFor(
     bookTitle: String,
     variant: ShareCardVariant,
     hasUpdateCard: Boolean,
+    progress: ShareCaptureProgress = ShareCaptureProgress.Idle,
+    closeRequested: Boolean = false,
 ): ShareSheetUiModel =
     ShareSheetUiModel(
-        card = card,
-        scaffold = shareSheetScaffoldFor(
-            bookTitle = bookTitle,
-            variant = variant,
+        sheet = ShareCardSheetUiModel(
+            card = card,
+            scaffold = shareSheetScaffoldFor(
+                bookTitle = bookTitle,
+                variant = variant,
+            ).withShareCapture(
+                progress = progress,
+                closeRequested = closeRequested,
+            ),
+            displayName = bookTitle,
         ),
-        displayName = bookTitle,
         variantToggle = if (hasUpdateCard) {
             SegmentedControlUiModel(
                 options = ShareCardVariant.entries

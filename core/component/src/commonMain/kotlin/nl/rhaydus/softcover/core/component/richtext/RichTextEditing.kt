@@ -12,7 +12,7 @@ import kotlinx.collections.immutable.toImmutableList
  */
 
 /** Drop empty marks and merge overlapping or touching marks of the same type into the fewest ranges. */
-internal fun normalizeMarks(marks: List<RichTextMark>): ImmutableList<RichTextMark> = marks
+fun normalizeMarks(marks: List<RichTextMark>): ImmutableList<RichTextMark> = marks
     .filter { it.start < it.end }
     .groupBy { it.type }
     .flatMap { (type, group) ->
@@ -50,7 +50,7 @@ internal fun normalizeMarks(marks: List<RichTextMark>): ImmutableList<RichTextMa
  * that strictly straddles a pure insertion grows to cover the inserted text, while one ending exactly
  * at the insertion point does not — so typing just after a bold word stays unbolded.
  */
-internal fun applyEditToMarks(
+fun applyEditToMarks(
     marks: List<RichTextMark>,
     oldText: String,
     newText: String,
@@ -96,7 +96,7 @@ internal fun applyEditToMarks(
 }
 
 /** Whether the whole selection [[start], [end]) is already covered by a mark of [type]. */
-internal fun isRangeMarked(
+fun isRangeMarked(
     marks: List<RichTextMark>,
     start: Int,
     end: Int,
@@ -111,7 +111,7 @@ internal fun isRangeMarked(
  * Toggle [type] over the selection [[start], [end]): when the selection is already fully marked the
  * mark is cleared across it (splitting any straddling mark), otherwise a mark is added over it.
  */
-internal fun toggleMark(
+fun toggleMark(
     marks: List<RichTextMark>,
     start: Int,
     end: Int,
@@ -151,7 +151,7 @@ internal fun toggleMark(
 }
 
 /** Build the structured [RichTextUiModel] from the editor's plain text and marks. */
-internal fun editorBufferToDocument(
+fun editorBufferToDocument(
     text: String,
     marks: List<RichTextMark>,
 ): RichTextUiModel {
@@ -188,7 +188,7 @@ internal fun editorBufferToDocument(
 }
 
 /** Build the editor's plain text and marks from a structured [RichTextUiModel]. */
-internal fun documentToEditorBuffer(document: RichTextUiModel): RichTextEditorBuffer {
+fun documentToEditorBuffer(document: RichTextUiModel): RichTextEditorBuffer {
     val builder = StringBuilder()
     val marks = mutableListOf<RichTextMark>()
 

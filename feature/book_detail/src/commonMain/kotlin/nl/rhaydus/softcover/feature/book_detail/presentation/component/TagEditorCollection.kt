@@ -83,7 +83,7 @@ private fun TagGroupSection(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             SoftcoverText(
-                text = group.category.label.uppercase(),
+                text = group.label.uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

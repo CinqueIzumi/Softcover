@@ -1,17 +1,24 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.toChipSet
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -68,7 +75,7 @@ class TagEditorSheetCollectorTest {
             launchCollector()
 
             // ----- Assert -----
-            stateFlow.value.tagEditorSheet shouldBe tagEditorSheetScaffoldFor(
+            stateFlow.value.tagEditorSheet.shouldNotBeNull().scaffold shouldBe tagEditorSheetScaffoldFor(
                 bookTitle = "Dune",
                 cover = cover,
             )
@@ -85,7 +92,7 @@ class TagEditorSheetCollectorTest {
             stateFlow.value = stateFlow.value.copy(tagEditorCover = cover)
 
             // ----- Assert -----
-            stateFlow.value.tagEditorSheet shouldBe tagEditorSheetScaffoldFor(
+            stateFlow.value.tagEditorSheet.shouldNotBeNull().scaffold shouldBe tagEditorSheetScaffoldFor(
                 bookTitle = "Dune",
                 cover = cover,
             )
@@ -102,6 +109,60 @@ class TagEditorSheetCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.tagEditorSheet.shouldBeNull()
+        }
+
+        @Test
+        fun `carries the add block and the tag groups from state into tagEditorSheet`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val categoryChips = persistentListOf(ChipUiModel(
+                    key = "MOOD",
+                    label = "Mood",
+                ),)
+                val suggestion = ChipUiModel(
+                    key = "suggestion",
+                    label = "cozy",
+                )
+                val emptyState = EmptyStateUiModel(
+                    title = "Nothing",
+                    body = "Add one",
+                )
+                stateFlow.value = BookDetailUiState(
+                    book = bookTitled("Dune"),
+                    tagEditorCategory = TagCategory.MOOD,
+                    tagEditorCategoryChips = categoryChips,
+                    tagSuggestionChips = listOf(suggestion to UserTag(
+                        name = "cozy",
+                        category = TagCategory.MOOD,
+                    ),)
+                        .toChipSet(),
+                    tagEditorEmptyState = emptyState,
+                    newlyAddedTagKey = "MOOD:cozy",
+                )
+
+                // ----- Act -----
+                launchCollector()
+
+                // ----- Assert -----
+                val sheet = stateFlow.value.tagEditorSheet.shouldNotBeNull()
+                sheet.categoryChips shouldBe categoryChips
+                sheet.selectedCategoryKey shouldBe "MOOD"
+                sheet.suggestionChips shouldBe listOf(suggestion)
+                sheet.emptyState shouldBe emptyState
+                sheet.newlyAddedTagKey shouldBe "MOOD:cozy"
+            }
+
+        @Test
+        fun `follows the selected category as it changes`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(book = bookTitled("Dune"))
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
+
+            // ----- Assert -----
+            stateFlow.value.tagEditorSheet.shouldNotBeNull().selectedCategoryKey shouldBe "GENRE"
         }
     }
 }

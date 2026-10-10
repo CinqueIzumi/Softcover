@@ -12,11 +12,11 @@ primitives among them), and every premium-feel sub-step has landed.
 | Sub | Scope | Runs after | Status |
 |---|---|---|---|
 | S11-1a | The `UiModelBuiltInRender` gate and `@ModelBuiltInComposition`, inactive; findings recorded as the work list | — | [x] |
-| S11-1b | `:core:component` sheets: `ChooseListsBottomSheet` (`membershipChipFor`), `ShareCardSheetContent` (`scaffold.copy`, `SheetFooterUiModel.Inline`), `VerdictSheet` (`spoilers.copy`, `editorBufferToDocument`) | S11-1a | [ ] |
-| S11-1c | Library: `LibraryControlLine` (`rearrangeChipFor`, `filterPillFor`), `LibraryScreenLayout.{jvm,mobile}` (`mastheadFor`) | S11-1a | [ ] |
-| S11-1d | Profile: the preview-state properties in `ProfileScreenLayout.{jvm,mobile}` move to fixtures | S11-1a | [ ] |
-| S11-1e | Item 4's sheet bodies the gate misses, swept with their owners | S11-1a | [ ] |
-| S11-1z | Turn `UiModelBuiltInRender` on; add it to `component-contract.md` § 7.4 and the intro's gate count, drop R10's "once the sweep enables it" | S11-1b–e | [ ] |
+| S11-1b | `:core:component` sheets: `ChooseListsBottomSheet` (`membershipChipFor`), `ShareCardSheetContent` (`scaffold.copy`, `SheetFooterUiModel.Inline`), `VerdictSheet` (`spoilers.copy`, `editorBufferToDocument`) | S11-1a | [x] |
+| S11-1c | Library: `LibraryControlLine` (`rearrangeChipFor`, `filterPillFor`), `LibraryScreenLayout.{jvm,mobile}` (`mastheadFor`) | S11-1a | [x] |
+| S11-1d | Profile: the preview-state properties in `ProfileScreenLayout.{jvm,mobile}` move to fixtures | S11-1a | [x] |
+| S11-1e | Item 4's sheet bodies the gate misses, swept with their owners | S11-1a | [x] |
+| S11-1z | Turn `UiModelBuiltInRender` on; add it to `component-contract.md` § 7.4 and the intro's gate count, drop R10's "once the sweep enables it" | S11-1b–e | [x] |
 | S11-2 | R11 holdouts | — | [ ] |
 | S11-3 | `TopBarSurface`, the `ShareCardPalette` fold, the final § 7.4a check | S11-1, S11-2 | [ ] |
 | S11-5 | Provide `LocalHaptics` at the theme root; one way of reading haptics | — | [ ] |
@@ -54,41 +54,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-40 | Predictive back drives the push/pop transition | S11-36–S11-39 | [ ] |
 | S11-C | Convergence pass over the family (family-procedure.md § Phase 3) | all | [ ] |
 
-## Approved shape
-
-S11-1 (approved 2026-10-08):
-- Rule `softcover:UiModelBuiltInRender` in `detekt-rules/`, type-resolved, shipped inactive like `RawCornerDp`.
-- A violation is a constructor of a UI model type (name ends in `UiModel`, or a supertype's does), or a call
-  to a function declared in `nl.rhaydus.*` whose return type is a UI model type (covers `copy`,
-  `to*UiModel`, render-file builders). Stdlib lookups stay quiet.
-- Reported inside a `@Composable` function or composable lambda (including `remember` and event lambdas),
-  and in a top-level property initializer in any file that declares a `@Composable`.
-- Skipped: `@Preview` functions, and path `excludes` `**/*Previews.kt`, `**/gallery/**`, `**/src/debug/**`
-  (debug stays exempt per § 7.4a).
-- Opt-out: `@ModelBuiltInComposition(reason: String)` in `:core:component` (package root), on a function
-  or top-level property, matched by name. Every use needs a matching § 7.4a line;
-  `@Suppress("UiModelBuiltInRender")` and an unrecorded annotation are reviewer blockers.
-- Done bar: gate green on the whole repo, no `@Suppress`, no baseline, every annotation recorded in § 7.4a.
-
-## S11-1 — R10 sweep
-
-A full sweep, not a list: every UI model constructed, copied or mapped outside the state layer moves onto
-the `UiState`, assembled by the collector.
-
-1. **Gate first.** Add a detekt rule that fails when render code (composables, `presentation/screen/**`,
-   `presentation/component/**`, `:core:component` render files, `app/src/debug`) calls a `*UiModel`
-   constructor, a `*UiModel.copy(…)`, or a `to*UiModel(…)` mapper — in composition, in `remember`, or as
-   a file-level constant. Allowed: collectors, ScreenModels, actions, state builders, mappers, fixtures
-   (`UiModelPreviews`), the gallery, and each recorded § 7.4a exception (named by symbol in the rule's
-   config).
-2. **Sweep.** Run the gate; its findings are the work list. Fix every one, split into feature-sized
-   briefs.
-3. **Done** when the gate is green on the whole repo with no suppressions and no baseline entries.
-4. **Sheet bodies the gate may miss** (derived values, domain types, loose params — not model
-   constructors): UpdateProgress tab derivation; Edition (`BookEdition`, labels, the count label, loose
-   params); ShareBook `displayedContent`; TagEditor (domain types, `TagCategory.fromName`); Genre label
-   and local `sheetVisible`; ContinueSeries `DismissedSeriesBook` and copy; Filter `filterChipsFor`;
-   Streak day labels and `today`; ProfileShare `isBusy` / "Saving…"; UnknownIsbn loose `isbn`.
+## R10 edges
 
 S11 settles the three R10 edges `component-contract.md` names. One stays open on purpose, as a recorded
 exception rather than a holdout: the preview fixtures / Component Gallery, which construct models by

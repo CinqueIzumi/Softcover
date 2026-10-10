@@ -1,15 +1,22 @@
 package nl.rhaydus.softcover.core.uibinding.lists
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import org.junit.jupiter.api.Nested
@@ -118,7 +125,7 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().chipLabel shouldBe "On the list"
+            result.rows.single().chip.label shouldBe "On the list"
         }
 
         @Test
@@ -140,7 +147,7 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().chipLabel shouldBe "Add"
+            result.rows.single().chip.label shouldBe "Add"
         }
     }
 
@@ -296,7 +303,7 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().chipLabel shouldBe "On all 5"
+            result.rows.single().chip.label shouldBe "On all 5"
         }
 
         @Test
@@ -317,7 +324,7 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().chipLabel shouldBe "Add the other 2"
+            result.rows.single().chip.label shouldBe "Add the other 2"
         }
 
         @Test
@@ -338,7 +345,7 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().chipLabel shouldBe "Add all 5"
+            result.rows.single().chip.label shouldBe "Add all 5"
         }
     }
 
@@ -512,7 +519,7 @@ class ChooseListsMapperTest {
                 bookIds = (1..selectedCount).toSet(),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
-            ).rows.single().chipLabel
+            ).rows.single().chip.label
         }
 
         @Test
@@ -699,6 +706,109 @@ class ChooseListsMapperTest {
 
             // ----- Assert -----
             result.rows.single().caption shouldBe "1 BOOK"
+        }
+    }
+
+    @Nested
+    inner class MembershipChip {
+        private fun chipFor(
+            listBookIds: List<Int>,
+            selection: Set<Int>,
+            listId: Int = 7,
+        ): ChipUiModel = listOf(
+            bookList(
+                id = listId,
+                bookIds = listBookIds,
+            ),
+        ).toBulkChooseListsUiModel(
+            bookIds = selection,
+            covers = emptyList(),
+            listsBeingMutated = emptySet(),
+        ).rows.single().chip
+
+        @Test
+        fun `ALL is a container chip with a close trailing icon and no leading`() {
+            // ----- Arrange -----
+            val listBookIds = listOf(1, 2)
+            val selection = setOf(1, 2)
+
+            // ----- Act -----
+            val chip = chipFor(
+                listBookIds = listBookIds,
+                selection = selection,
+            )
+
+            // ----- Assert -----
+            chip.tone shouldBe ChipTone.Container
+            chip.leading.shouldBeNull()
+            chip.trailing shouldBe ChipTrailing.Icon(icon = SoftcoverIcon.Close)
+        }
+
+        @Test
+        fun `PARTIAL is a filled chip with an add leading icon and no trailing`() {
+            // ----- Arrange -----
+            val listBookIds = listOf(1)
+            val selection = setOf(1, 2)
+
+            // ----- Act -----
+            val chip = chipFor(
+                listBookIds = listBookIds,
+                selection = selection,
+            )
+
+            // ----- Assert -----
+            chip.tone shouldBe ChipTone.Filled
+            chip.leading shouldBe ChipLeading.Icon(icon = SoftcoverIcon.Add)
+            chip.trailing.shouldBeNull()
+        }
+
+        @Test
+        fun `NONE is an outlined chip with an add leading icon and no trailing`() {
+            // ----- Arrange -----
+            val listBookIds = emptyList<Int>()
+            val selection = setOf(1, 2)
+
+            // ----- Act -----
+            val chip = chipFor(
+                listBookIds = listBookIds,
+                selection = selection,
+            )
+
+            // ----- Assert -----
+            chip.tone shouldBe ChipTone.Outlined
+            chip.leading shouldBe ChipLeading.Icon(icon = SoftcoverIcon.Add)
+            chip.trailing.shouldBeNull()
+        }
+
+        @Test
+        fun `the chip is keyed by its list id`() {
+            // ----- Arrange -----
+            val listId = 123
+
+            // ----- Act -----
+            val chip = chipFor(
+                listBookIds = emptyList(),
+                selection = setOf(1),
+                listId = listId,
+            )
+
+            // ----- Assert -----
+            chip.key shouldBe "123"
+        }
+
+        @Test
+        fun `the chip is decorative so it is inert`() {
+            // ----- Arrange -----
+            val selection = setOf(1)
+
+            // ----- Act -----
+            val chip = chipFor(
+                listBookIds = listOf(1),
+                selection = selection,
+            )
+
+            // ----- Assert -----
+            chip.interaction shouldBe ChipInteraction.Inert
         }
     }
 }

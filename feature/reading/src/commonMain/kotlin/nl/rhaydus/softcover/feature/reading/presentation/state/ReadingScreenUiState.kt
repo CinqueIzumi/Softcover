@@ -12,7 +12,6 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateButtonUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateVariant
@@ -21,13 +20,14 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DateStyle
-import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.feature.reading.presentation.collector.mastheadEyebrowFor
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.ALSO_READING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.FEATURED_STAND_IN_BOOK
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.PICK_UP_NEXT_STAND_IN_CARDS
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakSheetFor
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakStripFor
 import nl.rhaydus.toad.UiState
 
 internal data class ReadingScreenUiState(
@@ -77,11 +77,15 @@ internal data class ReadingScreenUiState(
         ),
     ),
 
-    val recentReadingActivity: List<ReadingDayActivity> = emptyList(),
     val hasLoadedReadingActivity: Boolean = false,
     val streakEnabled: Boolean = true,
 
-    val streakSheet: SheetScaffoldUiModel = streakSheetScaffoldFor(activity = emptyList()),
+    val streakStrip: StreakStripUiModel = streakStripFor(
+        activity = emptyList(),
+        isLoading = true,
+    ),
+    val streakSheet: StreakSheetUiModel = streakSheetFor(activity = emptyList()),
+    val showStreakSheet: Boolean = false,
 
     /** The featured book's pace line, mapped by `ReadingPaceForecastCollector`; null while no forecast exists. */
     val featuredBookPace: String? = null,

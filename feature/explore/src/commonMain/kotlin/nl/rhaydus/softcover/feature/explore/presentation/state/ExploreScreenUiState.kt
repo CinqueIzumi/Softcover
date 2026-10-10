@@ -14,8 +14,6 @@ import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.mood.MoodTileUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -31,6 +29,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.mapper.TRENDING_STAND_I
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.UP_NEXT_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.noSearchResultsEmptyState
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSortPillButton
+import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreControlUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesMenuSheetUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardUiModel
 import nl.rhaydus.toad.UiState
@@ -109,9 +108,7 @@ internal data class ExploreScreenUiState(
     /** A loading stand-in until a genre resolves; the rail is hidden by a `null` [becauseYouReadGenre], not by this. */
     val becauseYouReadHeader: SectionHeaderUiModel = BECAUSE_YOU_READ_HEADER_STAND_IN,
     val becauseYouReadGenreOptions: List<String> = emptyList(),
-    val becauseYouReadGenreSheet: SheetScaffoldUiModel = becauseYouReadGenreSheetScaffold(),
-    /** A `null` key is the "Auto (most-read)" row. */
-    val becauseYouReadGenreGroup: SheetRowGroupUiModel<String?> = SheetRowGroupUiModel(rows = persistentListOf()),
+    val becauseYouReadGenreControl: BecauseYouReadGenreControlUiModel = BecauseYouReadGenreControlUiModel(),
     val becauseYouReadBooks: List<Book> = emptyList(),
     val loadingBecauseYouReadBooks: Boolean = true,
     // Browse-by-mood grid + the active mood filter, when a mood tile/chip drove the current

@@ -6,5 +6,5 @@ softcover:
   RawCornerDp:
     active: true
   UiModelBuiltInRender:
-    active: false
+    active: true
     excludes: ['**/*Previews.kt', '**/gallery/**', '**/src/debug/**', '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**']

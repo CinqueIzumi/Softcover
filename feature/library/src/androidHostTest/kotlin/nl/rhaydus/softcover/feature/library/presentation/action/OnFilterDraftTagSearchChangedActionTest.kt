@@ -49,7 +49,7 @@ class OnFilterDraftTagSearchChangedActionTest {
 
             // ----- Assert -----
             stateFlow.value.filterDraft shouldBe null
-            stateFlow.value.tagSearchField.text shouldBe ""
+            stateFlow.value.filterSheet.tagSearchField.text shouldBe ""
         }
 
         @Test
@@ -70,7 +70,7 @@ class OnFilterDraftTagSearchChangedActionTest {
 
             // ----- Assert -----
             stateFlow.value.filterDraft shouldBe draft.copy(tagSearch = "kotlin")
-            stateFlow.value.tagSearchField.text shouldBe "kotlin"
+            stateFlow.value.filterSheet.tagSearchField.text shouldBe "kotlin"
         }
     }
 }

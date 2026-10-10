@@ -23,11 +23,13 @@ internal fun tagNamingFieldFor(
 
 /**
  * [BookDetailUiState.tagEditorInput] is the stored draft; its text is mirrored onto
- * [BookDetailUiState.tagNamingField] here so a keystroke never waits on a collector.
+ * [BookDetailUiState.tagNamingField] and the open sheet's model here so a keystroke never waits on a
+ * collector.
  */
 internal fun BookDetailUiState.withTagDraft(input: String): BookDetailUiState = copy(
     tagEditorInput = input,
     tagNamingField = tagNamingField.copy(text = input),
+    tagEditorSheet = tagEditorSheet?.copy(namingField = tagNamingField.copy(text = input)),
 )
 
 /**

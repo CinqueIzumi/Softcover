@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.scan.presentation.collector
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -13,6 +15,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
+import nl.rhaydus.softcover.feature.scan.presentation.state.UnknownIsbnSheetUiModel
 import nl.rhaydus.softcover.feature.scan.presentation.state.unknownIsbnSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
@@ -46,11 +49,17 @@ class UnknownIsbnSheetCollectorTest {
         }
     }
 
+    private fun sheet(isbn: String = ISBN) = UnknownIsbnSheetUiModel(
+        isbn = isbn,
+        scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
+    )
+
     @Nested
     inner class OnLaunch {
         @Test
         fun `follows isAddingBook between the adding and idle scaffold`() = runTest(testDispatcher) {
             // ----- Arrange -----
+            stateFlow.value = ScanUiState(unknownIsbnSheet = sheet())
             launchCollector()
 
             // ----- Act -----
@@ -59,14 +68,42 @@ class UnknownIsbnSheetCollectorTest {
             stateFlow.update { it.copy(isAddingBook = false) }
 
             // ----- Assert -----
-            whileAdding shouldBe unknownIsbnSheetScaffoldFor(isAdding = true)
-            stateFlow.value.unknownIsbnSheet shouldBe unknownIsbnSheetScaffoldFor(isAdding = false)
+            whileAdding.shouldNotBeNull().scaffold shouldBe unknownIsbnSheetScaffoldFor(isAdding = true)
+            stateFlow.value.unknownIsbnSheet.shouldNotBeNull().scaffold shouldBe
+                unknownIsbnSheetScaffoldFor(isAdding = false)
         }
 
         @Test
-        fun `a close request flags the sheet and keeps the adding footer instead of flashing idle`() =
+        fun `keeps the isbn when it rebuilds the scaffold`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            stateFlow.value = ScanUiState(unknownIsbnSheet = sheet())
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.update { it.copy(isAddingBook = true) }
+
+            // ----- Assert -----
+            stateFlow.value.unknownIsbnSheet.shouldNotBeNull().isbn shouldBe ISBN
+        }
+
+        @Test
+        fun `leaves a null sheet untouched`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.update { it.copy(isAddingBook = true) }
+            stateFlow.update { it.copy(isUnknownIsbnCloseRequested = true) }
+
+            // ----- Assert -----
+            stateFlow.value.unknownIsbnSheet.shouldBeNull()
+        }
+
+        @Test
+        fun `a close request flags the scaffold and keeps the adding footer instead of flashing idle`() =
             runTest(testDispatcher) {
                 // ----- Arrange -----
+                stateFlow.value = ScanUiState(unknownIsbnSheet = sheet())
                 launchCollector()
                 stateFlow.update { it.copy(isAddingBook = true) }
 
@@ -79,13 +116,14 @@ class UnknownIsbnSheetCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.unknownIsbnSheet shouldBe unknownIsbnSheetScaffoldFor(isAdding = true)
-                    .copy(closeRequested = true)
+                stateFlow.value.unknownIsbnSheet.shouldNotBeNull().scaffold shouldBe
+                    unknownIsbnSheetScaffoldFor(isAdding = true).copy(closeRequested = true)
             }
 
         @Test
         fun `clearing the close request rebuilds the scaffold from the current state`() = runTest(testDispatcher) {
             // ----- Arrange -----
+            stateFlow.value = ScanUiState(unknownIsbnSheet = sheet())
             launchCollector()
             stateFlow.update { it.copy(isUnknownIsbnCloseRequested = true) }
 
@@ -93,7 +131,12 @@ class UnknownIsbnSheetCollectorTest {
             stateFlow.update { it.copy(isUnknownIsbnCloseRequested = false) }
 
             // ----- Assert -----
-            stateFlow.value.unknownIsbnSheet shouldBe unknownIsbnSheetScaffoldFor(isAdding = false)
+            stateFlow.value.unknownIsbnSheet.shouldNotBeNull().scaffold shouldBe
+                unknownIsbnSheetScaffoldFor(isAdding = false)
         }
+    }
+
+    private companion object {
+        const val ISBN = "9780451524935"
     }
 }

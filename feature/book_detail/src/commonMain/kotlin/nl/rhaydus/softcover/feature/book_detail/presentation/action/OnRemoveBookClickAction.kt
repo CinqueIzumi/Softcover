@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLens
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.withBook
 import nl.rhaydus.toad.ActionScope
 
 internal class OnRemoveBookClickAction(val book: Book) : BookDetailAction {
@@ -27,8 +28,7 @@ internal class OnRemoveBookClickAction(val book: Book) : BookDetailAction {
             }
             .onSuccess {
                 scope.setState { state ->
-                    state.copy(
-                        selectedLens = BookDetailLens.THE_BOOK,
+                    state.copy(selectedLens = BookDetailLens.THE_BOOK).withBook(
                         book = state.book?.copy(
                             userBook = null,
                             userBookRead = null,

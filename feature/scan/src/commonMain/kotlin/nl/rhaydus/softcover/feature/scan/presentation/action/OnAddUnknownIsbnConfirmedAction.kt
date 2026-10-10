@@ -12,7 +12,7 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
         dependencies: ScanDependencies,
         scope: ActionScope<ScanUiState, ScanEvent, LocalScanVariables>,
     ) {
-        val isbn = scope.currentState.unknownIsbn ?: return
+        val isbn = scope.currentState.unknownIsbnSheet?.isbn ?: return
 
         if (scope.currentState.isAddingBook) return
 

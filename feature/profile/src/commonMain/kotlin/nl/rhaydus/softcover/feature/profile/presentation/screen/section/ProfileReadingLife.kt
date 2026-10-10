@@ -31,7 +31,7 @@ internal fun ColumnScope.ProfileReadingLife(
 
     ShareEntryRow(
         isLoading = state.isReadingLifeLoading,
-        enabled = state.readingLifeShareCard != null,
+        enabled = state.shareSheet != null,
         onClick = onShareClick,
     )
 

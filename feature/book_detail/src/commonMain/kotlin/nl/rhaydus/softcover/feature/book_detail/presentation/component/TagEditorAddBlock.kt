@@ -18,12 +18,11 @@ import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
-import nl.rhaydus.softcover.core.domain.model.TagCategory
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun TagEditorAddBlock(
-    selectedCategory: TagCategory,
+    selectedCategoryKey: String,
     categoryChips: List<ChipUiModel>,
     namingField: TextFieldUiModel,
     suggestionChips: List<ChipUiModel>,
@@ -59,7 +58,7 @@ internal fun TagEditorAddBlock(
             // `ExpandableFlowRow` holds its revealed-line count internally, so without a fresh key per
             // category, switching from an expanded Genre into Mood would show Mood already
             // part-unfurled to the same depth, having never asked for it.
-            key(selectedCategory) {
+            key(selectedCategoryKey) {
                 ExpandableFlowRow(
                     expansion = FlowRowExpansion.Progressive(linesPerExpand = 3),
                     collapsible = true,

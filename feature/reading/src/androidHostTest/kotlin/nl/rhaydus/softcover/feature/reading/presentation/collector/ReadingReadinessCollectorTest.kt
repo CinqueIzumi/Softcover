@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScre
 import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+import nl.rhaydus.softcover.feature.reading.presentation.state.StreakStripUiModel
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -94,6 +95,37 @@ class ReadingReadinessCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `clears the streak strip loading flag together with isLoading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = readyState().copy(
+                streakStrip = StreakStripUiModel(isLoading = true),
+            )
+
+            // ----- Act -----
+            val job = launchCollector(this)
+
+            // ----- Assert -----
+            stateFlow.value.streakStrip.isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the streak strip loading while a gate is unmet`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = readyState().copy(
+                hasLoadedBooks = false,
+                streakStrip = StreakStripUiModel(isLoading = true),
+            )
+
+            // ----- Act -----
+            val job = launchCollector(this)
+
+            // ----- Assert -----
+            stateFlow.value.streakStrip.isLoading shouldBe true
             job.cancel()
         }
 

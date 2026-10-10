@@ -10,11 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
@@ -22,49 +21,42 @@ import nl.rhaydus.designsystem.share.SaveOutcome
 import nl.rhaydus.designsystem.share.ShareOutcome
 import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.designsystem.util.SnackBarManager
-import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
-import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
- * The share sheet every share card goes through: a [SheetScaffold] around a scaled preview of [card]
- * with "Save to gallery" and "Share" as its inline footer.
+ * The share sheet every share card goes through: a [SheetScaffold] around a scaled preview of
+ * [ShareCardSheetUiModel.card] with "Save to gallery" and "Share" as its inline footer.
  *
- * Capture, the busy state and the outcome snackbars live here, not in the host. While a capture runs
- * the scaffold is busy, so both buttons lock and the sheet cannot be dismissed; a successful share
- * closes the sheet. [displayName] names the captured file. [aboveCard] renders over the preview, in
- * the sheet's centred column.
+ * The capture runs here because it needs composition, but progress is reported through [onEvent]:
+ * the host holds the busy and close state and passes it back in [ShareCardSheetUiModel.scaffold].
+ * A second capture is ignored until the running one ends; the scaffold's busy flag only locks the
+ * footer. Outcome snackbars are shown here.
+ * [aboveCard] renders over the preview, in the sheet's centred column.
  */
 @Composable
 fun ShareCardSheetContent(
-    card: ShareCardUiModel,
-    scaffold: SheetScaffoldUiModel,
-    displayName: String,
-    onDismissRequest: () -> Unit,
+    model: ShareCardSheetUiModel,
+    onEvent: (ShareCardSheetEvent) -> Unit,
     modifier: Modifier = Modifier,
-    previewMaxWidth: Dp = 280.dp,
-    previewMaxHeight: Dp = 360.dp,
     aboveCard: @Composable ColumnScope.() -> Unit = {},
 ) {
     val capture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
     val coroutineScope = rememberCoroutineScope()
-
-    var isSharing by remember { mutableStateOf(false) }
-    var isSaving by remember { mutableStateOf(false) }
-    var closeRequested by remember { mutableStateOf(false) }
-    val isBusy = isSharing || isSaving
+    val currentOnEvent by rememberUpdatedState(onEvent)
+    var isCaptureRunning by remember { mutableStateOf(false) }
 
     fun runCapture(
+        started: ShareCardSheetEvent,
         failureMessage: String,
-        setRunning: (Boolean) -> Unit,
         block: suspend () -> Unit,
     ) {
-        if (isBusy) return
+        if (isCaptureRunning) return
 
-        setRunning(true)
+        isCaptureRunning = true
+
+        currentOnEvent(started)
 
         coroutineScope.launch {
             try {
@@ -76,30 +68,25 @@ fun ShareCardSheetContent(
                     SnackBarManager.showSnackbar(title = failureMessage)
                 }
             } finally {
-                setRunning(false)
+                isCaptureRunning = false
+
+                currentOnEvent(ShareCardSheetEvent.CaptureFinished)
             }
         }
     }
 
     SheetScaffold(
-        model = scaffold.copy(
-            footer = SheetFooterUiModel.Inline(
-                primary = SheetFooterButton(label = if (isSharing) "Sharing…" else "Share"),
-                secondary = SheetFooterButton(label = if (isSaving) "Saving to gallery…" else "Save to gallery"),
-            ),
-            busy = isBusy,
-            closeRequested = closeRequested,
-        ),
+        model = model.scaffold,
         onEvent = { event ->
             when (event) {
-                SheetScaffoldEvent.Dismissed -> onDismissRequest()
+                SheetScaffoldEvent.Dismissed -> onEvent(ShareCardSheetEvent.Dismissed)
 
                 SheetScaffoldEvent.PrimaryClicked -> runCapture(
+                    started = ShareCardSheetEvent.ShareStarted,
                     failureMessage = "Couldn't share — try again",
-                    setRunning = { isSharing = it },
                 ) {
-                    when (val outcome = capture.share(displayName = displayName)) {
-                        is ShareOutcome.Shared -> closeRequested = true
+                    when (val outcome = capture.share(displayName = model.displayName)) {
+                        is ShareOutcome.Shared -> currentOnEvent(ShareCardSheetEvent.Shared)
 
                         is ShareOutcome.Cancelled -> Unit
 
@@ -112,10 +99,10 @@ fun ShareCardSheetContent(
                 }
 
                 SheetScaffoldEvent.SecondaryClicked -> runCapture(
+                    started = ShareCardSheetEvent.SaveStarted,
                     failureMessage = "Couldn't save to gallery",
-                    setRunning = { isSaving = it },
                 ) {
-                    val outcome = capture.saveToGallery(displayName = displayName)
+                    val outcome = capture.saveToGallery(displayName = model.displayName)
 
                     val message = if (outcome is SaveOutcome.Saved) "Saved to gallery" else "Couldn't save to gallery"
 
@@ -137,10 +124,10 @@ fun ShareCardSheetContent(
 
             ScaledShareCardPreview(
                 capture = capture,
-                maxWidth = previewMaxWidth,
-                maxHeight = previewMaxHeight,
+                maxWidth = model.previewMaxWidth,
+                maxHeight = model.previewMaxHeight,
             ) {
-                ShareCard(model = card)
+                ShareCard(model = model.card)
             }
         }
     }

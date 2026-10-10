@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.withBook
 import nl.rhaydus.toad.ActionScope
 
 internal class InitializeBookWithIdAction(
@@ -33,8 +34,7 @@ internal class InitializeBookWithIdAction(
                     } ?: fetched
                 }
 
-                state.copy(
-                    book = merged,
+                state.withBook(book = merged).copy(
                     editions = merged?.editions ?: emptyList(),
                     loadingBookDetails = false,
                 )

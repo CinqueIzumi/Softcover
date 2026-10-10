@@ -3,6 +3,12 @@ package nl.rhaydus.softcover.core.uibinding.lists
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipSize
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
@@ -14,6 +20,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 
 /**
@@ -127,21 +134,52 @@ private fun List<BookList>.rowsFor(
             totalCount = bookIds.size,
             isBulk = isBulk,
         ),
-        chipLabel = membershipChipLabelFor(
+        chip = membershipChipFor(
+            listId = list.id,
             membership = membership,
-            matchingCount = matchingCount,
-            totalCount = bookIds.size,
-            isBulk = isBulk,
+            label = membershipChipLabelFor(
+                membership = membership,
+                matchingCount = matchingCount,
+                totalCount = bookIds.size,
+                isBulk = isBulk,
+            ),
         ),
         membership = membership,
         isPending = list.id in listsBeingMutated,
     )
 }.toImmutableList()
 
+/** The chip's look is a function of membership alone; it is decorative, so the row's toggle announces state. */
+private fun membershipChipFor(
+    listId: Int,
+    membership: ListMembership,
+    label: String,
+): ChipUiModel = ChipUiModel(
+    key = listId.toString(),
+    label = label,
+    tone = when (membership) {
+        ListMembership.ALL -> ChipTone.Container
+        ListMembership.PARTIAL -> ChipTone.Filled
+        ListMembership.NONE -> ChipTone.Outlined
+    },
+    leading = when (membership) {
+        ListMembership.ALL -> null
+        ListMembership.PARTIAL,
+        ListMembership.NONE -> ChipLeading.Icon(icon = SoftcoverIcon.Add)
+    },
+    trailing = when (membership) {
+        ListMembership.ALL -> ChipTrailing.Icon(icon = SoftcoverIcon.Close)
+        ListMembership.PARTIAL,
+        ListMembership.NONE -> null
+    },
+    interaction = ChipInteraction.Inert,
+    size = ChipSize.Compact,
+)
+
 /**
- * "12 BOOKS" ("1 BOOK" for one) on its own for a single book; in bulk it appends the membership phrase — `ALL` → "ALL
- * {totalCount} HERE", `PARTIAL` → "{matchingCount} OF {totalCount} HERE", `NONE` → "NONE YET" — e.g.
- * "12 BOOKS · 3 OF 5 HERE".
+ * "12 BOOKS" ("1 BOOK" for one) on its own for a single book; in bulk it appends the membership phrase:
+ * `ALL` → "ALL {totalCount} HERE", `PARTIAL` → "{matchingCount} OF {totalCount} HERE", `NONE` → "NONE YET".
+ * For example "12 BOOKS · 3 OF 5 HERE".
  */
 private fun captionFor(
     bookCount: Int,

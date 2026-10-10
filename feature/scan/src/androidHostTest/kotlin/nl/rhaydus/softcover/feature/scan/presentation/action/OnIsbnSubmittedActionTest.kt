@@ -20,6 +20,8 @@ import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
+import nl.rhaydus.softcover.feature.scan.presentation.state.UnknownIsbnSheetUiModel
+import nl.rhaydus.softcover.feature.scan.presentation.state.unknownIsbnSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -147,7 +149,7 @@ class OnIsbnSubmittedActionTest {
         }
 
         @Test
-        fun `stores unknownIsbn and sends no event when result is UnknownEdition`() = runTest {
+        fun `builds the unknown isbn sheet with the normalized isbn and sends no event when result is UnknownEdition`() = runTest {
             // ----- Arrange -----
             val normalizedIsbn = "9780451524935"
             val dependencies = stubDependencies(this)
@@ -166,7 +168,9 @@ class OnIsbnSubmittedActionTest {
 
             // ----- Assert -----
             stateFlow.value.isResolving shouldBe false
-            stateFlow.value.unknownIsbn shouldBe normalizedIsbn
+            val sheet = stateFlow.value.unknownIsbnSheet.shouldNotBeNull()
+            sheet.isbn shouldBe normalizedIsbn
+            sheet.scaffold shouldBe unknownIsbnSheetScaffoldFor(isAdding = false)
             eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
 
@@ -196,7 +200,11 @@ class OnIsbnSubmittedActionTest {
         @Test
         fun `sets isResolving to false and sends ResolutionFailedEvent on use case failure`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
+            val existingSheet = UnknownIsbnSheetUiModel(
+                isbn = "9780451524935",
+                scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
+            )
+            stateFlow.value = ScanUiState(unknownIsbnSheet = existingSheet)
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -213,7 +221,7 @@ class OnIsbnSubmittedActionTest {
 
             // ----- Assert -----
             stateFlow.value.isResolving shouldBe false
-            stateFlow.value.unknownIsbn shouldBe "9780451524935"
+            stateFlow.value.unknownIsbnSheet shouldBe existingSheet
 
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ScanEvent.ResolutionFailedEvent>()
         }

@@ -13,6 +13,7 @@ import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
 /**
@@ -43,13 +44,16 @@ internal fun ReadingMasthead(
 
         PageMasthead(model = state.visibleCompactMasthead)
 
-        if (state.streakEnabled && (state.isLoading || state.recentReadingActivity.isNotEmpty())) {
+        if (state.streakEnabled && (state.isLoading || state.streakStrip.days.isNotEmpty())) {
             Spacer(modifier = Modifier.height(Spacing.md))
 
             StreakStrip(
-                activity = state.recentReadingActivity,
-                onClick = onExpandStreak,
-                isLoading = state.isLoading,
+                model = state.streakStrip,
+                onEvent = { event ->
+                    when (event) {
+                        StreakStripEvent.Clicked -> onExpandStreak()
+                    }
+                },
             )
         }
 

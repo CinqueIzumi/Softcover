@@ -19,7 +19,9 @@ internal class OnFilterDraftTagSearchChangedAction(
 
             state.copy(
                 filterDraft = draft.copy(tagSearch = query),
-                tagSearchField = state.tagSearchField.copy(text = query),
+                filterSheet = state.filterSheet.copy(
+                    tagSearchField = state.filterSheet.tagSearchField.copy(text = query),
+                ),
             )
         }
     }

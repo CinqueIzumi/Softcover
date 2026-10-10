@@ -14,11 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-1a done. S11-1 split into 1a–1e + 1z (approved shape in the step file). `softcover:UiModelBuiltInRender` (type-resolved, inactive) and `@ModelBuiltInComposition(reason)` in `:core:component` landed with 21 rule tests; reviewer findings fixed (composable lambdas by expected type, composable getters and typed properties, member properties in render files, `*Preview` skip on functions only). `RawCornerDp` now exempts `Corners.kt` by file name (it never had, hidden by stale detekt runs; gotcha in `build-wiring.md`). Active run: 17 findings, listed per sub-step in the table. PF-4/7 wait for S12-4.
-- **Next:** S11-1b (`:core:component` sheets: lists, share, verdict).
-- **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21, after `--stop`: `:detekt-rules:test` (90, all pass), `:core:component:compileKotlinJvm`, `styleCheck --rerun-tasks` and `checkDocBudgets` green with the rule inactive; AAA markers 21/21; `) }` hits only inside test code strings.
-- **Uncommitted:** all of S11-1a (rule, annotation, configs, tests, `RawCornerDp` fix, R10 bullet, `build-wiring.md`, step file, this block).
+- **State:** S11-1 done. `UiModelBuiltInRender` is active and green repo-wide with no `@Suppress` or baseline; `*UiState` members may look up stored models but never build one (containers and wrappers included). Swept: choose-lists chip, share sheet (capture state hoisted to hosts via `ShareCaptureState`), verdict draft (hoisted via `VerdictDraftReducer`), library per-tab lookups and filter sheet model, profile preview fixtures, explore genre control, streak strip/sheet, unknown-ISBN sheet, edition and tag-editor sheets, stored `topBar`. Also fixed: Row `BookCard` rules now sit under the skeleton mask (bare dividers on cold start). PF-4/7 wait for S12-4.
+- **Next:** S11-2, R11 holdouts (`RichText`, `StatNumber`, `ClickableText`, `MarkAsReadBurst`, `CoverlessTitleCover`).
+- **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).- **Verification:** JBR 21: `styleCheck` (rule active), `checkModuleGraph`, `checkDocBudgets`, every `testAndroidHostTest` and `:detekt-rules:test` green; two `softcover-reviewer` passes, findings fixed.
+- **Uncommitted:** all of S11-1b–1z and the divider fix.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

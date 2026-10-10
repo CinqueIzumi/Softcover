@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
@@ -12,6 +14,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
@@ -19,6 +22,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.core.uibinding.verdict.reduce
 import nl.rhaydus.softcover.core.uibinding.verdict.toVerdictSheetUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -181,5 +185,53 @@ class VerdictSheetCollectorTest {
                 cover = cover,
             )
         }
+    
+        @Test
+        fun `verdictSheet keeps the draft the reader edited when a cover resolves and rebuilds it`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val book = stubBook()
+                launchCollector()
+                stateFlow.value = stateFlow.value.copy(
+                    book = book,
+                    verdictSheetContext = VerdictSheetContext.FINISHED,
+                )
+                val edited = stateFlow.value.verdictSheet.shouldNotBeNull()
+                    .reduce(VerdictDraftEvent.RatingChanged(rating = 4.5))
+                    .reduce(VerdictDraftEvent.SpoilersToggled(checked = true))
+                stateFlow.value = stateFlow.value.copy(verdictSheet = edited)
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(verdictCover = buildCover())
+
+                // ----- Assert -----
+                val sheet = stateFlow.value.verdictSheet.shouldNotBeNull()
+                sheet.rating shouldBe 4.5
+                sheet.spoilers.checked shouldBe true
+                sheet.scaffold.header.trailing.shouldNotBeNull()
+            }
+
+        @Test
+        fun `verdictSheet starts from a fresh draft after it was closed and reopened`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val book = stubBook()
+                launchCollector()
+                stateFlow.value = stateFlow.value.copy(
+                    book = book,
+                    verdictSheetContext = VerdictSheetContext.FINISHED,
+                )
+                stateFlow.value = stateFlow.value.copy(
+                    verdictSheet = stateFlow.value.verdictSheet.shouldNotBeNull()
+                        .reduce(VerdictDraftEvent.RatingChanged(rating = 4.5)),
+                )
+                stateFlow.value = stateFlow.value.copy(verdictSheetContext = null)
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(verdictSheetContext = VerdictSheetContext.FINISHED)
+
+                // ----- Assert -----
+                stateFlow.value.verdictSheet.shouldNotBeNull().rating.shouldBeNull()
+            }
     }
 }

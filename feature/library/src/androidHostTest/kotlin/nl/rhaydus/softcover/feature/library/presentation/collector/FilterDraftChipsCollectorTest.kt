@@ -72,7 +72,7 @@ class FilterDraftChipsCollectorTest {
                 )
 
                 // ----- Assert -----
-                stateFlow.value.filterSheet shouldBe filterSheetScaffoldFor(
+                stateFlow.value.filterSheet.scaffold shouldBe filterSheetScaffoldFor(
                     resultCount = 0,
                     filtersActive = true,
                 )
@@ -86,7 +86,9 @@ class FilterDraftChipsCollectorTest {
                 resultCount = 8,
                 filtersActive = true,
             )
-            stateFlow.value = LibraryUiState(filterSheet = seeded)
+            stateFlow.value = LibraryUiState(
+                filterSheet = LibraryUiState().filterSheet.copy(scaffold = seeded),
+            )
             val collector = FilterDraftChipsCollector()
             val job = launch {
                 collector.onLaunch(
@@ -99,7 +101,7 @@ class FilterDraftChipsCollectorTest {
             stateFlow.value = stateFlow.value.copy(searchQuery = "x")
 
             // ----- Assert -----
-            stateFlow.value.filterSheet shouldBe seeded
+            stateFlow.value.filterSheet.scaffold shouldBe seeded
             job.cancel()
         }
 
@@ -146,7 +148,7 @@ class FilterDraftChipsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.filterSheetSelection?.tagChips?.map { it.key } shouldBe listOf("tag:1")
+            stateFlow.value.filterSheet.selection?.tagChips?.map { it.key } shouldBe listOf("tag:1")
             job.cancel()
         }
 
@@ -164,13 +166,13 @@ class FilterDraftChipsCollectorTest {
                 stateFlow.value = LibraryUiState(
                     filterDraft = LibraryFilterDraft(tabId = "all"),
                 )
-                val selectionAfterFirstEmit = stateFlow.value.filterSheetSelection
+                val selectionAfterFirstEmit = stateFlow.value.filterSheet.selection
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
 
                 // ----- Assert -----
-                (stateFlow.value.filterSheetSelection === selectionAfterFirstEmit) shouldBe true
+                (stateFlow.value.filterSheet.selection === selectionAfterFirstEmit) shouldBe true
                 job.cancel()
             }
     }

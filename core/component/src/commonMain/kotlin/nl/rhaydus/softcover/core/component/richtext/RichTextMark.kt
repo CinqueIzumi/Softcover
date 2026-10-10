@@ -7,7 +7,7 @@ import androidx.compose.runtime.Immutable
  * text.
  */
 @Immutable
-internal data class RichTextMark(
+data class RichTextMark(
     val start: Int,
     val end: Int,
     val type: RichTextMarkType,

@@ -7,6 +7,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -14,6 +15,7 @@ import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.feature.book_detail.presentation.editionSheetWithQuery
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -236,7 +238,7 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val state = BookDetailUiState(
                 editions = listOf(editionWithIsbn, editionWithoutIsbn),
-                editionSearchQuery = "",
+                editionSheet = editionSheetWithQuery(query = ""),
             )
 
             // ----- Act -----
@@ -251,7 +253,7 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val state = BookDetailUiState(
                 editions = listOf(editionWithIsbn, editionWithoutIsbn),
-                editionSearchQuery = "Penguin",
+                editionSheet = editionSheetWithQuery(query = "Penguin"),
             )
 
             // ----- Act -----
@@ -266,7 +268,7 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val state = BookDetailUiState(
                 editions = listOf(editionNullBoth),
-                editionSearchQuery = "anything",
+                editionSheet = editionSheetWithQuery(query = "anything"),
             )
 
             // ----- Act -----
@@ -601,6 +603,52 @@ class BookDetailUiStateTest {
 
             // ----- Assert -----
             result.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class WithBook {
+        @Test
+        fun `writes the book and a top bar titled with it`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = null,
+                currentEdition = null,
+            ).also { mock ->
+                every {
+                    mock.title
+                } returns "Piranesi"
+            }
+
+            // ----- Act -----
+            val result = BookDetailUiState().withBook(book = book)
+
+            // ----- Assert -----
+            result.book shouldBe book
+            result.topBar.title shouldBe "Piranesi"
+            result.topBar.surface shouldBe TopBarSurface.Opaque
+        }
+
+        @Test
+        fun `clears the top bar title when the book goes away`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = null,
+                currentEdition = null,
+            ).also { mock ->
+                every {
+                    mock.title
+                } returns "Piranesi"
+            }
+            val state = BookDetailUiState().withBook(book = book)
+
+            // ----- Act -----
+            val result = state.withBook(book = null)
+
+            // ----- Assert -----
+            result.book.shouldBeNull()
+            result.topBar.title.shouldBeNull()
+            result.topBar.surface shouldBe TopBarSurface.Opaque
         }
     }
 }

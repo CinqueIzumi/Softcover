@@ -31,13 +31,9 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnApplyFiltersAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftChipToggledAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftClearAllAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftTagSearchChangedAction
-import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterChips
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetEvent
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetSelection
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetUiModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 /**
@@ -46,56 +42,59 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
  * **Draft/commit.** [LibraryUiState.filterDraft] holds the sheet's facet selections and tag search
  * query, seeded from committed `state.filtersFor(tabId)` by `OnFilterSheetExpandedChangeAction` when
  * the sheet opens, and cleared when it closes, so a reopen always starts fresh. Every chip tap and
- * the in-sheet "Clear all" dispatch draft-edit actions only — [OnApplyFiltersAction] is the only
+ * the in-sheet "Clear all" dispatch draft-edit actions only — `OnApplyFiltersAction` is the only
  * action this sheet ever commits, firing once on "Show N titles" to apply the whole draft atomically.
  * Dismissing any other way (scrim, back) never dispatches it, so the draft is simply discarded.
- * [LibraryUiState.filterSheetSelection] previews live against the draft so the button's count always
+ * [LibraryFilterSheetUiModel.selection] previews live against the draft so the button's count always
  * matches what committing would actually show. This is deliberately separate from
  * `OnToggleFilterValueAction` / `OnClearFiltersAction`, which stay live/immediate — those back the
  * main-screen active-filter chip row, a different surface that has no "commit" step of its own.
  */
 @Composable
 internal fun LibraryFilterSheet(
-    tabId: String,
-    state: LibraryUiState,
-    runAction: (LibraryAction) -> Unit,
-    onDismissRequest: () -> Unit,
+    model: LibraryFilterSheetUiModel,
+    onEvent: (LibraryFilterSheetEvent) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val chips = state.filterChipsFor(tabId = tabId)
-    val selection = state.filterSheetSelection
+    val selection = model.selection
 
     SheetScaffold(
-        model = state.filterSheet,
+        model = model.scaffold,
+        modifier = modifier,
         onEvent = { event ->
             when (event) {
-                SheetScaffoldEvent.PrimaryClicked -> runAction(OnApplyFiltersAction())
+                SheetScaffoldEvent.PrimaryClicked -> onEvent(LibraryFilterSheetEvent.ApplyClicked)
 
-                SheetScaffoldEvent.SecondaryClicked -> runAction(OnFilterDraftClearAllAction())
+                SheetScaffoldEvent.SecondaryClicked -> onEvent(LibraryFilterSheetEvent.ClearAllClicked)
 
-                SheetScaffoldEvent.Dismissed -> onDismissRequest()
+                SheetScaffoldEvent.Dismissed -> onEvent(LibraryFilterSheetEvent.Dismissed)
 
                 SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
     ) {
         Column {
-            if (chips.isEmpty) {
-                EmptyFacetMessage()
+            if (selection != null && selection.isEmpty) {
+                EmptyFacetMessage(
+                    title = selection.emptyTitle,
+                    body = selection.emptyBody,
+                )
             } else if (selection != null) {
                 FacetSections(
-                    chips = chips,
                     selection = selection,
-                    tagSearchField = state.tagSearchField,
+                    tagSearchField = model.tagSearchField,
                     onChipEvent = { event ->
                         when (event) {
-                            is ChipEvent.Clicked -> runAction(OnFilterDraftChipToggledAction(key = event.key))
+                            is ChipEvent.Clicked -> onEvent(LibraryFilterSheetEvent.ChipToggled(key = event.key))
                             is ChipEvent.Dismissed -> Unit
                             is ChipEvent.SpoilerToggled -> Unit
                         }
                     },
                     onTagSearchEvent = { event ->
                         when (event) {
-                            is TextFieldEvent.ValueChanged -> runAction(OnFilterDraftTagSearchChangedAction(query = event.text))
+                            is TextFieldEvent.ValueChanged -> onEvent(
+                                LibraryFilterSheetEvent.TagSearchChanged(query = event.text),
+                            )
 
                             is TextFieldEvent.Submitted,
                             is TextFieldEvent.TrailingClicked -> Unit
@@ -109,13 +108,12 @@ internal fun LibraryFilterSheet(
 
 @Composable
 private fun FacetSections(
-    chips: LibraryFilterChips,
     selection: LibraryFilterSheetSelection,
     tagSearchField: TextFieldUiModel,
     onChipEvent: (ChipEvent) -> Unit,
     onTagSearchEvent: (TextFieldEvent) -> Unit,
 ) {
-    if (chips.ownershipChips.isEmpty.not() || chips.formatChips.isEmpty.not()) {
+    if (selection.showOwnershipFormat) {
         FacetSection(label = selection.ownershipFormatHeader) {
             (selection.ownershipChips + selection.formatChips).forEach { chip ->
                 Chip(
@@ -128,7 +126,7 @@ private fun FacetSections(
         Spacer(modifier = Modifier.height(Spacing.xl))
     }
 
-    if (chips.releaseYearChips.isEmpty.not()) {
+    if (selection.showReleaseYear) {
         FacetSection(label = selection.releaseYearHeader) {
             selection.releaseYearChips.forEach { chip ->
                 Chip(
@@ -141,7 +139,7 @@ private fun FacetSections(
         Spacer(modifier = Modifier.height(Spacing.xl))
     }
 
-    if (chips.readYearChips.isEmpty.not()) {
+    if (selection.showReadYear) {
         FacetSection(label = selection.readYearHeader) {
             selection.readYearChips.forEach { chip ->
                 Chip(
@@ -154,7 +152,7 @@ private fun FacetSections(
         Spacer(modifier = Modifier.height(Spacing.xl))
     }
 
-    if (chips.tagChips.isEmpty.not()) {
+    if (selection.showTags) {
         TagsFacetSection(
             header = selection.tagsHeader,
             availableLabel = selection.tagsAvailableLabel,
@@ -167,7 +165,7 @@ private fun FacetSections(
         Spacer(modifier = Modifier.height(Spacing.xl))
     }
 
-    if (chips.ratingChips.isEmpty.not()) {
+    if (selection.showRating) {
         FacetSection(label = selection.ratingHeader) {
             selection.ratingChips.forEach { chip ->
                 Chip(
@@ -183,8 +181,7 @@ private fun FacetSections(
  * The Tags facet: a "N available" count trailing the sub-label (the number of distinct tags the
  * shelf's books carry — not how many the user has selected, which would read wrong with e.g. one
  * tag active), a search-your-tags pill that narrows the chip cloud ([LibraryFilterSheetSelection]
- * already applies the query, since [nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft.tagSearch]
- * lives on state), and the checkable chip cloud itself.
+ * already applies the query, since `LibraryFilterDraft.tagSearch` lives on state), and the checkable chip cloud itself.
  */
 @Composable
 private fun TagsFacetSection(
@@ -272,7 +269,10 @@ private fun FacetSection(
 }
 
 @Composable
-private fun EmptyFacetMessage() {
+private fun EmptyFacetMessage(
+    title: String,
+    body: String,
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -287,7 +287,7 @@ private fun EmptyFacetMessage() {
                 ),
         ) {
             SoftcoverText(
-                text = "Nothing to filter yet",
+                text = title,
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -295,7 +295,7 @@ private fun EmptyFacetMessage() {
             Spacer(modifier = Modifier.height(Spacing.xxs))
 
             SoftcoverText(
-                text = "This shelf is too sparse for filters to matter — add a few books first.",
+                text = body,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

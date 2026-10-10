@@ -9,7 +9,9 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
  * (`component-contract.md` § 7.2 R9) off [LibraryFilterChips] and [LibraryFilterDraft] — each chip's
  * [ChipUiModel.selected] resolved against the draft, and [tagChips] narrowed to the draft's
  * [LibraryFilterDraft.tagSearch]. [resultCount] and [clearAllEnabled] ride along so the footer never
- * derives them from the draft in composition either.
+ * derives them from the draft in composition either. The `show*` flags and [isEmpty] carry the
+ * section visibility and empty-state decision, taken from [LibraryFilterChips] rather than from the
+ * (search-narrowed) chip lists.
  */
 internal data class LibraryFilterSheetSelection(
     val ownershipChips: List<ChipUiModel> = emptyList(),
@@ -26,6 +28,14 @@ internal data class LibraryFilterSheetSelection(
     val tagsHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Tags"),
     val ratingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Rating"),
     val tagsAvailableLabel: String = "0 available",
+    val isEmpty: Boolean = false,
+    val emptyTitle: String = "Nothing to filter yet",
+    val emptyBody: String = "This shelf is too sparse for filters to matter — add a few books first.",
+    val showOwnershipFormat: Boolean = false,
+    val showReleaseYear: Boolean = false,
+    val showReadYear: Boolean = false,
+    val showTags: Boolean = false,
+    val showRating: Boolean = false,
 )
 
 /**
@@ -62,6 +72,12 @@ internal fun buildLibraryFilterSheetSelection(
         resultCount = resultCount,
         clearAllEnabled = draft.filters.isEmpty.not(),
         tagsAvailableLabel = "${chips.tagChips.chips.size} available",
+        isEmpty = chips.isEmpty,
+        showOwnershipFormat = chips.ownershipChips.isEmpty.not() || chips.formatChips.isEmpty.not(),
+        showReleaseYear = chips.releaseYearChips.isEmpty.not(),
+        showReadYear = chips.readYearChips.isEmpty.not(),
+        showTags = chips.tagChips.isEmpty.not(),
+        showRating = chips.ratingChips.isEmpty.not(),
     )
 }
 

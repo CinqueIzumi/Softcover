@@ -6,11 +6,14 @@ import androidx.compose.runtime.LaunchedEffect
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
 import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.DismissStreakSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissVerdictPromptAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnEditVerdictDraftAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressMinutesSteppedAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTimeChangedAction
@@ -38,8 +41,6 @@ internal fun ReadingOverlays(
     state: ReadingScreenUiState,
     runAction: (ReadingAction) -> Unit,
     controller: MarkAsReadController,
-    showStreakSheet: Boolean,
-    onDismissStreakSheet: () -> Unit,
 ) {
     val haptics = rememberHaptics()
 
@@ -129,14 +130,9 @@ internal fun ReadingOverlays(
             model = verdictSheet,
             onEvent = { event ->
                 when (event) {
-                    is VerdictSheetEvent.Saved -> runAction(
-                        OnSaveVerdictAction(
-                            book = verdictBook,
-                            rating = event.rating,
-                            review = event.review,
-                            hasSpoilers = event.hasSpoilers,
-                        ),
-                    )
+                    VerdictSheetEvent.Saved -> runAction(OnSaveVerdictAction(book = verdictBook))
+
+                    is VerdictDraftEvent -> runAction(OnEditVerdictDraftAction(event = event))
 
                     // Reading never offers Delete, so the sheet cannot raise it.
                     VerdictSheetEvent.DeleteRequested -> Unit
@@ -147,11 +143,10 @@ internal fun ReadingOverlays(
         )
     }
 
-    if (showStreakSheet) {
+    if (state.showStreakSheet) {
         StreakStripSheet(
-            activity = state.recentReadingActivity,
-            scaffold = state.streakSheet,
-            onDismiss = onDismissStreakSheet,
+            model = state.streakSheet,
+            onDismiss = { runAction(DismissStreakSheetAction) },
         )
     }
 }

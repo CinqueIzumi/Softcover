@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -11,6 +12,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
@@ -19,6 +21,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.core.uibinding.verdict.reduce
 import nl.rhaydus.softcover.core.uibinding.verdict.toVerdictSheetUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -160,6 +163,55 @@ class VerdictSheetCollectorTest {
             stateFlow.value.verdictSheet shouldBe book.toVerdictSheetUiModel(
                 context = VerdictSheetContext.FINISHED,
                 review = reviewDocument.toRichTextUiModel(),
+                cover = null,
+            )
+        }
+
+        @Test
+        fun `keeps the edited draft when the cover arrives and rebuilds the model`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook
+            val cover = cover()
+            launchCollector()
+            stateFlow.value = stateFlow.value.copy(verdictPromptBook = book)
+            val edited = stateFlow.value.verdictSheet.shouldNotBeNull()
+                .reduce(event = VerdictDraftEvent.RatingChanged(rating = 4.0))
+                .reduce(event = VerdictDraftEvent.SpoilersToggled(checked = true))
+            stateFlow.value = stateFlow.value.copy(verdictSheet = edited)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(verdictCover = cover)
+
+            // ----- Assert -----
+            val sheet = stateFlow.value.verdictSheet.shouldNotBeNull()
+            sheet.rating shouldBe 4.0
+            sheet.spoilers.checked shouldBe true
+            sheet.scaffold shouldBe book.toVerdictSheetUiModel(
+                context = VerdictSheetContext.FINISHED,
+                review = null,
+                cover = cover,
+            ).scaffold
+        }
+
+        @Test
+        fun `does not carry a draft over to a new prompt after the sheet was cleared`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook
+            launchCollector()
+            stateFlow.value = stateFlow.value.copy(verdictPromptBook = book)
+            stateFlow.value = stateFlow.value.copy(
+                verdictSheet = stateFlow.value.verdictSheet.shouldNotBeNull()
+                    .reduce(event = VerdictDraftEvent.RatingChanged(rating = 4.0)),
+            )
+            stateFlow.value = stateFlow.value.copy(verdictPromptBook = null)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(verdictPromptBook = book)
+
+            // ----- Assert -----
+            stateFlow.value.verdictSheet shouldBe book.toVerdictSheetUiModel(
+                context = VerdictSheetContext.FINISHED,
+                review = null,
                 cover = null,
             )
         }

@@ -22,7 +22,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.share.ShareCaptureState
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
@@ -56,12 +56,17 @@ internal data class BookDetailUiState(
 
     val loadingBookDetails: Boolean = true,
     val book: Book? = null,
+
+    /**
+     * Opaque and titled with the book. Desktop's bar, mobile's bar once the hero has scrolled away,
+     * and the offline placeholder's bar, which has no hero to sit over.
+     */
+    val topBar: TopBarUiModel = topBarFor(book = null),
     val initialCover: BookInitialCover? = null,
     val fabMenuExpanded: Boolean = false,
     val showEditEditionSheet: Boolean = false,
     val editions: List<BookEdition> = emptyList(),
     val loadingEditions: Boolean = false,
-    val editionSearchQuery: String = "",
 
     /**
      * The edition selector's in-progress pick, set to [displayedEdition]'s id when the sheet opens
@@ -172,6 +177,8 @@ internal data class BookDetailUiState(
 
     val chosenShareVariant: ShareCardVariant? = null,
 
+    val shareCapture: ShareCaptureState = ShareCaptureState(),
+
     /**
      * [heroBackdropCover] deliberately carries a null `coverlessTitle`: it is
      * the blurred decorative layer behind the hero, not a cover the user reads, so a typographic
@@ -195,10 +202,11 @@ internal data class BookDetailUiState(
     val offlineEmptyState: EmptyStateUiModel? = null,
     val tagEditorCover: CoverUiModel? = null,
 
-    val tagEditorSheet: SheetScaffoldUiModel? = null,
+    /** `null` until [book] exists. */
+    val tagEditorSheet: TagEditorSheetUiModel? = null,
 
-    /** The edition selector's chrome; `null` until [book] and [displayedEdition] exist. */
-    val editionSheet: SheetScaffoldUiModel? = null,
+    /** `null` until [book] and [displayedEdition] exist. */
+    val editionSheet: EditionSheetUiModel? = null,
 
     val showChooseListsSheet: Boolean = false,
     val userLists: List<BookList> = emptyList(),
@@ -227,7 +235,7 @@ internal data class BookDetailUiState(
 
     val tagEditorOpenerChip: ChipUiModel? = null,
 
-    val userTagEditorGroups: List<UserTagEditorChipGroup> = emptyList(),
+    val userTagEditorGroups: ImmutableList<UserTagEditorChipGroup> = persistentListOf(),
     val tagEditorEmptyState: EmptyStateUiModel = EmptyStateUiModel(
         title = "Nothing here yet.",
         body = "Name the first thing this book is to you.",
@@ -242,20 +250,10 @@ internal data class BookDetailUiState(
      */
     val newlyAddedTagKey: String? = null,
 
-    val tagEditorCategoryChips: List<ChipUiModel> = emptyList(),
+    val tagEditorCategoryChips: ImmutableList<ChipUiModel> = persistentListOf(),
 
     val tagSuggestionChips: ChipSet<UserTag> = ChipSet(),
 ) : UiState {
-    /**
-     * Opaque and titled with the book. Desktop's bar, mobile's bar once the hero has scrolled away,
-     * and the offline placeholder's bar, which has no hero to sit over.
-     */
-    val topBar: TopBarUiModel
-        get() = TopBarUiModel(
-            title = book?.title,
-            surface = TopBarSurface.Opaque,
-        )
-
     /**
      * The edition pinned by an external entry point (a barcode scan), if any. It wins over every
      * other edition — including the persisted on-shelf edition — so a scan always shows the exact
@@ -314,5 +312,5 @@ internal data class BookDetailUiState(
     fun isEditionOwned(edition: BookEdition?): Boolean = edition != null && edition.id in ownedEditionIds
 
     val filteredEditions: List<BookEdition>
-        get() = editions.filterByEditionSearch(editionSearchQuery)
+        get() = editions.filterByEditionSearch(editionSheet?.searchQuery.orEmpty())
 }

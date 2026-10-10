@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -131,13 +133,13 @@ private fun List<Tag>.toTagCategoryChipGroups(revealedTagKeys: Set<String>): Lis
     }
 
 /** Mirrors `TagEditorBottomSheet`'s old `groupedForCollection()`, now emitting chips instead of [UserTag]s. */
-private fun List<UserTag>.toUserTagEditorChipGroups(): List<UserTagEditorChipGroup> {
+private fun List<UserTag>.toUserTagEditorChipGroups(): ImmutableList<UserTagEditorChipGroup> {
     val editableGroups = EDITABLE_CATEGORIES.mapNotNull { category ->
         val tagsInCategory = filter { it.category == category }
 
         tagsInCategory.takeIf { it.isNotEmpty() }?.let {
             UserTagEditorChipGroup(
-                category = category,
+                label = category.label,
                 chips = it.map { tag -> tag.toEditorChipUiModel() },
             )
         }
@@ -145,12 +147,12 @@ private fun List<UserTag>.toUserTagEditorChipGroups(): List<UserTagEditorChipGro
 
     val otherTags = filter { it.category !in EDITABLE_CATEGORIES }
 
-    return if (otherTags.isEmpty()) {
-        editableGroups
-    } else {
-        editableGroups + UserTagEditorChipGroup(
-            category = TagCategory.OTHER,
-            chips = otherTags.map { it.toEditorChipUiModel() },
+    val otherGroup = otherTags.takeIf { it.isNotEmpty() }?.let {
+        UserTagEditorChipGroup(
+            label = TagCategory.OTHER.label,
+            chips = it.map { tag -> tag.toEditorChipUiModel() },
         )
     }
+
+    return (editableGroups + listOfNotNull(otherGroup)).toImmutableList()
 }

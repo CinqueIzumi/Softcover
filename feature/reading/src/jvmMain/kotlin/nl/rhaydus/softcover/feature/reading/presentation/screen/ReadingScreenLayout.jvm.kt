@@ -11,10 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
@@ -32,9 +28,11 @@ import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowStreakSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripEvent
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.ALSO_READING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.AlsoReadingHeader
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
@@ -67,8 +65,6 @@ internal actual fun ReadingScreenLayout(
         runAction = runAction,
     )
 
-    var showStreakSheet by remember { mutableStateOf(false) }
-
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Box(
@@ -82,7 +78,7 @@ internal actual fun ReadingScreenLayout(
                             DesktopReadingHeader(
                                 state = state,
                                 runAction = runAction,
-                                onExpandStreak = { showStreakSheet = true },
+                                onExpandStreak = { runAction(OnShowStreakSheetClickAction) },
                             )
 
                             DesktopReadingContent(
@@ -105,8 +101,8 @@ internal actual fun ReadingScreenLayout(
                         trendingHeader = state.trendingHeader,
                         emptyState = state.emptyCurrentlyReading,
                         streakEnabled = state.streakEnabled,
-                        recentReadingActivity = state.recentReadingActivity,
-                        onExpandStreak = { showStreakSheet = true },
+                        streakStrip = state.streakStrip,
+                        onExpandStreak = { runAction(OnShowStreakSheetClickAction) },
                         onBookClick = onBookClick,
                         onNavigateToSearch = onNavigateToSearch,
                     )
@@ -117,8 +113,6 @@ internal actual fun ReadingScreenLayout(
                 state = state,
                 runAction = runAction,
                 controller = controller,
-                showStreakSheet = showStreakSheet,
-                onDismissStreakSheet = { showStreakSheet = false },
             )
         }
 
@@ -224,13 +218,16 @@ private fun DesktopReadingHeader(
             )
         }
 
-        if (state.streakEnabled && (state.isLoading || state.recentReadingActivity.isNotEmpty())) {
+        if (state.streakEnabled && (state.isLoading || state.streakStrip.days.isNotEmpty())) {
             Spacer(modifier = Modifier.height(Spacing.md))
 
             StreakStrip(
-                activity = state.recentReadingActivity,
-                onClick = onExpandStreak,
-                isLoading = state.isLoading,
+                model = state.streakStrip,
+                onEvent = { event ->
+                    when (event) {
+                        StreakStripEvent.Clicked -> onExpandStreak()
+                    }
+                },
             )
         }
 

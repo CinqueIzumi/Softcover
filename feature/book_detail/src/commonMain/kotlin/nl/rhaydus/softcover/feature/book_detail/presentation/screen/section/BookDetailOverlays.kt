@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
-import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.dialog.DatePickerEvent
 import nl.rhaydus.softcover.core.component.dialog.SoftcoverDatePickerDialog
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
@@ -11,11 +10,11 @@ import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
 import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnAddUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeleteReviewAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
@@ -25,6 +24,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissPro
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissTagEditorAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissVerdictSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditVerdictDraftAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
@@ -34,9 +34,12 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTa
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTimeChangedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveVerdictAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareCaptureEventAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareVariantSelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSubmitTagDraftAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagDraftChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagEditorCategoryChangeAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagSuggestionSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleUserTagSpoilerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
@@ -48,7 +51,9 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBo
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.EditionSheetEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.TagEditorSheetEvent
 
 /**
  * Every modal surface the Book Detail screen can raise — share, tag editor, choose-lists, review
@@ -73,6 +78,10 @@ internal fun BookDetailOverlays(
                         OnShareVariantSelectedAction(variant = event.variant),
                     )
 
+                    is ShareSheetEvent.CaptureReported -> runAction(
+                        OnShareCaptureEventAction(captureEvent = event.captureEvent),
+                    )
+
                     ShareSheetEvent.Dismissed -> runAction(OnDismissShareSheetAction())
                 }
             },
@@ -83,49 +92,29 @@ internal fun BookDetailOverlays(
     if (state.showTagEditorSheet && tagEditorSheet != null) {
         TagEditorBottomSheet(
             model = tagEditorSheet,
-            userTagEditorGroups = state.userTagEditorGroups,
-            emptyState = state.tagEditorEmptyState,
-            newlyAddedTagKey = state.newlyAddedTagKey,
-            categoryChips = state.tagEditorCategoryChips,
-            suggestions = state.tagSuggestionChips,
-            selectedCategory = state.tagEditorCategory,
-            namingField = state.tagNamingField,
-            onCategorySelected = { runAction(OnTagEditorCategoryChangeAction(category = it)) },
-            onDraftChange = { runAction(OnTagDraftChangeAction(input = it)) },
-            onAddTag = { name, category ->
-                runAction(
-                    OnAddUserTagAction(
-                        name = name,
-                        category = category,
-                    ),
-                )
-            },
-            onSuggestionSelected = {
-                runAction(
-                    OnAddUserTagAction(
-                        name = it.name,
-                        category = it.category,
-                    ),
-                )
-            },
-            onTagChipEvent = { event ->
+            onEvent = { event ->
                 when (event) {
-                    is ChipEvent.Dismissed -> {
-                        state.userTagByEditorChipKey[event.key]?.let { tag ->
-                            runAction(OnRemoveUserTagAction(tag = tag))
-                        }
-                    }
+                    is TagEditorSheetEvent.CategorySelected -> runAction(
+                        OnTagEditorCategoryChangeAction(categoryKey = event.categoryKey),
+                    )
 
-                    is ChipEvent.SpoilerToggled -> {
-                        state.userTagByEditorChipKey[event.key]?.let { tag ->
-                            runAction(OnToggleUserTagSpoilerAction(tag = tag))
-                        }
-                    }
+                    is TagEditorSheetEvent.DraftChanged -> runAction(OnTagDraftChangeAction(input = event.text))
 
-                    is ChipEvent.Clicked -> Unit
+                    TagEditorSheetEvent.DraftSubmitted -> runAction(OnSubmitTagDraftAction())
+
+                    is TagEditorSheetEvent.SuggestionSelected -> runAction(
+                        OnTagSuggestionSelectedAction(chipKey = event.chipKey),
+                    )
+
+                    is TagEditorSheetEvent.TagRemoved -> runAction(OnRemoveUserTagAction(chipKey = event.chipKey))
+
+                    is TagEditorSheetEvent.TagSpoilerToggled -> runAction(
+                        OnToggleUserTagSpoilerAction(chipKey = event.chipKey),
+                    )
+
+                    TagEditorSheetEvent.Dismissed -> runAction(OnDismissTagEditorAction())
                 }
             },
-            onDismissRequest = { runAction(OnDismissTagEditorAction()) },
         )
     }
 
@@ -158,14 +147,9 @@ internal fun BookDetailOverlays(
             model = verdictSheet,
             onEvent = { event ->
                 when (event) {
-                    is VerdictSheetEvent.Saved -> runAction(
-                        OnSaveVerdictAction(
-                            book = verdictBook,
-                            rating = event.rating,
-                            review = event.review,
-                            hasSpoilers = event.hasSpoilers,
-                        ),
-                    )
+                    VerdictSheetEvent.Saved -> runAction(OnSaveVerdictAction(book = verdictBook))
+
+                    is VerdictDraftEvent -> runAction(OnEditVerdictDraftAction(event = event))
 
                     VerdictSheetEvent.DeleteRequested -> runAction(OnDeleteReviewAction(book = verdictBook))
 
@@ -179,20 +163,20 @@ internal fun BookDetailOverlays(
     if (state.showEditEditionSheet && editionSheet != null) {
         EditionBottomSheetSelector(
             model = editionSheet,
-            editionCards = state.editionCards,
-            editionCountHeader = state.editionCountHeader,
-            searchQuery = state.editionSearchQuery,
-            onSearchQueryChange = {
-                runAction(OnEditionSearchQueryChangeAction(query = it))
-            },
-            onEditionSelected = { editionId ->
-                runAction(OnEditionSelectedAction(editionId = editionId))
-            },
-            onDismissRequest = {
-                runAction(OnDismissEditEditionSheetClickAction())
-            },
-            onConfirmClick = {
-                runAction(OnNewEditionSaveClickAction())
+            onEvent = { event ->
+                when (event) {
+                    is EditionSheetEvent.SearchChanged -> runAction(
+                        OnEditionSearchQueryChangeAction(query = event.query),
+                    )
+
+                    is EditionSheetEvent.EditionSelected -> runAction(
+                        OnEditionSelectedAction(editionId = event.editionId),
+                    )
+
+                    EditionSheetEvent.Confirmed -> runAction(OnNewEditionSaveClickAction())
+
+                    EditionSheetEvent.Dismissed -> runAction(OnDismissEditEditionSheetClickAction())
+                }
             },
         )
     }
