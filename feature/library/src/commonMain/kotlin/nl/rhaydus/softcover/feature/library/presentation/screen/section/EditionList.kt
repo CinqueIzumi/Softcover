@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.component.bookcard.bookCardHandOver
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
+import nl.rhaydus.softcover.core.component.reorder.reorderLift
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -173,6 +174,8 @@ internal fun EditionList(
             orderedKeys.removeAt(fromIndex),
         )
 
+        haptics.tickle()
+
         val current = minTouchedIndex.intValue
 
         minTouchedIndex.intValue = if (current == -1) {
@@ -214,7 +217,7 @@ internal fun EditionList(
         ) { index, card ->
             val gridItemScope = this
 
-            ReorderableItem(state = reorderableState, key = card.key.lazyKey) {
+            ReorderableItem(state = reorderableState, key = card.key.lazyKey) { isDragging ->
                 // Built unconditionally so the per-item composable structure is identical whether
                 // or not rearranging — only the drag-handle slot is toggled below, so the cover is
                 // never remounted (no flash).
@@ -264,6 +267,9 @@ internal fun EditionList(
                     animator = animator,
                     coordinator = entry,
                     index = index,
+                ).reorderLift(
+                    isDragging = isDragging,
+                    outset = Spacing.xs,
                 )
 
                 BookCard(

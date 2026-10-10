@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen.section
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,12 +15,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.DesktopTooltip
@@ -31,7 +28,6 @@ import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
@@ -41,9 +37,8 @@ private const val HIDDEN_ROW_ALPHA = 0.52f
 /**
  * One flat, borderless row: a leading grip/pin column, the name (a leading 6dp primary dot for a
  * list), an italic tabular count line, and a trailing eye toggle when [LibraryTabEntry.canHide]. There
- * is no per-row click target — only the grip (drag) and the eye (visibility) are interactive — so the
- * row's own "press wash" reflects [isDragging] rather than a tap, matching the design system's
- * settings-row press-wash convention (an `animateColorAsState` on the theme's effects spec).
+ * is no per-row click target — only the grip (drag) and the eye (visibility) are interactive — so
+ * [isDragging] only tints the grip; the row's lifted plate is drawn by the caller's `reorderLift`.
  */
 @Composable
 internal fun ReorderableRow(
@@ -54,21 +49,9 @@ internal fun ReorderableRow(
 ) {
     val hidden = entry.visibilityToggle?.checked == false
 
-    val rowBackground by animateColorAsState(
-        targetValue = if (isDragging) {
-            MaterialTheme.colorScheme.surfaceContainer
-        } else {
-            Color.Transparent
-        },
-        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
-        label = "libraryTabRowWash",
-    )
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(Corners.md)
-            .background(rowBackground)
             .alpha(if (hidden) HIDDEN_ROW_ALPHA else 1f)
             .padding(
                 start = Spacing.sm,

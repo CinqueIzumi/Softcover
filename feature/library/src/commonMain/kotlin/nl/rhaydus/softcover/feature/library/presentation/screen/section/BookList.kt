@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.bookCardHandOver
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
+import nl.rhaydus.softcover.core.component.reorder.reorderLift
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -193,6 +194,8 @@ internal fun BookList(
             orderedKeys.removeAt(fromIndex),
         )
 
+        haptics.tickle()
+
         maxTouchedIndex.intValue = maxOf(
             maxTouchedIndex.intValue,
             fromIndex,
@@ -224,7 +227,7 @@ internal fun BookList(
 
             val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@itemsIndexed
 
-            ReorderableItem(state = reorderableState, key = card.key.lazyKey) {
+            ReorderableItem(state = reorderableState, key = card.key.lazyKey) { isDragging ->
                 // Built unconditionally so the per-item composable structure is identical in and
                 // out of rearrange mode — only the drag-handle slot is swapped below (a parameter
                 // value, not a composable call), so the cover is never remounted (no flash).
@@ -347,7 +350,10 @@ internal fun BookList(
                         onCtrlClick = onCtrlClick,
                         onShiftClick = onShiftClick,
                     )
-                }
+                }.reorderLift(
+                    isDragging = isDragging,
+                    outset = Spacing.xs,
+                )
 
                 DesktopContextMenu(items = contextMenuItems) {
                     BookCard(

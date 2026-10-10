@@ -28,7 +28,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-13 | Charts grow, morph and slide | SL-15a | [x] |
 | S11-42 | Reduced motion resolves once at the theme root; call sites stop branching on it | S11-13 | [x] |
 | S11-14 | Cover selection animates | SL-15a, S11-42 | [x] |
-| S11-15 | One reorder lift treatment | S11-6 | [ ] |
+| S11-15 | One reorder lift treatment | S11-6 | [x] |
 | S11-16 | Selectable controls fire `select`; `ToggleRow` shares its interaction source | S11-6 | [ ] |
 | S11-17 | Selection states animate with motion-scheme specs | SL-15a | [ ] |
 | S11-18 | `SheetScaffold` footer: no haptic of its own, spinner on the running button | S11-6 | [ ] |
@@ -58,14 +58,12 @@ primitives among them), and every premium-feel sub-step has landed.
 
 ## Approved shape
 
-S11-14:
-- Render-only, in place: `SelectionMark.kt`, `BookCardParts.kt`, `BookCardRow.kt`; no model, event or public API change.
-- The cover dim eases between 1 and 0.55 on `slowEffectsSpec()`, so entering and leaving selection fade every cover together.
-- Ring and tint share one 0→1 fraction on `slowEffectsSpec()`; the overlay is composed while selected or fading out.
-- A selected cover, ring included, shrinks to 0.92 on `defaultSpatialSpec()` (drawn, not measured); the mark stays full size. New: no screen shrank a selection before.
-- `SelectionMark`'s container colour eases on `slowEffectsSpec()`; the check, and the mark entering on a cover, scale in on `defaultSpatialSpec()` (the pop), out on `fastEffectsSpec()`. Default/fast specs read as a cut on device.
-- The mark enters with selection: scale + fade on a cover; `expandHorizontally` + fade as a coverless row's lead, its gap growing with it. It keeps its last state while leaving.
-- Scheme specs only, so reduced motion snaps with no branch. No haptic (S11-16). No tests (no logic).
+S11-15:
+- One `@Composable fun Modifier.reorderLift(isDragging: Boolean)` in new `:core:component` package `reorder` (`ReorderLift.kt`); no model, the drag state is composition-only.
+- Dragged: scale 1→1.04 on `defaultSpatialSpec()` (settles on drop); a `Corners.md` plate in `surfaceContainer` plus ~8 dp shadow, both fading on `slowEffectsSpec()`.
+- Library `BookList` and `EditionList` read `isDragging` from `ReorderableItem` and lift the card; cover-only grids hide the plate behind the cover. `tickle` fires per slot crossed in the reorder callback.
+- Settings: `reorderLift` replaces `ReorderableRow`'s wash and the 0.95 alpha; the grip still turns primary. Slot shifts move on `defaultSpatialSpec()`; `tickle` fires on each hover-target change; the dropped row animates its residual offset to zero.
+- Scheme specs only, so reduced motion snaps with no branch. No tests (no logic), no Gallery entry (a modifier). Fallback if text cards look cramped on the plate: scale + shadow only on library items.
 
 ## R10 edges
 

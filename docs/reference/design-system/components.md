@@ -43,7 +43,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 
 - **Cover** — `core:component/cover` — the app's only book-cover renderer; variant-driven, never blank.
 - **Coverless title cover** — `core:component/cover` — the monogram/title jacket `Cover` falls back to.
-- **Book card** — `core:component/bookcard` — the one book/series card (cover-only, column or row) for every list, rail and grid surface; `bookCardStaggeredEntry` skips the entry animation for stand-ins; `bookCardHandOver` fades lazy stand-ins out as the real list staggers in.
+- **Book card** — `core:component/bookcard` — the one book/series card (cover-only, column or row); `bookCardHandOver` fades lazy stand-ins out as the real list staggers in.
 - **Rhaydus shimmer image** — [detail](components/covers.md#rhaydus-shimmer-image) — the loader for every non-cover image.
 
 ## States & feedback
@@ -60,6 +60,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Revealed when present** — `core:component/state` — expands a row vertically while its value is non-null.
 - **Unreleased badge** — `core:component/badge` — `Primary` tone; resolved in `core:uibinding` `release/`.
 - **Selection mark** — `core:component/selection` — selected-state circle mark for a cover, row or edition card.
+- **Reorder lift** — `core:component/reorder` — `Modifier.reorderLift`: the one drag-to-reorder lift.
 - **Mark-as-read celebration** — `core:component/celebration` — mark-as-read particle burst.
 - **Search results pagination** (feature-owned) — [detail](components/states-feedback.md#search-results-pagination) — append-on-scroll paging.
 - **Connectivity chrome** — [detail](components/states-feedback.md#connectivity-chrome) — `Banner`, `EmptyState` and `rememberIsOnline()` for offline.

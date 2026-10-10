@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-14 committed: book-card selection animates on motion-scheme specs; a selected cover shrinks to 0.92 with its ring + tint (fades on `slowEffectsSpec()`; the default/fast effects specs read as a cut on device), `SelectionMark` fills and its check pops, and the mark enters with selection (a coverless row's mark expands with its gap). `rememberHeldMark` keeps the mark's look while it leaves. Seen on device. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
-- **Next:** S11-15 Phase 1 in `steps/s11-contract-retrofit.md` § S11-15.
+- **State:** S11-15 committed: `Modifier.reorderLift(isDragging, outset)` (`core:component/reorder`) lifts dragged items in `BookList`, `EditionList` and the settings tab rows (scale 1.04, `surfaceContainer` plate, 8 dp shadow); library items pass an 8 dp plate outset, and the library grid takes its gutter as `contentPadding` so outer columns don't clip it. `tickle` per slot crossed; a dropped settings row settles its residual offset, cancelled when a new drag starts. Seen on device. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
+- **Next:** S11-16 Phase 1 in `steps/s11-contract-retrofit.md` § S11-16.
 - **Open questions:** none. Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck` pass after the review fixes and the shrink; no glommed closers. No tests (no logic).
+- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck` pass after the S11-15 review fixes; no glommed closers. No tests (no logic).
 - **Uncommitted:** nothing.
 ## Local verification
 

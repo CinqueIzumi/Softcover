@@ -138,10 +138,12 @@ internal fun LayoutGrid(
 
     LazyVerticalGrid(
         columns = columns,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = Spacing.gutter),
-        contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = Spacing.gutter,
+            end = Spacing.gutter,
+            bottom = rememberBottomBarPadding(),
+        ),
         verticalArrangement = Arrangement.spacedBy(itemSpacing),
         horizontalArrangement = Arrangement.spacedBy(itemSpacing),
         state = gridState,
