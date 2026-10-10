@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -49,7 +50,7 @@ internal fun BookCardRowLayout(
                 hoverHighlight = true,
             ),
     ) {
-        Divider()
+        Divider(modifier = Modifier.skeletonMask(visible = isLoading))
 
         Column(
             modifier = Modifier.padding(
