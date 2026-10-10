@@ -1,5 +1,10 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,11 +34,13 @@ internal fun BookCardRowLayout(
 ) {
     val selection = model.decorations.selection
     val markSelected = selection?.markSelected
+    val heldMark = rememberHeldMark(markSelected = markSelected)
     val isLoading = model.isLoading
     val lead = variant.lead
     val trailing = variant.trailing
     val deadline = variant.deadline
     val typography = MaterialTheme.editorialTypography
+    val motionScheme = MaterialTheme.motionScheme
 
     val leadWidth = when (variant.size) {
         BookCardVariant.Row.Size.Compact -> 40.dp
@@ -61,56 +68,68 @@ internal fun BookCardRowLayout(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (lead !is BookCardLead.Cover && markSelected != null) {
+                AnimatedVisibility(
+                    visible = lead !is BookCardLead.Cover && markSelected != null,
+                    enter = expandHorizontally(animationSpec = motionScheme.defaultSpatialSpec()) +
+                        fadeIn(animationSpec = motionScheme.defaultEffectsSpec()),
+                    exit = shrinkHorizontally(animationSpec = motionScheme.defaultSpatialSpec()) +
+                        fadeOut(animationSpec = motionScheme.defaultEffectsSpec()),
+                ) {
                     SelectionMark(
-                        selected = markSelected,
+                        selected = heldMark,
                         backdrop = SelectionMarkBackdrop.Surface,
+                        modifier = Modifier.padding(end = Spacing.sm),
                     )
                 }
 
-                when (lead) {
-                    is BookCardLead.Cover -> BookCardCoverLayout(
-                        cover = lead.cover,
-                        selection = selection,
-                        modifier = Modifier.width(leadWidth),
-                    )
-
-                    is BookCardLead.SeriesStack -> BookCardSeriesStack(
-                        front = lead.front,
-                        width = leadWidth,
-                        isLoading = isLoading,
-                    )
-
-                    null -> Unit
-                }
-
-                BookCardTextBlock(
-                    content = variant.text,
-                    titleStyle = if (variant.size == BookCardVariant.Row.Size.Large) {
-                        typography.titleLarge
-                    } else {
-                        typography.titleMedium
-                    },
-                    titleMinLines = 1,
-                    titleMaxLines = if (variant.size == BookCardVariant.Row.Size.Compact) 1 else 2,
-                    progress = model.decorations.progress,
-                    isLoading = isLoading,
+                Row(
                     modifier = Modifier.weight(1f),
-                )
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    when (lead) {
+                        is BookCardLead.Cover -> BookCardCoverLayout(
+                            cover = lead.cover,
+                            selection = selection,
+                            modifier = Modifier.width(leadWidth),
+                        )
 
-                if (trailing != null) {
-                    BookCardTrailingControl(
-                        trailing = trailing,
+                        is BookCardLead.SeriesStack -> BookCardSeriesStack(
+                            front = lead.front,
+                            width = leadWidth,
+                            isLoading = isLoading,
+                        )
+
+                        null -> Unit
+                    }
+
+                    BookCardTextBlock(
+                        content = variant.text,
+                        titleStyle = if (variant.size == BookCardVariant.Row.Size.Large) {
+                            typography.titleLarge
+                        } else {
+                            typography.titleMedium
+                        },
+                        titleMinLines = 1,
+                        titleMaxLines = if (variant.size == BookCardVariant.Row.Size.Compact) 1 else 2,
+                        progress = model.decorations.progress,
                         isLoading = isLoading,
-                        onClick = { onEvent(BookCardEvent.TrailingClicked(key = model.key)) },
+                        modifier = Modifier.weight(1f),
                     )
-                }
 
-                if (content != null && isLoading.not()) {
-                    content()
+                    if (trailing != null) {
+                        BookCardTrailingControl(
+                            trailing = trailing,
+                            isLoading = isLoading,
+                            onClick = { onEvent(BookCardEvent.TrailingClicked(key = model.key)) },
+                        )
+                    }
+
+                    if (content != null && isLoading.not()) {
+                        content()
+                    }
                 }
             }
 

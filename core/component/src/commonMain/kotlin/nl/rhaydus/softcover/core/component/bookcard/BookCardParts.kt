@@ -1,5 +1,11 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +50,7 @@ internal fun BookCardCoverLayout(
 ) {
     val selected = selection?.selected == true
     val markSelected = selection?.markSelected
+    val heldMark = rememberHeldMark(markSelected = markSelected)
 
     val coverModel = cover?.model
     val badge = cover?.badge
@@ -53,43 +61,68 @@ internal fun BookCardCoverLayout(
         coverModel.variant.shape()
     }
 
+    val scheme = MaterialTheme.colorScheme
+    val motionScheme = MaterialTheme.motionScheme
+    val coverAlpha by animateFloatAsState(
+        targetValue = if (selection?.dimsUnselected == true) 0.55f else 1f,
+        animationSpec = motionScheme.slowEffectsSpec(),
+    )
+    val coverScale by animateFloatAsState(
+        targetValue = if (selected) 0.92f else 1f,
+        animationSpec = motionScheme.defaultSpatialSpec(),
+    )
+    val ringFraction by animateFloatAsState(
+        targetValue = if (selected) 1f else 0f,
+        animationSpec = motionScheme.slowEffectsSpec(),
+    )
+
     Box(modifier = modifier) {
         Box(
             modifier = Modifier.graphicsLayer {
-                alpha = if (selection?.dimsUnselected == true) 0.55f else 1f
+                scaleX = coverScale
+                scaleY = coverScale
             },
         ) {
-            CoverOverlay(model = badge) {
-                Cover(
-                    model = coverModel,
-                    modifier = Modifier.fillMaxWidth(),
+            Box(
+                modifier = Modifier.graphicsLayer { alpha = coverAlpha },
+            ) {
+                CoverOverlay(model = badge) {
+                    Cover(
+                        model = coverModel,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+
+            if (selected || ringFraction > 0f) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .graphicsLayer { alpha = ringFraction }
+                        .background(
+                            color = scheme.primary.copy(alpha = 0.16f),
+                            shape = shape,
+                        )
+                        .border(
+                            width = 3.dp,
+                            color = scheme.primary,
+                            shape = shape,
+                        ),
                 )
             }
         }
 
-        if (selected) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
-                        shape = shape,
-                    )
-                    .border(
-                        width = 3.dp,
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = shape,
-                    ),
-            )
-        }
-
-        if (markSelected != null) {
-            SelectionMark(
-                selected = markSelected,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(Spacing.xs),
-            )
+        AnimatedVisibility(
+            visible = markSelected != null,
+            enter = scaleIn(animationSpec = motionScheme.defaultSpatialSpec()) +
+                fadeIn(animationSpec = motionScheme.fastEffectsSpec()),
+            exit = scaleOut(animationSpec = motionScheme.fastEffectsSpec()) +
+                fadeOut(animationSpec = motionScheme.fastEffectsSpec()),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(Spacing.xs),
+        ) {
+            SelectionMark(selected = heldMark)
         }
     }
 }

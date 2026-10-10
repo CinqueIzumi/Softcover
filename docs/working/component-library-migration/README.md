@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-42 committed: `SoftcoverTheme` resolves reduced motion once, passing `RhaydusTheme` `MotionScheme.expressive()` or the new snapping `ReducedMotionScheme`, and providing `Motion.Full` / `Motion.Reduced` read as `MaterialTheme.motion`. Call sites read specs and never branch; `playDecorativeMotion()` stays only where an effect is skipped outright (and the bottom-bar tab transition, until S11-32). Press / drag washes now show under reduced motion, snapping in. F44 logged. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
-- **Next:** S11-14 Phase 1 in `steps/s11-contract-retrofit.md` § S11-14.
+- **State:** S11-14 committed: book-card selection animates on motion-scheme specs; a selected cover shrinks to 0.92 with its ring + tint (fades on `slowEffectsSpec()`; the default/fast effects specs read as a cut on device), `SelectionMark` fills and its check pops, and the mark enters with selection (a coverless row's mark expands with its gap). `rememberHeldMark` keeps the mark's look while it leaves. Seen on device. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
+- **Next:** S11-15 Phase 1 in `steps/s11-contract-retrofit.md` § S11-15.
 - **Open questions:** none. Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21 (detekt fails on JDK 26). All touched modules compile (onboarding Android too), `checkModuleGraph`, `ktlintCheck`, `styleCheck` pass; no glommed closers; reviewer's stale KDoc / doc lines fixed, `styleCheck` re-passed. No tests (constants only).
+- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck` pass after the review fixes and the shrink; no glommed closers. No tests (no logic).
 - **Uncommitted:** nothing.
 ## Local verification
 

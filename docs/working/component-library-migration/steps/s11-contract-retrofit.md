@@ -27,7 +27,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-12 | The `StatNumber` count-up is slow enough to read | SL-15c, S11-11 | [x] |
 | S11-13 | Charts grow, morph and slide | SL-15a | [x] |
 | S11-42 | Reduced motion resolves once at the theme root; call sites stop branching on it | S11-13 | [x] |
-| S11-14 | Cover selection animates | SL-15a, S11-42 | [ ] |
+| S11-14 | Cover selection animates | SL-15a, S11-42 | [x] |
 | S11-15 | One reorder lift treatment | S11-6 | [ ] |
 | S11-16 | Selectable controls fire `select`; `ToggleRow` shares its interaction source | S11-6 | [ ] |
 | S11-17 | Selection states animate with motion-scheme specs | SL-15a | [ ] |
@@ -58,15 +58,14 @@ primitives among them), and every premium-feel sub-step has landed.
 
 ## Approved shape
 
-S11-42:
-- The theme root is the app's: `SoftcoverTheme` calls `playDecorativeMotion()` once and passes `RhaydusTheme` (which already takes `motionScheme`) either `MotionScheme.expressive()` or `ReducedMotionScheme`, an internal object in `:core:designsystem` `theme/` whose six specs are all `snap()`. No foundation change.
-- `Motion` becomes `@Immutable class Motion(val valueChange: FiniteAnimationSpec<Float>)` with a full and a reduced instance, provided through internal `LocalMotion` and read as `MaterialTheme.motion` (the `editorialTypography` pattern).
-- Spec branches (`if (playMotion) spec else snap()`) read the spec directly: the three charts, `Chip`, `SegmentedControl`, `Toggle`, `TextFieldPill`, `TopBar`, `FadeThroughText`, `StatNumber`, Explore's dimmed results, `LensContent`, onboarding.
-- `EnterTransition.None` / `ExitTransition.None` branches go; transitions pass scheme specs explicitly (a bare `expandVertically()` uses its own spring): `Banner`, `WhenReadRow`, `RevealedWhenPresent`, `ExternalLinksSection`, `TagsSection`, the `ProportionChart` legend, `TextFieldPill`, `SessionPeekBar`, `TagEditorCollection`, Explore's `animateItem`.
-- Hand-written tweens move onto scheme specs: `tween(220)` in `Chip`, `SegmentedControl`, `Toggle`, `LensContent`, onboarding → `defaultEffectsSpec()`; `ShelveControlCard`'s and `VerdictSheet`'s tweens → the nearest scheme spec.
-- Press and drag washes (`ToggleRow`, `SettingsRow`, `ReorderableRow`) show under reduced motion too, snapping in: feedback, not motion.
-- `playDecorativeMotion()` stays only where an effect is skipped outright: mark-as-read burst, quote glyph sway, skeleton shimmer, book-card hand-over, cover shared element and image crossfade, `MarkAsReadController`'s slide-out, `ShelveControlCard`'s celebration, `ProgressBar`'s reveal; the bottom-bar tab transition keeps its branch until S11-32.
-- `foundations.md`'s motion line names `MaterialTheme.motion`; F43 is updated and the reduced scheme logged as a foundation candidate. No tests (constants, no logic).
+S11-14:
+- Render-only, in place: `SelectionMark.kt`, `BookCardParts.kt`, `BookCardRow.kt`; no model, event or public API change.
+- The cover dim eases between 1 and 0.55 on `slowEffectsSpec()`, so entering and leaving selection fade every cover together.
+- Ring and tint share one 0→1 fraction on `slowEffectsSpec()`; the overlay is composed while selected or fading out.
+- A selected cover, ring included, shrinks to 0.92 on `defaultSpatialSpec()` (drawn, not measured); the mark stays full size. New: no screen shrank a selection before.
+- `SelectionMark`'s container colour eases on `slowEffectsSpec()`; the check, and the mark entering on a cover, scale in on `defaultSpatialSpec()` (the pop), out on `fastEffectsSpec()`. Default/fast specs read as a cut on device.
+- The mark enters with selection: scale + fade on a cover; `expandHorizontally` + fade as a coverless row's lead, its gap growing with it. It keeps its last state while leaving.
+- Scheme specs only, so reduced motion snaps with no branch. No haptic (S11-16). No tests (no logic).
 
 ## R10 edges
 

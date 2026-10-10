@@ -1,6 +1,11 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 @Immutable
 sealed interface BookCardSelection {
@@ -25,3 +30,14 @@ internal val BookCardSelection.markSelected: Boolean?
 
 internal val BookCardSelection.dimsUnselected: Boolean
     get() = this is BookCardSelection.Multiple && selected.not()
+
+@Composable
+internal fun rememberHeldMark(markSelected: Boolean?): Boolean {
+    var held by remember { mutableStateOf(markSelected == true) }
+
+    if (markSelected != null) {
+        held = markSelected
+    }
+
+    return held
+}
