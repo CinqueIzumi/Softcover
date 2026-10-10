@@ -28,7 +28,7 @@ data class ShareCaptureState(
         }
 }
 
-/** This scaffold with the share footer, busy and close state for [capture]. */
+/** This scaffold with the share footer and close state for [capture]. */
 fun SheetScaffoldUiModel.withShareCapture(capture: ShareCaptureState): SheetScaffoldUiModel =
     withShareCapture(
         progress = capture.progress,

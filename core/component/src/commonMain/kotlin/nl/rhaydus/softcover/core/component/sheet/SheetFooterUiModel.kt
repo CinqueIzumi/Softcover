@@ -47,6 +47,13 @@ sealed interface SheetFooterUiModel {
                 ),
                 secondary = SheetFooterButton(label = "Clear"),
             ),
+            "Inline, secondary running" to Inline(
+                primary = SheetFooterButton(label = "Share"),
+                secondary = SheetFooterButton(
+                    label = "Save to gallery",
+                    running = true,
+                ),
+            ),
         )
     }
 }

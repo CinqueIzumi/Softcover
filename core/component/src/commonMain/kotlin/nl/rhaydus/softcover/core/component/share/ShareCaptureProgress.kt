@@ -12,8 +12,8 @@ enum class ShareCaptureProgress {
 }
 
 /**
- * This scaffold with the share footer for [progress], busy while a capture runs and closing once
- * [closeRequested]. Safe to apply repeatedly: it overwrites the footer, busy and close state.
+ * This scaffold with the share footer for [progress], closing once [closeRequested]. Safe to apply
+ * repeatedly: it overwrites the footer and close state.
  */
 fun SheetScaffoldUiModel.withShareCapture(
     progress: ShareCaptureProgress,
@@ -23,11 +23,12 @@ fun SheetScaffoldUiModel.withShareCapture(
         footer = SheetFooterUiModel.Inline(
             primary = SheetFooterButton(
                 label = if (progress == ShareCaptureProgress.Sharing) "Sharing…" else "Share",
+                running = progress == ShareCaptureProgress.Sharing,
             ),
             secondary = SheetFooterButton(
-                label = if (progress == ShareCaptureProgress.Saving) "Saving to gallery…" else "Save to gallery",
+                label = "Save to gallery",
+                running = progress == ShareCaptureProgress.Saving,
             ),
         ),
-        busy = progress != ShareCaptureProgress.Idle,
         closeRequested = closeRequested,
     )

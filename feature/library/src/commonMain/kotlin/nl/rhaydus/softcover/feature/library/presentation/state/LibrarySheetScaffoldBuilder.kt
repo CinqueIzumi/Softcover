@@ -81,12 +81,14 @@ internal fun bulkRemoveSheetScaffoldFor(
             ),
         ),
         footer = SheetFooterUiModel.Stacked(
-            primary = SheetFooterButton(label = "Remove"),
+            primary = SheetFooterButton(
+                label = "Remove",
+                running = inProgress,
+            ),
             secondary = SheetFooterButton(
                 label = "Cancel",
                 dismissesSheet = true,
             ),
         ),
-        busy = inProgress,
     )
 }

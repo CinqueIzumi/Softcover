@@ -78,7 +78,7 @@ class OnShareCaptureEventActionTest {
         }
 
         @Test
-        fun `marks the held sheet busy with a saving label for SaveStarted`() = runTest {
+        fun `marks the held sheet busy and running the secondary button for SaveStarted`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
                 shareSheet = profileShareSheetFor(
@@ -98,7 +98,7 @@ class OnShareCaptureEventActionTest {
             // ----- Assert -----
             val scaffold = stateFlow.value.shareSheet.shouldNotBeNull().scaffold
             scaffold.busy shouldBe true
-            scaffold.footer.shouldNotBeNull().secondary.shouldNotBeNull().label shouldBe "Saving to gallery…"
+            scaffold.footer.shouldNotBeNull().secondary.shouldNotBeNull().running shouldBe true
         }
 
         @Test

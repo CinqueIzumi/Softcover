@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilit
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.discardSheetScaffold
 import nl.rhaydus.toad.ActionScope
 
 internal class OnSaveLibraryVisibilityAction(
@@ -35,7 +36,9 @@ internal class OnSaveLibraryVisibilityAction(
         scope.setState {
             it.copy(
                 isSaving = true,
-                discardSheetScaffold = it.discardSheetScaffold.copy(busy = leaveAfterSave),
+                discardSheetScaffold = discardSheetScaffold(saving = leaveAfterSave).copy(
+                    closeRequested = it.discardSheetScaffold.closeRequested,
+                ),
             )
         }
 
@@ -63,7 +66,9 @@ internal class OnSaveLibraryVisibilityAction(
             scope.setState {
                 it.copy(
                     isSaving = false,
-                    discardSheetScaffold = it.discardSheetScaffold.copy(busy = false),
+                    discardSheetScaffold = discardSheetScaffold(saving = false).copy(
+                        closeRequested = it.discardSheetScaffold.closeRequested,
+                    ),
                 )
             }
 

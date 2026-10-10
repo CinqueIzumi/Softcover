@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 
-internal fun discardSheetScaffold(): SheetScaffoldUiModel =
+internal fun discardSheetScaffold(saving: Boolean = false): SheetScaffoldUiModel =
     SheetScaffoldUiModel(
         header = SheetHeaderUiModel(
             section = SectionHeaderUiModel.Section(
@@ -19,6 +19,7 @@ internal fun discardSheetScaffold(): SheetScaffoldUiModel =
             primary = SheetFooterButton(
                 label = "Save",
                 dismissesSheet = false,
+                running = saving,
             ),
             secondary = SheetFooterButton(
                 label = "Discard",

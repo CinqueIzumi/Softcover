@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-17 committed: new `SelectionCheck` pops its check in `SheetRow` and `SettingsSelectableRow`; `SheetRow` ink, the `PreviewTileFrame` ring and label, and the settings title animate on `defaultEffectsSpec`; the glyph `Toggle` crossfades and pops on fill. Not yet seen on device. S11-16's ticks not yet felt on device. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
-- **Next:** S11-18 Phase 1 in `steps/s11-contract-retrofit.md` § S11-18.
+- **State:** S11-18 committed: `SheetFooterButton.running` puts the fading spinner on the running button; `SheetScaffoldUiModel.busy` is derived from it; the share card's secondary keeps "Save to gallery" while saving. Sheet spinners seen on Medium_Phone. Haptic half needed no change. S11-17's `SheetRow` part can't be seen on device until S11-20. S11-16's ticks not yet felt on device. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
+- **Next:** S11-19 Phase 1 in `steps/s11-contract-retrofit.md` § S11-19.
 - **Open questions:** none. Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm`, `:feature:settings:compileKotlinJvm`, `checkModuleGraph`, `projectHealth` (both), `ktlintCheck`, `styleCheck` pass after S11-17; close-out grep found no glommed closers. No tests (no logic).
+- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm`, `:feature:settings:compileKotlinJvm`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck` pass after S11-18, plus the other touched modules' compiles, `checkDocBudgets` and their `testAndroidHostTest` suites; glom grep clean. Test changes: `OnDismissDiscardSheetActionTest` setup moved to `discardSheetScaffold(saving = true)`; `ShareCaptureStateTest`, profile `OnShareCaptureEventActionTest` and `ProfileShareCaptureTest` assert `secondary.running` instead of the old saving label (re-run, 22 pass).
 - **Uncommitted:** none.
 ## Local verification
 

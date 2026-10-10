@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 /**
  * One share sheet: the [card] to preview, the finished [scaffold] around it, and the [displayName]
  * its captured file is saved under. Build [scaffold] with [withShareCapture] so the footer labels,
- * busy and close state agree.
+ * running button and close state agree.
  */
 data class ShareCardSheetUiModel(
     val card: ShareCardUiModel,

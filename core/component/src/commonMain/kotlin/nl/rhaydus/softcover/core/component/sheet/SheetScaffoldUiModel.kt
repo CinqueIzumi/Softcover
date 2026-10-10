@@ -21,9 +21,10 @@ data class SheetScaffoldUiModel(
     val footer: SheetFooterUiModel? = null,
     val layout: SheetLayout = SheetLayout.Scrolling,
     val dismissible: Boolean = true,
-    val busy: Boolean = false,
     val closeRequested: Boolean = false,
 ) {
+    val busy: Boolean get() = footer?.primary?.running == true || footer?.secondary?.running == true
+
     companion object : UiModelPreviews<SheetScaffoldUiModel> {
         override val previews: ImmutableMap<String, SheetScaffoldUiModel> = persistentMapOf(
             "Scrolling, footer" to SheetScaffoldUiModel(
@@ -98,10 +99,12 @@ data class SheetScaffoldUiModel(
                     ),
                 ),
                 footer = SheetFooterUiModel.Stacked(
-                    primary = SheetFooterButton(label = "Sign in"),
+                    primary = SheetFooterButton(
+                        label = "Sign in",
+                        running = true,
+                    ),
                     secondary = SheetFooterButton(label = "Not now"),
                 ),
-                busy = true,
             ),
         )
     }

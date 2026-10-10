@@ -30,8 +30,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
  * [ShareCardSheetUiModel.card] with "Save to gallery" and "Share" as its inline footer.
  *
  * The capture runs here because it needs composition, but progress is reported through [onEvent]:
- * the host holds the busy and close state and passes it back in [ShareCardSheetUiModel.scaffold].
- * A second capture is ignored until the running one ends; the scaffold's busy flag only locks the
+ * the host holds the capture progress and close state and passes it back in [ShareCardSheetUiModel.scaffold].
+ * A second capture is ignored until the running one ends; the scaffold's busy state only locks the
  * footer. Outcome snackbars are shown here.
  * [aboveCard] renders over the preview, in the sheet's centred column.
  */

@@ -7,9 +7,9 @@
 - **Layout** — `SheetLayout.Scrolling` scrolls the whole sheet with the footer at the end. `Pinned` fixes the dismiss label and header, scrolls the body, and sticks the footer under a divider. `PinnedLazy` is `Pinned` for a body that owns a lazy list. Bodies never add their own scroll or a bottom spacer.
 - **Dismiss label** — `dismissLabel` renders a right-aligned text button above the header; tapping it runs the animated hide.
 - **Footer** — `SheetFooterUiModel.Stacked` (primary full width, secondary beneath, at least one present) or `Inline` (secondary left, primary fills the row, both present). A button with `dismissesSheet` hides the sheet after emitting its click.
-- **Busy** — `busy` puts a progress indicator on the primary button, disables the footer and makes the sheet non-dismissible; the scaffold, not the model, disables the secondary button. `dismissible = false` also stops the dismiss label and `dismissesSheet` buttons from hiding the sheet.
+- **Busy** — a footer button with `running` fades in a progress indicator (trailing on a full-width button; on the inline secondary it replaces the label at the same width). While any button runs, the sheet is `busy`: the footer is disabled and the sheet is non-dismissible. `dismissible = false` also stops the dismiss label and `dismissesSheet` buttons from hiding the sheet.
 - **Closing from state** — an action sets `closeRequested`; the scaffold hides the sheet, then emits `Dismissed`, and the host clears its show state there. `closeRequested` hides the sheet regardless of `dismissible`. Once a hide starts the chrome, scrim tap and back press are disabled, so `Dismissed` emits once. A swipe-down still closes a non-dismissible bottom sheet.
-- **Semantics** — the headline is the heading and the sheet's pane title; a busy primary button reports a state description.
+- **Semantics** — the headline is the heading and the sheet's pane title; a running button reports a state description.
 
 ### Sheet rows
 

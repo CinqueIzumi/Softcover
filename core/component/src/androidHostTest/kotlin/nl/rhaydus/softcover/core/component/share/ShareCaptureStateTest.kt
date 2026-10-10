@@ -139,12 +139,13 @@ class ShareCaptureStateTest {
             // ----- Assert -----
             val footer = result.footer.shouldBeInstanceOf<SheetFooterUiModel.Inline>()
             footer.primary.label shouldBe "Sharing…"
+            footer.primary.running shouldBe true
             footer.secondary.label shouldBe "Save to gallery"
             result.busy shouldBe true
         }
 
         @Test
-        fun `saving relabels only the secondary button and is busy`() {
+        fun `saving runs only the secondary button and is busy`() {
             // ----- Arrange -----
             val capture = ShareCaptureState(progress = ShareCaptureProgress.Saving)
 
@@ -154,7 +155,8 @@ class ShareCaptureStateTest {
             // ----- Assert -----
             val footer = result.footer.shouldBeInstanceOf<SheetFooterUiModel.Inline>()
             footer.primary.label shouldBe "Share"
-            footer.secondary.label shouldBe "Saving to gallery…"
+            footer.secondary.label shouldBe "Save to gallery"
+            footer.secondary.running shouldBe true
             result.busy shouldBe true
         }
 

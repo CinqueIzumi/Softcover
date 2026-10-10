@@ -31,7 +31,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-15 | One reorder lift treatment | S11-6 | [x] |
 | S11-16 | Selectable controls fire `select`; `ToggleRow` shares its interaction source | S11-6 | [x] |
 | S11-17 | Selection states animate with motion-scheme specs | SL-15a | [x] |
-| S11-18 | `SheetScaffold` footer: no haptic of its own, spinner on the running button | S11-6 | [ ] |
+| S11-18 | `SheetScaffold` footer: no haptic of its own, spinner on the running button | S11-6 | [x] |
 | S11-19 | The progress sheet plays its dismiss on submit | — | [ ] |
 | S11-20 | Every sheet host leaves on `Dismissed` | S11-19 | [ ] |
 | S11-21 | Panel-form `AdaptiveModalSheet` animates in and out, with elevation | SL-15a | [ ] |
@@ -58,14 +58,12 @@ primitives among them), and every premium-feel sub-step has landed.
 
 ## Approved shape
 
-S11-17:
-- `Chip` is already on motion-scheme specs (S11-42); no change.
-- New public data-free primitive `SelectionCheck(selected, modifier, size = 18.dp)` in `:core:component` package `selection`: a `size` box that keeps its space; the primary `Check` pops in via `AnimatedVisibility` (`scaleIn(defaultSpatialSpec) + fadeIn(fastEffectsSpec)`; out `scaleOut + fadeOut` on `fastEffectsSpec`). Gallery entry with selected and unselected fixtures.
-- `SheetRow`: `ink` animates on `defaultEffectsSpec`; the check becomes `SelectionCheck`.
-- `PreviewTileFrame`: ring colour, ring width (1→2 dp, `animateDpAsState`) and label colour animate on `defaultEffectsSpec`.
-- `SettingsSelectableRow` (feature-local): title colour animates on `defaultEffectsSpec`; the check becomes `SelectionCheck(size = 24.dp)`.
-- Glyph `Toggle`: the icon swap is an `AnimatedContent` on `checked`; filling enters with `scaleIn(initialScale ≈ 0.6, defaultSpatialSpec) + fadeIn(fastEffectsSpec)`, emptying is a plain fade on `fastEffectsSpec`. Container and tint unchanged.
-- Scheme specs only, so reduced motion snaps with no branch. No model fields or helpers beyond `SelectionCheck`; no tests (no logic). `ToggleRow`'s `Switch` untouched.
+S11-18:
+- Haptics already meet the scope: the footer fires none; rating saves fire `select` / `reject` from their outcome events (Reading and book detail). No change.
+- `SheetFooterButton` gains `running: Boolean = false`; `SheetScaffoldUiModel.busy` becomes a read-only property, true while any footer button is running. Its three reads (outside/back dismiss, `canDismiss`, button enablement) stay as they are.
+- The five setters mark the running button: share card (Share while sharing, Save to gallery while saving), bulk Remove, unknown-ISBN Add, settings discard Save (`leaveAfterSave`), Re-authenticate.
+- The spinner shows on `button.running`, fading in and out on `fastEffectsSpec`, with the "Loading" state on that button. Fill-width buttons keep it at the trailing edge; the wrap-width Inline secondary crossfades its label out and a centred spinner in, keeping its width.
+- Previews: "Busy" becomes a running primary; new "Inline, secondary running". No tests.
 
 ## R10 edges
 

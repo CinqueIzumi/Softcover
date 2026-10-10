@@ -18,11 +18,11 @@ internal fun unknownIsbnSheetScaffoldFor(isAdding: Boolean): SheetScaffoldUiMode
         footer = SheetFooterUiModel.Stacked(
             primary = SheetFooterButton(
                 label = if (isAdding) "Adding to Hardcover" else "Add to Hardcover",
+                running = isAdding,
             ),
             secondary = SheetFooterButton(
                 label = "Cancel",
                 dismissesSheet = true,
             ),
         ),
-        busy = isAdding,
     )

@@ -44,8 +44,7 @@ class OnDismissDiscardSheetActionTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
                 showDiscardSheet = true,
-                discardSheetScaffold = discardSheetScaffold().copy(
-                    busy = true,
+                discardSheetScaffold = discardSheetScaffold(saving = true).copy(
                     closeRequested = true,
                 ),
                 leaveOnSheetDismissed = true,

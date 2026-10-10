@@ -1,5 +1,9 @@
 package nl.rhaydus.softcover.core.component.sheet
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,13 +22,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
@@ -258,6 +265,7 @@ private fun SheetFooter(
                 FooterButton(
                     button = model.primary,
                     primary = true,
+                    fillWidth = true,
                     chrome = chrome,
                     onEvent = onEvent,
                     modifier = Modifier.fillMaxWidth(),
@@ -268,6 +276,7 @@ private fun SheetFooter(
                 FooterButton(
                     button = model.secondary,
                     primary = false,
+                    fillWidth = true,
                     chrome = chrome,
                     onEvent = onEvent,
                     modifier = Modifier.fillMaxWidth(),
@@ -283,6 +292,7 @@ private fun SheetFooter(
             FooterButton(
                 button = model.secondary,
                 primary = false,
+                fillWidth = false,
                 chrome = chrome,
                 onEvent = onEvent,
             )
@@ -290,6 +300,7 @@ private fun SheetFooter(
             FooterButton(
                 button = model.primary,
                 primary = true,
+                fillWidth = true,
                 chrome = chrome,
                 onEvent = onEvent,
                 modifier = Modifier.weight(1f),
@@ -303,21 +314,25 @@ private fun SheetFooter(
 private fun FooterButton(
     button: SheetFooterButton,
     primary: Boolean,
+    fillWidth: Boolean,
     chrome: SheetChrome,
     onEvent: (SheetScaffoldEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val loading = primary && chrome.busy
+    val labelAlpha by animateFloatAsState(
+        targetValue = if (button.running && fillWidth.not()) 0f else 1f,
+        animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
+    )
 
     Box(
         modifier = modifier.then(
-            if (loading) {
+            if (button.running) {
                 Modifier.semantics { stateDescription = "Loading" }
             } else {
                 Modifier
             },
         ),
-        contentAlignment = Alignment.CenterEnd,
+        contentAlignment = if (fillWidth) Alignment.CenterEnd else Alignment.Center,
     ) {
         RhaydusButton(
             label = button.label,
@@ -329,15 +344,19 @@ private fun FooterButton(
                     chrome.dismiss()
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = if (fillWidth) Modifier.fillMaxWidth() else Modifier.alpha(labelAlpha),
             enabled = button.enabled && chrome.busy.not() && chrome.unlocked,
             size = ButtonSize.M,
         )
 
-        if (loading) {
+        AnimatedVisibility(
+            visible = button.running,
+            enter = fadeIn(MaterialTheme.motionScheme.fastEffectsSpec()),
+            exit = fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()),
+        ) {
             CircularWavyProgressIndicator(
                 modifier = Modifier
-                    .padding(end = Spacing.md)
+                    .padding(end = if (fillWidth) Spacing.md else 0.dp)
                     .size(20.dp),
             )
         }

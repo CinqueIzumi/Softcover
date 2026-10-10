@@ -23,11 +23,11 @@ internal fun ReAuthState.toSheetUiModel(): ReAuthSheetUiModel = ReAuthSheetUiMod
             primary = SheetFooterButton(
                 label = "Re-authenticate",
                 enabled = apiKey.isNotBlank(),
+                running = isSubmitting,
             ),
             secondary = SheetFooterButton(label = "Log out"),
         ),
         dismissible = false,
-        busy = isSubmitting,
         closeRequested = closeRequested,
     ),
     apiKeyField = TextFieldUiModel(

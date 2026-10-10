@@ -42,7 +42,7 @@ class ProfileShareCaptureTest {
             // ----- Assert -----
             sheet.scaffold.busy shouldBe true
             sheet.scaffold.closeRequested shouldBe true
-            sheet.scaffold.footer.shouldNotBeNull().secondary.shouldNotBeNull().label shouldBe "Saving to gallery…"
+            sheet.scaffold.footer.shouldNotBeNull().secondary.shouldNotBeNull().running shouldBe true
         }
     }
 
