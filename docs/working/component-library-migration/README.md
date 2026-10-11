@@ -15,10 +15,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 ## Now
 
 - **State:** PC-1 to PC-4 done. PC-4: skydoves Compose Stability Analyzer 0.7.5 (0.8.0 needs Gradle 9.3.1) applied by both Compose convention plugins through `StabilityGate.kt`; `androidMain` baselines in 15 modules; `stabilityCheck` in `check` and a CI step; foundation entry F47. The baselines hold ~107 non-skippable of ~570 composables (most: `book_detail` 20, `settings` 14, `component` 13, `explore` / `reading` / `library` 12). PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
-- **Next:** PC-5: triage the baselines' unstable parameters per module (fix, or keep baselined with a reason); the #275 PC box ticks after it.
+- **Next:** PC-5a in `steps/pc-performance-checks.md` (triage approved, shape recorded there), then PC-5b and PC-5c; the #275 PC box ticks after PC-5c.
 - **Open questions:** whether the CI stability step passes on JDK 17 (verified only under JBR 21); watch the first CI run.
-- **Verification:** `stabilityDump`, `stabilityCheck`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck` green (JBR 21); negative test (`MutableList<String>` on `Badge`) fails the gate; reviewed, findings fixed; `document-code` pass done.
-- **Uncommitted:** none. The reviewer agent now flags `.stability` hunks that lose stability or skippability.
+- **Verification:** `stabilityDump`, `stabilityCheck`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck` green (JBR 21); negative test (`MutableList<String>` on `Badge`) fails the gate; reviewed, findings fixed; `document-code` pass done; `styleCheck` passed after the last Kotlin edit; glommed-closer grep clean; no test files changed.
+- **Uncommitted:** this Now-block rewrite and the PC-5 triage in the step file (PC-4 committed in `c46116ce`).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:
@@ -74,7 +74,7 @@ every sub-step's Verify.
 | SP | — (spacing scale) | SP-1–SP-5, SP-C; after S10, before S11 | [x] |
 | SH | — (shape scale) | SH-1–SH-4, SH-C; after S10, before S11 | [x] |
 | S11 | — (contract retrofit) | S11-1–S11-40, S11-C | [x] |
-| PC | [steps/pc-performance-checks.md](steps/pc-performance-checks.md) | PC-1–PC-5 | [ ] |
+| PC | [steps/pc-performance-checks.md](steps/pc-performance-checks.md) | PC-1–PC-5c | [ ] |
 | S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-1–S12-5 | [ ] |
 
 ## Decisions
