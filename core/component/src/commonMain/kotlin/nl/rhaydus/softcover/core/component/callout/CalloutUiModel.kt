@@ -51,7 +51,7 @@ data class CalloutUiModel(
                 variant = CalloutVariant.Highlight(title = "Downloading the update"),
                 eyebrow = "Update available",
                 body = "Keep the app open while the new version downloads.",
-                callToAction = CalloutActionUiModel.Progress,
+                callToAction = CalloutActionUiModel.Progress(fraction = 0.4f),
             ),
         )
     }

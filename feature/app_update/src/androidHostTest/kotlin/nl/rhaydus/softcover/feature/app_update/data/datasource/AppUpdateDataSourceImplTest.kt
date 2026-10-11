@@ -26,6 +26,11 @@ import org.junit.jupiter.api.Test
 
 class AppUpdateDataSourceImplTest {
     companion object {
+        private val DOWNLOADING_STATE = AppUpdateState.Downloading(
+            bytesDownloaded = 10,
+            totalBytes = 100,
+        )
+
         private const val KTX_CLASS = "com.google.android.play.core.ktx.AppUpdateManagerKtxKt"
 
         @JvmStatic
@@ -57,10 +62,22 @@ class AppUpdateDataSourceImplTest {
         dataSource = AppUpdateDataSourceImpl(appUpdateManager = appUpdateManager)
     }
 
-    private fun stubInstallState(status: Int): InstallState = mockk {
+    private fun stubInstallState(
+        status: Int,
+        bytesDownloaded: Long = 0,
+        totalBytes: Long = 0,
+    ): InstallState = mockk {
         every {
             this@mockk.installStatus()
         } returns status
+
+        every {
+            this@mockk.bytesDownloaded()
+        } returns bytesDownloaded
+
+        every {
+            this@mockk.totalBytesToDownload()
+        } returns totalBytes
     }
 
     private fun stubAppUpdateInfo(
@@ -90,15 +107,60 @@ class AppUpdateDataSourceImplTest {
     @Nested
     inner class InstallListener {
         @Test
-        fun `maps DOWNLOADING to Downloading`() {
+        fun `maps DOWNLOADING to Downloading carrying bytes and total`() {
             // ----- Arrange -----
-            val installState = stubInstallState(InstallStatus.DOWNLOADING)
+            val installState = stubInstallState(
+                status = InstallStatus.DOWNLOADING,
+                bytesDownloaded = 250,
+                totalBytes = 1_000,
+            )
 
             // ----- Act -----
             listenerSlot.captured.onStateUpdate(installState)
 
             // ----- Assert -----
-            dataSource.updateState.value shouldBe AppUpdateState.Downloading
+            dataSource.updateState.value shouldBe AppUpdateState.Downloading(
+                bytesDownloaded = 250,
+                totalBytes = 1_000,
+            )
+        }
+
+        @Test
+        fun `maps a zero DOWNLOADING total to a null total`() {
+            // ----- Arrange -----
+            val installState = stubInstallState(
+                status = InstallStatus.DOWNLOADING,
+                bytesDownloaded = 40,
+                totalBytes = 0,
+            )
+
+            // ----- Act -----
+            listenerSlot.captured.onStateUpdate(installState)
+
+            // ----- Assert -----
+            dataSource.updateState.value shouldBe AppUpdateState.Downloading(
+                bytesDownloaded = 40,
+                totalBytes = null,
+            )
+        }
+
+        @Test
+        fun `maps a negative DOWNLOADING total to a null total`() {
+            // ----- Arrange -----
+            val installState = stubInstallState(
+                status = InstallStatus.DOWNLOADING,
+                bytesDownloaded = 40,
+                totalBytes = -1,
+            )
+
+            // ----- Act -----
+            listenerSlot.captured.onStateUpdate(installState)
+
+            // ----- Assert -----
+            dataSource.updateState.value shouldBe AppUpdateState.Downloading(
+                bytesDownloaded = 40,
+                totalBytes = null,
+            )
         }
 
         @Test
@@ -128,7 +190,7 @@ class AppUpdateDataSourceImplTest {
         @Test
         fun `maps CANCELED back to Idle`() {
             // ----- Arrange -----
-            dataSource.forceState(AppUpdateState.Downloading)
+            dataSource.forceState(DOWNLOADING_STATE)
 
             val installState = stubInstallState(InstallStatus.CANCELED)
 
@@ -156,7 +218,7 @@ class AppUpdateDataSourceImplTest {
         @Test
         fun `keeps the current state for unrecognised install statuses`() {
             // ----- Arrange -----
-            dataSource.forceState(AppUpdateState.Downloading)
+            dataSource.forceState(DOWNLOADING_STATE)
 
             val installState = stubInstallState(InstallStatus.UNKNOWN)
 
@@ -164,7 +226,7 @@ class AppUpdateDataSourceImplTest {
             listenerSlot.captured.onStateUpdate(installState)
 
             // ----- Assert -----
-            dataSource.updateState.value shouldBe AppUpdateState.Downloading
+            dataSource.updateState.value shouldBe DOWNLOADING_STATE
         }
     }
 

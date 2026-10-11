@@ -1,5 +1,11 @@
 package nl.rhaydus.softcover.core.component.callout
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +22,7 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -83,17 +90,89 @@ private fun CalloutContent(
         MaterialTheme.colorScheme.onSurface
     }
 
+    val motionScheme = MaterialTheme.motionScheme
+
+    val header = CalloutHeader(
+        eyebrow = model.eyebrow,
+        variant = model.variant,
+        body = model.body,
+    )
+
     Column(modifier = modifier) {
+        AnimatedContent(
+            targetState = header,
+            contentKey = { it.key },
+            transitionSpec = {
+                fadeIn(animationSpec = motionScheme.defaultEffectsSpec())
+                    .togetherWith(fadeOut(animationSpec = motionScheme.defaultEffectsSpec()))
+                    .using(SizeTransform { _, _ -> motionScheme.defaultSpatialSpec() })
+            },
+        ) { target ->
+            CalloutHeaderContent(
+                header = target,
+                content = content,
+            )
+        }
+
+        AnimatedContent(
+            targetState = model.callToAction,
+            contentKey = { it?.stageKey() },
+            transitionSpec = {
+                fadeIn(animationSpec = motionScheme.defaultEffectsSpec())
+                    .togetherWith(fadeOut(animationSpec = motionScheme.defaultEffectsSpec()))
+                    .using(SizeTransform { _, _ -> motionScheme.defaultSpatialSpec() })
+            },
+        ) { action ->
+            if (action != null) {
+                Column {
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+
+                    CalloutActionContent(
+                        action = action,
+                        variant = model.variant,
+                        onEvent = onEvent,
+                    )
+                }
+            }
+        }
+    }
+}
+
+private data class CalloutHeader(
+    val eyebrow: String,
+    val variant: CalloutVariant,
+    val body: String,
+) {
+    val key: List<String?> = listOf(
+        eyebrow,
+        (variant as? CalloutVariant.Highlight)?.title,
+        body,
+    )
+}
+
+private fun CalloutActionUiModel.stageKey(): Any = when (this) {
+    is CalloutActionUiModel.Progress -> CalloutActionUiModel.Progress::class
+    is CalloutActionUiModel.Button,
+    is CalloutActionUiModel.Busy,
+    -> this
+}
+
+@Composable
+private fun CalloutHeaderContent(
+    header: CalloutHeader,
+    content: Color,
+) {
+    Column {
         CalloutEyebrow(
-            eyebrow = model.eyebrow,
-            variant = model.variant,
+            eyebrow = header.eyebrow,
+            variant = header.variant,
         )
 
         Spacer(modifier = Modifier.height(Spacing.xs))
 
-        if (model.variant is CalloutVariant.Highlight) {
+        if (header.variant is CalloutVariant.Highlight) {
             SoftcoverText(
-                text = model.variant.title,
+                text = header.variant.title,
                 style = MaterialTheme.editorialTypography.headlineMedium,
                 color = content,
             )
@@ -102,20 +181,10 @@ private fun CalloutContent(
         }
 
         SoftcoverText(
-            text = model.body,
+            text = header.body,
             style = MaterialTheme.editorialTypography.bodySmall,
             color = content,
         )
-
-        if (model.callToAction != null) {
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
-            CalloutActionContent(
-                action = model.callToAction,
-                variant = model.variant,
-                onEvent = onEvent,
-            )
-        }
     }
 }
 
@@ -188,7 +257,27 @@ private fun CalloutActionContent(
             )
         }
 
-        CalloutActionUiModel.Progress -> LinearWavyProgressIndicator(
+        is CalloutActionUiModel.Progress -> CalloutProgressBar(fraction = action.fraction)
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun CalloutProgressBar(fraction: Float?) {
+    if (fraction == null) {
+        LinearWavyProgressIndicator(
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.outlineVariant,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    } else {
+        val animated by animateFloatAsState(
+            targetValue = fraction,
+            animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        )
+
+        LinearWavyProgressIndicator(
+            progress = { animated },
             color = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.outlineVariant,
             modifier = Modifier.fillMaxWidth(),

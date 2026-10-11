@@ -8,5 +8,6 @@ sealed interface CalloutActionUiModel {
 
     data class Busy(val label: String) : CalloutActionUiModel
 
-    data object Progress : CalloutActionUiModel
+    /** @property fraction completion in `0..1`, or `null` for an indeterminate bar. */
+    data class Progress(val fraction: Float? = null) : CalloutActionUiModel
 }

@@ -168,6 +168,7 @@ class JvmAppUpdateDataSourceTest {
                 remoteDataSource.downloadInstaller(
                     release = release,
                     destinationDirectory = any(),
+                    onProgress = any(),
                 )
             } returns File(
                 tempDir,
@@ -202,6 +203,7 @@ class JvmAppUpdateDataSourceTest {
                 remoteDataSource.downloadInstaller(
                     release = release,
                     destinationDirectory = any(),
+                    onProgress = any(),
                 )
             } returns null
 
@@ -233,6 +235,7 @@ class JvmAppUpdateDataSourceTest {
                 remoteDataSource.downloadInstaller(
                     release = release,
                     destinationDirectory = any(),
+                    onProgress = any(),
                 )
             } returns File(
                 tempDir,
@@ -249,7 +252,10 @@ class JvmAppUpdateDataSourceTest {
 
             // ----- Assert -----
             assertEquals(
-                AppUpdateState.Downloading,
+                AppUpdateState.Downloading(
+                    bytesDownloaded = 0,
+                    totalBytes = null,
+                ),
                 dataSource.updateState.value,
             )
             advanceUntilIdle()
@@ -257,8 +263,205 @@ class JvmAppUpdateDataSourceTest {
                 remoteDataSource.downloadInstaller(
                     release = release,
                     destinationDirectory = any(),
+                    onProgress = any(),
                 )
             }
+        }
+
+        private fun stubProgressDownload(
+            release: AppRelease,
+            ticks: List<Pair<Long, Long?>>,
+            observed: MutableList<AppUpdateState>,
+            dataSource: () -> JvmAppUpdateDataSource,
+        ) {
+            coEvery {
+                remoteDataSource.downloadInstaller(
+                    release = release,
+                    destinationDirectory = any(),
+                    onProgress = any(),
+                )
+            } coAnswers {
+                val onProgress = thirdArg<(Long, Long?) -> Unit>()
+
+                ticks.forEach { (bytes, total) ->
+                    onProgress(
+                        bytes,
+                        total,
+                    )
+                    observed.add(dataSource().updateState.value)
+                }
+
+                File(
+                    tempDir,
+                    release.installerFileName,
+                )
+            }
+        }
+
+        @Test
+        fun `publishes download progress to the state`() = runTest {
+            // ----- Arrange -----
+            val dataSource = createDataSource()
+            val release = stubRelease()
+            val observed = mutableListOf<AppUpdateState>()
+
+            coEvery {
+                remoteDataSource.fetchLatestRelease()
+            } returns release
+
+            stubProgressDownload(
+                release = release,
+                ticks = listOf(250L to 1_000L),
+                observed = observed,
+                dataSource = { dataSource },
+            )
+
+            dataSource.checkForUpdate()
+            advanceUntilIdle()
+
+            // ----- Act -----
+            dataSource.startDownload()
+            advanceUntilIdle()
+
+            // ----- Assert -----
+            assertEquals(
+                listOf<AppUpdateState>(
+                    AppUpdateState.Downloading(
+                        bytesDownloaded = 250,
+                        totalBytes = 1_000,
+                    ),
+                ),
+                observed,
+            )
+        }
+
+        @Test
+        fun `does not republish ticks that stay within the same whole percent`() = runTest {
+            // ----- Arrange -----
+            val dataSource = createDataSource()
+            val release = stubRelease()
+            val observed = mutableListOf<AppUpdateState>()
+
+            coEvery {
+                remoteDataSource.fetchLatestRelease()
+            } returns release
+
+            stubProgressDownload(
+                release = release,
+                ticks = listOf(
+                    100L to 1_000L,
+                    101L to 1_000L,
+                    109L to 1_000L,
+                    110L to 1_000L,
+                ),
+                observed = observed,
+                dataSource = { dataSource },
+            )
+
+            dataSource.checkForUpdate()
+            advanceUntilIdle()
+
+            // ----- Act -----
+            dataSource.startDownload()
+            advanceUntilIdle()
+
+            // ----- Assert -----
+            val expectedFirst = AppUpdateState.Downloading(
+                bytesDownloaded = 100,
+                totalBytes = 1_000,
+            )
+            assertEquals(
+                listOf<AppUpdateState>(
+                    expectedFirst,
+                    expectedFirst,
+                    expectedFirst,
+                    AppUpdateState.Downloading(
+                        bytesDownloaded = 110,
+                        totalBytes = 1_000,
+                    ),
+                ),
+                observed,
+            )
+        }
+
+        @Test
+        fun `keeps the total null while the server has not reported one`() = runTest {
+            // ----- Arrange -----
+            val dataSource = createDataSource()
+            val release = stubRelease()
+            val observed = mutableListOf<AppUpdateState>()
+
+            coEvery {
+                remoteDataSource.fetchLatestRelease()
+            } returns release
+
+            stubProgressDownload(
+                release = release,
+                ticks = listOf(
+                    500L to null,
+                    900L to null,
+                ),
+                observed = observed,
+                dataSource = { dataSource },
+            )
+
+            dataSource.checkForUpdate()
+            advanceUntilIdle()
+
+            // ----- Act -----
+            dataSource.startDownload()
+            advanceUntilIdle()
+
+            // ----- Assert -----
+            val initial = AppUpdateState.Downloading(
+                bytesDownloaded = 0,
+                totalBytes = null,
+            )
+            assertEquals(
+                listOf<AppUpdateState>(
+                    initial,
+                    initial,
+                ),
+                observed,
+            )
+        }
+
+        @Test
+        fun `republishes once when the total first becomes known`() = runTest {
+            // ----- Arrange -----
+            val dataSource = createDataSource()
+            val release = stubRelease()
+            val observed = mutableListOf<AppUpdateState>()
+
+            coEvery {
+                remoteDataSource.fetchLatestRelease()
+            } returns release
+
+            stubProgressDownload(
+                release = release,
+                ticks = listOf(
+                    0L to null,
+                    0L to 1_000L,
+                ),
+                observed = observed,
+                dataSource = { dataSource },
+            )
+
+            dataSource.checkForUpdate()
+            advanceUntilIdle()
+
+            // ----- Act -----
+            dataSource.startDownload()
+            advanceUntilIdle()
+
+            // ----- Assert -----
+            assertEquals(
+                AppUpdateState.Downloading(
+                    bytesDownloaded = 0,
+                    totalBytes = 1_000,
+                ),
+                observed.last(),
+            )
         }
     }
 
@@ -296,6 +499,7 @@ class JvmAppUpdateDataSourceTest {
                 remoteDataSource.downloadInstaller(
                     release = release,
                     destinationDirectory = any(),
+                    onProgress = any(),
                 )
             } returns File(
                 tempDir,
@@ -347,6 +551,7 @@ class JvmAppUpdateDataSourceTest {
                 remoteDataSource.downloadInstaller(
                     release = any(),
                     destinationDirectory = any(),
+                    onProgress = any(),
                 )
             }
         }

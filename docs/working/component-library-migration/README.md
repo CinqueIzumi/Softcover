@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-27 (app-local hover-aware `pressScaleClickable`, owned-source primitives wash on hover, cover cards lift, sidebar press scale and animated selection), S11-28 (app-local share capture: silent cancelled save, "Copied to clipboard", desktop labels) and S11-29 (commit + settle on success, shake on failure) are built together, approved app-local first (F45 new, F36 updated). Done, reviewed by the user and committed; desktop app launched for a check. #275 tracks S11 only at stage level. F42 / S12-4 waits unchanged.
-- **Next:** S11-30 — update callout crossfade: read § S11-30, propose its shape (Phase 1).
+- **State:** S11-30 (update `Callout` crossfades its header and call to action) and S11-31 (byte progress on Android and desktop, determinate `Progress(fraction)`) built together; app-wide `commit` / `reject` in `App.kt` only on a change from `Downloading`. Built, tested and reviewed; awaiting the user's commit go-ahead. #275 tracks S11 only at stage level. F42 / S12-4 waits unchanged.
+- **Next:** S11-32 — tab-switch timing: read § S11-32, propose its shape (Phase 1).
 - **Open questions:** none. `upsert_book` may share the `ListIdType.errors` schema mismatch.
-- **Verification:** JBR 21: `styleCheck`, `checkDocBudgets`, JVM / Android / iOS-sim compiles, `assembleDebug` and `DelegatingShareCardCaptureTest` (9, pass) passed after the last edit; reviewer clean after one fix round; no glommed closers.
-- **Uncommitted:** nothing.
+- **Verification:** JBR 21: `styleCheck`, `checkDocBudgets`, `checkModuleGraph`, `projectHealth` (app_update, component, settings), JVM compiles, Android main compile, app_update tests (27) and settings AppUpdate tests (7) pass; reviewer fix round applied (cancellable desktop download, `Progress` KDoc). Not run: iOS-sim compile, `assembleDebug`. No glommed closers; AAA markers complete.
+- **Uncommitted:** all S11-30 / S11-31 changes.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

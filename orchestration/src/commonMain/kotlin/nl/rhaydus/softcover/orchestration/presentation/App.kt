@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.distinctUntilChanged
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.util.SnackBarManager
@@ -77,45 +78,6 @@ internal fun App() {
         }
     }
 
-    LaunchedEffect(Unit) {
-        observeAppUpdateStateUseCase()
-            .distinctUntilChanged()
-            .collect { updateState ->
-                appUpdateState = updateState
-
-                when (updateState) {
-                    AppUpdateState.Available -> {
-                        SnackBarManager.showSnackBar(
-                            title = "A new version of Softcover is available.",
-                            actionLabel = "Update",
-                            duration = SnackbarDuration.Indefinite,
-                            onActionClick = {
-                                startAppUpdateFlowUseCase(appUpdateFlowLauncher)
-                            },
-                        )
-                    }
-
-                    AppUpdateState.Downloaded -> {
-                        SnackBarManager.showSnackBar(
-                            title = "Update downloaded. Restart to finish installing.",
-                            actionLabel = "Restart",
-                            duration = SnackbarDuration.Indefinite,
-                            onActionClick = {
-                                completeAppUpdateUseCase()
-                            },
-                        )
-                    }
-
-                    AppUpdateState.Failed -> {
-                        SnackBarManager.showSnackbar(title = "Update failed. Please try again later.")
-                    }
-
-                    AppUpdateState.Downloading,
-                    AppUpdateState.Idle -> Unit
-                }
-            }
-    }
-
     ApplyPlatformThemeAppearance(themeMode = themeConfig.themeMode)
 
     SoftcoverTheme(
@@ -126,6 +88,56 @@ internal fun App() {
         darkTheme = themeConfig.themeMode.isDark(),
         dynamicColor = themeConfig.useDynamicColor,
     ) {
+        val haptics = LocalHaptics.current
+
+        LaunchedEffect(Unit) {
+            var previousState: AppUpdateState = AppUpdateState.Idle
+
+            observeAppUpdateStateUseCase()
+                .distinctUntilChanged()
+                .collect { updateState ->
+                    val wasDownloading = previousState is AppUpdateState.Downloading
+
+                    previousState = updateState
+                    appUpdateState = updateState
+
+                    when (updateState) {
+                        AppUpdateState.Available -> {
+                            SnackBarManager.showSnackBar(
+                                title = "A new version of Softcover is available.",
+                                actionLabel = "Update",
+                                duration = SnackbarDuration.Indefinite,
+                                onActionClick = {
+                                    startAppUpdateFlowUseCase(appUpdateFlowLauncher)
+                                },
+                            )
+                        }
+
+                        AppUpdateState.Downloaded -> {
+                            if (wasDownloading) haptics.commit()
+
+                            SnackBarManager.showSnackBar(
+                                title = "Update downloaded. Restart to finish installing.",
+                                actionLabel = "Restart",
+                                duration = SnackbarDuration.Indefinite,
+                                onActionClick = {
+                                    completeAppUpdateUseCase()
+                                },
+                            )
+                        }
+
+                        AppUpdateState.Failed -> {
+                            if (wasDownloading) haptics.reject()
+
+                            SnackBarManager.showSnackbar(title = "Update failed. Please try again later.")
+                        }
+
+                        is AppUpdateState.Downloading,
+                        AppUpdateState.Idle -> Unit
+                    }
+                }
+        }
+
         ClearFocusOnTapScreen {
             ProvideCoverImagePersister {
                 CompositionLocalProvider(

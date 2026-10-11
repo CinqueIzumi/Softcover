@@ -82,14 +82,34 @@ internal class JvmAppUpdateDataSource(
     fun startDownload() {
         val release = pendingRelease ?: return
 
-        if (_updateState.value == AppUpdateState.Downloading) return
+        if (_updateState.value is AppUpdateState.Downloading) return
 
-        _updateState.value = AppUpdateState.Downloading
+        _updateState.value = AppUpdateState.Downloading(
+            bytesDownloaded = 0,
+            totalBytes = null,
+        )
+
+        var lastPercent = -1L
+        var totalKnown = false
 
         scope.launch {
             val installer = releaseSource.downloadInstaller(
                 release = release,
                 destinationDirectory = appDataDirectory,
+                onProgress = { bytesDownloaded, totalBytes ->
+                    val percent = if (totalBytes != null) bytesDownloaded * 100 / totalBytes else -1L
+                    val totalBecameKnown = totalBytes != null && totalKnown.not()
+
+                    if (percent != lastPercent || totalBecameKnown) {
+                        lastPercent = percent
+                        totalKnown = totalBytes != null
+
+                        _updateState.value = AppUpdateState.Downloading(
+                            bytesDownloaded = bytesDownloaded,
+                            totalBytes = totalBytes,
+                        )
+                    }
+                },
             )
 
             if (installer != null) {

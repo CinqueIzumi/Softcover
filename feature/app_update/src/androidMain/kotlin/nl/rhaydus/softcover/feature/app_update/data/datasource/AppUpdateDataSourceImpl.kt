@@ -17,7 +17,11 @@ internal class AppUpdateDataSourceImpl(private val appUpdateManager: AppUpdateMa
 
     private val installListener = InstallStateUpdatedListener { state ->
         when (state.installStatus()) {
-            InstallStatus.DOWNLOADING -> _updateState.value = AppUpdateState.Downloading
+            InstallStatus.DOWNLOADING -> _updateState.value = AppUpdateState.Downloading(
+                bytesDownloaded = state.bytesDownloaded(),
+                totalBytes = state.totalBytesToDownload().takeIf { it > 0 },
+            )
+
             InstallStatus.DOWNLOADED -> _updateState.value = AppUpdateState.Downloaded
             InstallStatus.FAILED -> _updateState.value = AppUpdateState.Failed
             InstallStatus.CANCELED -> _updateState.value = AppUpdateState.Idle

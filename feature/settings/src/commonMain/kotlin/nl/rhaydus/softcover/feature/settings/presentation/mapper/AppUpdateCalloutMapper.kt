@@ -25,18 +25,17 @@ private const val AVAILABLE_BODY = "A newer Softcover is ready whenever you are.
 private const val AVAILABLE_ACTION = "Download update"
 
 /**
- * The Settings app-update callout, or `null` while no update is in play. The copy names no version
- * and the download shows no percentage: the client has no reliable version string or progress to
- * report.
+ * The Settings app-update callout, or `null` while no update is in play. The copy names no version:
+ * the client has no reliable version string to report.
  */
 internal fun appUpdateCalloutFor(state: AppUpdateState): CalloutUiModel? = when (state) {
     AppUpdateState.Idle -> null
 
-    AppUpdateState.Downloading -> appUpdateCallout(
+    is AppUpdateState.Downloading -> appUpdateCallout(
         eyebrow = DOWNLOADING_EYEBROW,
         title = DOWNLOADING_TITLE,
         body = DOWNLOADING_BODY,
-        callToAction = CalloutActionUiModel.Progress,
+        callToAction = CalloutActionUiModel.Progress(fraction = state.fraction()),
     )
 
     AppUpdateState.Downloaded -> appUpdateCallout(
@@ -72,3 +71,14 @@ private fun appUpdateCallout(
     body = body,
     callToAction = callToAction,
 )
+
+private fun AppUpdateState.Downloading.fraction(): Float? {
+    val total = totalBytes ?: return null
+
+    if (total <= 0) return null
+
+    return (bytesDownloaded.toFloat() / total).coerceIn(
+        minimumValue = 0f,
+        maximumValue = 1f,
+    )
+}

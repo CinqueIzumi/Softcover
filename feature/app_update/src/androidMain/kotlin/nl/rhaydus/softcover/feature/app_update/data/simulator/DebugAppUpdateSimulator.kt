@@ -20,7 +20,12 @@ internal class DebugAppUpdateSimulator(
     }
 
     override fun simulateDownloading() {
-        appUpdateDataSource.forceState(AppUpdateState.Downloading)
+        appUpdateDataSource.forceState(
+            AppUpdateState.Downloading(
+                bytesDownloaded = 40L * BYTES_PER_MEGABYTE,
+                totalBytes = 100L * BYTES_PER_MEGABYTE,
+            ),
+        )
     }
 
     override fun simulateDownloaded() {
@@ -38,5 +43,6 @@ internal class DebugAppUpdateSimulator(
 
     companion object {
         private const val FAKE_AVAILABLE_VERSION_CODE = 9_999
+        private const val BYTES_PER_MEGABYTE = 1_000_000L
     }
 }

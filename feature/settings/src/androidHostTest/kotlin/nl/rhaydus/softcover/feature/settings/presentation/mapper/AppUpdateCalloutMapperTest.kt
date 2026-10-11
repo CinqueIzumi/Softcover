@@ -29,15 +29,63 @@ class AppUpdateCalloutMapperTest {
     @Nested
     inner class Action {
         @Test
-        fun `shows progress with no button while downloading`() {
+        fun `shows the downloaded fraction as progress when the total is known`() {
             // ----- Arrange -----
-            val state = AppUpdateState.Downloading
+            val state = AppUpdateState.Downloading(
+                bytesDownloaded = 25L,
+                totalBytes = 100L,
+            )
 
             // ----- Act -----
             val result = appUpdateCalloutFor(state = state)
 
             // ----- Assert -----
-            result.shouldNotBeNull().callToAction shouldBe CalloutActionUiModel.Progress
+            result.shouldNotBeNull().callToAction shouldBe CalloutActionUiModel.Progress(fraction = 0.25f)
+        }
+
+        @Test
+        fun `shows indeterminate progress when the total is unknown`() {
+            // ----- Arrange -----
+            val state = AppUpdateState.Downloading(
+                bytesDownloaded = 25L,
+                totalBytes = null,
+            )
+
+            // ----- Act -----
+            val result = appUpdateCalloutFor(state = state)
+
+            // ----- Assert -----
+            result.shouldNotBeNull().callToAction shouldBe CalloutActionUiModel.Progress(fraction = null)
+        }
+
+        @Test
+        fun `shows indeterminate progress when the total is zero`() {
+            // ----- Arrange -----
+            val state = AppUpdateState.Downloading(
+                bytesDownloaded = 0L,
+                totalBytes = 0L,
+            )
+
+            // ----- Act -----
+            val result = appUpdateCalloutFor(state = state)
+
+            // ----- Assert -----
+            result.shouldNotBeNull().callToAction shouldBe CalloutActionUiModel.Progress(fraction = null)
+        }
+
+        @Test
+        fun `clamps progress to full when more bytes arrive than the total`() {
+            // ----- Arrange -----
+            val state = AppUpdateState.Downloading(
+                bytesDownloaded = 150L,
+                totalBytes = 100L,
+            )
+
+            // ----- Act -----
+            val result = appUpdateCalloutFor(state = state)
+
+            // ----- Assert -----
+            result.shouldNotBeNull().callToAction shouldBe CalloutActionUiModel.Progress(fraction = 1f)
         }
 
         @Test

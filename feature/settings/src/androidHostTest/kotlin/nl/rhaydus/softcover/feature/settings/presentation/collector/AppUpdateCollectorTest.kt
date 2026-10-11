@@ -65,7 +65,10 @@ class AppUpdateCollectorTest {
 
             // ----- Act -----
             updateStateFlow.emit(AppUpdateState.Available)
-            updateStateFlow.emit(AppUpdateState.Downloading)
+            updateStateFlow.emit(AppUpdateState.Downloading(
+                bytesDownloaded = 10L,
+                totalBytes = 100L,
+            ),)
             updateStateFlow.emit(AppUpdateState.Failed)
 
             // ----- Assert -----

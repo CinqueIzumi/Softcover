@@ -43,8 +43,8 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-27 | Desktop hover on every clickable primitive; sidebar press scale | — | [x] |
 | S11-28 | Desktop share and save say what happened | — | [x] |
 | S11-29 | Share-card success and failure feedback | S11-6, S11-28 | [x] |
-| S11-30 | The update callout crossfades its call to action | S11-6 | [ ] |
-| S11-31 | The update download shows determinate progress | S11-30 | [ ] |
+| S11-30 | The update callout crossfades its call to action | S11-6 | [x] |
+| S11-31 | The update download shows determinate progress | S11-30 | [x] |
 | S11-32 | Tab switches take their specs from the motion scheme | SL-15a | [ ] |
 | S11-33 | Explore pull-to-refresh moves onto `PullToRefreshEyebrow` | S11-5 | [ ] |
 | S11-34 | Re-tapping the current tab scrolls to the top or pulses | — | [ ] |
@@ -137,6 +137,16 @@ S11-28 (built app-local first; F36 moves it upstream):
 S11-29 (render-only, local to `ShareCardSheetContent` beside the snackbars; no host change, no new events, no tests):
 - Success (saved, shared, copied): `haptics.commit()` and the preview settles (~0.97 and back on a spring).
 - Failure: `haptics.reject()` and `shakeOnError` on the preview.
+
+S11-30 + S11-31 (built together):
+- `AppUpdateState.Downloading(bytesDownloaded: Long, totalBytes: Long?)`; null total while unknown.
+- Android: `AppUpdateDataSourceImpl` reads `bytesDownloaded()` / `totalBytesToDownload()` from the install listener.
+- Desktop: `ReleaseSource.downloadInstaller` streams the body with a byte count and an `onProgress` callback, total from Content-Length; `JvmAppUpdateDataSource` emits only when the whole percentage changes.
+- `DebugAppUpdateSimulator` "downloading" forces a fixed ~40% value.
+- `CalloutActionUiModel.Progress(fraction: Float? = null)`: a value renders a determinate bar easing between ticks; null keeps the indeterminate wave. `appUpdateCalloutFor` maps bytes to the fraction; its "no progress" KDoc is corrected.
+- `Callout`: the call-to-action slot crossfades (`AnimatedContent`, `contentKey` = the action's kind plus its label, so progress ticks never restart it) with a `SizeTransform` height ease; the eyebrow / title / body block crossfades keyed on its three values. Specs from `MaterialTheme.motionScheme` only.
+- Haptics app-wide in `App.kt`: the update listener moves inside `SoftcoverTheme`; `commit` beside the "Update downloaded" snackbar and `reject` beside "Update failed", only on a direct change from `Downloading`. No Settings change.
+- Tests: the mapper's fraction (incl. unknown total) and both data sources' progress; existing tests updated.
 
 ## R10 edges
 
