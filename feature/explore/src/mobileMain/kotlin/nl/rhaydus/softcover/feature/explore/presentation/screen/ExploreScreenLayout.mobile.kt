@@ -1,11 +1,16 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -41,6 +46,12 @@ import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SearchFo
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreSearchPhase
 
+// File-level so scroll position survives recomposition when the shared tab body movableContent moves
+// between the compact/rail/sidebar chrome layouts on a window resize.
+private val editorialScrollState = ScrollState(initial = 0)
+
+private val focusScrollState = ScrollState(initial = 0)
+
 /**
  * Mobile Explore (explore-3a): a [SearchTopBar] search chrome over one of four bodies,
  * branched on [ExploreScreenUiState.searchPhase] — the editorial feed, the search-focus overlay
@@ -48,7 +59,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreSearchPhas
  * mood grid, and the recent-searches block are the shared shelf pieces; only this
  * Scaffold-and-phase framing is mobile-specific.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal actual fun ExploreScreenLayout(
     state: ExploreScreenUiState,
@@ -88,11 +99,36 @@ internal actual fun ExploreScreenLayout(
         onBackCompleted = { runAction(OnSearchDismissedAction) },
     )
 
+    val inResultsPhase = state.searchPhase == ExploreSearchPhase.LOADING ||
+        state.searchPhase == ExploreSearchPhase.RESULTS
+
+    val showsResultsList = inResultsPhase &&
+        state.searchError == null &&
+        state.showsNoSearchResults.not()
+
+    val resultsListState = rememberSaveable(
+        showsResultsList,
+        saver = LazyListState.Saver,
+    ) { LazyListState() }
+
+    val lifted by remember(isOnline, state.searchPhase, showsResultsList) {
+        derivedStateOf {
+            when {
+                isOnline.not() -> false
+                state.searchPhase == ExploreSearchPhase.FEED -> editorialScrollState.canScrollBackward
+                state.searchPhase == ExploreSearchPhase.FOCUS -> focusScrollState.canScrollBackward
+                showsResultsList -> resultsListState.canScrollBackward
+                else -> false
+            }
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             SearchTopBar(
                 model = state.searchTopBar,
+                lifted = lifted,
                 onEvent = { event ->
                     when (event) {
                         is SearchTopBarEvent.QueryChanged -> runAction(OnQueryChangeAction(newQuery = event.query))
@@ -123,12 +159,14 @@ internal actual fun ExploreScreenLayout(
                 runAction = runAction,
                 onBookClick = onBookClick,
                 contentPadding = padding,
+                scrollState = editorialScrollState,
             )
 
             ExploreSearchPhase.FOCUS -> SearchFocusScreen(
                 state = state,
                 runAction = runAction,
                 contentPadding = padding,
+                scrollState = focusScrollState,
             )
 
             ExploreSearchPhase.LOADING, ExploreSearchPhase.RESULTS -> ActiveSearchContent(
@@ -136,6 +174,7 @@ internal actual fun ExploreScreenLayout(
                 runAction = runAction,
                 onBookClick = onBookClick,
                 contentPadding = padding,
+                listState = resultsListState,
             )
         }
     }

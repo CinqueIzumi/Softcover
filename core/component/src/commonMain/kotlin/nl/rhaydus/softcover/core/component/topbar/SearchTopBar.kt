@@ -1,8 +1,16 @@
 package nl.rhaydus.softcover.core.component.topbar
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -35,16 +43,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
+import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -67,6 +80,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
  *
  * The scan action sits in the outer `Row` *beside* the search field, not inside it — the field's one
  * trailing slot is already spoken for by the clear/loading affordance.
+ *
+ * [lifted] is caller-derived scroll state, not model data: content sits scrolled under the bar, so a
+ * bottom hairline fades in.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -74,28 +90,48 @@ fun SearchTopBar(
     model: SearchTopBarUiModel,
     onEvent: (SearchTopBarEvent) -> Unit,
     modifier: Modifier = Modifier,
+    lifted: Boolean = false,
 ) {
-    Surface(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(
-                    horizontal = Spacing.md,
-                    vertical = Spacing.sm,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-        ) {
-            SearchChromeField(
-                model = model,
-                onEvent = onEvent,
-                modifier = Modifier.weight(1f),
-            )
+    val lift by animateFloatAsState(
+        targetValue = if (lifted) 1f else 0f,
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+    )
 
-            SearchChromeBarcodeButton(onClick = { onEvent(SearchTopBarEvent.ScanRequested) })
+    Surface(modifier = modifier.fillMaxWidth()) {
+        Box {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .padding(
+                        horizontal = Spacing.md,
+                        vertical = Spacing.sm,
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                SearchChromeField(
+                    model = model,
+                    onEvent = onEvent,
+                    modifier = Modifier.weight(1f),
+                )
+
+                SearchChromeBarcodeButton(onClick = { onEvent(SearchTopBarEvent.ScanRequested) })
+            }
+
+            Divider(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .graphicsLayer { alpha = lift },
+            )
         }
     }
+}
+
+private enum class SearchChromeTrailing {
+    Nothing,
+    Loading,
+    Clear,
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -134,48 +170,76 @@ private fun SearchChromeField(
         }
     }
 
+    val borderColor by animateColorAsState(
+        targetValue = if (model.active) MaterialTheme.colorScheme.primary else Color.Transparent,
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+    )
+
     Surface(
         modifier = modifier.height(48.dp),
         shape = Corners.lg,
         color = MaterialTheme.colorScheme.surfaceContainer,
-        border = if (model.active) BorderStroke(
+        border = BorderStroke(
             1.5.dp,
-            MaterialTheme.colorScheme.primary,
-        ) else null,
+            borderColor,
+        ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = Spacing.sm),
+                .padding(start = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             SearchChromeInputArea(
                 model = model,
                 onEvent = onEvent,
                 onFieldFocusChange = { fieldHoldsFocus = it },
                 focusRequester = focusRequester,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = Spacing.sm),
             )
 
-            if (model.isLoading || model.active) {
-                Box(
-                    modifier = Modifier.size(48.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    if (model.isLoading) {
-                        CircularWavyProgressIndicator(modifier = Modifier.size(18.dp))
-                    } else {
-                        ChromeIconButton(
-                            icon = SoftcoverIcon.Close,
-                            contentDescription = "Clear search",
-                            tooltip = "Clear",
-                            onClick = { onEvent(SearchTopBarEvent.SearchCleared) },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            ),
-                            iconSize = 18.dp,
+            val trailing = when {
+                model.isLoading -> SearchChromeTrailing.Loading
+                model.active -> SearchChromeTrailing.Clear
+                else -> SearchChromeTrailing.Nothing
+            }
+
+            val fadeSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+            val sizeSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntSize>()
+
+            AnimatedContent(
+                targetState = trailing,
+                transitionSpec = {
+                    fadeIn(fadeSpec) togetherWith
+                        fadeOut(fadeSpec) using
+                        SizeTransform(
+                            clip = false,
+                            sizeAnimationSpec = { _, _ -> sizeSpec },
                         )
+                },
+                label = "searchChromeTrailing",
+            ) { slot ->
+                if (slot != SearchChromeTrailing.Nothing) {
+                    Box(
+                        modifier = Modifier.size(48.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (slot == SearchChromeTrailing.Loading) {
+                            CircularWavyProgressIndicator(modifier = Modifier.size(18.dp))
+                        } else {
+                            ChromeIconButton(
+                                icon = SoftcoverIcon.Close,
+                                contentDescription = "Clear search",
+                                tooltip = "Clear",
+                                onClick = { onEvent(SearchTopBarEvent.SearchCleared) },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                ),
+                                iconSize = 18.dp,
+                            )
+                        }
                     }
                 }
             }
@@ -283,13 +347,17 @@ private fun SearchChromeInputArea(
 
 @Composable
 private fun SearchChromeBarcodeButton(onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+
     Surface(
         onClick = onClick,
         modifier = Modifier
             .size(48.dp)
+            .pressScale(interactionSource)
             .pointerHandCursor(),
         shape = Corners.lg,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        interactionSource = interactionSource,
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),

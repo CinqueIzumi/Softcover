@@ -22,10 +22,6 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
-// File-level so scroll position survives recomposition when the shared tab body movableContent moves
-// between the compact/rail/sidebar chrome layouts on a window resize.
-private val editorialScrollState = ScrollState(initial = 0)
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun EditorialContent(
@@ -33,6 +29,7 @@ internal fun EditorialContent(
     runAction: (ExploreAction) -> Unit,
     onBookClick: (Book, String?) -> Unit,
     contentPadding: PaddingValues,
+    scrollState: ScrollState,
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -54,7 +51,7 @@ internal fun EditorialContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(editorialScrollState)
+                .verticalScroll(scrollState)
                 .padding(
                     top = Spacing.xs,
                     bottom = rememberBottomBarPadding(),

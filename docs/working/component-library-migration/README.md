@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-25 (add-to-list rows: the bookmark pops when it fills, chip and spinner crossfade; a pending row holds its tap-time row via the mapper's `previous`, so Library's book-by-book bulk write shows no half states; `animateContentSize` dropped; `select` already fired from both hosts' result events, so the sheet adds no haptic) is built, tested, reviewed and checked on the emulator, not committed. #275 tracks S11 only at stage level, so sub-steps get no box there. F42 / S12-4 waits unchanged.
-- **Next:** commit S11-25 once the user approves (toggle actions wait for list data, bounded, cleared in `finally`; one `AnimatedContent` trailing slot; all built, tested, reviewed, recorded). Then S11-26 — search chrome: read `steps/s11-contract-retrofit.md` § S11-26 first, then propose its shape (Phase 1).
+- **State:** S11-26 (search chrome: barcode press scale, animated border and trailing slot, a `lifted` hairline from the visible body's scroll position, crossfading masthead Refresh label) is done and committed; the user checked it on device (the × now sits flush in the pill's end, unchecked since). #275 tracks S11 only at stage level, so sub-steps get no box there. F42 / S12-4 waits unchanged.
+- **Next:** S11-27 — desktop hover: read `steps/s11-contract-retrofit.md` § S11-27 first, then propose its shape (Phase 1).
 - **Open questions:** none. `upsert_book` may share the `ListIdType.errors` schema mismatch.
-- **Verification:** JBR 21: `styleCheck` passed after the last Kotlin edit; `ChooseListsMapperTest` and both `ChooseListsCollectorTest`s pass; reviewer clean; no glommed closers; installed on Medium_Phone and recorded (bulk add and remove).
-- **Uncommitted:** S11-25: `ChooseListsBottomSheet.kt`, `ChooseListsMapper.kt` and its test, both `ChooseListsCollector`s, the book_detail collector test, `sheets.md`, the step file and this block.
+- **Verification:** JBR 21: `styleCheck` and the explore compile passed after the last Kotlin edit; reviewer clean after two fix rounds; no glommed closers. No tests (render-only).
+- **Uncommitted:** nothing.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

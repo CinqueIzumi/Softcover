@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
@@ -25,6 +25,7 @@ internal fun ActiveSearchContent(
     runAction: (ExploreAction) -> Unit,
     onBookClick: (Book, String?) -> Unit,
     contentPadding: PaddingValues,
+    listState: LazyListState,
 ) {
     Column(
         modifier = Modifier
@@ -45,21 +46,19 @@ internal fun ActiveSearchContent(
                 )
             }
 
-            val resultsListState = rememberLazyListState()
-
             ScrollToTopWhenResultsReplacedEffect(
                 state = state,
-                scrollToTop = { resultsListState.scrollToItem(0) },
+                scrollToTop = { listState.scrollToItem(0) },
             )
 
             LoadMoreSearchResultsEffect(
                 state = state,
-                lastVisibleIndex = { resultsListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index },
+                lastVisibleIndex = { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index },
                 runAction = runAction,
             )
 
             LazyColumn(
-                state = resultsListState,
+                state = listState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)

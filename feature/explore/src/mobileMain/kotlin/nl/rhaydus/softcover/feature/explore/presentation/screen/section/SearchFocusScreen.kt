@@ -19,13 +19,12 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchDismissedAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
-private val focusScrollState = ScrollState(initial = 0)
-
 @Composable
 internal fun SearchFocusScreen(
     state: ExploreScreenUiState,
     runAction: (ExploreAction) -> Unit,
     contentPadding: PaddingValues,
+    scrollState: ScrollState,
 ) {
     Box(
         // Feedback item 11: tapping outside the focused field dismisses the focus surface. Only the
@@ -42,7 +41,7 @@ internal fun SearchFocusScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(focusScrollState)
+                .verticalScroll(scrollState)
                 .padding(top = Spacing.md),
         ) {
             SearchFocusContent(

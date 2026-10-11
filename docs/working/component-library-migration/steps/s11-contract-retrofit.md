@@ -39,7 +39,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-23 | `StepperCircle`: press scale, a tick per step, accelerating auto-repeat | S11-6 | [x] |
 | S11-24 | Progress-sheet page tab shakes on a past-the-end page | SL-15a | [x] |
 | S11-25 | Add-to-list: bookmark, chip and spinner animate; `select` fires | S11-6 | [x] |
-| S11-26 | Search chrome: press, border, slot crossfade, scroll lift, Refresh text | SL-15a | [ ] |
+| S11-26 | Search chrome: press, border, slot crossfade, scroll lift, Refresh text | SL-15a | [x] |
 | S11-27 | Desktop hover on every clickable primitive; sidebar press scale | — | [ ] |
 | S11-28 | Desktop share and save say what happened | — | [ ] |
 | S11-29 | Share-card success and failure feedback | S11-6, S11-28 | [ ] |
@@ -113,6 +113,14 @@ S11-25 (render-only, `ChooseListsBottomSheet.kt` plus one `sheets.md` line):
 - Both mappers take `previous: ChooseListsUiModel?`; a pending list re-emits its previous row with `isPending = true`, so the bulk path's book-by-book writes show no half states. Tests: the mapper rule and a book_detail collector case.
 - No haptic in the sheet: both hosts already fire `select` / `reject` from the toggle's result event.
 - The KDoc's "instant/optimistic" claim is corrected (rows wait on a spinner). No new types, no tests.
+
+S11-26 (render-only; no new public types, no tests):
+- Barcode button: one `MutableInteractionSource` drives `pressScale` and the ripple; no haptic.
+- Pill border always drawn; its colour animates transparent → `primary` on `active`.
+- Trailing slot: `AnimatedContent` over a private nothing / loading / clear target, fades plus a `SizeTransform` width ease; the `Spacing.sm` gap sits inside the slot.
+- `SearchTopBar(…, lifted: Boolean = false)` fades in a bottom `Divider` hairline, never a tint (the pill is already `surfaceContainer`).
+- Explore mobile owns the three body scroll states and derives `lifted` from the visible body's `canScrollBackward`; false offline and over the error / empty placeholders. The results state is saveable and keyed on the results list being shown.
+- `MastheadRefreshAction`: the label crossfades with a size ease.
 
 ## R10 edges
 
