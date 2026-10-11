@@ -17,8 +17,8 @@ checkboxes in step with `## Steps` and `## Gates` here.
 - **State:** PC-1 to PC-5b done. PC-5b: no leaf composable takes `Book` / `BookEdition` / `ActiveSession` / a profile breakdown; the approved shape in the step file is built; 15 UNSTABLE params left the baselines, none added. The live session timer and the lock screen share `:core:domain`'s `readingDuration`. `BookDetailPaneHost.destination` stays baselined. PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
 - **Next:** PC-5c in `steps/pc-performance-checks.md` (sections take their slice of state instead of the whole UiState); the #275 PC box ticks after PC-5c.
 - **Open questions:** whether the CI stability step passes on JDK 17 (verified only under JBR 21); watch the first CI run.
-- **Verification:** `ktlintFormat styleCheck stabilityCheck checkModuleGraph` green (JBR 21); `testAndroidHostTest` green for reading, explore, book_detail, profile, session, orchestration, core:presentation, core:domain; reviewed, findings fixed; AAA / glommed-closer / `!!` greps clean.
-- **Uncommitted:** all of PC-5b (production, tests, baselines, step-file and Now-block edits).
+- **Verification:** `styleCheck` and `stabilityCheck` passed after the last Kotlin edit (JBR 21); `testAndroidHostTest` green for reading, explore, book_detail, profile, session, orchestration, core:presentation, core:domain; reviewed, findings fixed; documentation pass done; AAA / glommed-closer / `!!` greps clean.
+- **Uncommitted:** this Now-block update only (PC-5b committed in `8e0987619`).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:
