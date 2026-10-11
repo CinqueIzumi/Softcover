@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-23 (`StepperCircle` press scale, tickle per step, accelerating hold-repeat, `enabled` dims at a limit) is done, signed off on device and committed. #275 tracks S11 only at stage level, so sub-steps get no box there. F42 / S12-4 waits unchanged.
-- **Next:** S11-24 (progress-sheet tab crossfade + page past-the-end shake); read its step-file section first.
+- **State:** S11-24 (page and percentage tabs shake on a past-the-end number instead of clamping; tab crossfade dropped, the tabs share one layout) is done and committed. #275 tracks S11 only at stage level, so sub-steps get no box there. F42 / S12-4 waits unchanged.
+- **Next:** S11-25 — add to list: bookmark pops, chip and spinner crossfade, `select` fires; read `steps/s11-contract-retrofit.md` § S11-25 first, then propose its shape (Phase 1).
 - **Open questions:** none. `upsert_book` may share the `ListIdType.errors` schema mismatch.
-- **Verification:** JBR 21: `:core:component`, `:core:uibinding`, `:feature:reading`, `:feature:book_detail` compiles, `checkModuleGraph`, `:core:component:projectHealth`, `styleCheck` passed; `:core:uibinding` progress tests pass (7 new); AAA markers complete, no glommed closers; reviewer no blockers (its `reading.md` drift fixed).
+- **Verification:** JBR 21: `:core:component` compiles, `styleCheck` passed; installed on Medium_Phone. No tests (composition only).
 - **Uncommitted:** nothing.
 ## Local verification
 

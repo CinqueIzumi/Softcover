@@ -24,13 +24,13 @@ import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
 import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import kotlin.math.min
 
 @Composable
 internal fun ColumnScope.ProgressBottomSheetPageContent(
@@ -156,8 +156,9 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
 }
 
 /**
- * A hero number between a minus and a plus stepper, clamped to `0..max` (no upper clamp when [max] is
- * null, and no suffix or bar either), with [unitSymbol] drawn after the number when set.
+ * A hero number between a minus and a plus stepper, kept within `0..max` (no upper bound when [max] is
+ * null): the steppers stop at either end, and a typed number above [max] shakes the field and is
+ * dropped rather than clamped. [unitSymbol] is drawn after the number when set.
  */
 @Composable
 private fun ColumnScope.SteppedNumberContent(
@@ -174,6 +175,8 @@ private fun ColumnScope.SteppedNumberContent(
     }
 
     var firstTimeFocusedGained by remember { mutableStateOf(true) }
+
+    var rejected by remember { mutableStateOf(false) }
 
     val parsed = number.text.toIntOrNull() ?: 0
 
@@ -236,12 +239,12 @@ private fun ColumnScope.SteppedNumberContent(
                         return@HeroStatNumberField
                     }
 
-                    val updatedNumber = if (max != null) min(
-                        newNumber,
-                        max,
-                    ) else newNumber
+                    if (max != null && newNumber > max) {
+                        rejected = true
+                        return@HeroStatNumberField
+                    }
 
-                    number = newValue.copy(text = updatedNumber.toString())
+                    number = newValue
                 },
                 onFocusReset = {
                     firstTimeFocusedGained = true
@@ -255,6 +258,10 @@ private fun ColumnScope.SteppedNumberContent(
                         ),
                     )
                 },
+                modifier = Modifier.shakeOnError(
+                    trigger = rejected,
+                    onShakeEnd = { rejected = false },
+                ),
             )
 
             if (unitSymbol != null) {

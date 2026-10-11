@@ -37,7 +37,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-21 | Panel-form `AdaptiveModalSheet` animates in and out, with elevation | SL-15a | [x] |
 | S11-22 | `TextFieldUiModel` error state: outline, shake and `reject` | S11-6 | [x] |
 | S11-23 | `StepperCircle`: press scale, a tick per step, accelerating auto-repeat | S11-6 | [x] |
-| S11-24 | Progress-sheet tab body crossfades with a size transform | SL-15a | [ ] |
+| S11-24 | Progress-sheet page tab shakes on a past-the-end page | SL-15a | [x] |
 | S11-25 | Add-to-list: bookmark, chip and spinner animate; `select` fires | S11-6 | [ ] |
 | S11-26 | Search chrome: press, border, slot crossfade, scroll lift, Refresh text | SL-15a | [ ] |
 | S11-27 | Desktop hover on every clickable primitive; sidebar press scale | — | [ ] |
@@ -272,8 +272,8 @@ long-press auto-repeat that speeds up.
 
 ### S11-24 — Progress-sheet tabs
 
-`UpdateProgressBottomSheet` switches its tab body with a plain `when`, so the sheet height jumps.
-Crossfade the body with a size transform. The page tab rejects a past-the-end page with a shake, as Focus Mode does.
+The page tab rejects a past-the-end page with a shake, as Focus Mode does. No tab crossfade: the tabs
+share one layout, so the sheet height never jumps.
 
 ### S11-25 — Add to list
 
