@@ -49,9 +49,9 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-33 | Explore pull-to-refresh moves onto `PullToRefreshEyebrow` | S11-5 | [x] |
 | S11-34 | Re-tapping the current tab scrolls to the top or pulses | — | [x] |
 | S11-35 | Exact chart values on hover and press-and-scrub | S11-13 | [x] |
-| S11-36 | One root push/pop transition | SL-15a | [ ] |
-| S11-37 | The Focus Mode cover travels | S11-36 | [ ] |
-| S11-38 | The full-screen cover grows out of the hero | S11-36 | [ ] |
+| S11-36 | One root push/pop transition | SL-15a | [x] |
+| S11-37 | The Focus Mode cover travels | S11-36 | [x] |
+| S11-38 | The full-screen cover grows out of the hero | S11-36 | [x] |
 | S11-39 | Shared title and rating keys into book detail | S11-36 | [ ] |
 | S11-40 | Predictive back drives the push/pop transition | S11-36–S11-39 | [ ] |
 | S11-43 | A snackbar raised while a sheet is open draws above the sheet, not under it | — | [x] |
@@ -165,6 +165,13 @@ Session 2 (S11-33, S11-35):
 - S11-35: the active column keeps full tone, the others dim; a small surface bubble above the plot, centred on the column, shows its `contentDescription` ("2018, 24 books"). No new model field; `ColumnUiModel` KDoc says the description is also the visible readout.
 - S11-35: not `DesktopTooltip` (hover delay, desktop-only, icon-control role). Active column is component-local pointer state. Motion from `motionScheme` through `playDecorativeMotion()`.
 - Docs: `components/statistics.md` notes the readout. Tests: any extracted pure column-at-offset logic, via test-writer.
+
+Session 3 (S11-36, S11-37, S11-38):
+- S11-36: `RootScreen`'s `ScreenTransition` is a direction-aware fade-through from `motionScheme` (private in `RootScreen.kt`): push = incoming fade + scale in from 0.92, outgoing fade; pop (`navigator.lastEvent == StackEvent.Pop`) = incoming fade, outgoing fade + scale out to 0.92. No `playDecorativeMotion()` gate; the snapping scheme covers reduced motion.
+- S11-36: `Cover`'s `sharedBounds` takes `boundsTransform` from `motionScheme.defaultSpatialSpec<Rect>()`.
+- S11-37: `ActiveSessionControllerImpl` builds `peekBarCover` and `focusCover` with `shareTransition = true`, `transitionSurface = "session"`; other Focus Mode entries get the plain transition.
+- S11-38: `CoverModelsSnapshot`'s `fullScreen` model carries the hero's key; `FullScreenCoverViewer` renders `Cover(model)` in a centred 2:3 box (zoom/pan still via `graphicsLayer`) in place of `RhaydusShimmerImage`.
+- Docs: foundations §2.5 tab-root line ("currently `None`") and cover-to-detail entry rewritten within the file's budget.
 
 ## R10 edges
 

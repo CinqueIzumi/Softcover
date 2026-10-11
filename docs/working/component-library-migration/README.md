@@ -14,12 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11 session 1 (S11-32, S11-34, S11-43) is done and committed (`2fc64878`). The offline list-write fix is committed (`5caeb48d`): retryable failures queue and succeed, rejections roll back and fail, `createList` never queues. #275 tracks S11 only at stage level. F42 / S12-4 waits unchanged.
-- **Session 2 (S11-33, S11-35):** built, reviewed (one round applied) and tested (`ColumnChartGeometryTest`, `SearchTopBarCollectorTest`), committed. Explore's eyebrow sits in `SearchTopBar` above the field (user-approved over the feed row): `SearchTopBarEyebrowUiModel` on the model, `pullToRefreshState` plumbing param; `ColumnChart` hover / long-press-scrub readout over `ColumnChartGeometry`, `ColumnChartPointer`, `ColumnReadout`.
-- **Next:** `steps/s11-contract-retrofit.md` § Sessions, session 3 (S11-36, S11-37, S11-38): propose the group's shape (Phase 1).
+- **State:** S11 sessions 1–3 are built; 1 and 2 committed (`07749a08`). Session 3 (S11-36/37/38, ticked) is built, reviewed (one fix round), tested (`ActiveSessionControllerImplTest`, `CoverModelsSnapshotTest`), awaiting commit: `RootScreen` fades through on push/pop (direction from `navigator.lastEvent`), `Cover`'s `sharedBounds` takes the scheme's spatial spec, session covers keyed on surface `"session"`, `FullScreenCoverViewer` renders `Cover` with the hero's key. #275 tracks S11 only at stage level. F42 / S12-4 waits unchanged.
+- **Next:** commit session 3 on the user's go-ahead, then § Sessions, session 4 (S11-39, S11-40): propose the group's shape (Phase 1).
 - **Open questions:** none.
-- **Verification:** JBR 21, after the last Kotlin edit: component / explore / profile compiles, `checkModuleGraph`, `projectHealth` (component, explore), `styleCheck`, `checkDocBudgets`, and full `testAndroidHostTest` of component, explore and profile passed. No glommed closers; AAA markers complete. Not run: iOS-sim compile, `assembleDebug`, on-device check of the scrub haptic, the bubble overlapping Profile's section header, and the Explore eyebrow lining up with Library's.
-- **Uncommitted:** nothing.
+- **Verification:** JBR 21, after the last Kotlin edit: `styleCheck`, `checkDocBudgets`, and full `testAndroidHostTest` of orchestration, book_detail, component and session passed. No glommed closers; AAA markers complete. Not run: iOS-sim compile, `assembleDebug`, on-device check of the push/pop fade, the peek bar → Focus Mode morph, and the hero → full-screen morph (and no shimmer on open).
+- **Uncommitted:** session 3 (5 Kotlin files, 2 tests, `foundations.md` §2.5) and these working docs.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

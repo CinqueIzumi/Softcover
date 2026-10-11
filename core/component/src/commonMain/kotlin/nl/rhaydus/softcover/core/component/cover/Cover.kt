@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.component.cover
 
+import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -22,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -58,9 +62,8 @@ private const val COVER_ASPECT_RATIO = 2f / 3f
  * elevation, corner radius, shadow tint, decode cap — comes from [CoverUiModel.variant]; no call site
  * hand-tunes a cover, and widths stay in the caller's [modifier] rather than in [CoverVariant].
  *
- * The reading hero backdrop and the full-screen viewer do not render through `Cover` — a `Crop` +
- * `blur` backdrop and a zoom/pan full-bleed viewer need their own composition, so those two surfaces
- * call [rememberCoverImageRequest] directly instead.
+ * The reading hero backdrop does not render through `Cover` — a `Crop` + `blur` backdrop needs its own
+ * composition, so it calls [rememberCoverImageRequest] directly instead.
  *
  * **[model] is nullable, and that is the whole point.** Because mapping happens in a collector,
  * a cover model lands one state emission after the book it belongs to, so every caller —
@@ -70,7 +73,7 @@ private const val COVER_ASPECT_RATIO = 2f / 3f
  * straight through: they must not skip the item (the list then renders empty and pops in) and they
  * must not re-invent a local placeholder.
  */
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun Cover(
     model: CoverUiModel?,
@@ -106,6 +109,8 @@ fun Cover(
     val sharedScope = LocalSharedTransitionScope.current
     val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
 
+    val boundsSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Rect>()
+
     val containerModifier = if (
         playMotion &&
         model.sharedTransitionKey != null &&
@@ -116,6 +121,7 @@ fun Cover(
             modifier.sharedBounds(
                 sharedContentState = rememberSharedContentState(key = model.sharedTransitionKey),
                 animatedVisibilityScope = animatedVisibilityScope,
+                boundsTransform = BoundsTransform { _, _ -> boundsSpec },
             )
         }
     } else {

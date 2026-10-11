@@ -221,5 +221,54 @@ class CoverModelsSnapshotTest {
             covers.fullScreen.source shouldBe covers.hero.source
             covers.fullScreen.coverlessTitle shouldBe "Piranesi"
         }
+
+        @Test
+        fun `full-screen cover carries the same transition key as the hero`() {
+            // ----- Arrange -----
+            val snapshot = snapshot(
+                book = stubBook(),
+                loadingBookDetails = false,
+            )
+
+            // ----- Act -----
+            val covers = snapshot.toCoverModels()
+
+            // ----- Assert -----
+            val heroKey = covers.hero.sharedTransitionKey.shouldNotBeNull()
+
+            covers.fullScreen.sharedTransitionKey shouldBe heroKey
+        }
+
+        @Test
+        fun `full-screen cover is loading while nothing has resolved and details load`() {
+            // ----- Arrange -----
+            val snapshot = snapshot(
+                book = null,
+                loadingBookDetails = true,
+            )
+
+            // ----- Act -----
+            val covers = snapshot.toCoverModels()
+
+            // ----- Assert -----
+            covers.hero.isLoading shouldBe true
+            covers.fullScreen.isLoading shouldBe true
+        }
+
+        @Test
+        fun `full-screen cover is not loading once the book has loaded`() {
+            // ----- Arrange -----
+            val snapshot = snapshot(
+                book = stubBook(),
+                loadingBookDetails = true,
+            )
+
+            // ----- Act -----
+            val covers = snapshot.toCoverModels()
+
+            // ----- Assert -----
+            covers.hero.isLoading shouldBe false
+            covers.fullScreen.isLoading shouldBe false
+        }
     }
 }

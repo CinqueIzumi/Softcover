@@ -1,9 +1,13 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +15,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -26,6 +32,7 @@ import androidx.compose.ui.layout.layout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import cafe.adriel.voyager.core.stack.StackEvent
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.ScreenTransition
 import kotlinx.coroutines.flow.combine
@@ -43,8 +50,29 @@ import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 import nl.rhaydus.softcover.orchestration.presentation.screenmodel.RootScreenModel
 import org.koin.compose.koinInject
 
+private const val PUSH_SCALE_FROM = 0.92f
+
+private fun rootFadeThrough(
+    isPop: Boolean,
+    effectsSpec: FiniteAnimationSpec<Float>,
+    spatialSpec: FiniteAnimationSpec<Float>,
+): ContentTransform = if (isPop) {
+    (fadeIn(animationSpec = effectsSpec) togetherWith
+        (fadeOut(animationSpec = effectsSpec) +
+            scaleOut(
+                animationSpec = spatialSpec,
+                targetScale = PUSH_SCALE_FROM,
+            ))).apply { targetContentZIndex = -1f }
+} else {
+    (fadeIn(animationSpec = effectsSpec) +
+        scaleIn(
+            animationSpec = spatialSpec,
+            initialScale = PUSH_SCALE_FROM,
+        )) togetherWith fadeOut(animationSpec = effectsSpec)
+}
+
 internal object RootScreen : Screen {
-    @OptIn(ExperimentalSharedTransitionApi::class)
+    @OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<RootScreenModel>()
@@ -152,13 +180,20 @@ internal object RootScreen : Screen {
                                         }
                                 }
 
+                                val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+                                val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+
                                 SharedTransitionLayout {
                                     val sharedTransitionScope = this
 
                                     ScreenTransition(
                                         navigator = navigator,
                                         transition = {
-                                            EnterTransition.None togetherWith ExitTransition.None
+                                            rootFadeThrough(
+                                                isPop = navigator.lastEvent == StackEvent.Pop,
+                                                effectsSpec = effectsSpec,
+                                                spatialSpec = spatialSpec,
+                                            )
                                         },
                                     ) { screen ->
                                         CompositionLocalProvider(

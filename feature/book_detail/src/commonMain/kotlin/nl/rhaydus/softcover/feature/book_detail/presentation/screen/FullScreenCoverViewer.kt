@@ -11,14 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
-import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.chrome.overMediaIconButtonColors
+import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
-import nl.rhaydus.softcover.core.component.cover.rememberCoverImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
@@ -28,7 +26,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
  * caller owns the zoom/pan state and supplies the platform-specific [imageGestureModifier] (touch
  * pinch + double-tap on mobile; mouse wheel + drag + double-click on desktop) and the [onSizeChanged]
  * sink for the container bounds used by [clampCoverOffset]. Hover/cursor on the close button is inert
- * on touch, so mobile renders identically.
+ * on touch, so mobile renders identically. The zoom layer and gestures span the whole container, not
+ * just the cover, so [clampCoverOffset] clamps against the container.
  */
 @Composable
 internal fun FullScreenCoverViewer(
@@ -45,10 +44,7 @@ internal fun FullScreenCoverViewer(
             .background(color = Color.Black)
             .onSizeChanged(onSizeChanged),
     ) {
-        RhaydusShimmerImage(
-            model = rememberCoverImageRequest(model = model),
-            contentDescription = "Full screen book cover",
-            contentScale = ContentScale.Fit,
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
@@ -58,7 +54,10 @@ internal fun FullScreenCoverViewer(
                     translationY = offset.y
                 }
                 .then(imageGestureModifier),
-        )
+            contentAlignment = Alignment.Center,
+        ) {
+            Cover(model = model)
+        }
 
         ChromeIconButton(
             icon = SoftcoverIcon.Close,

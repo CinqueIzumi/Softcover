@@ -71,6 +71,12 @@ internal fun CoverModelsSnapshot.toCoverModels(): CoverModels {
         coverlessTitle = book?.title,
         variant = CoverVariant.Flat,
         fallbackCoverUrl = fallbackCoverUrl,
+        isLoading = coverIsLoading,
+        sharedTransitionKey = bookCoverTransitionKey(
+            editionId = edition?.id,
+            bookId = bookId,
+            surface = transitionSurface,
+        ),
     )
 
     return CoverModels(

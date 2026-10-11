@@ -1,7 +1,9 @@
 package nl.rhaydus.softcover.orchestration.session
 
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -16,6 +18,7 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
@@ -193,6 +196,42 @@ class ActiveSessionControllerImplTest {
 
             // ----- Assert -----
             controller.activeSession.value shouldBe null
+        }
+
+        @Test
+        fun `peek bar and focus covers share one non-null transition key so the cover morphs`() = runTest {
+            // ----- Arrange -----
+            val controller = buildController(this)
+
+            // ----- Act -----
+            booksFlow.value = listOf(stubBook(id = 42))
+            sessionFlow.value = stubSession(bookId = 42)
+
+            // ----- Assert -----
+            val active = controller.activeSession.value.shouldNotBeNull()
+            val peekKey = active.peekBarCover.sharedTransitionKey.shouldNotBeNull()
+
+            peekKey shouldBe active.focusCover.sharedTransitionKey
+        }
+
+        @Test
+        fun `session cover key differs from the un-surfaced key of the same book`() = runTest {
+            // ----- Arrange -----
+            val controller = buildController(this)
+            val unsurfacedKey = bookCoverTransitionKey(
+                editionId = null,
+                bookId = 42,
+            )
+
+            // ----- Act -----
+            booksFlow.value = listOf(stubBook(id = 42))
+            sessionFlow.value = stubSession(bookId = 42)
+
+            // ----- Assert -----
+            val active = controller.activeSession.value.shouldNotBeNull()
+
+            active.peekBarCover.sharedTransitionKey shouldNotBe unsurfacedKey
+            active.focusCover.sharedTransitionKey shouldNotBe unsurfacedKey
         }
     }
 
