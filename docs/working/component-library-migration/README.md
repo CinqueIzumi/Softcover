@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11 sessions 1–3 are built; 1 and 2 committed (`07749a08`). Session 3 (S11-36/37/38, ticked) is built, reviewed (one fix round), tested (`ActiveSessionControllerImplTest`, `CoverModelsSnapshotTest`), awaiting commit: `RootScreen` fades through on push/pop (direction from `navigator.lastEvent`), `Cover`'s `sharedBounds` takes the scheme's spatial spec, session covers keyed on surface `"session"`, `FullScreenCoverViewer` renders `Cover` with the hero's key. #275 tracks S11 only at stage level. F42 / S12-4 waits unchanged.
-- **Next:** commit session 3 on the user's go-ahead, then § Sessions, session 4 (S11-39, S11-40): propose the group's shape (Phase 1).
+- **State:** S11 sessions 1–4 done and committed (session 4: S11-39 `2ea98ddf`, S11-40 the commit after it). S11-39: `bookTransitionKey(element, …)`, `Modifier.navSharedBounds`, title/rating keys on card mappers and the detail hero. S11-40: `RootStackTransition` (seekable root transition, one root `NavigationBackHandler`, `BackGestureSession`), `Navigator(onBackPressed = null)`, `backGestureSeeksTransition` (Android only); untested by rule (navigation glue; the device check is the test). #275 tracks S11 at stage level. F42 / S12-4 waits.
+- **Next:** `steps/s11-contract-retrofit.md` § Sessions, session 5 (S11-C, convergence pass).
 - **Open questions:** none.
-- **Verification:** JBR 21, after the last Kotlin edit: `styleCheck`, `checkDocBudgets`, and full `testAndroidHostTest` of orchestration, book_detail, component and session passed. No glommed closers; AAA markers complete. Not run: iOS-sim compile, `assembleDebug`, on-device check of the push/pop fade, the peek bar → Focus Mode morph, and the hero → full-screen morph (and no shimmer on open).
-- **Uncommitted:** session 3 (5 Kotlin files, 2 tests, `foundations.md` §2.5) and these working docs.
+- **Verification:** JBR 21, after the last Kotlin edit: `styleCheck`, `checkDocBudgets`, full `testAndroidHostTest` of every touched module, `:app:installDebug` on Medium_Phone, `:orchestration:compileKotlinIosSimulatorArm64` (whole graph), `:desktopApp:compileKotlin` passed; no glomming, no `!!`, AAA complete. User's device check on Medium_Phone (morphs, gesture, nested navigator, back-to-home) passed.
+- **Uncommitted:** nothing.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

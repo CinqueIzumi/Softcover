@@ -52,8 +52,8 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-36 | One root push/pop transition | SL-15a | [x] |
 | S11-37 | The Focus Mode cover travels | S11-36 | [x] |
 | S11-38 | The full-screen cover grows out of the hero | S11-36 | [x] |
-| S11-39 | Shared title and rating keys into book detail | S11-36 | [ ] |
-| S11-40 | Predictive back drives the push/pop transition | S11-36–S11-39 | [ ] |
+| S11-39 | Shared title and rating keys into book detail | S11-36 | [x] |
+| S11-40 | Predictive back drives the push/pop transition | S11-36–S11-39 | [x] |
 | S11-43 | A snackbar raised while a sheet is open draws above the sheet, not under it | — | [x] |
 | S11-C | Convergence pass over the family (family-procedure.md § Phase 3) | all | [ ] |
 
@@ -172,6 +172,17 @@ Session 3 (S11-36, S11-37, S11-38):
 - S11-37: `ActiveSessionControllerImpl` builds `peekBarCover` and `focusCover` with `shareTransition = true`, `transitionSurface = "session"`; other Focus Mode entries get the plain transition.
 - S11-38: `CoverModelsSnapshot`'s `fullScreen` model carries the hero's key; `FullScreenCoverViewer` renders `Cover(model)` in a centred 2:3 box (zoom/pan still via `graphicsLayer`) in place of `RhaydusShimmerImage`.
 - Docs: foundations §2.5 tab-root line ("currently `None`") and cover-to-detail entry rewritten within the file's budget.
+
+Session 4 (S11-39, then S11-40; one implementer round each):
+- S11-39: `bookCoverTransitionKey` becomes `bookTransitionKey(element, editionId, bookId, surface)` with `BookTransitionElement { Cover, Title, Rating }`; the six cover call sites pass `Cover`.
+- S11-39: `BookCardContent.titleTransitionKey: String? = null`, `BookCardLinePart.Rating.transitionKey: String? = null`, `bookStatsLine(ratingTransitionKey = null)`.
+- S11-39: every card mapper that shares its cover key also sets the title key (and rating key where a rating shows): library, reading, Explore's `BookCardModelsCollector`, `RecentlyLovedCardMapper`. The compact library list gets the title key. Edition cards stay unkeyed.
+- S11-39: `BookDetailUiState.heroTitleTransitionKey` / `heroRatingTransitionKey`, written by `CoverModelsCollector` beside the hero cover key; `GeneralBookInfoSection` matches the title and the rating's number+star row. `heroTitle` must be present on frame one (seed from nav args like `withCoverModels` if not).
+- S11-39: `Cover.kt`'s inline gated `sharedBounds` becomes `Modifier.navSharedBounds(key, resizeMode)` in `:core:component`, used by cover, card title, card rating and both detail elements; text uses `ScaleToBounds`. Update the foundations shared-element line.
+- S11-40 (within Voyager, which has no predictive back): `RootStackTransition` in `:orchestration` replaces `ScreenTransition`: a `SeekableTransitionState<Screen>` rendered via `rememberTransition(state).AnimatedContent` with `rootFadeThrough`, each screen in `navigator.saveableState`; pushes and pops `animateTo(navigator.lastItem)`.
+- S11-40: `Navigator(BottomBarScreen, onBackPressed = null)`; one root `NavigationBackHandler`, enabled while `navigator.canPop`: progress `seekTo(progress, targetState = previous)`, release animates to `previous` then `navigator.pop()`, cancel animates back. Deeper handlers keep priority.
+- S11-40: expect/actual `backGestureSeeksTransition` (Android `true`, iOS/JVM `false`); when `false` the handler ignores progress and the plain pop plays.
+- S11-40: `LibraryEditModeBackHandlers` stay commit-on-release, with no gesture preview.
 
 ## R10 edges
 

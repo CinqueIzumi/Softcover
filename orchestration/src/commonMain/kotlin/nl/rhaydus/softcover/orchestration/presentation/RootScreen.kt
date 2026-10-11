@@ -32,9 +32,7 @@ import androidx.compose.ui.layout.layout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.core.stack.StackEvent
 import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.transitions.ScreenTransition
 import kotlinx.coroutines.flow.combine
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
@@ -57,18 +55,21 @@ private fun rootFadeThrough(
     effectsSpec: FiniteAnimationSpec<Float>,
     spatialSpec: FiniteAnimationSpec<Float>,
 ): ContentTransform = if (isPop) {
-    (fadeIn(animationSpec = effectsSpec) togetherWith
-        (fadeOut(animationSpec = effectsSpec) +
-            scaleOut(
-                animationSpec = spatialSpec,
-                targetScale = PUSH_SCALE_FROM,
-            ))).apply { targetContentZIndex = -1f }
+    val shrinkOut = scaleOut(
+        animationSpec = spatialSpec,
+        targetScale = PUSH_SCALE_FROM,
+    )
+    val exit = fadeOut(animationSpec = effectsSpec) + shrinkOut
+
+    (fadeIn(animationSpec = effectsSpec) togetherWith exit).apply { targetContentZIndex = -1f }
 } else {
-    (fadeIn(animationSpec = effectsSpec) +
-        scaleIn(
-            animationSpec = spatialSpec,
-            initialScale = PUSH_SCALE_FROM,
-        )) togetherWith fadeOut(animationSpec = effectsSpec)
+    val growIn = scaleIn(
+        animationSpec = spatialSpec,
+        initialScale = PUSH_SCALE_FROM,
+    )
+    val enter = fadeIn(animationSpec = effectsSpec) + growIn
+
+    enter togetherWith fadeOut(animationSpec = effectsSpec)
 }
 
 internal object RootScreen : Screen {
@@ -159,7 +160,10 @@ internal object RootScreen : Screen {
                         }
 
                         Box(modifier = Modifier.consumeWindowInsets(bannerCoveredInsets)) {
-                            Navigator(BottomBarScreen) { navigator ->
+                            Navigator(
+                                screen = BottomBarScreen,
+                                onBackPressed = null,
+                            ) { navigator ->
                                 LaunchedEffect(navigator) {
                                     // Push Focus Mode only once a session is actually present. On a
                                     // cold start the deep-link flag is set before the session flow has
@@ -186,11 +190,11 @@ internal object RootScreen : Screen {
                                 SharedTransitionLayout {
                                     val sharedTransitionScope = this
 
-                                    ScreenTransition(
+                                    RootStackTransition(
                                         navigator = navigator,
-                                        transition = {
+                                        transitionSpec = { isPop ->
                                             rootFadeThrough(
-                                                isPop = navigator.lastEvent == StackEvent.Pop,
+                                                isPop = isPop,
                                                 effectsSpec = effectsSpec,
                                                 spatialSpec = spatialSpec,
                                             )
