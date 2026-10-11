@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen.section
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -12,14 +14,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.fillMaxWidth
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyGridState
 import nl.rhaydus.designsystem.component.DesktopContextMenu
 import nl.rhaydus.designsystem.component.DesktopContextMenuItem
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.platformModifierClick
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
@@ -46,6 +45,8 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnSelectBookRang
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleBookSelectionAction
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.state.bookReorderStatusFor
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyGridState
 
 @Composable
 internal fun BookList(
@@ -63,9 +64,12 @@ internal fun BookList(
             EmptyState(
                 model = emptyState,
                 modifier = Modifier
-                    .padding(horizontal = Spacing.gutter)
-                    .fillMaxWidth()
-                    .padding(top = Spacing.x4l),
+                    .fillMaxSize()
+                    .padding(
+                        start = Spacing.gutter,
+                        end = Spacing.gutter,
+                        bottom = rememberBottomBarPadding(),
+                    ),
             )
         }
 

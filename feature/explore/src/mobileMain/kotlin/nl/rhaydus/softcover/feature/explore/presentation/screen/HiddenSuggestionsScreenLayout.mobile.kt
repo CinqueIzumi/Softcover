@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -9,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -41,18 +43,29 @@ internal actual fun HiddenSuggestionsScreenLayout(
             )
         },
     ) { innerPadding ->
-        HiddenSuggestionsContent(
-            state = state,
-            runAction = runAction,
-            modifier = Modifier
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .cappedContentWidth()
-                .padding(
-                    horizontal = Spacing.gutter,
-                    vertical = Spacing.md,
-                ),
-        )
+        if (state.isEmpty) {
+            EmptyState(
+                model = state.emptyState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .cappedContentWidth()
+                    .padding(horizontal = Spacing.gutter),
+            )
+        } else {
+            HiddenSuggestionsContent(
+                state = state,
+                runAction = runAction,
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+                    .cappedContentWidth()
+                    .padding(
+                        horizontal = Spacing.gutter,
+                        vertical = Spacing.md,
+                    ),
+            )
+        }
     }
 }
 

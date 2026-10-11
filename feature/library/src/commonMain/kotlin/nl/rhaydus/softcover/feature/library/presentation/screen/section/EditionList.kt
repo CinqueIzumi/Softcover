@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen.section
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
@@ -49,9 +50,12 @@ internal fun EditionList(
             EmptyState(
                 model = emptyState,
                 modifier = Modifier
-                    .padding(horizontal = Spacing.gutter)
-                    .fillMaxWidth()
-                    .padding(top = Spacing.x4l),
+                    .fillMaxSize()
+                    .padding(
+                        start = Spacing.gutter,
+                        end = Spacing.gutter,
+                        bottom = rememberBottomBarPadding(),
+                    ),
             )
         }
 

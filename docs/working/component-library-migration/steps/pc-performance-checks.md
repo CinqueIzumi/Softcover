@@ -12,9 +12,9 @@ and a Perfetto trace. PC turns that check, and a Compose stability check, into r
 
 | Sub | Scope | Status |
 |---|---|---|
-| PC-1 | Approved shape (below) — stop for approval | [ ] |
-| PC-2 | Idle-frame check: a script that opens each main screen on a running emulator, waits for it to settle, and fails when it draws frames at rest | [ ] |
-| PC-3 | Run PC-2 across every screen; fix or record each screen that redraws at rest | [ ] |
+| PC-1 | Approved shape (below) — stop for approval | [x] |
+| PC-2 | Idle-frame check: dropped; no automated idle check (neither a debug route plus script nor Compose UI idle tests) | [x] |
+| PC-3 | One-off `dumpsys gfxinfo` sweep: every screen idles at 0 frames except any `EmptyState` (~60 fps from `quoteGlyphSway()`), kept by choice since empty states are short-lived | [x] |
 | PC-4 | Compose stability gate: compiler stability reports plus a baseline that fails on a newly unstable or non-skippable composable | [ ] |
 | PC-5 | Fix or baseline what PC-4 reports | [ ] |
 
@@ -29,4 +29,7 @@ and a Perfetto trace. PC turns that check, and a Compose stability check, into r
 
 ## Approved shape
 
-Not yet approved.
+- Stability: skydoves Compose Stability Analyzer plugin (`stabilityDump` baseline per module, `stabilityCheck` fails on a new unstable parameter); verify KMP / Kotlin 2.3.21 support first, else compiler reports plus a hand-written baseline diff task.
+- Checks unstable parameters only, not skippability (strong skipping is on by default).
+- Applied through `KmpComposeConventionPlugin` / `AndroidComposeConventionPlugin`; its own task wired into `check` and `ci.yml`, not `styleCheck`.
+- Filed in `foundation-upstream-candidates.md` as a gate for build-logic; built here first.

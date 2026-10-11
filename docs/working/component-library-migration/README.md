@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11 is done: S11-C session A reviewed and its findings fixed, `document-code` sweep run, S11 ticked here and on #275, both S11 step files deleted, agent memory pruned. PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
-- **Next:** PC-1 in `steps/pc-performance-checks.md` § PC-1: propose the idle-frame check and stability gate shape, then stop for approval (PC runs before S12).
+- **State:** PC-1 approved, PC-2 dropped (no automated idle check). PC-3 sweep run once on Medium_Phone: every screen idles at 0 frames except any `EmptyState`, which draws ~60 fps because `quoteGlyphSway()` (`core/designsystem/.../modifier/QuoteGlyphSway.kt`) is an infinite animation; kept by choice, since empty states are short-lived. Not measured: reading session / Focus Mode (writes to the account), barcode scanner, onboarding, debug screens. PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
+- **Next:** PC-4: brief `softcover-implementer` for the stability gate per the PC step file's § Approved shape (first verify the skydoves plugin supports KMP / Kotlin 2.3.21).
 - **Open questions:** none.
-- **Verification:** after the last Kotlin edit, under JBR 21: `ktlintCheck`, `styleCheck`, `:core:component:compileKotlinJvm`, `:feature:book_detail:compileKotlinJvm` passed; glommed-closer grep clean. Earlier on the merged tree: every module's `compileKotlinJvm` / `testAndroidHostTest`, platform compiles, `checkModuleGraph`, `checkDocBudgets`, `:app:installDebug` passed.
-- **Uncommitted:** all of S11-C (about 440 paths): `core/component` (sheet fork, `SheetSession`, `modifier/` tactile / shake / pulse, `haptics/` `Feedback`, `transition/`); `core/designsystem` `Motion` / `Theme`; `core/uibinding`; `core/presentation`; every feature's sheet hosts, events and host tests; `orchestration` (back gesture, `NavFadeThrough`, re-auth); `config/detekt/detekt.yml`; design-system docs and `module-structure.md`; tracker docs (S11 step files deleted, two copy-audit rows); agent-memory notes.
+- **Verification:** empty-state centring: `styleCheck` and the library / explore compiles passed (JBR 21); reviewed, findings fixed; checked on Medium_Phone (empty DNF shelf, empty Hidden suggestions).
+- **Uncommitted:** tracker edits (this file, the PC step file); empty-state centring (`BookList`, `EditionList`, `HiddenSuggestionsContent`, both `HiddenSuggestionsScreenLayout`s, `layout.md`).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

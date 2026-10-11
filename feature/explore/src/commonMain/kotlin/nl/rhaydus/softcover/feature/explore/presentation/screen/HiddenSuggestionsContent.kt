@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
@@ -16,7 +15,6 @@ import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -29,9 +27,9 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestions
  * standalone layout. An intro line opens the surface (the screen's title lives in the top bar, matching
  * the sibling Appearance / Library-tabs settings pages), then two hairline-separated groups — "Hidden
  * books" / "Hidden series" — each list their rows with a per-item warm "Restore" affordance; a group is
- * omitted entirely when its list is empty, and an overall editorial empty state replaces everything when
- * nothing at all is hidden ([HiddenSuggestionsUiState.isEmpty]). The caller supplies the scroll / width
- * [modifier].
+ * omitted entirely when its list is empty. It does not render the all-empty state
+ * ([HiddenSuggestionsUiState.isEmpty]): the screen layouts show that outside the scroll, where it can
+ * centre. The caller supplies the scroll / width [modifier].
  */
 @Composable
 internal fun HiddenSuggestionsContent(
@@ -40,45 +38,36 @@ internal fun HiddenSuggestionsContent(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        if (state.isEmpty) {
-            EmptyState(
-                model = state.emptyState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.x4l),
+        SoftcoverText(
+            text = state.intro,
+            style = MaterialTheme.editorialTypography.body,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.xxxl))
+
+        val hasBooksGroup = state.isLoadingBooks || state.hiddenBooks.isEmpty.not()
+
+        if (hasBooksGroup) {
+            HiddenGroupSection(
+                header = state.hiddenBooksGroupHeader,
+                set = state.hiddenBooks,
+                isLoading = state.isLoadingBooks,
+                runAction = runAction,
             )
-        } else {
-            SoftcoverText(
-                text = state.intro,
-                style = MaterialTheme.editorialTypography.body,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        }
 
-            Spacer(modifier = Modifier.height(Spacing.xxxl))
-
-            val hasBooksGroup = state.isLoadingBooks || state.hiddenBooks.isEmpty.not()
-
+        if (state.isLoadingSeries || state.hiddenSeries.isEmpty.not()) {
             if (hasBooksGroup) {
-                HiddenGroupSection(
-                    header = state.hiddenBooksGroupHeader,
-                    set = state.hiddenBooks,
-                    isLoading = state.isLoadingBooks,
-                    runAction = runAction,
-                )
+                Spacer(modifier = Modifier.height(Spacing.section))
             }
 
-            if (state.isLoadingSeries || state.hiddenSeries.isEmpty.not()) {
-                if (hasBooksGroup) {
-                    Spacer(modifier = Modifier.height(Spacing.section))
-                }
-
-                HiddenGroupSection(
-                    header = state.hiddenSeriesGroupHeader,
-                    set = state.hiddenSeries,
-                    isLoading = state.isLoadingSeries,
-                    runAction = runAction,
-                )
-            }
+            HiddenGroupSection(
+                header = state.hiddenSeriesGroupHeader,
+                set = state.hiddenSeries,
+                isLoading = state.isLoadingSeries,
+                runAction = runAction,
+            )
         }
     }
 }
