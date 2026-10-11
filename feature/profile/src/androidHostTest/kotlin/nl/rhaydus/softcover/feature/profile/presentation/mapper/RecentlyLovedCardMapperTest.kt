@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.mapper
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
@@ -10,6 +11,8 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverSource
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -187,6 +190,57 @@ class RecentlyLovedCardMapperTest {
             result.column().hasMenu shouldBe false
             result.decorations.progress.shouldBeNull()
             result.decorations.pressBehaviour shouldBe BookCardDecorations.Press.Tap
+        }
+    }
+
+    @Nested
+    inner class TransitionKeys {
+        @Test
+        fun `the title key is built from the same book id as the cover key`() {
+            // ----- Arrange -----
+            val book = lovedBook(bookId = 42)
+
+            // ----- Act -----
+            val column = book.toRecentlyLovedCard().column()
+
+            // ----- Assert -----
+            column.text.titleTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Title,
+                editionId = null,
+                bookId = 42,
+            )
+            column.cover.shouldNotBeNull().model.sharedTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Cover,
+                editionId = null,
+                bookId = 42,
+            )
+        }
+
+        @Test
+        fun `the rating part carries no transition key because it is the reader's own rating`() {
+            // ----- Arrange -----
+            val book = lovedBook(ratingStars = 4.5)
+
+            // ----- Act -----
+            val lines = book.toRecentlyLovedCard().column().text.supportingLines
+
+            // ----- Assert -----
+            val ratings = lines.flatten().filterIsInstance<BookCardLinePart.Rating>()
+            ratings.map { it.transitionKey } shouldBe listOf(null)
+        }
+
+        @Test
+        fun `different books get different title keys`() {
+            // ----- Arrange -----
+            val first = lovedBook(bookId = 1)
+            val second = lovedBook(bookId = 2)
+
+            // ----- Act -----
+            val firstKey = first.toRecentlyLovedCard().column().text.titleTransitionKey
+            val secondKey = second.toRecentlyLovedCard().column().text.titleTransitionKey
+
+            // ----- Assert -----
+            firstKey.shouldNotBeNull() shouldNotBe secondKey
         }
     }
 }

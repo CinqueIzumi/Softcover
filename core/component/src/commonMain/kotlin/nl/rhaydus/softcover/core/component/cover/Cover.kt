@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.core.component.cover
 
-import androidx.compose.animation.BoundsTransform
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -10,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -45,10 +40,9 @@ import coil3.request.crossfade
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.modifier.navSharedBounds
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
 
 private const val COVER_ASPECT_RATIO = 2f / 3f
 
@@ -73,7 +67,6 @@ private const val COVER_ASPECT_RATIO = 2f / 3f
  * straight through: they must not skip the item (the list then renders empty and pops in) and they
  * must not re-invent a local placeholder.
  */
-@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun Cover(
     model: CoverUiModel?,
@@ -105,28 +98,7 @@ fun Cover(
         Modifier.clip(shape)
     }
 
-    val playMotion = playDecorativeMotion()
-    val sharedScope = LocalSharedTransitionScope.current
-    val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
-
-    val boundsSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Rect>()
-
-    val containerModifier = if (
-        playMotion &&
-        model.sharedTransitionKey != null &&
-        sharedScope != null &&
-        animatedVisibilityScope != null
-    ) {
-        with(sharedScope) {
-            modifier.sharedBounds(
-                sharedContentState = rememberSharedContentState(key = model.sharedTransitionKey),
-                animatedVisibilityScope = animatedVisibilityScope,
-                boundsTransform = BoundsTransform { _, _ -> boundsSpec },
-            )
-        }
-    } else {
-        modifier
-    }
+    val containerModifier = modifier.navSharedBounds(model.sharedTransitionKey)
 
     if (request == null) {
         Box(

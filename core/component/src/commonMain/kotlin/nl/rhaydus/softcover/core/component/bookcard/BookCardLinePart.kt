@@ -9,5 +9,6 @@ sealed interface BookCardLinePart {
     data class Rating(
         val label: String,
         val contentDescription: String,
+        val transitionKey: String? = null,
     ) : BookCardLinePart
 }

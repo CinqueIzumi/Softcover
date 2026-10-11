@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.mapper
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
@@ -18,6 +19,8 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
@@ -67,8 +70,31 @@ class ExploreBookCardMapperTest {
         userBookRead = null,
     )
 
+    private fun titleKey(
+        bookId: Int,
+        surface: String? = null,
+    ): String? = bookTransitionKey(
+        element = BookTransitionElement.Title,
+        editionId = null,
+        bookId = bookId,
+        surface = surface,
+    )
+
+    private fun ratingKey(
+        bookId: Int,
+        surface: String? = null,
+    ): String? = bookTransitionKey(
+        element = BookTransitionElement.Rating,
+        editionId = null,
+        bookId = bookId,
+        surface = surface,
+    )
+
     private fun BookCardUiModel.stacked(): BookCardVariant.Column =
         variant.shouldBeInstanceOf<BookCardVariant.Column>()
+
+    private fun BookCardUiModel.row(): BookCardVariant.Row =
+        variant.shouldBeInstanceOf<BookCardVariant.Row>()
 
     @Nested
     inner class ToTrendingCard {
@@ -112,6 +138,7 @@ class ExploreBookCardMapperTest {
                     BookCardLinePart.Rating(
                         label = "4.5",
                         contentDescription = "Rated 4.5 out of 5",
+                        transitionKey = ratingKey(bookId = 7),
                     ),
                 ),
             )
@@ -248,9 +275,6 @@ class ExploreBookCardMapperTest {
 
     @Nested
     inner class ToSearchResultCard {
-        private fun BookCardUiModel.row(): BookCardVariant.Row =
-            variant.shouldBeInstanceOf<BookCardVariant.Row>()
-
         @Test
         fun `builds a row keyed by book id with the cover as lead`() {
             // ----- Arrange -----
@@ -373,6 +397,7 @@ class ExploreBookCardMapperTest {
                     BookCardLinePart.Rating(
                         label = "4.5",
                         contentDescription = "Rated 4.5 out of 5",
+                        transitionKey = ratingKey(bookId = 7),
                     ),
                 ),
             )
@@ -394,6 +419,157 @@ class ExploreBookCardMapperTest {
             card.row().text.supportingLines shouldBe persistentListOf(
                 persistentListOf(BookCardLinePart.Text(text = "5 readers")),
             )
+        }
+    }
+
+    @Nested
+    inner class TransitionKeys {
+        @Test
+        fun `trending threads the surface to the title and rating keys`() {
+            // ----- Arrange -----
+            val input = book(
+                id = 7,
+                rating = 4.5,
+            )
+
+            // ----- Act -----
+            val card = input.toTrendingCard(
+                cover = cover,
+                coverBadge = null,
+                transitionSurface = "trending",
+            )
+
+            // ----- Assert -----
+            val text = card.stacked().text
+            text.titleTransitionKey shouldBe titleKey(
+                bookId = 7,
+                surface = "trending",
+            )
+            val rating = text.supportingLines.single().single().shouldBeInstanceOf<BookCardLinePart.Rating>()
+            rating.transitionKey shouldBe ratingKey(
+                bookId = 7,
+                surface = "trending",
+            )
+        }
+
+        @Test
+        fun `one book on two surfaces gets distinct title and rating keys`() {
+            // ----- Arrange -----
+            val input = book(rating = 4.5)
+
+            // ----- Act -----
+            val first = input.toTrendingCard(
+                cover = cover,
+                coverBadge = null,
+                transitionSurface = "trending",
+            ).stacked().text
+            val second = input.toTrendingCard(
+                cover = cover,
+                coverBadge = null,
+                transitionSurface = "upNext",
+            ).stacked().text
+
+            // ----- Assert -----
+            first.titleTransitionKey.shouldNotBeNull() shouldNotBe second.titleTransitionKey
+            first.supportingLines shouldNotBe second.supportingLines
+        }
+
+        @Test
+        fun `trending omits the rating key along with the rating line for an unrated book`() {
+            // ----- Arrange -----
+            val input = book(rating = 0.0)
+
+            // ----- Act -----
+            val text = input.toTrendingCard(
+                cover = cover,
+                coverBadge = null,
+                transitionSurface = "trending",
+            ).stacked().text
+
+            // ----- Assert -----
+            text.supportingLines shouldBe persistentListOf()
+            text.titleTransitionKey shouldBe titleKey(
+                bookId = 7,
+                surface = "trending",
+            )
+        }
+
+        @Test
+        fun `because you read threads the surface to the title key`() {
+            // ----- Arrange -----
+            val input = book(id = 9)
+
+            // ----- Act -----
+            val text = input.toBecauseYouReadCard(
+                cover = cover,
+                coverBadge = null,
+                transitionSurface = "becauseYouRead",
+            ).stacked().text
+
+            // ----- Assert -----
+            text.titleTransitionKey shouldBe titleKey(
+                bookId = 9,
+                surface = "becauseYouRead",
+            )
+        }
+
+        @Test
+        fun `up next threads the surface to the title key`() {
+            // ----- Arrange -----
+            val input = book(id = 9)
+
+            // ----- Act -----
+            val text = input.toUpNextCard(
+                cover = cover,
+                coverBadge = null,
+                transitionSurface = "upNext",
+            ).stacked().text
+
+            // ----- Assert -----
+            text.titleTransitionKey shouldBe titleKey(
+                bookId = 9,
+                surface = "upNext",
+            )
+        }
+
+        @Test
+        fun `a search result threads the surface to the title and rating keys`() {
+            // ----- Arrange -----
+            val input = book(
+                id = 3,
+                rating = 4.5,
+            )
+
+            // ----- Act -----
+            val text = input.toSearchResultCard(
+                cover = cover,
+                transitionSurface = "search",
+            ).row().text
+
+            // ----- Assert -----
+            text.titleTransitionKey shouldBe titleKey(
+                bookId = 3,
+                surface = "search",
+            )
+            val ratings = text.supportingLines.flatten().filterIsInstance<BookCardLinePart.Rating>()
+            ratings.map { it.transitionKey } shouldBe listOf(
+                ratingKey(
+                    bookId = 3,
+                    surface = "search",
+                ),
+            )
+        }
+
+        @Test
+        fun `without a surface the keys carry no surface suffix`() {
+            // ----- Arrange -----
+            val input = book(id = 3)
+
+            // ----- Act -----
+            val text = input.toSearchResultCard(cover = cover).row().text
+
+            // ----- Assert -----
+            text.titleTransitionKey shouldBe titleKey(bookId = 3)
         }
     }
 }

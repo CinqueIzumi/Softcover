@@ -46,6 +46,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.shape
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
+import nl.rhaydus.softcover.core.component.modifier.navSharedBounds
 import nl.rhaydus.softcover.core.component.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -64,6 +65,8 @@ internal fun GeneralBookInfoSection(
     heroCover: CoverUiModel?,
     backdropCover: CoverUiModel?,
     title: String?,
+    titleTransitionKey: String?,
+    ratingTransitionKey: String?,
     seriesText: String?,
     rating: Double?,
     releaseYear: Int?,
@@ -212,6 +215,7 @@ internal fun GeneralBookInfoSection(
                             blurRadius = 8f,
                         ),
                     ),
+                    modifier = Modifier.navSharedBounds(key = titleTransitionKey),
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.xxs))
@@ -279,7 +283,10 @@ internal fun GeneralBookInfoSection(
                                     style = labelSmall,
                                 )
 
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.navSharedBounds(key = ratingTransitionKey),
+                                ) {
                                     SoftcoverText(
                                         text = rating?.let {
                                             formatDecimalNumber(

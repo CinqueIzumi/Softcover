@@ -13,4 +13,5 @@ data class BookCardContent(
     val titleIcon: SoftcoverIcon? = null,
     val byline: String? = null,
     val supportingLines: ImmutableList<ImmutableList<BookCardLinePart>> = persistentListOf(),
+    val titleTransitionKey: String? = null,
 )

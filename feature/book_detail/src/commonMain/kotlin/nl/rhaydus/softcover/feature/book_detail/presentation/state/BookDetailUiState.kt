@@ -197,6 +197,8 @@ internal data class BookDetailUiState(
     val heroCover: CoverUiModel? = null,
     val heroBackdropCover: CoverUiModel? = null,
     val fullScreenCover: CoverUiModel? = null,
+    val heroTitleTransitionKey: String? = null,
+    val heroRatingTransitionKey: String? = null,
     val verdictCover: CoverUiModel? = null,
     val editionSheetHeaderCover: CoverUiModel? = null,
 

@@ -1,7 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -49,7 +50,8 @@ internal fun CoverModelsSnapshot.toCoverModels(): CoverModels {
         variant = CoverVariant.Rounded,
         fallbackCoverUrl = fallbackCoverUrl,
         isLoading = coverIsLoading,
-        sharedTransitionKey = bookCoverTransitionKey(
+        sharedTransitionKey = bookTransitionKey(
+            element = BookTransitionElement.Cover,
             editionId = edition?.id,
             bookId = bookId,
             surface = transitionSurface,
@@ -72,7 +74,8 @@ internal fun CoverModelsSnapshot.toCoverModels(): CoverModels {
         variant = CoverVariant.Flat,
         fallbackCoverUrl = fallbackCoverUrl,
         isLoading = coverIsLoading,
-        sharedTransitionKey = bookCoverTransitionKey(
+        sharedTransitionKey = bookTransitionKey(
+            element = BookTransitionElement.Cover,
             editionId = edition?.id,
             bookId = bookId,
             surface = transitionSurface,
@@ -83,6 +86,18 @@ internal fun CoverModelsSnapshot.toCoverModels(): CoverModels {
         hero = hero,
         backdrop = backdrop,
         fullScreen = fullScreen,
+        heroTitleTransitionKey = bookTransitionKey(
+            element = BookTransitionElement.Title,
+            editionId = edition?.id,
+            bookId = bookId,
+            surface = transitionSurface,
+        ),
+        heroRatingTransitionKey = bookTransitionKey(
+            element = BookTransitionElement.Rating,
+            editionId = edition?.id,
+            bookId = bookId,
+            surface = transitionSurface,
+        ),
     )
 }
 
@@ -97,5 +112,7 @@ internal fun BookDetailUiState.withCoverModels(): BookDetailUiState {
         heroCover = covers.hero,
         heroBackdropCover = covers.backdrop,
         fullScreenCover = covers.fullScreen,
+        heroTitleTransitionKey = covers.heroTitleTransitionKey,
+        heroRatingTransitionKey = covers.heroRatingTransitionKey,
     )
 }

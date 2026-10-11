@@ -22,7 +22,9 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.uibinding.book.bookStatsLine
 import nl.rhaydus.softcover.core.uibinding.book.byline
+import nl.rhaydus.softcover.core.uibinding.book.ratingTransitionKey
 import nl.rhaydus.softcover.core.uibinding.book.seriesEyebrow
+import nl.rhaydus.softcover.core.uibinding.book.titleTransitionKey
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toBadgeUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
@@ -77,6 +79,7 @@ internal fun Book.toBookCard(
                 text = BookCardContent(
                     title = title,
                     byline = byline(author = authorString),
+                    titleTransitionKey = titleTransitionKey(),
                 ),
             )
             decorations = gridDecorations(
@@ -90,6 +93,7 @@ internal fun Book.toBookCard(
                 text = BookCardContent(
                     title = title,
                     byline = byline(author = authorString),
+                    titleTransitionKey = titleTransitionKey(),
                 ),
                 trailing = deadlineProgress?.toBadgeUiModel()?.let { BookCardTrailing.Badge(model = it) },
             )
@@ -113,10 +117,12 @@ internal fun Book.toBookCard(
                     title = title,
                     eyebrow = seriesEyebrow(seriesText = seriesText),
                     byline = byline(author = authorString),
+                    titleTransitionKey = titleTransitionKey(),
                     supportingLines = bookStatsLine(
                         releaseYear = releaseYear,
                         usersCount = usersCount,
                         rating = rating,
+                        ratingTransitionKey = ratingTransitionKey(),
                     )?.let { persistentListOf(it) } ?: persistentListOf(),
                 ),
                 deadline = deadlineProgress?.toDeadlineSummaryUiModel(

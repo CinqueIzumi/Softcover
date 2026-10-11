@@ -2,7 +2,8 @@ package nl.rhaydus.softcover.core.uibinding.cover
 
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 
@@ -52,7 +53,8 @@ fun Book.toCoverUiModel(
     variant = variant,
     fallbackCoverUrl = coverUrl,
     sharedTransitionKey = if (shareTransition) {
-        bookCoverTransitionKey(
+        bookTransitionKey(
+            element = BookTransitionElement.Cover,
             editionId = currentEdition?.id,
             bookId = id,
             surface = transitionSurface,

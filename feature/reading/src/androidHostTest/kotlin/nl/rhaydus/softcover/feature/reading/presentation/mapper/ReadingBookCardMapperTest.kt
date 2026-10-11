@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
@@ -21,6 +22,8 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardProgress
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -422,6 +425,109 @@ class ReadingBookCardMapperTest {
             column.hasMenu shouldBe false
             column.cover.shouldNotBeNull()
             card.decorations.progress.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class TransitionKeys {
+        private fun key(
+            element: BookTransitionElement,
+            editionId: Int?,
+            bookId: Int,
+        ): String? = bookTransitionKey(
+            element = element,
+            editionId = editionId,
+            bookId = bookId,
+        )
+
+        @Test
+        fun `the also reading title key matches its cover key's ids`() {
+            // ----- Arrange -----
+            val book = book(id = 7)
+
+            // ----- Act -----
+            val row = alsoReading(book = book).variant.shouldBeInstanceOf<BookCardVariant.Row>()
+
+            // ----- Assert -----
+            val lead = row.lead.shouldBeInstanceOf<BookCardLead.Cover>()
+            row.text.titleTransitionKey shouldBe key(
+                element = BookTransitionElement.Title,
+                editionId = 50,
+                bookId = 7,
+            )
+            lead.cover.model.sharedTransitionKey shouldBe key(
+                element = BookTransitionElement.Cover,
+                editionId = 50,
+                bookId = 7,
+            )
+        }
+
+        @Test
+        fun `the also reading card carries no rating key because it shows no rating`() {
+            // ----- Arrange -----
+            val book = book()
+
+            // ----- Act -----
+            val row = alsoReading(book = book).variant.shouldBeInstanceOf<BookCardVariant.Row>()
+
+            // ----- Assert -----
+            row.text.supportingLines shouldBe persistentListOf()
+        }
+
+        @Test
+        fun `the also reading title key falls back to the book id without an edition`() {
+            // ----- Arrange -----
+            val book = book(
+                id = 7,
+                authors = null,
+            )
+
+            // ----- Act -----
+            val row = alsoReading(book = book).variant.shouldBeInstanceOf<BookCardVariant.Row>()
+
+            // ----- Assert -----
+            row.text.titleTransitionKey shouldBe key(
+                element = BookTransitionElement.Title,
+                editionId = null,
+                bookId = 7,
+            )
+        }
+
+        @Test
+        fun `the pick up next title key matches its cover key's ids`() {
+            // ----- Arrange -----
+            val book = book(id = 3)
+
+            // ----- Act -----
+            val column = book.toPickUpNextCard().variant.shouldBeInstanceOf<BookCardVariant.Column>()
+
+            // ----- Assert -----
+            column.text.titleTransitionKey shouldBe key(
+                element = BookTransitionElement.Title,
+                editionId = 50,
+                bookId = 3,
+            )
+            column.cover.shouldNotBeNull().model.sharedTransitionKey shouldBe key(
+                element = BookTransitionElement.Cover,
+                editionId = 50,
+                bookId = 3,
+            )
+        }
+
+        @Test
+        fun `two different books get distinct title keys`() {
+            // ----- Arrange -----
+            val first = book(id = 1)
+            val second = book(id = 2)
+
+            // ----- Act -----
+            val firstKey = first.toPickUpNextCard().variant
+                .shouldBeInstanceOf<BookCardVariant.Column>().text.titleTransitionKey
+            val secondKey = second.toPickUpNextCard().variant
+                .shouldBeInstanceOf<BookCardVariant.Column>().text.titleTransitionKey
+
+            // ----- Assert -----
+            firstKey.shouldNotBeNull() shouldNotBe secondKey
         }
     }
 }

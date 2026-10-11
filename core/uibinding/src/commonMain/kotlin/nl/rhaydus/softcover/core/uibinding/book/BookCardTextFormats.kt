@@ -10,7 +10,10 @@ fun byline(author: String?): String? = author
     ?.let { "By $it" }
 
 /** A rating part reading "4.5" with the description "Rated 4.5 out of 5". */
-fun ratingPart(rating: Double): BookCardLinePart.Rating {
+fun ratingPart(
+    rating: Double,
+    transitionKey: String? = null,
+): BookCardLinePart.Rating {
     val label = formatDecimalNumber(
         rating,
         fractionDigits = 1,
@@ -19,6 +22,7 @@ fun ratingPart(rating: Double): BookCardLinePart.Rating {
     return BookCardLinePart.Rating(
         label = label,
         contentDescription = "Rated $label out of 5",
+        transitionKey = transitionKey,
     )
 }
 

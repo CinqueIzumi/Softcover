@@ -34,6 +34,8 @@ internal fun BookHero(
             isExpired = state.deadlineRow?.isExpired == true,
             rating = state.heroRating,
             title = state.heroTitle,
+            titleTransitionKey = state.heroTitleTransitionKey,
+            ratingTransitionKey = state.heroRatingTransitionKey,
             seriesText = state.heroSeriesText,
             releaseYear = state.heroReleaseYear,
             unreleasedBadge = state.unreleasedBadge,

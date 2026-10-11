@@ -6,4 +6,6 @@ internal data class CoverModels(
     val hero: CoverUiModel,
     val backdrop: CoverUiModel,
     val fullScreen: CoverUiModel,
+    val heroTitleTransitionKey: String?,
+    val heroRatingTransitionKey: String?,
 )

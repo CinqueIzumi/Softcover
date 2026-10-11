@@ -21,9 +21,12 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
+import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
@@ -71,12 +74,13 @@ class BookCardModelsCollectorTest {
         title: String = "Title $id",
         authors: List<Author> = emptyList(),
         bookSeries: BookSeries? = null,
+        rating: Double = 0.0,
     ): Book = Book(
         id = id,
         title = title,
         editions = emptyList(),
         defaultEdition = null,
-        rating = 0.0,
+        rating = rating,
         description = "",
         releaseYear = 2020,
         coverUrl = "https://covers.test/$id.jpg",
@@ -471,6 +475,173 @@ class BookCardModelsCollectorTest {
                 )
                 job.cancel()
             }
+    }
+
+    @Nested
+    inner class TransitionKeys {
+        private fun titleKey(
+            bookId: Int,
+            surface: String?,
+        ): String? = bookTransitionKey(
+            element = BookTransitionElement.Title,
+            editionId = null,
+            bookId = bookId,
+            surface = surface,
+        )
+
+        private fun ratingKey(
+            bookId: Int,
+            surface: String?,
+        ): String? = bookTransitionKey(
+            element = BookTransitionElement.Rating,
+            editionId = null,
+            bookId = bookId,
+            surface = surface,
+        )
+
+        private fun BookCardUiModel.ratingKeys(): List<String?> = columnOf(this).text.supportingLines
+            .flatten()
+            .filterIsInstance<BookCardLinePart.Rating>()
+            .map { it.transitionKey }
+
+        @Test
+        fun `each rail's title key carries that rail's surface, matching its cover key surface`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launch {
+                    BookCardModelsCollector().onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+                val shared = book(id = 1)
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    trendingBooks = listOf(shared),
+                    becauseYouReadBooks = listOf(shared),
+                    continueSeriesBooks = listOf(shared),
+                )
+
+                // ----- Assert -----
+                val trending = columnOf(stateFlow.value.trending.cards.single())
+                val becauseYouRead = columnOf(stateFlow.value.becauseYouRead.cards.single())
+                val upNext = columnOf(stateFlow.value.upNext.cards.single())
+                trending.text.titleTransitionKey shouldBe titleKey(
+                    bookId = 1,
+                    surface = SURFACE_TRENDING,
+                )
+                becauseYouRead.text.titleTransitionKey shouldBe titleKey(
+                    bookId = 1,
+                    surface = SURFACE_BECAUSE_YOU_READ,
+                )
+                upNext.text.titleTransitionKey shouldBe titleKey(
+                    bookId = 1,
+                    surface = SURFACE_UP_NEXT,
+                )
+                trending.cover.shouldNotBeNull().model.sharedTransitionKey shouldBe bookTransitionKey(
+                    element = BookTransitionElement.Cover,
+                    editionId = null,
+                    bookId = 1,
+                    surface = SURFACE_TRENDING,
+                )
+                job.cancel()
+            }
+
+        @Test
+        fun `one book on three rails gets three distinct title keys`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            val shared = book(id = 1)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                trendingBooks = listOf(shared),
+                becauseYouReadBooks = listOf(shared),
+                continueSeriesBooks = listOf(shared),
+            )
+
+            // ----- Assert -----
+            val keys = listOf(
+                columnOf(stateFlow.value.trending.cards.single()).text.titleTransitionKey,
+                columnOf(stateFlow.value.becauseYouRead.cards.single()).text.titleTransitionKey,
+                columnOf(stateFlow.value.upNext.cards.single()).text.titleTransitionKey,
+            )
+            keys.toSet() shouldHaveSize 3
+            job.cancel()
+        }
+
+        @Test
+        fun `the trending rating key carries the trending surface`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                trendingBooks = listOf(
+                    book(
+                        id = 1,
+                        rating = 4.5,
+                    ),
+                ),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.trending.cards.single().ratingKeys() shouldBe listOf(
+                ratingKey(
+                    bookId = 1,
+                    surface = SURFACE_TRENDING,
+                ),
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `search results carry unsuffixed title and rating keys`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                queriedBooks = listOf(
+                    book(
+                        id = 5,
+                        rating = 4.5,
+                    ),
+                ),
+            )
+
+            // ----- Assert -----
+            val row = stateFlow.value.searchResults.cards.single().variant
+                .shouldBeInstanceOf<BookCardVariant.Row>()
+            row.text.titleTransitionKey shouldBe titleKey(
+                bookId = 5,
+                surface = null,
+            )
+            val ratings = row.text.supportingLines.flatten().filterIsInstance<BookCardLinePart.Rating>()
+            ratings.map { it.transitionKey } shouldBe listOf(
+                ratingKey(
+                    bookId = 5,
+                    surface = null,
+                ),
+            )
+            job.cancel()
+        }
     }
 
     @Nested

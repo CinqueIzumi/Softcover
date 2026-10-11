@@ -18,7 +18,8 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
@@ -218,7 +219,8 @@ class ActiveSessionControllerImplTest {
         fun `session cover key differs from the un-surfaced key of the same book`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
-            val unsurfacedKey = bookCoverTransitionKey(
+            val unsurfacedKey = bookTransitionKey(
+                element = BookTransitionElement.Cover,
                 editionId = null,
                 bookId = 42,
             )

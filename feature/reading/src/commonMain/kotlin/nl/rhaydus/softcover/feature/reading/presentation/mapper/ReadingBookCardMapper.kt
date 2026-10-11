@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.uibinding.book.byline
 import nl.rhaydus.softcover.core.uibinding.book.seriesEyebrow
+import nl.rhaydus.softcover.core.uibinding.book.titleTransitionKey
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.uibinding.format.percentLabel
@@ -57,6 +58,7 @@ internal fun Book.toAlsoReadingCard(
             ),
             text = BookCardContent(
                 title = title,
+                titleTransitionKey = titleTransitionKey(),
                 eyebrow = eyebrow,
                 byline = byline(author = authorString),
             ),
@@ -87,6 +89,9 @@ internal fun Book.toPickUpNextCard(): BookCardUiModel = BookCardUiModel(
                 shareTransition = true,
             ),
         ),
-        text = BookCardContent(title = title),
+        text = BookCardContent(
+            title = title,
+            titleTransitionKey = titleTransitionKey(),
+        ),
     ),
 )

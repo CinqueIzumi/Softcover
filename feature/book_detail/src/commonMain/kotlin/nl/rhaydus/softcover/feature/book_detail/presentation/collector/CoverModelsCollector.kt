@@ -40,6 +40,8 @@ internal class CoverModelsCollector : BookDetailCollector {
                         heroCover = covers.hero,
                         heroBackdropCover = covers.backdrop,
                         fullScreenCover = covers.fullScreen,
+                        heroTitleTransitionKey = covers.heroTitleTransitionKey,
+                        heroRatingTransitionKey = covers.heroRatingTransitionKey,
                         // The verdict sheet passes the displayed edition as both the edition and the
                         // default, exactly as its old call site did — it deliberately does not fall
                         // back to the book's default edition.

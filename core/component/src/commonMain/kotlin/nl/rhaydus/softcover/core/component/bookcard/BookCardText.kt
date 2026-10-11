@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import kotlinx.collections.immutable.ImmutableList
+import nl.rhaydus.softcover.core.component.modifier.navSharedBounds
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -122,7 +123,7 @@ private fun TitleRow(
             minLines = minLines,
             maxLines = maxLines,
             overflow = TextOverflow.Ellipsis,
-            modifier = modifier,
+            modifier = modifier.navSharedBounds(key = content.titleTransitionKey),
         )
     }
 
@@ -198,6 +199,7 @@ private fun SupportingLine(
                 is BookCardLinePart.Rating -> RatingLabel(
                     label = part.label,
                     contentDescription = part.contentDescription,
+                    transitionKey = part.transitionKey,
                     style = style,
                     color = color,
                     isLoading = isLoading,
@@ -211,6 +213,7 @@ private fun SupportingLine(
 private fun RatingLabel(
     label: String,
     contentDescription: String,
+    transitionKey: String?,
     style: TextStyle,
     color: Color,
     isLoading: Boolean,
@@ -223,7 +226,9 @@ private fun RatingLabel(
     Row(
         horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clearAndSetSemantics { this.contentDescription = contentDescription },
+        modifier = Modifier
+            .navSharedBounds(key = transitionKey)
+            .clearAndSetSemantics { this.contentDescription = contentDescription },
     ) {
         Icon(
             painter = icon.getIconPainter(),

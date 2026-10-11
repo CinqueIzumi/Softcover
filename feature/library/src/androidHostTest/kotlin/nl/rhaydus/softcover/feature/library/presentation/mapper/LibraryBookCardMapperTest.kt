@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.mapper
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -7,8 +9,12 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
+import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
+import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardProgress
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
@@ -24,10 +30,19 @@ class LibraryBookCardMapperTest {
         seriesText: String? = null,
         status: BookStatus = BookStatus.Read,
         progress: Float? = null,
+        rating: Double = 0.0,
     ): Book = mockk<Book>(relaxed = true).also { book ->
         every {
             book.id
         } returns 1
+
+        every {
+            book.currentEdition
+        } returns stubEdition(authorString = "")
+
+        every {
+            book.rating
+        } returns rating
 
         every {
             book.title
@@ -272,6 +287,162 @@ class LibraryBookCardMapperTest {
 
             // ----- Assert -----
             progress.shouldBeInstanceOf<BookCardProgress.Value>().fraction shouldBe -0.05f
+        }
+    }
+
+    @Nested
+    inner class TransitionKeys {
+        private fun BookCardVariant.titleKey(): String? = when (this) {
+            is BookCardVariant.Column -> text.titleTransitionKey
+            is BookCardVariant.Row -> text.titleTransitionKey
+            is BookCardVariant.CoverOnly -> null
+        }
+
+        private fun BookCardVariant.ratingKeys(): List<String?> = (this as? BookCardVariant.Row)
+            ?.text
+            ?.supportingLines
+            .orEmpty()
+            .flatten()
+            .filterIsInstance<BookCardLinePart.Rating>()
+            .map { it.transitionKey }
+
+        @Test
+        fun `the column title key is built from the same ids as its cover key`() {
+            // ----- Arrange -----
+            val book = stubBook()
+
+            // ----- Act -----
+            val variant = book.card(LibraryGridLayout.GRID_TWO_COLUMNS).variant
+
+            // ----- Assert -----
+            val column = variant.shouldBeInstanceOf<BookCardVariant.Column>()
+            val expectedTitle = bookTransitionKey(
+                element = BookTransitionElement.Title,
+                editionId = 7,
+                bookId = 1,
+            )
+            val expectedCover = bookTransitionKey(
+                element = BookTransitionElement.Cover,
+                editionId = 7,
+                bookId = 1,
+            )
+            column.text.titleTransitionKey.shouldNotBeNull() shouldBe expectedTitle
+            column.cover.shouldNotBeNull().model.sharedTransitionKey shouldBe expectedCover
+        }
+
+        @Test
+        fun `the large row title key is built from the same ids as its cover key`() {
+            // ----- Arrange -----
+            val book = stubBook()
+
+            // ----- Act -----
+            val variant = book.card(LibraryGridLayout.LIST_LARGE).variant
+
+            // ----- Assert -----
+            val row = variant.shouldBeInstanceOf<BookCardVariant.Row>()
+            val lead = row.lead.shouldBeInstanceOf<BookCardLead.Cover>()
+            row.text.titleTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Title,
+                editionId = 7,
+                bookId = 1,
+            )
+            lead.cover.model.sharedTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Cover,
+                editionId = 7,
+                bookId = 1,
+            )
+        }
+
+        @Test
+        fun `the compact row has no cover but still carries the title key`() {
+            // ----- Arrange -----
+            val book = stubBook()
+
+            // ----- Act -----
+            val variant = book.card(LibraryGridLayout.LIST_COMPACT).variant
+
+            // ----- Assert -----
+            val row = variant.shouldBeInstanceOf<BookCardVariant.Row>()
+            row.lead.shouldBeNull()
+            row.text.titleTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Title,
+                editionId = 7,
+                bookId = 1,
+            )
+        }
+
+        @Test
+        fun `the large row rating part carries the rating key`() {
+            // ----- Arrange -----
+            val book = stubBook(rating = 4.5)
+
+            // ----- Act -----
+            val keys = book.card(LibraryGridLayout.LIST_LARGE).variant.ratingKeys()
+
+            // ----- Assert -----
+            keys shouldBe listOf(
+                bookTransitionKey(
+                    element = BookTransitionElement.Rating,
+                    editionId = 7,
+                    bookId = 1,
+                ),
+            )
+        }
+
+        @Test
+        fun `the large row has no rating part to key when the book is unrated`() {
+            // ----- Arrange -----
+            val book = stubBook(rating = 0.0)
+
+            // ----- Act -----
+            val keys = book.card(LibraryGridLayout.LIST_LARGE).variant.ratingKeys()
+
+            // ----- Assert -----
+            keys shouldHaveSize 0
+        }
+
+        @Test
+        fun `the title key falls back to the book id when there is no current edition`() {
+            // ----- Arrange -----
+            val book = stubBook()
+            every {
+                book.currentEdition
+            } returns null
+
+            // ----- Act -----
+            val titleKey = book.card(LibraryGridLayout.GRID_TWO_COLUMNS).variant.titleKey()
+
+            // ----- Assert -----
+            titleKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Title,
+                editionId = null,
+                bookId = 1,
+            )
+        }
+
+        @Test
+        fun `cover-only cards carry no title key`() {
+            // ----- Arrange -----
+            val book = stubBook()
+
+            // ----- Act -----
+            val titleKey = book.card(LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY).variant.titleKey()
+
+            // ----- Assert -----
+            titleKey.shouldBeNull()
+        }
+
+        @Test
+        fun `edition cards carry no title or rating key on any layout`() {
+            // ----- Arrange -----
+            val edition = stubEdition(authorString = "Ann")
+
+            // ----- Act -----
+            val variants = LibraryGridLayout.entries.map { edition.card(it).variant }
+
+            // ----- Assert -----
+            variants.map { it.titleKey() }.all { it == null } shouldBe true
+            variants.flatMap { it.ratingKeys() }.shouldBeEmpty()
         }
     }
 }

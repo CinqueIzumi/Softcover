@@ -33,6 +33,8 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -1090,6 +1092,11 @@ class BookCardModelsCollectorTest {
                     BookCardLinePart.Rating(
                         label = "4.2",
                         contentDescription = "Rated 4.2 out of 5",
+                        transitionKey = bookTransitionKey(
+                            element = BookTransitionElement.Rating,
+                            editionId = null,
+                            bookId = 1,
+                        ),
                     ),
                 ),
             )

@@ -16,23 +16,30 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.book.bookStatsLine
 import nl.rhaydus.softcover.core.uibinding.book.byline
 import nl.rhaydus.softcover.core.uibinding.book.ratingPart
+import nl.rhaydus.softcover.core.uibinding.book.ratingTransitionKey
 import nl.rhaydus.softcover.core.uibinding.book.seriesEyebrow
+import nl.rhaydus.softcover.core.uibinding.book.titleTransitionKey
 
 /** Trending's card: no byline, and a rating line only for a rated book. */
 internal fun Book.toTrendingCard(
     cover: CoverUiModel?,
     coverBadge: CoverOverlayUiModel?,
+    transitionSurface: String? = null,
 ): BookCardUiModel = toColumnCard(
     cover = cover,
     coverBadge = coverBadge,
     text = BookCardContent(
         title = title,
+        titleTransitionKey = titleTransitionKey(surface = transitionSurface),
         supportingLines = if (rating == 0.0) {
             persistentListOf()
         } else {
             persistentListOf(
                 persistentListOf(
-                    ratingPart(rating = rating),
+                    ratingPart(
+                        rating = rating,
+                        transitionKey = ratingTransitionKey(surface = transitionSurface),
+                    ),
                 ),
             )
         },
@@ -43,11 +50,13 @@ internal fun Book.toTrendingCard(
 internal fun Book.toBecauseYouReadCard(
     cover: CoverUiModel?,
     coverBadge: CoverOverlayUiModel?,
+    transitionSurface: String? = null,
 ): BookCardUiModel = toColumnCard(
     cover = cover,
     coverBadge = coverBadge,
     text = BookCardContent(
         title = title,
+        titleTransitionKey = titleTransitionKey(surface = transitionSurface),
         byline = byline(author = authorString),
     ),
 )
@@ -56,11 +65,13 @@ internal fun Book.toBecauseYouReadCard(
 internal fun Book.toUpNextCard(
     cover: CoverUiModel?,
     coverBadge: CoverOverlayUiModel?,
+    transitionSurface: String? = null,
 ): BookCardUiModel = toColumnCard(
     cover = cover,
     coverBadge = coverBadge,
     text = BookCardContent(
         title = title,
+        titleTransitionKey = titleTransitionKey(surface = transitionSurface),
         eyebrow = seriesEyebrow(seriesText = bookSeries?.name),
         supportingLines = positionInSeriesDisplay
             ?.let { position ->
@@ -71,7 +82,10 @@ internal fun Book.toUpNextCard(
     hasMenu = true,
 )
 
-internal fun Book.toSearchResultCard(cover: CoverUiModel): BookCardUiModel {
+internal fun Book.toSearchResultCard(
+    cover: CoverUiModel,
+    transitionSurface: String? = null,
+): BookCardUiModel {
     val saved = userBook != null
 
     return BookCardUiModel(
@@ -81,6 +95,7 @@ internal fun Book.toSearchResultCard(cover: CoverUiModel): BookCardUiModel {
             lead = BookCardLead.Cover(cover = BookCardCover(model = cover)),
             text = BookCardContent(
                 title = title,
+                titleTransitionKey = titleTransitionKey(surface = transitionSurface),
                 eyebrow = seriesEyebrow(seriesText = seriesText),
                 byline = byline(author = authorString),
                 supportingLines = listOfNotNull(
@@ -88,6 +103,7 @@ internal fun Book.toSearchResultCard(cover: CoverUiModel): BookCardUiModel {
                         releaseYear = releaseYear,
                         usersCount = usersCount,
                         rating = rating,
+                        ratingTransitionKey = ratingTransitionKey(surface = transitionSurface),
                     ),
                 ).toImmutableList(),
             ),

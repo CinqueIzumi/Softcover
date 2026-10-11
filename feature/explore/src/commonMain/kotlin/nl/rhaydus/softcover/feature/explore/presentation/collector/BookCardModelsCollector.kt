@@ -98,7 +98,12 @@ internal class BookCardModelsCollector : ExploreCollector {
                             coverVariant = CoverVariant.Flat,
                             coverSurface = null,
                             standIns = SEARCH_RESULT_STAND_IN_CARDS,
-                            map = { book, cover, _ -> book.toSearchResultCard(cover) },
+                            map = { book, cover, _, surface ->
+                                book.toSearchResultCard(
+                                    cover = cover,
+                                    transitionSurface = surface,
+                                )
+                            },
                         ),
                     )
                 }
@@ -112,7 +117,7 @@ private inline fun List<Book>.toCardSet(
     coverSurface: String?,
     standIns: ImmutableList<BookCardUiModel>,
     overlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
-    map: (Book, CoverUiModel, CoverOverlayUiModel?) -> BookCardUiModel,
+    map: (Book, CoverUiModel, CoverOverlayUiModel?, String?) -> BookCardUiModel,
 ): BookCardSet<Book> = if (loading && isEmpty()) {
     BookCardSet.standIns(standIns)
 } else {
@@ -125,6 +130,7 @@ private inline fun List<Book>.toCardSet(
                 transitionSurface = coverSurface,
             ),
             overlays[book.id],
+            coverSurface,
         ) to book
     }.toBookCardSet()
 }

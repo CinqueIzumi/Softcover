@@ -12,7 +12,8 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.uibinding.book.byline
 import nl.rhaydus.softcover.core.uibinding.book.ratingPart
@@ -33,7 +34,8 @@ internal fun LovedBook.toRecentlyLovedCard(): BookCardUiModel = BookCardUiModel(
                     },
                 coverlessTitle = title,
                 variant = CoverVariant.Raised,
-                sharedTransitionKey = bookCoverTransitionKey(
+                sharedTransitionKey = bookTransitionKey(
+                    element = BookTransitionElement.Cover,
                     editionId = null,
                     bookId = bookId,
                 ),
@@ -41,6 +43,11 @@ internal fun LovedBook.toRecentlyLovedCard(): BookCardUiModel = BookCardUiModel(
         ),
         text = BookCardContent(
             title = title,
+            titleTransitionKey = bookTransitionKey(
+                element = BookTransitionElement.Title,
+                editionId = null,
+                bookId = bookId,
+            ),
             byline = byline(author = author),
             supportingLines = persistentListOf(
                 persistentListOf(ratingPart(rating = ratingStars)),

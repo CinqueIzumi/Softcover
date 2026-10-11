@@ -3,11 +3,15 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import nl.rhaydus.softcover.core.component.cover.CoverSource
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import org.junit.jupiter.api.Nested
@@ -42,7 +46,8 @@ class CoverModelsSnapshotTest {
             val hero = result.heroCover.shouldNotBeNull()
             val backdrop = result.heroBackdropCover.shouldNotBeNull()
 
-            hero.sharedTransitionKey shouldBe bookCoverTransitionKey(
+            hero.sharedTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Cover,
                 editionId = null,
                 bookId = BOOK_ID,
                 surface = SURFACE,
@@ -143,6 +148,51 @@ class CoverModelsSnapshotTest {
             // ----- Assert -----
             result.heroCover.shouldNotBeNull().sharedTransitionKey.shouldBeNull()
         }
+
+        @Test
+        fun `seeds the hero title and rating keys on the first frame`() {
+            // ----- Arrange -----
+            val state = BookDetailUiState(
+                bookId = BOOK_ID,
+                transitionSurface = SURFACE,
+                initialCover = initialCover(COVER_URL),
+            )
+
+            // ----- Act -----
+            val result = state.withCoverModels()
+
+            // ----- Assert -----
+            result.heroTitleTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Title,
+                editionId = null,
+                bookId = BOOK_ID,
+                surface = SURFACE,
+            )
+            result.heroRatingTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Rating,
+                editionId = null,
+                bookId = BOOK_ID,
+                surface = SURFACE,
+            )
+            result.heroTitleTransitionKey.shouldNotBeNull()
+        }
+
+        @Test
+        fun `without a bookId or edition the hero title and rating have no key`() {
+            // ----- Arrange -----
+            val state = BookDetailUiState(
+                bookId = null,
+                transitionSurface = SURFACE,
+                initialCover = initialCover(COVER_URL),
+            )
+
+            // ----- Act -----
+            val result = state.withCoverModels()
+
+            // ----- Assert -----
+            result.heroTitleTransitionKey.shouldBeNull()
+            result.heroRatingTransitionKey.shouldBeNull()
+        }
     }
 
     @Nested
@@ -150,14 +200,17 @@ class CoverModelsSnapshotTest {
         private fun snapshot(
             book: Book?,
             loadingBookDetails: Boolean,
+            bookId: Int? = BOOK_ID,
+            transitionSurface: String? = null,
+            displayedEdition: BookEdition? = null,
         ): CoverModelsSnapshot = CoverModelsSnapshot(
             book = book,
-            displayedEdition = null,
+            displayedEdition = displayedEdition,
             editions = emptyList(),
             initialCover = null,
             loadingBookDetails = loadingBookDetails,
-            bookId = BOOK_ID,
-            transitionSurface = null,
+            bookId = bookId,
+            transitionSurface = transitionSurface,
         )
 
         private fun stubBook(): Book = mockk {
@@ -269,6 +322,147 @@ class CoverModelsSnapshotTest {
             // ----- Assert -----
             covers.hero.isLoading shouldBe false
             covers.fullScreen.isLoading shouldBe false
+        }
+
+        @Test
+        fun `hero title and rating keys equal the keys a library card computes for the book`() {
+            // ----- Arrange -----
+            val snapshot = snapshot(
+                book = stubBook(),
+                loadingBookDetails = false,
+                transitionSurface = SURFACE,
+            )
+
+            // ----- Act -----
+            val covers = snapshot.toCoverModels()
+
+            // ----- Assert -----
+            covers.heroTitleTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Title,
+                editionId = null,
+                bookId = BOOK_ID,
+                surface = SURFACE,
+            )
+            covers.heroRatingTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Rating,
+                editionId = null,
+                bookId = BOOK_ID,
+                surface = SURFACE,
+            )
+        }
+
+        @Test
+        fun `cover, title and rating keys are three distinct keys`() {
+            // ----- Arrange -----
+            val snapshot = snapshot(
+                book = stubBook(),
+                loadingBookDetails = false,
+                transitionSurface = SURFACE,
+            )
+
+            // ----- Act -----
+            val covers = snapshot.toCoverModels()
+
+            // ----- Assert -----
+            val keys = listOf(
+                covers.hero.sharedTransitionKey,
+                covers.heroTitleTransitionKey,
+                covers.heroRatingTransitionKey,
+            )
+
+            keys.forEach { it.shouldNotBeNull() }
+            keys.toSet().size shouldBe 3
+        }
+
+        @Test
+        fun `the transition surface threads through to every key`() {
+            // ----- Arrange -----
+            val onHome = snapshot(
+                book = stubBook(),
+                loadingBookDetails = false,
+                transitionSurface = SURFACE,
+            )
+            val bare = snapshot(
+                book = stubBook(),
+                loadingBookDetails = false,
+                transitionSurface = null,
+            )
+
+            // ----- Act -----
+            val surfaced = onHome.toCoverModels()
+            val unsurfaced = bare.toCoverModels()
+
+            // ----- Assert -----
+            surfaced.hero.sharedTransitionKey shouldNotBe unsurfaced.hero.sharedTransitionKey
+            surfaced.heroTitleTransitionKey shouldNotBe unsurfaced.heroTitleTransitionKey
+            surfaced.heroRatingTransitionKey shouldNotBe unsurfaced.heroRatingTransitionKey
+        }
+
+        @Test
+        fun `without a bookId or displayed edition the title and rating keys are null`() {
+            // ----- Arrange -----
+            val snapshot = snapshot(
+                book = stubBook(),
+                loadingBookDetails = false,
+                bookId = null,
+            )
+
+            // ----- Act -----
+            val covers = snapshot.toCoverModels()
+
+            // ----- Assert -----
+            covers.heroTitleTransitionKey.shouldBeNull()
+            covers.heroRatingTransitionKey.shouldBeNull()
+        }
+
+        @Test
+        fun `the displayed edition keys the title and rating when there is no bookId`() {
+            // ----- Arrange -----
+            val snapshot = snapshot(
+                book = stubBook(),
+                loadingBookDetails = false,
+                bookId = null,
+                displayedEdition = PreviewData.baseEdition.copy(id = 9),
+            )
+
+            // ----- Act -----
+            val covers = snapshot.toCoverModels()
+
+            // ----- Assert -----
+            covers.heroTitleTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Title,
+                editionId = 9,
+                bookId = null,
+            )
+            covers.heroRatingTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Rating,
+                editionId = 9,
+                bookId = null,
+            )
+        }
+
+        @Test
+        fun `the bookId keeps the title key stable when the displayed edition changes`() {
+            // ----- Arrange -----
+            val first = snapshot(
+                book = stubBook(),
+                loadingBookDetails = false,
+                displayedEdition = PreviewData.baseEdition.copy(id = 1),
+            )
+            val second = snapshot(
+                book = stubBook(),
+                loadingBookDetails = false,
+                displayedEdition = PreviewData.baseEdition.copy(id = 2),
+            )
+
+            // ----- Act -----
+            val firstCovers = first.toCoverModels()
+            val secondCovers = second.toCoverModels()
+
+            // ----- Assert -----
+            firstCovers.heroTitleTransitionKey.shouldNotBeNull()
+            firstCovers.heroTitleTransitionKey shouldBe secondCovers.heroTitleTransitionKey
+            firstCovers.heroRatingTransitionKey shouldBe secondCovers.heroRatingTransitionKey
         }
     }
 }

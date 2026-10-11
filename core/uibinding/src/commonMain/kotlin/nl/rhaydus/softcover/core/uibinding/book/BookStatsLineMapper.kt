@@ -14,11 +14,17 @@ fun bookStatsLine(
     releaseYear: Int?,
     usersCount: Int?,
     rating: Double?,
+    ratingTransitionKey: String? = null,
 ): ImmutableList<BookCardLinePart>? {
     val parts = listOfNotNull(
         releaseYear?.takeIf { it != -1 }?.let { BookCardLinePart.Text(text = it.toString()) },
         usersCount?.let { BookCardLinePart.Text(text = "${formatGroupedNumber(it)} readers") },
-        rating?.takeIf { it != 0.0 }?.let { ratingPart(rating = it) },
+        rating?.takeIf { it != 0.0 }?.let {
+            ratingPart(
+                rating = it,
+                transitionKey = ratingTransitionKey,
+            )
+        },
     )
 
     return if (parts.isEmpty()) null else parts.toImmutableList()
