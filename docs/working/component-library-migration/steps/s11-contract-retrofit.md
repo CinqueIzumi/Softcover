@@ -57,6 +57,18 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-43 | A snackbar raised while a sheet is open draws above the sheet, not under it | — | [ ] |
 | S11-C | Convergence pass over the family (family-procedure.md § Phase 3) | all | [ ] |
 
+## Sessions
+
+The open sub-steps, grouped so one session takes one group; Phase 1 proposes the whole group's shape at once.
+
+| Session | Sub-steps | Shared ground |
+|---|---|---|
+| 1 | S11-32, S11-34, S11-43 | The app shell in `:orchestration`: `BottomBarScreen`, the three nav bars, `App.kt`'s `SnackbarHost` |
+| 2 | S11-33, S11-35 | Gesture haptics: a `threshold` tick on Explore's pull, a `tickle` per column on the chart scrub |
+| 3 | S11-36, S11-37, S11-38 | The root push/pop transition, with the Focus Mode and full-screen cover morphs inside it |
+| 4 | S11-39, S11-40 | Title and rating continuity, then predictive back driving the finished transition |
+| 5 | S11-C | Convergence pass |
+
 ## Approved shape
 
 S11-19:

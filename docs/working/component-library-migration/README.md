@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-30 (update `Callout` crossfades its header and call to action) and S11-31 (byte progress on Android and desktop, determinate `Progress(fraction)`) built together; app-wide `commit` / `reject` in `App.kt` only on a change from `Downloading`. Built, tested and reviewed; awaiting the user's commit go-ahead. #275 tracks S11 only at stage level. F42 / S12-4 waits unchanged.
-- **Next:** S11-32 — tab-switch timing: read § S11-32, propose its shape (Phase 1).
+- **State:** S11-30 and S11-31 (update `Callout` crossfade, determinate download progress, app-wide outcome haptics in `App.kt`) are done and committed (`56ddf4c6`). The open S11 sub-steps are grouped into five sessions in `steps/s11-contract-retrofit.md` § Sessions. #275 tracks S11 only at stage level. F42 / S12-4 waits unchanged.
+- **Next:** `steps/s11-contract-retrofit.md` § Sessions, session 1 (S11-32 § Tab-switch timing, S11-34 § Re-tap the current tab, S11-43): propose the group's shape (Phase 1). S11-43 has only its table row, so scope it first.
 - **Open questions:** none. `upsert_book` may share the `ListIdType.errors` schema mismatch.
-- **Verification:** JBR 21: `styleCheck`, `checkDocBudgets`, `checkModuleGraph`, `projectHealth` (app_update, component, settings), JVM compiles, Android main compile, app_update tests (27) and settings AppUpdate tests (7) pass; reviewer fix round applied (cancellable desktop download, `Progress` KDoc). Not run: iOS-sim compile, `assembleDebug`. No glommed closers; AAA markers complete.
-- **Uncommitted:** all S11-30 / S11-31 changes.
+- **Verification:** JBR 21, after the last Kotlin edit: `styleCheck`, `checkDocBudgets`, `checkModuleGraph`, `projectHealth` (app_update, component, settings), JVM and Android main compiles, and the app_update (27) and settings AppUpdate (7) tests passed. Reviewer fix round applied. Not run: iOS-sim compile, `assembleDebug`. No glommed closers; AAA markers complete.
+- **Uncommitted:** tracker docs only: this `## Now` block and the step file's new `## Sessions` table.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:
