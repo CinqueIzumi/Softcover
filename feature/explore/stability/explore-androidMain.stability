@@ -232,14 +232,14 @@ internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.Fe
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.FeaturedSection(book: nl.rhaydus.softcover.core.domain.model.Book?, card: nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardUiModel?, onBookClick: kotlin.Function2<nl.rhaydus.softcover.core.domain.model.Book, kotlin.String?, kotlin.Unit>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction, kotlin.Unit>): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.FeaturedSection(card: nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardUiModel?, onOpen: kotlin.Function0<kotlin.Unit>, onAddToLibrary: kotlin.Function0<kotlin.Unit>, onRemoveFromLibrary: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - book: UNSTABLE (has mutable properties or unstable members)
     - card: STABLE (marked @Stable or @Immutable)
-    - onBookClick: STABLE (function type)
-    - runAction: STABLE (function type)
+    - onOpen: STABLE (function type)
+    - onAddToLibrary: STABLE (function type)
+    - onRemoveFromLibrary: STABLE (function type)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.LoadMoreSearchResultsEffect(state: nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState, lastVisibleIndex: kotlin.Function0<kotlin.Int?>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction, kotlin.Unit>): kotlin.Unit

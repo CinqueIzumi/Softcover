@@ -19,10 +19,10 @@ import nl.rhaydus.softcover.core.component.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
+import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedBookUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
 
 /**
@@ -33,7 +33,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressU
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun FeaturedBookCard(
-    book: Book,
+    book: FeaturedBookUiModel,
     backdropCover: CoverUiModel?,
     heroCover: CoverUiModel?,
     progress: FeaturedProgressUiModel,
@@ -44,7 +44,9 @@ internal fun FeaturedBookCard(
     paceNudge: BannerUiModel?,
     onDismissPlanToday: () -> Unit,
     runAction: (ReadingAction) -> Unit,
-    onBookClick: (Book) -> Unit,
+    onClick: () -> Unit,
+    onUpdateProgressClick: () -> Unit,
+    onStartSession: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
@@ -56,7 +58,7 @@ internal fun FeaturedBookCard(
             .padding(horizontal = Spacing.gutter)
             .then(if (isLoading) Modifier else Modifier.prefetchBookDetailOnPress(book.id))
             .tactileClickable(
-                onClick = { onBookClick(book) },
+                onClick = onClick,
                 enabled = isLoading.not(),
                 hoverShape = null,
             )
@@ -92,7 +94,8 @@ internal fun FeaturedBookCard(
                 deadlineSummary = deadlineSummary,
                 mutationFailed = mutationFailed,
                 paceForecast = paceForecast,
-                runAction = runAction,
+                onUpdateProgressClick = onUpdateProgressClick,
+                onStartSession = onStartSession,
                 isLoading = isLoading,
             )
         }

@@ -17,21 +17,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.cover.Cover
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.feature.reading.presentation.state.TrendingTileUiModel
 
 @Composable
 internal fun TrendingTileSection(
-    book: Book,
-    cover: CoverUiModel?,
+    model: TrendingTileUiModel,
     header: SectionHeaderUiModel,
-    onBookClick: (Book) -> Unit,
+    onClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -42,7 +40,7 @@ internal fun TrendingTileSection(
         Spacer(modifier = Modifier.height(Spacing.md))
 
         Surface(
-            onClick = { onBookClick(book) },
+            onClick = onClick,
             shape = Corners.xl,
             color = MaterialTheme.colorScheme.surfaceContainer,
             modifier = Modifier
@@ -55,7 +53,7 @@ internal fun TrendingTileSection(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Cover(
-                    model = cover,
+                    model = model.cover,
                     modifier = Modifier.width(80.dp),
                 )
 
@@ -70,14 +68,14 @@ internal fun TrendingTileSection(
                     )
 
                     SoftcoverText(
-                        text = book.title,
+                        text = model.title,
                         style = MaterialTheme.editorialTypography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
 
-                    val author = book.authors.firstOrNull()?.name.orEmpty()
+                    val author = model.author.orEmpty()
 
                     if (author.isNotBlank()) {
                         SoftcoverText(

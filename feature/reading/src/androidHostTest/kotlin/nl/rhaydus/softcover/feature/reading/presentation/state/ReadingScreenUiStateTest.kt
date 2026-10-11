@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.ALSO_READING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.FEATURED_STAND_IN_BOOK
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.toFeaturedBookUiModel
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -284,6 +285,63 @@ class ReadingScreenUiStateTest {
 
             // ----- Act & Assert -----
             state.visibleAlsoReadingHeader shouldBe header
+        }
+    }
+
+    @Nested
+    inner class VisibleFeaturedBookModel {
+        private fun loadedModel(): FeaturedBookUiModel = FeaturedBookUiModel(
+            id = 42,
+            title = "Loaded title",
+            seriesText = null,
+            authors = "Loaded Author",
+            isAudiobook = false,
+        )
+
+        @Test
+        fun `is the stand-in model while loading even when set`() {
+            // ----- Arrange -----
+            val state = ReadingScreenUiState(
+                isLoading = true,
+                featuredBookModel = loadedModel(),
+            )
+
+            // ----- Act -----
+            val result = state.visibleFeaturedBookModel
+
+            // ----- Assert -----
+            result shouldBe FEATURED_STAND_IN_BOOK.toFeaturedBookUiModel()
+        }
+
+        @Test
+        fun `is the stand-in model when loaded but there is no featured book`() {
+            // ----- Arrange -----
+            val state = ReadingScreenUiState(
+                isLoading = false,
+                featuredBookModel = null,
+            )
+
+            // ----- Act -----
+            val result = state.visibleFeaturedBookModel
+
+            // ----- Assert -----
+            result shouldBe FEATURED_STAND_IN_BOOK.toFeaturedBookUiModel()
+        }
+
+        @Test
+        fun `is the real model once loaded`() {
+            // ----- Arrange -----
+            val model = loadedModel()
+            val state = ReadingScreenUiState(
+                isLoading = false,
+                featuredBookModel = model,
+            )
+
+            // ----- Act -----
+            val result = state.visibleFeaturedBookModel
+
+            // ----- Assert -----
+            result shouldBe model
         }
     }
 

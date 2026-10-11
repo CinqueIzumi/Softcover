@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
 import kotlinx.coroutines.flow.combine
-import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicChartUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
@@ -14,7 +14,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import nl.rhaydus.toad.ActionScope
 
 /**
- * The only writer of the genre, author and ratings charts and of the author breakdown behind their captions.
+ * The only writer of the genre, author and ratings charts and their captions.
  * They depend on the reading life, the loaded profile and whether untagged authors are hidden, so one
  * collector sees all three: the charts load until both the reading life and the profile have arrived,
  * and the hide switch is applied once for charts and captions alike.
@@ -37,23 +37,35 @@ internal class ProfileChartsCollector : ProfileCollector {
                 readingLife.authorDemographics
             }
 
-            Triple(
-                readingLife.genres,
-                demographics,
-                readingLife.ratings,
+            ChartsInput(
+                genres = readingLife.genres,
+                demographics = demographics,
+                ratings = readingLife.ratings,
+                hideUntaggedAuthors = hideUntaggedAuthors,
             )
         }.collect { loaded ->
-            val genres = loaded?.first
-            val demographics = loaded?.second
-            val ratings = loaded?.third
+            val genres = loaded?.genres
+            val demographics = loaded?.demographics
+            val ratings = loaded?.ratings
+            val hideUntaggedAuthors = loaded?.hideUntaggedAuthors ?: false
 
             scope.setState {
                 it.copy(
-                    authorDemographics = demographics ?: AuthorDemographics(),
                     genreRanking = genreRankingUiModel(genres),
-                    genderChart = genderChartUiModel(demographics?.genderSlices),
-                    bipocChart = demographicChartUiModel(demographics?.bipocBreakdown),
-                    lgbtqChart = demographicChartUiModel(demographics?.lgbtqBreakdown),
+                    hasGenres = genres?.slices.orEmpty().isNotEmpty(),
+                    genreScopeCaption = genreScopeCaption(taggedBookCount = genres?.taggedBookCount ?: 0),
+                    genderBreakdown = genderBreakdownUiModel(
+                        demographics = demographics,
+                        hideUntaggedAuthors = hideUntaggedAuthors,
+                    ),
+                    bipocBreakdown = demographicBreakdownUiModel(
+                        breakdown = demographics?.bipocBreakdown,
+                        hideUntaggedAuthors = hideUntaggedAuthors,
+                    ),
+                    lgbtqBreakdown = demographicBreakdownUiModel(
+                        breakdown = demographics?.lgbtqBreakdown,
+                        hideUntaggedAuthors = hideUntaggedAuthors,
+                    ),
                     ratingsChart = ratingsChartUiModel(ratings),
                     ratingsAverage = ratingsAverageUiModel(ratings),
                 )

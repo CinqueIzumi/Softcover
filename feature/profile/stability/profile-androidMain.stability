@@ -50,14 +50,13 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Ac
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.AuthorRepresentationSection(authorDemographics: nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics, genderChart: nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel, bipocChart: nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel, lgbtqChart: nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel, hideUntaggedAuthors: kotlin.Boolean, hideUntaggedAuthorsToggle: nl.rhaydus.softcover.core.component.control.ToggleRowUiModel<kotlin.String>, canHideUntaggedAuthors: kotlin.Boolean, isLoading: kotlin.Boolean, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, onHideUntaggedAuthorsChange: kotlin.Function1<kotlin.Boolean, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.AuthorRepresentationSection(genderBreakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, bipocBreakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, lgbtqBreakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, hideUntaggedAuthors: kotlin.Boolean, hideUntaggedAuthorsToggle: nl.rhaydus.softcover.core.component.control.ToggleRowUiModel<kotlin.String>, canHideUntaggedAuthors: kotlin.Boolean, isLoading: kotlin.Boolean, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, onHideUntaggedAuthorsChange: kotlin.Function1<kotlin.Boolean, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - authorDemographics: UNSTABLE (has mutable properties or unstable members)
-    - genderChart: STABLE (marked @Stable or @Immutable)
-    - bipocChart: STABLE (marked @Stable or @Immutable)
-    - lgbtqChart: STABLE (marked @Stable or @Immutable)
+    - genderBreakdown: STABLE (marked @Stable or @Immutable)
+    - bipocBreakdown: STABLE (marked @Stable or @Immutable)
+    - lgbtqBreakdown: STABLE (marked @Stable or @Immutable)
     - hideUntaggedAuthors: STABLE (primitive type)
     - hideUntaggedAuthorsToggle: STABLE (marked @Stable or @Immutable)
     - canHideUntaggedAuthors: STABLE (primitive type)
@@ -67,22 +66,21 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Au
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.DemographicBreakdownBlock(label: kotlin.String, chart: nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel, breakdown: nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown, hideUntaggedAuthors: kotlin.Boolean, isLoading: kotlin.Boolean): kotlin.Unit
-  skippable: false
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.DemographicBreakdownBlock(label: kotlin.String, breakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
   restartable: true
   params:
     - label: STABLE (String is immutable)
-    - chart: STABLE (marked @Stable or @Immutable)
-    - breakdown: UNSTABLE (has mutable properties or unstable members)
-    - hideUntaggedAuthors: STABLE (primitive type)
+    - breakdown: STABLE (marked @Stable or @Immutable)
     - isLoading: STABLE (primitive type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.GenreRankingSection(genres: nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown, genreRanking: nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel, isLoading: kotlin.Boolean, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.GenreRankingSection(hasGenres: kotlin.Boolean, genreScopeCaption: kotlin.String, genreRanking: nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel, isLoading: kotlin.Boolean, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - genres: UNSTABLE (has mutable properties or unstable members)
+    - hasGenres: STABLE (primitive type)
+    - genreScopeCaption: STABLE (String is immutable)
     - genreRanking: STABLE (marked @Stable or @Immutable)
     - isLoading: STABLE (primitive type)
     - header: STABLE (marked @Stable or @Immutable)

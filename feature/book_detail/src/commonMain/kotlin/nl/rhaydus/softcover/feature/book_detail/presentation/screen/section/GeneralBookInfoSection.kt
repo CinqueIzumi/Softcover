@@ -36,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.formatDecimalNumber
-import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.grayscale
 import nl.rhaydus.softcover.core.component.badge.Badge
@@ -58,11 +57,11 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
-import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.HeroEditionUiModel
 
 @Composable
 internal fun GeneralBookInfoSection(
-    edition: BookEdition?,
+    heroEdition: HeroEditionUiModel?,
     heroCover: CoverUiModel?,
     backdropCover: CoverUiModel?,
     title: String?,
@@ -222,8 +221,8 @@ internal fun GeneralBookInfoSection(
 
                 Spacer(modifier = Modifier.height(Spacing.xxs))
 
-                val editionUnknown = isLoading && edition == null
-                val authorName = edition?.authorString.orEmpty()
+                val editionUnknown = isLoading && heroEdition == null
+                val authorName = heroEdition?.authors.orEmpty()
                 val showReleased = releaseYear != null && releaseYear > 0 && unreleasedBadge == null
                 val bylineText = if (editionUnknown) {
                     null
@@ -254,15 +253,11 @@ internal fun GeneralBookInfoSection(
                     Badge(model = unreleasedBadge)
                 }
 
-                val isAudiobook = edition?.isAudiobook == true
+                val isAudiobook = heroEdition?.isAudiobook == true
 
                 val ratingUnknown = isLoading && rating == null
                 val showRating = ratingUnknown || (rating ?: 0.0) > 0.0
-                val showLength = editionUnknown || if (isAudiobook) {
-                    (edition.audioSeconds ?: 0) > 0
-                } else {
-                    (edition?.pages ?: 0) > 0
-                }
+                val showLength = editionUnknown || heroEdition?.length != null
 
                 if (showRating || showLength) {
                     Spacer(modifier = Modifier.height(Spacing.xs))
@@ -330,14 +325,8 @@ internal fun GeneralBookInfoSection(
                                 )
 
                                 Row {
-                                    val lengthText = when {
-                                        editionUnknown -> null
-                                        isAudiobook -> secondsToHm(seconds = edition.audioSeconds ?: 0)
-                                        else -> "${edition?.pages ?: ""}"
-                                    }
-
                                     SoftcoverText(
-                                        text = lengthText,
+                                        text = heroEdition?.length,
                                         standIn = "320",
                                         style = bodySmall,
                                         modifier = Modifier.alignByBaseline(),

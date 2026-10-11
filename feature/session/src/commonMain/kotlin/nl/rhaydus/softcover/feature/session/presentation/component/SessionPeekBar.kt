@@ -38,8 +38,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel
 import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 import org.koin.compose.koinInject
@@ -62,9 +62,9 @@ fun SessionPeekBar(
     val navigator = LocalNavigator.currentOrThrow
     val active by controller.activeSession.collectAsStateWithLifecycle()
 
-    var lastActive by remember { mutableStateOf<ActiveSession?>(null) }
+    var lastActive by remember { mutableStateOf<ActiveSessionUiModel?>(null) }
 
-    active?.let { lastActive = it }
+    active?.let { lastActive = it.ui }
 
     AnimatedVisibility(
         visible = active != null,
@@ -84,7 +84,7 @@ fun SessionPeekBar(
                 flush = flush,
                 onOpen = { navigator.parent?.push(item = FocusModeScreen) },
                 onPauseResume = {
-                    if (session.session.isPaused) controller.resume() else controller.pause()
+                    if (session.isPaused) controller.resume() else controller.pause()
                 },
                 onStop = { controller.stop() },
             )
@@ -94,7 +94,7 @@ fun SessionPeekBar(
 
 @Composable
 private fun SessionPeekBarContent(
-    active: ActiveSession,
+    active: ActiveSessionUiModel,
     flush: Boolean,
     onOpen: () -> Unit,
     onPauseResume: () -> Unit,
@@ -131,7 +131,7 @@ private fun SessionPeekBarContent(
 
                 Column(modifier = Modifier.weight(1f)) {
                     SoftcoverText(
-                        text = active.book.title,
+                        text = active.title,
                         style = MaterialTheme.editorialTypography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
@@ -139,7 +139,7 @@ private fun SessionPeekBarContent(
                     )
 
                     SoftcoverText(
-                        text = if (active.session.isPaused) {
+                        text = if (active.isPaused) {
                             "Paused · ${formatSessionElapsed(elapsed = elapsed)}"
                         } else {
                             formatSessionElapsed(elapsed = elapsed)
@@ -151,15 +151,15 @@ private fun SessionPeekBarContent(
                 }
 
                 val pauseResumeIcon = drawableIconResource(
-                    icon = if (active.session.isPaused) SoftcoverIcon.Play else SoftcoverIcon.Pause,
-                    contentDescription = if (active.session.isPaused) {
+                    icon = if (active.isPaused) SoftcoverIcon.Play else SoftcoverIcon.Pause,
+                    contentDescription = if (active.isPaused) {
                         "Resume session"
                     } else {
                         "Pause session"
                     },
                 )
 
-                DesktopTooltip(text = if (active.session.isPaused) "Resume" else "Pause") {
+                DesktopTooltip(text = if (active.isPaused) "Resume" else "Pause") {
                     IconButton(
                         onClick = {
                             haptics.select()

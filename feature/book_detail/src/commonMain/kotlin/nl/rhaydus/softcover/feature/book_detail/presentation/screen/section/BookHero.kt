@@ -27,7 +27,7 @@ internal fun BookHero(
         ),
     ) {
         GeneralBookInfoSection(
-            edition = state.displayedEdition,
+            heroEdition = state.heroEdition,
             heroCover = state.heroCover,
             backdropCover = state.heroBackdropCover,
             isLoading = state.loadingBookDetails && state.book == null,

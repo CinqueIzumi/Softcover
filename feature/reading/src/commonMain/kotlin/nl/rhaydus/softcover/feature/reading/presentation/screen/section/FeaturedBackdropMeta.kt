@@ -23,12 +23,12 @@ import nl.rhaydus.softcover.core.component.state.RevealedWhenPresent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedBookUiModel
 
 /** The series eyebrow, hero title, byline, and "Your pace" row over the hero backdrop. */
 @Composable
 internal fun FeaturedBackdropMeta(
-    book: Book,
+    book: FeaturedBookUiModel,
     mutationFailed: Boolean,
     paceForecast: String?,
     modifier: Modifier = Modifier,
@@ -82,7 +82,7 @@ internal fun FeaturedBackdropMeta(
             overflow = TextOverflow.Ellipsis,
         )
 
-        book.currentEdition?.authorString?.takeIf { it.isNotBlank() }?.let { authors ->
+        book.authors?.takeIf { it.isNotBlank() }?.let { authors ->
             Spacer(modifier = Modifier.height(Spacing.xs))
 
             SoftcoverText(

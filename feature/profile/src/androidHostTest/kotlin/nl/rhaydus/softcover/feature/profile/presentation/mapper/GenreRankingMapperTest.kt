@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
+import io.kotest.matchers.string.shouldContain
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -135,6 +136,57 @@ class GenreRankingMapperTest {
 
             // ----- Assert -----
             result.rows.map { it.label } shouldBe listOf("A", "B", "C", "D", "E")
+        }
+    }
+
+    @Nested
+    inner class GenreScopeCaptionTests {
+        @Test
+        fun `falls back to the scope-free wording when the count is zero`() {
+            // ----- Arrange -----
+            val taggedBookCount = 0
+
+            // ----- Act -----
+            val result = genreScopeCaption(taggedBookCount)
+
+            // ----- Assert -----
+            result shouldContain "counted over your finished books that carry genre tags"
+        }
+
+        @Test
+        fun `uses the singular wording for a single book`() {
+            // ----- Arrange -----
+            val taggedBookCount = 1
+
+            // ----- Act -----
+            val result = genreScopeCaption(taggedBookCount)
+
+            // ----- Assert -----
+            result shouldContain "the single finished book of yours that carries genre tags"
+        }
+
+        @Test
+        fun `names the count for several books`() {
+            // ----- Arrange -----
+            val taggedBookCount = 12
+
+            // ----- Act -----
+            val result = genreScopeCaption(taggedBookCount)
+
+            // ----- Assert -----
+            result shouldContain "counted over the 12 finished books of yours that carry genre tags"
+        }
+
+        @Test
+        fun `always explains that the shares overlap`() {
+            // ----- Arrange -----
+            val counts = listOf(0, 1, 12)
+
+            // ----- Act -----
+            val results = counts.map { genreScopeCaption(it) }
+
+            // ----- Assert -----
+            results.forEach { it shouldContain "these overlap and don't total 100%" }
         }
     }
 }

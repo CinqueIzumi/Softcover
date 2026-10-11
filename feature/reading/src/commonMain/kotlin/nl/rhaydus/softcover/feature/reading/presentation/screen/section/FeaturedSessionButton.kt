@@ -17,7 +17,6 @@ import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.notification.rememberNotificationPermissionRequester
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
@@ -26,7 +25,9 @@ import org.koin.compose.koinInject
 
 @Composable
 internal fun FeaturedSessionButton(
-    book: Book,
+    bookId: Int,
+    isAudiobook: Boolean,
+    onStartSession: () -> Unit,
     isLoading: Boolean = false,
 ) {
     val controller = koinInject<ActiveSessionController>()
@@ -34,15 +35,15 @@ internal fun FeaturedSessionButton(
     val appNavigator = koinInject<AppNavigator>()
     val active by controller.activeSession.collectAsStateWithLifecycle()
 
-    val currentBook by rememberUpdatedState(book)
+    val currentOnStartSession by rememberUpdatedState(onStartSession)
 
-    val isSessionActiveForBook = isLoading.not() && active?.book?.id == book.id
+    val isSessionActiveForBook = isLoading.not() && active?.book?.id == bookId
 
     // The lock-screen surface is a plain notification, so it needs POST_NOTIFICATIONS (Android
     // 13+). Ask at the natural moment — the first session start — then start regardless of the
     // outcome, since the in-app peek bar and Focus Mode work without the permission.
     val sessionPermissionRequester = rememberNotificationPermissionRequester(
-        onResult = { controller.start(book = currentBook) },
+        onResult = { currentOnStartSession() },
     )
 
     when {
@@ -68,7 +69,7 @@ internal fun FeaturedSessionButton(
 
         // Audiobooks are tracked by listening time, not page-based reading sessions, so
         // the start control is never offered for them.
-        isLoading.not() && book.currentEdition?.isAudiobook == true -> Unit
+        isLoading.not() && isAudiobook -> Unit
 
         isLoading || active == null -> {
             Spacer(modifier = Modifier.height(Spacing.sm))

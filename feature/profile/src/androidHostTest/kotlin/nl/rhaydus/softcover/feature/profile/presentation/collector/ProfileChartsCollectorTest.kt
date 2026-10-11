@@ -24,9 +24,10 @@ import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicChartUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
@@ -196,10 +197,20 @@ class ProfileChartsCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.genreRanking shouldBe genreRankingUiModel(genres)
-                stateFlow.value.genderChart shouldBe genderChartUiModel(demographics.genderSlices)
-                stateFlow.value.bipocChart shouldBe demographicChartUiModel(demographics.bipocBreakdown)
-                stateFlow.value.lgbtqChart shouldBe demographicChartUiModel(demographics.lgbtqBreakdown)
-                stateFlow.value.authorDemographics shouldBe demographics
+                stateFlow.value.genderBreakdown shouldBe genderBreakdownUiModel(
+                    demographics = demographics,
+                    hideUntaggedAuthors = false,
+                )
+                stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
+                    breakdown = demographics.bipocBreakdown,
+                    hideUntaggedAuthors = false,
+                )
+                stateFlow.value.lgbtqBreakdown shouldBe demographicBreakdownUiModel(
+                    breakdown = demographics.lgbtqBreakdown,
+                    hideUntaggedAuthors = false,
+                )
+                stateFlow.value.hasGenres shouldBe true
+                stateFlow.value.genreScopeCaption shouldBe genreScopeCaption(taggedBookCount = genres.taggedBookCount)
                 job.cancel()
             }
 
@@ -275,10 +286,11 @@ class ProfileChartsCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.genreRanking shouldBe initial.genreRanking
-                stateFlow.value.genderChart shouldBe initial.genderChart
-                stateFlow.value.bipocChart shouldBe initial.bipocChart
-                stateFlow.value.lgbtqChart shouldBe initial.lgbtqChart
-                stateFlow.value.authorDemographics shouldBe AuthorDemographics()
+                stateFlow.value.genderBreakdown shouldBe initial.genderBreakdown
+                stateFlow.value.bipocBreakdown shouldBe initial.bipocBreakdown
+                stateFlow.value.lgbtqBreakdown shouldBe initial.lgbtqBreakdown
+                stateFlow.value.hasGenres shouldBe initial.hasGenres
+                stateFlow.value.genreScopeCaption shouldBe initial.genreScopeCaption
                 job.cancel()
             }
 
@@ -301,10 +313,11 @@ class ProfileChartsCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.genreRanking shouldBe initial.genreRanking
-                stateFlow.value.genderChart shouldBe initial.genderChart
-                stateFlow.value.bipocChart shouldBe initial.bipocChart
-                stateFlow.value.lgbtqChart shouldBe initial.lgbtqChart
-                stateFlow.value.authorDemographics shouldBe AuthorDemographics()
+                stateFlow.value.genderBreakdown shouldBe initial.genderBreakdown
+                stateFlow.value.bipocBreakdown shouldBe initial.bipocBreakdown
+                stateFlow.value.lgbtqBreakdown shouldBe initial.lgbtqBreakdown
+                stateFlow.value.hasGenres shouldBe initial.hasGenres
+                stateFlow.value.genreScopeCaption shouldBe initial.genreScopeCaption
                 job.cancel()
             }
 
@@ -328,7 +341,7 @@ class ProfileChartsCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.genreRanking shouldBe initial.genreRanking
-                stateFlow.value.genderChart shouldBe initial.genderChart
+                stateFlow.value.genderBreakdown shouldBe initial.genderBreakdown
                 job.cancel()
             }
 
@@ -352,10 +365,18 @@ class ProfileChartsCollectorTest {
                 readingLifeFlow.emit(buildReadingLife(demographics = demographics))
 
                 // ----- Assert -----
-                stateFlow.value.genderChart shouldBe genderChartUiModel(tagged.genderSlices)
-                stateFlow.value.bipocChart shouldBe demographicChartUiModel(tagged.bipocBreakdown)
-                stateFlow.value.lgbtqChart shouldBe demographicChartUiModel(tagged.lgbtqBreakdown)
-                stateFlow.value.authorDemographics shouldBe tagged
+                stateFlow.value.genderBreakdown shouldBe genderBreakdownUiModel(
+                    demographics = tagged,
+                    hideUntaggedAuthors = true,
+                )
+                stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
+                    breakdown = tagged.bipocBreakdown,
+                    hideUntaggedAuthors = true,
+                )
+                stateFlow.value.lgbtqBreakdown shouldBe demographicBreakdownUiModel(
+                    breakdown = tagged.lgbtqBreakdown,
+                    hideUntaggedAuthors = true,
+                )
                 job.cancel()
             }
 
@@ -403,9 +424,65 @@ class ProfileChartsCollectorTest {
                 hideFlow.emit(true)
 
                 // ----- Assert -----
-                stateFlow.value.genderChart shouldBe genderChartUiModel(tagged.genderSlices)
-                stateFlow.value.bipocChart shouldBe demographicChartUiModel(tagged.bipocBreakdown)
-                stateFlow.value.authorDemographics shouldBe tagged
+                stateFlow.value.genderBreakdown shouldBe genderBreakdownUiModel(
+                    demographics = tagged,
+                    hideUntaggedAuthors = true,
+                )
+                stateFlow.value.bipocBreakdown shouldBe demographicBreakdownUiModel(
+                    breakdown = tagged.bipocBreakdown,
+                    hideUntaggedAuthors = true,
+                )
+                stateFlow.value.lgbtqBreakdown shouldBe demographicBreakdownUiModel(
+                    breakdown = tagged.lgbtqBreakdown,
+                    hideUntaggedAuthors = true,
+                )
+                job.cancel()
+            }
+
+        @Test
+        fun `hasGenres is false and the caption drops the book count when there are no genre slices`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val dependencies = stubDependencies(this)
+                val job = launch {
+                    ProfileChartsCollector().onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                hideFlow.emit(false)
+                profileDataFlow.emit(buildProfileData())
+                readingLifeFlow.emit(buildReadingLife(genres = GenreBreakdown()))
+
+                // ----- Assert -----
+                stateFlow.value.hasGenres shouldBe false
+                stateFlow.value.genreScopeCaption shouldBe genreScopeCaption(taggedBookCount = 0)
+                job.cancel()
+            }
+
+        @Test
+        fun `leaves the genre fields untouched when untagged authors are hidden`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val genres = buildGenres()
+                val dependencies = stubDependencies(this)
+                val job = launch {
+                    ProfileChartsCollector().onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                hideFlow.emit(true)
+                profileDataFlow.emit(buildProfileData())
+                readingLifeFlow.emit(buildReadingLife(genres = genres))
+
+                // ----- Assert -----
+                stateFlow.value.hasGenres shouldBe true
+                stateFlow.value.genreScopeCaption shouldBe genreScopeCaption(taggedBookCount = 4)
                 job.cancel()
             }
     }

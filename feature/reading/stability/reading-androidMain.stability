@@ -150,7 +150,7 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.Al
     - model: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen(pickUpNextHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, trendingHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, emptyState: nl.rhaydus.softcover.core.component.state.EmptyStateUiModel, trendingBooks: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.domain.model.Book>, pickUpNext: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, trendingTileCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, streakEnabled: kotlin.Boolean, streakStrip: nl.rhaydus.softcover.feature.reading.presentation.state.StreakStripUiModel, onExpandStreak: kotlin.Function0<kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, onNavigateToSearch: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen(pickUpNextHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, trendingHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, emptyState: nl.rhaydus.softcover.core.component.state.EmptyStateUiModel, trendingBooks: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.domain.model.Book>, pickUpNext: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, trendingTile: nl.rhaydus.softcover.feature.reading.presentation.state.TrendingTileUiModel?, streakEnabled: kotlin.Boolean, streakStrip: nl.rhaydus.softcover.feature.reading.presentation.state.StreakStripUiModel, onExpandStreak: kotlin.Function0<kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, onNavigateToSearch: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -159,7 +159,7 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.Em
     - emptyState: STABLE (marked @Stable or @Immutable)
     - trendingBooks: STABLE (known stable type)
     - pickUpNext: STABLE (marked @Stable or @Immutable)
-    - trendingTileCover: STABLE (marked @Stable or @Immutable)
+    - trendingTile: STABLE (marked @Stable or @Immutable)
     - streakEnabled: STABLE (primitive type)
     - streakStrip: STABLE (marked @Stable or @Immutable)
     - onExpandStreak: STABLE (function type)
@@ -167,11 +167,11 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.Em
     - onNavigateToSearch: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedBackdropCard(book: nl.rhaydus.softcover.core.domain.model.Book, backdropCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, heroCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, progress: nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel, deadlineCoverOverlay: nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel?, deadlineSummary: nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel?, mutationFailed: kotlin.Boolean, paceForecast: kotlin.String?, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, isLoading: kotlin.Boolean): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedBackdropCard(book: nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedBookUiModel, backdropCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, heroCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, progress: nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel, deadlineCoverOverlay: nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel?, deadlineSummary: nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel?, mutationFailed: kotlin.Boolean, paceForecast: kotlin.String?, onUpdateProgressClick: kotlin.Function0<kotlin.Unit>, onStartSession: kotlin.Function0<kotlin.Unit>, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - book: UNSTABLE (has mutable properties or unstable members)
+    - book: STABLE (marked @Stable or @Immutable)
     - backdropCover: STABLE (marked @Stable or @Immutable)
     - heroCover: STABLE (marked @Stable or @Immutable)
     - progress: STABLE (marked @Stable or @Immutable)
@@ -179,26 +179,27 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.Fe
     - deadlineSummary: STABLE (marked @Stable or @Immutable)
     - mutationFailed: STABLE (primitive type)
     - paceForecast: STABLE (class with no mutable properties)
-    - runAction: STABLE (function type)
+    - onUpdateProgressClick: STABLE (function type)
+    - onStartSession: STABLE (function type)
     - isLoading: STABLE (primitive type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedBackdropMeta(book: nl.rhaydus.softcover.core.domain.model.Book, mutationFailed: kotlin.Boolean, paceForecast: kotlin.String?, modifier: androidx.compose.ui.Modifier, isLoading: kotlin.Boolean): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedBackdropMeta(book: nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedBookUiModel, mutationFailed: kotlin.Boolean, paceForecast: kotlin.String?, modifier: androidx.compose.ui.Modifier, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - book: UNSTABLE (has mutable properties or unstable members)
+    - book: STABLE (marked @Stable or @Immutable)
     - mutationFailed: STABLE (primitive type)
     - paceForecast: STABLE (class with no mutable properties)
     - modifier: STABLE (marked @Stable or @Immutable)
     - isLoading: STABLE (primitive type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedBookCard(book: nl.rhaydus.softcover.core.domain.model.Book, backdropCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, heroCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, progress: nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel, deadlineCoverOverlay: nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel?, deadlineSummary: nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel?, mutationFailed: kotlin.Boolean, paceForecast: kotlin.String?, paceNudge: nl.rhaydus.softcover.core.component.callout.BannerUiModel?, onDismissPlanToday: kotlin.Function0<kotlin.Unit>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, modifier: androidx.compose.ui.Modifier, isLoading: kotlin.Boolean): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedBookCard(book: nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedBookUiModel, backdropCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, heroCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, progress: nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel, deadlineCoverOverlay: nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel?, deadlineSummary: nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel?, mutationFailed: kotlin.Boolean, paceForecast: kotlin.String?, paceNudge: nl.rhaydus.softcover.core.component.callout.BannerUiModel?, onDismissPlanToday: kotlin.Function0<kotlin.Unit>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, onClick: kotlin.Function0<kotlin.Unit>, onUpdateProgressClick: kotlin.Function0<kotlin.Unit>, onStartSession: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - book: UNSTABLE (has mutable properties or unstable members)
+    - book: STABLE (marked @Stable or @Immutable)
     - backdropCover: STABLE (marked @Stable or @Immutable)
     - heroCover: STABLE (marked @Stable or @Immutable)
     - progress: STABLE (marked @Stable or @Immutable)
@@ -209,7 +210,9 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.Fe
     - paceNudge: STABLE (marked @Stable or @Immutable)
     - onDismissPlanToday: STABLE (function type)
     - runAction: STABLE (function type)
-    - onBookClick: STABLE (function type)
+    - onClick: STABLE (function type)
+    - onUpdateProgressClick: STABLE (function type)
+    - onStartSession: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
     - isLoading: STABLE (primitive type)
 
@@ -230,11 +233,13 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.Fe
     - model: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedSessionButton(book: nl.rhaydus.softcover.core.domain.model.Book, isLoading: kotlin.Boolean): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedSessionButton(bookId: kotlin.Int, isAudiobook: kotlin.Boolean, onStartSession: kotlin.Function0<kotlin.Unit>, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - book: UNSTABLE (has mutable properties or unstable members)
+    - bookId: STABLE (primitive type)
+    - isAudiobook: STABLE (primitive type)
+    - onStartSession: STABLE (function type)
     - isLoading: STABLE (primitive type)
 
 @Composable
@@ -290,14 +295,13 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.Re
     - controller: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.TrendingTileSection(book: nl.rhaydus.softcover.core.domain.model.Book, cover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.TrendingTileSection(model: nl.rhaydus.softcover.feature.reading.presentation.state.TrendingTileUiModel, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - book: UNSTABLE (has mutable properties or unstable members)
-    - cover: STABLE (marked @Stable or @Immutable)
+    - model: STABLE (marked @Stable or @Immutable)
     - header: STABLE (marked @Stable or @Immutable)
-    - onBookClick: STABLE (function type)
+    - onClick: STABLE (function type)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.rememberReadingCardEventHandler(alsoReading: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>): kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>

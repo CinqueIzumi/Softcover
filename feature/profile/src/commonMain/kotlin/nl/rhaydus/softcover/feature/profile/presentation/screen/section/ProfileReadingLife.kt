@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
-import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAuthorsToggledAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnYearMetricSelectedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
@@ -50,7 +49,8 @@ internal fun ColumnScope.ProfileReadingLife(
     Spacer(modifier = Modifier.height(Spacing.section))
 
     GenreRankingSection(
-        genres = state.readingLife?.genres ?: GenreBreakdown(),
+        hasGenres = state.hasGenres,
+        genreScopeCaption = state.genreScopeCaption,
         genreRanking = state.genreRanking,
         isLoading = state.isReadingLifeLoading,
         header = state.genreRankingHeader,
@@ -60,10 +60,9 @@ internal fun ColumnScope.ProfileReadingLife(
     Spacer(modifier = Modifier.height(Spacing.section))
 
     AuthorRepresentationSection(
-        authorDemographics = state.authorDemographics,
-        genderChart = state.genderChart,
-        bipocChart = state.bipocChart,
-        lgbtqChart = state.lgbtqChart,
+        genderBreakdown = state.genderBreakdown,
+        bipocBreakdown = state.bipocBreakdown,
+        lgbtqBreakdown = state.lgbtqBreakdown,
         hideUntaggedAuthors = state.hideUntaggedAuthors,
         hideUntaggedAuthorsToggle = state.hideUntaggedAuthorsToggle,
         canHideUntaggedAuthors = state.hasUntaggedAuthors,

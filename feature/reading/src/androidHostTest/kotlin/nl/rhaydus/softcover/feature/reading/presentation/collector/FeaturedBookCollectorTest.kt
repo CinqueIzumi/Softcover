@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -21,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class FeaturedProgressCollectorTest {
+class FeaturedBookCollectorTest {
     private lateinit var dependencies: ReadingScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>
@@ -57,7 +59,7 @@ class FeaturedProgressCollectorTest {
         fun `falls back to the loading stand-in when there is no featured book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(books = persistentListOf())
-            val collector = FeaturedProgressCollector()
+            val collector = FeaturedBookCollector()
 
             // ----- Act -----
             val job = launch {
@@ -76,7 +78,7 @@ class FeaturedProgressCollectorTest {
         fun `maps the first book as the featured book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(books = persistentListOf(stubBook(progress = 40f), stubBook(progress = 90f)))
-            val collector = FeaturedProgressCollector()
+            val collector = FeaturedBookCollector()
 
             // ----- Act -----
             val job = launch {
@@ -96,7 +98,7 @@ class FeaturedProgressCollectorTest {
         fun `rebuilds when the featured book changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(books = persistentListOf(stubBook(progress = 40f)))
-            val collector = FeaturedProgressCollector()
+            val collector = FeaturedBookCollector()
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -109,6 +111,123 @@ class FeaturedProgressCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.featuredProgress.percent.value shouldBe 75.0
+            job.cancel()
+        }
+    }
+
+    @Nested
+    inner class FeaturedBookModel {
+        private fun namedBook(
+            id: Int,
+            title: String,
+        ): Book {
+            val book = mockk<Book>(relaxed = true)
+            every {
+                book.id
+            } returns id
+            every {
+                book.title
+            } returns title
+
+            return book
+        }
+
+        @Test
+        fun `is null when there is no featured book`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf())
+            val collector = FeaturedBookCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.featuredBookModel.shouldBeNull()
+            job.cancel()
+        }
+
+        @Test
+        fun `is set for the first book as the featured book`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(
+                books = persistentListOf(namedBook(
+                    id = 1,
+                    title = "First",
+                ), namedBook(
+                    id = 2,
+                    title = "Second",
+                ),),
+            )
+            val collector = FeaturedBookCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            val model = stateFlow.value.featuredBookModel.shouldNotBeNull()
+            model.id shouldBe 1
+            model.title shouldBe "First"
+            job.cancel()
+        }
+
+        @Test
+        fun `updates when the featured book changes`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(namedBook(
+                id = 1,
+                title = "Old",
+            ),),)
+            val collector = FeaturedBookCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(books = persistentListOf(namedBook(
+                id = 2,
+                title = "New",
+            ),),)
+
+            // ----- Assert -----
+            val model = stateFlow.value.featuredBookModel.shouldNotBeNull()
+            model.id shouldBe 2
+            model.title shouldBe "New"
+            job.cancel()
+        }
+
+        @Test
+        fun `clears when the featured book goes away`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(namedBook(
+                id = 1,
+                title = "Only",
+            ),),)
+            val collector = FeaturedBookCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(books = persistentListOf())
+
+            // ----- Assert -----
+            stateFlow.value.featuredBookModel.shouldBeNull()
             job.cancel()
         }
     }

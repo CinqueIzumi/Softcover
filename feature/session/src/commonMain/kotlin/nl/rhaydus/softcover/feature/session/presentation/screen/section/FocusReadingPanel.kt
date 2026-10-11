@@ -26,7 +26,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel
 import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
 import nl.rhaydus.softcover.feature.session.presentation.component.rememberSessionElapsed
@@ -40,7 +40,7 @@ import nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState
  */
 @Composable
 internal fun FocusReadingPanel(
-    active: ActiveSession,
+    active: ActiveSessionUiModel,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
     state: FocusModeUiState,
@@ -49,7 +49,7 @@ internal fun FocusReadingPanel(
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHaptics.current
-    val isPaused = active.session.isPaused
+    val isPaused = active.isPaused
 
     val elapsed = rememberSessionElapsed(active = active)
 
@@ -75,7 +75,7 @@ internal fun FocusReadingPanel(
         Spacer(modifier = Modifier.height(Spacing.md))
 
         SoftcoverText(
-            text = active.book.title,
+            text = active.title,
             style = MaterialTheme.editorialTypography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
@@ -83,11 +83,11 @@ internal fun FocusReadingPanel(
             overflow = TextOverflow.Ellipsis,
         )
 
-        active.book.authors.firstOrNull()?.let { author ->
+        active.author?.let { author ->
             Spacer(modifier = Modifier.height(Spacing.xxs))
 
             SoftcoverText(
-                text = "By ${author.name}",
+                text = "By $author",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

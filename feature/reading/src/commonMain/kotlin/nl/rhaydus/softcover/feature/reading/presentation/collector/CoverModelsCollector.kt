@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.toTrendingTileUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
@@ -44,12 +45,7 @@ internal class CoverModelsCollector : ReadingCollector {
                                 shareTransition = true,
                             )
                         },
-                        trendingTileCover = snapshot.trendingBook?.let { book ->
-                            book.toCoverUiModel(
-                                variant = CoverVariant.Tile,
-                                shareTransition = true,
-                            )
-                        },
+                        trendingTile = snapshot.trendingBook?.toTrendingTileUiModel(),
                         // The verdict sheet's cover has never actually fallen back to a different
                         // edition than the finished book's currentEdition — EditionImage was called
                         // with defaultEdition = verdictBook.currentEdition here, unlike every other

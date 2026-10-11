@@ -41,10 +41,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.supportsBlur
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.collector.greetingForNow
+import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedBookUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
 
 /**
@@ -55,7 +53,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressU
  */
 @Composable
 internal fun FeaturedBackdropCard(
-    book: Book,
+    book: FeaturedBookUiModel,
     backdropCover: CoverUiModel?,
     heroCover: CoverUiModel?,
     progress: FeaturedProgressUiModel,
@@ -63,7 +61,8 @@ internal fun FeaturedBackdropCard(
     deadlineSummary: DeadlineSummaryUiModel?,
     mutationFailed: Boolean,
     paceForecast: String?,
-    runAction: (ReadingAction) -> Unit,
+    onUpdateProgressClick: () -> Unit,
+    onStartSession: () -> Unit,
     isLoading: Boolean = false,
 ) {
     val isInspection = LocalInspectionMode.current
@@ -184,7 +183,7 @@ internal fun FeaturedBackdropCard(
                     icon = SoftcoverIcon.Edit,
                     contentDescription = "Update progress icon",
                 ),
-                onClick = { runAction(OnShowProgressSheetClickAction(book = book)) },
+                onClick = onUpdateProgressClick,
                 enabled = isLoading.not(),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -192,7 +191,9 @@ internal fun FeaturedBackdropCard(
             )
 
             FeaturedSessionButton(
-                book = book,
+                bookId = book.id,
+                isAudiobook = book.isAudiobook,
+                onStartSession = onStartSession,
                 isLoading = isLoading,
             )
 

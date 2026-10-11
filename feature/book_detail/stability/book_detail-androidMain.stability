@@ -202,11 +202,13 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.sectio
     - iconColors: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenuItems(book: nl.rhaydus.softcover.core.domain.model.Book, state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>, isOnline: kotlin.Boolean, dismiss: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenuItems(isOnShelf: kotlin.Boolean, hasEditions: kotlin.Boolean, onRemoveClick: kotlin.Function0<kotlin.Unit>, state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>, isOnline: kotlin.Boolean, dismiss: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - book: UNSTABLE (has mutable properties or unstable members)
+    - isOnShelf: STABLE (primitive type)
+    - hasEditions: STABLE (primitive type)
+    - onRemoveClick: STABLE (function type)
     - state: UNSTABLE (has mutable properties or unstable members)
     - runAction: STABLE (function type)
     - isOnline: STABLE (primitive type)
@@ -221,11 +223,11 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.sectio
     - runAction: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.GeneralBookInfoSection(edition: nl.rhaydus.softcover.core.domain.model.BookEdition?, heroCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, backdropCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, title: kotlin.String?, titleTransitionKey: nl.rhaydus.softcover.core.component.transition.BookTransitionKey?, ratingTransitionKey: nl.rhaydus.softcover.core.component.transition.BookTransitionKey?, seriesText: kotlin.String?, rating: kotlin.Double?, releaseYear: kotlin.Int?, unreleasedBadge: nl.rhaydus.softcover.core.component.badge.BadgeUiModel?, isLoading: kotlin.Boolean, isExpired: kotlin.Boolean, ownedCoverBadge: nl.rhaydus.softcover.core.component.badge.BadgeUiModel?, onCoverClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.GeneralBookInfoSection(heroEdition: nl.rhaydus.softcover.feature.book_detail.presentation.state.HeroEditionUiModel?, heroCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, backdropCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, title: kotlin.String?, titleTransitionKey: nl.rhaydus.softcover.core.component.transition.BookTransitionKey?, ratingTransitionKey: nl.rhaydus.softcover.core.component.transition.BookTransitionKey?, seriesText: kotlin.String?, rating: kotlin.Double?, releaseYear: kotlin.Int?, unreleasedBadge: nl.rhaydus.softcover.core.component.badge.BadgeUiModel?, isLoading: kotlin.Boolean, isExpired: kotlin.Boolean, ownedCoverBadge: nl.rhaydus.softcover.core.component.badge.BadgeUiModel?, onCoverClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - edition: UNSTABLE (has mutable properties or unstable members)
+    - heroEdition: STABLE (marked @Stable or @Immutable)
     - heroCover: STABLE (marked @Stable or @Immutable)
     - backdropCover: STABLE (marked @Stable or @Immutable)
     - title: STABLE (class with no mutable properties)

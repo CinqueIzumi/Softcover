@@ -105,6 +105,9 @@ class ActiveSessionControllerImplTest {
             book.title
         } returns "Stub Book"
         every {
+            book.authors
+        } returns emptyList()
+        every {
             book.currentEdition
         } returns null
         every {
@@ -179,8 +182,8 @@ class ActiveSessionControllerImplTest {
 
             active?.session shouldBe session
             active?.book shouldBe book
-            active?.peekBarCover?.variant shouldBe CoverVariant.Flat
-            active?.focusCover?.variant shouldBe CoverVariant.Spotlight
+            active?.ui?.peekBarCover?.variant shouldBe CoverVariant.Flat
+            active?.ui?.focusCover?.variant shouldBe CoverVariant.Spotlight
         }
 
         @Test
@@ -210,9 +213,9 @@ class ActiveSessionControllerImplTest {
 
             // ----- Assert -----
             val active = controller.activeSession.value.shouldNotBeNull()
-            val peekKey = active.peekBarCover.sharedTransitionKey.shouldNotBeNull()
+            val peekKey = active.ui.peekBarCover.sharedTransitionKey.shouldNotBeNull()
 
-            peekKey shouldBe active.focusCover.sharedTransitionKey
+            peekKey shouldBe active.ui.focusCover.sharedTransitionKey
         }
 
         @Test
@@ -231,8 +234,8 @@ class ActiveSessionControllerImplTest {
             // ----- Assert -----
             val active = controller.activeSession.value.shouldNotBeNull()
 
-            active.peekBarCover.sharedTransitionKey shouldNotBe unsurfacedKey
-            active.focusCover.sharedTransitionKey shouldNotBe unsurfacedKey
+            active.ui.peekBarCover.sharedTransitionKey shouldNotBe unsurfacedKey
+            active.ui.focusCover.sharedTransitionKey shouldNotBe unsurfacedKey
         }
     }
 

@@ -15,7 +15,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.collector.CoverModelsCo
 import nl.rhaydus.softcover.feature.reading.presentation.collector.CurrentlyReadingBooksCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.DeadlineModelsCollector
-import nl.rhaydus.softcover.feature.reading.presentation.collector.FeaturedProgressCollector
+import nl.rhaydus.softcover.feature.reading.presentation.collector.FeaturedBookCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.MastheadCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.PlanTodayDismissalsCollector
@@ -74,7 +74,7 @@ val readingModule = module {
     factory { ProgressSheetCollector() } bind ReadingCollector::class
     factory { VerdictSheetCollector() } bind ReadingCollector::class
     factory { CoverModelsCollector() } bind ReadingCollector::class
-    factory { FeaturedProgressCollector() } bind ReadingCollector::class
+    factory { FeaturedBookCollector() } bind ReadingCollector::class
     factory { DeadlineModelsCollector() } bind ReadingCollector::class
     factory { BookCardModelsCollector() } bind ReadingCollector::class
     factory { BookDeadlinesCollector() } bind ReadingCollector::class

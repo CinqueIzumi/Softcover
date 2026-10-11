@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.profile.presentation.state
 
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
-import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
@@ -19,9 +18,10 @@ import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_STAND_IN_CARDS
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicChartUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
@@ -65,18 +65,27 @@ internal data class ProfileUiState(
 
     val readingAtlas: ReadingAtlasUiModel = readingAtlasUiModel(null),
 
-    /**
-     * The author breakdown the section's captions and empty checks read: every author by default, or
-     * only the ones tagged for each attribute once [hideUntaggedAuthors] is on. Written by
-     * `ProfileChartsCollector` together with the charts so the two never disagree.
-     */
-    val authorDemographics: AuthorDemographics = AuthorDemographics(),
-
     /** Mapped by `ProfileChartsCollector`, which also decides when they stop loading. */
     val genreRanking: RankedBarsUiModel = genreRankingUiModel(null),
-    val genderChart: ProportionChartUiModel = genderChartUiModel(null),
-    val bipocChart: ProportionChartUiModel = demographicChartUiModel(null),
-    val lgbtqChart: ProportionChartUiModel = demographicChartUiModel(null),
+    val hasGenres: Boolean = false,
+    val genreScopeCaption: String = genreScopeCaption(taggedBookCount = 0),
+
+    /**
+     * Every author by default, or only the ones tagged for each attribute once [hideUntaggedAuthors]
+     * is on.
+     */
+    val genderBreakdown: DemographicBreakdownUiModel = genderBreakdownUiModel(
+        demographics = null,
+        hideUntaggedAuthors = false,
+    ),
+    val bipocBreakdown: DemographicBreakdownUiModel = demographicBreakdownUiModel(
+        breakdown = null,
+        hideUntaggedAuthors = false,
+    ),
+    val lgbtqBreakdown: DemographicBreakdownUiModel = demographicBreakdownUiModel(
+        breakdown = null,
+        hideUntaggedAuthors = false,
+    ),
     val ratingsChart: ColumnChartUiModel = ratingsChartUiModel(null),
     val ratingsAverage: StatNumberUiModel = ratingsAverageUiModel(null),
 
@@ -128,7 +137,7 @@ internal data class ProfileUiState(
 
     /**
      * Whether any of the three breakdowns actually has an untagged bucket to drop. Reads the
-     * *unfiltered* data on purpose: [authorDemographics] has already zeroed those buckets while the
+     * *unfiltered* data on purpose: the breakdown models have already zeroed those buckets while the
      * switch is on, so deriving it from that would make the switch disappear the moment it was used.
      */
     val hasUntaggedAuthors: Boolean

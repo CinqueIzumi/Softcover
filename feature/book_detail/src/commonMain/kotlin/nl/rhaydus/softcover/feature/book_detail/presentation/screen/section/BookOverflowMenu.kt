@@ -16,7 +16,6 @@ import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
@@ -66,7 +65,11 @@ internal fun BookOverflowMenu(
         ) {
             book?.let {
                 BookOverflowMenuItems(
-                    book = it,
+                    isOnShelf = it.status != BookStatus.None,
+                    hasEditions = it.editions.isNotEmpty(),
+                    onRemoveClick = {
+                        runAction(OnRemoveBookClickAction(book = it))
+                    },
                     state = state,
                     runAction = runAction,
                     isOnline = isOnline,
@@ -79,14 +82,14 @@ internal fun BookOverflowMenu(
 
 @Composable
 private fun BookOverflowMenuItems(
-    book: Book,
+    isOnShelf: Boolean,
+    hasEditions: Boolean,
+    onRemoveClick: () -> Unit,
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
     isOnline: Boolean,
     dismiss: () -> Unit,
 ) {
-    val isOnShelf = book.status != BookStatus.None
-
     DropdownMenuItem(
         text = { SoftcoverText(text = "Share") },
         leadingIcon = {
@@ -131,7 +134,7 @@ private fun BookOverflowMenuItems(
     // on-shelf gate. Marking an edition as owned mutates the user's shelf, so it stays below.
     // Hidden when the book has no known editions (e.g. a freshly added-by-ISBN book) — there
     // is nothing to switch between.
-    if (isOnline && book.editions.isNotEmpty()) {
+    if (isOnline && hasEditions) {
         DropdownMenuItem(
             text = { SoftcoverText(text = "Change edition") },
             leadingIcon = {
@@ -263,7 +266,7 @@ private fun BookOverflowMenuItems(
             },
             onClick = {
                 dismiss()
-                runAction(OnRemoveBookClickAction(book = book))
+                onRemoveClick()
             },
         )
     }

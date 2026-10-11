@@ -17,7 +17,6 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.EmptyStateEvent
@@ -28,6 +27,7 @@ import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCa
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.StreakStripUiModel
+import nl.rhaydus.softcover.feature.reading.presentation.state.TrendingTileUiModel
 
 @Composable
 internal fun EmptyCurrentlyReadingScreen(
@@ -36,15 +36,15 @@ internal fun EmptyCurrentlyReadingScreen(
     emptyState: EmptyStateUiModel,
     trendingBooks: ImmutableList<Book> = persistentListOf(),
     pickUpNext: BookCardSet<Book> = BookCardSet.empty(),
-    trendingTileCover: CoverUiModel? = null,
+    trendingTile: TrendingTileUiModel? = null,
     streakEnabled: Boolean = false,
     streakStrip: StreakStripUiModel,
     onExpandStreak: () -> Unit = {},
     onBookClick: (Book) -> Unit = {},
     onNavigateToSearch: () -> Unit,
 ) {
-    // Mirrors CoverModelsCollector's own trendingBooks.firstOrNull(): the tile's cover is mapped there.
-    val trendingTile = trendingBooks.firstOrNull()
+    // Mirrors CoverModelsCollector's own trendingBooks.firstOrNull(): the tile model is built there.
+    val trendingBook = trendingBooks.firstOrNull()
     val showAdaptive = pickUpNext.isEmpty.not() || trendingTile != null
     val onPickUpNextEvent = rememberPrefetchingBookCardEventHandler(
         set = pickUpNext,
@@ -107,10 +107,11 @@ internal fun EmptyCurrentlyReadingScreen(
             Spacer(modifier = Modifier.height(Spacing.section))
 
             TrendingTileSection(
-                book = trendingTile,
-                cover = trendingTileCover,
+                model = trendingTile,
                 header = trendingHeader,
-                onBookClick = onBookClick,
+                onClick = {
+                    trendingBook?.let(onBookClick)
+                },
             )
         }
     }

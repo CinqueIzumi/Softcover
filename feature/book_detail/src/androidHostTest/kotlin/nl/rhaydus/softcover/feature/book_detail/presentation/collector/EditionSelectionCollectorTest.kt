@@ -5,6 +5,7 @@ import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -21,6 +22,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.HeroEditionUiModel
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -131,6 +133,75 @@ class EditionSelectionCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.ownedCoverBadge shouldBe null
+            job.cancel()
+        }
+
+        @Test
+        fun `sets heroEdition from the displayed edition`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                previewEdition = buildEdition(id = 1).copy(pages = 200),
+            )
+            val collector = EditionSelectionCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.heroEdition shouldBe HeroEditionUiModel(
+                authors = "",
+                length = "200",
+                isAudiobook = false,
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `leaves heroEdition null while no edition is displayed`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = EditionSelectionCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.heroEdition shouldBe null
+            job.cancel()
+        }
+
+        @Test
+        fun `updates heroEdition when the displayed edition changes`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                previewEdition = buildEdition(id = 1).copy(pages = 200),
+            )
+            val collector = EditionSelectionCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.update { it.copy(previewEdition = buildEdition(id = 2).copy(pages = 450)) }
+
+            // ----- Assert -----
+            stateFlow.value.heroEdition shouldBe HeroEditionUiModel(
+                authors = "",
+                length = "450",
+                isAudiobook = false,
+            )
             job.cancel()
         }
     }

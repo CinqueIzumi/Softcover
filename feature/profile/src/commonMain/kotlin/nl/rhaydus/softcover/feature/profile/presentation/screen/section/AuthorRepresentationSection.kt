@@ -7,7 +7,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.chart.ProportionChart
-import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
@@ -17,17 +16,13 @@ import nl.rhaydus.softcover.core.component.text.FadeThroughText
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
-import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel
 
 /**
- * "Who you read" — a gender chart over two three-way Yes/No/Unknown charts for
- * [AuthorDemographics.bipocBreakdown] and [AuthorDemographics.lgbtqBreakdown], each a
- * [ProportionChart] built upstream ([genderChart], [bipocChart], [lgbtqChart]). By default all three
- * are scoped to *every* distinct tagged author (not just the ones with that attribute known), so the
- * — often large — untagged population is always visible rather than hidden behind a
- * share-of-tagged-authors percentage. [authorDemographics] still feeds the empty-state checks and the
- * captions.
+ * "Who you read" — a gender chart over two three-way Yes/No/Unknown charts for BIPOC and LGBTQ+
+ * authors. By default all three are scoped to *every* distinct tagged author (not just the ones with
+ * that attribute known), so the — often large — untagged population is always visible rather than
+ * hidden behind a share-of-tagged-authors percentage.
  *
  * [hideUntaggedAuthors] is the reader's opt-in to the *other* reading: the untagged bucket drops out
  * of each bar and the remaining percentages are renormalised over the tagged authors alone (per bar —
@@ -42,10 +37,9 @@ import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
  */
 @Composable
 internal fun AuthorRepresentationSection(
-    authorDemographics: AuthorDemographics,
-    genderChart: ProportionChartUiModel,
-    bipocChart: ProportionChartUiModel,
-    lgbtqChart: ProportionChartUiModel,
+    genderBreakdown: DemographicBreakdownUiModel,
+    bipocBreakdown: DemographicBreakdownUiModel,
+    lgbtqBreakdown: DemographicBreakdownUiModel,
     hideUntaggedAuthors: Boolean,
     hideUntaggedAuthorsToggle: ToggleRowUiModel<String>,
     canHideUntaggedAuthors: Boolean,
@@ -54,9 +48,9 @@ internal fun AuthorRepresentationSection(
     onHideUntaggedAuthorsChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val hasGenderData = authorDemographics.genderSlices.isNotEmpty()
-    val hasBipocData = authorDemographics.bipocBreakdown.total > 0
-    val hasLgbtqData = authorDemographics.lgbtqBreakdown.total > 0
+    val hasGenderData = genderBreakdown.hasData
+    val hasBipocData = bipocBreakdown.hasData
+    val hasLgbtqData = lgbtqBreakdown.hasData
     val hasContent = hasGenderData || hasBipocData || hasLgbtqData
 
     Column(modifier = modifier) {
@@ -85,16 +79,12 @@ internal fun AuthorRepresentationSection(
             )
         } else {
             if (hasGenderData || isLoading) {
-                ProportionChart(model = genderChart)
+                ProportionChart(model = genderBreakdown.chart)
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
                 FadeThroughText(
-                    text = genderCaption(
-                        knownGenderCount = authorDemographics.knownGenderCount,
-                        unknownGenderCount = authorDemographics.unknownGenderCount,
-                        hideUntaggedAuthors = hideUntaggedAuthors,
-                    ),
+                    text = genderBreakdown.caption,
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     isLoading = isLoading,
@@ -119,9 +109,7 @@ internal fun AuthorRepresentationSection(
 
                 DemographicBreakdownBlock(
                     label = "BIPOC",
-                    chart = bipocChart,
-                    breakdown = authorDemographics.bipocBreakdown,
-                    hideUntaggedAuthors = hideUntaggedAuthors,
+                    breakdown = bipocBreakdown,
                     isLoading = isLoading,
                 )
 
@@ -129,9 +117,7 @@ internal fun AuthorRepresentationSection(
 
                 DemographicBreakdownBlock(
                     label = "LGBTQ+",
-                    chart = lgbtqChart,
-                    breakdown = authorDemographics.lgbtqBreakdown,
-                    hideUntaggedAuthors = hideUntaggedAuthors,
+                    breakdown = lgbtqBreakdown,
                     isLoading = isLoading,
                 )
             }
@@ -145,25 +131,6 @@ private fun emptyAuthorDemographicsCaption(hideUntaggedAuthors: Boolean): String
     "Author demographics will appear here as the authors you read get tagged."
 }
 
-// The bar/legend already render the untagged share directly as their own Unknown slice, so this no
-// longer repeats "M unknown" alongside it — it just grounds the section in the reader's total author
-// count, mirroring how DemographicBreakdownBlock's caption grounds its Yes/No/Unknown breakdown. While
-// the untagged authors are hidden the count is the same arithmetic (unknownGenderCount is 0 by then)
-// but a different claim, so the wording says which authors it counted.
-private fun genderCaption(
-    knownGenderCount: Int,
-    unknownGenderCount: Int,
-    hideUntaggedAuthors: Boolean,
-): String {
-    val totalAuthorCount = knownGenderCount + unknownGenderCount
-
-    if (totalAuthorCount == 0) return "Gender breakdown will fill in as your tagged authors are identified."
-
-    if (hideUntaggedAuthors) return "Across $totalAuthorCount authors with a known gender."
-
-    return "Across $totalAuthorCount authors."
-}
-
 // Names what the two breakdowns below are a share *of* — the one line that changes meaning wholesale
 // with the switch, since each bar's denominator drops to its own tagged subset.
 private fun demographicScopeCaption(hideUntaggedAuthors: Boolean): String = if (hideUntaggedAuthors) {
@@ -175,9 +142,7 @@ private fun demographicScopeCaption(hideUntaggedAuthors: Boolean): String = if (
 @Composable
 private fun DemographicBreakdownBlock(
     label: String,
-    chart: ProportionChartUiModel,
-    breakdown: DemographicBreakdown,
-    hideUntaggedAuthors: Boolean,
+    breakdown: DemographicBreakdownUiModel,
     isLoading: Boolean,
 ) {
     Column {
@@ -191,45 +156,18 @@ private fun DemographicBreakdownBlock(
 
         // An empty breakdown keeps its eyebrow and drops to the caption alone: with nobody tagged there
         // is no proportion to draw, and a bar of three zero-width segments would read as data.
-        if (breakdown.total > 0 || isLoading) {
-            ProportionChart(model = chart)
+        if (breakdown.hasData || isLoading) {
+            ProportionChart(model = breakdown.chart)
 
             Spacer(modifier = Modifier.height(Spacing.sm))
         }
 
         FadeThroughText(
-            text = demographicCaption(
-                breakdown = breakdown,
-                hideUntaggedAuthors = hideUntaggedAuthors,
-            ),
+            text = breakdown.caption,
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             isLoading = isLoading,
             standIn = "Yes 24 · No 96 · Unknown 12 · of 132 authors",
         )
     }
-}
-
-private fun demographicCaption(
-    breakdown: DemographicBreakdown,
-    hideUntaggedAuthors: Boolean,
-): String {
-    if (breakdown.total == 0) {
-        if (hideUntaggedAuthors) return "None of your authors carry this data yet."
-
-        return "This breakdown will fill in as your tagged authors are identified."
-    }
-
-    val counts = listOfNotNull(
-        "Yes ${breakdown.yesCount}",
-        "No ${breakdown.noCount}",
-        "Unknown ${breakdown.unknownCount}".takeIf { breakdown.unknownCount > 0 },
-    ).joinToString(separator = " · ")
-    val total = if (hideUntaggedAuthors) {
-        "of ${breakdown.total} tagged authors"
-    } else {
-        "of ${breakdown.total} authors"
-    }
-
-    return "$counts · $total"
 }

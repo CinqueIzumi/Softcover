@@ -20,14 +20,14 @@ import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
-import nl.rhaydus.softcover.core.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel
 import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
 import nl.rhaydus.softcover.feature.session.presentation.screen.section.FocusReadingPanel
 import nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState
 
 @Composable
 internal actual fun FocusModeScreenLayout(
-    active: ActiveSession,
+    active: ActiveSessionUiModel,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
     state: FocusModeUiState,

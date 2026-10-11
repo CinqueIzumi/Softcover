@@ -5,11 +5,40 @@ import nl.rhaydus.softcover.core.component.chart.ChartSliceUiModel
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.uibinding.format.percentLabel
+import nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel
 
 private const val LOADING_SEGMENT_COUNT = 3
+
+/** The gender chart with its caption; a null [demographics] yields the loading chart and no data. */
+internal fun genderBreakdownUiModel(
+    demographics: AuthorDemographics?,
+    hideUntaggedAuthors: Boolean,
+): DemographicBreakdownUiModel = DemographicBreakdownUiModel(
+    chart = genderChartUiModel(demographics?.genderSlices),
+    caption = genderCaption(
+        knownGenderCount = demographics?.knownGenderCount ?: 0,
+        unknownGenderCount = demographics?.unknownGenderCount ?: 0,
+        hideUntaggedAuthors = hideUntaggedAuthors,
+    ),
+    hasData = demographics?.genderSlices.orEmpty().isNotEmpty(),
+)
+
+/** A Yes/No/Unknown chart with its caption; a null [breakdown] yields the loading chart and no data. */
+internal fun demographicBreakdownUiModel(
+    breakdown: DemographicBreakdown?,
+    hideUntaggedAuthors: Boolean,
+): DemographicBreakdownUiModel = DemographicBreakdownUiModel(
+    chart = demographicChartUiModel(breakdown),
+    caption = demographicCaption(
+        breakdown = breakdown ?: DemographicBreakdown(),
+        hideUntaggedAuthors = hideUntaggedAuthors,
+    ),
+    hasData = (breakdown?.total ?: 0) > 0,
+)
 
 /**
  * Known genders take `Lead`, `Second`, `Third` in rank order; [Gender.Unknown] stays out of that indexing
@@ -107,4 +136,44 @@ private fun Gender.toDisplayLabel(): String = when (this) {
     Gender.Male -> "Men"
     Gender.Other -> "Other"
     Gender.Unknown -> "Unknown"
+}
+
+// While the untagged authors are hidden the count is the same arithmetic (unknownGenderCount is 0 by
+// then) but a different claim, so the wording says which authors it counted.
+private fun genderCaption(
+    knownGenderCount: Int,
+    unknownGenderCount: Int,
+    hideUntaggedAuthors: Boolean,
+): String {
+    val totalAuthorCount = knownGenderCount + unknownGenderCount
+
+    if (totalAuthorCount == 0) return "Gender breakdown will fill in as your tagged authors are identified."
+
+    if (hideUntaggedAuthors) return "Across $totalAuthorCount authors with a known gender."
+
+    return "Across $totalAuthorCount authors."
+}
+
+private fun demographicCaption(
+    breakdown: DemographicBreakdown,
+    hideUntaggedAuthors: Boolean,
+): String {
+    if (breakdown.total == 0) {
+        if (hideUntaggedAuthors) return "None of your authors carry this data yet."
+
+        return "This breakdown will fill in as your tagged authors are identified."
+    }
+
+    val counts = listOfNotNull(
+        "Yes ${breakdown.yesCount}",
+        "No ${breakdown.noCount}",
+        "Unknown ${breakdown.unknownCount}".takeIf { breakdown.unknownCount > 0 },
+    ).joinToString(separator = " · ")
+    val total = if (hideUntaggedAuthors) {
+        "of ${breakdown.total} tagged authors"
+    } else {
+        "of ${breakdown.total} authors"
+    }
+
+    return "$counts · $total"
 }

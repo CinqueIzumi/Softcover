@@ -36,6 +36,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.mapper.FEATURED_STAND_I
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.PICK_UP_NEXT_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakSheetFor
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakStripFor
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.toFeaturedBookUiModel
 import nl.rhaydus.toad.UiState
 
 internal data class ReadingScreenUiState(
@@ -104,7 +105,7 @@ internal data class ReadingScreenUiState(
 
     val featuredBackdropCover: CoverUiModel? = null,
     val featuredCover: CoverUiModel? = null,
-    val trendingTileCover: CoverUiModel? = null,
+    val trendingTile: TrendingTileUiModel? = null,
     val verdictCover: CoverUiModel? = null,
 
     /**
@@ -117,7 +118,7 @@ internal data class ReadingScreenUiState(
     val deadlineCoverOverlays: ImmutableMap<Int, CoverOverlayUiModel> = persistentMapOf(),
 
     /**
-     * The featured card's progress readout, mapped by `FeaturedProgressCollector` from the featured
+     * The featured card's progress readout, mapped by `FeaturedBookCollector` from the featured
      * book ([books] `.firstOrNull()`); the masked stand-in while there is none.
      */
     val featuredProgress: FeaturedProgressUiModel = FeaturedProgressUiModel.Loading,
@@ -132,6 +133,9 @@ internal data class ReadingScreenUiState(
      * message with `visible = false`, so the banner can animate out.
      */
     val featuredPaceNudge: BannerUiModel? = null,
+
+    /** `null` while there is no featured book. */
+    val featuredBookModel: FeaturedBookUiModel? = null,
 
     /** `null` until the books first load. */
     val masthead: PageMastheadUiModel? = null,
@@ -165,6 +169,10 @@ internal data class ReadingScreenUiState(
     val visibleAlsoReadingHeader: SectionHeaderUiModel
         get() = if (isLoading) ALSO_READING_HEADER_STAND_IN else alsoReadingHeader
 
+    /** [featuredBookModel], or the loading stand-in while [isLoading] or there is no featured book. */
+    val visibleFeaturedBookModel: FeaturedBookUiModel
+        get() = if (isLoading) FEATURED_BOOK_STAND_IN else featuredBookModel ?: FEATURED_BOOK_STAND_IN
+
     val visibleFeaturedProgress: FeaturedProgressUiModel
         get() = if (isLoading) FeaturedProgressUiModel.Loading else featuredProgress
 
@@ -194,6 +202,8 @@ internal data class ReadingScreenUiState(
             headline = "Also between your fingers",
             isLoading = true,
         )
+
+        val FEATURED_BOOK_STAND_IN = FEATURED_STAND_IN_BOOK.toFeaturedBookUiModel()
 
         val ALSO_READING_STAND_IN_SET: BookCardSet<Book> = BookCardSet.standIns(ALSO_READING_STAND_IN_CARDS)
     }

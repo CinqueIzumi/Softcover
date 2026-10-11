@@ -13,7 +13,6 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
-import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveActiveSessionUseCase
@@ -25,10 +24,7 @@ import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.presentation.session.ReadingSessionLauncher
 import nl.rhaydus.softcover.core.presentation.session.SessionOutcome
-import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import kotlin.coroutines.cancellation.CancellationException
-
-private const val SESSION_TRANSITION_SURFACE = "session"
 
 internal class ActiveSessionControllerImpl(
     private val observeActiveSessionUseCase: ObserveActiveSessionUseCase,
@@ -54,15 +50,9 @@ internal class ActiveSessionControllerImpl(
                     ActiveSession(
                         session = session,
                         book = book,
-                        peekBarCover = book.toCoverUiModel(
-                            variant = CoverVariant.Flat,
-                            shareTransition = true,
-                            transitionSurface = SESSION_TRANSITION_SURFACE,
-                        ),
-                        focusCover = book.toCoverUiModel(
-                            variant = CoverVariant.Spotlight,
-                            shareTransition = true,
-                            transitionSurface = SESSION_TRANSITION_SURFACE,
+                        ui = toActiveSessionUiModel(
+                            session = session,
+                            book = book,
                         ),
                     )
                 }

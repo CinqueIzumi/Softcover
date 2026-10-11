@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import org.junit.jupiter.api.Nested
@@ -168,6 +169,222 @@ class AuthorRepresentationChartMapperTest {
             result.segments.map { it.label } shouldBe listOf("Yes", "No")
             result.segments.map { it.share } shouldBe listOf("0%", "0%")
             result.segments.map { it.fraction } shouldBe listOf(0f, 0f)
+        }
+    }
+
+    @Nested
+    inner class GenderBreakdownUiModelTests {
+        @Test
+        fun `has no data and the loading chart when demographics is null`() {
+            // ----- Arrange -----
+            val demographics: AuthorDemographics? = null
+
+            // ----- Act -----
+            val result = genderBreakdownUiModel(
+                demographics = demographics,
+                hideUntaggedAuthors = false,
+            )
+
+            // ----- Assert -----
+            result.hasData shouldBe false
+            result.chart.isLoading shouldBe true
+            result.caption shouldBe "Gender breakdown will fill in as your tagged authors are identified."
+        }
+
+        @Test
+        fun `has no data when there are no gender slices`() {
+            // ----- Arrange -----
+            val demographics = AuthorDemographics()
+
+            // ----- Act -----
+            val result = genderBreakdownUiModel(
+                demographics = demographics,
+                hideUntaggedAuthors = false,
+            )
+
+            // ----- Assert -----
+            result.hasData shouldBe false
+            result.chart.isLoading shouldBe false
+        }
+
+        @Test
+        fun `has data and counts known and unknown authors in the caption`() {
+            // ----- Arrange -----
+            val demographics = AuthorDemographics(
+                genderSlices = listOf(
+                    slice(
+                        gender = Gender.Female,
+                        fraction = 0.6,
+                    ),
+                    slice(
+                        gender = Gender.Unknown,
+                        fraction = 0.4,
+                    ),
+                ),
+                knownGenderCount = 6,
+                unknownGenderCount = 4,
+            )
+
+            // ----- Act -----
+            val result = genderBreakdownUiModel(
+                demographics = demographics,
+                hideUntaggedAuthors = false,
+            )
+
+            // ----- Assert -----
+            result.hasData shouldBe true
+            result.caption shouldBe "Across 10 authors."
+            result.chart shouldBe genderChartUiModel(demographics.genderSlices)
+        }
+
+        @Test
+        fun `says the authors have a known gender while untagged authors are hidden`() {
+            // ----- Arrange -----
+            val demographics = AuthorDemographics(
+                genderSlices = listOf(
+                    slice(
+                        gender = Gender.Female,
+                        fraction = 1.0,
+                    ),
+                ),
+                knownGenderCount = 6,
+                unknownGenderCount = 0,
+            )
+
+            // ----- Act -----
+            val result = genderBreakdownUiModel(
+                demographics = demographics,
+                hideUntaggedAuthors = true,
+            )
+
+            // ----- Assert -----
+            result.caption shouldBe "Across 6 authors with a known gender."
+        }
+
+        @Test
+        fun `uses the fill-in caption when hidden and no authors remain`() {
+            // ----- Arrange -----
+            val demographics = AuthorDemographics()
+
+            // ----- Act -----
+            val result = genderBreakdownUiModel(
+                demographics = demographics,
+                hideUntaggedAuthors = true,
+            )
+
+            // ----- Assert -----
+            result.caption shouldBe "Gender breakdown will fill in as your tagged authors are identified."
+        }
+    }
+
+    @Nested
+    inner class DemographicBreakdownUiModelTests {
+        @Test
+        fun `has no data and the loading chart when the breakdown is null`() {
+            // ----- Arrange -----
+            val breakdown: DemographicBreakdown? = null
+
+            // ----- Act -----
+            val result = demographicBreakdownUiModel(
+                breakdown = breakdown,
+                hideUntaggedAuthors = false,
+            )
+
+            // ----- Assert -----
+            result.hasData shouldBe false
+            result.chart.isLoading shouldBe true
+            result.caption shouldBe "This breakdown will fill in as your tagged authors are identified."
+        }
+
+        @Test
+        fun `has no data and the fill-in caption for an empty breakdown`() {
+            // ----- Arrange -----
+            val breakdown = DemographicBreakdown()
+
+            // ----- Act -----
+            val result = demographicBreakdownUiModel(
+                breakdown = breakdown,
+                hideUntaggedAuthors = false,
+            )
+
+            // ----- Assert -----
+            result.hasData shouldBe false
+            result.chart.isLoading shouldBe false
+            result.caption shouldBe "This breakdown will fill in as your tagged authors are identified."
+        }
+
+        @Test
+        fun `says none of the authors carry the data when hidden and the breakdown is empty`() {
+            // ----- Arrange -----
+            val breakdown = DemographicBreakdown()
+
+            // ----- Act -----
+            val result = demographicBreakdownUiModel(
+                breakdown = breakdown,
+                hideUntaggedAuthors = true,
+            )
+
+            // ----- Assert -----
+            result.caption shouldBe "None of your authors carry this data yet."
+        }
+
+        @Test
+        fun `lists yes, no and unknown counts when someone is untagged`() {
+            // ----- Arrange -----
+            val breakdown = DemographicBreakdown(
+                yesCount = 2,
+                noCount = 3,
+                unknownCount = 5,
+            )
+
+            // ----- Act -----
+            val result = demographicBreakdownUiModel(
+                breakdown = breakdown,
+                hideUntaggedAuthors = false,
+            )
+
+            // ----- Assert -----
+            result.hasData shouldBe true
+            result.caption shouldBe "Yes 2 · No 3 · Unknown 5 · of 10 authors"
+            result.chart shouldBe demographicChartUiModel(breakdown)
+        }
+
+        @Test
+        fun `omits the unknown count when nobody is untagged`() {
+            // ----- Arrange -----
+            val breakdown = DemographicBreakdown(
+                yesCount = 2,
+                noCount = 3,
+                unknownCount = 0,
+            )
+
+            // ----- Act -----
+            val result = demographicBreakdownUiModel(
+                breakdown = breakdown,
+                hideUntaggedAuthors = false,
+            )
+
+            // ----- Assert -----
+            result.caption shouldBe "Yes 2 · No 3 · of 5 authors"
+        }
+
+        @Test
+        fun `names the total as tagged authors while untagged authors are hidden`() {
+            // ----- Arrange -----
+            val breakdown = DemographicBreakdown(
+                yesCount = 2,
+                noCount = 3,
+                unknownCount = 0,
+            )
+
+            // ----- Act -----
+            val result = demographicBreakdownUiModel(
+                breakdown = breakdown,
+                hideUntaggedAuthors = true,
+            )
+
+            // ----- Assert -----
+            result.caption shouldBe "Yes 2 · No 3 · of 5 tagged authors"
         }
     }
 }

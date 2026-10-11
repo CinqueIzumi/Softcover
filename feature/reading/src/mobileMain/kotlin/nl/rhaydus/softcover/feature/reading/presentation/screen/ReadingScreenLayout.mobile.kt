@@ -31,7 +31,6 @@ import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
-import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -40,12 +39,12 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
-import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowStreakSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakStripFor
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.toPickUpNextCard
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.toTrendingTileUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingBooksColumn
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingMasthead
@@ -120,7 +119,7 @@ internal actual fun ReadingScreenLayout(
                         else -> EmptyCurrentlyReadingScreen(
                             trendingBooks = state.trendingBooks,
                             pickUpNext = state.pickUpNext,
-                            trendingTileCover = state.trendingTileCover,
+                            trendingTile = state.trendingTile,
                             pickUpNextHeader = state.pickUpNextHeader,
                             trendingHeader = state.trendingHeader,
                             emptyState = state.emptyCurrentlyReading,
@@ -269,8 +268,7 @@ private val previewEmptyWithPickUpNextState = ReadingScreenUiState(
 private val previewEmptyWithTrendingState = ReadingScreenUiState(
     isLoading = false,
     trendingBooks = persistentListOf(previewBooks.first()),
-    trendingTileCover = previewBooks.first()
-        .toCoverUiModel(variant = CoverVariant.Tile),
+    trendingTile = previewBooks.first().toTrendingTileUiModel(),
 )
 
 @StandardPreview

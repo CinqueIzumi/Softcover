@@ -101,7 +101,7 @@ internal actual fun ReadingScreenLayout(
                     else -> EmptyCurrentlyReadingScreen(
                         trendingBooks = state.trendingBooks,
                         pickUpNext = state.pickUpNext,
-                        trendingTileCover = state.trendingTileCover,
+                        trendingTile = state.trendingTile,
                         pickUpNextHeader = state.pickUpNextHeader,
                         trendingHeader = state.trendingHeader,
                         emptyState = state.emptyCurrentlyReading,

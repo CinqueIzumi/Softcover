@@ -18,7 +18,7 @@ and a Perfetto trace. PC turns that check, and a Compose stability check, into r
 | PC-4 | Compose stability gate: skydoves analyzer 0.7.5, `androidMain` baselines in 15 modules, `stabilityCheck` in `check` and CI | [x] |
 | PC-5 | Triage of the PC-4 baselines: approved shape (below) | [x] |
 | PC-5a | Local type fixes: immutable collections in UiStates and models, `ImmutableList` params, concrete types for `Any` params, `@Immutable` on sealed / generic models; re-dump baselines | [x] |
-| PC-5b | Feature-local UI models for leaf composables that take a domain type, built when the state is set; re-dump baselines | [ ] |
+| PC-5b | Feature-local UI models for leaf composables that take a domain type, built when the state is set; re-dump baselines | [x] |
 | PC-5c | Per screen, sections take the slice of state they render instead of the whole UiState; re-dump baselines | [ ] |
 
 ## PC-1 — decisions
@@ -41,6 +41,10 @@ and a Perfetto trace. PC turns that check, and a Compose stability check, into r
 - PC-5a, `Any` params: tab-reselect effects take `Tab`, `ScrollToTopOnVisibleSetChange` takes `Int`; `rememberPulseScale`'s key stays `Any` (foundation `NavPulse` keys by `Any`, filed as F48).
 - PC-5a, annotations: `@Immutable` on `ShareCardUiModel`, `RoadmapRenderUnit`, `RoadmapBlock`, `SettingsChoiceRowUiModel`.
 - PC-5a, expected flip: Library and Library visibility entries move from RUNTIME to UNSTABLE once their collections expose `Book` / `Tag` / `BookList`; PC-5b / PC-5c resolve them, not a regression.
-- PC-5b, scope: `FeaturedBackdropCard`, `FeaturedBackdropMeta`, `FeaturedBookCard`, `FeaturedSessionButton`, `TrendingTileSection` (`Book`), `FeaturedSection` (`Book?`), `BookOverflowMenuItems` (`Book`), `GeneralBookInfoSection` (`BookEdition`), the four `ActiveSession` composables, the profile breakdown blocks, `rememberMarkAsReadController`, `EmptyCurrentlyReadingScreen`; domain modules stay Compose-free, no annotation workaround.
+- PC-5b, scope: `FeaturedBackdropCard`, `FeaturedBackdropMeta`, `FeaturedBookCard`, `FeaturedSessionButton`, `TrendingTileSection` (`Book`), `FeaturedSection` (`Book?`), `BookOverflowMenuItems` (`Book`), `GeneralBookInfoSection` (`BookEdition`), the four `ActiveSession` composables, the profile breakdown blocks; domain modules stay Compose-free, no annotation workaround; `BookDetailPaneHost.destination` stays baselined.
+- PC-5b, Reading: one `FeaturedBookUiModel(id, title, seriesText, authors, isAudiobook)` from `FeaturedBookCollector`; `TrendingTileUiModel(title, author, cover)` replaces `trendingTileCover`; leaves take `() -> Unit` callbacks closed over the `Book` by their parent.
+- PC-5b, Explore / Book detail: `FeaturedSection` drops `book` for callbacks; `BookOverflowMenuItems` takes `isOnShelf`, `hasEditions`, `onRemoveClick`; `HeroEditionUiModel(authors, length, isAudiobook)` from `EditionSelectionCollector`.
+- PC-5b, Session: `ActiveSessionUiModel(title, author, isPaused, startedAtEpochMs, pausedSeconds, pausedAtEpochMs, peekBarCover, focusCover)` in `:core:presentation`, built by the controller, replaces `ActiveSession`'s cover fields; elapsed time shares `:core:domain`'s `readingDuration` with the lock screen.
+- PC-5b, Profile: `DemographicBreakdownUiModel(chart, caption, hasData)` × 3 from `ProfileChartsCollector` replaces `authorDemographics` and the three chart fields; genres take `hasGenres` / `genreScopeCaption` state fields.
 - PC-5c, scope: every section composable taking a whole `*UiState` in Book Detail, Explore, Reading, Profile, Library and Settings.
 - Kept baselined: services (`AppUpdateSimulator`, `NetworkAvailabilityProvider`, `ShareCardCapture`, Voyager `Navigator`), not data; Voyager `Tab` / `Screen` (`NavItemUi`, root and debug `Render` hosts, the tab-reselect effects' `tab`), library interfaces; Compose / Coil API types (`ImageRequest`, `Painter`, `TextAutoSize`, `FiniteAnimationSpec`, `InlineTextContent` map, `ResizeMode`, generic `T`), not ours to annotate.

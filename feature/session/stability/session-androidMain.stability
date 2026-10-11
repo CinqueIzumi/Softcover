@@ -13,22 +13,22 @@ public fun nl.rhaydus.softcover.feature.session.presentation.component.SessionPe
     - flush: STABLE (primitive type)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBarContent(active: nl.rhaydus.softcover.core.presentation.session.ActiveSession, flush: kotlin.Boolean, onOpen: kotlin.Function0<kotlin.Unit>, onPauseResume: kotlin.Function0<kotlin.Unit>, onStop: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: false
+private fun nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBarContent(active: nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel, flush: kotlin.Boolean, onOpen: kotlin.Function0<kotlin.Unit>, onPauseResume: kotlin.Function0<kotlin.Unit>, onStop: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - active: UNSTABLE (has mutable properties or unstable members)
+    - active: STABLE (marked @Stable or @Immutable)
     - flush: STABLE (primitive type)
     - onOpen: STABLE (function type)
     - onPauseResume: STABLE (function type)
     - onStop: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.session.presentation.component.rememberSessionElapsed(active: nl.rhaydus.softcover.core.presentation.session.ActiveSession): kotlin.time.Duration
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.session.presentation.component.rememberSessionElapsed(active: nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel): kotlin.time.Duration
+  skippable: true
   restartable: true
   params:
-    - active: UNSTABLE (has mutable properties or unstable members)
+    - active: STABLE (marked @Stable or @Immutable)
 
 @Composable
 public fun nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen.Content(): kotlin.Unit
@@ -37,11 +37,11 @@ public fun nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScr
   params:
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreenLayout(active: nl.rhaydus.softcover.core.presentation.session.ActiveSession, onPauseResume: kotlin.Function0<kotlin.Unit>, onStop: kotlin.Function0<kotlin.Unit>, state: nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction, kotlin.Unit>, onClose: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreenLayout(active: nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel, onPauseResume: kotlin.Function0<kotlin.Unit>, onStop: kotlin.Function0<kotlin.Unit>, state: nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction, kotlin.Unit>, onClose: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - active: UNSTABLE (has mutable properties or unstable members)
+    - active: STABLE (marked @Stable or @Immutable)
     - onPauseResume: STABLE (function type)
     - onStop: STABLE (function type)
     - state: STABLE (class with no mutable properties)
@@ -59,11 +59,11 @@ internal fun nl.rhaydus.softcover.feature.session.presentation.screen.section.Fo
     - runAction: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.session.presentation.screen.section.FocusReadingPanel(active: nl.rhaydus.softcover.core.presentation.session.ActiveSession, onPauseResume: kotlin.Function0<kotlin.Unit>, onStop: kotlin.Function0<kotlin.Unit>, state: nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction, kotlin.Unit>, coverWidth: androidx.compose.ui.unit.Dp, modifier: androidx.compose.ui.Modifier): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.session.presentation.screen.section.FocusReadingPanel(active: nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel, onPauseResume: kotlin.Function0<kotlin.Unit>, onStop: kotlin.Function0<kotlin.Unit>, state: nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction, kotlin.Unit>, coverWidth: androidx.compose.ui.unit.Dp, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - active: UNSTABLE (has mutable properties or unstable members)
+    - active: STABLE (marked @Stable or @Immutable)
     - onPauseResume: STABLE (function type)
     - onStop: STABLE (function type)
     - state: STABLE (class with no mutable properties)

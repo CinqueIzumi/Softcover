@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PC-1 to PC-5a done. PC-5a: every collection in a UiState and the models it holds is `Immutable*`, updated through `toPersistent*()` ops; tab-reselect effects take `Tab` (still RUNTIME, kept baselined); `ScrollToTopOnVisibleSetChange` takes `Int`; `@Immutable` on the four sealed / generic models; baselines re-dumped, only flips to STABLE. `rememberPulseScale`'s `Any` key stays, filed under foundation F48 (stability-gate entry renumbered F47 → F50). PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
-- **Next:** PC-5b in `steps/pc-performance-checks.md` (feature-local UI models for leaf composables taking `Book` / `BookEdition` / `ActiveSession` / profile breakdowns), then PC-5c; the #275 PC box ticks after PC-5c.
+- **State:** PC-1 to PC-5b done. PC-5b: no leaf composable takes `Book` / `BookEdition` / `ActiveSession` / a profile breakdown; the approved shape in the step file is built; 15 UNSTABLE params left the baselines, none added. The live session timer and the lock screen share `:core:domain`'s `readingDuration`. `BookDetailPaneHost.destination` stays baselined. PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
+- **Next:** PC-5c in `steps/pc-performance-checks.md` (sections take their slice of state instead of the whole UiState); the #275 PC box ticks after PC-5c.
 - **Open questions:** whether the CI stability step passes on JDK 17 (verified only under JBR 21); watch the first CI run.
-- **Verification:** `styleCheck`, `stabilityCheck` green (JBR 21); `testAndroidHostTest` green for library (624), explore, reading, book_detail, settings, core:presentation, orchestration; reviewed, findings fixed; AAA / glommed-closer / `!!` greps clean.
-- **Uncommitted:** all of PC-5a (production, tests, baselines, this Now block, step-file and upstream-candidates edits).
+- **Verification:** `ktlintFormat styleCheck stabilityCheck checkModuleGraph` green (JBR 21); `testAndroidHostTest` green for reading, explore, book_detail, profile, session, orchestration, core:presentation, core:domain; reviewed, findings fixed; AAA / glommed-closer / `!!` greps clean.
+- **Uncommitted:** all of PC-5b (production, tests, baselines, step-file and Now-block edits).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

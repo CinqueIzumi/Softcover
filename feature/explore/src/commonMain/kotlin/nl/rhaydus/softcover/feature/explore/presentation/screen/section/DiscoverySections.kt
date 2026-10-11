@@ -5,6 +5,9 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
+import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_FEATURED
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
 @Composable
@@ -14,11 +17,28 @@ internal fun DiscoverySections(
     onBookClick: (Book, String?) -> Unit,
     rail: @Composable (ExploreRail, BookCardSet<Book>, (BookCardEvent) -> Unit) -> Unit,
 ) {
+    val featuredBook = state.featuredUpcomingRelease
+
     FeaturedSection(
-        book = state.featuredUpcomingRelease,
         card = state.featuredCard,
-        onBookClick = onBookClick,
-        runAction = runAction,
+        onOpen = {
+            featuredBook?.let { book ->
+                onBookClick(
+                    book,
+                    SURFACE_FEATURED,
+                )
+            }
+        },
+        onAddToLibrary = {
+            featuredBook?.let { book ->
+                runAction(OnAddBookToLibraryClickAction(book = book))
+            }
+        },
+        onRemoveFromLibrary = {
+            featuredBook?.let { book ->
+                runAction(OnRemoveBookFromLibraryClickAction(book = book))
+            }
+        },
     )
 
     UpNextSection(

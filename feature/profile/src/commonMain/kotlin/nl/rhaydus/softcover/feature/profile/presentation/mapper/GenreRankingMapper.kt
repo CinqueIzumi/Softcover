@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.softcover.core.component.chart.ChartSliceUiModel
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
@@ -39,4 +40,21 @@ internal fun genreRankingUiModel(genres: GenreBreakdown?): RankedBarsUiModel {
             }
             .toImmutableList(),
     )
+}
+
+/**
+ * Falls back to the scope-free wording when the count is 0 — that is either a genuinely empty library
+ * or a profile cached by a build older than 3.1.1 (the stored count defaults to 0 and fills in on the
+ * session's refresh), and naming "0 books" beneath five populated bars would be worse than saying
+ * nothing.
+ */
+internal fun genreScopeCaption(taggedBookCount: Int): String {
+    val scope = when (taggedBookCount) {
+        0 -> "counted over your finished books that carry genre tags"
+        1 -> "counted over the single finished book of yours that carries genre tags"
+        else -> "counted over the ${formatGroupedNumber(taggedBookCount)} finished books of yours that carry genre tags"
+    }
+
+    return "Your five most-read genres, each as a share of your books — $scope. " +
+        "A book tagged with several counts toward each, so these overlap and don't total 100%."
 }

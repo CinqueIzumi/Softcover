@@ -167,6 +167,9 @@ internal data class BookDetailUiState(
 
     val scanEditionCallout: CalloutUiModel? = null,
 
+    /** Null while the edition is unknown. */
+    val heroEdition: HeroEditionUiModel? = null,
+
     /** Non-null only while `isEditionOwned(displayedEdition)`. */
     val ownedCoverBadge: BadgeUiModel? = null,
 

@@ -8,11 +8,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 import nl.rhaydus.common.currentInstant
-import nl.rhaydus.softcover.core.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.domain.model.readingDuration
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel
 import kotlin.time.Duration
 
 @Composable
-internal fun rememberSessionElapsed(active: ActiveSession): Duration {
+internal fun rememberSessionElapsed(active: ActiveSessionUiModel): Duration {
     var now by remember { mutableStateOf(currentInstant()) }
 
     LaunchedEffect(Unit) {
@@ -23,5 +24,10 @@ internal fun rememberSessionElapsed(active: ActiveSession): Duration {
         }
     }
 
-    return active.session.readingDuration(now = now)
+    return readingDuration(
+        startedAtEpochMs = active.startedAtEpochMs,
+        pausedSeconds = active.pausedSeconds,
+        lastPausedAtEpochMs = active.pausedAtEpochMs,
+        endEpochMs = now.toEpochMilliseconds(),
+    )
 }

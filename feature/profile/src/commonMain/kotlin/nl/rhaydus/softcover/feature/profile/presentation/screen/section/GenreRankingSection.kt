@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.softcover.core.component.chart.RankedBars
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -34,7 +33,8 @@ import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
  */
 @Composable
 internal fun GenreRankingSection(
-    genres: GenreBreakdown,
+    hasGenres: Boolean,
+    genreScopeCaption: String,
     genreRanking: RankedBarsUiModel,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
@@ -45,7 +45,7 @@ internal fun GenreRankingSection(
 
         Spacer(modifier = Modifier.height(Spacing.md))
 
-        if (genres.slices.isEmpty() && isLoading.not()) {
+        if (hasGenres.not() && isLoading.not()) {
             SoftcoverText(
                 text = "Once a few books settle onto your shelves, this fills in.",
                 style = MaterialTheme.editorialTypography.bodySmall,
@@ -57,7 +57,7 @@ internal fun GenreRankingSection(
             Spacer(modifier = Modifier.height(Spacing.md))
 
             SoftcoverText(
-                text = genreScopeCaption(taggedBookCount = genres.taggedBookCount),
+                text = genreScopeCaption,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 isLoading = isLoading,
@@ -67,25 +67,4 @@ internal fun GenreRankingSection(
             )
         }
     }
-}
-
-/**
- * Names the denominator in words, because the bars alone can't: a share of *books* is only meaningful
- * once the reader knows which books were counted. Untagged books are outside the scope entirely, so
- * the sentence says so rather than leaving "your books" to be read as the whole shelf.
- *
- * Falls back to the scope-free wording when the count is 0 — that is either a genuinely empty library
- * or a profile cached by a build older than 3.1.1 (the stored count defaults to 0 and fills in on the
- * session's refresh), and naming "0 books" beneath five populated bars would be worse than saying
- * nothing.
- */
-private fun genreScopeCaption(taggedBookCount: Int): String {
-    val scope = when (taggedBookCount) {
-        0 -> "counted over your finished books that carry genre tags"
-        1 -> "counted over the single finished book of yours that carries genre tags"
-        else -> "counted over the ${formatGroupedNumber(taggedBookCount)} finished books of yours that carry genre tags"
-    }
-
-    return "Your five most-read genres, each as a share of your books — $scope. " +
-        "A book tagged with several counts toward each, so these overlap and don't total 100%."
 }

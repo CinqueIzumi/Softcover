@@ -15,8 +15,8 @@ import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
 import nl.rhaydus.softcover.core.component.haptics.play
-import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel
 import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
 import nl.rhaydus.softcover.feature.session.presentation.event.FocusModeEvent
 import nl.rhaydus.softcover.feature.session.presentation.screen.section.FocusReadingPanel
@@ -52,9 +52,9 @@ object FocusModeScreen : Screen {
             }
         }
 
-        var lastActive by remember { mutableStateOf<ActiveSession?>(null) }
+        var lastActive by remember { mutableStateOf<ActiveSessionUiModel?>(null) }
 
-        if (active != null) lastActive = active
+        active?.let { lastActive = it.ui }
 
         val isSessionEnded = active == null
 
@@ -67,7 +67,7 @@ object FocusModeScreen : Screen {
         FocusModeScreenLayout(
             active = current,
             onPauseResume = {
-                if (current.session.isPaused) controller.resume() else controller.pause()
+                if (current.isPaused) controller.resume() else controller.pause()
             },
             onStop = {
                 controller.stop()
@@ -87,7 +87,7 @@ object FocusModeScreen : Screen {
 // declaration, so every argument is supplied explicitly at the single call site above.
 @Composable
 internal expect fun FocusModeScreenLayout(
-    active: ActiveSession,
+    active: ActiveSessionUiModel,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
     state: FocusModeUiState,
