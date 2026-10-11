@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.component.sidebar
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -106,12 +109,21 @@ private fun <K> SidebarRow(
         null
     }
 
-    val container = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
-    val content = if (isSelected) {
-        MaterialTheme.colorScheme.onSecondaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
+    val motionScheme = MaterialTheme.motionScheme
+    val container by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+        animationSpec = motionScheme.defaultEffectsSpec(),
+        label = "SidebarRowContainer",
+    )
+    val content by animateColorAsState(
+        targetValue = if (isSelected) {
+            MaterialTheme.colorScheme.onSecondaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
+        animationSpec = motionScheme.defaultEffectsSpec(),
+        label = "SidebarRowContent",
+    )
 
     Surface(
         modifier = modifier
@@ -121,6 +133,7 @@ private fun <K> SidebarRow(
                 vertical = Spacing.xxxs,
             )
             .pointerHandCursor()
+            .pressScale(interactionSource)
             .hoverHighlight(
                 interactionSource = interactionSource,
                 shape = Corners.md,

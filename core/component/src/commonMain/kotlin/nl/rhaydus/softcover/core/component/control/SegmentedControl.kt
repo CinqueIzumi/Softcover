@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
@@ -253,7 +254,12 @@ private fun ProseWord(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.width(IntrinsicSize.Min),
+            modifier = Modifier
+                .width(IntrinsicSize.Min)
+                .hoverHighlight(
+                    interactionSource = interactionSource,
+                    shape = Corners.pill,
+                ),
         ) {
             SoftcoverText(
                 text = label,

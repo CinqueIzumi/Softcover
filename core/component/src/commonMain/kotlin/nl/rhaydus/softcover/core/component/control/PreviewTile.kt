@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -105,6 +106,10 @@ internal fun PreviewTileFrame(
                 .fillMaxWidth()
                 .aspectRatio(TILE_ASPECT_RATIO)
                 .clip(Corners.lg)
+                .hoverHighlight(
+                    interactionSource = interactionSource,
+                    shape = Corners.lg,
+                )
                 .border(
                     width = borderWidth,
                     color = accentColor,

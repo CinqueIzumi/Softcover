@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -38,13 +39,14 @@ import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.grayscale
-import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.shape
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
+import nl.rhaydus.softcover.core.component.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -119,7 +121,10 @@ internal fun GeneralBookInfoSection(
         ) {
             Box(
                 modifier = if (isLoading.not()) {
-                    Modifier.pressScaleClickable(onClick = onCoverClick)
+                    Modifier.pressScaleClickable(
+                        onClick = onCoverClick,
+                        hoverShape = heroCover?.variant?.shape() ?: RectangleShape,
+                    )
                 } else {
                     Modifier
                 },

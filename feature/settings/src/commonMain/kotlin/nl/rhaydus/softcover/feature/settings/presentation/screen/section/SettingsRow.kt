@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -64,6 +65,7 @@ internal fun SettingsRow(
         Modifier
             .pointerHandCursor()
             .pressScale(interactionSource)
+            .hoverHighlight(interactionSource = interactionSource)
             .then(semantics)
             .background(rowBackground)
     } else {

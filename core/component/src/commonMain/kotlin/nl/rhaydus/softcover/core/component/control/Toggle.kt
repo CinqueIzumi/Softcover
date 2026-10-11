@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
@@ -77,6 +78,10 @@ fun Toggle(
                 .pressScale(interactionSource)
                 .clip(shape)
                 .background(container)
+                .hoverHighlight(
+                    interactionSource = interactionSource,
+                    shape = shape,
+                )
                 .pointerHandCursor()
                 .toggleable(
                     value = model.checked,

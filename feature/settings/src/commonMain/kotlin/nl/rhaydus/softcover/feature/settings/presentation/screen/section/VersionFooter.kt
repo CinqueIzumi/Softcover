@@ -15,7 +15,7 @@ import kotlin.time.Clock
  * The version rule, and the hidden entry to the Component Gallery (`component-contract.md` § 7.5).
  *
  * It uses [noRippleClickable] rather than
- * [pressScaleClickable][nl.rhaydus.designsystem.modifier.pressScaleClickable] or a plain `clickable` on
+ * [pressScaleClickable][nl.rhaydus.softcover.core.component.modifier.pressScaleClickable] or a plain `clickable` on
  * purpose: no ripple, hand cursor or press scale may hint that the footer is tappable.
  */
 @Composable

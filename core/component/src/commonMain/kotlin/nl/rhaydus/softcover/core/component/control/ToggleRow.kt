@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -55,6 +56,7 @@ fun <K> ToggleRow(
         modifier = modifier
             .fillMaxWidth()
             .pointerHandCursor()
+            .hoverHighlight(interactionSource = interactionSource)
             .toggleable(
                 value = model.checked,
                 interactionSource = interactionSource,

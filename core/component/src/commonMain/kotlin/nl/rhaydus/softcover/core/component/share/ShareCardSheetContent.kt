@@ -1,10 +1,12 @@
 package nl.rhaydus.softcover.core.component.share
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,12 +16,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.designsystem.share.SaveOutcome
-import nl.rhaydus.designsystem.share.ShareOutcome
-import nl.rhaydus.designsystem.share.rememberShareCardCapture
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
@@ -27,12 +30,12 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * The share sheet every share card goes through: a [SheetScaffold] around a scaled preview of
- * [ShareCardSheetUiModel.card] with "Save to gallery" and "Share" as its inline footer.
+ * [ShareCardSheetUiModel.card] with the platform's save and share actions as its inline footer.
  *
  * The capture runs here because it needs composition, but progress is reported through [onEvent]:
  * the host holds the capture progress and close state and passes it back in [ShareCardSheetUiModel.scaffold].
  * A second capture is ignored until the running one ends; the scaffold's busy state only locks the
- * footer. Outcome snackbars are shown here.
+ * footer. Outcome snackbars, haptics and the preview's settle or shake are handled here.
  * [aboveCard] renders over the preview, in the sheet's centred column.
  */
 @Composable
@@ -45,7 +48,38 @@ fun ShareCardSheetContent(
     val capture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
     val coroutineScope = rememberCoroutineScope()
     val currentOnEvent by rememberUpdatedState(onEvent)
+    val haptics = LocalHaptics.current
+    val playMotion = playDecorativeMotion()
     var isCaptureRunning by remember { mutableStateOf(false) }
+    var shaking by remember { mutableStateOf(false) }
+    val settleScale = remember { Animatable(initialValue = 1f) }
+    val settleSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+
+    fun succeed() {
+        haptics.commit()
+
+        if (playMotion.not()) return
+
+        coroutineScope.launch {
+            settleScale.animateTo(
+                targetValue = SETTLE_SCALE,
+                animationSpec = settleSpec,
+            )
+
+            settleScale.animateTo(
+                targetValue = 1f,
+                animationSpec = settleSpec,
+            )
+        }
+    }
+
+    fun fail() {
+        if (playMotion) {
+            shaking = true
+        } else {
+            haptics.reject()
+        }
+    }
 
     fun runCapture(
         started: ShareCardSheetEvent,
@@ -66,6 +100,8 @@ fun ShareCardSheetContent(
                     AppLog.e("Share capture failed: $error")
 
                     SnackBarManager.showSnackbar(title = failureMessage)
+
+                    fail()
                 }
             } finally {
                 isCaptureRunning = false
@@ -86,7 +122,19 @@ fun ShareCardSheetContent(
                     failureMessage = "Couldn't share — try again",
                 ) {
                     when (val outcome = capture.share(displayName = model.displayName)) {
-                        is ShareOutcome.Shared -> currentOnEvent(ShareCardSheetEvent.Shared)
+                        is ShareOutcome.Shared -> {
+                            succeed()
+
+                            currentOnEvent(ShareCardSheetEvent.Shared)
+                        }
+
+                        is ShareOutcome.CopiedToClipboard -> {
+                            succeed()
+
+                            SnackBarManager.showSnackbar(title = "Copied to clipboard")
+
+                            currentOnEvent(ShareCardSheetEvent.Shared)
+                        }
 
                         is ShareOutcome.Cancelled -> Unit
 
@@ -94,19 +142,39 @@ fun ShareCardSheetContent(
                             AppLog.e("Failed to share card: ${outcome.reason}")
 
                             SnackBarManager.showSnackbar(title = "Couldn't share — try again")
+
+                            fail()
                         }
                     }
                 }
 
                 SheetScaffoldEvent.SecondaryClicked -> runCapture(
                     started = ShareCardSheetEvent.SaveStarted,
-                    failureMessage = "Couldn't save to gallery",
+                    failureMessage = shareCaptureCopy.saveFailedMessage,
                 ) {
-                    val outcome = capture.saveToGallery(displayName = model.displayName)
+                    when (val outcome = capture.saveToGallery(displayName = model.displayName)) {
+                        is SaveOutcome.Saved -> {
+                            succeed()
 
-                    val message = if (outcome is SaveOutcome.Saved) "Saved to gallery" else "Couldn't save to gallery"
+                            SnackBarManager.showSnackbar(title = shareCaptureCopy.savedMessage)
+                        }
 
-                    SnackBarManager.showSnackbar(title = message)
+                        is SaveOutcome.Cancelled -> Unit
+
+                        is SaveOutcome.Cached -> {
+                            SnackBarManager.showSnackbar(title = shareCaptureCopy.saveFailedMessage)
+
+                            fail()
+                        }
+
+                        is SaveOutcome.Failure -> {
+                            AppLog.e("Failed to save card: ${outcome.reason}")
+
+                            SnackBarManager.showSnackbar(title = shareCaptureCopy.saveFailedMessage)
+
+                            fail()
+                        }
+                    }
                 }
 
                 SheetScaffoldEvent.HeaderActionClicked -> Unit
@@ -126,9 +194,20 @@ fun ShareCardSheetContent(
                 capture = capture,
                 maxWidth = model.previewMaxWidth,
                 maxHeight = model.previewMaxHeight,
+                modifier = Modifier
+                    .shakeOnError(
+                        trigger = shaking,
+                        onShakeEnd = { shaking = false },
+                    )
+                    .graphicsLayer {
+                        scaleX = settleScale.value
+                        scaleY = settleScale.value
+                    },
             ) {
                 ShareCard(model = model.card)
             }
         }
     }
 }
+
+private const val SETTLE_SCALE = 0.97f

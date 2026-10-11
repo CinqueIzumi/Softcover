@@ -36,8 +36,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
+import nl.rhaydus.softcover.core.component.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -182,7 +182,10 @@ private fun Modifier.chipInteraction(
     interaction: ChipInteraction,
     onClick: () -> Unit,
 ): Modifier = when (interaction) {
-    ChipInteraction.Clickable -> pointerHandCursor().pressScaleClickable(onClick = onClick)
+    ChipInteraction.Clickable -> pointerHandCursor().pressScaleClickable(
+        onClick = onClick,
+        hoverShape = Corners.pill,
+    )
     ChipInteraction.Disabled -> alpha(DISABLED_ALPHA)
     ChipInteraction.Inert -> this
 }
@@ -304,7 +307,14 @@ private fun ChipIconSlot(
         modifier = Modifier
             .size(size)
             .let { base ->
-                if (onClick != null) base.pointerHandCursor().pressScaleClickable(onClick = onClick) else base
+                if (onClick != null) {
+                    base.pointerHandCursor().pressScaleClickable(
+                        onClick = onClick,
+                        hoverShape = Corners.pill,
+                    )
+                } else {
+                    base
+                }
             },
     )
 }

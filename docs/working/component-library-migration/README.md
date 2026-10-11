@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-26 (search chrome: barcode press scale, animated border and trailing slot, a `lifted` hairline from the visible body's scroll position, crossfading masthead Refresh label) is done and committed; the user checked it on device (the × now sits flush in the pill's end, unchecked since). #275 tracks S11 only at stage level, so sub-steps get no box there. F42 / S12-4 waits unchanged.
-- **Next:** S11-27 — desktop hover: read `steps/s11-contract-retrofit.md` § S11-27 first, then propose its shape (Phase 1).
+- **State:** S11-27 (app-local hover-aware `pressScaleClickable`, owned-source primitives wash on hover, cover cards lift, sidebar press scale and animated selection), S11-28 (app-local share capture: silent cancelled save, "Copied to clipboard", desktop labels) and S11-29 (commit + settle on success, shake on failure) are built together, approved app-local first (F45 new, F36 updated). Done, reviewed by the user and committed; desktop app launched for a check. #275 tracks S11 only at stage level. F42 / S12-4 waits unchanged.
+- **Next:** S11-30 — update callout crossfade: read § S11-30, propose its shape (Phase 1).
 - **Open questions:** none. `upsert_book` may share the `ListIdType.errors` schema mismatch.
-- **Verification:** JBR 21: `styleCheck` and the explore compile passed after the last Kotlin edit; reviewer clean after two fix rounds; no glommed closers. No tests (render-only).
+- **Verification:** JBR 21: `styleCheck`, `checkDocBudgets`, JVM / Android / iOS-sim compiles, `assembleDebug` and `DelegatingShareCardCaptureTest` (9, pass) passed after the last edit; reviewer clean after one fix round; no glommed closers.
 - **Uncommitted:** nothing.
 ## Local verification
 

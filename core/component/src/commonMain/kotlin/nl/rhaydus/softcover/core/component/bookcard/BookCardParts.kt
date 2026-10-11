@@ -32,6 +32,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -47,6 +48,7 @@ internal fun BookCardCoverLayout(
     cover: BookCardCover?,
     selection: BookCardSelection?,
     modifier: Modifier = Modifier,
+    lifted: Boolean = false,
 ) {
     val selected = selection?.selected == true
     val markSelected = selection?.markSelected
@@ -71,6 +73,10 @@ internal fun BookCardCoverLayout(
         targetValue = if (selected) 0.92f else 1f,
         animationSpec = motionScheme.defaultSpatialSpec(),
     )
+    val liftProgress by animateFloatAsState(
+        targetValue = if (lifted && playDecorativeMotion()) 1f else 0f,
+        animationSpec = motionScheme.defaultSpatialSpec(),
+    )
     val ringFraction by animateFloatAsState(
         targetValue = if (selected) 1f else 0f,
         animationSpec = motionScheme.slowEffectsSpec(),
@@ -81,6 +87,10 @@ internal fun BookCardCoverLayout(
             modifier = Modifier.graphicsLayer {
                 scaleX = coverScale
                 scaleY = coverScale
+                translationY = -3.dp.toPx() * liftProgress
+                shadowElevation = 12.dp.toPx() * liftProgress
+                this.shape = shape
+                clip = false
             },
         ) {
             Box(

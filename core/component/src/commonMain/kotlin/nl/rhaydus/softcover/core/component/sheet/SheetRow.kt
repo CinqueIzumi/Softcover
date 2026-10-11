@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.component.sheet
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +24,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.selection.SelectionCheck
@@ -37,6 +40,7 @@ internal fun <K> SheetRow(
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHaptics.current
+    val interactionSource = remember { MutableInteractionSource() }
 
     Column(modifier = modifier) {
         Divider()
@@ -45,8 +49,10 @@ internal fun <K> SheetRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .pointerHandCursor()
+                .hoverHighlight(interactionSource = interactionSource)
                 .selectable(
                     selected = model.selected,
+                    interactionSource = interactionSource,
                     role = Role.RadioButton,
                     onClick = {
                         if (model.selected.not()) {

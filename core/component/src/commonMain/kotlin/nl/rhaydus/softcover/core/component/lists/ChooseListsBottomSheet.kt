@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.conditional
+import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.chip.Chip
@@ -139,6 +140,7 @@ private fun ChooseListsRow(
                         Modifier
                             .pointerHandCursor()
                             .pressScale(interactionSource)
+                            .hoverHighlight(interactionSource = interactionSource)
                             .triStateToggleable(
                                 state = row.membership.toToggleableState(),
                                 interactionSource = interactionSource,

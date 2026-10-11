@@ -1,9 +1,12 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,8 +28,7 @@ import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScaleClickable
-import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
+import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -85,18 +87,22 @@ private fun BookCardCoverScaffold(
 ) {
     val progress = model.decorations.progress
     val isLoading = model.isLoading
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
 
     Column(
         modifier = modifier.bookCardInteraction(
             model = model,
             onEvent = onEvent,
-            hoverHighlight = false,
+            interactionSource = interactionSource,
+            hoverWash = false,
         ),
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             BookCardCoverLayout(
                 cover = cover,
                 selection = model.decorations.selection,
+                lifted = isHovered,
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -142,14 +148,19 @@ private fun BookCardCoverScaffold(
 }
 
 /**
+ * The caller hoists [interactionSource] to read the card's own press and hover; [hoverWash] additionally paints
+ * the hover highlight over the whole card.
+ *
  * [BookCardEvent.PressStarted] fires only for downs no child has consumed, so a tap on a trailing control,
  * menu or [content] never reads as a card press.
  */
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 internal fun Modifier.bookCardInteraction(
     model: BookCardUiModel,
     onEvent: (BookCardEvent) -> Unit,
-    hoverHighlight: Boolean,
+    interactionSource: MutableInteractionSource,
+    hoverWash: Boolean,
 ): Modifier {
     if (model.isLoading) return this
 
@@ -158,22 +169,23 @@ internal fun Modifier.bookCardInteraction(
     val latestOnEvent by rememberUpdatedState(newValue = onEvent)
     val interactive = decorations.pressBehaviour != BookCardDecorations.Press.None
     val selection = decorations.selection
-    val hoverSource = remember { MutableInteractionSource() }
 
-    val hover = if (hoverHighlight && interactive) {
-        Modifier
-            .hoverable(interactionSource = hoverSource)
-            .hoverHighlight(interactionSource = hoverSource)
+    val hover = if (hoverWash && interactive) {
+        Modifier.hoverHighlight(interactionSource = interactionSource)
     } else {
         Modifier
     }
 
     val press = when (decorations.pressBehaviour) {
-        BookCardDecorations.Press.Tap -> Modifier.pressScaleClickable(
+        BookCardDecorations.Press.Tap -> Modifier.clickable(
+            interactionSource = interactionSource,
+            indication = null,
             onClick = { latestOnEvent(BookCardEvent.Clicked(key = key)) },
         )
 
-        BookCardDecorations.Press.TapAndLongPress -> Modifier.pressScaleCombinedClickable(
+        BookCardDecorations.Press.TapAndLongPress -> Modifier.combinedClickable(
+            interactionSource = interactionSource,
+            indication = null,
             onClick = { latestOnEvent(BookCardEvent.Clicked(key = key)) },
             onLongClick = { latestOnEvent(BookCardEvent.LongClicked(key = key)) },
         )
@@ -199,6 +211,7 @@ internal fun Modifier.bookCardInteraction(
             trigger = decorations.shakeOnError,
             onShakeEnd = { latestOnEvent(BookCardEvent.ShakeEnded(key = key)) },
         )
+        .pressScale(interactionSource)
         .then(hover)
         .then(press)
         .then(pressStarted)

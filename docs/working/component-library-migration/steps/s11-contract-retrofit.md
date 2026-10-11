@@ -40,9 +40,9 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-24 | Progress-sheet page tab shakes on a past-the-end page | SL-15a | [x] |
 | S11-25 | Add-to-list: bookmark, chip and spinner animate; `select` fires | S11-6 | [x] |
 | S11-26 | Search chrome: press, border, slot crossfade, scroll lift, Refresh text | SL-15a | [x] |
-| S11-27 | Desktop hover on every clickable primitive; sidebar press scale | — | [ ] |
-| S11-28 | Desktop share and save say what happened | — | [ ] |
-| S11-29 | Share-card success and failure feedback | S11-6, S11-28 | [ ] |
+| S11-27 | Desktop hover on every clickable primitive; sidebar press scale | — | [x] |
+| S11-28 | Desktop share and save say what happened | — | [x] |
+| S11-29 | Share-card success and failure feedback | S11-6, S11-28 | [x] |
 | S11-30 | The update callout crossfades its call to action | S11-6 | [ ] |
 | S11-31 | The update download shows determinate progress | S11-30 | [ ] |
 | S11-32 | Tab switches take their specs from the motion scheme | SL-15a | [ ] |
@@ -121,6 +121,22 @@ S11-26 (render-only; no new public types, no tests):
 - `SearchTopBar(…, lifted: Boolean = false)` fades in a bottom `Divider` hairline, never a tint (the pill is already `surfaceContainer`).
 - Explore mobile owns the three body scroll states and derives `lifted` from the visible body's `canScrollBackward`; false offline and over the error / empty placeholders. The results state is saveable and keyed on the results list being shown.
 - `MastheadRefreshAction`: the label crossfades with a size ease.
+
+S11-27 (built app-local first; a new upstream candidate moves it into the foundation's modifiers):
+- `:core:component` `modifier/` `pressScaleClickable` / `pressScaleCombinedClickable`, same names and signatures as the foundation's, with hover built in (`hoverHighlight` on the clickable's own source, optional `hoverShape`); every caller swaps its import.
+- Primitives that own a source (Toggle, SegmentedControl, PreviewTile, SheetRow, ToggleRow, SettingsRow) pass it to `hoverHighlight` with their shape. Material `IconButton` / `RhaydusButton` keep their own hover layer.
+- Cover-variant `BookCard`: no wash; on hover the cover lifts (a small rise plus shadow). Row cards keep the wash.
+- `SidebarSection` rows: `pressScale` on the existing source; selected container and content colours animate from the motion scheme.
+- No new models; no tests (render-only).
+
+S11-28 (built app-local first; F36 moves it upstream):
+- `:core:component` `share/`: app-local `ShareCardCapture`, `SaveOutcome` (+ `Cancelled`), `ShareOutcome` (+ `CopiedToClipboard`) and `rememberShareCardCapture`, foundation names; Android / iOS actuals wrap the foundation capture, the JVM actual is a local copy of `JvmShareCardCapture` reporting cancel and clipboard.
+- `ShareCardSheetContent`: "Copied to clipboard" after a clipboard share; silence on a cancelled save.
+- Desktop wording through an `expect` in `share/`: "Save image…" / "Saved image" / "Copy image"; `withShareCapture` and the snackbars read it.
+
+S11-29 (render-only, local to `ShareCardSheetContent` beside the snackbars; no host change, no new events, no tests):
+- Success (saved, shared, copied): `haptics.commit()` and the preview settles (~0.97 and back on a spring).
+- Failure: `haptics.reject()` and `shakeOnError` on the preview.
 
 ## R10 edges
 

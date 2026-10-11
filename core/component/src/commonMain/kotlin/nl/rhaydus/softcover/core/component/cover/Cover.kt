@@ -320,7 +320,8 @@ fun rememberCoverImageRequest(model: CoverUiModel): ImageRequest? {
     }
 }
 
-internal fun CoverVariant.shape(): RoundedCornerShape = when (this) {
+/** The corner shape [Cover] clips this variant to; callers match a hover wash or ring to the visible cover. */
+fun CoverVariant.shape(): RoundedCornerShape = when (this) {
     CoverVariant.Shelf -> Corners.md
     CoverVariant.Rounded -> Corners.lg
     CoverVariant.Tile,

@@ -5,6 +5,7 @@ import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -41,6 +43,7 @@ internal fun BookCardRowLayout(
     val deadline = variant.deadline
     val typography = MaterialTheme.editorialTypography
     val motionScheme = MaterialTheme.motionScheme
+    val interactionSource = remember { MutableInteractionSource() }
 
     val leadWidth = when (variant.size) {
         BookCardVariant.Row.Size.Compact -> 40.dp
@@ -54,7 +57,8 @@ internal fun BookCardRowLayout(
             .bookCardInteraction(
                 model = model,
                 onEvent = onEvent,
-                hoverHighlight = true,
+                interactionSource = interactionSource,
+                hoverWash = true,
             ),
     ) {
         Divider(modifier = Modifier.skeletonMask(visible = isLoading))

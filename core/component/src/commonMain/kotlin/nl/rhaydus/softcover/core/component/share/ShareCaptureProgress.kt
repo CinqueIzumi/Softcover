@@ -22,11 +22,15 @@ fun SheetScaffoldUiModel.withShareCapture(
     copy(
         footer = SheetFooterUiModel.Inline(
             primary = SheetFooterButton(
-                label = if (progress == ShareCaptureProgress.Sharing) "Sharing…" else "Share",
+                label = if (progress == ShareCaptureProgress.Sharing) {
+                    shareCaptureCopy.sharingLabel
+                } else {
+                    shareCaptureCopy.shareLabel
+                },
                 running = progress == ShareCaptureProgress.Sharing,
             ),
             secondary = SheetFooterButton(
-                label = "Save to gallery",
+                label = shareCaptureCopy.saveLabel,
                 running = progress == ShareCaptureProgress.Saving,
             ),
         ),

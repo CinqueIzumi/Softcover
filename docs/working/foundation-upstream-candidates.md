@@ -241,12 +241,23 @@ Filed but not yet implemented in the foundation.
 
 - **Type:** bug
 - **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.share.JvmShareCardCapture`)
-- **Status:** **Open.** `saveToGallery` returns `SaveOutcome.Failure("Save cancelled")` when the save
-  dialog is cancelled, and `share` copies to the clipboard but returns a plain `ShareOutcome.Shared`.
-- **Impact in the app:** cancelling a desktop save shows an error, and Share gives no hint that the
-  image is now on the clipboard.
-- **What to build:** a `SaveOutcome.Cancelled`, and a share outcome that says the image went to the
-  clipboard, so the caller can confirm "Copied to clipboard".
+- **Status:** **Open — built locally first.** `saveToGallery` returns `SaveOutcome.Failure("Save cancelled")`
+  when the save dialog is cancelled, and `share` copies to the clipboard but returns a plain
+  `ShareOutcome.Shared`. Softcover's `:core:component` `share/` carries its own `ShareCardCapture`,
+  outcomes and `rememberShareCardCapture` (foundation names), wrapping the foundation on Android and iOS
+  and copying `JvmShareCardCapture` on desktop.
+- **What to build:** a `SaveOutcome.Cancelled`, and a `ShareOutcome.CopiedToClipboard`, so the caller can
+  confirm "Copied to clipboard"; release, swap Softcover's imports back and delete the local copy.
+
+### F45 — `pressScaleClickable` has no hover
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.modifier`)
+- **Status:** **Open — built locally first.** `pressScaleClickable` / `pressScaleCombinedClickable` remember
+  their interaction source internally, so `hoverHighlight` cannot share it. Softcover's `:core:component`
+  `modifier/` defines both under the same names with hover built in.
+- **What to build:** `hoverHighlight` on the internal source, with an optional `hoverShape`;
+  release, swap Softcover's imports back and delete the local copy.
 
 ### F37 — ktlint-rules has no unused-imports rule
 

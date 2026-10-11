@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.share.CapturableShareCard
-import nl.rhaydus.designsystem.share.ShareCardCapture
 import kotlin.math.roundToInt
 
 /**
@@ -36,7 +35,7 @@ fun ScaledShareCardPreview(
         contentAlignment = Alignment.Center,
     ) {
         CapturableShareCard(
-            capture = capture,
+            capture = capture.foundation,
             modifier = Modifier.layout { measurable, _ ->
                 val placeable = measurable.measure(constraints = Constraints())
 
