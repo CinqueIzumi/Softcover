@@ -26,6 +26,7 @@ import nl.rhaydus.softcover.core.database.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.core.database.model.EditionImageRef
 import nl.rhaydus.softcover.core.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.database.model.ListBookFull
+import nl.rhaydus.softcover.core.database.model.ListBookPositionRow
 import nl.rhaydus.softcover.core.database.model.ListSignatureRow
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
@@ -803,6 +804,37 @@ interface BookDao {
             setListBookPosition(
                 listBookId = listBookId,
                 position = startPosition + index,
+            )
+        }
+    }
+
+    @Query(
+        """
+        SELECT listBookId, position
+        FROM list_books
+        WHERE listId = :listId
+          AND (listBookId IN (:listBookIds) OR position IN (:positions))
+        """,
+    )
+    suspend fun getListBookPositions(
+        listId: Int,
+        listBookIds: List<Int>,
+        positions: List<Int>,
+    ): List<ListBookPositionRow>
+
+    @Query("UPDATE list_books SET position = :position WHERE listBookId = :listBookId")
+    suspend fun setListBookPositionOrNull(
+        listBookId: Int,
+        position: Int?,
+    )
+
+    /** Writes each snapshotted row's position back, including rows that had none. */
+    @Transaction
+    suspend fun restoreListBookPositions(rows: List<ListBookPositionRow>) {
+        rows.forEach { row ->
+            setListBookPositionOrNull(
+                listBookId = row.listBookId,
+                position = row.position,
             )
         }
     }

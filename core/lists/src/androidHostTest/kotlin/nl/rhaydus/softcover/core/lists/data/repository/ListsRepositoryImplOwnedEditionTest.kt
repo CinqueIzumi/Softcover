@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
+import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -363,14 +364,51 @@ class ListsRepositoryImplOwnedEditionTest {
         }
 
         @Test
-        fun `on failure enqueues REMOVE_LIST_BOOK with snapshot fields and rethrows`() = runTest {
+        fun `on a retryable failure returns normally, does not restore the entry and enqueues REMOVE_LIST_BOOK`() = runTest {
             // ----- Arrange -----
             val editionId = 10
             val snapshot = stubListBook(
                 listBookId = 5,
                 editionId = editionId,
             )
-            val remoteError = RuntimeException("network error")
+
+            coEvery {
+                listsLocalDataSource.findOwnedListBookByEditionId(editionId = editionId)
+            } returns snapshot
+
+            coEvery {
+                listsRemoteDataSource.removeListBook(book = snapshot)
+            } throws OfflineException()
+
+            val enqueuedWrites = mutableListOf<PendingListWrite>()
+
+            coJustRun {
+                listWriteQueue.enqueue(capture(enqueuedWrites))
+            }
+
+            // ----- Act -----
+            repository.removeOwnedEdition(editionId = editionId)
+
+            // ----- Assert -----
+            enqueuedWrites.size shouldBe 1
+            enqueuedWrites[0].kind shouldBe PendingListWriteKind.REMOVE_LIST_BOOK
+            enqueuedWrites[0].listBookId shouldBe snapshot.listBookId
+            enqueuedWrites[0].editionId shouldBe editionId
+
+            coVerify(exactly = 0) {
+                listsLocalDataSource.cacheListBook(book = any())
+            }
+        }
+
+        @Test
+        fun `on a rejected failure restores the snapshot, rethrows and does not enqueue`() = runTest {
+            // ----- Arrange -----
+            val editionId = 10
+            val snapshot = stubListBook(
+                listBookId = 5,
+                editionId = editionId,
+            )
+            val remoteError = RuntimeException("rejected")
 
             coEvery {
                 listsLocalDataSource.findOwnedListBookByEditionId(editionId = editionId)
@@ -380,25 +418,51 @@ class ListsRepositoryImplOwnedEditionTest {
                 listsRemoteDataSource.removeListBook(book = snapshot)
             } throws remoteError
 
-            val enqueuedWrites = mutableListOf<PendingListWrite>()
-
-            coJustRun {
-                listWriteQueue.enqueue(capture(enqueuedWrites))
-            }
-
             // ----- Act -----
             val caught = runCatching { repository.removeOwnedEdition(editionId = editionId) }
 
             // ----- Assert -----
             caught.exceptionOrNull() shouldBe remoteError
 
-            enqueuedWrites.size shouldBe 1
-            enqueuedWrites[0].kind shouldBe PendingListWriteKind.REMOVE_LIST_BOOK
-            enqueuedWrites[0].listBookId shouldBe snapshot.listBookId
-            enqueuedWrites[0].editionId shouldBe editionId
+            coVerify(exactly = 1) {
+                listsLocalDataSource.cacheListBook(book = snapshot)
+            }
 
             coVerify(exactly = 0) {
-                listsLocalDataSource.cacheListBook(book = any())
+                listWriteQueue.enqueue(payload = any())
+            }
+        }
+
+        @Test
+        fun `when enqueueing a retryable failure also fails, restores the snapshot and rethrows the queue error`() = runTest {
+            // ----- Arrange -----
+            val editionId = 10
+            val snapshot = stubListBook(
+                listBookId = 5,
+                editionId = editionId,
+            )
+            val queueError = IllegalStateException("queue full")
+
+            coEvery {
+                listsLocalDataSource.findOwnedListBookByEditionId(editionId = editionId)
+            } returns snapshot
+
+            coEvery {
+                listsRemoteDataSource.removeListBook(book = snapshot)
+            } throws OfflineException()
+
+            coEvery {
+                listWriteQueue.enqueue(payload = any())
+            } throws queueError
+
+            // ----- Act -----
+            val caught = runCatching { repository.removeOwnedEdition(editionId = editionId) }
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe queueError
+
+            coVerify(exactly = 1) {
+                listsLocalDataSource.cacheListBook(book = snapshot)
             }
         }
 

@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core.lists.data.datasource
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
@@ -11,6 +12,7 @@ import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.mapper.toModel
 import nl.rhaydus.softcover.core.database.model.BookListEntity
 import nl.rhaydus.softcover.core.database.model.BookListWithBooks
+import nl.rhaydus.softcover.core.database.model.ListBookPositionRow
 import nl.rhaydus.softcover.core.database.model.ListSignatureRow
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -120,6 +122,73 @@ class ListsLocalDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe mapOf(3 to null)
+        }
+    }
+
+    @Nested
+    inner class ListBookPositions {
+        @Test
+        fun `getAffectedListBookPositions asks for the ids and the consecutive position window and maps rows by id`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                dao.getListBookPositions(
+                    listId = 5,
+                    listBookIds = listOf(10, 20, 30),
+                    positions = listOf(2, 3, 4),
+                )
+            } returns listOf(
+                ListBookPositionRow(
+                    listBookId = 10,
+                    position = 4,
+                ),
+                ListBookPositionRow(
+                    listBookId = 99,
+                    position = null,
+                ),
+            )
+
+            // ----- Act -----
+            val result = dataSource.getAffectedListBookPositions(
+                listId = 5,
+                startPosition = 2,
+                orderedListBookIds = listOf(10, 20, 30),
+            )
+
+            // ----- Assert -----
+            result shouldBe mapOf(
+                10 to 4,
+                99 to null,
+            )
+        }
+
+        @Test
+        fun `restoreListBookPositions hands every entry to the dao, keeping null positions`() = runTest {
+            // ----- Arrange -----
+            // dao is relaxed.
+
+            // ----- Act -----
+            dataSource.restoreListBookPositions(
+                positions = mapOf(
+                    10 to 4,
+                    20 to null,
+                ),
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                dao.restoreListBookPositions(
+                    rows = listOf(
+                        ListBookPositionRow(
+                            listBookId = 10,
+                            position = 4,
+                        ),
+                        ListBookPositionRow(
+                            listBookId = 20,
+                            position = null,
+                        ),
+                    ),
+                )
+            }
         }
     }
 }

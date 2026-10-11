@@ -10,6 +10,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.exception.OfflineException
+import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
@@ -235,7 +237,7 @@ class OnSubmitActionTest {
                     name = "Summer",
                     privacy = any(),
                 )
-            } throws RuntimeException("API error")
+            } throws UnexpectedApiException("API error")
 
             // ----- Act -----
             OnSubmitAction().execute(
@@ -244,9 +246,63 @@ class OnSubmitActionTest {
             )
 
             // ----- Assert -----
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<CreateListEvent.ListCreationFailedEvent>()
+            val event = eventChannel.tryReceive().getOrNull()
+
+            event.shouldBeInstanceOf<CreateListEvent.ListCreationFailedEvent>()
+            event.message shouldBe "Something went wrong. Please try again."
             stateFlow.value.isSubmitting shouldBe false
             stateFlow.value.nameField.enabled shouldBe true
+        }
+
+        @Test
+        fun `carries the offline message in ListCreationFailedEvent when the failure is retryable`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState().withName(newName = "Summer")
+
+            coEvery {
+                createListUseCase(
+                    name = "Summer",
+                    privacy = any(),
+                )
+            } throws OfflineException()
+
+            // ----- Act -----
+            OnSubmitAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+
+            event.shouldBeInstanceOf<CreateListEvent.ListCreationFailedEvent>()
+            event.message shouldBe "You're offline. Check your connection and try again."
+            stateFlow.value.isSubmitting shouldBe false
+        }
+
+        @Test
+        fun `carries a null message in ListCreationFailedEvent when the failure has no user copy`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState().withName(newName = "Summer")
+
+            coEvery {
+                createListUseCase(
+                    name = "Summer",
+                    privacy = any(),
+                )
+            } throws RuntimeException("bug")
+
+            // ----- Act -----
+            OnSubmitAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+
+            event.shouldBeInstanceOf<CreateListEvent.ListCreationFailedEvent>()
+            event.message shouldBe null
         }
     }
 }

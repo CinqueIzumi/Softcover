@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
+import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -158,7 +159,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
         }
 
         @Test
-        fun `on remote failure enqueues ADD_LIST_BOOK, rethrows and keeps the optimistic entry`() = runTest {
+        fun `on a retryable failure returns normally, keeps the optimistic entry and enqueues ADD_LIST_BOOK`() = runTest {
             // ----- Arrange -----
             val listId = 5
             val bookId = 3
@@ -167,7 +168,6 @@ class ListsRepositoryImplAddRemoveListBookTest {
                 id = editionId,
                 bookId = bookId,
             )
-            val remoteError = RuntimeException("network error")
 
             coEvery {
                 listsRemoteDataSource.addBookToList(
@@ -175,7 +175,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
                     bookId = bookId,
                     editionId = editionId,
                 )
-            } throws remoteError
+            } throws OfflineException()
 
             val slot = mutableListOf<PendingListWrite>()
 
@@ -184,17 +184,13 @@ class ListsRepositoryImplAddRemoveListBookTest {
             }
 
             // ----- Act -----
-            val thrown = shouldThrow<RuntimeException> {
-                repository.addBookToList(
-                    listId = listId,
-                    bookId = bookId,
-                    edition = edition,
-                )
-            }
+            repository.addBookToList(
+                listId = listId,
+                bookId = bookId,
+                edition = edition,
+            )
 
             // ----- Assert -----
-            thrown shouldBe remoteError
-
             coVerify(exactly = 1) {
                 listWriteQueue.enqueue(payload = any())
             }
@@ -210,6 +206,94 @@ class ListsRepositoryImplAddRemoveListBookTest {
                 listsLocalDataSource.removeOptimisticListBook(
                     listId = any(),
                     bookId = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `on a rejected failure rolls back the optimistic entry, rethrows and does not enqueue`() = runTest {
+            // ----- Arrange -----
+            val listId = 5
+            val bookId = 3
+            val editionId = 10
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
+            val remoteError = RuntimeException("rejected")
+
+            coEvery {
+                listsRemoteDataSource.addBookToList(
+                    listId = listId,
+                    bookId = bookId,
+                    editionId = editionId,
+                )
+            } throws remoteError
+
+            // ----- Act -----
+            val thrown = shouldThrow<RuntimeException> {
+                repository.addBookToList(
+                    listId = listId,
+                    bookId = bookId,
+                    edition = edition,
+                )
+            }
+
+            // ----- Assert -----
+            thrown shouldBe remoteError
+
+            coVerify(exactly = 1) {
+                listsLocalDataSource.removeOptimisticListBook(
+                    listId = listId,
+                    bookId = bookId,
+                )
+            }
+
+            coVerify(exactly = 0) {
+                listWriteQueue.enqueue(payload = any())
+            }
+        }
+
+        @Test
+        fun `when enqueueing a retryable failure also fails, rolls back and rethrows the queue error`() = runTest {
+            // ----- Arrange -----
+            val listId = 5
+            val bookId = 3
+            val editionId = 10
+            val edition = stubEdition(
+                id = editionId,
+                bookId = bookId,
+            )
+            val queueError = IllegalStateException("queue full")
+
+            coEvery {
+                listsRemoteDataSource.addBookToList(
+                    listId = listId,
+                    bookId = bookId,
+                    editionId = editionId,
+                )
+            } throws OfflineException()
+
+            coEvery {
+                listWriteQueue.enqueue(payload = any())
+            } throws queueError
+
+            // ----- Act -----
+            val thrown = shouldThrow<IllegalStateException> {
+                repository.addBookToList(
+                    listId = listId,
+                    bookId = bookId,
+                    edition = edition,
+                )
+            }
+
+            // ----- Assert -----
+            thrown shouldBe queueError
+
+            coVerify(exactly = 1) {
+                listsLocalDataSource.removeOptimisticListBook(
+                    listId = listId,
+                    bookId = bookId,
                 )
             }
         }
@@ -322,7 +406,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
         }
 
         @Test
-        fun `on remote failure enqueues REMOVE_LIST_BOOK with snapshot fields, rethrows and does not restore the entry`() = runTest {
+        fun `on a retryable failure returns normally, does not restore the entry and enqueues REMOVE_LIST_BOOK`() = runTest {
             // ----- Arrange -----
             val listId = 5
             val bookId = 3
@@ -334,7 +418,6 @@ class ListsRepositoryImplAddRemoveListBookTest {
                 bookId = bookId,
                 editionId = editionId,
             )
-            val remoteError = RuntimeException("network error")
 
             coEvery {
                 listsLocalDataSource.findListBookByListAndBook(
@@ -345,7 +428,7 @@ class ListsRepositoryImplAddRemoveListBookTest {
 
             coEvery {
                 listsRemoteDataSource.removeListBook(book = snapshot)
-            } throws remoteError
+            } throws OfflineException()
 
             val slot = mutableListOf<PendingListWrite>()
 
@@ -354,16 +437,12 @@ class ListsRepositoryImplAddRemoveListBookTest {
             }
 
             // ----- Act -----
-            val thrown = shouldThrow<RuntimeException> {
-                repository.removeBookFromList(
-                    listId = listId,
-                    bookId = bookId,
-                )
-            }
+            repository.removeBookFromList(
+                listId = listId,
+                bookId = bookId,
+            )
 
             // ----- Assert -----
-            thrown shouldBe remoteError
-
             coVerify(exactly = 1) {
                 listWriteQueue.enqueue(payload = any())
             }
@@ -378,6 +457,92 @@ class ListsRepositoryImplAddRemoveListBookTest {
 
             coVerify(exactly = 0) {
                 listsLocalDataSource.cacheListBook(book = any())
+            }
+        }
+
+        @Test
+        fun `on a rejected failure restores the snapshot, rethrows and does not enqueue`() = runTest {
+            // ----- Arrange -----
+            val listId = 5
+            val bookId = 3
+            val snapshot = stubListBook(
+                listBookId = 42,
+                listId = listId,
+                bookId = bookId,
+            )
+            val remoteError = RuntimeException("rejected")
+
+            coEvery {
+                listsLocalDataSource.findListBookByListAndBook(
+                    listId = listId,
+                    bookId = bookId,
+                )
+            } returns snapshot
+
+            coEvery {
+                listsRemoteDataSource.removeListBook(book = snapshot)
+            } throws remoteError
+
+            // ----- Act -----
+            val thrown = shouldThrow<RuntimeException> {
+                repository.removeBookFromList(
+                    listId = listId,
+                    bookId = bookId,
+                )
+            }
+
+            // ----- Assert -----
+            thrown shouldBe remoteError
+
+            coVerify(exactly = 1) {
+                listsLocalDataSource.cacheListBook(book = snapshot)
+            }
+
+            coVerify(exactly = 0) {
+                listWriteQueue.enqueue(payload = any())
+            }
+        }
+
+        @Test
+        fun `when enqueueing a retryable failure also fails, restores the snapshot and rethrows the queue error`() = runTest {
+            // ----- Arrange -----
+            val listId = 5
+            val bookId = 3
+            val snapshot = stubListBook(
+                listBookId = 42,
+                listId = listId,
+                bookId = bookId,
+            )
+            val queueError = IllegalStateException("queue full")
+
+            coEvery {
+                listsLocalDataSource.findListBookByListAndBook(
+                    listId = listId,
+                    bookId = bookId,
+                )
+            } returns snapshot
+
+            coEvery {
+                listsRemoteDataSource.removeListBook(book = snapshot)
+            } throws OfflineException()
+
+            coEvery {
+                listWriteQueue.enqueue(payload = any())
+            } throws queueError
+
+            // ----- Act -----
+            val thrown = shouldThrow<IllegalStateException> {
+                repository.removeBookFromList(
+                    listId = listId,
+                    bookId = bookId,
+                )
+            }
+
+            // ----- Assert -----
+            thrown shouldBe queueError
+
+            coVerify(exactly = 1) {
+                listsLocalDataSource.cacheListBook(book = snapshot)
             }
         }
 

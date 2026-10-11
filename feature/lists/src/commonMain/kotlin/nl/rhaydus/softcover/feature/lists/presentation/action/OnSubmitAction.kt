@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.lists.presentation.action
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.component.field.TextFieldError
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
+import nl.rhaydus.softcover.core.presentation.error.toUserMessage
 import nl.rhaydus.softcover.feature.lists.presentation.event.CreateListEvent
 import nl.rhaydus.softcover.feature.lists.presentation.screenmodel.CreateListDependencies
 import nl.rhaydus.softcover.feature.lists.presentation.state.CreateListUiState
@@ -55,7 +56,9 @@ internal class OnSubmitAction : CreateListAction {
                     )
                 }
             } else {
-                scope.sendEvent(event = CreateListEvent.ListCreationFailedEvent())
+                scope.sendEvent(
+                    event = CreateListEvent.ListCreationFailedEvent(message = error.toUserMessage()),
+                )
             }
         }
     }

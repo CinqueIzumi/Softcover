@@ -12,8 +12,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
-import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
-import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
+import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
@@ -88,20 +87,41 @@ class ListsRepositoryImplCreateListTest {
         }
 
         @Test
-        fun `on generic remote failure enqueues CREATE_LIST with listName and rethrows`() = runTest {
+        fun `on a retryable failure rethrows without enqueuing or caching`() = runTest {
             // ----- Arrange -----
             val name = "Retry Me"
-            val error = RuntimeException("network error")
+            val error = OfflineException()
 
             coEvery {
                 listsRemoteDataSource.createList(name = name)
             } throws error
 
-            val slot = mutableListOf<PendingListWrite>()
-
-            coJustRun {
-                listWriteQueue.enqueue(capture(slot))
+            // ----- Act -----
+            val thrown = shouldThrow<OfflineException> {
+                repository.createList(name = name)
             }
+
+            // ----- Assert -----
+            thrown shouldBe error
+
+            coVerify(exactly = 0) {
+                listWriteQueue.enqueue(payload = any())
+            }
+
+            coVerify(exactly = 0) {
+                listsLocalDataSource.cacheUserBookLists(lists = any())
+            }
+        }
+
+        @Test
+        fun `on a rejected failure rethrows without enqueuing or caching`() = runTest {
+            // ----- Arrange -----
+            val name = "Rejected"
+            val error = RuntimeException("rejected")
+
+            coEvery {
+                listsRemoteDataSource.createList(name = name)
+            } throws error
 
             // ----- Act -----
             val thrown = shouldThrow<RuntimeException> {
@@ -111,14 +131,9 @@ class ListsRepositoryImplCreateListTest {
             // ----- Assert -----
             thrown shouldBe error
 
-            coVerify(exactly = 1) {
+            coVerify(exactly = 0) {
                 listWriteQueue.enqueue(payload = any())
             }
-
-            val enqueued = slot.first()
-
-            enqueued.kind shouldBe PendingListWriteKind.CREATE_LIST
-            enqueued.listName shouldBe name
 
             coVerify(exactly = 0) {
                 listsLocalDataSource.cacheUserBookLists(lists = any())

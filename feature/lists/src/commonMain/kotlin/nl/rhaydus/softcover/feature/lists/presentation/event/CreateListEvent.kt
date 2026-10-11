@@ -8,5 +8,7 @@ internal sealed interface CreateListEvent : UiEvent {
         val name: String,
     ) : CreateListEvent
 
-    class ListCreationFailedEvent : CreateListEvent
+    data class ListCreationFailedEvent(
+        val message: String?,
+    ) : CreateListEvent
 }

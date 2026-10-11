@@ -14,12 +14,14 @@ import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
+import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.coroutines.cancellation.CancellationException
 
 class ListsRepositoryImplReorderTest {
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
@@ -127,12 +129,22 @@ class ListsRepositoryImplReorderTest {
         }
 
         @Test
-        fun `on remote failure local positions are not rolled back and REORDER_LIST_BOOKS is enqueued`() = runTest {
+        fun `on a retryable failure returns normally, keeps the local order and enqueues REORDER_LIST_BOOKS`() = runTest {
             // ----- Arrange -----
             val listId = 5
             val startPosition = 2
             val orderedIds = listOf(10, 20, 30)
-            val remoteError = RuntimeException("network failure")
+
+            coEvery {
+                listsLocalDataSource.getAffectedListBookPositions(
+                    listId = any(),
+                    startPosition = any(),
+                    orderedListBookIds = any(),
+                )
+            } returns mapOf(
+                10 to 4,
+                20 to null,
+            )
 
             coEvery {
                 listsRemoteDataSource.updateListBookPositions(
@@ -140,7 +152,7 @@ class ListsRepositoryImplReorderTest {
                     startPosition = any(),
                     orderedListBookIds = any(),
                 )
-            } throws remoteError
+            } throws OfflineException()
 
             val slot = mutableListOf<PendingListWrite>()
 
@@ -149,23 +161,23 @@ class ListsRepositoryImplReorderTest {
             }
 
             // ----- Act -----
-            val thrown = shouldThrow<RuntimeException> {
-                repository.reorderListBooks(
-                    listId = listId,
-                    startPosition = startPosition,
-                    orderedListBookIds = orderedIds,
-                )
-            }
+            repository.reorderListBooks(
+                listId = listId,
+                startPosition = startPosition,
+                orderedListBookIds = orderedIds,
+            )
 
             // ----- Assert -----
-            thrown shouldBe remoteError
-
             coVerify(exactly = 1) {
                 listsLocalDataSource.applyListBookPositions(
                     listId = listId,
                     startPosition = startPosition,
                     orderedListBookIds = orderedIds,
                 )
+            }
+
+            coVerify(exactly = 0) {
+                listsLocalDataSource.restoreListBookPositions(positions = any())
             }
 
             coVerify(exactly = 1) {
@@ -178,6 +190,146 @@ class ListsRepositoryImplReorderTest {
             enqueued.listId shouldBe listId
             enqueued.startPosition shouldBe startPosition
             enqueued.orderedListBookIds shouldBe orderedIds
+        }
+
+        @Test
+        fun `on a rejected failure rethrows and does not enqueue`() = runTest {
+            // ----- Arrange -----
+            val remoteError = RuntimeException("rejected")
+
+            coEvery {
+                listsLocalDataSource.getAffectedListBookPositions(
+                    listId = any(),
+                    startPosition = any(),
+                    orderedListBookIds = any(),
+                )
+            } returns mapOf(
+                10 to 4,
+                20 to null,
+            )
+
+            coEvery {
+                listsRemoteDataSource.updateListBookPositions(
+                    listId = any(),
+                    startPosition = any(),
+                    orderedListBookIds = any(),
+                )
+            } throws remoteError
+
+            // ----- Act -----
+            val thrown = shouldThrow<RuntimeException> {
+                repository.reorderListBooks(
+                    listId = 5,
+                    startPosition = 2,
+                    orderedListBookIds = listOf(10, 20, 30),
+                )
+            }
+
+            // ----- Assert -----
+            thrown shouldBe remoteError
+
+            coVerify(exactly = 1) {
+                listsLocalDataSource.restoreListBookPositions(
+                    positions = mapOf(
+                        10 to 4,
+                        20 to null,
+                    ),
+                )
+            }
+
+            coVerify(exactly = 0) {
+                listWriteQueue.enqueue(payload = any())
+            }
+        }
+
+        @Test
+        fun `cancellation — rethrows CancellationException without enqueuing`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                listsLocalDataSource.getAffectedListBookPositions(
+                    listId = any(),
+                    startPosition = any(),
+                    orderedListBookIds = any(),
+                )
+            } returns mapOf(
+                10 to 4,
+                20 to null,
+            )
+
+            coEvery {
+                listsRemoteDataSource.updateListBookPositions(
+                    listId = any(),
+                    startPosition = any(),
+                    orderedListBookIds = any(),
+                )
+            } throws CancellationException("cancelled")
+
+            // ----- Act & Assert -----
+            shouldThrow<CancellationException> {
+                repository.reorderListBooks(
+                    listId = 5,
+                    startPosition = 2,
+                    orderedListBookIds = listOf(10, 20, 30),
+                )
+            }
+
+            coVerify(exactly = 0) {
+                listsLocalDataSource.restoreListBookPositions(positions = any())
+            }
+
+            coVerify(exactly = 0) {
+                listWriteQueue.enqueue(payload = any())
+            }
+        }
+
+        @Test
+        fun `when enqueueing a retryable failure also fails, restores the snapshotted positions and rethrows the queue error`() = runTest {
+            // ----- Arrange -----
+            val queueError = IllegalStateException("queue full")
+
+            coEvery {
+                listsLocalDataSource.getAffectedListBookPositions(
+                    listId = any(),
+                    startPosition = any(),
+                    orderedListBookIds = any(),
+                )
+            } returns mapOf(
+                10 to 4,
+                20 to null,
+            )
+
+            coEvery {
+                listsRemoteDataSource.updateListBookPositions(
+                    listId = any(),
+                    startPosition = any(),
+                    orderedListBookIds = any(),
+                )
+            } throws OfflineException()
+
+            coEvery {
+                listWriteQueue.enqueue(payload = any())
+            } throws queueError
+
+            // ----- Act -----
+            val thrown = shouldThrow<IllegalStateException> {
+                repository.reorderListBooks(
+                    listId = 5,
+                    startPosition = 2,
+                    orderedListBookIds = listOf(10, 20, 30),
+                )
+            }
+
+            // ----- Assert -----
+            thrown shouldBe queueError
+
+            coVerify(exactly = 1) {
+                listsLocalDataSource.restoreListBookPositions(
+                    positions = mapOf(
+                        10 to 4,
+                        20 to null,
+                    ),
+                )
+            }
         }
     }
 }

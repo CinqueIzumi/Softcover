@@ -65,7 +65,7 @@ internal class CreateListScreen(
                         haptics.reject()
 
                         SnackBarManager.showSnackbar(
-                            title = "Could not create list. Try again.",
+                            title = event.message ?: "Could not create list. Try again.",
                         )
                     }
                 }
