@@ -35,6 +35,7 @@ internal class ChooseListsCollector : BookDetailCollector {
                         bookTitle = book.title,
                         cover = book.toCoverUiModel(variant = CoverVariant.Jacket),
                         listsBeingMutated = snapshot.listsBeingMutated,
+                        previous = scope.currentState.chooseListsSheet,
                     )
                 } else {
                     null

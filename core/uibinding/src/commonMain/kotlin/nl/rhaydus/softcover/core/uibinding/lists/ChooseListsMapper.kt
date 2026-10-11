@@ -36,10 +36,12 @@ fun List<BookList>.toChooseListsUiModel(
     bookTitle: String,
     cover: CoverUiModel,
     listsBeingMutated: Set<Int>,
+    previous: ChooseListsUiModel?,
 ): ChooseListsUiModel = ChooseListsUiModel(
     rows = rowsFor(
         bookIds = setOf(bookId),
         listsBeingMutated = listsBeingMutated,
+        previous = previous,
         isBulk = false,
     ),
     scaffold = chooseListsScaffold(
@@ -62,6 +64,7 @@ fun List<BookList>.toBulkChooseListsUiModel(
     bookIds: Set<Int>,
     covers: List<CoverUiModel>,
     listsBeingMutated: Set<Int>,
+    previous: ChooseListsUiModel?,
 ): ChooseListsUiModel {
     val name = if (bookIds.size == 1) "1 book" else "${bookIds.size} books"
     val takesOff = if (bookIds.size == 1) "it" else "all ${bookIds.size}"
@@ -71,6 +74,7 @@ fun List<BookList>.toBulkChooseListsUiModel(
         rows = rowsFor(
             bookIds = bookIds,
             listsBeingMutated = listsBeingMutated,
+            previous = previous,
             isBulk = true,
         ),
         scaffold = chooseListsScaffold(
@@ -120,20 +124,43 @@ private fun chooseListsScaffold(
 private fun List<BookList>.rowsFor(
     bookIds: Set<Int>,
     listsBeingMutated: Set<Int>,
+    previous: ChooseListsUiModel?,
     isBulk: Boolean,
-): ImmutableList<ChooseListsRowUiModel> = filter { it.isOwned.not() }.map { list ->
+): ImmutableList<ChooseListsRowUiModel> {
+    val previousRows = previous?.rows?.associateBy { it.listId }
+
+    return filter { it.isOwned.not() }.map { list ->
+        // A bulk toggle writes book by book, so the data passes through half-written states; the row keeps
+        // what it showed at the tap until the write finishes.
+        val heldRow = if (list.id in listsBeingMutated) previousRows?.get(list.id) else null
+
+        heldRow?.copy(isPending = true) ?: rowFor(
+            list = list,
+            bookIds = bookIds,
+            listsBeingMutated = listsBeingMutated,
+            isBulk = isBulk,
+        )
+    }.toImmutableList()
+}
+
+private fun rowFor(
+    list: BookList,
+    bookIds: Set<Int>,
+    listsBeingMutated: Set<Int>,
+    isBulk: Boolean,
+): ChooseListsRowUiModel {
     val listBookIds = list.books.mapTo(mutableSetOf()) { it.bookId }
     val matchingCount = bookIds.count { it in listBookIds }
 
     // Order matters: an empty selection has `matchingCount == bookIds.size == 0`, so the `ALL` arm
-    // would claim it if it came first. The pre-migration helper guarded this with an early return.
+    // would claim it if it came first.
     val membership = when {
         matchingCount == 0 -> ListMembership.NONE
         matchingCount == bookIds.size -> ListMembership.ALL
         else -> ListMembership.PARTIAL
     }
 
-    ChooseListsRowUiModel(
+    return ChooseListsRowUiModel(
         listId = list.id,
         name = list.name,
         caption = captionFor(
@@ -156,7 +183,7 @@ private fun List<BookList>.rowsFor(
         membership = membership,
         isPending = list.id in listsBeingMutated,
     )
-}.toImmutableList()
+}
 
 /** The chip's look is a function of membership alone; it is decorative, so the row's toggle announces state. */
 private fun membershipChipFor(

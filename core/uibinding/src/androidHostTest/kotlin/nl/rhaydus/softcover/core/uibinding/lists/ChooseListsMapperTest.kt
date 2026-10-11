@@ -73,6 +73,7 @@ class ChooseListsMapperTest {
                 bookTitle = "Piranesi",
                 cover = cover,
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -100,6 +101,7 @@ class ChooseListsMapperTest {
                 bookTitle = "Piranesi",
                 cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -122,6 +124,7 @@ class ChooseListsMapperTest {
                 bookTitle = "Piranesi",
                 cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -144,6 +147,7 @@ class ChooseListsMapperTest {
                 bookTitle = "Piranesi",
                 cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -168,6 +172,7 @@ class ChooseListsMapperTest {
                 bookIds = setOf(1, 2, 3),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -189,6 +194,7 @@ class ChooseListsMapperTest {
                 bookIds = setOf(1, 2, 3),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -210,6 +216,7 @@ class ChooseListsMapperTest {
                 bookIds = setOf(1, 2, 3),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -234,6 +241,7 @@ class ChooseListsMapperTest {
                 bookIds = setOf(0, 1, 2, 3, 4),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -255,6 +263,7 @@ class ChooseListsMapperTest {
                 bookIds = setOf(0, 1, 2, 3, 4),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -276,6 +285,7 @@ class ChooseListsMapperTest {
                 bookIds = setOf(0, 1, 2, 3, 4),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -300,6 +310,7 @@ class ChooseListsMapperTest {
                 bookIds = setOf(0, 1, 2, 3, 4),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -321,6 +332,7 @@ class ChooseListsMapperTest {
                 bookIds = setOf(0, 1, 2, 3, 4),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -342,6 +354,7 @@ class ChooseListsMapperTest {
                 bookIds = setOf(0, 1, 2, 3, 4),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -370,6 +383,7 @@ class ChooseListsMapperTest {
                 bookIds = emptySet(),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -395,6 +409,7 @@ class ChooseListsMapperTest {
                 bookIds = setOf(1),
                 covers = covers,
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -420,6 +435,7 @@ class ChooseListsMapperTest {
                 bookIds = setOf(1),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -441,6 +457,7 @@ class ChooseListsMapperTest {
                 bookIds = setOf(1, 2),
                 covers = covers,
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -460,6 +477,7 @@ class ChooseListsMapperTest {
                 bookIds = bookIds,
                 covers = covers,
                 listsBeingMutated = listsBeingMutated,
+                previous = null,
             )
 
             // ----- Assert -----
@@ -478,6 +496,7 @@ class ChooseListsMapperTest {
                 bookIds = (1..count).toSet(),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             return result.scaffold.header.section.description
@@ -497,6 +516,7 @@ class ChooseListsMapperTest {
                 bookIds = bookIds,
                 covers = covers,
                 listsBeingMutated = listsBeingMutated,
+                previous = null,
             )
 
             // ----- Assert -----
@@ -519,6 +539,7 @@ class ChooseListsMapperTest {
                 bookIds = (1..selectedCount).toSet(),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             ).rows.single().chip.label
         }
 
@@ -594,6 +615,7 @@ class ChooseListsMapperTest {
                 bookTitle = "Piranesi",
                 cover = coverUiModel(),
                 listsBeingMutated = setOf(2),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -602,6 +624,154 @@ class ChooseListsMapperTest {
                 2 to true,
                 3 to false,
             )
+        }
+
+        @Test
+        fun `a pending list keeps its previous single-book row even though the data has since changed`() {
+            // ----- Arrange -----
+            val before = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = emptyList(),
+                ),
+            ).toChooseListsUiModel(
+                bookId = 42,
+                bookTitle = "Piranesi",
+                cover = coverUiModel(),
+                listsBeingMutated = emptySet(),
+                previous = null,
+            )
+            val after = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(42, 43),
+                ),
+            )
+
+            // ----- Act -----
+            val result = after.toChooseListsUiModel(
+                bookId = 42,
+                bookTitle = "Piranesi",
+                cover = coverUiModel(),
+                listsBeingMutated = setOf(1),
+                previous = before,
+            )
+
+            // ----- Assert -----
+            result.rows.single() shouldBe before.rows.single().copy(isPending = true)
+            result.rows.single().membership shouldBe ListMembership.NONE
+        }
+
+        @Test
+        fun `a pending bulk list keeps its previous row while the write is half done`() {
+            // ----- Arrange -----
+            val before = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = emptyList(),
+                ),
+            ).toBulkChooseListsUiModel(
+                bookIds = setOf(1, 2),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+                previous = null,
+            )
+            val halfWritten = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(1),
+                ),
+            )
+
+            // ----- Act -----
+            val result = halfWritten.toBulkChooseListsUiModel(
+                bookIds = setOf(1, 2),
+                covers = emptyList(),
+                listsBeingMutated = setOf(1),
+                previous = before,
+            )
+
+            // ----- Assert -----
+            result.rows.single() shouldBe before.rows.single().copy(isPending = true)
+            result.rows.single().membership shouldBe ListMembership.NONE
+            result.rows.single().caption shouldContain "NONE YET"
+        }
+
+        @Test
+        fun `a pending list with no previous row is mapped fresh from the data`() {
+            // ----- Arrange -----
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(42),
+                ),
+                bookList(
+                    id = 2,
+                    bookIds = emptyList(),
+                ),
+            )
+            val previous = listOf(
+                bookList(
+                    id = 2,
+                    bookIds = emptyList(),
+                ),
+            ).toChooseListsUiModel(
+                bookId = 42,
+                bookTitle = "Piranesi",
+                cover = coverUiModel(),
+                listsBeingMutated = emptySet(),
+                previous = null,
+            )
+
+            // ----- Act -----
+            val result = lists.toChooseListsUiModel(
+                bookId = 42,
+                bookTitle = "Piranesi",
+                cover = coverUiModel(),
+                listsBeingMutated = setOf(1),
+                previous = previous,
+            )
+
+            // ----- Assert -----
+            val fresh = result.rows.first { it.listId == 1 }
+            fresh.isPending shouldBe true
+            fresh.membership shouldBe ListMembership.ALL
+        }
+
+        @Test
+        fun `a list that is no longer pending ignores the previous row and shows its final state`() {
+            // ----- Arrange -----
+            val before = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = emptyList(),
+                ),
+            ).toChooseListsUiModel(
+                bookId = 42,
+                bookTitle = "Piranesi",
+                cover = coverUiModel(),
+                listsBeingMutated = setOf(1),
+                previous = null,
+            )
+            val finished = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(42),
+                ),
+            )
+
+            // ----- Act -----
+            val result = finished.toChooseListsUiModel(
+                bookId = 42,
+                bookTitle = "Piranesi",
+                cover = coverUiModel(),
+                listsBeingMutated = emptySet(),
+                previous = before,
+            )
+
+            // ----- Assert -----
+            result.rows.single().isPending shouldBe false
+            result.rows.single().membership shouldBe ListMembership.ALL
         }
     }
 
@@ -631,6 +801,7 @@ class ChooseListsMapperTest {
                 bookTitle = "Piranesi",
                 cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -648,6 +819,7 @@ class ChooseListsMapperTest {
                 bookTitle = "Piranesi",
                 cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -677,6 +849,7 @@ class ChooseListsMapperTest {
                 bookTitle = "Piranesi",
                 cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -702,6 +875,7 @@ class ChooseListsMapperTest {
                 bookTitle = "Piranesi",
                 cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
+                previous = null,
             )
 
             // ----- Assert -----
@@ -724,6 +898,7 @@ class ChooseListsMapperTest {
             bookIds = selection,
             covers = emptyList(),
             listsBeingMutated = emptySet(),
+            previous = null,
         ).rows.single().chip
 
         @Test

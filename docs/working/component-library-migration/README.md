@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-24 (page and percentage tabs shake on a past-the-end number instead of clamping; tab crossfade dropped, the tabs share one layout) is done and committed. #275 tracks S11 only at stage level, so sub-steps get no box there. F42 / S12-4 waits unchanged.
-- **Next:** S11-25 — add to list: bookmark pops, chip and spinner crossfade, `select` fires; read `steps/s11-contract-retrofit.md` § S11-25 first, then propose its shape (Phase 1).
+- **State:** S11-25 (add-to-list rows: the bookmark pops when it fills, chip and spinner crossfade; a pending row holds its tap-time row via the mapper's `previous`, so Library's book-by-book bulk write shows no half states; `animateContentSize` dropped; `select` already fired from both hosts' result events, so the sheet adds no haptic) is built, tested, reviewed and checked on the emulator, not committed. #275 tracks S11 only at stage level, so sub-steps get no box there. F42 / S12-4 waits unchanged.
+- **Next:** commit S11-25 once the user approves (toggle actions wait for list data, bounded, cleared in `finally`; one `AnimatedContent` trailing slot; all built, tested, reviewed, recorded). Then S11-26 — search chrome: read `steps/s11-contract-retrofit.md` § S11-26 first, then propose its shape (Phase 1).
 - **Open questions:** none. `upsert_book` may share the `ListIdType.errors` schema mismatch.
-- **Verification:** JBR 21: `:core:component` compiles, `styleCheck` passed; installed on Medium_Phone. No tests (composition only).
-- **Uncommitted:** nothing.
+- **Verification:** JBR 21: `styleCheck` passed after the last Kotlin edit; `ChooseListsMapperTest` and both `ChooseListsCollectorTest`s pass; reviewer clean; no glommed closers; installed on Medium_Phone and recorded (bulk add and remove).
+- **Uncommitted:** S11-25: `ChooseListsBottomSheet.kt`, `ChooseListsMapper.kt` and its test, both `ChooseListsCollector`s, the book_detail collector test, `sheets.md`, the step file and this block.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

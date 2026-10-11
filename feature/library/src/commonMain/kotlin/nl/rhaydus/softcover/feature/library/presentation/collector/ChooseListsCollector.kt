@@ -43,6 +43,7 @@ internal class ChooseListsCollector : LibraryCollector {
                         bookIds = snapshot.selectedBookIds,
                         covers = covers,
                         listsBeingMutated = snapshot.listsBeingMutated,
+                        previous = scope.currentState.chooseListsSheet,
                     )
                 }
 

@@ -1,5 +1,9 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.component.lists.ListMembership
@@ -44,58 +48,77 @@ internal class OnBulkToggleListMembershipAction(
         var failureCount = 0
         val isRemove = currentMembership == ListMembership.ALL
 
-        when (currentMembership) {
-            ListMembership.ALL -> {
-                for (book in books) {
-                    if ((book.id in existingBookIdsOnList).not()) continue
+        try {
+            when (currentMembership) {
+                ListMembership.ALL -> {
+                    for (book in books) {
+                        if ((book.id in existingBookIdsOnList).not()) continue
 
-                    dependencies.removeBookFromListUseCase(
-                        listId = listId,
-                        bookId = book.id,
-                    ).onFailure { throwable ->
-                        AppLog.e(
-                            throwable,
-                            "Bulk remove from list $listId failed for book ${book.id}",
-                        )
+                        dependencies.removeBookFromListUseCase(
+                            listId = listId,
+                            bookId = book.id,
+                        ).onFailure { throwable ->
+                            AppLog.e(
+                                throwable,
+                                "Bulk remove from list $listId failed for book ${book.id}",
+                            )
 
-                        failureCount++
+                            failureCount++
+                        }
+                    }
+                }
+
+                ListMembership.NONE,
+                ListMembership.PARTIAL,
+                    -> {
+                    for (book in books) {
+                        if (book.id in existingBookIdsOnList) continue
+
+                        val edition = book.currentEdition ?: book.defaultEdition
+
+                        if (edition == null) {
+                            AppLog.e("Bulk add to list $listId skipped book ${book.id}: no edition available")
+
+                            failureCount++
+
+                            continue
+                        }
+
+                        dependencies.addBookToListUseCase(
+                            listId = listId,
+                            bookId = book.id,
+                            edition = edition,
+                        ).onFailure { throwable ->
+                            AppLog.e(
+                                throwable,
+                                "Bulk add to list $listId failed for book ${book.id}",
+                            )
+
+                            failureCount++
+                        }
                     }
                 }
             }
 
-            ListMembership.NONE,
-            ListMembership.PARTIAL,
-                -> {
-                for (book in books) {
-                    if (book.id in existingBookIdsOnList) continue
+            val attemptedWriteCount = books.count { (it.id in existingBookIdsOnList) == isRemove }
 
-                    val edition = book.currentEdition ?: book.defaultEdition
+            if (failureCount < attemptedWriteCount) {
+                withTimeoutOrNull(DATA_WAIT_MILLIS) {
+                    scope.state.first { current ->
+                        val bookIds = current.customLists
+                            .firstOrNull { it.id == listId }
+                            ?.books
+                            ?.mapTo(mutableSetOf()) { it.bookId }
 
-                    if (edition == null) {
-                        AppLog.e("Bulk add to list $listId skipped book ${book.id}: no edition available")
-
-                        failureCount++
-
-                        continue
-                    }
-
-                    dependencies.addBookToListUseCase(
-                        listId = listId,
-                        bookId = book.id,
-                        edition = edition,
-                    ).onFailure { throwable ->
-                        AppLog.e(
-                            throwable,
-                            "Bulk add to list $listId failed for book ${book.id}",
-                        )
-
-                        failureCount++
+                        bookIds == null || bookIds != existingBookIdsOnList
                     }
                 }
+            }
+        } finally {
+            withContext(NonCancellable) {
+                scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated - listId) }
             }
         }
-
-        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated - listId) }
 
         if (failureCount > 0) {
             val noun = if (failureCount == 1) "book" else "books"
@@ -112,3 +135,5 @@ internal class OnBulkToggleListMembershipAction(
         }
     }
 }
+
+private const val DATA_WAIT_MILLIS = 2_000L

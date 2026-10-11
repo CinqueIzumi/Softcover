@@ -1,5 +1,11 @@
 package nl.rhaydus.softcover.core.component.lists
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -46,14 +52,14 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
- * The editorial "index of shelves" (redesign brief): a shared surface for adding/removing one or more
+ * The editorial "index of shelves": a shared surface for adding/removing one or more
  * books to the user's custom lists, consumed by both `book_detail` and the library **bulk-select**
  * pattern. The header names the act ("Shelve {book}" / "Shelve {n} books") with the book's jacket (or a
  * stack of the selection's) as the header's trailing slot; the list rows read like a ruled index —
  * italic chapter-style names, a leading bookmark that fills when the list already holds the selection,
  * and a reversible trailing control (a removable `primaryContainer` "On the list ×" chip, a quiet
- * outline "+ Add", or — in bulk, for a part-filled list — a filled "+ Add the other N"). Every toggle
- * is instant/optimistic; there is no save button.
+ * outline "+ Add", or — in bulk, for a part-filled list — a filled "+ Add the other N"). A toggle
+ * writes at once and its row shows a spinner until the write lands; there is no save button.
  *
  * The sheet is a dumb renderer: the caller owns the `AddBookToListUseCase` / `RemoveBookFromListUseCase`
  * writes behind [ChooseListsEvent.MembershipToggled] and decides whether to stay open for consecutive
@@ -113,7 +119,6 @@ fun ChooseListsBottomSheet(
     }
 }
 
-/** One ruled-index row: top hairline, leading bookmark, italic name + caption, reversible trailing control. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ChooseListsRow(
@@ -170,15 +175,35 @@ private fun ChooseListsRow(
                 )
             }
 
-            // The chip stays laid out while a change is pending, so the row's text does not reflow.
-            Box(contentAlignment = Alignment.Center) {
-                Chip(
-                    model = row.chip,
-                    modifier = Modifier.alpha(if (row.isPending) 0f else 1f),
-                )
+            val motionScheme = MaterialTheme.motionScheme
 
-                if (row.isPending) {
-                    CircularWavyProgressIndicator(modifier = Modifier.size(20.dp))
+            // The invisible chip keeps the slot at the tapped chip's width while a change is pending.
+            AnimatedContent(
+                targetState = row.isPending to row.chip,
+                contentAlignment = Alignment.CenterEnd,
+                transitionSpec = {
+                    val fadeIn = fadeIn(animationSpec = motionScheme.defaultEffectsSpec())
+                    val fadeOut = fadeOut(animationSpec = motionScheme.defaultEffectsSpec())
+                    val sizeTransform = SizeTransform(clip = false) { _, _ ->
+                        motionScheme.defaultSpatialSpec()
+                    }
+
+                    fadeIn togetherWith fadeOut using sizeTransform
+                },
+                contentKey = { (pending, _) -> pending },
+                label = "ChooseListsTrailing",
+            ) { (pending, chip) ->
+                if (pending) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Chip(
+                            model = chip,
+                            modifier = Modifier.alpha(0f),
+                        )
+
+                        CircularWavyProgressIndicator(modifier = Modifier.size(20.dp))
+                    }
+                } else {
+                    Chip(model = chip)
                 }
             }
         }
@@ -193,40 +218,59 @@ private fun ListMembership.toToggleableState(): ToggleableState = when (this) {
 
 @Composable
 private fun BookmarkGlyph(membership: ListMembership) {
-    when (membership) {
-        ListMembership.ALL -> {
-            val icon = drawableIconResource(
-                icon = SoftcoverIcon.BookmarkCheck,
-                contentDescription = "",
-            )
+    val motionScheme = MaterialTheme.motionScheme
 
-            Icon(
-                painter = icon.getIconPainter(),
-                contentDescription = icon.contentDescription,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(23.dp),
-            )
-        }
+    AnimatedContent(
+        targetState = membership,
+        transitionSpec = {
+            if (targetState == ListMembership.ALL) {
+                val pop = scaleIn(
+                    initialScale = 0.6f,
+                    animationSpec = motionScheme.defaultSpatialSpec(),
+                ) + fadeIn(animationSpec = motionScheme.fastEffectsSpec())
 
-        ListMembership.PARTIAL -> PartialBookmarkMark()
+                pop togetherWith fadeOut(animationSpec = motionScheme.fastEffectsSpec())
+            } else {
+                fadeIn(animationSpec = motionScheme.fastEffectsSpec()) togetherWith
+                    fadeOut(animationSpec = motionScheme.fastEffectsSpec())
+            }
+        },
+        label = "BookmarkGlyph",
+    ) { target ->
+        when (target) {
+            ListMembership.ALL -> {
+                val icon = drawableIconResource(
+                    icon = SoftcoverIcon.BookmarkCheck,
+                    contentDescription = "",
+                )
 
-        ListMembership.NONE -> {
-            val icon = drawableIconResource(
-                icon = SoftcoverIcon.Bookmark,
-                contentDescription = "",
-            )
+                Icon(
+                    painter = icon.getIconPainter(),
+                    contentDescription = icon.contentDescription,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(23.dp),
+                )
+            }
 
-            Icon(
-                painter = icon.getIconPainter(),
-                contentDescription = icon.contentDescription,
-                tint = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.size(23.dp),
-            )
+            ListMembership.PARTIAL -> PartialBookmarkMark()
+
+            ListMembership.NONE -> {
+                val icon = drawableIconResource(
+                    icon = SoftcoverIcon.Bookmark,
+                    contentDescription = "",
+                )
+
+                Icon(
+                    painter = icon.getIconPainter(),
+                    contentDescription = icon.contentDescription,
+                    tint = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.size(23.dp),
+                )
+            }
         }
     }
 }
 
-/** The hand-drawn tri-state mark: a primary-bordered 19×23dp box with a short horizontal primary bar. */
 @Composable
 private fun PartialBookmarkMark() {
     val primary = MaterialTheme.colorScheme.primary

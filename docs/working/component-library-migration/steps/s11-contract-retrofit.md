@@ -38,7 +38,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-22 | `TextFieldUiModel` error state: outline, shake and `reject` | S11-6 | [x] |
 | S11-23 | `StepperCircle`: press scale, a tick per step, accelerating auto-repeat | S11-6 | [x] |
 | S11-24 | Progress-sheet page tab shakes on a past-the-end page | SL-15a | [x] |
-| S11-25 | Add-to-list: bookmark, chip and spinner animate; `select` fires | S11-6 | [ ] |
+| S11-25 | Add-to-list: bookmark, chip and spinner animate; `select` fires | S11-6 | [x] |
 | S11-26 | Search chrome: press, border, slot crossfade, scroll lift, Refresh text | SL-15a | [ ] |
 | S11-27 | Desktop hover on every clickable primitive; sidebar press scale | — | [ ] |
 | S11-28 | Desktop share and save say what happened | — | [ ] |
@@ -106,6 +106,13 @@ S11-23 (signature otherwise unchanged; all 12 call sites in `progress/`):
 - `enabled: Boolean = true`: disabled dims, takes no press and stops a running repeat.
 - Bounds: the number stepper from its local `parsed` / `max`; `ProgressSheetMedium.Timed` gains `canDecreaseMinutes` / `canIncreaseMinutes` (0..`MINUTES.maximum`) and `WhenReadUiModel` gains `canShiftLater` (a backdate before `now`), both set by their `:core:uibinding` mappers. Earlier has no bound.
 - No new events. Tests: the two mappers' new flags, via test-writer.
+
+S11-25 (render-only, `ChooseListsBottomSheet.kt` plus one `sheets.md` line):
+- `BookmarkGlyph` runs through `AnimatedContent` on membership, the `Toggle` glyph's spec: to ALL pops (`scaleIn` 0.6, `defaultSpatialSpec`, + `fadeIn` fast effects); other changes crossfade on fast effects.
+- Trailing slot: chip alpha via `animateFloatAsState`, spinner in an `AnimatedContent` fade (`AnimatedVisibility` resolves to `RowScope`'s overload there), both `defaultEffectsSpec`; both stay laid out; no `animateContentSize` (it clipped the chip).
+- Both mappers take `previous: ChooseListsUiModel?`; a pending list re-emits its previous row with `isPending = true`, so the bulk path's book-by-book writes show no half states. Tests: the mapper rule and a book_detail collector case.
+- No haptic in the sheet: both hosts already fire `select` / `reject` from the toggle's result event.
+- The KDoc's "instant/optimistic" claim is corrected (rows wait on a spinner). No new types, no tests.
 
 ## R10 edges
 

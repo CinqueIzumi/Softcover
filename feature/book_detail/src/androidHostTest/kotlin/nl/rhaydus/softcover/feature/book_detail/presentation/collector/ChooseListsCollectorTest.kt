@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
@@ -10,6 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.cover.CoverSource
+import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
@@ -200,6 +202,42 @@ class ChooseListsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.chooseListsSheet?.rows?.first { it.listId == customList.id }?.isPending shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `a pending list keeps its pre-write row while its data changes underneath`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook
+            val onList = buildList(
+                id = 2,
+                name = "Winter reading",
+                slug = "winter-reading",
+                bookId = book.id,
+            )
+            val offList = onList.copy(books = emptyList())
+
+            val collector = ChooseListsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            stateFlow.value = stateFlow.value.copy(
+                book = book,
+                userLists = listOf(onList),
+            )
+            stateFlow.value = stateFlow.value.copy(listsBeingMutated = setOf(onList.id))
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(userLists = listOf(offList))
+
+            // ----- Assert -----
+            val row = stateFlow.value.chooseListsSheet?.rows?.first { it.listId == onList.id }.shouldNotBeNull()
+            row.isPending shouldBe true
+            row.membership shouldBe ListMembership.ALL
             job.cancel()
         }
     }

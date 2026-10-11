@@ -8,9 +8,15 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
@@ -85,6 +91,20 @@ class OnToggleListMembershipActionTest {
             this@mockk.defaultEdition
         } returns default
     }
+
+    private fun stubList(vararg bookIds: Int): BookList = BookList(
+        id = 3,
+        name = "Favourites",
+        slug = "favourites",
+        books = bookIds.map { bookId ->
+            ListBook(
+                listBookId = bookId,
+                listId = 3,
+                bookId = bookId,
+                editionId = 1,
+            )
+        },
+    )
 
     @Nested
     inner class Execute {
@@ -315,6 +335,163 @@ class OnToggleListMembershipActionTest {
             // ----- Assert -----
             stateFlow.value.listsBeingMutated shouldBe emptySet()
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
+        }
+
+        @Test
+        fun `the list stays mutated until its book ids change and then clears`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(
+                book = stubBook(),
+                userLists = listOf(stubList()),
+            )
+            val job = backgroundScope.launch {
+                OnToggleListMembershipAction(
+                    listId = 3,
+                    isMember = false,
+                ).execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+            }
+
+            // ----- Act -----
+            runCurrent()
+            val mutatedBeforeChange = stateFlow.value.listsBeingMutated
+            val completedBeforeChange = job.isCompleted
+            stateFlow.update { current ->
+                current.copy(userLists = listOf(stubList(7)))
+            }
+            runCurrent()
+
+            // ----- Assert -----
+            mutatedBeforeChange shouldBe setOf(3)
+            completedBeforeChange shouldBe false
+            job.isCompleted shouldBe true
+            stateFlow.value.listsBeingMutated shouldBe emptySet()
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
+        }
+
+        @Test
+        fun `the list clears when it disappears from state`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(
+                book = stubBook(),
+                userLists = listOf(stubList()),
+            )
+            val job = backgroundScope.launch {
+                OnToggleListMembershipAction(
+                    listId = 3,
+                    isMember = false,
+                ).execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+            }
+            runCurrent()
+
+            // ----- Act -----
+            stateFlow.update { current ->
+                current.copy(userLists = emptyList())
+            }
+            runCurrent()
+
+            // ----- Assert -----
+            job.isCompleted shouldBe true
+            stateFlow.value.listsBeingMutated shouldBe emptySet()
+        }
+
+        @Test
+        fun `a success that leaves the list data unchanged clears the list only after the timeout`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(
+                book = stubBook(),
+                userLists = listOf(stubList()),
+            )
+            val job = backgroundScope.launch {
+                OnToggleListMembershipAction(
+                    listId = 3,
+                    isMember = false,
+                ).execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+            }
+
+            // ----- Act -----
+            runCurrent()
+            advanceTimeBy(1_999L)
+            runCurrent()
+            val mutatedBeforeTimeout = stateFlow.value.listsBeingMutated
+            val completedBeforeTimeout = job.isCompleted
+            advanceTimeBy(1L)
+            runCurrent()
+
+            // ----- Assert -----
+            mutatedBeforeTimeout shouldBe setOf(3)
+            completedBeforeTimeout shouldBe false
+            job.isCompleted shouldBe true
+            stateFlow.value.listsBeingMutated shouldBe emptySet()
+        }
+
+        @Test
+        fun `cancelling the action while it waits for list data clears the list`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(
+                book = stubBook(),
+                userLists = listOf(stubList()),
+            )
+            val job = backgroundScope.launch {
+                OnToggleListMembershipAction(
+                    listId = 3,
+                    isMember = false,
+                ).execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+            }
+            runCurrent()
+            val mutatedBeforeCancel = stateFlow.value.listsBeingMutated
+
+            // ----- Act -----
+            job.cancel()
+            runCurrent()
+
+            // ----- Assert -----
+            mutatedBeforeCancel shouldBe setOf(3)
+            job.isCancelled shouldBe true
+            stateFlow.value.listsBeingMutated shouldBe emptySet()
+        }
+
+        @Test
+        fun `a failed mutation clears the list at once without waiting for list data`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(
+                book = stubBook(),
+                userLists = listOf(stubList()),
+            )
+            coEvery {
+                addBookToListUseCase(
+                    listId = any(),
+                    bookId = any(),
+                    edition = any(),
+                )
+            } returns Result.failure(IllegalStateException("offline"))
+            val job = backgroundScope.launch {
+                OnToggleListMembershipAction(
+                    listId = 3,
+                    isMember = false,
+                ).execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+            }
+
+            // ----- Act -----
+            runCurrent()
+
+            // ----- Assert -----
+            job.isCompleted shouldBe true
+            stateFlow.value.listsBeingMutated shouldBe emptySet()
         }
     }
 }
