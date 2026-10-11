@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -26,10 +27,10 @@ internal fun LibraryUiState.withTabSelected(tabId: String): LibraryUiState =
     copy(
         selectedTabId = tabId,
         selectionMode = false,
-        selectedBookIds = emptySet(),
+        selectedBookIds = persistentSetOf(),
         isBulkMoveMenuExpanded = false,
         isBulkRemoveSheetRequested = false,
         isChooseListsSheetRequested = false,
-        listsBeingMutated = emptySet(),
+        listsBeingMutated = persistentSetOf(),
         isRearranging = false,
     )

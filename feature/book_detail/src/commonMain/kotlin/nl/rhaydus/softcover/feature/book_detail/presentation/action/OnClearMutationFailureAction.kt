@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -23,12 +24,12 @@ internal class OnClearMutationFailureAction(
         scope.setState {
             it.copy(
                 failedMutationBookIds = if (bookId != null) {
-                    it.failedMutationBookIds - bookId
+                    it.failedMutationBookIds.toPersistentSet().remove(bookId)
                 } else {
                     it.failedMutationBookIds
                 },
                 failedMutationEditionIds = if (editionId != null) {
-                    it.failedMutationEditionIds - editionId
+                    it.failedMutationEditionIds.toPersistentSet().remove(editionId)
                 } else {
                     it.failedMutationEditionIds
                 },

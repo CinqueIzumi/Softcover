@@ -5,6 +5,8 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -73,7 +75,7 @@ class ChooseListsCollectorTest {
                 localImagePath = null,
             )
             val book = PreviewData.baseBook.copy(
-                editions = emptyList(),
+                editions = persistentListOf(),
                 defaultEdition = defaultEdition,
                 coverUrl = "https://example.com/fallback.jpg",
                 userBook = null,
@@ -89,7 +91,7 @@ class ChooseListsCollectorTest {
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
                 book = book,
-                userLists = listOf(
+                userLists = persistentListOf(
                     buildList(
                         id = 2,
                         name = "Winter reading",
@@ -137,7 +139,7 @@ class ChooseListsCollectorTest {
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
                 book = book,
-                userLists = listOf(ownedList, customList),
+                userLists = persistentListOf(ownedList, customList),
             )
 
             // ----- Assert -----
@@ -167,7 +169,7 @@ class ChooseListsCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userLists = listOf(customList))
+            stateFlow.value = stateFlow.value.copy(userLists = persistentListOf(customList))
 
             // ----- Assert -----
             stateFlow.value.chooseListsSheet shouldBe null
@@ -195,11 +197,11 @@ class ChooseListsCollectorTest {
 
             stateFlow.value = stateFlow.value.copy(
                 book = book,
-                userLists = listOf(customList),
+                userLists = persistentListOf(customList),
             )
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(listsBeingMutated = setOf(customList.id))
+            stateFlow.value = stateFlow.value.copy(listsBeingMutated = persistentSetOf(customList.id))
 
             // ----- Assert -----
             stateFlow.value.chooseListsSheet?.rows?.first { it.listId == customList.id }?.isPending shouldBe true
@@ -228,12 +230,12 @@ class ChooseListsCollectorTest {
 
             stateFlow.value = stateFlow.value.copy(
                 book = book,
-                userLists = listOf(onList),
+                userLists = persistentListOf(onList),
             )
-            stateFlow.value = stateFlow.value.copy(listsBeingMutated = setOf(onList.id))
+            stateFlow.value = stateFlow.value.copy(listsBeingMutated = persistentSetOf(onList.id))
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userLists = listOf(offList))
+            stateFlow.value = stateFlow.value.copy(userLists = persistentListOf(offList))
 
             // ----- Assert -----
             val row = stateFlow.value.chooseListsSheet?.rows?.first { it.listId == onList.id }.shouldNotBeNull()

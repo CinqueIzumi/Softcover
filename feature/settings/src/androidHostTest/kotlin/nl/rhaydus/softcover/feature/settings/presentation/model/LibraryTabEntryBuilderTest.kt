@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
@@ -345,7 +346,7 @@ class LibraryTabEntryBuilderTest {
             // ----- Arrange -----
             val state = LibraryVisibilitySettingsUiState(
                 totalCount = 8,
-                draftTabOrder = listOf("status-${UserBookStatus.READ.code}"),
+                draftTabOrder = persistentListOf("status-${UserBookStatus.READ.code}"),
             )
 
             // ----- Act -----

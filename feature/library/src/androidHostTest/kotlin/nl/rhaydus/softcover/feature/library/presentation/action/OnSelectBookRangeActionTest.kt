@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -37,7 +38,7 @@ class OnSelectBookRangeActionTest {
             // ----- Arrange -----
             val initialState = LibraryUiState(
                 selectionMode = false,
-                selectedBookIds = emptySet(),
+                selectedBookIds = persistentSetOf(),
                 isRearranging = true,
             )
             stateFlow.value = initialState
@@ -56,7 +57,7 @@ class OnSelectBookRangeActionTest {
         fun `non-empty bookIds enter selection mode, add to the selection and leave rearrange mode`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(10),
+                selectedBookIds = persistentSetOf(10),
                 isRearranging = true,
             )
 

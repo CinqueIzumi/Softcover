@@ -13,6 +13,10 @@ import io.mockk.mockk
 import kotlin.time.Clock
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -265,12 +269,12 @@ class BookCardModelsCollectorTest {
         isRearranging: Boolean = false,
         sortMode: LibrarySortMode? = null,
     ) = LibraryUiState(
-        visibleTabs = listOf(tab),
-        booksByTab = mapOf(tab.id to books),
+        visibleTabs = persistentListOf(tab),
+        booksByTab = persistentMapOf(tab.id to books.toImmutableList()),
         gridLayout = layout,
         selectionMode = selectionMode,
         isRearranging = isRearranging,
-        sortModeByTab = sortMode?.let { mapOf(tab.id to it) } ?: emptyMap(),
+        sortModeByTab = (sortMode?.let { mapOf(tab.id to it) } ?: emptyMap()).toImmutableMap(),
     )
 
     @Nested
@@ -285,7 +289,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = bookState(books = listOf(first, second, third)).copy(
-                displayBooksByTab = mapOf("all" to listOf(third, first)),
+                displayBooksByTab = persistentMapOf("all" to persistentListOf(third, first)),
             )
 
             // ----- Assert -----
@@ -317,7 +321,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = bookState(books = listOf(stubBook(id = 1))).copy(
-                displayBooksByTab = mapOf("all" to emptyList()),
+                displayBooksByTab = persistentMapOf("all" to persistentListOf()),
             )
 
             // ----- Assert -----
@@ -334,9 +338,9 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(listTab),
-                editionsByTab = mapOf(listTab.id to listOf(first, second)),
-                displayEditionsByTab = mapOf(listTab.id to listOf(second, first)),
+                visibleTabs = persistentListOf(listTab),
+                editionsByTab = persistentMapOf(listTab.id to persistentListOf(first, second)),
+                displayEditionsByTab = persistentMapOf(listTab.id to persistentListOf(second, first)),
             )
 
             // ----- Assert -----
@@ -352,8 +356,8 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(listTab),
-                editionsByTab = mapOf(listTab.id to listOf(stubEdition(id = 9), stubEdition(id = 7))),
+                visibleTabs = persistentListOf(listTab),
+                editionsByTab = persistentMapOf(listTab.id to persistentListOf(stubEdition(id = 9), stubEdition(id = 7))),
             )
 
             // ----- Assert -----
@@ -433,8 +437,8 @@ class BookCardModelsCollectorTest {
                     books = listOf(stubBook(id = 1)),
                     layout = layout,
                 ).copy(
-                    visibleTabs = listOf(LibraryTab.All, listTab),
-                    editionsByTab = mapOf(listTab.id to listOf(stubEdition(id = 9))),
+                    visibleTabs = persistentListOf(LibraryTab.All, listTab),
+                    editionsByTab = persistentMapOf(listTab.id to persistentListOf(stubEdition(id = 9))),
                 )
 
                 // ----- Assert -----
@@ -525,8 +529,8 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(listTab),
-                editionsByTab = mapOf(listTab.id to listOf(stubEdition(id = 7))),
+                visibleTabs = persistentListOf(listTab),
+                editionsByTab = persistentMapOf(listTab.id to persistentListOf(stubEdition(id = 7))),
             )
 
             // ----- Assert -----
@@ -602,10 +606,10 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = emptyList(),
-                booksByTab = mapOf(readTab.id to listOf(stubBook(id = 1))),
+                visibleTabs = persistentListOf(),
+                booksByTab = persistentMapOf(readTab.id to persistentListOf(stubBook(id = 1))),
                 isRearranging = true,
-                sortModeByTab = mapOf(readTab.id to LibrarySortMode.MANUAL),
+                sortModeByTab = persistentMapOf(readTab.id to LibrarySortMode.MANUAL),
             )
 
             // ----- Assert -----
@@ -620,15 +624,15 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(listTab),
-                editionsByTab = mapOf(listTab.id to listOf(stubEdition(id = 7))),
-                customLists = listOf(
+                visibleTabs = persistentListOf(listTab),
+                editionsByTab = persistentMapOf(listTab.id to persistentListOf(stubEdition(id = 7))),
+                customLists = persistentListOf(
                     stubList(
                         id = 5,
                         ranked = true,
                     ),
                 ),
-                sortModeByTab = mapOf(listTab.id to LibrarySortMode.ORDER),
+                sortModeByTab = persistentMapOf(listTab.id to LibrarySortMode.ORDER),
                 isRearranging = true,
             )
 
@@ -645,15 +649,15 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(listTab),
-                editionsByTab = mapOf(listTab.id to listOf(stubEdition(id = 7))),
-                customLists = listOf(
+                visibleTabs = persistentListOf(listTab),
+                editionsByTab = persistentMapOf(listTab.id to persistentListOf(stubEdition(id = 7))),
+                customLists = persistentListOf(
                     stubList(
                         id = 5,
                         ranked = false,
                     ),
                 ),
-                sortModeByTab = mapOf(listTab.id to LibrarySortMode.ORDER),
+                sortModeByTab = persistentMapOf(listTab.id to LibrarySortMode.ORDER),
                 isRearranging = true,
             )
 
@@ -670,9 +674,9 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(listTab),
-                editionsByTab = mapOf(listTab.id to listOf(stubEdition(id = 7))),
-                customLists = listOf(
+                visibleTabs = persistentListOf(listTab),
+                editionsByTab = persistentMapOf(listTab.id to persistentListOf(stubEdition(id = 7))),
+                customLists = persistentListOf(
                     stubList(
                         id = 5,
                         ranked = true,
@@ -757,9 +761,9 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(listTab),
-                editionsByTab = mapOf(
-                    listTab.id to listOf(
+                visibleTabs = persistentListOf(listTab),
+                editionsByTab = persistentMapOf(
+                    listTab.id to persistentListOf(
                         stubEdition(
                             id = 7,
                             title = "Audio",
@@ -817,7 +821,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = bookState(
                 books = listOf(stubBook(id = 1), stubBook(id = 2)),
                 selectionMode = true,
-            ).copy(selectedBookIds = setOf(2))
+            ).copy(selectedBookIds = persistentSetOf(2))
 
             // ----- Assert -----
             val cards = stateFlow.value.bookCardsByTab.getValue("all").set.cards
@@ -897,7 +901,7 @@ class BookCardModelsCollectorTest {
                     edition = stubCurrentEdition(pages = 100),
                 ),
             ).copy(
-                deadlines = mapOf(
+                deadlines = persistentMapOf(
                     1 to buildDeadline(
                         bookId = 1,
                         unit = DeadlineUnit.PAGES,
@@ -923,7 +927,7 @@ class BookCardModelsCollectorTest {
                     edition = null,
                 ),
             ).copy(
-                deadlines = mapOf(
+                deadlines = persistentMapOf(
                     1 to buildDeadline(
                         bookId = 1,
                         unit = DeadlineUnit.PAGES,
@@ -1166,7 +1170,7 @@ class BookCardModelsCollectorTest {
                     currentPage = 0,
                 ),
             ).copy(
-                deadlines = mapOf(
+                deadlines = persistentMapOf(
                     1 to buildDeadline(
                         bookId = 1,
                         unit = DeadlineUnit.PAGES,
@@ -1194,7 +1198,7 @@ class BookCardModelsCollectorTest {
                     currentSeconds = 0,
                 ),
             ).copy(
-                deadlines = mapOf(
+                deadlines = persistentMapOf(
                     1 to buildDeadline(
                         bookId = 1,
                         unit = DeadlineUnit.SECONDS,
@@ -1221,7 +1225,7 @@ class BookCardModelsCollectorTest {
                     currentPage = 50,
                 ),
             ).copy(
-                deadlines = mapOf(
+                deadlines = persistentMapOf(
                     1 to buildDeadline(
                         bookId = 1,
                         unit = DeadlineUnit.PAGES,
@@ -1256,7 +1260,7 @@ class BookCardModelsCollectorTest {
                 val job = launchCollector()
 
                 // ----- Act -----
-                stateFlow.value = largeState(book).copy(deadlines = deadlines)
+                stateFlow.value = largeState(book).copy(deadlines = deadlines.toImmutableMap())
 
                 // ----- Assert -----
                 stateFlow.value.row().deadline.shouldBeNull()
@@ -1284,7 +1288,7 @@ class BookCardModelsCollectorTest {
                     ),
                     layout = layout,
                 ).copy(
-                    deadlines = mapOf(
+                    deadlines = persistentMapOf(
                         1 to buildDeadline(
                             bookId = 1,
                             unit = DeadlineUnit.PAGES,
@@ -1306,8 +1310,8 @@ class BookCardModelsCollectorTest {
             layout: LibraryGridLayout,
             edition: BookEdition,
         ) = LibraryUiState(
-            visibleTabs = listOf(listTab),
-            editionsByTab = mapOf(listTab.id to listOf(edition)),
+            visibleTabs = persistentListOf(listTab),
+            editionsByTab = persistentMapOf(listTab.id to persistentListOf(edition)),
             gridLayout = layout,
         )
 
@@ -1473,7 +1477,7 @@ class BookCardModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(LibraryTab.All),
+                    visibleTabs = persistentListOf(LibraryTab.All),
                     gridLayout = LibraryGridLayout.LIST_LARGE,
                 )
 
@@ -1515,7 +1519,7 @@ class BookCardModelsCollectorTest {
             val job = launchCollector()
 
             // ----- Act -----
-            stateFlow.value = LibraryUiState(visibleTabs = listOf(listTab))
+            stateFlow.value = LibraryUiState(visibleTabs = persistentListOf(listTab))
 
             // ----- Assert -----
             stateFlow.value.editionCardsByTab.containsKey(listTab.id) shouldBe false
@@ -1530,8 +1534,8 @@ class BookCardModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(LibraryTab.All, readTab),
-                    booksByTab = mapOf("all" to listOf(stubBook(id = 1))),
+                    visibleTabs = persistentListOf(LibraryTab.All, readTab),
+                    booksByTab = persistentMapOf("all" to persistentListOf(stubBook(id = 1))),
                 )
 
                 // ----- Assert -----
@@ -1548,7 +1552,7 @@ class BookCardModelsCollectorTest {
             LibraryGridLayout.entries.forEach { layout ->
                 // ----- Act -----
                 stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(LibraryTab.All),
+                    visibleTabs = persistentListOf(LibraryTab.All),
                     gridLayout = layout,
                 )
 
@@ -1591,8 +1595,8 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(listTab),
-                editionsByTab = mapOf(listTab.id to listOf(edition)),
+                visibleTabs = persistentListOf(listTab),
+                editionsByTab = persistentMapOf(listTab.id to persistentListOf(edition)),
                 gridLayout = LibraryGridLayout.LIST_COMPACT,
             )
 
@@ -1613,10 +1617,10 @@ class BookCardModelsCollectorTest {
             booksB: List<Book>,
             layout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
         ) = LibraryUiState(
-            visibleTabs = listOf(tabA, tabB),
-            booksByTab = mapOf(
-                tabA.id to booksA,
-                tabB.id to booksB,
+            visibleTabs = persistentListOf(tabA, tabB),
+            booksByTab = persistentMapOf(
+                tabA.id to booksA.toImmutableList(),
+                tabB.id to booksB.toImmutableList(),
             ),
             gridLayout = layout,
         )
@@ -1641,7 +1645,7 @@ class BookCardModelsCollectorTest {
             val before = stateFlow.value.bookCardsByTab
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(deadlines = mapOf(2 to deadlineFor(2)))
+            stateFlow.value = stateFlow.value.copy(deadlines = persistentMapOf(2 to deadlineFor(2)))
 
             // ----- Assert -----
             val after = stateFlow.value.bookCardsByTab
@@ -1661,7 +1665,7 @@ class BookCardModelsCollectorTest {
             val before = stateFlow.value.bookCardsByTab
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(selectedBookIds = setOf(2))
+            stateFlow.value = stateFlow.value.copy(selectedBookIds = persistentSetOf(2))
 
             // ----- Assert -----
             val after = stateFlow.value.bookCardsByTab
@@ -1688,7 +1692,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value.bookCardsByTab.getValue("all").set.cards.cardWithId(1).coverBadge().shouldBeNull()
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(deadlines = mapOf(1 to deadlineFor(1)))
+            stateFlow.value = stateFlow.value.copy(deadlines = persistentMapOf(1 to deadlineFor(1)))
 
             // ----- Assert -----
             stateFlow.value.bookCardsByTab.getValue("all").set.cards.cardWithId(1).coverBadge().shouldNotBeNull()
@@ -1714,7 +1718,7 @@ class BookCardModelsCollectorTest {
                 ),
                 layout = LibraryGridLayout.LIST_LARGE,
             ).copy(
-                deadlines = mapOf(
+                deadlines = persistentMapOf(
                     1 to deadlineFor(1),
                     2 to deadlineFor(2),
                 ),
@@ -1761,17 +1765,20 @@ class BookCardModelsCollectorTest {
             // ----- Arrange -----
             val job = launchCollector()
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(listTab, tabB),
-                editionsByTab = mapOf(
-                    listTab.id to listOf(stubEdition(id = 7)),
-                    tabB.id to listOf(stubEdition(id = 8)),
+                visibleTabs = persistentListOf(listTab, tabB),
+                editionsByTab = persistentMapOf(
+                    listTab.id to persistentListOf(stubEdition(id = 7)),
+                    tabB.id to persistentListOf(stubEdition(id = 8)),
                 ),
             )
             val before = stateFlow.value.editionCardsByTab
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                editionsByTab = stateFlow.value.editionsByTab + (tabB.id to listOf(stubEdition(id = 9))),
+                editionsByTab = (
+                    stateFlow.value.editionsByTab +
+                        (tabB.id to listOf(stubEdition(id = 9)).toImmutableList())
+                    ).toImmutableMap(),
             )
 
             // ----- Assert -----
@@ -1790,7 +1797,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = twoTabState(
                 booksA = listOf(stubBook(id = 1)),
                 booksB = listOf(stubBook(id = 2)),
-            ).copy(visibleTabs = listOf(tabA))
+            ).copy(visibleTabs = persistentListOf(tabA))
 
             // ----- Assert -----
             stateFlow.value.bookCardsByTab.keys shouldBe setOf(tabA.id)

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.chip.toChipSet
@@ -7,7 +8,7 @@ import nl.rhaydus.softcover.core.component.chip.toChipSet
 private const val RECENT_SEARCH_CHIP_KEY_PREFIX = "recent:"
 
 internal data class RecentSearchChipsSnapshot(
-    val previousSearchQueries: List<String>,
+    val previousSearchQueries: ImmutableList<String>,
 ) {
     fun compute(): ChipSet<String> = previousSearchQueries.map { query ->
         val chip = ChipUiModel(

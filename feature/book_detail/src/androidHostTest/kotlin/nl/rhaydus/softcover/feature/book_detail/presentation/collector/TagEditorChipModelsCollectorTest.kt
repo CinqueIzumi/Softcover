@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -85,7 +87,7 @@ class TagEditorChipModelsCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(tagSuggestions = suggestions)
+            stateFlow.value = stateFlow.value.copy(tagSuggestions = suggestions.toImmutableList())
 
             // ----- Assert -----
             val chips = stateFlow.value.tagSuggestionChips.chips
@@ -115,7 +117,7 @@ class TagEditorChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(tagSuggestions = listOf(genreFantasy, moodFantasy))
+                stateFlow.value = stateFlow.value.copy(tagSuggestions = persistentListOf(genreFantasy, moodFantasy))
 
                 // ----- Assert -----
                 val chips = stateFlow.value.tagSuggestionChips.chips

@@ -6,6 +6,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -261,7 +263,7 @@ class OnToggleListMembershipActionTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
-                listsBeingMutated = setOf(3),
+                listsBeingMutated = persistentSetOf(3),
             )
             val action = OnToggleListMembershipAction(
                 listId = 3,
@@ -290,7 +292,7 @@ class OnToggleListMembershipActionTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
-                listsBeingMutated = setOf(4),
+                listsBeingMutated = persistentSetOf(4),
             )
             val action = OnToggleListMembershipAction(
                 listId = 3,
@@ -347,7 +349,7 @@ class OnToggleListMembershipActionTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
-                userLists = listOf(stubList()),
+                userLists = persistentListOf(stubList()),
             )
             val job = backgroundScope.launch {
                 OnToggleListMembershipAction(
@@ -364,7 +366,7 @@ class OnToggleListMembershipActionTest {
             val mutatedBeforeChange = stateFlow.value.listsBeingMutated
             val completedBeforeChange = job.isCompleted
             stateFlow.update { current ->
-                current.copy(userLists = listOf(stubList(7)))
+                current.copy(userLists = persistentListOf(stubList(7)))
             }
             runCurrent()
 
@@ -382,7 +384,7 @@ class OnToggleListMembershipActionTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
-                userLists = listOf(stubList()),
+                userLists = persistentListOf(stubList()),
             )
             val job = backgroundScope.launch {
                 OnToggleListMembershipAction(
@@ -397,7 +399,7 @@ class OnToggleListMembershipActionTest {
 
             // ----- Act -----
             stateFlow.update { current ->
-                current.copy(userLists = emptyList())
+                current.copy(userLists = persistentListOf())
             }
             runCurrent()
 
@@ -411,7 +413,7 @@ class OnToggleListMembershipActionTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
-                userLists = listOf(stubList()),
+                userLists = persistentListOf(stubList()),
             )
             val job = backgroundScope.launch {
                 OnToggleListMembershipAction(
@@ -444,7 +446,7 @@ class OnToggleListMembershipActionTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
-                userLists = listOf(stubList()),
+                userLists = persistentListOf(stubList()),
             )
             val job = backgroundScope.launch {
                 OnToggleListMembershipAction(
@@ -473,7 +475,7 @@ class OnToggleListMembershipActionTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
-                userLists = listOf(stubList()),
+                userLists = persistentListOf(stubList()),
             )
             coEvery {
                 addBookToListUseCase(

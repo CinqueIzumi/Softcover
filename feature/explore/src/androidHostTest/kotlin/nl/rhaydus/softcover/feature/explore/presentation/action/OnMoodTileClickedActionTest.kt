@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -81,7 +82,7 @@ class OnMoodTileClickedActionTest {
         fun `a key that matches no mood tag is a no-op`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
-            val initialState = ExploreScreenUiState(moodTags = listOf(cozy))
+            val initialState = ExploreScreenUiState(moodTags = persistentListOf(cozy))
             stateFlow.value = initialState
             val action = OnMoodTileClickedAction(key = 99)
 
@@ -101,7 +102,7 @@ class OnMoodTileClickedActionTest {
         fun `a matching key searches by that mood and makes it the active filter`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
-            stateFlow.value = ExploreScreenUiState(moodTags = listOf(cozy, gritty))
+            stateFlow.value = ExploreScreenUiState(moodTags = persistentListOf(cozy, gritty))
 
             coEvery {
                 searchByMoodUseCase(mood = gritty)

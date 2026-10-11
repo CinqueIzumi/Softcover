@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -12,8 +14,8 @@ class LibraryVisibilitySettingsUiStateTest {
             // ----- Arrange -----
             val state = LibraryVisibilitySettingsUiState(
                 initialized = false,
-                persistedEnabledStatusCodes = setOf(1),
-                draftEnabledStatusCodes = setOf(99),
+                persistedEnabledStatusCodes = persistentSetOf(1),
+                draftEnabledStatusCodes = persistentSetOf(99),
             )
 
             // ----- Act -----
@@ -28,12 +30,12 @@ class LibraryVisibilitySettingsUiStateTest {
             // ----- Arrange -----
             val state = LibraryVisibilitySettingsUiState(
                 initialized = true,
-                persistedEnabledStatusCodes = setOf(1, 2),
-                draftEnabledStatusCodes = setOf(1, 2),
-                persistedEnabledListIds = setOf(10),
-                draftEnabledListIds = setOf(10),
-                persistedTabOrder = listOf("list-1", "status-2"),
-                draftTabOrder = listOf("list-1", "status-2"),
+                persistedEnabledStatusCodes = persistentSetOf(1, 2),
+                draftEnabledStatusCodes = persistentSetOf(1, 2),
+                persistedEnabledListIds = persistentSetOf(10),
+                draftEnabledListIds = persistentSetOf(10),
+                persistedTabOrder = persistentListOf("list-1", "status-2"),
+                draftTabOrder = persistentListOf("list-1", "status-2"),
             )
 
             // ----- Act -----
@@ -48,12 +50,12 @@ class LibraryVisibilitySettingsUiStateTest {
             // ----- Arrange -----
             val state = LibraryVisibilitySettingsUiState(
                 initialized = true,
-                persistedEnabledStatusCodes = setOf(1),
-                draftEnabledStatusCodes = setOf(1),
-                persistedEnabledListIds = setOf(10),
-                draftEnabledListIds = setOf(10),
-                persistedTabOrder = listOf("status-1", "list-10"),
-                draftTabOrder = listOf("list-10", "status-1"),
+                persistedEnabledStatusCodes = persistentSetOf(1),
+                draftEnabledStatusCodes = persistentSetOf(1),
+                persistedEnabledListIds = persistentSetOf(10),
+                draftEnabledListIds = persistentSetOf(10),
+                persistedTabOrder = persistentListOf("status-1", "list-10"),
+                draftTabOrder = persistentListOf("list-10", "status-1"),
             )
 
             // ----- Act -----
@@ -68,12 +70,12 @@ class LibraryVisibilitySettingsUiStateTest {
             // ----- Arrange -----
             val state = LibraryVisibilitySettingsUiState(
                 initialized = true,
-                persistedEnabledStatusCodes = setOf(1),
-                draftEnabledStatusCodes = setOf(1, 3),
-                persistedEnabledListIds = emptySet(),
-                draftEnabledListIds = emptySet(),
-                persistedTabOrder = emptyList(),
-                draftTabOrder = emptyList(),
+                persistedEnabledStatusCodes = persistentSetOf(1),
+                draftEnabledStatusCodes = persistentSetOf(1, 3),
+                persistedEnabledListIds = persistentSetOf(),
+                draftEnabledListIds = persistentSetOf(),
+                persistedTabOrder = persistentListOf(),
+                draftTabOrder = persistentListOf(),
             )
 
             // ----- Act -----
@@ -88,12 +90,12 @@ class LibraryVisibilitySettingsUiStateTest {
             // ----- Arrange -----
             val state = LibraryVisibilitySettingsUiState(
                 initialized = true,
-                persistedEnabledStatusCodes = emptySet(),
-                draftEnabledStatusCodes = emptySet(),
-                persistedEnabledListIds = setOf(5),
-                draftEnabledListIds = setOf(5, 7),
-                persistedTabOrder = emptyList(),
-                draftTabOrder = emptyList(),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(),
+                persistedEnabledListIds = persistentSetOf(5),
+                draftEnabledListIds = persistentSetOf(5, 7),
+                persistedTabOrder = persistentListOf(),
+                draftTabOrder = persistentListOf(),
             )
 
             // ----- Act -----

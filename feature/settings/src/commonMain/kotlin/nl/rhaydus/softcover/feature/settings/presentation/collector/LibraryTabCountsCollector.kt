@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -35,7 +36,7 @@ internal class LibraryTabCountsCollector : LibraryVisibilityCollector {
                 state
                     .copy(
                         totalCount = totalCount,
-                        statusCounts = statusCounts,
+                        statusCounts = statusCounts.toImmutableMap(),
                     )
                     .withOrderedEntries()
             }

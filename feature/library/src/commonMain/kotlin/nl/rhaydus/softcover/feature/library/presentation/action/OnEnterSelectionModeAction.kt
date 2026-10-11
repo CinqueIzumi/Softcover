@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -23,7 +24,7 @@ internal class OnEnterSelectionModeAction(
         scope.setState {
             it.copy(
                 selectionMode = true,
-                selectedBookIds = bookId?.let { id -> setOf(id) } ?: emptySet(),
+                selectedBookIds = bookId?.let { id -> persistentSetOf(id) } ?: persistentSetOf(),
                 isRearranging = false,
             )
         }

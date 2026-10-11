@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.toImmutableMap
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
@@ -26,7 +27,7 @@ internal class OnToggleFilterValueAction(
                 state.filtersByTab + (tabId to next)
             }
 
-            state.copy(filtersByTab = newFilters)
+            state.copy(filtersByTab = newFilters.toImmutableMap())
         }
     }
 }

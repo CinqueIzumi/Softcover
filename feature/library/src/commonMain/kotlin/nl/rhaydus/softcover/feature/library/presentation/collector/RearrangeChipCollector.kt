@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -36,7 +37,7 @@ internal class RearrangeChipCollector : LibraryCollector {
                     snapshot.compute()
                 }
 
-                scope.setState { it.copy(rearrangeChipByTab = chipByTab) }
+                scope.setState { it.copy(rearrangeChipByTab = chipByTab.toImmutableMap()) }
             }
     }
 }

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
@@ -16,7 +17,9 @@ internal class OnListToggleAction(
         scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>,
     ) {
         scope.setState { state ->
-            val updated = if (enabled) state.draftEnabledListIds + id else state.draftEnabledListIds - id
+            val updated = state.draftEnabledListIds.toPersistentSet().let { current ->
+                if (enabled) current.add(id) else current.remove(id)
+            }
             state.copy(draftEnabledListIds = updated).withOrderedEntries()
         }
     }

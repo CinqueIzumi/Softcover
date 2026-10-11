@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
@@ -25,8 +26,8 @@ internal class BecauseYouReadCollector : ExploreCollector {
                             isLoading = recommendation.loading,
                         )
                     } ?: BECAUSE_YOU_READ_HEADER_STAND_IN,
-                    becauseYouReadGenreOptions = recommendation?.genreOptions.orEmpty(),
-                    becauseYouReadBooks = recommendation?.books.orEmpty(),
+                    becauseYouReadGenreOptions = recommendation?.genreOptions.orEmpty().toImmutableList(),
+                    becauseYouReadBooks = recommendation?.books.orEmpty().toImmutableList(),
                     // Mapped from the recommendation rather than hardcoded false - see
                     // BecauseYouReadRecommendation.loading for why a mid-switch placeholder must
                     // keep this true instead of prematurely clearing OnBecauseYouReadGenreSelectedAction's

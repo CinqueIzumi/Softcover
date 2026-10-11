@@ -68,7 +68,7 @@ class ReadingScreenUiStateTest {
         fun `is the loading stand-in while there are no books`() {
             // ----- Arrange -----
             val state = ReadingScreenUiState(
-                books = emptyList(),
+                books = persistentListOf(),
                 isLoading = false,
             )
 
@@ -80,7 +80,7 @@ class ReadingScreenUiStateTest {
         fun `is the loading stand-in while loading even when there are books`() {
             // ----- Arrange -----
             val state = ReadingScreenUiState(
-                books = listOf(book(5)),
+                books = persistentListOf(book(5)),
                 isLoading = true,
             )
 
@@ -92,7 +92,7 @@ class ReadingScreenUiStateTest {
         fun `is the first book once loaded`() {
             // ----- Arrange -----
             val state = ReadingScreenUiState(
-                books = listOf(book(5), book(6)),
+                books = persistentListOf(book(5), book(6)),
                 isLoading = false,
             )
 
@@ -107,7 +107,7 @@ class ReadingScreenUiStateTest {
         fun `is true while there are no books`() {
             // ----- Arrange -----
             val state = ReadingScreenUiState(
-                books = emptyList(),
+                books = persistentListOf(),
                 isLoading = false,
             )
 
@@ -119,7 +119,7 @@ class ReadingScreenUiStateTest {
         fun `is true while loading even when there is a book`() {
             // ----- Arrange -----
             val state = ReadingScreenUiState(
-                books = listOf(book(1)),
+                books = persistentListOf(book(1)),
                 isLoading = true,
             )
 
@@ -131,7 +131,7 @@ class ReadingScreenUiStateTest {
         fun `is false once loaded with a book`() {
             // ----- Arrange -----
             val state = ReadingScreenUiState(
-                books = listOf(book(1)),
+                books = persistentListOf(book(1)),
                 isLoading = false,
             )
 

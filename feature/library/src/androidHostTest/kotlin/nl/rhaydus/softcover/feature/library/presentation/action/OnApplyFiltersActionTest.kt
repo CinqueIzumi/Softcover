@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -40,9 +42,9 @@ class OnApplyFiltersActionTest {
         @Test
         fun `no-op when filterDraft is null`() = runTest {
             // ----- Arrange -----
-            val existing = LibraryFilters(formats = setOf("ebook"))
+            val existing = LibraryFilters(formats = persistentSetOf("ebook"))
             stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(tabId to existing),
+                filtersByTab = persistentMapOf(tabId to existing),
                 filterDraft = null,
             )
 
@@ -59,14 +61,14 @@ class OnApplyFiltersActionTest {
         @Test
         fun `replaces the tab's entry with the draft filters and leaves other tabs alone`() = runTest {
             // ----- Arrange -----
-            val previous = LibraryFilters(formats = setOf("paperback"))
+            val previous = LibraryFilters(formats = persistentSetOf("paperback"))
             val draft = LibraryFilters(
-                formats = setOf("ebook"),
+                formats = persistentSetOf("ebook"),
                 owned = true,
             )
-            val otherFilters = LibraryFilters(releaseYears = setOf(2020))
+            val otherFilters = LibraryFilters(releaseYears = persistentSetOf(2020))
             stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(
+                filtersByTab = persistentMapOf(
                     tabId to previous,
                     otherTabId to otherFilters,
                 ),
@@ -92,10 +94,10 @@ class OnApplyFiltersActionTest {
         @Test
         fun `removes the tab's entry when the draft filters are empty and leaves other tabs alone`() = runTest {
             // ----- Arrange -----
-            val ownFilters = LibraryFilters(formats = setOf("ebook"))
-            val otherFilters = LibraryFilters(releaseYears = setOf(2020))
+            val ownFilters = LibraryFilters(formats = persistentSetOf("ebook"))
+            val otherFilters = LibraryFilters(releaseYears = persistentSetOf(2020))
             stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(
+                filtersByTab = persistentMapOf(
                     tabId to ownFilters,
                     otherTabId to otherFilters,
                 ),

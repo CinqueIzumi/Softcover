@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -16,10 +18,10 @@ import nl.rhaydus.softcover.feature.library.presentation.state.buildLibraryArran
  */
 internal data class ArrangeDraftChipsSnapshot(
     val draft: LibraryArrangeDraft?,
-    val visibleTabs: List<LibraryTab>,
-    val customLists: List<BookList>,
-    val booksByTab: Map<String, List<Book>>,
-    val deadlines: Map<Int, BookDeadline>,
+    val visibleTabs: ImmutableList<LibraryTab>,
+    val customLists: ImmutableList<BookList>,
+    val booksByTab: ImmutableMap<String, ImmutableList<Book>>,
+    val deadlines: ImmutableMap<Int, BookDeadline>,
 ) {
     fun compute(): LibraryArrangeChips {
         val draft = draft

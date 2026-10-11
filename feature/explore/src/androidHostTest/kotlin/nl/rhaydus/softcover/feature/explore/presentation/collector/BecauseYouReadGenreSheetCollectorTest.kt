@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -130,7 +131,7 @@ class BecauseYouReadGenreSheetCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Romance",
-                becauseYouReadGenreOptions = listOf("Romance", "Horror"),
+                becauseYouReadGenreOptions = persistentListOf("Romance", "Horror"),
             )
             val collector = BecauseYouReadGenreSheetCollector()
 
@@ -152,7 +153,7 @@ class BecauseYouReadGenreSheetCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Romance",
-                becauseYouReadGenreOptions = listOf("Romance", "Horror"),
+                becauseYouReadGenreOptions = persistentListOf("Romance", "Horror"),
             )
             val collector = BecauseYouReadGenreSheetCollector()
             val job = launch {
@@ -175,7 +176,7 @@ class BecauseYouReadGenreSheetCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Horror",
-                becauseYouReadGenreOptions = listOf("Horror"),
+                becauseYouReadGenreOptions = persistentListOf("Horror"),
             )
             val collector = BecauseYouReadGenreSheetCollector()
 

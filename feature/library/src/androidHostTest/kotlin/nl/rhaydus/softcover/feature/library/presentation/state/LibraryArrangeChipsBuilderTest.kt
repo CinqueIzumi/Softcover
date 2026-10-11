@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -32,9 +34,9 @@ class LibraryArrangeChipsBuilderTest {
             val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----
@@ -60,9 +62,9 @@ class LibraryArrangeChipsBuilderTest {
             val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(customListTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----
@@ -83,9 +85,9 @@ class LibraryArrangeChipsBuilderTest {
             val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----
@@ -111,9 +113,9 @@ class LibraryArrangeChipsBuilderTest {
             val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----
@@ -139,9 +141,9 @@ class LibraryArrangeChipsBuilderTest {
             val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----
@@ -164,9 +166,9 @@ class LibraryArrangeChipsBuilderTest {
             val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----
@@ -200,9 +202,9 @@ class LibraryArrangeChipsBuilderTest {
             val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(customListTab),
-                customLists = listOf(rankedList),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                customLists = persistentListOf(rankedList),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----
@@ -224,9 +226,9 @@ class LibraryArrangeChipsBuilderTest {
             val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----
@@ -247,9 +249,9 @@ class LibraryArrangeChipsBuilderTest {
             val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = emptyList(),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----
@@ -273,9 +275,9 @@ class LibraryArrangeChipsBuilderTest {
             val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----
@@ -296,9 +298,9 @@ class LibraryArrangeChipsBuilderTest {
             val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----
@@ -319,9 +321,9 @@ class LibraryArrangeChipsBuilderTest {
             val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----

@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.action
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -91,7 +92,7 @@ class OnReorderLibraryTabsActionTest {
         fun `strips the All entry id from the supplied order`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftTabOrder = emptyList(),
+                draftTabOrder = persistentListOf(),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)

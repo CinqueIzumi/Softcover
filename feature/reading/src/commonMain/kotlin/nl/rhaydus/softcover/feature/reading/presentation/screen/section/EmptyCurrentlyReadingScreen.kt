@@ -12,6 +12,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
@@ -32,7 +34,7 @@ internal fun EmptyCurrentlyReadingScreen(
     pickUpNextHeader: SectionHeaderUiModel,
     trendingHeader: SectionHeaderUiModel,
     emptyState: EmptyStateUiModel,
-    trendingBooks: List<Book> = emptyList(),
+    trendingBooks: ImmutableList<Book> = persistentListOf(),
     pickUpNext: BookCardSet<Book> = BookCardSet.empty(),
     trendingTileCover: CoverUiModel? = null,
     streakEnabled: Boolean = false,

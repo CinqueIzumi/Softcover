@@ -10,6 +10,9 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -120,8 +123,8 @@ class OnBulkAddToNewListActionTest {
         fun `empty selection leaves the sheet closed and makes no use case calls or snackbar`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                selectedBookIds = emptySet(),
-                booksByTab = emptyMap(),
+                selectedBookIds = persistentSetOf(),
+                booksByTab = persistentMapOf(),
             )
 
             val action = OnBulkAddToNewListAction(
@@ -156,8 +159,8 @@ class OnBulkAddToNewListActionTest {
             val firstBook = buildBook(id = 1)
             val secondBook = buildBook(id = 2)
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1, 2),
-                booksByTab = mapOf(tabKey to listOf(firstBook, secondBook)),
+                selectedBookIds = persistentSetOf(1, 2),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(firstBook, secondBook)),
             )
 
             coEvery {
@@ -211,8 +214,8 @@ class OnBulkAddToNewListActionTest {
                 pending = CreateList,
             )
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(buildBook(id = 1))),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(buildBook(id = 1))),
                 chooseListsSheet = closing,
             )
             coEvery {
@@ -243,8 +246,8 @@ class OnBulkAddToNewListActionTest {
         fun `requests the chooser before the writes land so the rows show their in-flight state`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(buildBook(id = 1))),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(buildBook(id = 1))),
             )
             var requestedDuringWrite: Boolean? = null
             var mutatedDuringWrite: Set<Int>? = null
@@ -286,8 +289,8 @@ class OnBulkAddToNewListActionTest {
                 edition = null,
             )
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(editionlessBook)),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(editionlessBook)),
             )
 
             val action = OnBulkAddToNewListAction(
@@ -322,8 +325,8 @@ class OnBulkAddToNewListActionTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
             )
 
             coEvery {
@@ -359,8 +362,8 @@ class OnBulkAddToNewListActionTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
             )
 
             coEvery {
@@ -389,8 +392,8 @@ class OnBulkAddToNewListActionTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
             )
 
             coEvery {

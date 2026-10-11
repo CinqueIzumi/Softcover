@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -38,7 +39,7 @@ class SelectionCountCollectorTest {
         @Test
         fun `writes the size of the initial selection`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(selectedBookIds = setOf(1, 2, 3))
+            stateFlow.value = LibraryUiState(selectedBookIds = persistentSetOf(1, 2, 3))
             val collector = SelectionCountCollector()
 
             // ----- Act -----
@@ -67,9 +68,9 @@ class SelectionCountCollectorTest {
             stateFlow.value.selectionCount shouldBe selectionCountOf(count = 0)
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(selectedBookIds = setOf(4, 5))
+            stateFlow.value = stateFlow.value.copy(selectedBookIds = persistentSetOf(4, 5))
             val afterSelecting = stateFlow.value.selectionCount
-            stateFlow.value = stateFlow.value.copy(selectedBookIds = emptySet())
+            stateFlow.value = stateFlow.value.copy(selectedBookIds = persistentSetOf())
 
             // ----- Assert -----
             afterSelecting shouldBe selectionCountOf(count = 2)

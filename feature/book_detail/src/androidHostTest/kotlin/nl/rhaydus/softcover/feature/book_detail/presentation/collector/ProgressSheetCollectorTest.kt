@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldEndWith
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -257,7 +258,7 @@ class ProgressSheetCollectorTest {
                 audioSeconds = 7200,
             )
             val book = PreviewData.baseBook.copy(
-                editions = listOf(audioEdition),
+                editions = persistentListOf(audioEdition),
                 defaultEdition = audioEdition,
                 userBookRead = null,
             )
@@ -300,7 +301,7 @@ class ProgressSheetCollectorTest {
                 audioSeconds = 7200,
             )
             val book = PreviewData.baseBook.copy(
-                editions = listOf(audioEdition),
+                editions = persistentListOf(audioEdition),
                 defaultEdition = audioEdition,
                 userBookRead = null,
             )

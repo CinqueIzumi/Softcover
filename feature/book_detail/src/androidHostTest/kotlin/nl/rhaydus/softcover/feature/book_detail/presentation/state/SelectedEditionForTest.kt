@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -16,7 +17,7 @@ class SelectedEditionForTest {
 
             // ----- Act -----
             val result = selectedEditionFor(
-                editions = listOf(current, other),
+                editions = persistentListOf(current, other),
                 selectedEditionId = 2,
                 currentEdition = current,
             )
@@ -32,7 +33,7 @@ class SelectedEditionForTest {
 
             // ----- Act -----
             val result = selectedEditionFor(
-                editions = listOf(current, buildEdition(id = 2)),
+                editions = persistentListOf(current, buildEdition(id = 2)),
                 selectedEditionId = null,
                 currentEdition = current,
             )
@@ -48,7 +49,7 @@ class SelectedEditionForTest {
 
             // ----- Act -----
             val result = selectedEditionFor(
-                editions = listOf(buildEdition(id = 2)),
+                editions = persistentListOf(buildEdition(id = 2)),
                 selectedEditionId = 99,
                 currentEdition = current,
             )

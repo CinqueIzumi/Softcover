@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
@@ -37,7 +39,6 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnMoodChipClicke
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveAllSearchQueriesClickedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveSearchQueryClickedAction
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * The search-focus overlay content (explore-3a §4 "Search focus state"): the recent-query history as
@@ -46,7 +47,7 @@ import kotlin.time.Duration.Companion.seconds
  */
 @Composable
 internal fun SearchFocusContent(
-    queries: List<String>,
+    queries: ImmutableList<String>,
     moodChips: ChipSet<MoodTag>,
     runAction: (ExploreAction) -> Unit,
     modifier: Modifier = Modifier,

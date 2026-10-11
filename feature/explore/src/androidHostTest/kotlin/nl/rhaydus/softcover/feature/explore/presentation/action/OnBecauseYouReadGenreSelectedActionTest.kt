@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +53,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Romance",
-                becauseYouReadBooks = listOf(mockk()),
+                becauseYouReadBooks = persistentListOf(mockk()),
             )
             val gate = CompletableDeferred<Unit>()
 
@@ -87,7 +88,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Romance",
-                becauseYouReadGenreOptions = listOf("Horror", "Fantasy"),
+                becauseYouReadGenreOptions = persistentListOf("Horror", "Fantasy"),
             )
             coEvery {
                 setBecauseYouReadGenreUseCase(genre = null)
@@ -110,7 +111,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Romance",
-                becauseYouReadGenreOptions = emptyList(),
+                becauseYouReadGenreOptions = persistentListOf(),
             )
             coEvery {
                 setBecauseYouReadGenreUseCase(genre = null)
@@ -133,8 +134,8 @@ class OnBecauseYouReadGenreSelectedActionTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Fantasy",
-                becauseYouReadGenreOptions = listOf("Horror", "Fantasy"),
-                becauseYouReadBooks = listOf(mockk()),
+                becauseYouReadGenreOptions = persistentListOf("Horror", "Fantasy"),
+                becauseYouReadBooks = persistentListOf(mockk()),
                 loadingBecauseYouReadBooks = false,
             )
 
@@ -159,8 +160,8 @@ class OnBecauseYouReadGenreSelectedActionTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Horror",
-                becauseYouReadGenreOptions = listOf("Horror", "Fantasy"),
-                becauseYouReadBooks = listOf(mockk()),
+                becauseYouReadGenreOptions = persistentListOf("Horror", "Fantasy"),
+                becauseYouReadBooks = persistentListOf(mockk()),
                 loadingBecauseYouReadBooks = false,
             )
 

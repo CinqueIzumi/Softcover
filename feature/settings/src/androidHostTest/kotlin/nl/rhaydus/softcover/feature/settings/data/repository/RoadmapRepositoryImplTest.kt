@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -41,7 +42,7 @@ class RoadmapRepositoryImplTest {
     }
 
     private fun stubDocument(source: RoadmapSource): RoadmapDocument = RoadmapDocument(
-        blocks = emptyList(),
+        blocks = persistentListOf(),
         fetchedAtEpochMillis = 1_000L,
         source = source,
     )

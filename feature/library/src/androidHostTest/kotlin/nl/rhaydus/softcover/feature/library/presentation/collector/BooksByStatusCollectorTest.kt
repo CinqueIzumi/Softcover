@@ -4,6 +4,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -131,7 +133,7 @@ class BooksByStatusCollectorTest {
         fun `disabling a status removes its tab and leaves non-status tabs alone`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val allBook = mockk<Book>()
-            stateFlow.value = LibraryUiState(booksByTab = mapOf("all" to listOf(allBook)))
+            stateFlow.value = LibraryUiState(booksByTab = persistentMapOf("all" to persistentListOf(allBook)))
             val job = launchCollector()
 
             // ----- Act -----

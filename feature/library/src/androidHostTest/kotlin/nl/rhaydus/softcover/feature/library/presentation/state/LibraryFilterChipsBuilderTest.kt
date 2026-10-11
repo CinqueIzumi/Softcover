@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import org.junit.jupiter.api.Nested
@@ -62,7 +63,7 @@ class LibraryFilterChipsBuilderTest {
         @Test
         fun `builds one format chip per option in source order`() {
             // ----- Arrange -----
-            val options = LibraryFilterOptions(formats = listOf("hardcover", "ebook", "audiobook"))
+            val options = LibraryFilterOptions(formats = persistentListOf("hardcover", "ebook", "audiobook"))
 
             // ----- Act -----
             val chips = buildLibraryFilterChips(options = options)
@@ -76,7 +77,7 @@ class LibraryFilterChipsBuilderTest {
         @Test
         fun `builds one releaseYear chip per option in source order`() {
             // ----- Arrange -----
-            val options = LibraryFilterOptions(releaseYears = listOf(2021, 2019))
+            val options = LibraryFilterOptions(releaseYears = persistentListOf(2021, 2019))
 
             // ----- Act -----
             val chips = buildLibraryFilterChips(options = options)
@@ -89,7 +90,7 @@ class LibraryFilterChipsBuilderTest {
         @Test
         fun `builds one readYear chip per option in source order`() {
             // ----- Arrange -----
-            val options = LibraryFilterOptions(readYears = listOf(2022, 2020))
+            val options = LibraryFilterOptions(readYears = persistentListOf(2022, 2020))
 
             // ----- Act -----
             val chips = buildLibraryFilterChips(options = options)
@@ -102,7 +103,7 @@ class LibraryFilterChipsBuilderTest {
         @Test
         fun `builds one tag chip per option in source order`() {
             // ----- Arrange -----
-            val options = LibraryFilterOptions(tags = listOf(tagScifi, tagFiction))
+            val options = LibraryFilterOptions(tags = persistentListOf(tagScifi, tagFiction))
 
             // ----- Act -----
             val chips = buildLibraryFilterChips(options = options)
@@ -116,7 +117,7 @@ class LibraryFilterChipsBuilderTest {
         @Test
         fun `builds one rating chip per bucket in source order`() {
             // ----- Arrange -----
-            val options = LibraryFilterOptions(ratingBuckets = listOf(4.0, 3.5, 3.0))
+            val options = LibraryFilterOptions(ratingBuckets = persistentListOf(4.0, 3.5, 3.0))
 
             // ----- Act -----
             val chips = buildLibraryFilterChips(options = options)
@@ -129,7 +130,7 @@ class LibraryFilterChipsBuilderTest {
         @Test
         fun `rating chip label collapses a whole rating to an integer`() {
             // ----- Arrange -----
-            val options = LibraryFilterOptions(ratingBuckets = listOf(4.0))
+            val options = LibraryFilterOptions(ratingBuckets = persistentListOf(4.0))
 
             // ----- Act -----
             val chips = buildLibraryFilterChips(options = options)
@@ -141,7 +142,7 @@ class LibraryFilterChipsBuilderTest {
         @Test
         fun `rating chip label keeps the fractional digit for a half rating`() {
             // ----- Arrange -----
-            val options = LibraryFilterOptions(ratingBuckets = listOf(3.5))
+            val options = LibraryFilterOptions(ratingBuckets = persistentListOf(3.5))
 
             // ----- Act -----
             val chips = buildLibraryFilterChips(options = options)
@@ -156,8 +157,8 @@ class LibraryFilterChipsBuilderTest {
             // "2020" is both a format's own name and a release year's label — each facet's own
             // ChipSet can only disambiguate them because each key carries its facet prefix.
             val options = LibraryFilterOptions(
-                formats = listOf("2020"),
-                releaseYears = listOf(2020),
+                formats = persistentListOf("2020"),
+                releaseYears = persistentListOf(2020),
             )
 
             // ----- Act -----
@@ -178,11 +179,11 @@ class LibraryFilterChipsBuilderTest {
             // ----- Arrange -----
             val options = LibraryFilterOptions(
                 supportsOwnedFilter = true,
-                formats = listOf("ebook"),
-                releaseYears = listOf(2020),
-                readYears = listOf(2020),
-                tags = listOf(tagFiction),
-                ratingBuckets = listOf(4.0),
+                formats = persistentListOf("ebook"),
+                releaseYears = persistentListOf(2020),
+                readYears = persistentListOf(2020),
+                tags = persistentListOf(tagFiction),
+                ratingBuckets = persistentListOf(4.0),
             )
 
             // ----- Act -----

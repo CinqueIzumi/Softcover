@@ -6,6 +6,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -93,7 +95,7 @@ class ShareCardsCollectorTest {
         book = book,
         currentUsername = "reader",
         currentUserAvatarUrl = "https://example.com/avatar.png",
-        userTags = userTags,
+        userTags = userTags.toImmutableList(),
         chosenShareVariant = chosenShareVariant,
         shareSheet = shareSheet,
         shareSheetRequested = shareSheetRequested,
@@ -320,7 +322,7 @@ class ShareCardsCollectorTest {
                 )
                 stateFlow.value = stateFlow.value.copy(currentUsername = "frodo")
                 stateFlow.value = stateFlow.value.copy(currentUserAvatarUrl = "https://example.com/avatar.png")
-                stateFlow.value = stateFlow.value.copy(userTags = listOf(tag))
+                stateFlow.value = stateFlow.value.copy(userTags = persistentListOf(tag))
 
                 // ----- Assert -----
                 val card = stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.card
@@ -352,7 +354,7 @@ class ShareCardsCollectorTest {
             // ----- Act -----
             stateFlow.value = readerState(
                 book = book,
-                userTags = listOf(visibleTag, spoilerTag),
+                userTags = persistentListOf(visibleTag, spoilerTag),
             )
 
             // ----- Assert -----

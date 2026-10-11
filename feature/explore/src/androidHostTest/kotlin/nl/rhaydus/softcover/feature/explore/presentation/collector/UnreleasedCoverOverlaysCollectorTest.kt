@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -76,7 +77,7 @@ class UnreleasedCoverOverlaysCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val book = stubBook(id = 1)
-                stateFlow.value = ExploreScreenUiState(trendingBooks = listOf(book))
+                stateFlow.value = ExploreScreenUiState(trendingBooks = persistentListOf(book))
                 val collector = UnreleasedCoverOverlaysCollector()
 
                 // ----- Act -----
@@ -99,7 +100,7 @@ class UnreleasedCoverOverlaysCollectorTest {
                 id = 1,
                 isUnreleased = false,
             )
-            stateFlow.value = ExploreScreenUiState(trendingBooks = listOf(book))
+            stateFlow.value = ExploreScreenUiState(trendingBooks = persistentListOf(book))
             val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
@@ -122,7 +123,7 @@ class UnreleasedCoverOverlaysCollectorTest {
                 id = 1,
                 effectiveReleaseDate = null,
             )
-            stateFlow.value = ExploreScreenUiState(trendingBooks = listOf(book))
+            stateFlow.value = ExploreScreenUiState(trendingBooks = persistentListOf(book))
             val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
@@ -142,10 +143,10 @@ class UnreleasedCoverOverlaysCollectorTest {
         fun `collects unreleased books from every rail and the search results`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
-                trendingBooks = listOf(stubBook(id = 1)),
-                becauseYouReadBooks = listOf(stubBook(id = 2)),
-                continueSeriesBooks = listOf(stubBook(id = 3)),
-                queriedBooks = listOf(stubBook(id = 4)),
+                trendingBooks = persistentListOf(stubBook(id = 1)),
+                becauseYouReadBooks = persistentListOf(stubBook(id = 2)),
+                continueSeriesBooks = persistentListOf(stubBook(id = 3)),
+                queriedBooks = persistentListOf(stubBook(id = 4)),
             )
             val collector = UnreleasedCoverOverlaysCollector()
 
@@ -167,8 +168,8 @@ class UnreleasedCoverOverlaysCollectorTest {
             // ----- Arrange -----
             val book = stubBook(id = 5)
             stateFlow.value = ExploreScreenUiState(
-                trendingBooks = listOf(book),
-                becauseYouReadBooks = listOf(book),
+                trendingBooks = persistentListOf(book),
+                becauseYouReadBooks = persistentListOf(book),
             )
             val collector = UnreleasedCoverOverlaysCollector()
 

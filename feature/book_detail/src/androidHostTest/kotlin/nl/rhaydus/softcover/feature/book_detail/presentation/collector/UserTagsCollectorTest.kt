@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -128,7 +129,7 @@ class UserTagsCollectorTest {
                     category = TagCategory.GENRE,
                 ),
             )
-            stateFlow.value = stateFlow.value.copy(userTags = existingTags)
+            stateFlow.value = stateFlow.value.copy(userTags = existingTags.toImmutableList())
 
             coEvery {
                 getUserTagsUseCase(bookId = 3)

@@ -5,6 +5,10 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -57,8 +61,8 @@ class MastheadCollectorTest {
         fun `emits one masthead entry per visible tab titled after the tab's label`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(LibraryTab.All, readTab),
-                tabStatsByTab = mapOf(
+                visibleTabs = persistentListOf(LibraryTab.All, readTab),
+                tabStatsByTab = persistentMapOf(
                     LibraryTab.All.id to LibraryTabStats(
                         itemCount = 3,
                         totalPages = 0,
@@ -95,8 +99,8 @@ class MastheadCollectorTest {
             )
             val tabs = listOf(readTab, wantToReadTab, currentlyReadingTab, customListTab)
             stateFlow.value = LibraryUiState(
-                visibleTabs = tabs,
-                tabStatsByTab = tabs.associate { it.id to emptyStats },
+                visibleTabs = tabs.toImmutableList(),
+                tabStatsByTab = (tabs.associate { it.id to emptyStats }).toImmutableMap(),
             )
             val collector = MastheadCollector()
 
@@ -125,8 +129,8 @@ class MastheadCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(readTab),
-                    tabStatsByTab = mapOf(
+                    visibleTabs = persistentListOf(readTab),
+                    tabStatsByTab = persistentMapOf(
                         readTab.id to LibraryTabStats(
                             itemCount = 5,
                             totalPages = 250,
@@ -171,8 +175,8 @@ class MastheadCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(readTab),
-                    tabStatsByTab = mapOf(
+                    visibleTabs = persistentListOf(readTab),
+                    tabStatsByTab = persistentMapOf(
                         readTab.id to LibraryTabStats(
                             itemCount = 5,
                             totalPages = 0,
@@ -200,7 +204,7 @@ class MastheadCollectorTest {
         fun `a tab whose stats have not landed shows the loading stand-in counts`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                stateFlow.value = LibraryUiState(visibleTabs = listOf(readTab))
+                stateFlow.value = LibraryUiState(visibleTabs = persistentListOf(readTab))
                 val collector = MastheadCollector()
 
                 // ----- Act -----
@@ -225,8 +229,8 @@ class MastheadCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(LibraryTab.All, readTab, wantToReadTab),
-                    tabStatsByTab = mapOf(
+                    visibleTabs = persistentListOf(LibraryTab.All, readTab, wantToReadTab),
+                    tabStatsByTab = persistentMapOf(
                         readTab.id to LibraryTabStats(
                             itemCount = 1,
                             totalPages = 0,
@@ -256,8 +260,8 @@ class MastheadCollectorTest {
         fun `a tab stops loading once its stats land`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(readTab),
-                tabStatsByTab = emptyMap(),
+                visibleTabs = persistentListOf(readTab),
+                tabStatsByTab = persistentMapOf(),
             )
             val collector = MastheadCollector()
             val job = launch {
@@ -270,7 +274,7 @@ class MastheadCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                tabStatsByTab = mapOf(
+                tabStatsByTab = persistentMapOf(
                     readTab.id to LibraryTabStats(
                         itemCount = 4,
                         totalPages = 0,
@@ -291,7 +295,7 @@ class MastheadCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(readTab),
+                    visibleTabs = persistentListOf(readTab),
                     isLoading = true,
                 )
                 val collector = MastheadCollector()

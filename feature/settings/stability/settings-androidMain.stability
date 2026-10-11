@@ -184,10 +184,10 @@ private fun nl.rhaydus.softcover.feature.settings.presentation.screen.GalleryThe
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilityContent(state: nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction, kotlin.Unit>, onCreateListClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
     - onCreateListClick: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
@@ -200,38 +200,38 @@ public fun nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisi
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilitySettingsScreenLayout(state: nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction, kotlin.Unit>, onCreateListClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
     - onCreateListClick: STABLE (function type)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapBlockQuote(spans: kotlin.collections.List<nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSpan>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
-  skippable: false
+private fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapBlockQuote(spans: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSpan>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - spans: RUNTIME (requires runtime check)
+    - spans: STABLE (known stable type)
     - openUrl: STABLE (function type)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapContent(state: nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction, kotlin.Unit>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
     - openUrl: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapDocumentBody(isBundled: kotlin.Boolean, renderUnits: kotlin.collections.List<nl.rhaydus.softcover.feature.settings.presentation.model.RoadmapRenderUnit>, lastUpdatedText: kotlin.String?, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
-  skippable: false
+private fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapDocumentBody(isBundled: kotlin.Boolean, renderUnits: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.feature.settings.presentation.model.RoadmapRenderUnit>, lastUpdatedText: kotlin.String?, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
+  skippable: true
   restartable: true
   params:
     - isBundled: STABLE (primitive type)
-    - renderUnits: RUNTIME (requires runtime check)
+    - renderUnits: STABLE (known stable type)
     - lastUpdatedText: STABLE (class with no mutable properties)
     - openUrl: STABLE (function type)
 
@@ -251,20 +251,20 @@ private fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapLas
     - text: STABLE (String is immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapList(items: kotlin.collections.List<nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, isLoading: kotlin.Boolean): kotlin.Unit
-  skippable: false
+private fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapList(items: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - items: RUNTIME (requires runtime check)
+    - items: STABLE (known stable type)
     - openUrl: STABLE (function type)
     - isLoading: STABLE (primitive type)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapParagraph(spans: kotlin.collections.List<nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSpan>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
-  skippable: false
+private fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapParagraph(spans: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSpan>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - spans: RUNTIME (requires runtime check)
+    - spans: STABLE (known stable type)
     - openUrl: STABLE (function type)
 
 @Composable
@@ -275,10 +275,10 @@ public fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapScre
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapScreenLayout(state: nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction, kotlin.Unit>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, onNavigateBack: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
     - openUrl: STABLE (function type)
     - onNavigateBack: STABLE (function type)
@@ -294,7 +294,7 @@ private fun nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapUni
   skippable: true
   restartable: true
   params:
-    - unit: STABLE (class with no mutable properties)
+    - unit: STABLE (marked @Stable or @Immutable)
     - openUrl: STABLE (function type)
 
 @Composable
@@ -305,7 +305,7 @@ public fun nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsScr
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsScreenLayout(state: nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState, settingsRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction, kotlin.Unit>, navigateToProfile: kotlin.Function0<kotlin.Unit>, navigateToAppearanceSettings: kotlin.Function0<kotlin.Unit>, navigateToLibraryVisibility: kotlin.Function0<kotlin.Unit>, navigateToHiddenSuggestions: kotlin.Function0<kotlin.Unit>, navigateToAbout: kotlin.Function0<kotlin.Unit>, navigateToRoadmap: kotlin.Function0<kotlin.Unit>, navigateToComponentGallery: kotlin.Function0<kotlin.Unit>, libraryVisibilityState: nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState, libraryVisibilityRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction, kotlin.Unit>, roadmapState: nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState, roadmapRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction, kotlin.Unit>, onCreateListClick: kotlin.Function0<kotlin.Unit>, onStartAppUpdate: kotlin.Function0<kotlin.Unit>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, debugSection: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
     - state: STABLE (class with no mutable properties)
@@ -317,9 +317,9 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsS
     - navigateToAbout: STABLE (function type)
     - navigateToRoadmap: STABLE (function type)
     - navigateToComponentGallery: STABLE (function type)
-    - libraryVisibilityState: RUNTIME (requires runtime check)
+    - libraryVisibilityState: STABLE (class with no mutable properties)
     - libraryVisibilityRunAction: STABLE (function type)
-    - roadmapState: RUNTIME (requires runtime check)
+    - roadmapState: STABLE (class with no mutable properties)
     - roadmapRunAction: STABLE (function type)
     - onCreateListClick: STABLE (function type)
     - onStartAppUpdate: STABLE (function type)
@@ -360,11 +360,11 @@ private fun nl.rhaydus.softcover.feature.settings.presentation.screen.SourceSect
     - onRoadmapClick: STABLE (function type)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.roadmapAnnotatedString(spans: kotlin.collections.List<nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSpan>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, leadingMarker: kotlin.String?): androidx.compose.ui.text.AnnotatedString
-  skippable: false
+private fun nl.rhaydus.softcover.feature.settings.presentation.screen.roadmapAnnotatedString(spans: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSpan>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, leadingMarker: kotlin.String?): androidx.compose.ui.text.AnnotatedString
+  skippable: true
   restartable: true
   params:
-    - spans: RUNTIME (requires runtime check)
+    - spans: STABLE (known stable type)
     - openUrl: STABLE (function type)
     - leadingMarker: STABLE (class with no mutable properties)
 
@@ -426,10 +426,10 @@ private fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.Li
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilityDiscardGuard(state: nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction, kotlin.Unit>): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
 
 @Composable
@@ -453,10 +453,10 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.R
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.ReorderableTabsGroup(state: nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction, kotlin.Unit>): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
 
 @Composable
@@ -527,10 +527,10 @@ public fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.Set
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsSelectableRow(model: nl.rhaydus.softcover.feature.settings.presentation.model.SettingsChoiceRowUiModel<*>, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - model: RUNTIME (requires runtime check)
+    - model: STABLE (marked @Stable or @Immutable)
     - onClick: STABLE (function type)
 
 @Composable

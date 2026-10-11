@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.model
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
@@ -18,7 +20,7 @@ internal fun buildLibraryTabEntries(
     draftEnabledStatusCodes: Set<Int>,
     draftEnabledListIds: Set<Int>,
     draftTabOrder: List<String>,
-): List<LibraryTabEntry> {
+): ImmutableList<LibraryTabEntry> {
     val statusEntries: List<LibraryTabEntry> = defaultStatusOrder
         .map { status ->
             val label = LibraryTab.Status.labelFor(status = status)
@@ -67,5 +69,6 @@ internal fun buildLibraryTabEntries(
         ordered + appended
     }
 
-    return listOf<LibraryTabEntry>(LibraryTabEntry.All(totalCount = totalCount)) + reorderableOrdered
+    return (listOf<LibraryTabEntry>(LibraryTabEntry.All(totalCount = totalCount)) + reorderableOrdered)
+        .toImmutableList()
 }

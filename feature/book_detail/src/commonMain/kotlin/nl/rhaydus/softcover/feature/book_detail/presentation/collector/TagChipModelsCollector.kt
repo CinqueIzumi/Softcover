@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -61,11 +62,11 @@ internal class TagChipModelsCollector : BookDetailCollector {
 
                 scope.setState {
                     it.copy(
-                        userTagChips = userTagChips,
-                        communityTagGroups = communityTagGroups,
+                        userTagChips = userTagChips.toImmutableList(),
+                        communityTagGroups = communityTagGroups.toImmutableList(),
                         tagEditorOpenerChip = tagEditorOpenerChip(hasTags = snapshot.userTags.isNotEmpty()),
                         userTagEditorGroups = snapshot.userTags.toUserTagEditorChipGroups(),
-                        userTagByEditorChipKey = snapshot.userTags.associateBy { it.chipKey },
+                        userTagByEditorChipKey = snapshot.userTags.associateBy { it.chipKey }.toImmutableMap(),
                     )
                 }
             }
@@ -128,7 +129,7 @@ private fun List<Tag>.toTagCategoryChipGroups(revealedTagKeys: Set<String>): Lis
                     tone = if (concealed) ChipTone.Spoiler else ChipTone.Tonal,
                     interaction = if (concealed) ChipInteraction.Clickable else ChipInteraction.Inert,
                 )
-            },
+            }.toImmutableList(),
         )
     }
 
@@ -140,7 +141,7 @@ private fun List<UserTag>.toUserTagEditorChipGroups(): ImmutableList<UserTagEdit
         tagsInCategory.takeIf { it.isNotEmpty() }?.let {
             UserTagEditorChipGroup(
                 label = category.label,
-                chips = it.map { tag -> tag.toEditorChipUiModel() },
+                chips = it.map { tag -> tag.toEditorChipUiModel() }.toImmutableList(),
             )
         }
     }
@@ -150,7 +151,7 @@ private fun List<UserTag>.toUserTagEditorChipGroups(): ImmutableList<UserTagEdit
     val otherGroup = otherTags.takeIf { it.isNotEmpty() }?.let {
         UserTagEditorChipGroup(
             label = TagCategory.OTHER.label,
-            chips = it.map { tag -> tag.toEditorChipUiModel() },
+            chips = it.map { tag -> tag.toEditorChipUiModel() }.toImmutableList(),
         )
     }
 

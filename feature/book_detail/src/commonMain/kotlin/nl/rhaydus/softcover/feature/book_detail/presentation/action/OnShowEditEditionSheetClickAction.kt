@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -32,7 +33,7 @@ internal class OnShowEditEditionSheetClickAction : BookDetailAction {
                     scope.setLocalVariables { it.copy(editionsLoadedForBookId = bookId) }
                     scope.setState {
                         it.copy(
-                            editions = editions,
+                            editions = editions.toImmutableList(),
                             loadingEditions = false,
                         )
                     }

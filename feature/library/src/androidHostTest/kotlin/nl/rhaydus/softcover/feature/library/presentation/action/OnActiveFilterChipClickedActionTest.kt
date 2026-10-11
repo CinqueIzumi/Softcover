@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -44,11 +46,11 @@ class OnActiveFilterChipClickedActionTest {
         @Test
         fun `the clear-all key clears the tab's filters and leaves other tabs alone`() = runTest {
             // ----- Arrange -----
-            val otherFilters = LibraryFilters(releaseYears = setOf(2021))
+            val otherFilters = LibraryFilters(releaseYears = persistentSetOf(2021))
 
             stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(
-                    tabId to LibraryFilters(formats = setOf("ebook")),
+                filtersByTab = persistentMapOf(
+                    tabId to LibraryFilters(formats = persistentSetOf("ebook")),
                     otherTabId to otherFilters,
                 ),
             )
@@ -78,8 +80,8 @@ class OnActiveFilterChipClickedActionTest {
             )
 
             stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(tabId to LibraryFilters(formats = setOf("ebook"))),
-                activeFilterChipsByTab = mapOf(
+                filtersByTab = persistentMapOf(tabId to LibraryFilters(formats = persistentSetOf("ebook"))),
+                activeFilterChipsByTab = persistentMapOf(
                     tabId to LibraryActiveFilterChips(chips = listOf(chip to value).toChipSet()),
                 ),
             )
@@ -102,11 +104,11 @@ class OnActiveFilterChipClickedActionTest {
         @Test
         fun `a key not present in the tab's active filter chips is a no-op`() = runTest {
             // ----- Arrange -----
-            val existing = LibraryFilters(formats = setOf("ebook"))
+            val existing = LibraryFilters(formats = persistentSetOf("ebook"))
 
             stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(tabId to existing),
-                activeFilterChipsByTab = emptyMap(),
+                filtersByTab = persistentMapOf(tabId to existing),
+                activeFilterChipsByTab = persistentMapOf(),
             )
 
             val action = OnActiveFilterChipClickedAction(

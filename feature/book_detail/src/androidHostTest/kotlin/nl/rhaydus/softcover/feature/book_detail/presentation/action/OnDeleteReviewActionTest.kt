@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -108,7 +109,7 @@ class OnDeleteReviewActionTest {
         fun `adds book id to failedMutationBookIds without losing prior entries when use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
-            stateFlow.value = buildBookDetailUiState().copy(failedMutationBookIds = setOf(1, 2))
+            stateFlow.value = buildBookDetailUiState().copy(failedMutationBookIds = persistentSetOf(1, 2))
 
             coEvery {
                 updateBookReviewUseCase(

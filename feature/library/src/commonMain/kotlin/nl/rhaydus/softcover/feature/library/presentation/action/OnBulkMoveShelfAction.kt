@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.component.haptics.Feedback
@@ -71,12 +72,12 @@ internal class OnBulkMoveShelfAction(
         scope.setState {
             it.copy(
                 selectionMode = false,
-                selectedBookIds = emptySet(),
+                selectedBookIds = persistentSetOf(),
                 bulkActionInProgress = false,
                 isBulkMoveMenuExpanded = false,
                 isBulkRemoveSheetRequested = false,
                 isChooseListsSheetRequested = false,
-                listsBeingMutated = emptySet(),
+                listsBeingMutated = persistentSetOf(),
             )
         }
     }

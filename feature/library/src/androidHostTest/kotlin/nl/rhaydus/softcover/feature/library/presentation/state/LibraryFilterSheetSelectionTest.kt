@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.chip.toChipSet
@@ -74,7 +75,7 @@ class LibraryFilterSheetSelectionTest {
             )
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.All.id,
-                filters = LibraryFilters(formats = setOf("ebook")),
+                filters = LibraryFilters(formats = persistentSetOf("ebook")),
             )
 
             // ----- Act -----
@@ -105,7 +106,7 @@ class LibraryFilterSheetSelectionTest {
             )
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.All.id,
-                filters = LibraryFilters(releaseYears = setOf(2020)),
+                filters = LibraryFilters(releaseYears = persistentSetOf(2020)),
             )
 
             // ----- Act -----
@@ -167,7 +168,7 @@ class LibraryFilterSheetSelectionTest {
             )
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.All.id,
-                filters = LibraryFilters(tags = setOf(tagFiction)),
+                filters = LibraryFilters(tags = persistentSetOf(tagFiction)),
             )
 
             // ----- Act -----
@@ -224,7 +225,7 @@ class LibraryFilterSheetSelectionTest {
             )
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.All.id,
-                filters = LibraryFilters(formats = setOf("unknown")),
+                filters = LibraryFilters(formats = persistentSetOf("unknown")),
             )
 
             // ----- Act -----

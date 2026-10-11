@@ -9,6 +9,8 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -84,7 +86,7 @@ class OnSetListRankedActionTest {
                     gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
                 )
                 stateFlow.value = LibraryUiState(
-                    customLists = listOf(
+                    customLists = persistentListOf(
                         BookList(
                             id = listId,
                             name = listName,
@@ -153,9 +155,9 @@ class OnSetListRankedActionTest {
                 )
 
                 stateFlow.value = LibraryUiState(
-                    sortModeByTab = mapOf(tabId to previousMode),
-                    sortDirectionByTab = mapOf(tabId to previousDirection),
-                    customLists = listOf(
+                    sortModeByTab = persistentMapOf(tabId to previousMode),
+                    sortDirectionByTab = persistentMapOf(tabId to previousDirection),
+                    customLists = persistentListOf(
                         BookList(
                             id = listId,
                             name = listName,
@@ -222,7 +224,7 @@ class OnSetListRankedActionTest {
                 gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
             )
             stateFlow.value = LibraryUiState(
-                customLists = listOf(
+                customLists = persistentListOf(
                     BookList(
                         id = listId,
                         name = listName,
@@ -275,7 +277,7 @@ class OnSetListRankedActionTest {
             runTest {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
-                    customLists = listOf(
+                    customLists = persistentListOf(
                         BookList(
                             id = listId,
                             name = listName,
@@ -326,7 +328,7 @@ class OnSetListRankedActionTest {
         @Test
         fun `list missing from state — snackbar text lacks the for suffix`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(customLists = emptyList())
+            stateFlow.value = LibraryUiState(customLists = persistentListOf())
 
             coEvery {
                 setListRankedUseCase(
@@ -371,7 +373,7 @@ class OnSetListRankedActionTest {
             )
 
             stateFlow.value = LibraryUiState(
-                customLists = listOf(
+                customLists = persistentListOf(
                     BookList(
                         id = listId,
                         name = listName,

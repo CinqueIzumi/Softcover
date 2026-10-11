@@ -3,6 +3,10 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -93,8 +97,8 @@ class ChooseListsCollectorTest {
         fun `opens on the request with one cover per resolved jacket edition`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFlow.value.copy(
-                booksByTab = mapOf("all" to listOf(bookWithId(id = 1), bookWithId(id = 2))),
-                selectedBookIds = setOf(1, 2),
+                booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1), bookWithId(id = 2))),
+                selectedBookIds = persistentSetOf(1, 2),
             )
             val job = launchCollector()
 
@@ -113,14 +117,14 @@ class ChooseListsCollectorTest {
         fun `a selection change rewrites the open sheet`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFlow.value.copy(
-                booksByTab = mapOf("all" to listOf(bookWithId(id = 1), bookWithId(id = 2))),
-                selectedBookIds = setOf(1),
+                booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1), bookWithId(id = 2))),
+                selectedBookIds = persistentSetOf(1),
                 isChooseListsSheetRequested = true,
             )
             val job = launchCollector()
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(selectedBookIds = setOf(1, 2))
+            stateFlow.value = stateFlow.value.copy(selectedBookIds = persistentSetOf(1, 2))
 
             // ----- Assert -----
             shownSheet().scaffold.header.shouldNotBeNull().section.headlineText shouldBe "Shelve 2 books"
@@ -135,8 +139,8 @@ class ChooseListsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    booksByTab = mapOf("all" to listOf(bookWithId(id = 1))),
-                    selectedBookIds = setOf(1),
+                    booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1))),
+                    selectedBookIds = persistentSetOf(1),
                 )
 
                 // ----- Assert -----
@@ -151,13 +155,13 @@ class ChooseListsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                customLists = listOf(
+                customLists = persistentListOf(
                     customList(
                         id = 10,
                         name = "Winter reading",
                     ),
                 ),
-                selectedBookIds = emptySet(),
+                selectedBookIds = persistentSetOf(),
                 isChooseListsSheetRequested = true,
             )
 
@@ -179,13 +183,13 @@ class ChooseListsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    customLists = listOf(
+                    customLists = persistentListOf(
                         customList(
                             id = 10,
                             name = "Winter reading",
                         ),
                     ),
-                    selectedBookIds = emptySet(),
+                    selectedBookIds = persistentSetOf(),
                 )
 
                 // ----- Assert -----
@@ -198,8 +202,8 @@ class ChooseListsCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 stateFlow.value = stateFlow.value.copy(
-                    booksByTab = mapOf("all" to listOf(bookWithId(id = 1))),
-                    selectedBookIds = setOf(1),
+                    booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1))),
+                    selectedBookIds = persistentSetOf(1),
                     isChooseListsSheetRequested = true,
                 )
                 val job = launchCollector()
@@ -207,7 +211,7 @@ class ChooseListsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    selectedBookIds = emptySet(),
+                    selectedBookIds = persistentSetOf(),
                     isChooseListsSheetRequested = false,
                 )
 
@@ -222,8 +226,8 @@ class ChooseListsCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 stateFlow.value = stateFlow.value.copy(
-                    booksByTab = mapOf("all" to listOf(bookWithId(id = 1), bookWithId(id = 2))),
-                    selectedBookIds = setOf(1),
+                    booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1), bookWithId(id = 2))),
+                    selectedBookIds = persistentSetOf(1),
                     isChooseListsSheetRequested = true,
                 )
                 val job = launchCollector()
@@ -233,7 +237,7 @@ class ChooseListsCollectorTest {
                     chooseListsSheet = stateFlow.value.chooseListsSheet.requestClose(pending = CreateList),
                     isChooseListsSheetRequested = false,
                 )
-                stateFlow.value = stateFlow.value.copy(listsBeingMutated = setOf(10))
+                stateFlow.value = stateFlow.value.copy(listsBeingMutated = persistentSetOf(10))
 
                 // ----- Assert -----
                 stateFlow.value.chooseListsSheet.isClosing shouldBe true
@@ -246,8 +250,8 @@ class ChooseListsCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 stateFlow.value = stateFlow.value.copy(
-                    booksByTab = mapOf("all" to listOf(bookWithId(id = 1))),
-                    selectedBookIds = setOf(1),
+                    booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1))),
+                    selectedBookIds = persistentSetOf(1),
                     chooseListsSheet = openChooseListsSession(
                         closing = true,
                         pending = CreateList,
@@ -270,14 +274,14 @@ class ChooseListsCollectorTest {
             // ----- Arrange -----
             val books = (1..5).map { id -> bookWithId(id = id) }
             stateFlow.value = stateFlow.value.copy(
-                booksByTab = mapOf("all" to books),
-                selectedBookIds = setOf(1),
+                booksByTab = persistentMapOf("all" to books.toImmutableList()),
+                selectedBookIds = persistentSetOf(1),
                 isChooseListsSheetRequested = true,
             )
             val job = launchCollector()
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(selectedBookIds = setOf(1, 2, 3, 4, 5))
+            stateFlow.value = stateFlow.value.copy(selectedBookIds = persistentSetOf(1, 2, 3, 4, 5))
 
             // ----- Assert -----
             val trailing = shownSheet().scaffold.header.shouldNotBeNull().trailing
@@ -296,14 +300,14 @@ class ChooseListsCollectorTest {
                 coverUrl = "https://example.com/cover.jpg",
             )
             stateFlow.value = stateFlow.value.copy(
-                booksByTab = mapOf("all" to listOf(withEdition, withoutEdition)),
-                selectedBookIds = setOf(1),
+                booksByTab = persistentMapOf("all" to persistentListOf(withEdition, withoutEdition)),
+                selectedBookIds = persistentSetOf(1),
                 isChooseListsSheetRequested = true,
             )
             val job = launchCollector()
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(selectedBookIds = setOf(1, 2))
+            stateFlow.value = stateFlow.value.copy(selectedBookIds = persistentSetOf(1, 2))
 
             // ----- Assert -----
             val trailing = shownSheet().scaffold.header.shouldNotBeNull().trailing
@@ -321,14 +325,14 @@ class ChooseListsCollectorTest {
                 name = "Winter reading",
             )
             stateFlow.value = stateFlow.value.copy(
-                booksByTab = mapOf("all" to listOf(book)),
-                selectedBookIds = setOf(1),
+                booksByTab = persistentMapOf("all" to persistentListOf(book)),
+                selectedBookIds = persistentSetOf(1),
                 isChooseListsSheetRequested = true,
             )
             val job = launchCollector()
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(customLists = listOf(owned, custom))
+            stateFlow.value = stateFlow.value.copy(customLists = persistentListOf(owned, custom))
 
             // ----- Assert -----
             shownSheet().rows.map { it.listId } shouldBe listOf(2)

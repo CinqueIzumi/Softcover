@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -24,7 +25,7 @@ internal class OnSelectBookRangeAction(
         scope.setState {
             it.copy(
                 selectionMode = true,
-                selectedBookIds = it.selectedBookIds + bookIds,
+                selectedBookIds = it.selectedBookIds.toPersistentSet().addAll(bookIds),
                 isRearranging = false,
             )
         }

@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -44,7 +45,7 @@ class OnLibraryVisibilityBackClickActionTest {
         fun `shows the discard sheet and sends no event when dirty`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledStatusCodes = setOf(1),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
             val action = OnLibraryVisibilityBackClickAction()
@@ -83,7 +84,7 @@ class OnLibraryVisibilityBackClickActionTest {
         fun `sends NavigateBack and does not open the sheet when dirty but saving`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledStatusCodes = setOf(1),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
                 isSaving = true,
             )

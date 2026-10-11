@@ -9,6 +9,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -249,7 +250,7 @@ class OnSaveVerdictActionTest {
                 hasSpoilers = false,
             )
             stateFlow.value = buildBookDetailUiState().copy(
-                failedMutationBookIds = setOf(1, 2),
+                failedMutationBookIds = persistentSetOf(1, 2),
                 verdictSheet = sheet,
             )
             dependencies = stubDependencies()

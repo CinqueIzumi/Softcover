@@ -2,7 +2,10 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -69,14 +72,14 @@ class LibraryUiStateTest {
             prevEditionsByTab = emptyMap(),
         )
         return LibraryUiState(
-            booksByTab = booksByTab,
-            editionsByTab = editionsByTab,
-            bookByBookId = bookByBookId,
+            booksByTab = booksByTab.mapValues { (_, books) -> books.toImmutableList() }.toImmutableMap(),
+            editionsByTab = editionsByTab.mapValues { (_, editions) -> editions.toImmutableList() }.toImmutableMap(),
+            bookByBookId = bookByBookId.toImmutableMap(),
             searchQuery = searchQuery,
-            sortModeByTab = sortModeByTab,
-            sortDirectionByTab = sortDirectionByTab,
-            filtersByTab = filtersByTab,
-            filterOptionsByTab = filterOptionsByTab,
+            sortModeByTab = sortModeByTab.toImmutableMap(),
+            sortDirectionByTab = sortDirectionByTab.toImmutableMap(),
+            filtersByTab = filtersByTab.toImmutableMap(),
+            filterOptionsByTab = filterOptionsByTab.toImmutableMap(),
             displayBooksByTab = displayResult.displayBooksByTab,
             displayEditionsByTab = displayResult.displayEditionsByTab,
             tabStatsByTab = displayResult.tabStatsByTab,
@@ -247,16 +250,16 @@ class LibraryUiStateTest {
     @Nested
     inner class AvailableFilterOptionsFor {
         private val sampleOptions = LibraryFilterOptions(
-            tags = listOf(
+            tags = persistentListOf(
                 Tag(
                     id = 1,
                     name = "Fiction",
                 ),
             ),
-            formats = listOf("ebook"),
-            releaseYears = listOf(2024),
+            formats = persistentListOf("ebook"),
+            releaseYears = persistentListOf(2024),
             supportsOwnedFilter = true,
-            ratingBuckets = listOf(4.0),
+            ratingBuckets = persistentListOf(4.0),
         )
 
         @Test
@@ -292,7 +295,7 @@ class LibraryUiStateTest {
         fun `returns the stored pill for a tab that has one`() {
             // ----- Arrange -----
             val storedPill = filterPillButton(active = true)
-            val state = buildState().copy(filterPillByTab = mapOf(readTabId to storedPill))
+            val state = buildState().copy(filterPillByTab = persistentMapOf(readTabId to storedPill))
 
             // ----- Act -----
             val result = state.filterPillFor(readTabId)
@@ -305,7 +308,7 @@ class LibraryUiStateTest {
         fun `returns the inactive pill without an indicator for an unknown tab`() {
             // ----- Arrange -----
             val state = buildState().copy(
-                filterPillByTab = mapOf(readTabId to filterPillButton(active = true)),
+                filterPillByTab = persistentMapOf(readTabId to filterPillButton(active = true)),
             )
 
             // ----- Act -----

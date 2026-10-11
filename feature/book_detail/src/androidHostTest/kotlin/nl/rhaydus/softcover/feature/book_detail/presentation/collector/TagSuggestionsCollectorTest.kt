@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -138,7 +139,7 @@ class TagSuggestionsCollectorTest {
             stateFlow.value.tagSuggestions shouldBe listOf(fantasy)
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userTags = listOf(fantasy))
+            stateFlow.value = stateFlow.value.copy(userTags = persistentListOf(fantasy))
 
             // ----- Assert -----
             stateFlow.value.tagSuggestions shouldBe emptyList()

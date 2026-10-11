@@ -4,6 +4,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -259,7 +261,7 @@ class AllBooksCollectorTest {
                     status = BookStatus.Read,
                 )
                 stateFlow.value = LibraryUiState(
-                    booksByTab = mapOf("status-3" to listOf(other)),
+                    booksByTab = persistentMapOf("status-3" to persistentListOf(other)),
                     isLoading = true,
                 )
                 val job = launchCollector()

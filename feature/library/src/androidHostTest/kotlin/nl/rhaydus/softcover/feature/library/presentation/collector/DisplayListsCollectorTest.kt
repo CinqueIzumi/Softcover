@@ -3,6 +3,9 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -133,9 +136,9 @@ class DisplayListsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                editionsByTab = mapOf(listTabId to listOf(edition)),
-                sortModeByTab = mapOf(listTabId to LibrarySortMode.TITLE),
-                sortDirectionByTab = mapOf(listTabId to SortDirection.ASCENDING),
+                editionsByTab = persistentMapOf(listTabId to persistentListOf(edition)),
+                sortModeByTab = persistentMapOf(listTabId to LibrarySortMode.TITLE),
+                sortDirectionByTab = persistentMapOf(listTabId to SortDirection.ASCENDING),
             )
 
             // ----- Assert -----
@@ -165,7 +168,7 @@ class DisplayListsCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = LibraryUiState(booksByTab = mapOf(tabId to listOf(book1, book2)))
+            stateFlow.value = LibraryUiState(booksByTab = persistentMapOf(tabId to persistentListOf(book1, book2)))
 
             // ----- Assert -----
             val stats = stateFlow.value.tabStatsByTab[tabId]
@@ -197,9 +200,9 @@ class DisplayListsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                editionsByTab = mapOf(listTabId to listOf(edition)),
-                sortModeByTab = mapOf(listTabId to LibrarySortMode.TITLE),
-                sortDirectionByTab = mapOf(listTabId to SortDirection.ASCENDING),
+                editionsByTab = persistentMapOf(listTabId to persistentListOf(edition)),
+                sortModeByTab = persistentMapOf(listTabId to LibrarySortMode.TITLE),
+                sortDirectionByTab = persistentMapOf(listTabId to SortDirection.ASCENDING),
             )
 
             // ----- Assert -----
@@ -232,7 +235,7 @@ class DisplayListsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                booksByTab = mapOf(tabId to listOf(matching, nonMatching)),
+                booksByTab = persistentMapOf(tabId to persistentListOf(matching, nonMatching)),
                 searchQuery = "kotlin",
             )
 
@@ -272,8 +275,8 @@ class DisplayListsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                booksByTab = mapOf(tabId to listOf(ebookBook, paperBook)),
-                filtersByTab = mapOf(tabId to LibraryFilters(formats = setOf("ebook"))),
+                booksByTab = persistentMapOf(tabId to persistentListOf(ebookBook, paperBook)),
+                filtersByTab = persistentMapOf(tabId to LibraryFilters(formats = persistentSetOf("ebook"))),
             )
 
             // ----- Assert -----
@@ -298,7 +301,7 @@ class DisplayListsCollectorTest {
                 )
             }
 
-            stateFlow.value = LibraryUiState(booksByTab = mapOf(tabId to listOf(book)))
+            stateFlow.value = LibraryUiState(booksByTab = persistentMapOf(tabId to persistentListOf(book)))
             val refAfterFirstEmit = stateFlow.value.displayBooksByTab[tabId]
 
             // ----- Act -----
@@ -331,7 +334,7 @@ class DisplayListsCollectorTest {
 
             // First emission: empty query, one book → computed list stored as prev
             stateFlow.value = LibraryUiState(
-                booksByTab = mapOf(tabId to listOf(book)),
+                booksByTab = persistentMapOf(tabId to persistentListOf(book)),
                 searchQuery = "",
             )
             val refAfterFirst = stateFlow.value.displayBooksByTab[tabId]

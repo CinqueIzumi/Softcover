@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -26,8 +27,8 @@ class OnClearMutationFailureActionTest {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(
             buildBookDetailUiState().copy(
-                failedMutationBookIds = setOf(1, 2),
-                failedMutationEditionIds = setOf(10, 20),
+                failedMutationBookIds = persistentSetOf(1, 2),
+                failedMutationEditionIds = persistentSetOf(10, 20),
             ),
         )
         scope = ActionScope(

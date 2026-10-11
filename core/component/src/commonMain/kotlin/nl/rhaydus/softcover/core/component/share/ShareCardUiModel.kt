@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.component.share
 
+import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -16,6 +17,7 @@ import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
  * year-in-review recap), and [ReadingLifeShareCardUiModel] (a whole-history recap). [ShareCard]
  * dispatches on the concrete subtype to a private per-variant body.
  */
+@Immutable
 sealed interface ShareCardUiModel {
     companion object : UiModelPreviews<ShareCardUiModel> {
         override val previews: ImmutableMap<String, ShareCardUiModel> = persistentMapOf(

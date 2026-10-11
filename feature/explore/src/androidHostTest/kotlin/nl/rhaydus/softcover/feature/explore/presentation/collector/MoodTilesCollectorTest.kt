@@ -62,7 +62,7 @@ class MoodTilesCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                moodTags = listOf(cosy, dark),
+                moodTags = persistentListOf(cosy, dark),
                 loadingMoodTags = false,
             )
 
@@ -77,7 +77,7 @@ class MoodTilesCollectorTest {
         fun `emits four loading stand-in tiles while the first load has no tags`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFlow.value.copy(
-                moodTags = emptyList(),
+                moodTags = persistentListOf(),
                 loadingMoodTags = true,
             )
 
@@ -107,7 +107,7 @@ class MoodTilesCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                moodTags = listOf(cosy),
+                moodTags = persistentListOf(cosy),
                 loadingMoodTags = true,
             )
 
@@ -128,7 +128,7 @@ class MoodTilesCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                moodTags = emptyList(),
+                moodTags = persistentListOf(),
                 loadingMoodTags = false,
             )
 
@@ -141,7 +141,7 @@ class MoodTilesCollectorTest {
         fun `unrelated state change does not recompute the tiles`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFlow.value.copy(
-                moodTags = listOf(cosy),
+                moodTags = persistentListOf(cosy),
                 loadingMoodTags = false,
             )
             val job = launch {

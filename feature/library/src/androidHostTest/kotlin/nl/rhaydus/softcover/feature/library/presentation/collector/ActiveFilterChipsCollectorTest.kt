@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -56,8 +58,8 @@ class ActiveFilterChipsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(
-                    "all" to LibraryFilters(formats = setOf("ebook")),
+                filtersByTab = persistentMapOf(
+                    "all" to LibraryFilters(formats = persistentSetOf("ebook")),
                     "read" to LibraryFilters(readYear = 2021),
                 ),
             )
@@ -84,7 +86,7 @@ class ActiveFilterChipsCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = LibraryUiState(filtersByTab = mapOf("all" to LibraryFilters(formats = setOf("ebook"))))
+            stateFlow.value = LibraryUiState(filtersByTab = persistentMapOf("all" to LibraryFilters(formats = persistentSetOf("ebook"))))
 
             // ----- Assert -----
             stateFlow.value.activeFilterChipsFor("missing").chips.chips shouldBe emptyList()
@@ -104,7 +106,11 @@ class ActiveFilterChipsCollectorTest {
                     )
                 }
 
-                stateFlow.value = LibraryUiState(filtersByTab = mapOf("all" to LibraryFilters(formats = setOf("ebook"))))
+                stateFlow.value = LibraryUiState(
+                    filtersByTab = persistentMapOf(
+                        "all" to LibraryFilters(formats = persistentSetOf("ebook")),
+                    ),
+                )
                 val chipsByTabAfterFirstEmit = stateFlow.value.activeFilterChipsByTab
 
                 // ----- Act -----

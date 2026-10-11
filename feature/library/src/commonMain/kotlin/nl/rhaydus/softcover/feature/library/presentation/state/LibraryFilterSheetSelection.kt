@@ -1,5 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -14,12 +17,12 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
  * (search-narrowed) chip lists.
  */
 internal data class LibraryFilterSheetSelection(
-    val ownershipChips: List<ChipUiModel> = emptyList(),
-    val formatChips: List<ChipUiModel> = emptyList(),
-    val releaseYearChips: List<ChipUiModel> = emptyList(),
-    val readYearChips: List<ChipUiModel> = emptyList(),
-    val tagChips: List<ChipUiModel> = emptyList(),
-    val ratingChips: List<ChipUiModel> = emptyList(),
+    val ownershipChips: ImmutableList<ChipUiModel> = persistentListOf(),
+    val formatChips: ImmutableList<ChipUiModel> = persistentListOf(),
+    val releaseYearChips: ImmutableList<ChipUiModel> = persistentListOf(),
+    val readYearChips: ImmutableList<ChipUiModel> = persistentListOf(),
+    val tagChips: ImmutableList<ChipUiModel> = persistentListOf(),
+    val ratingChips: ImmutableList<ChipUiModel> = persistentListOf(),
     val resultCount: Int = 0,
     val clearAllEnabled: Boolean = false,
     val ownershipFormatHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Ownership · Format"),
@@ -49,18 +52,18 @@ internal fun buildLibraryFilterSheetSelection(
     draft: LibraryFilterDraft,
     resultCount: Int,
 ): LibraryFilterSheetSelection {
-    fun ChipSet<LibraryFilterValue>.resolveSelection(): List<ChipUiModel> = this.chips.map { chip ->
+    fun ChipSet<LibraryFilterValue>.resolveSelection(): ImmutableList<ChipUiModel> = this.chips.map { chip ->
         val value = this[chip.key] ?: return@map chip
 
         chip.copy(selected = draft.filters.isSelected(value = value))
-    }
+    }.toImmutableList()
 
-    fun List<ChipUiModel>.matchingTagSearch(): List<ChipUiModel> = filter { chip ->
+    fun List<ChipUiModel>.matchingTagSearch(): ImmutableList<ChipUiModel> = filter { chip ->
         chip.label.contains(
             other = draft.tagSearch,
             ignoreCase = true,
         )
-    }
+    }.toImmutableList()
 
     return LibraryFilterSheetSelection(
         ownershipChips = chips.ownershipChips.resolveSelection(),

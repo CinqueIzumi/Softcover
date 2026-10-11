@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -32,7 +33,7 @@ internal data class OnSaveVerdictAction(
             .onFailure { error ->
                 AppLog.e("$error")
 
-                scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
+                scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds.toPersistentSet().add(book.id)) }
             }
     }
 }

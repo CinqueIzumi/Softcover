@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -51,7 +52,7 @@ class ShelveControlHeaderCollectorTest {
                 // ----- Arrange -----
                 stateFlow.value = buildBookDetailUiState().copy(
                     book = stubBook(id = 1),
-                    failedMutationBookIds = emptySet(),
+                    failedMutationBookIds = persistentSetOf(),
                 )
                 val collector = ShelveControlHeaderCollector()
 
@@ -74,7 +75,7 @@ class ShelveControlHeaderCollectorTest {
                 // ----- Arrange -----
                 stateFlow.value = buildBookDetailUiState().copy(
                     book = stubBook(id = 1),
-                    failedMutationBookIds = setOf(1),
+                    failedMutationBookIds = persistentSetOf(1),
                 )
                 val collector = ShelveControlHeaderCollector()
 
@@ -100,7 +101,7 @@ class ShelveControlHeaderCollectorTest {
                 // ----- Arrange -----
                 stateFlow.value = buildBookDetailUiState().copy(
                     book = stubBook(id = 1),
-                    failedMutationBookIds = setOf(2),
+                    failedMutationBookIds = persistentSetOf(2),
                 )
                 val collector = ShelveControlHeaderCollector()
 
@@ -123,7 +124,7 @@ class ShelveControlHeaderCollectorTest {
                 // ----- Arrange -----
                 stateFlow.value = buildBookDetailUiState().copy(
                     book = null,
-                    failedMutationBookIds = setOf(1),
+                    failedMutationBookIds = persistentSetOf(1),
                 )
                 val collector = ShelveControlHeaderCollector()
 

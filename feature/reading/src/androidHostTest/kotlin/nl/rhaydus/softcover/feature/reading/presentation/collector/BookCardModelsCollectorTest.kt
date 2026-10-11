@@ -5,6 +5,11 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
+import kotlin.time.Clock
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -35,7 +40,6 @@ import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import kotlin.time.Clock
 
 class BookCardModelsCollectorTest {
     private lateinit var dependencies: ReadingScreenDependencies
@@ -116,7 +120,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                books = listOf(
+                books = persistentListOf(
                     book(1),
                     book(5),
                     book(3),
@@ -144,7 +148,7 @@ class BookCardModelsCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(books = emptyList())
+            stateFlow.value = stateFlow.value.copy(books = persistentListOf())
 
             // ----- Assert -----
             stateFlow.value.alsoReading.cards.shouldNotBeEmpty()
@@ -163,7 +167,7 @@ class BookCardModelsCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(books = listOf(book(1)))
+            stateFlow.value = stateFlow.value.copy(books = persistentListOf(book(1)))
 
             // ----- Assert -----
             stateFlow.value.alsoReading.cards shouldBe emptyList()
@@ -181,7 +185,7 @@ class BookCardModelsCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(wantToReadBooks = (1..5).map { book(it) })
+            stateFlow.value = stateFlow.value.copy(wantToReadBooks = (1..5).map { book(it) }.toImmutableList())
 
             // ----- Assert -----
             stateFlow.value.pickUpNext.cards.map { it.key } shouldBe listOf(
@@ -204,7 +208,7 @@ class BookCardModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(books = listOf(book(1), book(2)))
+                stateFlow.value = stateFlow.value.copy(books = persistentListOf(book(1), book(2)))
 
                 // ----- Assert -----
                 stateFlow.value.pickUpNext.cards.shouldNotBeEmpty()
@@ -224,7 +228,7 @@ class BookCardModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(wantToReadBooks = emptyList())
+                stateFlow.value = stateFlow.value.copy(wantToReadBooks = persistentListOf())
 
                 // ----- Assert -----
                 stateFlow.value.pickUpNext.cards shouldBe emptyList()
@@ -244,7 +248,7 @@ class BookCardModelsCollectorTest {
                 val loading = stateFlow.value.alsoReading.cards
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(books = listOf(book(1), book(2), book(3)))
+                stateFlow.value = stateFlow.value.copy(books = persistentListOf(book(1), book(2), book(3)))
 
                 // ----- Assert -----
                 loading.forEach { it.isLoading shouldBe true }
@@ -265,7 +269,7 @@ class BookCardModelsCollectorTest {
                     )
                 }
                 stateFlow.value = stateFlow.value.copy(
-                    books = listOf(
+                    books = persistentListOf(
                         book(1),
                         book(2),
                         book(3),
@@ -273,9 +277,9 @@ class BookCardModelsCollectorTest {
                 )
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(failedMutationBookIds = setOf(2))
+                stateFlow.value = stateFlow.value.copy(failedMutationBookIds = persistentSetOf(2))
                 val failed = stateFlow.value.alsoReading.cards
-                stateFlow.value = stateFlow.value.copy(failedMutationBookIds = emptySet())
+                stateFlow.value = stateFlow.value.copy(failedMutationBookIds = persistentSetOf())
 
                 // ----- Assert -----
                 failed.card(2).decorations.shakeOnError shouldBe true
@@ -298,7 +302,7 @@ class BookCardModelsCollectorTest {
                 val books = listOf(book(1), book(2), book(3))
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(books = books)
+                stateFlow.value = stateFlow.value.copy(books = books.toImmutableList())
 
                 // ----- Assert -----
                 val alsoReading = stateFlow.value.alsoReading
@@ -320,7 +324,7 @@ class BookCardModelsCollectorTest {
             val shelf = listOf(book(7), book(8))
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(wantToReadBooks = shelf)
+            stateFlow.value = stateFlow.value.copy(wantToReadBooks = shelf.toImmutableList())
 
             // ----- Assert -----
             val pickUpNext = stateFlow.value.pickUpNext
@@ -340,7 +344,7 @@ class BookCardModelsCollectorTest {
                 )
             }
             stateFlow.value = stateFlow.value.copy(
-                books = listOf(
+                books = persistentListOf(
                     book(1),
                     book(2),
                 ),
@@ -349,7 +353,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                deadlines = mapOf(
+                deadlines = persistentMapOf(
                     2 to BookDeadline(
                         bookId = 2,
                         deadlineDate = today.plus(DatePeriod(days = 10)),
@@ -376,14 +380,14 @@ class BookCardModelsCollectorTest {
                 )
             }
             stateFlow.value = stateFlow.value.copy(
-                books = listOf(
+                books = persistentListOf(
                     book(1),
                     book(2),
                 ),
             )
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(deadlineCoverOverlays = mapOf(2 to overlay))
+            stateFlow.value = stateFlow.value.copy(deadlineCoverOverlays = persistentMapOf(2 to overlay))
 
             // ----- Assert -----
             val lead = stateFlow.value.alsoReading.cards.card(2)

@@ -5,6 +5,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -82,7 +85,7 @@ class OnToggleUserTagSpoilerActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = listOf(tag),
+                userTags = persistentListOf(tag),
             )
             val toggled = tag.copy(spoiler = true)
 
@@ -95,7 +98,7 @@ class OnToggleUserTagSpoilerActionTest {
 
             stateFlow.value = stateFlow.value.copy(
 
-                userTagByEditorChipKey = mapOf("chip" to tag),
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
 
             )
 
@@ -127,7 +130,7 @@ class OnToggleUserTagSpoilerActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = listOf(targetTag, otherTag),
+                userTags = persistentListOf(targetTag, otherTag),
             )
             val serverResponse = listOf(targetTag.copy(spoiler = true), otherTag)
 
@@ -140,7 +143,7 @@ class OnToggleUserTagSpoilerActionTest {
 
             stateFlow.value = stateFlow.value.copy(
 
-                userTagByEditorChipKey = mapOf("chip" to targetTag),
+                userTagByEditorChipKey = persistentMapOf("chip" to targetTag),
 
             )
 
@@ -167,7 +170,7 @@ class OnToggleUserTagSpoilerActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 7),
-                userTags = listOf(tag),
+                userTags = persistentListOf(tag),
             )
             val canonicalTag = tag.copy(
                 spoiler = true,
@@ -184,7 +187,7 @@ class OnToggleUserTagSpoilerActionTest {
 
             stateFlow.value = stateFlow.value.copy(
 
-                userTagByEditorChipKey = mapOf("chip" to tag),
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
 
             )
 
@@ -212,7 +215,7 @@ class OnToggleUserTagSpoilerActionTest {
             val originalTags = listOf(tag)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = originalTags,
+                userTags = originalTags.toImmutableList(),
             )
 
             coEvery {
@@ -224,7 +227,7 @@ class OnToggleUserTagSpoilerActionTest {
 
             stateFlow.value = stateFlow.value.copy(
 
-                userTagByEditorChipKey = mapOf("chip" to tag),
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
 
             )
 
@@ -251,11 +254,11 @@ class OnToggleUserTagSpoilerActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = null,
-                userTags = listOf(tag),
+                userTags = persistentListOf(tag),
             )
             val initialTags = stateFlow.value.userTags
             stateFlow.value = stateFlow.value.copy(
-                userTagByEditorChipKey = mapOf("chip" to tag),
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
             )
             val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
 
@@ -279,8 +282,8 @@ class OnToggleUserTagSpoilerActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = listOf(tag),
-                userTagByEditorChipKey = mapOf("chip" to tag),
+                userTags = persistentListOf(tag),
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
             )
             val action = OnToggleUserTagSpoilerAction(chipKey = "unknown")
 

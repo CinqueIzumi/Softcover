@@ -8,6 +8,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -117,7 +119,7 @@ class OnContinueSeriesMenuDismissedActionTest {
         books: List<Book>,
     ) {
         stateFlow.value = stateFlow.value.copy(
-            continueSeriesBooks = books,
+            continueSeriesBooks = books.toImmutableList(),
             continueSeriesMenu = SheetSession.Open(
                 model = menu.requestingClose(),
                 pending = PendingContinueSeriesDismissal(
@@ -310,7 +312,7 @@ class OnContinueSeriesMenuDismissedActionTest {
         fun `closes the session and hides nothing when the sheet was swiped away without a choice`() = runTest {
             // ----- Arrange -----
             stateFlow.value = stateFlow.value.copy(
-                continueSeriesBooks = listOf(book()),
+                continueSeriesBooks = persistentListOf(book()),
                 continueSeriesMenu = SheetSession.Open(model = menu),
                 continueSeriesMenuBookId = 3,
             )
@@ -330,7 +332,7 @@ class OnContinueSeriesMenuDismissedActionTest {
         @Test
         fun `does nothing when the session is already closed`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(continueSeriesBooks = listOf(book()))
+            stateFlow.value = stateFlow.value.copy(continueSeriesBooks = persistentListOf(book()))
 
             // ----- Act -----
             OnContinueSeriesMenuDismissedAction().execute(

@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
@@ -229,7 +231,7 @@ private val previewSearchFocusMoodTags = listOf(
     ),
 )
 
-private val previewRecentSearchQueries = listOf(
+private val previewRecentSearchQueries = persistentListOf(
     "Bubblegum",
     "Earthlings",
     "Convenience Store",
@@ -240,10 +242,10 @@ private val previewRecentSearchQueries = listOf(
 private val previewMockState = ExploreScreenUiState(
     previousSearchQueries = previewRecentSearchQueries,
     recentSearchChips = RecentSearchChipsSnapshot(previousSearchQueries = previewRecentSearchQueries).compute(),
-    trendingBooks = ExploreMockData.trending,
+    trendingBooks = ExploreMockData.trending.toImmutableList(),
     trending = ExploreMockData.trending.toPreviewTrendingSet(),
     loadingTrendingBooks = false,
-    continueSeriesBooks = ExploreMockData.continueSeries,
+    continueSeriesBooks = ExploreMockData.continueSeries.toImmutableList(),
     loadingContinueSeriesBooks = false,
     loadingFeaturedUpcomingRelease = false,
     loadingBecauseYouReadBooks = false,
@@ -274,12 +276,12 @@ private fun EmptyFirstLaunchExploreScreenPreview() {
             onScanClick = {},
             isOnline = true,
             state = ExploreScreenUiState(
-                trendingBooks = ExploreMockData.trending,
+                trendingBooks = ExploreMockData.trending.toImmutableList(),
                 trending = ExploreMockData.trending.toPreviewTrendingSet(),
                 loadingTrendingBooks = false,
-                continueSeriesBooks = emptyList(),
+                continueSeriesBooks = persistentListOf(),
                 loadingContinueSeriesBooks = false,
-                previousSearchQueries = emptyList(),
+                previousSearchQueries = persistentListOf(),
                 loadingFeaturedUpcomingRelease = false,
                 loadingBecauseYouReadBooks = false,
                 loadingMoodTags = false,
@@ -298,13 +300,13 @@ private fun LoadingTrendingExploreScreenPreview() {
             onScanClick = {},
             isOnline = true,
             state = ExploreScreenUiState(
-                trendingBooks = emptyList(),
+                trendingBooks = persistentListOf(),
                 loadingTrendingBooks = true,
-                continueSeriesBooks = ExploreMockData.continueSeries,
+                continueSeriesBooks = ExploreMockData.continueSeries.toImmutableList(),
                 loadingContinueSeriesBooks = false,
-                previousSearchQueries = listOf("Bubblegum", "Earthlings"),
+                previousSearchQueries = persistentListOf("Bubblegum", "Earthlings"),
                 recentSearchChips = RecentSearchChipsSnapshot(
-                    previousSearchQueries = listOf("Bubblegum", "Earthlings"),
+                    previousSearchQueries = persistentListOf("Bubblegum", "Earthlings"),
                 ).compute(),
                 loadingFeaturedUpcomingRelease = false,
                 loadingBecauseYouReadBooks = false,
@@ -324,12 +326,12 @@ private fun LoadingContinueSeriesExploreScreenPreview() {
             onScanClick = {},
             isOnline = true,
             state = ExploreScreenUiState(
-                trendingBooks = ExploreMockData.trending,
+                trendingBooks = ExploreMockData.trending.toImmutableList(),
                 trending = ExploreMockData.trending.toPreviewTrendingSet(),
                 loadingTrendingBooks = false,
-                continueSeriesBooks = emptyList(),
+                continueSeriesBooks = persistentListOf(),
                 loadingContinueSeriesBooks = true,
-                previousSearchQueries = emptyList(),
+                previousSearchQueries = persistentListOf(),
                 loadingFeaturedUpcomingRelease = false,
                 loadingBecauseYouReadBooks = false,
                 loadingMoodTags = false,
@@ -349,7 +351,7 @@ private fun SearchFocusExploreScreenPreview() {
             isOnline = true,
             state = previewMockState.copy(
                 searchFocused = true,
-                moodTags = previewSearchFocusMoodTags,
+                moodTags = previewSearchFocusMoodTags.toImmutableList(),
                 moodChips = MoodChipsSnapshot(moodTags = previewSearchFocusMoodTags).compute(),
             ),
         )
@@ -413,7 +415,7 @@ private fun ActiveExploreScreenPreview() {
 
     val state = ExploreScreenUiState(
         searchText = "Last to leave",
-        queriedBooks = queriedBooks,
+        queriedBooks = queriedBooks.toImmutableList(),
         searchResults = queriedBooks.map { book ->
             book.toSearchResultCard(
                 cover = book.toCoverUiModel(
@@ -446,7 +448,7 @@ private fun LoadingActiveExploreScreenPreview() {
             isOnline = true,
             state = ExploreScreenUiState(
                 searchText = "Piranesi",
-                queriedBooks = emptyList(),
+                queriedBooks = persistentListOf(),
                 isLoading = true,
             ),
         )
@@ -464,7 +466,7 @@ private fun NoResultsActiveExploreScreenPreview() {
             isOnline = true,
             state = ExploreScreenUiState(
                 searchText = "qwertyuiop",
-                queriedBooks = emptyList(),
+                queriedBooks = persistentListOf(),
                 isLoading = false,
             ),
         )

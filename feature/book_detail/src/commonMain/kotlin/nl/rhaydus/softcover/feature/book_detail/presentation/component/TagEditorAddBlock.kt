@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.layout.ExpandableFlowRow
 import nl.rhaydus.designsystem.layout.FlowRowExpansion
 import nl.rhaydus.softcover.core.component.chip.Chip
@@ -23,9 +24,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 @Composable
 internal fun TagEditorAddBlock(
     selectedCategoryKey: String,
-    categoryChips: List<ChipUiModel>,
+    categoryChips: ImmutableList<ChipUiModel>,
     namingField: TextFieldUiModel,
-    suggestionChips: List<ChipUiModel>,
+    suggestionChips: ImmutableList<ChipUiModel>,
     onCategoryChipEvent: (ChipEvent) -> Unit,
     onNamingFieldEvent: (TextFieldEvent) -> Unit,
     onSuggestionChipEvent: (ChipEvent) -> Unit,

@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.domain.model.Tag
 
 /**
@@ -9,13 +11,13 @@ import nl.rhaydus.softcover.core.domain.model.Tag
  * common "show me ≥X★" question instead of forcing the user to pick a precise threshold.
  */
 internal data class LibraryFilterOptions(
-    val tags: List<Tag> = emptyList(),
-    val formats: List<String> = emptyList(),
-    val releaseYears: List<Int> = emptyList(),
+    val tags: ImmutableList<Tag> = persistentListOf(),
+    val formats: ImmutableList<String> = persistentListOf(),
+    val releaseYears: ImmutableList<Int> = persistentListOf(),
     /** Year-finished facet values, populated for the Read tab only — see [buildBookFilterOptions]. */
-    val readYears: List<Int> = emptyList(),
+    val readYears: ImmutableList<Int> = persistentListOf(),
     val supportsOwnedFilter: Boolean = false,
-    val ratingBuckets: List<Double> = emptyList(),
+    val ratingBuckets: ImmutableList<Double> = persistentListOf(),
 ) {
     val isEmpty: Boolean
         get() = tags.isEmpty() &&

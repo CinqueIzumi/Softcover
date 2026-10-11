@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.domain.model.Tag
 import org.junit.jupiter.api.Nested
@@ -33,7 +34,7 @@ class LibraryActiveFilterChipsBuilderTest {
         @Test
         fun `a single active filter produces one chip and no clearAll`() {
             // ----- Arrange -----
-            val filters = LibraryFilters(formats = setOf("ebook"))
+            val filters = LibraryFilters(formats = persistentSetOf("ebook"))
 
             // ----- Act -----
             val result = buildLibraryActiveFilterChips(filters = filters)
@@ -47,8 +48,8 @@ class LibraryActiveFilterChipsBuilderTest {
         fun `more than one active filter adds a clearAll chip with the reserved key`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
-                formats = setOf("ebook"),
-                releaseYears = setOf(2021),
+                formats = persistentSetOf("ebook"),
+                releaseYears = persistentSetOf(2021),
             )
 
             // ----- Act -----
@@ -62,9 +63,9 @@ class LibraryActiveFilterChipsBuilderTest {
         fun `chips are ordered tags, formats, releaseYears, readYear, owned, rating`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
-                tags = setOf(tagFiction),
-                formats = setOf("ebook"),
-                releaseYears = setOf(2021),
+                tags = persistentSetOf(tagFiction),
+                formats = persistentSetOf("ebook"),
+                releaseYears = persistentSetOf(2021),
                 readYear = 2020,
                 owned = true,
                 ratingMin = 4.0,
@@ -149,8 +150,8 @@ class LibraryActiveFilterChipsBuilderTest {
         fun `every chip's trailing close action names the filter it removes`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
-                tags = setOf(tagFiction),
-                formats = setOf("ebook"),
+                tags = persistentSetOf(tagFiction),
+                formats = persistentSetOf("ebook"),
             )
 
             // ----- Act -----
@@ -167,9 +168,9 @@ class LibraryActiveFilterChipsBuilderTest {
         fun `the ChipSet resolves every chip key back to the LibraryFilterValue that built it`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
-                tags = setOf(tagFiction),
-                formats = setOf("ebook"),
-                releaseYears = setOf(2021),
+                tags = persistentSetOf(tagFiction),
+                formats = persistentSetOf("ebook"),
+                releaseYears = persistentSetOf(2021),
                 readYear = 2020,
                 owned = true,
                 ratingMin = 4.0,

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
@@ -16,7 +17,7 @@ internal class UserListsCollector : LibraryVisibilityCollector {
         dependencies.getAllUserListsUseCase().collectLatest { lists ->
             scope.setState { state ->
                 state
-                    .copy(availableLists = lists.sortedBy { list -> list.name.lowercase() })
+                    .copy(availableLists = lists.sortedBy { list -> list.name.lowercase() }.toImmutableList())
                     .withOrderedEntries()
             }
         }

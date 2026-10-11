@@ -4,6 +4,11 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -75,9 +80,9 @@ class SheetScaffoldCollectorsTest {
             // ----- Act -----
             stateFlow.value = LibraryUiState(
                 selectedTabId = LibraryTab.All.id,
-                booksByTab = mapOf(LibraryTab.All.id to List(5) { mockk<Book>() }),
-                displayBooksByTab = mapOf(LibraryTab.All.id to List(2) { mockk<Book>() }),
-                tabStatsByTab = mapOf(
+                booksByTab = persistentMapOf(LibraryTab.All.id to List(5) { mockk<Book>() }.toImmutableList()),
+                displayBooksByTab = persistentMapOf(LibraryTab.All.id to List(2) { mockk<Book>() }.toImmutableList()),
+                tabStatsByTab = persistentMapOf(
                     LibraryTab.All.id to LibraryTabStats(
                         itemCount = 5,
                         totalPages = 0,
@@ -98,8 +103,8 @@ class SheetScaffoldCollectorsTest {
             // ----- Act -----
             stateFlow.value = LibraryUiState(
                 selectedTabId = tabId,
-                editionsByTab = mapOf(tabId to List(4) { mockk<BookEdition>() }),
-                displayEditionsByTab = mapOf(tabId to List(3) { mockk<BookEdition>() }),
+                editionsByTab = persistentMapOf(tabId to List(4) { mockk<BookEdition>() }.toImmutableList()),
+                displayEditionsByTab = persistentMapOf(tabId to List(3) { mockk<BookEdition>() }.toImmutableList()),
             )
 
             // ----- Assert -----
@@ -114,7 +119,7 @@ class SheetScaffoldCollectorsTest {
             // ----- Act -----
             stateFlow.value = LibraryUiState(
                 selectedTabId = LibraryTab.All.id,
-                tabStatsByTab = mapOf(
+                tabStatsByTab = persistentMapOf(
                     LibraryTab.All.id to LibraryTabStats(
                         itemCount = 9,
                         totalPages = 0,
@@ -192,7 +197,7 @@ class SheetScaffoldCollectorsTest {
             // ----- Act -----
             stateFlow.value = LibraryUiState(
                 selectedTabId = LibraryTab.CustomList.idFor(listId = 3),
-                customLists = listOf(unranked),
+                customLists = persistentListOf(unranked),
             )
 
             // ----- Assert -----
@@ -212,11 +217,11 @@ class SheetScaffoldCollectorsTest {
             )
             stateFlow.value = LibraryUiState(
                 selectedTabId = LibraryTab.CustomList.idFor(listId = 3),
-                customLists = listOf(unranked),
+                customLists = persistentListOf(unranked),
             )
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(customLists = listOf(unranked.copy(ranked = true)))
+            stateFlow.value = stateFlow.value.copy(customLists = persistentListOf(unranked.copy(ranked = true)))
 
             // ----- Assert -----
             stateFlow.value.arrangeMakeOrderedListId.shouldBeNull()
@@ -232,7 +237,7 @@ class SheetScaffoldCollectorsTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                selectedBookIds = setOf(1, 2, 3),
+                selectedBookIds = persistentSetOf(1, 2, 3),
                 bulkActionInProgress = true,
                 isBulkRemoveSheetRequested = true,
             )
@@ -249,14 +254,14 @@ class SheetScaffoldCollectorsTest {
         fun `follows the selection size and the in-flight flag while open`() = runTest(testDispatcher) {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
+                selectedBookIds = persistentSetOf(1),
                 isBulkRemoveSheetRequested = true,
             )
             launchCollector(BulkRemoveSheetCollector())
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                selectedBookIds = setOf(1, 2),
+                selectedBookIds = persistentSetOf(1, 2),
                 bulkActionInProgress = true,
             )
 
@@ -275,7 +280,7 @@ class SheetScaffoldCollectorsTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    selectedBookIds = setOf(1, 2),
+                    selectedBookIds = persistentSetOf(1, 2),
                     bulkActionInProgress = true,
                 )
 
@@ -288,7 +293,7 @@ class SheetScaffoldCollectorsTest {
             runTest(testDispatcher) {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
-                    selectedBookIds = setOf(1, 2),
+                    selectedBookIds = persistentSetOf(1, 2),
                     bulkActionInProgress = true,
                     isBulkRemoveSheetRequested = true,
                 )
@@ -310,7 +315,7 @@ class SheetScaffoldCollectorsTest {
             runTest(testDispatcher) {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
-                    selectedBookIds = setOf(1, 2, 3),
+                    selectedBookIds = persistentSetOf(1, 2, 3),
                     bulkActionInProgress = true,
                     isBulkRemoveSheetRequested = true,
                 )
@@ -318,7 +323,7 @@ class SheetScaffoldCollectorsTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    selectedBookIds = emptySet(),
+                    selectedBookIds = persistentSetOf(),
                     bulkActionInProgress = false,
                     isBulkRemoveSheetRequested = false,
                 )
@@ -333,7 +338,7 @@ class SheetScaffoldCollectorsTest {
             runTest(testDispatcher) {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
-                    selectedBookIds = setOf(1),
+                    selectedBookIds = persistentSetOf(1),
                     bulkRemoveSheet = openBulkRemoveSession(
                         closing = true,
                         bookCount = 3,
@@ -374,9 +379,9 @@ class SheetScaffoldCollectorsTest {
         fun `opens on the request with rows from the visible tabs, selection and stats`() = runTest(testDispatcher) {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = tabs,
+                visibleTabs = tabs.toImmutableList(),
                 selectedTabId = LibraryTab.CustomList.idFor(listId = 2),
-                tabStatsByTab = tabStatsByTab,
+                tabStatsByTab = tabStatsByTab.toImmutableMap(),
             )
             launchCollector(ShelvesSheetCollector())
 
@@ -398,7 +403,7 @@ class SheetScaffoldCollectorsTest {
         fun `rewrites the rows while open when the selected tab changes`() = runTest(testDispatcher) {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = tabs,
+                visibleTabs = tabs.toImmutableList(),
                 selectedTabId = LibraryTab.All.id,
                 isShelvesSheetRequested = true,
             )
@@ -419,7 +424,7 @@ class SheetScaffoldCollectorsTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                visibleTabs = tabs,
+                visibleTabs = tabs.toImmutableList(),
                 selectedTabId = LibraryTab.All.id,
             )
 
@@ -432,7 +437,7 @@ class SheetScaffoldCollectorsTest {
             runTest(testDispatcher) {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
-                    visibleTabs = tabs,
+                    visibleTabs = tabs.toImmutableList(),
                     selectedTabId = LibraryTab.All.id,
                     isShelvesSheetRequested = true,
                 )
@@ -444,7 +449,7 @@ class SheetScaffoldCollectorsTest {
                     shelvesSheet = stateFlow.value.shelvesSheet.requestClose(pending = ManageShelves),
                     isShelvesSheetRequested = false,
                 )
-                stateFlow.value = stateFlow.value.copy(visibleTabs = tabs.take(1))
+                stateFlow.value = stateFlow.value.copy(visibleTabs = tabs.take(1).toImmutableList())
 
                 // ----- Assert -----
                 stateFlow.value.shelvesSheet.isClosing shouldBe true
@@ -457,7 +462,7 @@ class SheetScaffoldCollectorsTest {
             runTest(testDispatcher) {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
-                    visibleTabs = tabs,
+                    visibleTabs = tabs.toImmutableList(),
                     selectedTabId = LibraryTab.All.id,
                     shelvesSheet = openShelvesSession(
                         closing = true,

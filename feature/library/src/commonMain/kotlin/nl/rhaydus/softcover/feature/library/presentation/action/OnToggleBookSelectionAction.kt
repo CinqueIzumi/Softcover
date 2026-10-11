@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableSet
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -25,14 +27,14 @@ internal class OnToggleBookSelectionAction(
             if (next.isEmpty()) {
                 it.copy(
                     selectionMode = false,
-                    selectedBookIds = emptySet(),
+                    selectedBookIds = persistentSetOf(),
                     isBulkMoveMenuExpanded = false,
                     isBulkRemoveSheetRequested = false,
                     isChooseListsSheetRequested = false,
-                    listsBeingMutated = emptySet(),
+                    listsBeingMutated = persistentSetOf(),
                 )
             } else {
-                it.copy(selectedBookIds = next)
+                it.copy(selectedBookIds = next.toImmutableSet())
             }
         }
     }

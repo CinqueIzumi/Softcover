@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -29,7 +30,7 @@ internal class OnToggleListMembershipAction(
 
         val bookIdsBeforeWrite = scope.currentState.userLists.bookIdsOf(listId)
 
-        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated + listId) }
+        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated.toPersistentSet().add(listId)) }
 
         try {
             val result = if (isMember) {
@@ -71,7 +72,7 @@ internal class OnToggleListMembershipAction(
             }
         } finally {
             withContext(NonCancellable) {
-                scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated - listId) }
+                scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated.toPersistentSet().remove(listId)) }
             }
         }
     }

@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -43,7 +44,7 @@ class OnSearchDismissedActionTest {
                 searchFocused = true,
                 isSortMenuExpanded = true,
                 searchText = "dune",
-                queriedBooks = existingBooks,
+                queriedBooks = existingBooks.toImmutableList(),
             )
 
             // ----- Act -----

@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -167,7 +168,7 @@ class OnQueryChangeActionTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(
-                queriedBooks = listOf(mockk()),
+                queriedBooks = persistentListOf(mockk()),
                 searchError = "previous error",
                 activeMoodFilter = MoodTag(
                     id = 1,

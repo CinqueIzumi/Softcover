@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -36,7 +37,7 @@ internal class PillButtonsCollector : LibraryCollector {
                     it.copy(
                         filterPillByTab = snapshot.filterActiveByTab.mapValues { (_, active) ->
                             filterPillButton(active = active)
-                        },
+                        }.toImmutableMap(),
                         selectionPills = LibrarySelectionPills.of(
                             bulkActionInProgress = snapshot.bulkActionInProgress,
                         ),

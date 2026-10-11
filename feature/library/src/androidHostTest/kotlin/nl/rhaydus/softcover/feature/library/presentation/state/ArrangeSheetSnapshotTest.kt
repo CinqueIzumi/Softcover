@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
@@ -93,7 +94,7 @@ class ArrangeSheetSnapshotTest {
             // ----- Arrange -----
             val state = LibraryUiState(
                 selectedTabId = LibraryTab.CustomList.idFor(listId = 7),
-                customLists = listOf(
+                customLists = persistentListOf(
                     list(
                         id = 7,
                         ranked = false,
@@ -113,7 +114,7 @@ class ArrangeSheetSnapshotTest {
             // ----- Arrange -----
             val state = LibraryUiState(
                 selectedTabId = LibraryTab.CustomList.idFor(listId = 7),
-                customLists = listOf(
+                customLists = persistentListOf(
                     list(
                         id = 7,
                         ranked = true,
@@ -133,7 +134,7 @@ class ArrangeSheetSnapshotTest {
             // ----- Arrange -----
             val state = LibraryUiState(
                 selectedTabId = LibraryTab.All.id,
-                customLists = listOf(
+                customLists = persistentListOf(
                     list(
                         id = 7,
                         ranked = false,
@@ -153,7 +154,7 @@ class ArrangeSheetSnapshotTest {
             // ----- Arrange -----
             val state = LibraryUiState(
                 selectedTabId = LibraryTab.CustomList.idFor(listId = 8),
-                customLists = listOf(
+                customLists = persistentListOf(
                     list(
                         id = 7,
                         ranked = false,

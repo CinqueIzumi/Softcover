@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -38,7 +39,7 @@ internal class OnEditionOwnedToggleAction(
                     AppLog.e("$error")
 
                     scope.setState {
-                        it.copy(failedMutationEditionIds = it.failedMutationEditionIds + edition.id)
+                        it.copy(failedMutationEditionIds = it.failedMutationEditionIds.toPersistentSet().add(edition.id))
                     }
                 }
         }

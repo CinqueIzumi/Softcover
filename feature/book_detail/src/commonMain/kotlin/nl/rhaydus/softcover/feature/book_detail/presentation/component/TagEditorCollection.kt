@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
@@ -38,7 +39,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagEditor
 
 @Composable
 internal fun TagEditorCollection(
-    groups: List<UserTagEditorChipGroup>,
+    groups: ImmutableList<UserTagEditorChipGroup>,
     emptyState: EmptyStateUiModel,
     newlyAddedTagKey: String?,
     onEvent: (ChipEvent) -> Unit,

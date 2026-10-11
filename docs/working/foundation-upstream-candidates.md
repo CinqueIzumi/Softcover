@@ -343,13 +343,13 @@ Filed but not yet implemented in the foundation.
 - **Impact in the app:** the foundation shake plays under reduced motion and times its half-periods with hand-written `tween`s, so it ignores the motion scheme. It also reads `rememberHaptics()` instead of `LocalHaptics`, and every caller keeps its own latch flag so a shake finishes after the error clears.
 - **What to build:** take the half-period specs from `MaterialTheme.motionScheme`, skip the offsets under reduced motion while still firing `reject` and calling `onShakeEnd`, read `LocalHaptics`, and ship the latch as `rememberShakeTrigger()`. Once adopted, drop the fork and the ban.
 
-### F48 — `rememberPulseScale` hand-writes its timing and only takes a `NavPulse`
+### F48 — `rememberPulseScale` hand-writes its timing, only takes a `NavPulse`, and `NavPulse` keys by `Any`
 
 - **Type:** bug
 - **Home:** `nl.rhaydus:designsystem-core`
 - **Status:** **Open.** Softcover forks it as `rememberPulseScale` in `:core:component`'s `modifier/`, and a detekt `ForbiddenImport` entry bans the foundation import.
-- **Impact in the app:** the peak and settle use hand-written `tween`s (180 ms and 240 ms) instead of the motion scheme, and the pulse cannot be driven by a plain counter, so a row celebration hand-rolls its own scale.
-- **What to build:** peak and settle from `MaterialTheme.motionScheme`'s spatial specs, plus an overload that pulses whenever an `Int` trigger changes. Once adopted, drop the fork and the ban.
+- **Impact in the app:** the peak and settle use hand-written `tween`s (180 ms and 240 ms) instead of the motion scheme, and the pulse cannot be driven by a plain counter, so a row celebration hand-rolls its own scale. `NavPulse.pulse` and `countFor` take `key: Any`, so the fork's `rememberPulseScale(pulse, key)` carries an unstable `Any` param in the stability baseline.
+- **What to build:** peak and settle from `MaterialTheme.motionScheme`'s spatial specs, plus an overload that pulses whenever an `Int` trigger changes. Key `NavPulse` by a stable type (a `NavPulseKey` marker interface the app's keys implement) instead of `Any`. Once adopted, drop the fork and the ban, and type the fork's key param.
 
 ### F49 — `StarRatingInput` and `PullToRefreshEyebrow` read `rememberHaptics()` instead of `LocalHaptics`
 
@@ -459,7 +459,7 @@ clone would fail to *configure* — `build-logic` is not in the foundation's `ma
   `LocalModalSheetClosing` beside `LocalModalSheetDismiss`), release, swap the imports back, and delete the
   local copy and the ban.
 
-### F47 — Compose stability gate in the convention plugins
+### F50 — Compose stability gate in the convention plugins
 
 - **Type:** gate
 - **Home:** `build-logic` Compose convention plugins (Android and KMP)

@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
@@ -21,10 +23,10 @@ class ArrangeDraftChipsSnapshotTest {
             // ----- Arrange -----
             val snapshot = ArrangeDraftChipsSnapshot(
                 draft = null,
-                visibleTabs = listOf(readingTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                visibleTabs = persistentListOf(readingTab),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Act -----
@@ -45,10 +47,10 @@ class ArrangeDraftChipsSnapshotTest {
             )
             val snapshot = ArrangeDraftChipsSnapshot(
                 draft = draft,
-                visibleTabs = listOf(readingTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
+                visibleTabs = persistentListOf(readingTab),
+                customLists = persistentListOf(),
+                booksByTab = persistentMapOf(),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Act -----

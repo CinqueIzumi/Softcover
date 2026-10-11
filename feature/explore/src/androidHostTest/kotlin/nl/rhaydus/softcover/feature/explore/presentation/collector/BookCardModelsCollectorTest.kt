@@ -8,6 +8,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -112,8 +113,8 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                trendingBooks = listOf(book(id = 1)),
-                becauseYouReadBooks = listOf(
+                trendingBooks = persistentListOf(book(id = 1)),
+                becauseYouReadBooks = persistentListOf(
                     book(
                         id = 2,
                         authors = listOf(
@@ -124,7 +125,7 @@ class BookCardModelsCollectorTest {
                         ),
                     ),
                 ),
-                continueSeriesBooks = listOf(
+                continueSeriesBooks = persistentListOf(
                     book(
                         id = 3,
                         bookSeries = BookSeries(
@@ -164,9 +165,9 @@ class BookCardModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    trendingBooks = listOf(trendingBook),
-                    continueSeriesBooks = listOf(upNextBook),
-                    queriedBooks = listOf(searched),
+                    trendingBooks = persistentListOf(trendingBook),
+                    continueSeriesBooks = persistentListOf(upNextBook),
+                    queriedBooks = persistentListOf(searched),
                 )
 
                 // ----- Assert -----
@@ -190,9 +191,9 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                trendingBooks = listOf(shared),
-                becauseYouReadBooks = listOf(shared),
-                continueSeriesBooks = listOf(shared),
+                trendingBooks = persistentListOf(shared),
+                becauseYouReadBooks = persistentListOf(shared),
+                continueSeriesBooks = persistentListOf(shared),
             )
 
             // ----- Assert -----
@@ -230,12 +231,12 @@ class BookCardModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    trendingBooks = listOf(
+                    trendingBooks = persistentListOf(
                         book(id = 1),
                         book(id = 2),
                     ),
-                    continueSeriesBooks = listOf(book(id = 1)),
-                    unreleasedCoverOverlays = mapOf(1 to overlay),
+                    continueSeriesBooks = persistentListOf(book(id = 1)),
+                    unreleasedCoverOverlays = persistentMapOf(1 to overlay),
                 )
 
                 // ----- Assert -----
@@ -260,9 +261,9 @@ class BookCardModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    trendingBooks = emptyList(),
-                    becauseYouReadBooks = emptyList(),
-                    continueSeriesBooks = emptyList(),
+                    trendingBooks = persistentListOf(),
+                    becauseYouReadBooks = persistentListOf(),
+                    continueSeriesBooks = persistentListOf(),
                     loadingTrendingBooks = true,
                     loadingBecauseYouReadBooks = true,
                     loadingContinueSeriesBooks = true,
@@ -293,9 +294,9 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                trendingBooks = emptyList(),
-                becauseYouReadBooks = emptyList(),
-                continueSeriesBooks = emptyList(),
+                trendingBooks = persistentListOf(),
+                becauseYouReadBooks = persistentListOf(),
+                continueSeriesBooks = persistentListOf(),
                 loadingTrendingBooks = false,
                 loadingBecauseYouReadBooks = false,
                 loadingContinueSeriesBooks = false,
@@ -321,7 +322,7 @@ class BookCardModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    trendingBooks = listOf(book(id = 1)),
+                    trendingBooks = persistentListOf(book(id = 1)),
                     loadingTrendingBooks = true,
                 )
 
@@ -343,7 +344,7 @@ class BookCardModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    queriedBooks = emptyList(),
+                    queriedBooks = persistentListOf(),
                     isLoading = true,
                 )
 
@@ -368,7 +369,7 @@ class BookCardModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    queriedBooks = listOf(book(id = 1), book(id = 2)),
+                    queriedBooks = persistentListOf(book(id = 1), book(id = 2)),
                     isLoading = true,
                 )
 
@@ -394,7 +395,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                queriedBooks = listOf(book(id = 7)),
+                queriedBooks = persistentListOf(book(id = 7)),
                 isLoading = false,
             )
 
@@ -409,7 +410,7 @@ class BookCardModelsCollectorTest {
         fun `unrelated state change does not recompute the cards`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFlow.value.copy(
-                trendingBooks = listOf(book(id = 1)),
+                trendingBooks = persistentListOf(book(id = 1)),
             )
             val job = launch {
                 BookCardModelsCollector().onLaunch(
@@ -442,7 +443,7 @@ class BookCardModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    queriedBooks = listOf(
+                    queriedBooks = persistentListOf(
                         first,
                         second,
                     ),
@@ -517,9 +518,9 @@ class BookCardModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    trendingBooks = listOf(shared),
-                    becauseYouReadBooks = listOf(shared),
-                    continueSeriesBooks = listOf(shared),
+                    trendingBooks = persistentListOf(shared),
+                    becauseYouReadBooks = persistentListOf(shared),
+                    continueSeriesBooks = persistentListOf(shared),
                 )
 
                 // ----- Assert -----
@@ -559,9 +560,9 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                trendingBooks = listOf(shared),
-                becauseYouReadBooks = listOf(shared),
-                continueSeriesBooks = listOf(shared),
+                trendingBooks = persistentListOf(shared),
+                becauseYouReadBooks = persistentListOf(shared),
+                continueSeriesBooks = persistentListOf(shared),
             )
 
             // ----- Assert -----
@@ -586,7 +587,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                trendingBooks = listOf(
+                trendingBooks = persistentListOf(
                     book(
                         id = 1,
                         rating = 4.5,
@@ -616,7 +617,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
-                queriedBooks = listOf(
+                queriedBooks = persistentListOf(
                     book(
                         id = 5,
                         rating = 4.5,
@@ -659,7 +660,7 @@ class BookCardModelsCollectorTest {
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
                 becauseYouReadGenre = null,
-                becauseYouReadBooks = listOf(book(id = 1)),
+                becauseYouReadBooks = persistentListOf(book(id = 1)),
             )
 
             // ----- Assert -----
@@ -676,7 +677,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(
                 becauseYouReadGenre = "Horror",
                 loadingBecauseYouReadBooks = false,
-                becauseYouReadBooks = emptyList(),
+                becauseYouReadBooks = persistentListOf(),
             )
 
             // ----- Assert -----
@@ -693,7 +694,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(
                 becauseYouReadGenre = "Horror",
                 loadingBecauseYouReadBooks = true,
-                becauseYouReadBooks = emptyList(),
+                becauseYouReadBooks = persistentListOf(),
             )
 
             // ----- Assert -----
@@ -713,7 +714,7 @@ class BookCardModelsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(
                     becauseYouReadGenre = "Horror",
                     loadingBecauseYouReadBooks = true,
-                    becauseYouReadBooks = listOf(book(id = 1)),
+                    becauseYouReadBooks = persistentListOf(book(id = 1)),
                 )
 
                 // ----- Assert -----
@@ -739,7 +740,7 @@ class BookCardModelsCollectorTest {
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
                     becauseYouReadGenre = "Horror",
-                    becauseYouReadBooks = listOf(book(id = 1)),
+                    becauseYouReadBooks = persistentListOf(book(id = 1)),
                 )
 
                 // ----- Assert -----

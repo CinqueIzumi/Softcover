@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.mapper
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock
@@ -22,9 +23,9 @@ internal val ROADMAP_STAND_IN_UNITS: ImmutableList<RoadmapRenderUnit> = List(ROA
         RoadmapRenderUnit.ListGroup(
             items = List(3) {
                 RoadmapBlock.BulletListItem(
-                    spans = listOf(RoadmapSpan(text = "A roadmap item describing what is coming next")),
+                    spans = persistentListOf(RoadmapSpan(text = "A roadmap item describing what is coming next")),
                 )
-            },
+            }.toImmutableList(),
             isLoading = true,
         ),
     )

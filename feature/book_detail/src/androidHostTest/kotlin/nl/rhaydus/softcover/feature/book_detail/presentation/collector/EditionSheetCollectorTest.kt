@@ -87,7 +87,7 @@ class EditionSheetCollectorTest {
                 stateFlow.value = buildBookDetailUiState().copy(
                     book = offShelfBook("Dune"),
                     previewEdition = current,
-                    editions = listOf(current, buildEdition(id = 2)),
+                    editions = persistentListOf(current, buildEdition(id = 2)),
                 )
 
                 // ----- Act -----
@@ -111,7 +111,7 @@ class EditionSheetCollectorTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 book = offShelfBook("Dune"),
                 previewEdition = current,
-                editions = listOf(current, other),
+                editions = persistentListOf(current, other),
             )
             launchCollector()
 
@@ -136,7 +136,7 @@ class EditionSheetCollectorTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 book = offShelfBook("Dune"),
                 previewEdition = current,
-                editions = listOf(current, other),
+                editions = persistentListOf(current, other),
                 selectedEditionId = other.id,
             )
             launchCollector()
@@ -180,7 +180,7 @@ class EditionSheetCollectorTest {
                 stateFlow.value = buildBookDetailUiState().copy(
                     book = offShelfBook("Dune"),
                     previewEdition = current,
-                    editions = listOf(current),
+                    editions = persistentListOf(current),
                     editionCards = cards,
                     editionCountHeader = countHeader,
                     editionSheet = editionSheetWithQuery(query = "penguin"),
@@ -203,7 +203,7 @@ class EditionSheetCollectorTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 book = offShelfBook("Dune"),
                 previewEdition = current,
-                editions = listOf(current),
+                editions = persistentListOf(current),
             )
             launchCollector()
 
@@ -221,7 +221,7 @@ class EditionSheetCollectorTest {
             stateFlow.value = buildBookDetailUiState().copy(
                 book = offShelfBook("Dune"),
                 previewEdition = current,
-                editions = listOf(current),
+                editions = persistentListOf(current),
             )
 
             // ----- Act -----

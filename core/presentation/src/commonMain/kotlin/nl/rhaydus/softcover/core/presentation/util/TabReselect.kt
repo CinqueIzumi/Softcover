@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import cafe.adriel.voyager.navigator.tab.Tab
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import org.koin.compose.koinInject
 
@@ -16,7 +17,7 @@ import org.koin.compose.koinInject
  */
 @Composable
 fun TabReselectEffect(
-    tab: Any,
+    tab: Tab,
     onReselect: suspend () -> Boolean,
 ) {
     val registry = koinInject<TabReselectRegistry>()
@@ -44,7 +45,7 @@ fun TabReselectEffect(
  */
 @Composable
 fun TabReselectScrollToTopEffect(
-    tab: Any,
+    tab: Tab,
     scrollToTop: suspend (animate: Boolean) -> Boolean,
 ) {
     val animate = playDecorativeMotion()
@@ -54,7 +55,7 @@ fun TabReselectScrollToTopEffect(
 
 @Composable
 fun TabReselectScrollToTopEffect(
-    tab: Any,
+    tab: Tab,
     state: ScrollState,
 ) {
     TabReselectScrollToTopEffect(tab) { animate -> state.scrollToTop(animate) }
@@ -62,7 +63,7 @@ fun TabReselectScrollToTopEffect(
 
 @Composable
 fun TabReselectScrollToTopEffect(
-    tab: Any,
+    tab: Tab,
     state: LazyListState,
 ) {
     TabReselectScrollToTopEffect(tab) { animate -> state.scrollToTop(animate) }
@@ -70,7 +71,7 @@ fun TabReselectScrollToTopEffect(
 
 @Composable
 fun TabReselectScrollToTopEffect(
-    tab: Any,
+    tab: Tab,
     state: LazyGridState,
 ) {
     TabReselectScrollToTopEffect(tab) { animate -> state.scrollToTop(animate) }

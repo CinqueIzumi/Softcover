@@ -8,6 +8,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,7 +56,7 @@ class OnRemoveBookClickActionTest {
         id = id,
         canonicalId = null,
         title = "Book $id",
-        editions = emptyList(),
+        editions = persistentListOf(),
         defaultEdition = null,
         rating = 0.0,
         description = "",

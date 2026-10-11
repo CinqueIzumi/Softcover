@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -31,12 +32,12 @@ internal class OnBulkRemoveFromLibraryAction(
         scope.setState {
             it.copy(
                 selectionMode = false,
-                selectedBookIds = emptySet(),
+                selectedBookIds = persistentSetOf(),
                 bulkActionInProgress = false,
                 isBulkMoveMenuExpanded = false,
                 isBulkRemoveSheetRequested = false,
                 isChooseListsSheetRequested = false,
-                listsBeingMutated = emptySet(),
+                listsBeingMutated = persistentSetOf(),
             )
         }
     }

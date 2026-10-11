@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.domain.model.Tag
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -33,7 +34,7 @@ class LibraryFilterValueTest {
         @Test
         fun `removes tag when already present`() {
             // ----- Arrange -----
-            val filters = LibraryFilters(tags = setOf(tagFiction))
+            val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
 
             // ----- Act -----
             val result = filters.toggle(value = LibraryFilterValue.Tag(tagFiction))
@@ -45,7 +46,7 @@ class LibraryFilterValueTest {
         @Test
         fun `toggling a second tag adds it without removing the first`() {
             // ----- Arrange -----
-            val filters = LibraryFilters(tags = setOf(tagFiction))
+            val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
 
             // ----- Act -----
             val result = filters.toggle(value = LibraryFilterValue.Tag(tagScifi))
@@ -208,9 +209,9 @@ class LibraryFilterValueTest {
         fun `toggling one facet does not change other facets`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
-                tags = setOf(tagFiction),
-                formats = setOf("paperback"),
-                releaseYears = setOf(2020),
+                tags = persistentSetOf(tagFiction),
+                formats = persistentSetOf("paperback"),
+                releaseYears = persistentSetOf(2020),
                 readYear = 2019,
                 owned = true,
                 ratingMin = 4.0,

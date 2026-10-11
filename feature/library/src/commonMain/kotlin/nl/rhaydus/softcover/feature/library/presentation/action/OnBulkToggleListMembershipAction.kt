@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -44,7 +45,7 @@ internal class OnBulkToggleListMembershipAction(
 
         val existingBookIdsOnList = list.books.mapTo(mutableSetOf()) { it.bookId }
 
-        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated + listId) }
+        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated.toPersistentSet().add(listId)) }
 
         var failureCount = 0
         val isRemove = currentMembership == ListMembership.ALL
@@ -117,7 +118,7 @@ internal class OnBulkToggleListMembershipAction(
             }
         } finally {
             withContext(NonCancellable) {
-                scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated - listId) }
+                scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated.toPersistentSet().remove(listId)) }
             }
         }
 

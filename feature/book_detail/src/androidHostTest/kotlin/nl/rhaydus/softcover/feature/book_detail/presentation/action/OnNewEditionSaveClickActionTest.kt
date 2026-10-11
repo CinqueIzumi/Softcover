@@ -6,6 +6,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -100,7 +101,7 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition()
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
-                editions = listOf(edition),
+                editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
                 showEditEditionSheet = true,
             )
@@ -135,7 +136,7 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition(id = 99)
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
-                editions = listOf(edition),
+                editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
             )
             dependencies = stubDependencies(this)
@@ -199,7 +200,7 @@ class OnNewEditionSaveClickActionTest {
             )
             val initialState = buildBookDetailUiState().copy(
                 book = book,
-                editions = listOf(stubEdition(id = 5)),
+                editions = persistentListOf(stubEdition(id = 5)),
                 selectedEditionId = 5,
                 scannedEditionId = 42,
                 showEditEditionSheet = true,
@@ -235,7 +236,7 @@ class OnNewEditionSaveClickActionTest {
                     userBook = userBook,
                     currentEdition = current,
                 ),
-                editions = listOf(stubEdition(id = 5)),
+                editions = persistentListOf(stubEdition(id = 5)),
                 selectedEditionId = 99,
             )
             dependencies = stubDependencies(this)
@@ -271,7 +272,7 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition(id = 77)
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
-                editions = listOf(edition),
+                editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
                 showEditEditionSheet = true,
             )
@@ -304,7 +305,7 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition(id = 77)
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
-                editions = listOf(edition),
+                editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
                 scannedEditionId = 42,
                 showEditEditionSheet = true,
@@ -331,7 +332,7 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition()
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
-                editions = listOf(edition),
+                editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
                 loadingBookDetails = false,
             )
@@ -366,7 +367,7 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition()
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
-                editions = listOf(edition),
+                editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
                 loadingBookDetails = false,
             )

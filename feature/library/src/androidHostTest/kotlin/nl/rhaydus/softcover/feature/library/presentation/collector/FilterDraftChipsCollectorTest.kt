@@ -3,6 +3,9 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -66,9 +69,9 @@ class FilterDraftChipsCollectorTest {
                 stateFlow.value = LibraryUiState(
                     filterDraft = LibraryFilterDraft(
                         tabId = "all",
-                        filters = LibraryFilters(formats = setOf("ebook")),
+                        filters = LibraryFilters(formats = persistentSetOf("ebook")),
                     ),
-                    booksByTab = mapOf("all" to emptyList()),
+                    booksByTab = persistentMapOf("all" to persistentListOf()),
                 )
 
                 // ----- Assert -----
@@ -139,7 +142,7 @@ class FilterDraftChipsCollectorTest {
             }
             stateFlow.value = LibraryUiState(
                 filterDraft = LibraryFilterDraft(tabId = "all"),
-                filterChipsByTab = mapOf("all" to chips),
+                filterChipsByTab = persistentMapOf("all" to chips),
             )
 
             // ----- Act -----

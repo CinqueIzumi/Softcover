@@ -3,11 +3,16 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -60,9 +65,9 @@ class RearrangeChipCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(readingTab),
-                sortModeByTab = mapOf(readingTab.id to LibrarySortMode.MANUAL),
-                displayBooksByTab = mapOf(readingTab.id to List(2) { mockk() }),
+                visibleTabs = persistentListOf(readingTab),
+                sortModeByTab = persistentMapOf(readingTab.id to LibrarySortMode.MANUAL),
+                displayBooksByTab = persistentMapOf(readingTab.id to List(2) { mockk<Book>() }.toImmutableList()),
             )
 
             // ----- Assert -----
@@ -94,11 +99,11 @@ class RearrangeChipCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(customListTab),
-                sortModeByTab = mapOf(customListTab.id to LibrarySortMode.ORDER),
-                editionsByTab = mapOf(customListTab.id to List(2) { mockk() }),
-                displayEditionsByTab = mapOf(customListTab.id to List(2) { mockk() }),
-                customLists = listOf(rankedList),
+                visibleTabs = persistentListOf(customListTab),
+                sortModeByTab = persistentMapOf(customListTab.id to LibrarySortMode.ORDER),
+                editionsByTab = persistentMapOf(customListTab.id to List(2) { mockk<BookEdition>() }.toImmutableList()),
+                displayEditionsByTab = persistentMapOf(customListTab.id to List(2) { mockk<BookEdition>() }.toImmutableList()),
+                customLists = persistentListOf(rankedList),
             )
 
             // ----- Assert -----
@@ -119,9 +124,9 @@ class RearrangeChipCollectorTest {
                 }
 
                 stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(readingTab),
-                    sortModeByTab = mapOf(readingTab.id to LibrarySortMode.MANUAL),
-                    displayBooksByTab = mapOf(readingTab.id to List(2) { mockk() }),
+                    visibleTabs = persistentListOf(readingTab),
+                    sortModeByTab = persistentMapOf(readingTab.id to LibrarySortMode.MANUAL),
+                    displayBooksByTab = persistentMapOf(readingTab.id to List(2) { mockk<Book>() }.toImmutableList()),
                 )
                 val chipByTabAfterFirstEmit = stateFlow.value.rearrangeChipByTab
 

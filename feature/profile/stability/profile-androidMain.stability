@@ -119,10 +119,10 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Pr
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileShareBottomSheet(model: nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction, kotlin.Unit>): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - model: UNSTABLE (has mutable properties or unstable members)
+    - model: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
 
 @Composable

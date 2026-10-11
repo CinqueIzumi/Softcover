@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.nav.NavPulse
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -16,7 +17,7 @@ import org.koin.compose.koinInject
 
 @Composable
 internal fun rememberMarkAsReadController(
-    books: List<Book>,
+    books: ImmutableList<Book>,
     runAction: (ReadingAction) -> Unit,
 ): MarkAsReadController {
     val playMotion = playDecorativeMotion()

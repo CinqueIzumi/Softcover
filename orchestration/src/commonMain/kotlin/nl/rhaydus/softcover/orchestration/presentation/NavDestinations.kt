@@ -91,7 +91,7 @@ internal fun rememberNavItems(): List<NavItemUi> {
 
 internal class NavItemClickResolver(
     private val selectTab: (Tab) -> Unit,
-    private val reselect: suspend (Any) -> Boolean,
+    private val reselect: suspend (Tab) -> Boolean,
     private val pulse: (Any) -> Unit,
 ) {
     fun onClick(

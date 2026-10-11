@@ -64,7 +64,7 @@ internal fun ScrollToTopOnVisibleSetChange(
     sortMode: LibrarySortMode,
     sortDirection: SortDirection,
     filters: LibraryFilters,
-    visibleItemsKey: Any,
+    visibleItemsKey: Int,
     gridState: LazyGridState,
 ) {
     var previousKey by remember(tabId) {

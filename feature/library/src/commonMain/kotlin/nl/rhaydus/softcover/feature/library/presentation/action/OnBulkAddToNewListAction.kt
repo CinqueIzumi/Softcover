@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -36,7 +37,7 @@ internal class OnBulkAddToNewListAction(
 
         if (books.isEmpty()) return
 
-        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated + listId) }
+        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated.toPersistentSet().add(listId)) }
 
         var failureCount = 0
 
@@ -65,7 +66,7 @@ internal class OnBulkAddToNewListAction(
             }
         }
 
-        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated - listId) }
+        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated.toPersistentSet().remove(listId)) }
 
         if (failureCount > 0) {
             val noun = if (failureCount == 1) "book" else "books"

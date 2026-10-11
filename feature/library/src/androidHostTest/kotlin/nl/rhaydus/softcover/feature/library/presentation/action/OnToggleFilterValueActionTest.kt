@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -40,9 +42,9 @@ class OnToggleFilterValueActionTest {
         @Test
         fun `adds filter value when tab has no filters yet and leaves other tabs alone`() = runTest {
             // ----- Arrange -----
-            val otherFilters = LibraryFilters(releaseYears = setOf(2020))
+            val otherFilters = LibraryFilters(releaseYears = persistentSetOf(2020))
 
-            stateFlow.value = LibraryUiState(filtersByTab = mapOf(otherTabId to otherFilters))
+            stateFlow.value = LibraryUiState(filtersByTab = persistentMapOf(otherTabId to otherFilters))
 
             val action = OnToggleFilterValueAction(
                 tabId = tabId,
@@ -63,9 +65,9 @@ class OnToggleFilterValueActionTest {
         @Test
         fun `adds filter value to existing non-empty filters`() = runTest {
             // ----- Arrange -----
-            val existing = LibraryFilters(formats = setOf("ebook"))
+            val existing = LibraryFilters(formats = persistentSetOf("ebook"))
 
-            stateFlow.value = LibraryUiState(filtersByTab = mapOf(tabId to existing))
+            stateFlow.value = LibraryUiState(filtersByTab = persistentMapOf(tabId to existing))
 
             val action = OnToggleFilterValueAction(
                 tabId = tabId,
@@ -86,9 +88,9 @@ class OnToggleFilterValueActionTest {
         @Test
         fun `removes tab entry from filtersByTab when resulting filters are empty`() = runTest {
             // ----- Arrange -----
-            val existing = LibraryFilters(formats = setOf("ebook"))
+            val existing = LibraryFilters(formats = persistentSetOf("ebook"))
 
-            stateFlow.value = LibraryUiState(filtersByTab = mapOf(tabId to existing))
+            stateFlow.value = LibraryUiState(filtersByTab = persistentMapOf(tabId to existing))
 
             val action = OnToggleFilterValueAction(
                 tabId = tabId,

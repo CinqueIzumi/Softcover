@@ -7,6 +7,8 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -155,7 +157,7 @@ class BookDetailUiStateTest {
             val book = stubBook(
                 userBook = userBook,
                 currentEdition = shelvedEdition,
-                editions = listOf(scannedEdition, shelvedEdition),
+                editions = persistentListOf(scannedEdition, shelvedEdition),
             )
             val state = buildBookDetailUiState().copy(
                 book = book,
@@ -201,7 +203,7 @@ class BookDetailUiStateTest {
             )
             val state = buildBookDetailUiState().copy(
                 book = null,
-                editions = emptyList(),
+                editions = persistentListOf(),
                 initialCover = initialCover,
                 scannedEditionId = 7,
             )
@@ -238,7 +240,7 @@ class BookDetailUiStateTest {
         fun `returns all editions when query is empty`() {
             // ----- Arrange -----
             val state = buildBookDetailUiState().copy(
-                editions = listOf(editionWithIsbn, editionWithoutIsbn),
+                editions = persistentListOf(editionWithIsbn, editionWithoutIsbn),
                 editionSheet = editionSheetWithQuery(query = ""),
             )
 
@@ -253,7 +255,7 @@ class BookDetailUiStateTest {
         fun `filters by publisher substring match`() {
             // ----- Arrange -----
             val state = buildBookDetailUiState().copy(
-                editions = listOf(editionWithIsbn, editionWithoutIsbn),
+                editions = persistentListOf(editionWithIsbn, editionWithoutIsbn),
                 editionSheet = editionSheetWithQuery(query = "Penguin"),
             )
 
@@ -268,7 +270,7 @@ class BookDetailUiStateTest {
         fun `edition with both isbn10 and publisher null does not crash and is excluded`() {
             // ----- Arrange -----
             val state = buildBookDetailUiState().copy(
-                editions = listOf(editionNullBoth),
+                editions = persistentListOf(editionNullBoth),
                 editionSheet = editionSheetWithQuery(query = "anything"),
             )
 
@@ -301,7 +303,7 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val edition = stubEdition(id = 77)
             val state = buildBookDetailUiState().copy(
-                userLists = listOf(ownedList(77)),
+                userLists = persistentListOf(ownedList(77)),
             )
 
             // ----- Act -----
@@ -316,7 +318,7 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val edition = stubEdition(id = 99)
             val state = buildBookDetailUiState().copy(
-                userLists = listOf(ownedList(77)),
+                userLists = persistentListOf(ownedList(77)),
             )
 
             // ----- Act -----
@@ -337,7 +339,7 @@ class BookDetailUiStateTest {
                 books = listOf(listBook(77)),
             )
             val state = buildBookDetailUiState().copy(
-                userLists = listOf(nonOwnedList),
+                userLists = persistentListOf(nonOwnedList),
             )
 
             // ----- Act -----
@@ -351,7 +353,7 @@ class BookDetailUiStateTest {
         fun `isEditionOwned returns false when edition is null`() {
             // ----- Arrange -----
             val state = buildBookDetailUiState().copy(
-                userLists = listOf(ownedList(77)),
+                userLists = persistentListOf(ownedList(77)),
             )
 
             // ----- Act -----
@@ -559,7 +561,7 @@ class BookDetailUiStateTest {
             )
             val state = buildBookDetailUiState().copy(
                 book = book,
-                failedMutationEditionIds = setOf(
+                failedMutationEditionIds = persistentSetOf(
                     7,
                     8,
                 ),
@@ -581,7 +583,7 @@ class BookDetailUiStateTest {
             )
             val state = buildBookDetailUiState().copy(
                 book = book,
-                failedMutationEditionIds = setOf(8),
+                failedMutationEditionIds = persistentSetOf(8),
             )
 
             // ----- Act -----
@@ -596,7 +598,7 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val state = buildBookDetailUiState().copy(
                 book = null,
-                failedMutationEditionIds = setOf(7),
+                failedMutationEditionIds = persistentSetOf(7),
             )
 
             // ----- Act -----

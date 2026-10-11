@@ -50,7 +50,7 @@ internal fun ReorderableTabsGroup(
 
     val reorderHaptics = rememberReorderHaptics()
 
-    var workingOrder by remember(state.initialized) { mutableStateOf(entries) }
+    var workingOrder by remember(state.initialized) { mutableStateOf<List<LibraryTabEntry>>(entries) }
 
     var draggingId by remember { mutableStateOf<String?>(null) }
     var dragOffsetY by remember { mutableFloatStateOf(0f) }

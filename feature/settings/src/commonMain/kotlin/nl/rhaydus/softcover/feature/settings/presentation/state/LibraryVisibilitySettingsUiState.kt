@@ -1,5 +1,11 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.header.SectionHeaderTone
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
@@ -22,23 +28,23 @@ internal data class LibraryVisibilitySettingsUiState(
         eyebrow = "Your tabs",
         tone = SectionHeaderTone.Accent,
     ),
-    val persistedEnabledStatusCodes: Set<Int> = emptySet(),
-    val persistedEnabledListIds: Set<Int> = emptySet(),
-    val persistedTabOrder: List<String> = emptyList(),
-    val draftEnabledStatusCodes: Set<Int> = emptySet(),
-    val draftEnabledListIds: Set<Int> = emptySet(),
-    val draftTabOrder: List<String> = emptyList(),
+    val persistedEnabledStatusCodes: ImmutableSet<Int> = persistentSetOf(),
+    val persistedEnabledListIds: ImmutableSet<Int> = persistentSetOf(),
+    val persistedTabOrder: ImmutableList<String> = persistentListOf(),
+    val draftEnabledStatusCodes: ImmutableSet<Int> = persistentSetOf(),
+    val draftEnabledListIds: ImmutableSet<Int> = persistentSetOf(),
+    val draftTabOrder: ImmutableList<String> = persistentListOf(),
     val initialized: Boolean = false,
     val isSaving: Boolean = false,
     val discardSheet: SheetSession<SheetScaffoldUiModel, LeaveScreen> = SheetSession.Closed,
-    val availableLists: List<BookList> = emptyList(),
-    val statusCounts: Map<Int, Int> = emptyMap(),
+    val availableLists: ImmutableList<BookList> = persistentListOf(),
+    val statusCounts: ImmutableMap<Int, Int> = persistentMapOf(),
     val totalCount: Int = 0,
     val topBar: TopBarUiModel = TopBarUiModel(
         title = LIBRARY_TABS_TITLE,
     ),
     /** Derived from the count, list and draft fields, but only refreshed by [withOrderedEntries]. */
-    val orderedEntries: List<LibraryTabEntry> = buildLibraryTabEntries(
+    val orderedEntries: ImmutableList<LibraryTabEntry> = buildLibraryTabEntries(
         statusCounts = emptyMap(),
         totalCount = 0,
         availableLists = emptyList(),

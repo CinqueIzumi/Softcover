@@ -17,7 +17,7 @@ and a Perfetto trace. PC turns that check, and a Compose stability check, into r
 | PC-3 | One-off `dumpsys gfxinfo` sweep: every screen idles at 0 frames except any `EmptyState` (~60 fps from `quoteGlyphSway()`), kept by choice since empty states are short-lived | [x] |
 | PC-4 | Compose stability gate: skydoves analyzer 0.7.5, `androidMain` baselines in 15 modules, `stabilityCheck` in `check` and CI | [x] |
 | PC-5 | Triage of the PC-4 baselines: approved shape (below) | [x] |
-| PC-5a | Local type fixes: immutable collections in UiStates and models, `ImmutableList` params, concrete types for `Any` params, `@Immutable` on sealed / generic models; re-dump baselines | [ ] |
+| PC-5a | Local type fixes: immutable collections in UiStates and models, `ImmutableList` params, concrete types for `Any` params, `@Immutable` on sealed / generic models; re-dump baselines | [x] |
 | PC-5b | Feature-local UI models for leaf composables that take a domain type, built when the state is set; re-dump baselines | [ ] |
 | PC-5c | Per screen, sections take the slice of state they render instead of the whole UiState; re-dump baselines | [ ] |
 
@@ -38,9 +38,9 @@ and a Perfetto trace. PC turns that check, and a Compose stability check, into r
 - Filed in `foundation-upstream-candidates.md` as a gate for build-logic; built here first.
 - PC-5a, collections: every plain `List` / `Set` / `Map` field in a UiState or UI model becomes `ImmutableList` / `ImmutableSet` / `ImmutableMap` (Library, Library visibility, Roadmap, `UserTagEditorChipGroup`, `CalloutHeader.key`, Explore's `previousSearchQueries`, Reading's book lists); the contract's R3 extends to UiStates.
 - PC-5a, params: `List` params fed from an `ImmutableList` take `ImmutableList` (book-card entry coordinator, reading-life charts, tag editor, roadmap, search focus, mark-as-read, empty Reading).
-- PC-5a, `Any` params: tab-reselect effects take `Tab`, `rememberPulseScale` takes its pulse-key type, `ScrollToTopOnVisibleSetChange` takes `Int`.
+- PC-5a, `Any` params: tab-reselect effects take `Tab`, `ScrollToTopOnVisibleSetChange` takes `Int`; `rememberPulseScale`'s key stays `Any` (foundation `NavPulse` keys by `Any`, filed as F48).
 - PC-5a, annotations: `@Immutable` on `ShareCardUiModel`, `RoadmapRenderUnit`, `RoadmapBlock`, `SettingsChoiceRowUiModel`.
 - PC-5a, expected flip: Library and Library visibility entries move from RUNTIME to UNSTABLE once their collections expose `Book` / `Tag` / `BookList`; PC-5b / PC-5c resolve them, not a regression.
 - PC-5b, scope: `FeaturedBackdropCard`, `FeaturedBackdropMeta`, `FeaturedBookCard`, `FeaturedSessionButton`, `TrendingTileSection` (`Book`), `FeaturedSection` (`Book?`), `BookOverflowMenuItems` (`Book`), `GeneralBookInfoSection` (`BookEdition`), the four `ActiveSession` composables, the profile breakdown blocks, `rememberMarkAsReadController`, `EmptyCurrentlyReadingScreen`; domain modules stay Compose-free, no annotation workaround.
 - PC-5c, scope: every section composable taking a whole `*UiState` in Book Detail, Explore, Reading, Profile, Library and Settings.
-- Kept baselined: services (`AppUpdateSimulator`, `NetworkAvailabilityProvider`, `ShareCardCapture`, Voyager `Navigator`), not data; Voyager `Tab` / `Screen` (`NavItemUi`, root and debug `Render` hosts), library interfaces; Compose / Coil API types (`ImageRequest`, `Painter`, `TextAutoSize`, `FiniteAnimationSpec`, `InlineTextContent` map, `ResizeMode`, generic `T`), not ours to annotate.
+- Kept baselined: services (`AppUpdateSimulator`, `NetworkAvailabilityProvider`, `ShareCardCapture`, Voyager `Navigator`), not data; Voyager `Tab` / `Screen` (`NavItemUi`, root and debug `Render` hosts, the tab-reselect effects' `tab`), library interfaces; Compose / Coil API types (`ImageRequest`, `Painter`, `TextAutoSize`, `FiniteAnimationSpec`, `InlineTextContent` map, `ResizeMode`, generic `T`), not ours to annotate.

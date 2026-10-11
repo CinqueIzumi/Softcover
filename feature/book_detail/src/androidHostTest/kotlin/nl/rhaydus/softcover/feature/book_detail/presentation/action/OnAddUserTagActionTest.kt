@@ -6,6 +6,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -101,7 +103,7 @@ class OnAddUserTagActionTest {
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(),
-                userTags = listOf(
+                userTags = persistentListOf(
                     UserTag(
                         name = "Horror",
                         category = TagCategory.GENRE,
@@ -130,7 +132,7 @@ class OnAddUserTagActionTest {
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(),
-                userTags = listOf(
+                userTags = persistentListOf(
                     UserTag(
                         name = "horror",
                         category = TagCategory.GENRE,
@@ -163,7 +165,7 @@ class OnAddUserTagActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = listOf(existingTag),
+                userTags = persistentListOf(existingTag),
             )
             val savedResult = listOf(
                 existingTag,
@@ -339,7 +341,7 @@ class OnAddUserTagActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = originalTags,
+                userTags = originalTags.toImmutableList(),
             )
 
             coEvery {

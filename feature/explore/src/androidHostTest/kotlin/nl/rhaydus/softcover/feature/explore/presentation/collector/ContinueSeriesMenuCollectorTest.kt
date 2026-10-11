@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -48,7 +50,7 @@ class ContinueSeriesMenuCollectorTest {
         books: List<Book> = listOf(book),
         requestedBookId: Int? = null,
     ): ExploreScreenUiState = ExploreScreenUiState(
-        continueSeriesBooks = books,
+        continueSeriesBooks = books.toImmutableList(),
         continueSeriesMenuBookId = requestedBookId,
     )
 
@@ -176,7 +178,7 @@ class ContinueSeriesMenuCollectorTest {
             stateFlow.value = stateFlow.value.copy(continueSeriesMenuBookId = null)
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(continueSeriesBooks = listOf(book.copy(title = "Updated")))
+            stateFlow.value = stateFlow.value.copy(continueSeriesBooks = persistentListOf(book.copy(title = "Updated")))
 
             // ----- Assert -----
             stateFlow.value.continueSeriesMenu.isClosing shouldBe true

@@ -81,7 +81,7 @@ class ReadingReadinessCollectorTest {
     private fun masthead(): PageMastheadUiModel = PageMastheadUiModel(title = "Good morning.")
 
     private fun readyState(): ReadingScreenUiState = ReadingScreenUiState(
-        books = listOf(FEATURED_STAND_IN_BOOK),
+        books = persistentListOf(FEATURED_STAND_IN_BOOK),
         hasLoadedBooks = true,
         hasLoadedReadingActivity = true,
         featuredCover = cover(),
@@ -277,7 +277,7 @@ class ReadingReadinessCollectorTest {
         fun `clears for empty books as soon as they have loaded`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
-                books = emptyList(),
+                books = persistentListOf(),
                 hasLoadedBooks = true,
                 hasLoadedReadingActivity = true,
             )
@@ -294,7 +294,7 @@ class ReadingReadinessCollectorTest {
         fun `stays loading for empty books until they have loaded`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
-                books = emptyList(),
+                books = persistentListOf(),
                 hasLoadedBooks = false,
             )
 
@@ -323,7 +323,7 @@ class ReadingReadinessCollectorTest {
         fun `stays loading for empty books until reading activity has loaded`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
-                books = emptyList(),
+                books = persistentListOf(),
                 hasLoadedBooks = true,
                 hasLoadedReadingActivity = false,
             )

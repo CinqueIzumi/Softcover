@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -152,7 +153,7 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 getReadingJournalHistoryUseCase(bookId = any())
             } returns Result.success(history)
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(book))
             val dependencies = buildDependencies(this)
             val collector = ReadingPaceForecastCollector()
 
@@ -199,7 +200,7 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 getReadingJournalHistoryUseCase(bookId = any())
             } returns Result.success(history)
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(book))
             val dependencies = buildDependencies(this)
             val collector = ReadingPaceForecastCollector()
 
@@ -230,7 +231,7 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 getReadingJournalHistoryUseCase(bookId = any())
             } returns Result.success(history)
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(book))
             val dependencies = buildDependencies(this)
             val collector = ReadingPaceForecastCollector()
 
@@ -265,7 +266,7 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 getReadingJournalHistoryUseCase(bookId = any())
             } returns Result.success(history)
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(book))
             val dependencies = buildDependencies(this)
             val collector = ReadingPaceForecastCollector()
 
@@ -304,7 +305,7 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 getReadingJournalHistoryUseCase(bookId = any())
             } returns Result.success(history)
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(book))
             val dependencies = buildDependencies(this)
             val collector = ReadingPaceForecastCollector()
 
@@ -343,7 +344,7 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 getReadingJournalHistoryUseCase(bookId = any())
             } returns Result.success(history)
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(book))
             val dependencies = buildDependencies(this)
             val collector = ReadingPaceForecastCollector()
 
@@ -364,7 +365,7 @@ class ReadingPaceForecastCollectorTest {
         fun `does not set featuredBookPace and never invokes the journal history use case when there is no featured book`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                stateFlow.value = ReadingScreenUiState(books = emptyList())
+                stateFlow.value = ReadingScreenUiState(books = persistentListOf())
                 val dependencies = buildDependencies(this)
                 val collector = ReadingPaceForecastCollector()
 

@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
@@ -20,13 +22,13 @@ import nl.rhaydus.softcover.feature.library.presentation.state.libraryPreviewCou
  */
 internal data class FilterDraftChipsSnapshot(
     val draft: LibraryFilterDraft?,
-    val filterChipsByTab: Map<String, LibraryFilterChips>,
-    val booksByTab: Map<String, List<Book>>,
-    val editionsByTab: Map<String, List<BookEdition>>,
-    val addedAtByTab: Map<String, Map<Int, String?>>,
-    val bookByBookId: Map<Int, Book>,
-    val sortModeByTab: Map<String, LibrarySortMode>,
-    val sortDirectionByTab: Map<String, SortDirection>,
+    val filterChipsByTab: ImmutableMap<String, LibraryFilterChips>,
+    val booksByTab: ImmutableMap<String, ImmutableList<Book>>,
+    val editionsByTab: ImmutableMap<String, ImmutableList<BookEdition>>,
+    val addedAtByTab: ImmutableMap<String, ImmutableMap<Int, String?>>,
+    val bookByBookId: ImmutableMap<Int, Book>,
+    val sortModeByTab: ImmutableMap<String, LibrarySortMode>,
+    val sortDirectionByTab: ImmutableMap<String, SortDirection>,
     val searchQuery: String,
 ) {
     fun compute(): LibraryFilterSheetSelection? {

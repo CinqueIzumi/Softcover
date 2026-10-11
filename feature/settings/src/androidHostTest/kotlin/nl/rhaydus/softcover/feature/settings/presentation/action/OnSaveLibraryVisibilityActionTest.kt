@@ -5,6 +5,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -119,10 +121,10 @@ class OnSaveLibraryVisibilityActionTest {
         fun `does nothing when state is not dirty`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = setOf(1, 3),
-                persistedEnabledListIds = setOf(10),
-                draftEnabledStatusCodes = setOf(1, 3),
-                draftEnabledListIds = setOf(10),
+                persistedEnabledStatusCodes = persistentSetOf(1, 3),
+                persistedEnabledListIds = persistentSetOf(10),
+                draftEnabledStatusCodes = persistentSetOf(1, 3),
+                draftEnabledListIds = persistentSetOf(10),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
@@ -144,10 +146,10 @@ class OnSaveLibraryVisibilityActionTest {
         fun `does nothing when isSaving is already true`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = setOf(1),
-                persistedEnabledListIds = emptySet(),
-                draftEnabledStatusCodes = setOf(1, 3),
-                draftEnabledListIds = setOf(5),
+                persistedEnabledStatusCodes = persistentSetOf(1),
+                persistedEnabledListIds = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1, 3),
+                draftEnabledListIds = persistentSetOf(5),
                 initialized = true,
                 isSaving = true,
             )
@@ -170,11 +172,11 @@ class OnSaveLibraryVisibilityActionTest {
         fun `persists the draft status codes and list ids then refreshes the library`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = setOf(1),
-                persistedEnabledListIds = emptySet(),
-                draftEnabledStatusCodes = setOf(1, 3),
-                draftEnabledListIds = setOf(10, 20),
-                draftTabOrder = listOf("status:3", "list:10"),
+                persistedEnabledStatusCodes = persistentSetOf(1),
+                persistedEnabledListIds = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1, 3),
+                draftEnabledListIds = persistentSetOf(10, 20),
+                draftTabOrder = persistentListOf("status:3", "list:10"),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
@@ -217,10 +219,10 @@ class OnSaveLibraryVisibilityActionTest {
             // fire-and-forget launch call returns), so isSaving is still true when the
             // use case executes. After execute() returns the synchronous setState resets it.
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = emptySet(),
-                persistedEnabledListIds = emptySet(),
-                draftEnabledStatusCodes = setOf(1),
-                draftEnabledListIds = emptySet(),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                persistedEnabledListIds = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1),
+                draftEnabledListIds = persistentSetOf(),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
@@ -263,8 +265,8 @@ class OnSaveLibraryVisibilityActionTest {
         fun `still refreshes and clears isSaving when saving status codes fails`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = emptySet(),
-                draftEnabledStatusCodes = setOf(1),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
@@ -304,8 +306,8 @@ class OnSaveLibraryVisibilityActionTest {
         fun `still refreshes and clears isSaving when saving list ids fails`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = emptySet(),
-                draftEnabledStatusCodes = setOf(1),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
@@ -345,8 +347,8 @@ class OnSaveLibraryVisibilityActionTest {
         fun `still refreshes and clears isSaving when saving tab order fails`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = emptySet(),
-                draftEnabledStatusCodes = setOf(1),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
@@ -386,8 +388,8 @@ class OnSaveLibraryVisibilityActionTest {
         fun `skips the refresh and clears isSaving when saving every use case fails`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = emptySet(),
-                draftEnabledStatusCodes = setOf(1),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
@@ -427,8 +429,8 @@ class OnSaveLibraryVisibilityActionTest {
         fun `requests close and leave on dismiss when leaveAfterSave is true and every save succeeds`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = emptySet(),
-                draftEnabledStatusCodes = setOf(1),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
@@ -471,8 +473,8 @@ class OnSaveLibraryVisibilityActionTest {
         fun `leaves the sheet open and not closing after a save without leaveAfterSave`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = emptySet(),
-                draftEnabledStatusCodes = setOf(1),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
@@ -511,8 +513,8 @@ class OnSaveLibraryVisibilityActionTest {
         fun `shows the open sheet as busy while the save runs under leaveAfterSave`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = emptySet(),
-                draftEnabledStatusCodes = setOf(1),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
@@ -554,8 +556,8 @@ class OnSaveLibraryVisibilityActionTest {
         fun `closes the sheet without leaving and sends SaveFailed when leaveAfterSave is true and a save fails`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = emptySet(),
-                draftEnabledStatusCodes = setOf(1),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
@@ -598,8 +600,8 @@ class OnSaveLibraryVisibilityActionTest {
         fun `neither closes nor leaves when the sheet was dismissed during a leaveAfterSave save`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = emptySet(),
-                draftEnabledStatusCodes = setOf(1),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
@@ -668,8 +670,8 @@ class OnSaveLibraryVisibilityActionTest {
         fun `requests close and leave on dismiss without saving when leaveAfterSave is true and isSaving is true`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = emptySet(),
-                draftEnabledStatusCodes = setOf(1),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
                 isSaving = true,
                 discardSheet = SheetSession.Open(model = discardSheetScaffold()),
@@ -698,8 +700,8 @@ class OnSaveLibraryVisibilityActionTest {
         fun `sends no event by default`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = emptySet(),
-                draftEnabledStatusCodes = setOf(1),
+                persistedEnabledStatusCodes = persistentSetOf(),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)

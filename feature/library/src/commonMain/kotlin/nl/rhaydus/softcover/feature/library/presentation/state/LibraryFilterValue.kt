@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import kotlinx.collections.immutable.toImmutableSet
 import nl.rhaydus.softcover.core.domain.model.Tag as DomainTag
 
 internal sealed interface LibraryFilterValue {
@@ -19,15 +20,15 @@ internal sealed interface LibraryFilterValue {
 
 internal fun LibraryFilters.toggle(value: LibraryFilterValue): LibraryFilters = when (value) {
     is LibraryFilterValue.Tag -> copy(
-        tags = tags.toggleElement(value.tag),
+        tags = tags.toggleElement(value.tag).toImmutableSet(),
     )
 
     is LibraryFilterValue.Format -> copy(
-        formats = formats.toggleElement(value.value),
+        formats = formats.toggleElement(value.value).toImmutableSet(),
     )
 
     is LibraryFilterValue.ReleaseYear -> copy(
-        releaseYears = releaseYears.toggleElement(value.year),
+        releaseYears = releaseYears.toggleElement(value.year).toImmutableSet(),
     )
 
     is LibraryFilterValue.ReadYear -> copy(

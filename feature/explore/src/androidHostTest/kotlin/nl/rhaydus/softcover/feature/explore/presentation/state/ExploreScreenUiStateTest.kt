@@ -241,7 +241,7 @@ class ExploreScreenUiStateTest {
             // ----- Arrange -----
             val state = ExploreScreenUiState(
                 searchText = "dune",
-                queriedBooks = listOf(mockk<Book>()),
+                queriedBooks = persistentListOf(mockk<Book>()),
                 searchResults = BookCardSet.empty(),
             )
 

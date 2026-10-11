@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -40,7 +41,7 @@ class OnBulkAddToListSheetShownActionTest {
         @Test
         fun `requests the chooser without building its model when shown is true`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(selectedBookIds = setOf(1, 2))
+            stateFlow.value = LibraryUiState(selectedBookIds = persistentSetOf(1, 2))
 
             // ----- Act -----
             OnBulkAddToListSheetShownAction(shown = true).execute(
@@ -62,7 +63,7 @@ class OnBulkAddToListSheetShownActionTest {
                 pending = CreateList,
             )
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
+                selectedBookIds = persistentSetOf(1),
                 chooseListsSheet = closing,
             )
 
@@ -81,7 +82,7 @@ class OnBulkAddToListSheetShownActionTest {
         fun `closes the session and withdraws the request when shown is false`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
+                selectedBookIds = persistentSetOf(1),
                 chooseListsSheet = openChooseListsSession(closing = true),
                 isChooseListsSheetRequested = true,
             )

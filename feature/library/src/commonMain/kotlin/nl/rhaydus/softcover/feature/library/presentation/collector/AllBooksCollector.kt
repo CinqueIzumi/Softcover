@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -56,7 +58,10 @@ internal class AllBooksCollector : LibraryCollector {
         }.collectLatest { filtered ->
             scope.setState { state ->
                 state.copy(
-                    booksByTab = state.booksByTab + (LibraryTab.All.id to filtered),
+                    booksByTab = state.booksByTab.toPersistentMap().put(
+                        LibraryTab.All.id,
+                        filtered.toImmutableList(),
+                    ),
                     isLoading = false,
                 )
             }

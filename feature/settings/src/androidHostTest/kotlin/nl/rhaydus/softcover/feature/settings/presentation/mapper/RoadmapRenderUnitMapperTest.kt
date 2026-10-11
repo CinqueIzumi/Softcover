@@ -18,7 +18,7 @@ class RoadmapRenderUnitMapperTest {
             val blocks = listOf(
                 RoadmapBlock.Heading(
                     level = 2,
-                    spans = listOf(RoadmapSpan(text = "3.2.0: Widgets: and more")),
+                    spans = persistentListOf(RoadmapSpan(text = "3.2.0: Widgets: and more")),
                 ),
             )
 
@@ -47,7 +47,7 @@ class RoadmapRenderUnitMapperTest {
                 val blocks = listOf(
                     RoadmapBlock.Heading(
                         level = 2,
-                        spans = listOf(RoadmapSpan(text = text)),
+                        spans = persistentListOf(RoadmapSpan(text = text)),
                     ),
                 )
 
@@ -62,10 +62,10 @@ class RoadmapRenderUnitMapperTest {
         @Test
         fun `consecutive bullet and ordered items merge into one list group`() {
             // ----- Arrange -----
-            val bullet = RoadmapBlock.BulletListItem(spans = listOf(RoadmapSpan(text = "First")))
+            val bullet = RoadmapBlock.BulletListItem(spans = persistentListOf(RoadmapSpan(text = "First")))
             val ordered = RoadmapBlock.OrderedListItem(
                 index = 1,
-                spans = listOf(RoadmapSpan(text = "Second")),
+                spans = persistentListOf(RoadmapSpan(text = "Second")),
             )
             val blocks = listOf(bullet, ordered)
 
@@ -73,15 +73,15 @@ class RoadmapRenderUnitMapperTest {
             val units = blocks.toRoadmapRenderUnits()
 
             // ----- Assert -----
-            units shouldBe persistentListOf(RoadmapRenderUnit.ListGroup(items = listOf(bullet, ordered)))
+            units shouldBe persistentListOf(RoadmapRenderUnit.ListGroup(items = persistentListOf(bullet, ordered)))
         }
 
         @Test
         fun `a non-list block splits an otherwise consecutive list run into separate list groups`() {
             // ----- Arrange -----
-            val firstBullet = RoadmapBlock.BulletListItem(spans = listOf(RoadmapSpan(text = "First")))
-            val paragraph = RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Between")))
-            val secondBullet = RoadmapBlock.BulletListItem(spans = listOf(RoadmapSpan(text = "Second")))
+            val firstBullet = RoadmapBlock.BulletListItem(spans = persistentListOf(RoadmapSpan(text = "First")))
+            val paragraph = RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Between")))
+            val secondBullet = RoadmapBlock.BulletListItem(spans = persistentListOf(RoadmapSpan(text = "Second")))
             val blocks = listOf(firstBullet, paragraph, secondBullet)
 
             // ----- Act -----
@@ -89,17 +89,17 @@ class RoadmapRenderUnitMapperTest {
 
             // ----- Assert -----
             units shouldBe persistentListOf(
-                RoadmapRenderUnit.ListGroup(items = listOf(firstBullet)),
+                RoadmapRenderUnit.ListGroup(items = persistentListOf(firstBullet)),
                 RoadmapRenderUnit.Paragraph(spans = paragraph.spans),
-                RoadmapRenderUnit.ListGroup(items = listOf(secondBullet)),
+                RoadmapRenderUnit.ListGroup(items = persistentListOf(secondBullet)),
             )
         }
 
         @Test
         fun `paragraph blockquote and thematic break map one to one`() {
             // ----- Arrange -----
-            val paragraph = RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Body")))
-            val blockQuote = RoadmapBlock.BlockQuote(spans = listOf(RoadmapSpan(text = "Quoted")))
+            val paragraph = RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Body")))
+            val blockQuote = RoadmapBlock.BlockQuote(spans = persistentListOf(RoadmapSpan(text = "Quoted")))
             val blocks = listOf(paragraph, blockQuote, RoadmapBlock.ThematicBreak)
 
             // ----- Act -----

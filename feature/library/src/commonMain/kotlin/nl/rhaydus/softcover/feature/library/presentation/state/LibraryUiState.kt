@@ -1,7 +1,11 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
@@ -34,7 +38,7 @@ import nl.rhaydus.softcover.feature.library.presentation.mapper.standInCards
 import nl.rhaydus.toad.UiState
 
 internal data class LibraryUiState(
-    val visibleTabs: List<LibraryTab> = listOf(
+    val visibleTabs: ImmutableList<LibraryTab> = persistentListOf(
         LibraryTab.All,
         LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING),
     ),
@@ -53,8 +57,8 @@ internal data class LibraryUiState(
     ),
 
     val emptyStatesByTab: ImmutableMap<String, EmptyStateUiModel> = emptyStatesFor(visibleTabs),
-    val booksByTab: Map<String, List<Book>> = emptyMap(),
-    val editionsByTab: Map<String, List<BookEdition>> = emptyMap(),
+    val booksByTab: ImmutableMap<String, ImmutableList<Book>> = persistentMapOf(),
+    val editionsByTab: ImmutableMap<String, ImmutableList<BookEdition>> = persistentMapOf(),
 
     /**
      * Custom-list `list_books.created_at` keyed by tab id, then edition id. Populated by
@@ -62,14 +66,14 @@ internal data class LibraryUiState(
      * of leaning on the data layer's input order — which only happens to be date-added DESC for
      * non-ranked lists and gets shuffled by position-first ordering on ranked lists.
      */
-    val addedAtByTab: Map<String, Map<Int, String?>> = emptyMap(),
+    val addedAtByTab: ImmutableMap<String, ImmutableMap<Int, String?>> = persistentMapOf(),
 
     /**
      * Parent [Book] lookup for editions rendered in custom-list tabs. Populated by
      * [BookListsCollector] so book-level facets (tags, rating, release year) can resolve
      * even when the surface only renders [BookEdition]s.
      */
-    val bookByBookId: Map<Int, Book> = emptyMap(),
+    val bookByBookId: ImmutableMap<Int, Book> = persistentMapOf(),
 
     val isLoading: Boolean = true,
     val gridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
@@ -82,8 +86,8 @@ internal data class LibraryUiState(
      * it — its Library switches shelves from a permanent sidebar.
      */
     val shelfSwipeEnabled: Boolean = false,
-    val sortModeByTab: Map<String, LibrarySortMode> = emptyMap(),
-    val sortDirectionByTab: Map<String, SortDirection> = emptyMap(),
+    val sortModeByTab: ImmutableMap<String, LibrarySortMode> = persistentMapOf(),
+    val sortDirectionByTab: ImmutableMap<String, SortDirection> = persistentMapOf(),
 
     /** The Arrange sheet (layout + titles toggle + sort) shown on both mobile and desktop. */
     val isArrangeSheetExpanded: Boolean = false,
@@ -122,7 +126,7 @@ internal data class LibraryUiState(
     /** Set when a shelf is picked in the Shelves sheet; the layout clears it once the pager has shown that shelf. */
     val isShelvesSheetPickPending: Boolean = false,
 
-    val filtersByTab: Map<String, LibraryFilters> = emptyMap(),
+    val filtersByTab: ImmutableMap<String, LibraryFilters> = persistentMapOf(),
     val isFilterSheetExpanded: Boolean = false,
 
     /**
@@ -147,15 +151,15 @@ internal data class LibraryUiState(
      * so opening the sheet is O(1) on the UI thread. Tabs whose books haven't been collected yet
      * are absent from this map; the lookup falls back to an empty [LibraryFilterOptions].
      */
-    val filterOptionsByTab: Map<String, LibraryFilterOptions> = emptyMap(),
+    val filterOptionsByTab: ImmutableMap<String, LibraryFilterOptions> = persistentMapOf(),
 
-    val filterChipsByTab: Map<String, LibraryFilterChips> = emptyMap(),
+    val filterChipsByTab: ImmutableMap<String, LibraryFilterChips> = persistentMapOf(),
 
-    val activeFilterChipsByTab: Map<String, LibraryActiveFilterChips> = emptyMap(),
-    val rearrangeChipByTab: Map<String, ChipUiModel> = emptyMap(),
+    val activeFilterChipsByTab: ImmutableMap<String, LibraryActiveFilterChips> = persistentMapOf(),
+    val rearrangeChipByTab: ImmutableMap<String, ChipUiModel> = persistentMapOf(),
 
     /** The control line's Filter pill per tab, mapped by `PillButtonsCollector`; the dot marks active filters. */
-    val filterPillByTab: Map<String, PillButtonUiModel> = emptyMap(),
+    val filterPillByTab: ImmutableMap<String, PillButtonUiModel> = persistentMapOf(),
     val inactiveFilterPill: PillButtonUiModel = filterPillButton(active = false),
     val selectPill: PillButtonUiModel = selectPillButton(),
 
@@ -167,19 +171,19 @@ internal data class LibraryUiState(
      * [LibraryFilters.readYear]), precomputed off the main thread by [DisplayListsCollector] so
      * composition just does a map lookup on every frame.
      */
-    val displayBooksByTab: Map<String, List<Book>> = emptyMap(),
+    val displayBooksByTab: ImmutableMap<String, ImmutableList<Book>> = persistentMapOf(),
 
     /**
      * Search + sort + filter results per tab for custom-list (edition) shelves, precomputed off
      * the main thread by [DisplayListsCollector].
      */
-    val displayEditionsByTab: Map<String, List<BookEdition>> = emptyMap(),
+    val displayEditionsByTab: ImmutableMap<String, ImmutableList<BookEdition>> = persistentMapOf(),
 
     /**
      * Tab-level stats (count + pages) keyed by tab id, precomputed off the main thread by
      * [DisplayListsCollector].
      */
-    val tabStatsByTab: Map<String, LibraryTabStats> = emptyMap(),
+    val tabStatsByTab: ImmutableMap<String, LibraryTabStats> = persistentMapOf(),
 
     /**
      * Masthead copy per visible tab, mapped by `MastheadCollector` off each tab's stats and
@@ -200,7 +204,7 @@ internal data class LibraryUiState(
     /** The masthead's trailing refresh action, mapped by `MastheadCollector` off [isLoading]. */
     val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = true),
 
-    val deadlines: Map<Int, BookDeadline> = emptyMap(),
+    val deadlines: ImmutableMap<Int, BookDeadline> = persistentMapOf(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
 
     val searchQuery: String = "",
@@ -212,7 +216,7 @@ internal data class LibraryUiState(
      * don't have shelf semantics.
      */
     val selectionMode: Boolean = false,
-    val selectedBookIds: Set<Int> = emptySet(),
+    val selectedBookIds: ImmutableSet<Int> = persistentSetOf(),
 
     val selectionCount: StatNumberUiModel = selectionCountOf(count = 0),
 
@@ -248,10 +252,10 @@ internal data class LibraryUiState(
      * [BookListsCollector] so the bulk "Add to list" sheet can offer every list the user owns —
      * not just the ones surfaced as Library tabs.
      */
-    val customLists: List<BookList> = emptyList(),
+    val customLists: ImmutableList<BookList> = persistentListOf(),
 
     /** List ids whose bulk add/remove mutation is in flight; rows render a spinner instead of the indicator. */
-    val listsBeingMutated: Set<Int> = emptySet(),
+    val listsBeingMutated: ImmutableSet<Int> = persistentSetOf(),
 
     val chooseListsSheet: SheetSession<ChooseListsUiModel, CreateList> = SheetSession.Closed,
 

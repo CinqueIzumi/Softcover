@@ -19,6 +19,10 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
@@ -258,13 +262,13 @@ private fun ReadingScreenEmptyPreview() {
  */
 private val previewEmptyWithPickUpNextState = ReadingScreenUiState(
     isLoading = false,
-    wantToReadBooks = previewBooks.take(3),
+    wantToReadBooks = previewBooks.take(3).toImmutableList(),
     pickUpNext = previewBooks.take(3).map { it.toPickUpNextCard() to it }.toBookCardSet(),
 )
 
 private val previewEmptyWithTrendingState = ReadingScreenUiState(
     isLoading = false,
-    trendingBooks = listOf(previewBooks.first()),
+    trendingBooks = persistentListOf(previewBooks.first()),
     trendingTileCover = previewBooks.first()
         .toCoverUiModel(variant = CoverVariant.Tile),
 )
@@ -314,7 +318,7 @@ private fun ReadingScreenSingleBookPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = previewBooks.take(1),
+                books = previewBooks.take(1).toImmutableList(),
                 isLoading = false,
             ),
             runAction = {},
@@ -330,7 +334,7 @@ private fun ReadingScreenPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = previewBooks,
+                books = previewBooks.toImmutableList(),
                 isLoading = false,
             ),
             runAction = {},
@@ -365,7 +369,7 @@ private fun ReadingScreenWithStreakStripPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = previewBooks,
+                books = previewBooks.toImmutableList(),
                 isLoading = false,
                 streakStrip = streakStripFor(activity = previewReadingActivity()),
             ),
@@ -415,9 +419,9 @@ private fun ReadingScreenWithDeadlineAndNudgePreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = previewBooks,
+                books = previewBooks.toImmutableList(),
                 isLoading = false,
-                deadlines = deadlines,
+                deadlines = deadlines.toImmutableMap(),
             ),
             runAction = {},
             onBookClick = {},
@@ -451,9 +455,9 @@ private fun ReadingScreenExpiredDeadlinePreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = previewBooks.take(3),
+                books = previewBooks.take(3).toImmutableList(),
                 isLoading = false,
-                deadlines = deadlines,
+                deadlines = deadlines.toImmutableMap(),
             ),
             runAction = {},
             onBookClick = {},
@@ -468,9 +472,9 @@ private fun ReadingScreenMutationFailedPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = previewBooks,
+                books = previewBooks.toImmutableList(),
                 isLoading = false,
-                failedMutationBookIds = setOf(previewBooks[0].id, previewBooks[2].id),
+                failedMutationBookIds = persistentSetOf(previewBooks[0].id, previewBooks[2].id),
             ),
             runAction = {},
             onBookClick = {},
@@ -502,7 +506,7 @@ private fun ReadingScreenAudiobookPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = listOf(audioBook) + previewBooks.take(2),
+                books = (listOf(audioBook) + previewBooks.take(2)).toImmutableList(),
                 isLoading = false,
             ),
             runAction = {},

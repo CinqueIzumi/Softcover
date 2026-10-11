@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 
 /**
@@ -8,5 +9,5 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
  */
 internal data class UserTagEditorChipGroup(
     val label: String,
-    val chips: List<ChipUiModel>,
+    val chips: ImmutableList<ChipUiModel>,
 )

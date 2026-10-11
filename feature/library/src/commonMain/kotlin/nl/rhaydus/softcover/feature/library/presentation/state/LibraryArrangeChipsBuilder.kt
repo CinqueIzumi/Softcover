@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
@@ -24,9 +26,9 @@ import nl.rhaydus.softcover.feature.library.presentation.sort.librarySortOptions
 internal fun buildLibraryArrangeChips(
     draft: LibraryArrangeDraft,
     visibleTabs: List<LibraryTab>,
-    customLists: List<BookList>,
-    booksByTab: Map<String, List<Book>>,
-    deadlines: Map<Int, BookDeadline>,
+    customLists: ImmutableList<BookList>,
+    booksByTab: ImmutableMap<String, ImmutableList<Book>>,
+    deadlines: ImmutableMap<Int, BookDeadline>,
 ): LibraryArrangeChips {
     val tab = visibleTabs.firstOrNull { it.id == draft.tabId }
         ?: return LibraryArrangeChips.Empty

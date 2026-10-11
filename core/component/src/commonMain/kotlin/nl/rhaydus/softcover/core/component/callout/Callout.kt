@@ -27,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
@@ -143,7 +145,7 @@ private data class CalloutHeader(
     val variant: CalloutVariant,
     val body: String,
 ) {
-    val key: List<String?> = listOf(
+    val key: ImmutableList<String?> = persistentListOf(
         eyebrow,
         (variant as? CalloutVariant.Highlight)?.title,
         body,

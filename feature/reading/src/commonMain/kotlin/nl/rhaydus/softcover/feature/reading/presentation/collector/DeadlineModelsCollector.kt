@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -50,7 +51,7 @@ internal class DeadlineModelsCollector : ReadingCollector {
                     it.copy(
                         deadlineCoverOverlays = progressByBook.mapValues { (_, progress) ->
                             progress.toCoverOverlayUiModel()
-                        },
+                        }.toImmutableMap(),
                         featuredDeadlineSummary = progressByBook[featuredId]?.toDeadlineSummaryUiModel(
                             dateStyle = snapshot.dateStyle,
                         ),

@@ -1,5 +1,11 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
@@ -33,7 +39,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakStripFor
 import nl.rhaydus.toad.UiState
 
 internal data class ReadingScreenUiState(
-    val books: List<Book> = emptyList(),
+    val books: ImmutableList<Book> = persistentListOf(),
 
     /** True until the first load has built every slice the screen shows; a pull-to-refresh is [isRefreshing]. */
     val isLoading: Boolean = true,
@@ -55,15 +61,15 @@ internal data class ReadingScreenUiState(
 
     val progressSheet: SheetSession<ProgressSheetUiModel, Nothing> = SheetSession.Closed,
 
-    val deadlines: Map<Int, BookDeadline> = emptyMap(),
+    val deadlines: ImmutableMap<Int, BookDeadline> = persistentMapOf(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
 
-    val failedMutationBookIds: Set<Int> = emptySet(),
-    val dismissedPlanTodayByBook: Map<Int, String> = emptyMap(),
+    val failedMutationBookIds: ImmutableSet<Int> = persistentSetOf(),
+    val dismissedPlanTodayByBook: ImmutableMap<Int, String> = persistentMapOf(),
 
     /** `null` until the want-to-read shelf first loads; empty means it loaded with nothing on it. */
-    val wantToReadBooks: List<Book>? = null,
-    val trendingBooks: List<Book> = emptyList(),
+    val wantToReadBooks: ImmutableList<Book>? = null,
+    val trendingBooks: ImmutableList<Book> = persistentListOf(),
 
     val pickUpNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Pick up next"),
     val trendingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Trending now"),
@@ -108,7 +114,7 @@ internal data class ReadingScreenUiState(
     val alsoReading: BookCardSet<Book> = BookCardSet.standIns(ALSO_READING_STAND_IN_CARDS),
     val pickUpNext: BookCardSet<Book> = BookCardSet.standIns(PICK_UP_NEXT_STAND_IN_CARDS),
 
-    val deadlineCoverOverlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
+    val deadlineCoverOverlays: ImmutableMap<Int, CoverOverlayUiModel> = persistentMapOf(),
 
     /**
      * The featured card's progress readout, mapped by `FeaturedProgressCollector` from the featured

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -54,7 +55,7 @@ internal class UnreleasedCoverOverlaysCollector : ExploreCollector {
                                 snapshot.becauseYouReadBooks +
                                 snapshot.continueSeriesBooks +
                                 snapshot.queriedBooks
-                        ).toUnreleasedCoverOverlays(),
+                        ).toUnreleasedCoverOverlays().toImmutableMap(),
                         featuredReleaseBadge = snapshot.featuredUpcomingRelease
                             ?.effectiveReleaseDate
                             ?.toFeaturedUnreleasedBadgeUiModel(),

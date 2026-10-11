@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 
@@ -11,5 +12,5 @@ import nl.rhaydus.softcover.core.domain.model.TagCategory
  */
 internal data class TagCategoryChipGroup(
     val category: TagCategory,
-    val chips: List<ChipUiModel>,
+    val chips: ImmutableList<ChipUiModel>,
 )

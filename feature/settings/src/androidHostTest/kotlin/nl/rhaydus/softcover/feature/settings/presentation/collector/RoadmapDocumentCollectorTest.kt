@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +32,7 @@ import org.junit.jupiter.api.Test
 import kotlin.time.Instant
 
 private val TEST_DOCUMENT = RoadmapDocument(
-    blocks = emptyList(),
+    blocks = persistentListOf(),
     fetchedAtEpochMillis = 1_000L,
     source = RoadmapSource.CACHE,
 )
@@ -72,7 +73,7 @@ class RoadmapDocumentCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val documentWithBlocks = TEST_DOCUMENT.copy(
-                    blocks = listOf(RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Body")))),
+                    blocks = persistentListOf(RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Body")))),
                 )
                 val collector = RoadmapDocumentCollector()
                 val job = launch {

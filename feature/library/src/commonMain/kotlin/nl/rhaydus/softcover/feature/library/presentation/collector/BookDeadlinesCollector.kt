@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
@@ -13,7 +14,7 @@ internal class BookDeadlinesCollector : LibraryCollector {
         dependencies: LibraryDependencies,
     ) {
         dependencies.observeAllBookDeadlinesUseCase().collectLatest { deadlines ->
-            scope.setState { it.copy(deadlines = deadlines) }
+            scope.setState { it.copy(deadlines = deadlines.toImmutableMap()) }
         }
     }
 }

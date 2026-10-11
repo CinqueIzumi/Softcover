@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.mapper
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock
@@ -31,7 +32,7 @@ internal fun List<RoadmapBlock>.toRoadmapRenderUnits(): ImmutableList<RoadmapRen
                     items = subList(
                         runStart,
                         index,
-                    ),
+                    ).toImmutableList(),
                 )
             }
 

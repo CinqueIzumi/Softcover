@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
 import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
@@ -164,7 +165,7 @@ class CoverModelsSnapshotTest {
         ): CoverModelsSnapshot = CoverModelsSnapshot(
             book = book,
             displayedEdition = displayedEdition,
-            editions = emptyList(),
+            editions = persistentListOf(),
             initialCover = null,
             loadingBookDetails = loadingBookDetails,
             bookId = bookId,

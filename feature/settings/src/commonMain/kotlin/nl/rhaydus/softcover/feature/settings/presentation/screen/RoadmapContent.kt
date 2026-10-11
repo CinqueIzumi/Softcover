@@ -28,6 +28,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -106,7 +107,7 @@ private fun RoadmapErrorBanner(
 @Composable
 private fun RoadmapDocumentBody(
     isBundled: Boolean,
-    renderUnits: List<RoadmapRenderUnit>,
+    renderUnits: ImmutableList<RoadmapRenderUnit>,
     lastUpdatedText: String?,
     openUrl: (String) -> Unit,
 ) {
@@ -196,7 +197,7 @@ private fun RoadmapUnitContent(
 
 @Composable
 private fun RoadmapParagraph(
-    spans: List<RoadmapSpan>,
+    spans: ImmutableList<RoadmapSpan>,
     openUrl: (String) -> Unit,
 ) {
     SoftcoverText(
@@ -210,7 +211,7 @@ private fun RoadmapParagraph(
 
 @Composable
 private fun RoadmapList(
-    items: List<RoadmapBlock>,
+    items: ImmutableList<RoadmapBlock>,
     openUrl: (String) -> Unit,
     isLoading: Boolean = false,
 ) {
@@ -248,7 +249,7 @@ private fun RoadmapList(
  */
 @Composable
 private fun RoadmapBlockQuote(
-    spans: List<RoadmapSpan>,
+    spans: ImmutableList<RoadmapSpan>,
     openUrl: (String) -> Unit,
 ) {
     Row(
@@ -285,7 +286,7 @@ private fun RoadmapBlockQuote(
  */
 @Composable
 private fun roadmapAnnotatedString(
-    spans: List<RoadmapSpan>,
+    spans: ImmutableList<RoadmapSpan>,
     openUrl: (String) -> Unit,
     leadingMarker: String? = null,
 ): AnnotatedString {

@@ -47,42 +47,42 @@ public fun nl.rhaydus.softcover.core.presentation.theme.isDark(): kotlin.Boolean
   params:
 
 @Composable
-public fun nl.rhaydus.softcover.core.presentation.util.TabReselectEffect(tab: kotlin.Any, onReselect: kotlin.coroutines.SuspendFunction0<kotlin.Boolean>): kotlin.Unit
+public fun nl.rhaydus.softcover.core.presentation.util.TabReselectEffect(tab: cafe.adriel.voyager.navigator.tab.Tab, onReselect: kotlin.coroutines.SuspendFunction0<kotlin.Boolean>): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - tab: UNSTABLE (has mutable properties or unstable members)
+    - tab: RUNTIME (requires runtime check)
     - onReselect: STABLE (function type)
 
 @Composable
-public fun nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect(tab: kotlin.Any, scrollToTop: kotlin.coroutines.SuspendFunction1<@[ParameterName(name = \): kotlin.Unit
+public fun nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect(tab: cafe.adriel.voyager.navigator.tab.Tab, scrollToTop: kotlin.coroutines.SuspendFunction1<@[ParameterName(name = \): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - tab: UNSTABLE (has mutable properties or unstable members)
+    - tab: RUNTIME (requires runtime check)
     - scrollToTop: STABLE (function type)
 
 @Composable
-public fun nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect(tab: kotlin.Any, state: androidx.compose.foundation.ScrollState): kotlin.Unit
+public fun nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect(tab: cafe.adriel.voyager.navigator.tab.Tab, state: androidx.compose.foundation.ScrollState): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - tab: UNSTABLE (has mutable properties or unstable members)
+    - tab: RUNTIME (requires runtime check)
     - state: STABLE (marked @Stable or @Immutable)
 
 @Composable
-public fun nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect(tab: kotlin.Any, state: androidx.compose.foundation.lazy.LazyListState): kotlin.Unit
+public fun nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect(tab: cafe.adriel.voyager.navigator.tab.Tab, state: androidx.compose.foundation.lazy.LazyListState): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - tab: UNSTABLE (has mutable properties or unstable members)
+    - tab: RUNTIME (requires runtime check)
     - state: STABLE (marked @Stable or @Immutable)
 
 @Composable
-public fun nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect(tab: kotlin.Any, state: androidx.compose.foundation.lazy.grid.LazyGridState): kotlin.Unit
+public fun nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect(tab: cafe.adriel.voyager.navigator.tab.Tab, state: androidx.compose.foundation.lazy.grid.LazyGridState): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - tab: UNSTABLE (has mutable properties or unstable members)
+    - tab: RUNTIME (requires runtime check)
     - state: STABLE (marked @Stable or @Immutable)
 

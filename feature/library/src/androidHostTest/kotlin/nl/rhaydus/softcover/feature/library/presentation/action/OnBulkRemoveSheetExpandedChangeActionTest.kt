@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -38,7 +39,7 @@ class OnBulkRemoveSheetExpandedChangeActionTest {
         fun `showing the sheet requests it without building its model`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1, 2, 3),
+                selectedBookIds = persistentSetOf(1, 2, 3),
                 bulkActionInProgress = true,
             )
 
@@ -58,7 +59,7 @@ class OnBulkRemoveSheetExpandedChangeActionTest {
             // ----- Arrange -----
             val closing = openBulkRemoveSession(closing = true)
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
+                selectedBookIds = persistentSetOf(1),
                 bulkRemoveSheet = closing,
             )
 

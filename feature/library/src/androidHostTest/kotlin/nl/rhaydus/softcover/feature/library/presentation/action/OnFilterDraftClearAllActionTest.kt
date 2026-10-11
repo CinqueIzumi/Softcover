@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -57,7 +58,7 @@ class OnFilterDraftClearAllActionTest {
             val draft = LibraryFilterDraft(
                 tabId = tabId,
                 filters = LibraryFilters(
-                    formats = setOf("Hardcover"),
+                    formats = persistentSetOf("Hardcover"),
                     owned = true,
                     ratingMin = 4.0,
                 ),

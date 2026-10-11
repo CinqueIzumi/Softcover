@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -55,7 +56,7 @@ class FeaturedProgressCollectorTest {
         @Test
         fun `falls back to the loading stand-in when there is no featured book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(books = emptyList())
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf())
             val collector = FeaturedProgressCollector()
 
             // ----- Act -----
@@ -74,7 +75,7 @@ class FeaturedProgressCollectorTest {
         @Test
         fun `maps the first book as the featured book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(books = listOf(stubBook(progress = 40f), stubBook(progress = 90f)))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(stubBook(progress = 40f), stubBook(progress = 90f)))
             val collector = FeaturedProgressCollector()
 
             // ----- Act -----
@@ -94,7 +95,7 @@ class FeaturedProgressCollectorTest {
         @Test
         fun `rebuilds when the featured book changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(books = listOf(stubBook(progress = 40f)))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(stubBook(progress = 40f)))
             val collector = FeaturedProgressCollector()
             val job = launch {
                 collector.onLaunch(
@@ -104,7 +105,7 @@ class FeaturedProgressCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(books = listOf(stubBook(progress = 75f)))
+            stateFlow.value = stateFlow.value.copy(books = persistentListOf(stubBook(progress = 75f)))
 
             // ----- Assert -----
             stateFlow.value.featuredProgress.percent.value shouldBe 75.0

@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -47,7 +48,7 @@ class RecentSearchChipsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = ExploreScreenUiState(previousSearchQueries = listOf("kotlin", "android"))
+                stateFlow.value = ExploreScreenUiState(previousSearchQueries = persistentListOf("kotlin", "android"))
 
                 // ----- Assert -----
                 stateFlow.value.recentSearchChips.chips.map { it.key } shouldBe
@@ -63,7 +64,7 @@ class RecentSearchChipsCollectorTest {
         fun `unrelated state change that leaves previousSearchQueries equal does not retrigger recompute`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                stateFlow.value = ExploreScreenUiState(previousSearchQueries = listOf("kotlin"))
+                stateFlow.value = ExploreScreenUiState(previousSearchQueries = persistentListOf("kotlin"))
                 val collector = RecentSearchChipsCollector()
                 val job = launch {
                     collector.onLaunch(

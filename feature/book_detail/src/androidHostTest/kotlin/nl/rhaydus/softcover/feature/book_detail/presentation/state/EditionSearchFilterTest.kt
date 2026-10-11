@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -17,7 +18,7 @@ class EditionSearchFilterTest {
         isbn13 = "9781473222687",
         publisher = "Gollancz",
     )
-    private val editions = listOf(first, second)
+    private val editions = persistentListOf(first, second)
 
     @Nested
     inner class FilterByEditionSearch {

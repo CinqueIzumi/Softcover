@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -62,7 +64,9 @@ internal class BooksByStatusCollector : LibraryCollector {
                 val stripped = state.booksByTab.filterKeys { key ->
                     key.startsWith("status-").not() || key in retainedStatusKeys
                 }
-                state.copy(booksByTab = stripped + grouped)
+                state.copy(
+                    booksByTab = stripped.toPersistentMap().putAll(grouped.mapValues { (_, books) -> books.toImmutableList() }),
+                )
             }
         }
     }

@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -54,7 +55,7 @@ class MoodChipsCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = ExploreScreenUiState(moodTags = listOf(cozy))
+            stateFlow.value = ExploreScreenUiState(moodTags = persistentListOf(cozy))
 
             // ----- Assert -----
             stateFlow.value.moodChips.chips.map { it.key } shouldBe listOf("mood:1")
@@ -67,7 +68,7 @@ class MoodChipsCollectorTest {
         fun `unrelated state change that leaves moodTags equal does not retrigger recompute`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                stateFlow.value = ExploreScreenUiState(moodTags = listOf(cozy))
+                stateFlow.value = ExploreScreenUiState(moodTags = persistentListOf(cozy))
                 val collector = MoodChipsCollector()
                 val job = launch {
                     collector.onLaunch(

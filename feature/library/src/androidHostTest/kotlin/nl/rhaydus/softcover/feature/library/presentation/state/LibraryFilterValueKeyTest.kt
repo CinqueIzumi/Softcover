@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.domain.model.Tag
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -18,16 +20,16 @@ class LibraryFilterValueKeyTest {
             // ----- Arrange -----
             val options = LibraryFilterOptions(
                 supportsOwnedFilter = true,
-                formats = listOf("ebook"),
-                releaseYears = listOf(2021),
-                readYears = listOf(2020),
-                tags = listOf(tagFiction),
-                ratingBuckets = listOf(4.0),
+                formats = persistentListOf("ebook"),
+                releaseYears = persistentListOf(2021),
+                readYears = persistentListOf(2020),
+                tags = persistentListOf(tagFiction),
+                ratingBuckets = persistentListOf(4.0),
             )
             val filters = LibraryFilters(
-                tags = setOf(tagFiction),
-                formats = setOf("ebook"),
-                releaseYears = setOf(2021),
+                tags = persistentSetOf(tagFiction),
+                formats = persistentSetOf("ebook"),
+                releaseYears = persistentSetOf(2021),
                 readYear = 2020,
                 owned = true,
                 ratingMin = 4.0,

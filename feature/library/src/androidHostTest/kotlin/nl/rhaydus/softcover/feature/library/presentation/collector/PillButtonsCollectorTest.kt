@@ -2,6 +2,9 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -55,8 +58,8 @@ class PillButtonsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(readingTab, readTab),
-                filtersByTab = mapOf(readTab.id to LibraryFilters(formats = setOf("Ebook"))),
+                visibleTabs = persistentListOf(readingTab, readTab),
+                filtersByTab = persistentMapOf(readTab.id to LibraryFilters(formats = persistentSetOf("Ebook"))),
             )
 
             // ----- Assert -----

@@ -223,11 +223,11 @@ private fun nl.rhaydus.softcover.core.component.bookcard.handOver(card: nl.rhayd
     - standIn: STABLE (function type)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator(cards: kotlin.collections.List<nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel>, key: kotlin.String): nl.rhaydus.designsystem.component.StaggeredEntryCoordinator
-  skippable: false
+public fun nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator(cards: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel>, key: kotlin.String): nl.rhaydus.designsystem.component.StaggeredEntryCoordinator
+  skippable: true
   restartable: true
   params:
-    - cards: RUNTIME (requires runtime check)
+    - cards: STABLE (known stable type)
     - key: STABLE (String is immutable)
 
 @Composable
@@ -327,10 +327,10 @@ private fun nl.rhaydus.softcover.core.component.callout.CalloutEyebrow(eyebrow: 
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.callout.CalloutHeaderContent(header: nl.rhaydus.softcover.core.component.callout.CalloutHeader, content: androidx.compose.ui.graphics.Color): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - header: RUNTIME (requires runtime check)
+    - header: STABLE (class with no mutable properties)
     - content: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -1296,11 +1296,11 @@ private fun nl.rhaydus.softcover.core.component.share.ReadingLifeFooterStat(labe
     - accessory: STABLE (composable function type)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.share.ReadingLifeGenreRanking(genres: kotlin.collections.List<nl.rhaydus.softcover.core.component.share.ReadingLifeGenre>): kotlin.Unit
-  skippable: false
+private fun nl.rhaydus.softcover.core.component.share.ReadingLifeGenreRanking(genres: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.share.ReadingLifeGenre>): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - genres: RUNTIME (requires runtime check)
+    - genres: STABLE (known stable type)
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.share.ReadingLifeGenreRow(genre: nl.rhaydus.softcover.core.component.share.ReadingLifeGenre, isLeading: kotlin.Boolean): kotlin.Unit
@@ -1311,11 +1311,11 @@ private fun nl.rhaydus.softcover.core.component.share.ReadingLifeGenreRow(genre:
     - isLeading: STABLE (primitive type)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.share.ReadingLifeRidgeline(monthlyPages: kotlin.collections.List<kotlin.Int>): kotlin.Unit
-  skippable: false
+private fun nl.rhaydus.softcover.core.component.share.ReadingLifeRidgeline(monthlyPages: kotlinx.collections.immutable.ImmutableList<kotlin.Int>): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - monthlyPages: RUNTIME (requires runtime check)
+    - monthlyPages: STABLE (known stable type)
 
 @Composable
 internal fun nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardBody(content: nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel): kotlin.Unit
@@ -1355,7 +1355,7 @@ public fun nl.rhaydus.softcover.core.component.share.ShareCard(model: nl.rhaydus
   skippable: true
   restartable: true
   params:
-    - model: STABLE (class with no mutable properties)
+    - model: STABLE (marked @Stable or @Immutable)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable

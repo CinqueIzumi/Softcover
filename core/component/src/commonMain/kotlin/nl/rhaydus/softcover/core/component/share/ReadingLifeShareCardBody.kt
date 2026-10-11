@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.softcover.core.component.divider.Divider
@@ -245,7 +246,7 @@ private fun MiniScallopPortrait(
  * [ReadingLifeShareCardUiModel.pagesByMonth].
  */
 @Composable
-private fun ReadingLifeRidgeline(monthlyPages: List<Int>) {
+private fun ReadingLifeRidgeline(monthlyPages: ImmutableList<Int>) {
     val maxValue = monthlyPages.max().coerceAtLeast(1)
     val lineColor = LocalContentColor.current.copy(alpha = 0.9f)
     val areaColor = LocalContentColor.current.copy(alpha = 0.22f)
@@ -347,7 +348,7 @@ private fun ReadingLifeRidgeline(monthlyPages: List<Int>) {
 }
 
 @Composable
-private fun ReadingLifeGenreRanking(genres: List<ReadingLifeGenre>) {
+private fun ReadingLifeGenreRanking(genres: ImmutableList<ReadingLifeGenre>) {
     Column(modifier = Modifier.fillMaxWidth()) {
         SoftcoverText(
             text = "WHAT YOU READ MOST",

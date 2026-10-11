@@ -4,6 +4,8 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -133,9 +135,9 @@ class PersistedLibraryVisibilityCollectorTest {
 
             // Simulate user toggling the draft before the persisted store updates again
             stateFlow.value = stateFlow.value.copy(
-                draftEnabledStatusCodes = setOf(1),
-                draftEnabledListIds = setOf(10, 20),
-                draftTabOrder = listOf(readId),
+                draftEnabledStatusCodes = persistentSetOf(1),
+                draftEnabledListIds = persistentSetOf(10, 20),
+                draftTabOrder = persistentListOf(readId),
             )
 
             // ----- Act -----

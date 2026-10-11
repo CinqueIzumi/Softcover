@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -14,7 +15,7 @@ internal class PreviousQueriesCollector : ExploreCollector {
     ) {
         dependencies.getPreviousSearchQueriesUseCase().collectLatest { queries ->
             scope.setState {
-                it.copy(previousSearchQueries = queries)
+                it.copy(previousSearchQueries = queries.toImmutableList())
             }
         }
     }

@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.settings.presentation.action
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -78,7 +80,7 @@ class OnListToggleActionTest {
         fun `adds id to draftEnabledListIds when enabled is true`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledListIds = setOf(10),
+                draftEnabledListIds = persistentSetOf(10),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
@@ -101,13 +103,13 @@ class OnListToggleActionTest {
         fun `rebuilds orderedEntries so the toggled list entry reflects the new checked state`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                availableLists = listOf(
+                availableLists = persistentListOf(
                     stubBookList(
                         id = 20,
                         name = "Favourites",
                     ),
                 ),
-                draftEnabledListIds = emptySet(),
+                draftEnabledListIds = persistentSetOf(),
                 initialized = true,
             ).withOrderedEntries()
             val dependencies = stubDependencies(this)
@@ -133,7 +135,7 @@ class OnListToggleActionTest {
         fun `removes id from draftEnabledListIds when enabled is false`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledListIds = setOf(10, 20, 30),
+                draftEnabledListIds = persistentSetOf(10, 20, 30),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)

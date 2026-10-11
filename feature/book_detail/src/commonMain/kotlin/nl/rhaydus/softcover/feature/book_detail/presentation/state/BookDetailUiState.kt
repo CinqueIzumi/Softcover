@@ -1,8 +1,10 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
@@ -74,7 +76,7 @@ internal data class BookDetailUiState(
     val initialCover: BookInitialCover? = null,
     val fabMenuExpanded: Boolean = false,
     val showEditEditionSheet: Boolean = false,
-    val editions: List<BookEdition> = emptyList(),
+    val editions: ImmutableList<BookEdition> = persistentListOf(),
     val loadingEditions: Boolean = false,
 
     /**
@@ -181,8 +183,8 @@ internal data class BookDetailUiState(
     /** `null` whenever [verdictSheetContext] is. */
     val verdictSheet: VerdictSheetUiModel? = null,
 
-    val failedMutationBookIds: Set<Int> = emptySet(),
-    val failedMutationEditionIds: Set<Int> = emptySet(),
+    val failedMutationBookIds: ImmutableSet<Int> = persistentSetOf(),
+    val failedMutationEditionIds: ImmutableSet<Int> = persistentSetOf(),
 
     val currentUsername: String? = null,
     val currentUserAvatarUrl: String? = null,
@@ -230,12 +232,12 @@ internal data class BookDetailUiState(
     val showChooseListsSheet: Boolean = false,
 
     val createListPending: Boolean = false,
-    val userLists: List<BookList> = emptyList(),
-    val listsBeingMutated: Set<Int> = emptySet(),
+    val userLists: ImmutableList<BookList> = persistentListOf(),
+    val listsBeingMutated: ImmutableSet<Int> = persistentSetOf(),
 
     val chooseListsSheet: ChooseListsUiModel? = null,
 
-    val userTags: List<UserTag> = emptyList(),
+    val userTags: ImmutableList<UserTag> = persistentListOf(),
     val showTagEditorSheet: Boolean = false,
     val tagEditorCategory: TagCategory = TagCategory.TAG,
     val tagEditorInput: String = "",
@@ -245,11 +247,11 @@ internal data class BookDetailUiState(
         category = TagCategory.TAG,
         addPill = tagAddPill,
     ),
-    val tagSuggestions: List<UserTag> = emptyList(),
+    val tagSuggestions: ImmutableList<UserTag> = persistentListOf(),
 
-    val userTagChips: List<ChipUiModel> = emptyList(),
+    val userTagChips: ImmutableList<ChipUiModel> = persistentListOf(),
 
-    val communityTagGroups: List<TagCategoryChipGroup> = emptyList(),
+    val communityTagGroups: ImmutableList<TagCategoryChipGroup> = persistentListOf(),
 
     /**
      * Community content-warning tag keys `OnRevealTagSpoilerAction` has revealed, for the rest of this screen
@@ -265,7 +267,7 @@ internal data class BookDetailUiState(
         body = "Name the first thing this book is to you.",
     ),
 
-    val userTagByEditorChipKey: Map<String, UserTag> = emptyMap(),
+    val userTagByEditorChipKey: ImmutableMap<String, UserTag> = persistentMapOf(),
 
     /**
      * The chip key of the [UserTag] `OnAddUserTagAction` most recently inserted, so `TagEditorCollection`

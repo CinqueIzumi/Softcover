@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -49,7 +50,7 @@ internal data class OnUpdatePageProgressClickAction(
                     AppLog.e("$error")
 
                     scope.setState {
-                        it.copy(failedMutationBookIds = it.failedMutationBookIds + bookToUpdate.id)
+                        it.copy(failedMutationBookIds = it.failedMutationBookIds.toPersistentSet().add(bookToUpdate.id))
                     }
                 }
         }

@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,7 +60,7 @@ class OnClearSearchActionTest {
                 searchFocused = true,
                 isSortMenuExpanded = true,
                 searchText = "dune",
-                queriedBooks = listOf(mockk()),
+                queriedBooks = persistentListOf(mockk()),
                 activeMoodFilter = MoodTag(
                     id = 1,
                     label = "Cozy",

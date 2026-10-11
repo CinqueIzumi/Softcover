@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -19,7 +20,7 @@ internal class CurrentlyReadingBooksCollector : ReadingCollector {
 
             scope.setState {
                 it.copy(
-                    books = books,
+                    books = books.toImmutableList(),
                     hasLoadedBooks = true,
                     alsoReadingHeader = SectionHeaderUiModel.Section(
                         eyebrow = if (restCount == 1) "One more in motion" else "$restCount more in motion",

@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
@@ -28,12 +30,12 @@ internal class PersistedLibraryVisibilityCollector : LibraryVisibilityCollector 
             scope.setState { state ->
                 state
                     .copy(
-                        persistedEnabledStatusCodes = codes,
-                        persistedEnabledListIds = ids,
-                        persistedTabOrder = order,
-                        draftEnabledStatusCodes = if (state.initialized) state.draftEnabledStatusCodes else codes,
-                        draftEnabledListIds = if (state.initialized) state.draftEnabledListIds else ids,
-                        draftTabOrder = if (state.initialized) state.draftTabOrder else order,
+                        persistedEnabledStatusCodes = codes.toImmutableSet(),
+                        persistedEnabledListIds = ids.toImmutableSet(),
+                        persistedTabOrder = order.toImmutableList(),
+                        draftEnabledStatusCodes = if (state.initialized) state.draftEnabledStatusCodes else codes.toImmutableSet(),
+                        draftEnabledListIds = if (state.initialized) state.draftEnabledListIds else ids.toImmutableSet(),
+                        draftTabOrder = if (state.initialized) state.draftTabOrder else order.toImmutableList(),
                         initialized = true,
                     )
                     .withOrderedEntries()

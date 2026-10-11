@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.data.mapper
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSpan
 import org.junit.jupiter.api.Nested
@@ -19,7 +20,7 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Body"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Body"))),
             )
         }
 
@@ -33,10 +34,10 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Paragraph one"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Paragraph one"))),
                 RoadmapBlock.Heading(
                     level = 1,
-                    spans = listOf(RoadmapSpan(text = "Title")),
+                    spans = persistentListOf(RoadmapSpan(text = "Title")),
                 ),
             )
         }
@@ -51,14 +52,14 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Intro"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Intro"))),
                 RoadmapBlock.Heading(
                     level = 2,
-                    spans = listOf(RoadmapSpan(text = "Heading Two")),
+                    spans = persistentListOf(RoadmapSpan(text = "Heading Two")),
                 ),
                 RoadmapBlock.Heading(
                     level = 3,
-                    spans = listOf(RoadmapSpan(text = "Heading Three")),
+                    spans = persistentListOf(RoadmapSpan(text = "Heading Three")),
                 ),
             )
         }
@@ -76,7 +77,7 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Line one Line two Line three"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Line one Line two Line three"))),
             )
         }
 
@@ -90,8 +91,8 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "First paragraph text"))),
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Second paragraph text"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "First paragraph text"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Second paragraph text"))),
             )
         }
     }
@@ -108,8 +109,8 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.BulletListItem(spans = listOf(RoadmapSpan(text = "First item"))),
-                RoadmapBlock.BulletListItem(spans = listOf(RoadmapSpan(text = "Second item"))),
+                RoadmapBlock.BulletListItem(spans = persistentListOf(RoadmapSpan(text = "First item"))),
+                RoadmapBlock.BulletListItem(spans = persistentListOf(RoadmapSpan(text = "Second item"))),
             )
         }
 
@@ -125,11 +126,11 @@ class RoadmapMarkdownMapperTest {
             blocks shouldBe listOf(
                 RoadmapBlock.OrderedListItem(
                     index = 1,
-                    spans = listOf(RoadmapSpan(text = "First item")),
+                    spans = persistentListOf(RoadmapSpan(text = "First item")),
                 ),
                 RoadmapBlock.OrderedListItem(
                     index = 5,
-                    spans = listOf(RoadmapSpan(text = "Fifth item")),
+                    spans = persistentListOf(RoadmapSpan(text = "Fifth item")),
                 ),
             )
         }
@@ -147,7 +148,7 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.BlockQuote(spans = listOf(RoadmapSpan(text = "Line one Line two"))),
+                RoadmapBlock.BlockQuote(spans = persistentListOf(RoadmapSpan(text = "Line one Line two"))),
             )
         }
 
@@ -161,8 +162,8 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.BlockQuote(spans = listOf(RoadmapSpan(text = "Quoted text"))),
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Plain paragraph"))),
+                RoadmapBlock.BlockQuote(spans = persistentListOf(RoadmapSpan(text = "Quoted text"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Plain paragraph"))),
             )
         }
     }
@@ -200,7 +201,7 @@ class RoadmapMarkdownMapperTest {
             // ----- Assert -----
             blocks shouldBe listOf(
                 RoadmapBlock.Paragraph(
-                    spans = listOf(
+                    spans = persistentListOf(
                         RoadmapSpan(
                             text = "bold text",
                             bold = true,
@@ -221,7 +222,7 @@ class RoadmapMarkdownMapperTest {
             // ----- Assert -----
             blocks shouldBe listOf(
                 RoadmapBlock.Paragraph(
-                    spans = listOf(
+                    spans = persistentListOf(
                         RoadmapSpan(
                             text = "one",
                             italic = true,
@@ -247,7 +248,7 @@ class RoadmapMarkdownMapperTest {
             // ----- Assert -----
             blocks shouldBe listOf(
                 RoadmapBlock.Paragraph(
-                    spans = listOf(
+                    spans = persistentListOf(
                         RoadmapSpan(
                             text = "code text",
                             code = true,
@@ -268,7 +269,7 @@ class RoadmapMarkdownMapperTest {
             // ----- Assert -----
             blocks shouldBe listOf(
                 RoadmapBlock.Paragraph(
-                    spans = listOf(
+                    spans = persistentListOf(
                         RoadmapSpan(
                             text = "Click here",
                             url = "https://example.com",
@@ -289,7 +290,7 @@ class RoadmapMarkdownMapperTest {
             // ----- Assert -----
             blocks shouldBe listOf(
                 RoadmapBlock.Paragraph(
-                    spans = listOf(
+                    spans = persistentListOf(
                         RoadmapSpan(
                             text = "Bold",
                             bold = true,
@@ -315,7 +316,7 @@ class RoadmapMarkdownMapperTest {
             // ----- Assert -----
             blocks shouldBe listOf(
                 RoadmapBlock.Paragraph(
-                    spans = listOf(
+                    spans = persistentListOf(
                         RoadmapSpan(text = "Plain text "),
                         RoadmapSpan(
                             text = "bold forever",
@@ -336,7 +337,7 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "*"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "*"))),
             )
         }
     }
@@ -382,8 +383,8 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "| a | b |"))),
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "<div>text</div>"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "| a | b |"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "<div>text</div>"))),
             )
         }
     }

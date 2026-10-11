@@ -9,6 +9,9 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -104,8 +107,8 @@ class OnBulkMoveShelfActionTest {
             val unselectedBook = buildBook(id = 2)
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(selectedBook, unselectedBook)),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(selectedBook, unselectedBook)),
                 isBulkMoveMenuExpanded = true,
             )
 
@@ -139,8 +142,8 @@ class OnBulkMoveShelfActionTest {
             val selectedBook2 = buildBook(id = 2)
             val explicitBook = buildBook(id = 99)
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1, 2),
-                booksByTab = mapOf(tabKey to listOf(selectedBook1, selectedBook2, explicitBook)),
+                selectedBookIds = persistentSetOf(1, 2),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(selectedBook1, selectedBook2, explicitBook)),
             )
 
             coEvery {
@@ -167,8 +170,8 @@ class OnBulkMoveShelfActionTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
             )
 
             coEvery {
@@ -192,8 +195,8 @@ class OnBulkMoveShelfActionTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
             )
 
             coEvery {
@@ -219,8 +222,8 @@ class OnBulkMoveShelfActionTest {
             val okBook = buildBook(id = 2)
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
-                selectedBookIds = setOf(1, 2),
-                booksByTab = mapOf(tabKey to listOf(failingBook, okBook)),
+                selectedBookIds = persistentSetOf(1, 2),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(failingBook, okBook)),
             )
 
             coEvery {
@@ -253,7 +256,7 @@ class OnBulkMoveShelfActionTest {
         fun `no books resolved closes the move menu without starting progress`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                selectedBookIds = emptySet(),
+                selectedBookIds = persistentSetOf(),
                 isBulkMoveMenuExpanded = true,
             )
 
@@ -274,8 +277,8 @@ class OnBulkMoveShelfActionTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
             )
 
             coEvery {
@@ -299,8 +302,8 @@ class OnBulkMoveShelfActionTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
             )
 
             coEvery {
@@ -324,8 +327,8 @@ class OnBulkMoveShelfActionTest {
             val failingBook = buildBook(id = 1)
             val okBook = buildBook(id = 2)
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1, 2),
-                booksByTab = mapOf(tabKey to listOf(failingBook, okBook)),
+                selectedBookIds = persistentSetOf(1, 2),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(failingBook, okBook)),
             )
 
             coEvery {
@@ -356,8 +359,8 @@ class OnBulkMoveShelfActionTest {
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
                 isBulkRemoveSheetRequested = true,
                 isChooseListsSheetRequested = true,
             )
@@ -382,8 +385,8 @@ class OnBulkMoveShelfActionTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
                 isChooseListsSheetRequested = true,
             )
 

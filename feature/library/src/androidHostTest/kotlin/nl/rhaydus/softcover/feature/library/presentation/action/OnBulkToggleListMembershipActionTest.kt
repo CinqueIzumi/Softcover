@@ -9,6 +9,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -109,7 +114,7 @@ class OnBulkToggleListMembershipActionTest {
     ) {
         stateFlow.update { current ->
             current.copy(
-                customLists = current.customLists.map { list ->
+                customLists = (current.customLists.map { list ->
                     when {
                         list.id != listId -> list
 
@@ -117,7 +122,7 @@ class OnBulkToggleListMembershipActionTest {
 
                         else -> list.copy(books = list.books.filterNot { it.bookId == bookId })
                     }
-                },
+                }).toImmutableList(),
             )
         }
     }
@@ -169,9 +174,9 @@ class OnBulkToggleListMembershipActionTest {
         list: BookList,
         selected: List<Book>,
     ) = LibraryUiState(
-        customLists = listOf(list),
-        selectedBookIds = selected.map { it.id }.toSet(),
-        booksByTab = mapOf("all" to selected),
+        customLists = persistentListOf(list),
+        selectedBookIds = (selected.map { it.id }.toSet()).toImmutableSet(),
+        booksByTab = persistentMapOf("all" to selected.toImmutableList()),
     )
 
     @Nested
@@ -261,7 +266,7 @@ class OnBulkToggleListMembershipActionTest {
             stateFlow.value = stateWith(
                 list = stubList(),
                 selected = listOf(book),
-            ).copy(listsBeingMutated = setOf(listId))
+            ).copy(listsBeingMutated = persistentSetOf(listId))
 
             // ----- Act -----
             OnBulkToggleListMembershipAction(
@@ -320,7 +325,7 @@ class OnBulkToggleListMembershipActionTest {
         @Test
         fun `an empty selection does nothing`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(customLists = listOf(stubList()))
+            stateFlow.value = LibraryUiState(customLists = persistentListOf(stubList()))
 
             // ----- Act -----
             OnBulkToggleListMembershipAction(
@@ -585,7 +590,7 @@ class OnBulkToggleListMembershipActionTest {
 
             // ----- Act -----
             stateFlow.update { current ->
-                current.copy(customLists = emptyList())
+                current.copy(customLists = persistentListOf())
             }
             runCurrent()
 

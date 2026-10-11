@@ -4,7 +4,9 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -56,7 +58,7 @@ class TagChipModelsCollectorTest {
         @Test
         fun `maps userTags to read-only chips keyed by category and name`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val userTags = listOf(
+            val userTags = persistentListOf(
                 UserTag(
                     name = "Fantasy",
                     category = TagCategory.GENRE,
@@ -75,7 +77,7 @@ class TagChipModelsCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userTags = userTags)
+            stateFlow.value = stateFlow.value.copy(userTags = userTags.toImmutableList())
 
             // ----- Assert -----
             stateFlow.value.userTagChips.map { it.key } shouldBe listOf("GENRE:Fantasy", "MOOD:Cozy")
@@ -334,7 +336,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = emptyList())
+                stateFlow.value = stateFlow.value.copy(userTags = persistentListOf())
 
                 // ----- Assert -----
                 stateFlow.value.tagEditorOpenerChip?.label shouldBe "Add tags"
@@ -345,7 +347,7 @@ class TagChipModelsCollectorTest {
         fun `tagEditorOpenerChip reads Edit tags once the user has at least one tag`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                val userTags = listOf(
+                val userTags = persistentListOf(
                     UserTag(
                         name = "Fantasy",
                         category = TagCategory.GENRE,
@@ -360,7 +362,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = userTags)
+                stateFlow.value = stateFlow.value.copy(userTags = userTags.toImmutableList())
 
                 // ----- Assert -----
                 stateFlow.value.tagEditorOpenerChip?.label shouldBe "Edit tags"
@@ -371,7 +373,7 @@ class TagChipModelsCollectorTest {
         fun `userTagEditorGroups follow EDITABLE_CATEGORIES order with a trailing Other group`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                val userTags = listOf(
+                val userTags = persistentListOf(
                     UserTag(
                         name = "Zesty",
                         category = TagCategory.OTHER,
@@ -398,7 +400,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = userTags)
+                stateFlow.value = stateFlow.value.copy(userTags = userTags.toImmutableList())
 
                 // ----- Assert -----
                 stateFlow.value.userTagEditorGroups.map { it.label } shouldBe listOf(
@@ -414,7 +416,7 @@ class TagChipModelsCollectorTest {
         fun `userTagEditorGroups omits editable categories with no tags and carries no Other group when empty`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                val userTags = listOf(
+                val userTags = persistentListOf(
                     UserTag(
                         name = "Fantasy",
                         category = TagCategory.GENRE,
@@ -429,7 +431,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = userTags)
+                stateFlow.value = stateFlow.value.copy(userTags = userTags.toImmutableList())
 
                 // ----- Assert -----
                 stateFlow.value.userTagEditorGroups.map { it.label } shouldBe listOf(TagCategory.GENRE.label)
@@ -440,7 +442,7 @@ class TagChipModelsCollectorTest {
         fun `userTagEditorGroups chips carry a SpoilerToggle leading and a Remove Dismiss trailing`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                val userTags = listOf(
+                val userTags = persistentListOf(
                     UserTag(
                         name = "Fantasy",
                         category = TagCategory.GENRE,
@@ -461,7 +463,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = userTags)
+                stateFlow.value = stateFlow.value.copy(userTags = userTags.toImmutableList())
 
                 // ----- Assert -----
                 val chips = stateFlow.value.userTagEditorGroups.flatMap { it.chips }.associateBy { it.label }
@@ -484,7 +486,7 @@ class TagChipModelsCollectorTest {
                     name = "Cozy",
                     category = TagCategory.MOOD,
                 )
-                val userTags = listOf(fantasy, cozy)
+                val userTags = persistentListOf(fantasy, cozy)
                 val collector = TagChipModelsCollector()
                 val job = launch {
                     collector.onLaunch(
@@ -494,7 +496,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = userTags)
+                stateFlow.value = stateFlow.value.copy(userTags = userTags.toImmutableList())
 
                 // ----- Assert -----
                 stateFlow.value.userTagByEditorChipKey shouldBe mapOf(

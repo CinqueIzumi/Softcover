@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import nl.rhaydus.common.AppLog
@@ -33,7 +34,7 @@ internal data object OnRefreshAction : ExploreAction {
                     allUserBooks.find { it.id == book.id } ?: book
                 }
 
-                scope.setState { it.copy(trendingBooks = overlaid) }
+                scope.setState { it.copy(trendingBooks = overlaid.toImmutableList()) }
             }
             .onFailure { error ->
                 AppLog.e(

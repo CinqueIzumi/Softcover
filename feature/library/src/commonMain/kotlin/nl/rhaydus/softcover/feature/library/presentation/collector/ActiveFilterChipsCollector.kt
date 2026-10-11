@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -21,7 +22,7 @@ internal class ActiveFilterChipsCollector : LibraryCollector {
             .collectLatest { snapshot ->
                 val chipsByTab = withContext(dependencies.defaultDispatcher) { snapshot.compute() }
 
-                scope.setState { it.copy(activeFilterChipsByTab = chipsByTab) }
+                scope.setState { it.copy(activeFilterChipsByTab = chipsByTab.toImmutableMap()) }
             }
     }
 }

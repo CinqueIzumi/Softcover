@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -52,7 +53,7 @@ class EditionCardsCollectorTest {
         fun `maps one card per edition in filteredEditions order and counts them in the header`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
-                editions = listOf(
+                editions = persistentListOf(
                     buildEdition(id = 3),
                     buildEdition(id = 1),
                     buildEdition(id = 2),
@@ -82,7 +83,7 @@ class EditionCardsCollectorTest {
         fun `only maps the editions matching the search query`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
-                editions = listOf(
+                editions = persistentListOf(
                     buildEdition(id = 1).copy(publisher = "Tor"),
                     buildEdition(id = 2).copy(publisher = "Penguin"),
                 ),
@@ -107,7 +108,7 @@ class EditionCardsCollectorTest {
         fun `updates the selection mark when selectedEditionId changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
-                editions = listOf(
+                editions = persistentListOf(
                     buildEdition(id = 1),
                     buildEdition(id = 2),
                 ),
@@ -136,7 +137,7 @@ class EditionCardsCollectorTest {
             // ----- Arrange -----
             val displayed = buildEdition(id = 2)
             stateFlow.value = buildBookDetailUiState().copy(
-                editions = listOf(
+                editions = persistentListOf(
                     buildEdition(id = 1),
                     displayed,
                 ),
@@ -165,7 +166,7 @@ class EditionCardsCollectorTest {
         fun `header counts zero cards when there are no editions`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
-                editions = emptyList(),
+                editions = persistentListOf(),
             )
             val collector = EditionCardsCollector()
 
@@ -187,7 +188,7 @@ class EditionCardsCollectorTest {
         fun `header counts only the search-filtered subset`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
-                editions = listOf(
+                editions = persistentListOf(
                     buildEdition(id = 1).copy(publisher = "Tor"),
                     buildEdition(id = 2).copy(publisher = "Penguin"),
                     buildEdition(id = 3).copy(publisher = "Tor"),

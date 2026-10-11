@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -39,11 +41,11 @@ class OnClearFiltersActionTest {
         @Test
         fun `removes the tab's entry and leaves other tabs' filters alone`() = runTest {
             // ----- Arrange -----
-            val otherFilters = LibraryFilters(releaseYears = setOf(2021))
+            val otherFilters = LibraryFilters(releaseYears = persistentSetOf(2021))
 
             stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(
-                    tabId to LibraryFilters(formats = setOf("ebook")),
+                filtersByTab = persistentMapOf(
+                    tabId to LibraryFilters(formats = persistentSetOf("ebook")),
                     otherTabId to otherFilters,
                 ),
             )

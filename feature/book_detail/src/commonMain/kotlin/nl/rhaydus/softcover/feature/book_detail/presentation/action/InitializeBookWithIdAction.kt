@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -35,7 +37,7 @@ internal class InitializeBookWithIdAction(
                 }
 
                 state.withBook(book = merged).copy(
-                    editions = merged?.editions ?: emptyList(),
+                    editions = (merged?.editions ?: persistentListOf()).toImmutableList(),
                     loadingBookDetails = false,
                 )
             }

@@ -37,6 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
@@ -325,13 +327,13 @@ private fun LibraryScreenPreview() {
     SoftcoverTheme {
         LibraryScreenLayout(
             state = LibraryUiState(
-                visibleTabs = listOf(
+                visibleTabs = persistentListOf(
                     LibraryContentTab.All,
                     LibraryContentTab.Status.of(UserBookStatus.CURRENTLY_READING),
                     LibraryContentTab.Status.of(UserBookStatus.WANT_TO_READ),
                 ),
-                booksByTab = mapOf(
-                    "status-1" to listOf(
+                booksByTab = persistentMapOf(
+                    "status-1" to persistentListOf(
                         PreviewData.baseBook.copy(title = "Last to Leave the room"),
                         PreviewData.baseBook.copy(title = "Futility"),
                         PreviewData.baseBook.copy(title = "We call them witches"),
@@ -354,11 +356,11 @@ private fun LibraryEmptyScreenPreview() {
     SoftcoverTheme {
         LibraryScreenLayout(
             state = LibraryUiState(
-                visibleTabs = listOf(
+                visibleTabs = persistentListOf(
                     LibraryContentTab.All,
                     LibraryContentTab.Status.of(UserBookStatus.WANT_TO_READ),
                 ),
-                booksByTab = mapOf("status-1" to emptyList()),
+                booksByTab = persistentMapOf("status-1" to persistentListOf()),
                 isLoading = false,
             ),
             runAction = {},

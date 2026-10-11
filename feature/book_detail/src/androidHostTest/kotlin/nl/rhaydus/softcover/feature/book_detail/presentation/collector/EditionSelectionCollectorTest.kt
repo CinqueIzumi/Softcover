@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -92,7 +93,7 @@ class EditionSelectionCollectorTest {
             val displayed = buildEdition(id = 1)
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = displayed,
-                userLists = listOf(buildOwnedList(editionId = displayed.id)),
+                userLists = persistentListOf(buildOwnedList(editionId = displayed.id)),
             )
             val collector = EditionSelectionCollector()
 
@@ -116,7 +117,7 @@ class EditionSelectionCollectorTest {
             val ownedElsewhere = buildEdition(id = 2)
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = displayed,
-                userLists = listOf(buildOwnedList(editionId = ownedElsewhere.id)),
+                userLists = persistentListOf(buildOwnedList(editionId = ownedElsewhere.id)),
             )
             val collector = EditionSelectionCollector()
 

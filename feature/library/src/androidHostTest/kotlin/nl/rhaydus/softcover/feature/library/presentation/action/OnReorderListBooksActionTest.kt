@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -136,7 +137,7 @@ class OnReorderListBooksActionTest {
             )
 
             stateFlow.value = LibraryUiState(
-                customLists = listOf(
+                customLists = persistentListOf(
                     BookList(
                         id = listId,
                         name = listName,

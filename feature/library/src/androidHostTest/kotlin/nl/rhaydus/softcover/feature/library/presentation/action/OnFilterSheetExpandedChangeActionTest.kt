@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -40,12 +42,12 @@ class OnFilterSheetExpandedChangeActionTest {
         fun `opening seeds the draft and sheet from the selected tab and clears stale tag search text`() = runTest {
             // ----- Arrange -----
             val selectedTabId = "list-42"
-            val committedFilters = LibraryFilters(formats = setOf("ebook"))
+            val committedFilters = LibraryFilters(formats = persistentSetOf("ebook"))
             val initial = LibraryUiState()
             stateFlow.value = initial.copy(
                 selectedTabId = selectedTabId,
-                filtersByTab = mapOf(selectedTabId to committedFilters),
-                tabStatsByTab = mapOf(
+                filtersByTab = persistentMapOf(selectedTabId to committedFilters),
+                tabStatsByTab = persistentMapOf(
                     selectedTabId to LibraryTabStats(
                         itemCount = 11,
                         totalPages = 0,
@@ -109,7 +111,7 @@ class OnFilterSheetExpandedChangeActionTest {
                 ),
                 filterDraft = LibraryFilterDraft(
                     tabId = "list-42",
-                    filters = LibraryFilters(formats = setOf("ebook")),
+                    filters = LibraryFilters(formats = persistentSetOf("ebook")),
                     tagSearch = "kotlin",
                 ),
             )

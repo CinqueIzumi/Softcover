@@ -14,6 +14,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.LocalModalSheetForm
 import nl.rhaydus.designsystem.layout.ExpandableFlowRow
 import nl.rhaydus.designsystem.model.ModalSheetForm
@@ -189,7 +190,7 @@ private fun TagsFacetSection(
     header: SectionHeaderUiModel,
     availableLabel: String,
     tagSearchField: TextFieldUiModel,
-    visibleChips: List<ChipUiModel>,
+    visibleChips: ImmutableList<ChipUiModel>,
     onChipEvent: (ChipEvent) -> Unit,
     onTagSearchEvent: (TextFieldEvent) -> Unit,
 ) {

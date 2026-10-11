@@ -5,6 +5,8 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +67,7 @@ class MastheadCollectorTest {
         fun `subtitle counts zero books`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
-                books = emptyList(),
+                books = persistentListOf(),
                 hasLoadedBooks = true,
             )
 
@@ -81,7 +83,7 @@ class MastheadCollectorTest {
         fun `subtitle uses the singular for exactly one book without a read`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
-                books = listOf(stubBook(userBookRead = null)),
+                books = persistentListOf(stubBook(userBookRead = null)),
                 hasLoadedBooks = true,
             )
 
@@ -97,7 +99,7 @@ class MastheadCollectorTest {
         fun `subtitle counts several books`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
-                books = listOf(stubBook(), stubBook(), stubBook()),
+                books = persistentListOf(stubBook(), stubBook(), stubBook()),
                 hasLoadedBooks = true,
             )
 
@@ -117,7 +119,7 @@ class MastheadCollectorTest {
                 stubBook(userBookRead = stubUserBookRead(progress = 80f)),
             )
             stateFlow.value = ReadingScreenUiState(
-                books = books,
+                books = books.toImmutableList(),
                 hasLoadedBooks = true,
             )
 
@@ -139,7 +141,7 @@ class MastheadCollectorTest {
                 stubBook(userBookRead = stubUserBookRead(progress = 45f)),
             )
             stateFlow.value = ReadingScreenUiState(
-                books = books,
+                books = books.toImmutableList(),
                 hasLoadedBooks = true,
             )
 
@@ -157,13 +159,13 @@ class MastheadCollectorTest {
         fun `recomputes the subtitle when the books change`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
-                books = emptyList(),
+                books = persistentListOf(),
                 hasLoadedBooks = true,
             )
             val job = launchCollector(this)
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(books = listOf(stubBook()))
+            stateFlow.value = stateFlow.value.copy(books = persistentListOf(stubBook()))
 
             // ----- Assert -----
             stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("One title in motion")
@@ -174,7 +176,7 @@ class MastheadCollectorTest {
         fun `is null before the books have loaded`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
-                books = listOf(stubBook()),
+                books = persistentListOf(stubBook()),
                 hasLoadedBooks = false,
             )
 
@@ -229,7 +231,7 @@ class MastheadCollectorTest {
         fun `shares the same title and subtitle as the regular masthead`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
-                books = listOf(stubBook(), stubBook()),
+                books = persistentListOf(stubBook(), stubBook()),
                 hasLoadedBooks = true,
             )
 

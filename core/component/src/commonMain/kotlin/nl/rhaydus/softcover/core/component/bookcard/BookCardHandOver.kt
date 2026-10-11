@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.LazyItemMutationAnimator
 import nl.rhaydus.designsystem.component.StaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.mutationAnimated
@@ -94,7 +95,7 @@ private fun Modifier.handOver(
  */
 @Composable
 fun rememberBookCardEntryCoordinator(
-    cards: List<BookCardUiModel>,
+    cards: ImmutableList<BookCardUiModel>,
     key: String,
 ): StaggeredEntryCoordinator = rememberStaggeredEntryCoordinator(
     key = if (cards.any(BookCardUiModel::isLoading)) "$key:standIns" else key,

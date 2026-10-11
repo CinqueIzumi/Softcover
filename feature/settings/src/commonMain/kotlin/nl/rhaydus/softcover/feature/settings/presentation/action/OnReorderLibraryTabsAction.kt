@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
@@ -16,7 +17,7 @@ internal class OnReorderLibraryTabsAction(
         scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>,
     ) {
         scope.setState { state ->
-            state.copy(draftTabOrder = newOrderedIds.filterNot { it == LibraryTabEntry.ALL_ID }).withOrderedEntries()
+            state.copy(draftTabOrder = newOrderedIds.filterNot { it == LibraryTabEntry.ALL_ID }.toImmutableList()).withOrderedEntries()
         }
     }
 }

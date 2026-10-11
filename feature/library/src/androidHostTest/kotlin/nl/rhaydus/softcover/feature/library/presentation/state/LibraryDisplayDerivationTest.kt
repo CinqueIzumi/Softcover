@@ -1,6 +1,9 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -291,7 +294,7 @@ class LibraryDisplayDerivationTest {
             val result = computeDisplayBooks(
                 raw = listOf(ebookBook, paperbackBook),
                 query = "",
-                filters = LibraryFilters(formats = setOf("ebook")),
+                filters = LibraryFilters(formats = persistentSetOf("ebook")),
             )
 
             // ----- Assert -----
@@ -329,7 +332,7 @@ class LibraryDisplayDerivationTest {
                 raw = listOf(matchingBook, wrongYearBook, wrongTagBook),
                 query = "kotlin",
                 filters = LibraryFilters(
-                    tags = setOf(tagFiction),
+                    tags = persistentSetOf(tagFiction),
                     readYear = 2023,
                 ),
             )
@@ -544,7 +547,7 @@ class LibraryDisplayDerivationTest {
                 mode = LibrarySortMode.TITLE,
                 direction = SortDirection.ASCENDING,
                 addedAtByEditionId = emptyMap(),
-                filters = LibraryFilters(tags = setOf(tagScifi)),
+                filters = LibraryFilters(tags = persistentSetOf(tagScifi)),
                 bookByBookId = mapOf(100 to scifiBook, 200 to nonScifiBook),
             )
 
@@ -572,7 +575,7 @@ class LibraryDisplayDerivationTest {
                 mode = LibrarySortMode.TITLE,
                 direction = SortDirection.ASCENDING,
                 addedAtByEditionId = emptyMap(),
-                filters = LibraryFilters(tags = setOf(tagScifi)),
+                filters = LibraryFilters(tags = persistentSetOf(tagScifi)),
                 bookByBookId = emptyMap(),
             )
 
@@ -607,14 +610,14 @@ class LibraryDisplayDerivationTest {
             )
 
             val state = LibraryUiState(
-                booksByTab = mapOf(tabId to listOf(ebookBook, paperbackBook)),
+                booksByTab = persistentMapOf(tabId to persistentListOf(ebookBook, paperbackBook)),
             )
 
             // ----- Act -----
             val result = libraryPreviewCount(
                 state = state,
                 tabId = tabId,
-                draftFilters = LibraryFilters(formats = setOf("ebook")),
+                draftFilters = LibraryFilters(formats = persistentSetOf("ebook")),
             )
 
             // ----- Assert -----
@@ -657,7 +660,7 @@ class LibraryDisplayDerivationTest {
             )
 
             val state = LibraryUiState(
-                booksByTab = mapOf(tabId to listOf(matching, wrongFormat, wrongTitle)),
+                booksByTab = persistentMapOf(tabId to persistentListOf(matching, wrongFormat, wrongTitle)),
                 searchQuery = "kotlin",
             )
 
@@ -665,7 +668,7 @@ class LibraryDisplayDerivationTest {
             val result = libraryPreviewCount(
                 state = state,
                 tabId = tabId,
-                draftFilters = LibraryFilters(formats = setOf("ebook")),
+                draftFilters = LibraryFilters(formats = persistentSetOf("ebook")),
             )
 
             // ----- Assert -----
@@ -688,7 +691,7 @@ class LibraryDisplayDerivationTest {
             )
 
             val state = LibraryUiState(
-                editionsByTab = mapOf(tabId to listOf(ownedEdition, unownedEdition)),
+                editionsByTab = persistentMapOf(tabId to persistentListOf(ownedEdition, unownedEdition)),
             )
 
             // ----- Act -----
@@ -706,8 +709,8 @@ class LibraryDisplayDerivationTest {
         fun `unknown tabId absent from both books and editions returns 0`() {
             // ----- Arrange -----
             val state = LibraryUiState(
-                booksByTab = emptyMap(),
-                editionsByTab = emptyMap(),
+                booksByTab = persistentMapOf(),
+                editionsByTab = persistentMapOf(),
             )
 
             // ----- Act -----
@@ -726,8 +729,8 @@ class LibraryDisplayDerivationTest {
             // ----- Arrange -----
             val tabId = "status-read"
             val state = LibraryUiState(
-                booksByTab = mapOf(tabId to emptyList()),
-                editionsByTab = mapOf(tabId to listOf(buildEdition(id = 1))),
+                booksByTab = persistentMapOf(tabId to persistentListOf()),
+                editionsByTab = persistentMapOf(tabId to persistentListOf(buildEdition(id = 1))),
             )
 
             // ----- Act -----
@@ -776,11 +779,11 @@ class LibraryDisplayDerivationTest {
             // Committed filters would narrow to just the paperback book (count 1); the draft below
             // is empty, so the correct result is all 3 books. Asserting 3 proves committed filters
             // were not consulted.
-            val committedFilters = LibraryFilters(formats = setOf("paperback"))
+            val committedFilters = LibraryFilters(formats = persistentSetOf("paperback"))
 
             val state = LibraryUiState(
-                booksByTab = mapOf(tabId to listOf(ebookBook, paperbackBook, audiobookBook)),
-                filtersByTab = mapOf(tabId to committedFilters),
+                booksByTab = persistentMapOf(tabId to persistentListOf(ebookBook, paperbackBook, audiobookBook)),
+                filtersByTab = persistentMapOf(tabId to committedFilters),
             )
 
             // ----- Act -----

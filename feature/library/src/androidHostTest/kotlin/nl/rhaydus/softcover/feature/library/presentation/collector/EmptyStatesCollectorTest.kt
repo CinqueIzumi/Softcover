@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -66,7 +67,7 @@ class EmptyStatesCollectorTest {
             )
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(visibleTabs = listOf(LibraryTab.All, list))
+            stateFlow.value = stateFlow.value.copy(visibleTabs = persistentListOf(LibraryTab.All, list))
 
             // ----- Assert -----
             stateFlow.value.emptyStatesByTab shouldBe emptyStatesFor(listOf(LibraryTab.All, list))

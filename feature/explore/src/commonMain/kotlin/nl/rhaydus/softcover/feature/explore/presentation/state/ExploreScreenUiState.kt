@@ -1,7 +1,9 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
@@ -37,15 +39,15 @@ import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardUiMod
 import nl.rhaydus.toad.UiState
 
 internal data class ExploreScreenUiState(
-    val previousSearchQueries: List<String> = emptyList(),
+    val previousSearchQueries: ImmutableList<String> = persistentListOf(),
     val recentSearchChips: ChipSet<String> = ChipSet(),
-    val queriedBooks: List<Book> = emptyList(),
+    val queriedBooks: ImmutableList<Book> = persistentListOf(),
     val featuredCover: CoverUiModel? = null,
     // One map keyed by book id: an overlay carries no per-rail `sharedTransitionKey` surface, so the
     // same book yields an identical overlay everywhere it appears. `featuredReleaseBadge` does not
     // gate on `isUnreleased` - the featured hero is by construction the upcoming-release card, so it
     // badges on `effectiveReleaseDate` alone.
-    val unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
+    val unreleasedCoverOverlays: ImmutableMap<Int, CoverOverlayUiModel> = persistentMapOf(),
     val featuredReleaseBadge: BadgeUiModel? = null,
     // Loading stand-ins until the surface has loaded.
     val trending: BookCardSet<Book> = BookCardSet.standIns(TRENDING_STAND_IN_CARDS),
@@ -61,13 +63,13 @@ internal data class ExploreScreenUiState(
     // the UI can tell an initial search from a "load more" tail fetch.
     val queriedBooksHasMore: Boolean = true,
     val loadingMoreQueriedBooks: Boolean = false,
-    val trendingBooks: List<Book> = emptyList(),
+    val trendingBooks: ImmutableList<Book> = persistentListOf(),
     val loadingTrendingBooks: Boolean = true,
     val trendingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Trending this week",
         headline = "What everyone's reading",
     ),
-    val continueSeriesBooks: List<Book> = emptyList(),
+    val continueSeriesBooks: ImmutableList<Book> = persistentListOf(),
     val loadingContinueSeriesBooks: Boolean = true,
     val upNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Pick up where you left off",
@@ -116,13 +118,13 @@ internal data class ExploreScreenUiState(
     val becauseYouReadGenre: String? = null,
     /** A loading stand-in until a genre resolves; the rail is hidden by a `null` [becauseYouReadGenre], not by this. */
     val becauseYouReadHeader: SectionHeaderUiModel = BECAUSE_YOU_READ_HEADER_STAND_IN,
-    val becauseYouReadGenreOptions: List<String> = emptyList(),
+    val becauseYouReadGenreOptions: ImmutableList<String> = persistentListOf(),
     val becauseYouReadGenreControl: BecauseYouReadGenreControlUiModel = BecauseYouReadGenreControlUiModel(),
-    val becauseYouReadBooks: List<Book> = emptyList(),
+    val becauseYouReadBooks: ImmutableList<Book> = persistentListOf(),
     val loadingBecauseYouReadBooks: Boolean = true,
     // Browse-by-mood grid + the active mood filter, when a mood tile/chip drove the current
     // results (see [searchPhase]).
-    val moodTags: List<MoodTag> = emptyList(),
+    val moodTags: ImmutableList<MoodTag> = persistentListOf(),
     val moodGridHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Browse by mood",
         headline = "How do you want to feel?",

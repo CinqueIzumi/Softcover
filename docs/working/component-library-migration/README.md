@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PC-1 to PC-4 done. PC-4: skydoves Compose Stability Analyzer 0.7.5 (0.8.0 needs Gradle 9.3.1) applied by both Compose convention plugins through `StabilityGate.kt`; `androidMain` baselines in 15 modules; `stabilityCheck` in `check` and a CI step; foundation entry F47. The baselines hold ~107 non-skippable of ~570 composables (most: `book_detail` 20, `settings` 14, `component` 13, `explore` / `reading` / `library` 12). PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
-- **Next:** PC-5a in `steps/pc-performance-checks.md` (triage approved, shape recorded there), then PC-5b and PC-5c; the #275 PC box ticks after PC-5c.
+- **State:** PC-1 to PC-5a done. PC-5a: every collection in a UiState and the models it holds is `Immutable*`, updated through `toPersistent*()` ops; tab-reselect effects take `Tab` (still RUNTIME, kept baselined); `ScrollToTopOnVisibleSetChange` takes `Int`; `@Immutable` on the four sealed / generic models; baselines re-dumped, only flips to STABLE. `rememberPulseScale`'s `Any` key stays, filed under foundation F48 (stability-gate entry renumbered F47 → F50). PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
+- **Next:** PC-5b in `steps/pc-performance-checks.md` (feature-local UI models for leaf composables taking `Book` / `BookEdition` / `ActiveSession` / profile breakdowns), then PC-5c; the #275 PC box ticks after PC-5c.
 - **Open questions:** whether the CI stability step passes on JDK 17 (verified only under JBR 21); watch the first CI run.
-- **Verification:** `stabilityDump`, `stabilityCheck`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck` green (JBR 21); negative test (`MutableList<String>` on `Badge`) fails the gate; reviewed, findings fixed; `document-code` pass done; `styleCheck` passed after the last Kotlin edit; glommed-closer grep clean; no test files changed.
-- **Uncommitted:** this Now-block rewrite and the PC-5 triage in the step file (PC-4 committed in `c46116ce`).
+- **Verification:** `styleCheck`, `stabilityCheck` green (JBR 21); `testAndroidHostTest` green for library (624), explore, reading, book_detail, settings, core:presentation, orchestration; reviewed, findings fixed; AAA / glommed-closer / `!!` greps clean.
+- **Uncommitted:** all of PC-5a (production, tests, baselines, this Now block, step-file and upstream-candidates edits).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

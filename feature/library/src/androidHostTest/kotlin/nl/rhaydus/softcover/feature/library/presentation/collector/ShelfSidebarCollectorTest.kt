@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -130,7 +131,7 @@ class ShelfSidebarCollectorTest {
         fun `a change to visibleTabs recomputes shelfSidebar`() = runTest(testDispatcher) {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(ALL_TAB),
+                visibleTabs = persistentListOf(ALL_TAB),
                 selectedTabId = ALL_TAB.id,
             )
             val collector = ShelfSidebarCollector()
@@ -142,7 +143,7 @@ class ShelfSidebarCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(visibleTabs = listOf(ALL_TAB, LIST_TAB))
+            stateFlow.value = stateFlow.value.copy(visibleTabs = persistentListOf(ALL_TAB, LIST_TAB))
 
             // ----- Assert -----
             stateFlow.value.shelfSidebar.sections.size shouldBe 2
@@ -153,7 +154,7 @@ class ShelfSidebarCollectorTest {
         fun `a change to selectedTabId moves the selection to the new tab`() = runTest(testDispatcher) {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(ALL_TAB, READING_TAB),
+                visibleTabs = persistentListOf(ALL_TAB, READING_TAB),
                 selectedTabId = ALL_TAB.id,
             )
             val collector = ShelfSidebarCollector()
@@ -177,7 +178,7 @@ class ShelfSidebarCollectorTest {
         fun `a state change unrelated to visibleTabs or selectedTabId does not re-emit`() = runTest(testDispatcher) {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(ALL_TAB),
+                visibleTabs = persistentListOf(ALL_TAB),
                 selectedTabId = ALL_TAB.id,
             )
             val collector = ShelfSidebarCollector()

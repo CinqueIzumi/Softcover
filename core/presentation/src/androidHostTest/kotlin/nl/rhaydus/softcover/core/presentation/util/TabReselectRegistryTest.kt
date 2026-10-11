@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.presentation.util
 
+import cafe.adriel.voyager.navigator.tab.Tab
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Nested
@@ -7,7 +8,7 @@ import org.junit.jupiter.api.Test
 
 class TabReselectRegistryTest {
     private val registry = TabReselectRegistry()
-    private val key = Any()
+    private val key: Tab = FakeTab()
 
     @Nested
     inner class Reselect {
@@ -38,7 +39,7 @@ class TabReselectRegistryTest {
         @Test
         fun `does not invoke handlers registered for other keys`() = runTest {
             // ----- Arrange -----
-            registry.register(Any()) { true }
+            registry.register(FakeTab()) { true }
 
             // ----- Act -----
             val result = registry.reselect(key)

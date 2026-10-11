@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -65,7 +66,7 @@ class ArrangeDraftChipsCollectorTest {
                 )
             }
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(readingTab, wantToReadTab),
+                visibleTabs = persistentListOf(readingTab, wantToReadTab),
                 arrangeDraft = LibraryArrangeDraft(
                     tabId = readingTab.id,
                     sortMode = LibrarySortMode.MANUAL,
@@ -95,7 +96,7 @@ class ArrangeDraftChipsCollectorTest {
                 )
             }
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(readingTab),
+                visibleTabs = persistentListOf(readingTab),
                 arrangeDraft = LibraryArrangeDraft(
                     tabId = readingTab.id,
                     sortMode = LibrarySortMode.MANUAL,
@@ -136,7 +137,7 @@ class ArrangeDraftChipsCollectorTest {
                     )
                 }
                 stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(readingTab),
+                    visibleTabs = persistentListOf(readingTab),
                     arrangeDraft = LibraryArrangeDraft(
                         tabId = readingTab.id,
                         sortMode = LibrarySortMode.MANUAL,

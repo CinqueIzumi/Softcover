@@ -3,6 +3,9 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.chip.toChipSet
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -21,13 +24,13 @@ class FilterDraftChipsSnapshotTest {
             // ----- Arrange -----
             val snapshot = FilterDraftChipsSnapshot(
                 draft = null,
-                filterChipsByTab = emptyMap(),
-                booksByTab = emptyMap(),
-                editionsByTab = emptyMap(),
-                addedAtByTab = emptyMap(),
-                bookByBookId = emptyMap(),
-                sortModeByTab = emptyMap(),
-                sortDirectionByTab = emptyMap(),
+                filterChipsByTab = persistentMapOf(),
+                booksByTab = persistentMapOf(),
+                editionsByTab = persistentMapOf(),
+                addedAtByTab = persistentMapOf(),
+                bookByBookId = persistentMapOf(),
+                sortModeByTab = persistentMapOf(),
+                sortDirectionByTab = persistentMapOf(),
                 searchQuery = "",
             )
 
@@ -43,13 +46,13 @@ class FilterDraftChipsSnapshotTest {
             // ----- Arrange -----
             val snapshot = FilterDraftChipsSnapshot(
                 draft = LibraryFilterDraft(tabId = "all"),
-                filterChipsByTab = emptyMap(),
-                booksByTab = emptyMap(),
-                editionsByTab = emptyMap(),
-                addedAtByTab = emptyMap(),
-                bookByBookId = emptyMap(),
-                sortModeByTab = emptyMap(),
-                sortDirectionByTab = emptyMap(),
+                filterChipsByTab = persistentMapOf(),
+                booksByTab = persistentMapOf(),
+                editionsByTab = persistentMapOf(),
+                addedAtByTab = persistentMapOf(),
+                bookByBookId = persistentMapOf(),
+                sortModeByTab = persistentMapOf(),
+                sortDirectionByTab = persistentMapOf(),
                 searchQuery = "",
             )
 
@@ -75,16 +78,16 @@ class FilterDraftChipsSnapshotTest {
             )
             val snapshot = FilterDraftChipsSnapshot(
                 draft = LibraryFilterDraft(tabId = "read"),
-                filterChipsByTab = mapOf(
+                filterChipsByTab = persistentMapOf(
                     "all" to LibraryFilterChips(),
                     "read" to chips,
                 ),
-                booksByTab = emptyMap(),
-                editionsByTab = emptyMap(),
-                addedAtByTab = emptyMap(),
-                bookByBookId = emptyMap(),
-                sortModeByTab = emptyMap(),
-                sortDirectionByTab = emptyMap(),
+                booksByTab = persistentMapOf(),
+                editionsByTab = persistentMapOf(),
+                addedAtByTab = persistentMapOf(),
+                bookByBookId = persistentMapOf(),
+                sortModeByTab = persistentMapOf(),
+                sortDirectionByTab = persistentMapOf(),
                 searchQuery = "",
             )
 
@@ -111,15 +114,15 @@ class FilterDraftChipsSnapshotTest {
             val snapshot = FilterDraftChipsSnapshot(
                 draft = LibraryFilterDraft(
                     tabId = "all",
-                    filters = LibraryFilters(releaseYears = setOf(2020)),
+                    filters = LibraryFilters(releaseYears = persistentSetOf(2020)),
                 ),
-                filterChipsByTab = emptyMap(),
-                booksByTab = mapOf("all" to listOf(matchingBook, nonMatchingBook)),
-                editionsByTab = emptyMap(),
-                addedAtByTab = emptyMap(),
-                bookByBookId = emptyMap(),
-                sortModeByTab = emptyMap(),
-                sortDirectionByTab = emptyMap(),
+                filterChipsByTab = persistentMapOf(),
+                booksByTab = persistentMapOf("all" to persistentListOf(matchingBook, nonMatchingBook)),
+                editionsByTab = persistentMapOf(),
+                addedAtByTab = persistentMapOf(),
+                bookByBookId = persistentMapOf(),
+                sortModeByTab = persistentMapOf(),
+                sortDirectionByTab = persistentMapOf(),
                 searchQuery = "",
             )
 

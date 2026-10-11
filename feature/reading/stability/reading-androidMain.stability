@@ -135,11 +135,11 @@ public fun nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab.o
   params:
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.rememberMarkAsReadController(books: kotlin.collections.List<nl.rhaydus.softcover.core.domain.model.Book>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>): nl.rhaydus.softcover.feature.reading.presentation.screen.MarkAsReadController
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.rememberMarkAsReadController(books: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.domain.model.Book>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>): nl.rhaydus.softcover.feature.reading.presentation.screen.MarkAsReadController
+  skippable: true
   restartable: true
   params:
-    - books: RUNTIME (requires runtime check)
+    - books: STABLE (known stable type)
     - runAction: STABLE (function type)
 
 @Composable
@@ -150,14 +150,14 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.Al
     - model: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen(pickUpNextHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, trendingHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, emptyState: nl.rhaydus.softcover.core.component.state.EmptyStateUiModel, trendingBooks: kotlin.collections.List<nl.rhaydus.softcover.core.domain.model.Book>, pickUpNext: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, trendingTileCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, streakEnabled: kotlin.Boolean, streakStrip: nl.rhaydus.softcover.feature.reading.presentation.state.StreakStripUiModel, onExpandStreak: kotlin.Function0<kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, onNavigateToSearch: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen(pickUpNextHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, trendingHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, emptyState: nl.rhaydus.softcover.core.component.state.EmptyStateUiModel, trendingBooks: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.domain.model.Book>, pickUpNext: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, trendingTileCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, streakEnabled: kotlin.Boolean, streakStrip: nl.rhaydus.softcover.feature.reading.presentation.state.StreakStripUiModel, onExpandStreak: kotlin.Function0<kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, onNavigateToSearch: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
   restartable: true
   params:
     - pickUpNextHeader: STABLE (marked @Stable or @Immutable)
     - trendingHeader: STABLE (marked @Stable or @Immutable)
     - emptyState: STABLE (marked @Stable or @Immutable)
-    - trendingBooks: RUNTIME (requires runtime check)
+    - trendingBooks: STABLE (known stable type)
     - pickUpNext: STABLE (marked @Stable or @Immutable)
     - trendingTileCover: STABLE (marked @Stable or @Immutable)
     - streakEnabled: STABLE (primitive type)

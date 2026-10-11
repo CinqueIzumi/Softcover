@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -54,8 +56,8 @@ class FilterChipModelsCollectorTest {
         @Test
         fun `filterChipsByTab is keyed per tab and filterChipsFor returns the matching entry`() = runTest(testDispatcher) {
             // ----- Arrange -----
-            val allOptions = LibraryFilterOptions(formats = listOf("ebook"))
-            val readOptions = LibraryFilterOptions(readYears = listOf(2021))
+            val allOptions = LibraryFilterOptions(formats = persistentListOf("ebook"))
+            val readOptions = LibraryFilterOptions(readYears = persistentListOf(2021))
             val collector = FilterChipModelsCollector()
             val job = launch {
                 collector.onLaunch(
@@ -66,7 +68,7 @@ class FilterChipModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                filterOptionsByTab = mapOf(
+                filterOptionsByTab = persistentMapOf(
                     "all" to allOptions,
                     "read" to readOptions,
                 ),
@@ -87,11 +89,11 @@ class FilterChipModelsCollectorTest {
                 // ----- Arrange -----
                 val options = LibraryFilterOptions(
                     supportsOwnedFilter = true,
-                    formats = listOf("ebook"),
-                    releaseYears = listOf(2020),
-                    readYears = listOf(2019),
-                    tags = listOf(tagFiction),
-                    ratingBuckets = listOf(4.0),
+                    formats = persistentListOf("ebook"),
+                    releaseYears = persistentListOf(2020),
+                    readYears = persistentListOf(2019),
+                    tags = persistentListOf(tagFiction),
+                    ratingBuckets = persistentListOf(4.0),
                 )
                 val collector = FilterChipModelsCollector()
                 val job = launch {
@@ -102,7 +104,7 @@ class FilterChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = LibraryUiState(filterOptionsByTab = mapOf("all" to options))
+                stateFlow.value = LibraryUiState(filterOptionsByTab = persistentMapOf("all" to options))
 
                 // ----- Assert -----
                 val chips = stateFlow.value.filterChipsFor("all")
@@ -124,7 +126,7 @@ class FilterChipModelsCollectorTest {
         fun `unrelated state change that leaves filterOptionsByTab equal does not retrigger recompute`() =
             runTest(testDispatcher) {
                 // ----- Arrange -----
-                val options = LibraryFilterOptions(formats = listOf("ebook"))
+                val options = LibraryFilterOptions(formats = persistentListOf("ebook"))
                 val collector = FilterChipModelsCollector()
                 val job = launch {
                     collector.onLaunch(
@@ -133,7 +135,7 @@ class FilterChipModelsCollectorTest {
                     )
                 }
 
-                stateFlow.value = LibraryUiState(filterOptionsByTab = mapOf("all" to options))
+                stateFlow.value = LibraryUiState(filterOptionsByTab = persistentMapOf("all" to options))
                 val chipsByTabAfterFirstEmit = stateFlow.value.filterChipsByTab
 
                 // ----- Act -----

@@ -5,6 +5,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -85,7 +88,7 @@ class OnRemoveUserTagActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = listOf(tagToRemove, otherTag),
+                userTags = persistentListOf(tagToRemove, otherTag),
             )
             val serverResponse = listOf(otherTag)
 
@@ -98,7 +101,7 @@ class OnRemoveUserTagActionTest {
 
             stateFlow.value = stateFlow.value.copy(
 
-                userTagByEditorChipKey = mapOf("chip" to tagToRemove),
+                userTagByEditorChipKey = persistentMapOf("chip" to tagToRemove),
 
             )
 
@@ -128,7 +131,7 @@ class OnRemoveUserTagActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = listOf(genreTag, moodTag),
+                userTags = persistentListOf(genreTag, moodTag),
             )
             val serverResponse = listOf(moodTag)
 
@@ -141,7 +144,7 @@ class OnRemoveUserTagActionTest {
 
             stateFlow.value = stateFlow.value.copy(
 
-                userTagByEditorChipKey = mapOf("chip" to genreTag),
+                userTagByEditorChipKey = persistentMapOf("chip" to genreTag),
 
             )
 
@@ -172,7 +175,7 @@ class OnRemoveUserTagActionTest {
             val originalTags = listOf(tagToRemove, otherTag)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = originalTags,
+                userTags = originalTags.toImmutableList(),
             )
 
             coEvery {
@@ -184,7 +187,7 @@ class OnRemoveUserTagActionTest {
 
             stateFlow.value = stateFlow.value.copy(
 
-                userTagByEditorChipKey = mapOf("chip" to tagToRemove),
+                userTagByEditorChipKey = persistentMapOf("chip" to tagToRemove),
 
             )
 
@@ -210,11 +213,11 @@ class OnRemoveUserTagActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = null,
-                userTags = listOf(tag),
+                userTags = persistentListOf(tag),
             )
             val initialTags = stateFlow.value.userTags
             stateFlow.value = stateFlow.value.copy(
-                userTagByEditorChipKey = mapOf("chip" to tag),
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
             )
             val action = OnRemoveUserTagAction(chipKey = "chip")
 
@@ -238,8 +241,8 @@ class OnRemoveUserTagActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = listOf(tag),
-                userTagByEditorChipKey = mapOf("chip" to tag),
+                userTags = persistentListOf(tag),
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
             )
             val action = OnRemoveUserTagAction(chipKey = "unknown")
 

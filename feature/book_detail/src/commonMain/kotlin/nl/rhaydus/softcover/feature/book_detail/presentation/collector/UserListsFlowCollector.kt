@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -13,7 +14,7 @@ internal class UserListsFlowCollector : BookDetailCollector {
         dependencies: BookDetailDependencies,
     ) {
         dependencies.getAllUserListsUseCase().collectLatest { lists ->
-            scope.setState { it.copy(userLists = lists) }
+            scope.setState { it.copy(userLists = lists.toImmutableList()) }
         }
     }
 }

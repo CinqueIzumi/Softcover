@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -62,7 +63,7 @@ class OnStatusToggleActionTest {
         fun `adds code to draftEnabledStatusCodes when enabled is true`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledStatusCodes = setOf(1),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
@@ -85,7 +86,7 @@ class OnStatusToggleActionTest {
         fun `rebuilds orderedEntries so the toggled status entry reflects the new checked state`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledStatusCodes = emptySet(),
+                draftEnabledStatusCodes = persistentSetOf(),
                 initialized = true,
             ).withOrderedEntries()
             val dependencies = stubDependencies(this)
@@ -111,7 +112,7 @@ class OnStatusToggleActionTest {
         fun `removes code from draftEnabledStatusCodes when enabled is false`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledStatusCodes = setOf(1, 3, 5),
+                draftEnabledStatusCodes = persistentSetOf(1, 3, 5),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)

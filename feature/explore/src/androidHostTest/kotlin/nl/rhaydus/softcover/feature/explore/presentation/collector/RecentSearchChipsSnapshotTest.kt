@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -10,7 +11,7 @@ class RecentSearchChipsSnapshotTest {
         @Test
         fun `labels each chip with its query under a stable key per query`() {
             // ----- Arrange -----
-            val snapshot = RecentSearchChipsSnapshot(previousSearchQueries = listOf("kotlin", "android"))
+            val snapshot = RecentSearchChipsSnapshot(previousSearchQueries = persistentListOf("kotlin", "android"))
 
             // ----- Act -----
             val (chips, _) = snapshot.compute()
@@ -23,7 +24,7 @@ class RecentSearchChipsSnapshotTest {
         @Test
         fun `maps each chip key back to the query it was built from`() {
             // ----- Arrange -----
-            val snapshot = RecentSearchChipsSnapshot(previousSearchQueries = listOf("kotlin", "android"))
+            val snapshot = RecentSearchChipsSnapshot(previousSearchQueries = persistentListOf("kotlin", "android"))
 
             // ----- Act -----
             val (_, queryByKey) = snapshot.compute()
@@ -38,7 +39,7 @@ class RecentSearchChipsSnapshotTest {
         @Test
         fun `duplicate queries produce duplicate chips that collapse to one map entry`() {
             // ----- Arrange -----
-            val snapshot = RecentSearchChipsSnapshot(previousSearchQueries = listOf("kotlin", "kotlin"))
+            val snapshot = RecentSearchChipsSnapshot(previousSearchQueries = persistentListOf("kotlin", "kotlin"))
 
             // ----- Act -----
             val (chips, queryByKey) = snapshot.compute()

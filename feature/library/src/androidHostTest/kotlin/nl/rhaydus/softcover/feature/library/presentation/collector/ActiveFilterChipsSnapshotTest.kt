@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import org.junit.jupiter.api.Nested
@@ -27,7 +28,7 @@ class ActiveFilterChipsSnapshotTest {
             // ----- Arrange -----
             val snapshot = ActiveFilterChipsSnapshot(
                 filtersByTab = mapOf(
-                    "all" to LibraryFilters(formats = setOf("ebook")),
+                    "all" to LibraryFilters(formats = persistentSetOf("ebook")),
                     "read" to LibraryFilters(readYear = 2021),
                 ),
             )

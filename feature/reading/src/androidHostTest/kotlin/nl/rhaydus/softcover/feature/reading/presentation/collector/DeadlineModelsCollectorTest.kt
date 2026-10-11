@@ -5,6 +5,9 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlin.time.Clock
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -29,7 +32,6 @@ import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import kotlin.time.Clock
 
 class DeadlineModelsCollectorTest {
     private lateinit var dependencies: ReadingScreenDependencies
@@ -145,8 +147,8 @@ class DeadlineModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = ReadingScreenUiState(
-                    books = listOf(book),
-                    deadlines = mapOf(1 to deadline),
+                    books = persistentListOf(book),
+                    deadlines = persistentMapOf(1 to deadline),
                 )
 
                 // ----- Assert -----
@@ -173,8 +175,8 @@ class DeadlineModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = ReadingScreenUiState(
-                books = listOf(book),
-                deadlines = emptyMap(),
+                books = persistentListOf(book),
+                deadlines = persistentMapOf(),
             )
 
             // ----- Assert -----
@@ -205,8 +207,8 @@ class DeadlineModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = ReadingScreenUiState(
-                books = listOf(book),
-                deadlines = mapOf(1 to deadline),
+                books = persistentListOf(book),
+                deadlines = persistentMapOf(1 to deadline),
             )
 
             // ----- Assert -----
@@ -239,8 +241,8 @@ class DeadlineModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = ReadingScreenUiState(
-                books = listOf(book),
-                deadlines = mapOf(1 to deadline),
+                books = persistentListOf(book),
+                deadlines = persistentMapOf(1 to deadline),
             )
 
             // ----- Assert -----
@@ -272,8 +274,8 @@ class DeadlineModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = ReadingScreenUiState(
-                books = listOf(book),
-                deadlines = mapOf(1 to deadline),
+                books = persistentListOf(book),
+                deadlines = persistentMapOf(1 to deadline),
             )
 
             // ----- Assert -----
@@ -312,8 +314,8 @@ class DeadlineModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = ReadingScreenUiState(
-                    books = listOf(featuredBook, otherBook),
-                    deadlines = mapOf(2 to otherDeadline),
+                    books = persistentListOf(featuredBook, otherBook),
+                    deadlines = persistentMapOf(2 to otherDeadline),
                 )
 
                 // ----- Assert -----
@@ -348,8 +350,8 @@ class DeadlineModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = ReadingScreenUiState(
-                    books = listOf(book),
-                    deadlines = mapOf(1 to deadline),
+                    books = persistentListOf(book),
+                    deadlines = persistentMapOf(1 to deadline),
                 )
 
                 // ----- Assert -----
@@ -384,9 +386,9 @@ class DeadlineModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = ReadingScreenUiState(
-                books = listOf(book),
-                deadlines = mapOf(1 to deadline),
-                dismissedPlanTodayByBook = mapOf(1 to today().toString()),
+                books = persistentListOf(book),
+                deadlines = persistentMapOf(1 to deadline),
+                dismissedPlanTodayByBook = persistentMapOf(1 to today().toString()),
             )
 
             // ----- Assert -----
@@ -422,12 +424,12 @@ class DeadlineModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = ReadingScreenUiState(
-                    books = listOf(book),
-                    deadlines = mapOf(1 to deadline),
-                    dismissedPlanTodayByBook = mapOf(1 to today().toString()),
+                    books = persistentListOf(book),
+                    deadlines = persistentMapOf(1 to deadline),
+                    dismissedPlanTodayByBook = persistentMapOf(1 to today().toString()),
                 )
                 val dismissedVisible = stateFlow.value.featuredPaceNudge.shouldNotBeNull().visible
-                stateFlow.value = stateFlow.value.copy(dismissedPlanTodayByBook = emptyMap())
+                stateFlow.value = stateFlow.value.copy(dismissedPlanTodayByBook = persistentMapOf())
 
                 // ----- Assert -----
                 dismissedVisible shouldBe false
@@ -462,8 +464,8 @@ class DeadlineModelsCollectorTest {
 
             // ----- Act -----
             stateFlow.value = ReadingScreenUiState(
-                books = listOf(book),
-                deadlines = mapOf(1 to deadline),
+                books = persistentListOf(book),
+                deadlines = persistentMapOf(1 to deadline),
             )
 
             // ----- Assert -----
@@ -497,9 +499,9 @@ class DeadlineModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = ReadingScreenUiState(
-                    books = listOf(book),
-                    deadlines = mapOf(1 to deadline),
-                    dismissedPlanTodayByBook = mapOf(1 to today().toString()),
+                    books = persistentListOf(book),
+                    deadlines = persistentMapOf(1 to deadline),
+                    dismissedPlanTodayByBook = persistentMapOf(1 to today().toString()),
                 )
                 val dismissedVisible = stateFlow.value.featuredPaceNudge.shouldNotBeNull().visible
                 todayFlow.value = today().plus(DatePeriod(days = 1))
@@ -538,10 +540,10 @@ class DeadlineModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = ReadingScreenUiState(
-                    books = listOf(book),
-                    deadlines = mapOf(1 to deadline),
+                    books = persistentListOf(book),
+                    deadlines = persistentMapOf(1 to deadline),
                 )
-                stateFlow.value = stateFlow.value.copy(deadlines = emptyMap())
+                stateFlow.value = stateFlow.value.copy(deadlines = persistentMapOf())
 
                 // ----- Assert -----
                 val nudge = stateFlow.value.featuredPaceNudge.shouldNotBeNull()

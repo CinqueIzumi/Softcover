@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -44,8 +45,8 @@ class OnArrangeSheetExpandedChangeActionTest {
             val selectedTabId = LibraryTab.CustomList.idFor(listId = 42)
             stateFlow.value = LibraryUiState(
                 selectedTabId = selectedTabId,
-                sortModeByTab = mapOf(selectedTabId to LibrarySortMode.TITLE),
-                sortDirectionByTab = mapOf(selectedTabId to SortDirection.ASCENDING),
+                sortModeByTab = persistentMapOf(selectedTabId to LibrarySortMode.TITLE),
+                sortDirectionByTab = persistentMapOf(selectedTabId to SortDirection.ASCENDING),
                 gridLayout = LibraryGridLayout.GRID_THREE_COLUMNS,
                 arrangeDraft = null,
             )

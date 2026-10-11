@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -261,7 +262,7 @@ class UserBooksFlowCollectorTest {
             )
             val remoteBook = buildBook(
                 id = 2,
-                editions = listOf(remoteEdition),
+                editions = persistentListOf(remoteEdition),
             )
             val localEdition = buildEdition(
                 id = 99,
@@ -269,7 +270,7 @@ class UserBooksFlowCollectorTest {
             )
             val localBook = buildBook(
                 id = 2,
-                editions = listOf(localEdition),
+                editions = persistentListOf(localEdition),
             )
             stateFlow.value = buildBookDetailUiState().copy(book = remoteBook)
             val collector = UserBooksFlowCollector()
@@ -299,12 +300,12 @@ class UserBooksFlowCollectorTest {
             )
             val remoteBook = buildBook(
                 id = 3,
-                editions = listOf(remoteEdition),
+                editions = persistentListOf(remoteEdition),
             )
             // Local book no longer has any owned editions
             val localBook = buildBook(
                 id = 3,
-                editions = listOf(
+                editions = persistentListOf(
                     buildEdition(
                         id = 30,
                         owned = false,

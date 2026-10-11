@@ -1,5 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -58,10 +61,10 @@ internal class BookListsCollector : LibraryCollector {
                 .associateBy(Book::id)
 
             CollectedLists(
-                editionsPerList = editionsPerList,
-                addedAtPerList = addedAtPerList,
-                booksById = booksById,
-                allLists = lists,
+                editionsPerList = editionsPerList.mapValues { (_, editions) -> editions.toImmutableList() }.toImmutableMap(),
+                addedAtPerList = addedAtPerList.mapValues { (_, addedAt) -> addedAt.toImmutableMap() }.toImmutableMap(),
+                booksById = booksById.toImmutableMap(),
+                allLists = lists.toImmutableList(),
             )
         }.collectLatest { collected ->
             scope.setState { state ->
@@ -69,8 +72,8 @@ internal class BookListsCollector : LibraryCollector {
                 val strippedEditions = state.editionsByTab.filterKeys { it in retainedKeys }
                 val strippedAddedAt = state.addedAtByTab.filterKeys { it in retainedKeys }
                 state.copy(
-                    editionsByTab = strippedEditions + collected.editionsPerList,
-                    addedAtByTab = strippedAddedAt + collected.addedAtPerList,
+                    editionsByTab = strippedEditions.toPersistentMap().putAll(collected.editionsPerList),
+                    addedAtByTab = strippedAddedAt.toPersistentMap().putAll(collected.addedAtPerList),
                     bookByBookId = collected.booksById,
                     customLists = collected.allLists,
                 )

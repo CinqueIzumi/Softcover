@@ -282,11 +282,11 @@ internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.Sc
     - scrollToTop: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.SearchFocusContent(queries: kotlin.collections.List<kotlin.String>, moodChips: nl.rhaydus.softcover.core.component.chip.ChipSet<nl.rhaydus.softcover.feature.explore.domain.model.MoodTag>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
-  skippable: false
+internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.SearchFocusContent(queries: kotlinx.collections.immutable.ImmutableList<kotlin.String>, moodChips: nl.rhaydus.softcover.core.component.chip.ChipSet<nl.rhaydus.softcover.feature.explore.domain.model.MoodTag>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - queries: RUNTIME (requires runtime check)
+    - queries: STABLE (known stable type)
     - moodChips: STABLE (marked @Stable or @Immutable)
     - runAction: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)

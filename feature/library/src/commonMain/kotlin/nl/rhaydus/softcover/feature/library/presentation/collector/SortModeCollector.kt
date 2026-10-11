@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
@@ -15,8 +16,8 @@ internal class SortModeCollector : LibraryCollector {
         dependencies.getLibrarySortSettingsAsFlowUseCase().collectLatest { settings ->
             scope.setState {
                 it.copy(
-                    sortModeByTab = settings.mapValues { (_, s) -> s.mode },
-                    sortDirectionByTab = settings.mapValues { (_, s) -> s.direction },
+                    sortModeByTab = settings.mapValues { (_, s) -> s.mode }.toImmutableMap(),
+                    sortDirectionByTab = settings.mapValues { (_, s) -> s.direction }.toImmutableMap(),
                 )
             }
         }
