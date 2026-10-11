@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
+import nl.rhaydus.softcover.feature.explore.presentation.collector.discoverEyebrow
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_HEADER_STAND_IN
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.FEATURED_CARD_STAND_IN
@@ -93,6 +94,7 @@ internal data class ExploreScreenUiState(
         active = false,
         focused = false,
         isLoading = false,
+        eyebrow = discoverEyebrow(isRefreshing = false),
     ),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,

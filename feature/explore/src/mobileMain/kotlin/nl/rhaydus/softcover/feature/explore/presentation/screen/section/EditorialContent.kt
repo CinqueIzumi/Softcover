@@ -11,7 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,9 +30,8 @@ internal fun EditorialContent(
     onBookClick: (Book, String?) -> Unit,
     contentPadding: PaddingValues,
     scrollState: ScrollState,
+    pullToRefreshState: PullToRefreshState,
 ) {
-    val pullToRefreshState = rememberPullToRefreshState()
-
     PullToRefreshBox(
         isRefreshing = state.isRefreshing,
         onRefresh = { runAction(OnRefreshAction) },

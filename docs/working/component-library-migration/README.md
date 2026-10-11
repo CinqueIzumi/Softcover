@@ -14,12 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** session 1 is built, uncommitted: S11-32 (tab crossfade on motion-scheme specs), S11-34 (`TabReselectRegistry` / `TabReselectEffect`, `rememberNavItemClick`, every tab pulses), S11-43 (`SoftcoverSnackbarHost`: level-ranked, one per sheet window, carry-over without re-entry). Also `UndoableBookRemover` got an `internal constructor` (cleared a `projectHealth` api leak). #275 tracks S11 only at stage level. F42 / S12-4 waits unchanged.
-- **Also built (uncommitted):** `ListsRepositoryImpl` list writes. On `RetryableSyncException` a write keeps the change, queues and succeeds; a rejection rolls back (reorder restores the snapshotted positions) and fails. A failed queue write rolls back and fails. `createList` never queues; the offline copy comes from `toUserMessage()`.
-- **Next:** commit (ask first), then session 2 (S11-33, S11-35): propose the group's shape.
-- **Open questions:** none. `upsert_book` may share the `ListIdType.errors` schema mismatch: check and fix it.
-- **Verification:** JBR 21, after the last Kotlin edit: all touched JVM / Android main compiles, `checkModuleGraph`, `projectHealth` (component, presentation, orchestration), `ktlintCheck`, `styleCheck`, `checkDocBudgets`, and the full `testAndroidHostTest` of component, presentation and orchestration passed. Two reviewer rounds applied. Not run: iOS-sim compile, `assembleDebug`, an on-device check of a full-height mobile sheet (the content now sits in `Box { Column }`). No glommed closers; AAA markers complete.
-- **Uncommitted:** all of session 1 plus these tracker edits.
+- **State:** S11 session 1 (S11-32, S11-34, S11-43) is done and committed (`2fc64878`). The offline list-write fix is committed (`5caeb48d`): retryable failures queue and succeed, rejections roll back and fail, `createList` never queues. #275 tracks S11 only at stage level. F42 / S12-4 waits unchanged.
+- **Session 2 (S11-33, S11-35):** built, reviewed (one round applied) and tested (`ColumnChartGeometryTest`, `SearchTopBarCollectorTest`), committed. Explore's eyebrow sits in `SearchTopBar` above the field (user-approved over the feed row): `SearchTopBarEyebrowUiModel` on the model, `pullToRefreshState` plumbing param; `ColumnChart` hover / long-press-scrub readout over `ColumnChartGeometry`, `ColumnChartPointer`, `ColumnReadout`.
+- **Next:** `steps/s11-contract-retrofit.md` § Sessions, session 3 (S11-36, S11-37, S11-38): propose the group's shape (Phase 1).
+- **Open questions:** none.
+- **Verification:** JBR 21, after the last Kotlin edit: component / explore / profile compiles, `checkModuleGraph`, `projectHealth` (component, explore), `styleCheck`, `checkDocBudgets`, and full `testAndroidHostTest` of component, explore and profile passed. No glommed closers; AAA markers complete. Not run: iOS-sim compile, `assembleDebug`, on-device check of the scrub haptic, the bubble overlapping Profile's section header, and the Explore eyebrow lining up with Library's.
+- **Uncommitted:** nothing.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

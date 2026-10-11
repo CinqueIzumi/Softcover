@@ -13,6 +13,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +33,8 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,6 +57,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
@@ -91,7 +95,10 @@ fun SearchTopBar(
     onEvent: (SearchTopBarEvent) -> Unit,
     modifier: Modifier = Modifier,
     lifted: Boolean = false,
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
 ) {
+    val eyebrow = model.eyebrow
+
     val lift by animateFloatAsState(
         targetValue = if (lifted) 1f else 0f,
         animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
@@ -99,24 +106,47 @@ fun SearchTopBar(
 
     Surface(modifier = modifier.fillMaxWidth()) {
         Box {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .windowInsetsPadding(WindowInsets.statusBars)
-                    .padding(
-                        horizontal = Spacing.md,
-                        vertical = Spacing.sm,
-                    ),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-            ) {
-                SearchChromeField(
-                    model = model,
-                    onEvent = onEvent,
-                    modifier = Modifier.weight(1f),
-                )
+            Column(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
+                if (eyebrow != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                start = Spacing.gutter,
+                                end = Spacing.gutter,
+                                top = Spacing.xs,
+                                bottom = Spacing.xs,
+                            ),
+                    ) {
+                        PullToRefreshEyebrow(
+                            pullToRefreshState = pullToRefreshState,
+                            isRefreshing = eyebrow.isRefreshing,
+                            baseText = eyebrow.text,
+                            refreshingText = eyebrow.refreshingText,
+                        )
+                    }
+                }
 
-                SearchChromeBarcodeButton(onClick = { onEvent(SearchTopBarEvent.ScanRequested) })
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = Spacing.md,
+                            end = Spacing.md,
+                            top = if (eyebrow == null) Spacing.sm else 0.dp,
+                            bottom = Spacing.sm,
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    SearchChromeField(
+                        model = model,
+                        onEvent = onEvent,
+                        modifier = Modifier.weight(1f),
+                    )
+
+                    SearchChromeBarcodeButton(onClick = { onEvent(SearchTopBarEvent.ScanRequested) })
+                }
             }
 
             Divider(

@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.topbar.SearchTopBarEyebrowUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -31,6 +32,7 @@ internal class SearchTopBarCollector : ExploreCollector {
                     active = it.searchPhase != ExploreSearchPhase.FEED,
                     focused = it.searchFocused,
                     isLoading = it.isLoading,
+                    eyebrow = discoverEyebrow(isRefreshing = it.isRefreshing),
                 )
             }
             .distinctUntilChanged()
@@ -39,3 +41,9 @@ internal class SearchTopBarCollector : ExploreCollector {
             }
     }
 }
+
+internal fun discoverEyebrow(isRefreshing: Boolean): SearchTopBarEyebrowUiModel = SearchTopBarEyebrowUiModel(
+    text = "Discover",
+    refreshingText = "Finding new shelves…",
+    isRefreshing = isRefreshing,
+)

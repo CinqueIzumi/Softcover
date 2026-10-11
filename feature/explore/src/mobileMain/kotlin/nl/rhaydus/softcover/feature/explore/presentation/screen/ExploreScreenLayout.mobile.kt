@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -128,6 +129,8 @@ internal actual fun ExploreScreenLayout(
 
     val animateScroll = playDecorativeMotion()
 
+    val pullToRefreshState = rememberPullToRefreshState()
+
     TabReselectEffect(tab = ExploreTab) {
         when {
             isOnline.not() -> false
@@ -144,6 +147,7 @@ internal actual fun ExploreScreenLayout(
             SearchTopBar(
                 model = state.searchTopBar,
                 lifted = lifted,
+                pullToRefreshState = pullToRefreshState,
                 onEvent = { event ->
                     when (event) {
                         is SearchTopBarEvent.QueryChanged -> runAction(OnQueryChangeAction(newQuery = event.query))
@@ -175,6 +179,7 @@ internal actual fun ExploreScreenLayout(
                 onBookClick = onBookClick,
                 contentPadding = padding,
                 scrollState = editorialScrollState,
+                pullToRefreshState = pullToRefreshState,
             )
 
             ExploreSearchPhase.FOCUS -> SearchFocusScreen(

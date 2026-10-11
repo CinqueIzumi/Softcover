@@ -70,6 +70,7 @@ class SearchTopBarCollectorTest {
                 active = true,
                 focused = true,
                 isLoading = true,
+                eyebrow = discoverEyebrow(isRefreshing = false),
             )
             job.cancel()
         }
@@ -170,7 +171,30 @@ class SearchTopBarCollectorTest {
         }
 
         @Test
-        fun `an unrelated state change leaving the four inputs equal does not emit a new model`() =
+        fun `eyebrow isRefreshing follows isRefreshing in state`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = SearchTopBarCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isRefreshing = true)
+            val eyebrowWhileRefreshing = stateFlow.value.searchTopBar.eyebrow
+            stateFlow.value = stateFlow.value.copy(isRefreshing = false)
+            val eyebrowAfterRefresh = stateFlow.value.searchTopBar.eyebrow
+
+            // ----- Assert -----
+            eyebrowWhileRefreshing shouldBe discoverEyebrow(isRefreshing = true)
+            eyebrowAfterRefresh shouldBe discoverEyebrow(isRefreshing = false)
+            job.cancel()
+        }
+
+        @Test
+        fun `an unrelated state change leaving every derived input equal does not emit a new model`() =
             runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = SearchTopBarCollector()

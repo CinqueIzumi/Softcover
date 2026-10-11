@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  * @property focused **The caller's** search state, which the platform field follows. It is never the
  * other way round: the field's platform focus dies with its composition while the caller's state
  * outlives it, so re-entering a screen with a search still active must not yank the keyboard open.
+ * @property eyebrow The pull-to-refresh label above the row; null draws the bar as the row alone.
  */
 @Immutable
 data class SearchTopBarUiModel(
@@ -22,6 +23,7 @@ data class SearchTopBarUiModel(
     val active: Boolean,
     val focused: Boolean,
     val isLoading: Boolean,
+    val eyebrow: SearchTopBarEyebrowUiModel? = null,
 ) {
     companion object : UiModelPreviews<SearchTopBarUiModel> {
         override val previews: ImmutableMap<String, SearchTopBarUiModel> = persistentMapOf(
@@ -48,6 +50,17 @@ data class SearchTopBarUiModel(
                 active = true,
                 focused = false,
                 isLoading = false,
+            ),
+            "With eyebrow" to SearchTopBarUiModel(
+                query = "",
+                active = false,
+                focused = false,
+                isLoading = false,
+                eyebrow = SearchTopBarEyebrowUiModel(
+                    text = "Discover",
+                    refreshingText = "Finding new shelves…",
+                    isRefreshing = false,
+                ),
             ),
         )
     }

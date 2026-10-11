@@ -46,9 +46,9 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-30 | The update callout crossfades its call to action | S11-6 | [x] |
 | S11-31 | The update download shows determinate progress | S11-30 | [x] |
 | S11-32 | Tab switches take their specs from the motion scheme | SL-15a | [x] |
-| S11-33 | Explore pull-to-refresh moves onto `PullToRefreshEyebrow` | S11-5 | [ ] |
+| S11-33 | Explore pull-to-refresh moves onto `PullToRefreshEyebrow` | S11-5 | [x] |
 | S11-34 | Re-tapping the current tab scrolls to the top or pulses | — | [x] |
-| S11-35 | Exact chart values on hover and press-and-scrub | S11-13 | [ ] |
+| S11-35 | Exact chart values on hover and press-and-scrub | S11-13 | [x] |
 | S11-36 | One root push/pop transition | SL-15a | [ ] |
 | S11-37 | The Focus Mode cover travels | S11-36 | [ ] |
 | S11-38 | The full-screen cover grows out of the hero | S11-36 | [ ] |
@@ -159,14 +159,12 @@ S11-30 + S11-31 (built together):
 - Haptics app-wide in `App.kt`: the update listener moves inside `SoftcoverTheme`; `commit` beside the "Update downloaded" snackbar and `reject` beside "Update failed", only on a direct change from `Downloading`. No Settings change.
 - Tests: the mapper's fraction (incl. unknown total) and both data sources' progress; existing tests updated.
 
-Session 1 (S11-32, S11-34, S11-43):
-- S11-32: `TabRootHost` fades on `defaultEffectsSpec`, drifts on `defaultSpatialSpec`; `TAB_ROOT_TRANSITION_DURATION_MS` goes. Render-only.
-- S11-34: `TabReselect` registry in `:core:presentation` `util/` (Koin `single`); `TabReselectEffect(tab) { … }` registers a `suspend () -> Boolean` ("scrolled") keyed by the feature's own `Tab`.
-- S11-34: `rememberNavItemClick()` beside `rememberNavItems()`, used by all four renderers: select, else run the handler, else (no scroll, no handler) `NavPulse` that tab. Every tab pulses (Library keeps `LibraryNavPulseKey`, others key on their `Tab`).
-- S11-34: every root layout (mobile and JVM) registers: `canScrollBackward` → animate to item 0 (jump under reduced motion); Library the current page, Explore the visible body; hoist states where missing. No haptic; an open detail pane stays open.
-- S11-43: `SoftcoverSnackbarHost(modifier)` in `:core:component` `snackbar/` on `SnackBarManager.snackBarState`; hosts register in a stack and only the topmost draws.
-- S11-43: `App.kt` swaps its host (placement unchanged); `AdaptiveModalSheet` hosts one per window: sheet form overlays the sheet bottom (`BottomCenter`, nav-bar padding), panel form bottom-end in the dialog box, 420 dp cap.
-- Tests: the nav click resolution and the topmost-host rule, via test-writer.
+Session 2 (S11-33, S11-35):
+- S11-33: Explore keeps its `LoadingIndicator`; `SearchTopBar` draws a `PullToRefreshEyebrow` above its field from `model.eyebrow`, on a hoisted `pullToRefreshState` param; copy "Discover" / "Finding new shelves…" from the collector.
+- S11-35: one active-column readout in `ColumnChart`, driven by hover on desktop (enter/move sets, exit clears) and long-press-then-horizontal-scrub on touch (release clears; `tickle` on each column change). Vertical scroll never starts a scrub.
+- S11-35: the active column keeps full tone, the others dim; a small surface bubble above the plot, centred on the column, shows its `contentDescription` ("2018, 24 books"). No new model field; `ColumnUiModel` KDoc says the description is also the visible readout.
+- S11-35: not `DesktopTooltip` (hover delay, desktop-only, icon-control role). Active column is component-local pointer state. Motion from `motionScheme` through `playDecorativeMotion()`.
+- Docs: `components/statistics.md` notes the readout. Tests: any extracted pure column-at-offset logic, via test-writer.
 
 ## R10 edges
 
