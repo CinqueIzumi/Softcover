@@ -16,6 +16,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
@@ -27,6 +28,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.core.presentation.util.TabReselectEffect
+import nl.rhaydus.softcover.core.presentation.util.scrollToTop
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
@@ -120,6 +123,18 @@ internal actual fun ExploreScreenLayout(
                 showsResultsList -> resultsListState.canScrollBackward
                 else -> false
             }
+        }
+    }
+
+    val animateScroll = playDecorativeMotion()
+
+    TabReselectEffect(tab = ExploreTab) {
+        when {
+            isOnline.not() -> false
+            state.searchPhase == ExploreSearchPhase.FEED -> editorialScrollState.scrollToTop(animateScroll)
+            state.searchPhase == ExploreSearchPhase.FOCUS -> focusScrollState.scrollToTop(animateScroll)
+            showsResultsList -> resultsListState.scrollToTop(animateScroll)
+            else -> false
         }
     }
 

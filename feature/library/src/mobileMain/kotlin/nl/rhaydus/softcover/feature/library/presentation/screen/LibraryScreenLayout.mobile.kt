@@ -48,6 +48,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
+import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnShelvesSheetCloseRequestedAction
@@ -147,6 +148,13 @@ internal actual fun LibraryScreenLayout(
     // worse trade.
     val currentTabIndex = pagerState.currentPage.coerceAtMost(tabs.lastIndex.coerceAtLeast(0))
     val currentTab = tabs.getOrNull(currentTabIndex)
+
+    currentTab?.let { shelf ->
+        TabReselectScrollToTopEffect(
+            tab = LibraryTab,
+            state = gridStateFor(shelf.id),
+        )
+    }
 
     val pullToRefreshState = rememberPullToRefreshState()
 

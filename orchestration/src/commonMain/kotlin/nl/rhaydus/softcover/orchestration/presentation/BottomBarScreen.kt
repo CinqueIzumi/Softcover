@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
@@ -56,8 +57,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBar
 import nl.rhaydus.softcover.orchestration.presentation.screenmodel.BottomBarScreenModel
 import org.koin.compose.koinInject
-
-private const val TAB_ROOT_TRANSITION_DURATION_MS = 200
 
 // Expanded two-pane list-pane sizing: a fraction of the available body width, clamped so a desktop
 // list surface stays roomy while the detail pane never collapses on a smaller expanded window.
@@ -301,12 +300,15 @@ private fun BottomBarStyle.toPlacement(): BottomBarPlacement = when (this) {
     BottomBarStyle.FLOATING -> BottomBarPlacement.OVERLAY
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TabRootHost() {
     val tabNavigator = LocalTabNavigator.current
     val stateHolder = rememberSaveableStateHolder()
     val density = LocalDensity.current
     val driftPx = remember(density) { with(density) { 12.dp.roundToPx() } }
+    val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
 
     if (playDecorativeMotion().not()) {
         CurrentTab()
@@ -317,13 +319,13 @@ private fun TabRootHost() {
         targetState = tabNavigator.current,
         contentKey = { it.key },
         transitionSpec = {
-            val enter = fadeIn(animationSpec = tween(TAB_ROOT_TRANSITION_DURATION_MS)) +
+            val enter = fadeIn(animationSpec = effectsSpec) +
                 slideInVertically(
-                    animationSpec = tween(TAB_ROOT_TRANSITION_DURATION_MS),
+                    animationSpec = spatialSpec,
                     initialOffsetY = { driftPx },
                 )
 
-            enter.togetherWith(fadeOut(animationSpec = tween(TAB_ROOT_TRANSITION_DURATION_MS)))
+            enter.togetherWith(fadeOut(animationSpec = effectsSpec))
         },
         label = "TabRootCrossfade",
     ) { tab ->

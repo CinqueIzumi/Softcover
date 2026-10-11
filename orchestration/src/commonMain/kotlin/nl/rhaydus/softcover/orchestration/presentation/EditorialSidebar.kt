@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -39,12 +38,12 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
  * The expanded-width navigation chrome (`>= 840dp`): a permanent editorial sidebar that replaces
  * the navigation rail. The app wordmark sits in the editorial voice over the four destinations,
  * each a selectable row that mirrors the app's selected-chip colours. Renders the same selection,
- * badge, and library pulse as every other chrome by consuming [rememberNavItems].
+ * badge, and icon pulse as every other chrome by consuming [rememberNavItems].
  */
 @Composable
 internal fun EditorialSidebar(modifier: Modifier = Modifier) {
     val navItems = rememberNavItems()
-    val tabNavigator = LocalTabNavigator.current
+    val onNavItemClick = rememberNavItemClick()
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -81,7 +80,7 @@ internal fun EditorialSidebar(modifier: Modifier = Modifier) {
                     SidebarItem(
                         item = item,
                         painter = iconPainter,
-                        onClick = { tabNavigator.current = item.tab },
+                        onClick = { onNavItemClick(item) },
                     )
                 }
             }

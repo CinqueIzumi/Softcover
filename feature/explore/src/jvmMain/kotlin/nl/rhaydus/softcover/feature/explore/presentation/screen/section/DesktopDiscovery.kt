@@ -15,7 +15,9 @@ import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
 private val discoveryScrollState = ScrollState(initial = 0)
@@ -26,6 +28,11 @@ internal fun DesktopDiscovery(
     runAction: (ExploreAction) -> Unit,
     onBookClick: (Book, String?) -> Unit,
 ) {
+    TabReselectScrollToTopEffect(
+        tab = ExploreTab,
+        state = discoveryScrollState,
+    )
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier

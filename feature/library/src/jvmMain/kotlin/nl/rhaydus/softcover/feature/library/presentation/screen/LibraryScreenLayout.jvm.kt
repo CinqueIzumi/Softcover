@@ -36,6 +36,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
+import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitRearrangeModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitSelectionModeAction
@@ -72,6 +73,13 @@ internal actual fun LibraryScreenLayout(
     val tabs = state.visibleTabs
 
     val currentTab = tabs.firstOrNull { it.id == state.selectedTabId } ?: tabs.firstOrNull()
+
+    currentTab?.let { shelf ->
+        TabReselectScrollToTopEffect(
+            tab = LibraryTab,
+            state = gridStateFor(shelf.id),
+        )
+    }
 
     LibraryEditModeBackHandlers(
         selectionMode = state.selectionMode,

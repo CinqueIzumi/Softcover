@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowStreakSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
@@ -59,6 +60,11 @@ internal actual fun ReadingScreenLayout(
     onBookClick: (Book) -> Unit,
     onNavigateToSearch: () -> Unit,
 ) {
+    TabReselectScrollToTopEffect(
+        tab = ReadingTab,
+        state = readingScrollState,
+    )
+
     val controller = rememberMarkAsReadController(
         books = state.books,
         runAction = runAction,

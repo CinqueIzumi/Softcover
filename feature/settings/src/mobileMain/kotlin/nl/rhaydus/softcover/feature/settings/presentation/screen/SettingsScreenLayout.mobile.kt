@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
+import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
@@ -79,6 +80,12 @@ internal actual fun SettingsScreenLayout(
     debugSection: @Composable () -> Unit,
 ) {
     val bottomBarPadding = rememberBottomBarPadding()
+    val scrollState = rememberScrollState()
+
+    TabReselectScrollToTopEffect(
+        tab = SettingsTab,
+        state = scrollState,
+    )
 
     Scaffold(
         contentWindowInsets = WindowInsets.statusBars,
@@ -87,7 +94,7 @@ internal actual fun SettingsScreenLayout(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .imePadding()
                 .cappedContentWidth()
                 .padding(horizontal = Spacing.gutter),

@@ -1,17 +1,20 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.layout.DesktopScrollPage
+import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSaveLibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSettingsCategorySelectedAction
@@ -53,6 +56,14 @@ internal actual fun SettingsScreenLayout(
 ) {
     val selected = state.selectedCategory
 
+    // Fresh per category, as the pages' own state was before it was hoisted for the reselect effect.
+    val pageScrollState = remember(selected) { ScrollState(initial = 0) }
+
+    TabReselectScrollToTopEffect(
+        tab = SettingsTab,
+        state = pageScrollState,
+    )
+
     Row(modifier = Modifier.fillMaxSize()) {
         SettingsCategorySidebar(
             state = state,
@@ -73,6 +84,7 @@ internal actual fun SettingsScreenLayout(
         ) {
             when (selected) {
                 SettingsCategory.APPEARANCE -> DesktopScrollPage(
+                    scrollState = pageScrollState,
                     masthead = { PageMasthead(model = state.appearancePaneMasthead) },
                 ) {
                     AppearanceSettingsContent(
@@ -84,6 +96,7 @@ internal actual fun SettingsScreenLayout(
                 }
 
                 SettingsCategory.LIBRARY_TABS -> DesktopScrollPage(
+                    scrollState = pageScrollState,
                     bottomBar = {
                         LibraryVisibilitySaveBar(
                             isDirty = libraryVisibilityState.isDirty,
@@ -100,6 +113,7 @@ internal actual fun SettingsScreenLayout(
                 }
 
                 SettingsCategory.ABOUT -> DesktopScrollPage(
+                    scrollState = pageScrollState,
                     masthead = { PageMasthead(model = state.aboutPaneMasthead) },
                 ) {
                     AboutContent(
@@ -123,6 +137,7 @@ internal actual fun SettingsScreenLayout(
                 }
 
                 SettingsCategory.ROADMAP -> DesktopScrollPage(
+                    scrollState = pageScrollState,
                     masthead = { PageMasthead(model = roadmapState.masthead) },
                 ) {
                     RoadmapContent(

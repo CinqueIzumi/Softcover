@@ -14,11 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-30 and S11-31 (update `Callout` crossfade, determinate download progress, app-wide outcome haptics in `App.kt`) are done and committed (`56ddf4c6`). The open S11 sub-steps are grouped into five sessions in `steps/s11-contract-retrofit.md` § Sessions. #275 tracks S11 only at stage level. F42 / S12-4 waits unchanged.
-- **Next:** `steps/s11-contract-retrofit.md` § Sessions, session 1 (S11-32 § Tab-switch timing, S11-34 § Re-tap the current tab, S11-43): propose the group's shape (Phase 1). S11-43 has only its table row, so scope it first.
-- **Open questions:** none. `upsert_book` may share the `ListIdType.errors` schema mismatch.
-- **Verification:** JBR 21, after the last Kotlin edit: `styleCheck`, `checkDocBudgets`, `checkModuleGraph`, `projectHealth` (app_update, component, settings), JVM and Android main compiles, and the app_update (27) and settings AppUpdate (7) tests passed. Reviewer fix round applied. Not run: iOS-sim compile, `assembleDebug`. No glommed closers; AAA markers complete.
-- **Uncommitted:** tracker docs only: this `## Now` block and the step file's new `## Sessions` table.
+- **State:** session 1 is built, uncommitted: S11-32 (tab crossfade on motion-scheme specs), S11-34 (`TabReselectRegistry` / `TabReselectEffect`, `rememberNavItemClick`, every tab pulses), S11-43 (`SoftcoverSnackbarHost`: level-ranked, one per sheet window, carry-over without re-entry). Also `UndoableBookRemover` got an `internal constructor` (cleared a `projectHealth` api leak). #275 tracks S11 only at stage level. F42 / S12-4 waits unchanged.
+- **Also built (uncommitted):** `ListsRepositoryImpl` list writes. On `RetryableSyncException` a write keeps the change, queues and succeeds; a rejection rolls back (reorder restores the snapshotted positions) and fails. A failed queue write rolls back and fails. `createList` never queues; the offline copy comes from `toUserMessage()`.
+- **Next:** commit (ask first), then session 2 (S11-33, S11-35): propose the group's shape.
+- **Open questions:** none. `upsert_book` may share the `ListIdType.errors` schema mismatch: check and fix it.
+- **Verification:** JBR 21, after the last Kotlin edit: all touched JVM / Android main compiles, `checkModuleGraph`, `projectHealth` (component, presentation, orchestration), `ktlintCheck`, `styleCheck`, `checkDocBudgets`, and the full `testAndroidHostTest` of component, presentation and orchestration passed. Two reviewer rounds applied. Not run: iOS-sim compile, `assembleDebug`, an on-device check of a full-height mobile sheet (the content now sits in `Box { Column }`). No glommed closers; AAA markers complete.
+- **Uncommitted:** all of session 1 plus these tracker edits.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

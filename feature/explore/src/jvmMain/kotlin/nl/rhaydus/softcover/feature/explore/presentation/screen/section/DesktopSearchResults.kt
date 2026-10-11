@@ -26,7 +26,9 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
 private val searchResultsGridState = LazyGridState()
@@ -37,6 +39,11 @@ internal fun DesktopSearchResults(
     runAction: (ExploreAction) -> Unit,
     onBookClick: (Book, String?) -> Unit,
 ) {
+    TabReselectScrollToTopEffect(
+        tab = ExploreTab,
+        state = searchResultsGridState,
+    )
+
     Column(modifier = Modifier.fillMaxSize()) {
         SearchResultsSection(
             state = state,

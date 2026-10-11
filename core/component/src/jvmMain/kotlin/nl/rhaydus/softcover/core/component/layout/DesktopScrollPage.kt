@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.component.layout
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -26,12 +27,12 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 @Composable
 fun DesktopScrollPage(
     modifier: Modifier = Modifier,
+    scrollState: ScrollState = rememberScrollState(),
     topBar: (@Composable () -> Unit)? = null,
     masthead: (@Composable () -> Unit)? = null,
     bottomBar: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val scrollState = rememberScrollState()
     val bottomBarPadding = rememberBottomBarPadding()
 
     Column(modifier = modifier.fillMaxSize()) {

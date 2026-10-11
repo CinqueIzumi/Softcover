@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -33,6 +32,7 @@ import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.snackbar.SoftcoverSnackbarHost
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.appupdate.ObserveAppUpdateStateUseCase
@@ -65,7 +65,6 @@ internal fun App() {
     val themeConfig by viewModel.themeState.collectAsStateWithLifecycle()
     val spinePalette by viewModel.spinePalette.collectAsStateWithLifecycle()
     val reAuthSheet by viewModel.reAuthSheet.collectAsStateWithLifecycle()
-    val snackBarState by SnackBarManager.snackBarState.collectAsStateWithLifecycle()
 
     val appUpdateFlowLauncher = rememberAppUpdateFlowLauncher()
 
@@ -205,10 +204,7 @@ internal fun App() {
                             }
                         }
 
-                        SnackbarHost(
-                            hostState = snackBarState,
-                            modifier = snackbarModifier,
-                        )
+                        SoftcoverSnackbarHost(modifier = snackbarModifier)
 
                         // Show the re-auth overlay only during an authenticated session — if the user
                         // is already on onboarding they can enter a token through the normal flow.

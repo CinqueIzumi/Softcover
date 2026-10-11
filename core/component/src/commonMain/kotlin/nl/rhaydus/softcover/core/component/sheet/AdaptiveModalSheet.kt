@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.widthIn
@@ -36,6 +37,8 @@ import nl.rhaydus.designsystem.component.LocalModalSheetForm
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.model.ModalSheetForm
+import nl.rhaydus.softcover.core.component.snackbar.LocalSnackbarHostLevel
+import nl.rhaydus.softcover.core.component.snackbar.SoftcoverSnackbarHost
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
@@ -48,6 +51,8 @@ private const val PANEL_ENTER_SCALE = 0.92f
  * Every close path of the panel (outside tap, back, Esc and [LocalModalSheetDismiss]) plays the
  * exit animation first and calls [onDismissRequest] once, after it finishes. The host must remove the
  * sheet in response; the panel does not reset itself, as with the foundation bottom sheet.
+ *
+ * Each sheet window hosts the app snackbar, so callers never add their own.
  */
 @Composable
 fun AdaptiveModalSheet(
@@ -58,11 +63,13 @@ fun AdaptiveModalSheet(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val windowSize = rememberWindowSizeClass()
+    val sheetLevel = LocalSnackbarHostLevel.current + 1
 
     if (windowSize.widthClass == WindowWidthClass.EXPANDED) {
         AnimatedSheetPanel(
             onDismissRequest = onDismissRequest,
             maxHeight = windowSize.heightDp * 0.9f,
+            sheetLevel = sheetLevel,
             dismissOnTapOutside = dismissOnTapOutside,
             dismissOnBackPress = dismissOnBackPress,
             modifier = modifier,
@@ -74,8 +81,20 @@ fun AdaptiveModalSheet(
             modifier = modifier,
             dismissOnTapOutside = dismissOnTapOutside,
             dismissOnBackPress = dismissOnBackPress,
-            content = content,
-        )
+        ) {
+            CompositionLocalProvider(LocalSnackbarHostLevel provides sheetLevel) {
+                Box {
+                    Column { content() }
+
+                    SoftcoverSnackbarHost(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                            .padding(Spacing.md),
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -83,6 +102,7 @@ fun AdaptiveModalSheet(
 private fun AnimatedSheetPanel(
     onDismissRequest: () -> Unit,
     maxHeight: Dp,
+    sheetLevel: Int,
     dismissOnTapOutside: Boolean,
     dismissOnBackPress: Boolean,
     modifier: Modifier,
@@ -116,48 +136,58 @@ private fun AnimatedSheetPanel(
         if (closing) currentOnDismissRequest()
     }
 
-    ScrimlessDialog(
-        onDismissRequest = close,
-        dismissOnBackPress = dismissOnBackPress,
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer { this.alpha = alpha.value }
-                    .background(scrimColor)
-                    .pointerInput(dismissOnTapOutside) {
-                        if (dismissOnTapOutside) detectTapGestures { close() }
-                    },
-            )
+    CompositionLocalProvider(LocalSnackbarHostLevel provides sheetLevel) {
+        ScrimlessDialog(
+            onDismissRequest = close,
+            dismissOnBackPress = dismissOnBackPress,
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer { this.alpha = alpha.value }
+                        .background(scrimColor)
+                        .pointerInput(dismissOnTapOutside) {
+                            if (dismissOnTapOutside) detectTapGestures { close() }
+                        },
+                )
 
-            Box(
-                modifier = Modifier.fillMaxSize().safeDrawingPadding(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Surface(
-                    modifier = modifier
-                        .graphicsLayer {
-                            scaleX = scale.value
-                            scaleY = scale.value
-                            this.alpha = alpha.value
-                        }
-                        .widthIn(max = 420.dp)
-                        .fillMaxWidth()
-                        .heightIn(max = maxHeight),
-                    shape = Corners.xxl,
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                    shadowElevation = 6.dp,
+                Box(
+                    modifier = Modifier.fillMaxSize().safeDrawingPadding(),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Column(modifier = Modifier.padding(top = Spacing.md)) {
-                        CompositionLocalProvider(
-                            LocalModalSheetForm provides ModalSheetForm.PANEL,
-                            LocalModalSheetDismiss provides close,
-                        ) {
-                            content()
+                    Surface(
+                        modifier = modifier
+                            .graphicsLayer {
+                                scaleX = scale.value
+                                scaleY = scale.value
+                                this.alpha = alpha.value
+                            }
+                            .widthIn(max = 420.dp)
+                            .fillMaxWidth()
+                            .heightIn(max = maxHeight),
+                        shape = Corners.xxl,
+                        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                        shadowElevation = 6.dp,
+                    ) {
+                        Column(modifier = Modifier.padding(top = Spacing.md)) {
+                            CompositionLocalProvider(
+                                LocalModalSheetForm provides ModalSheetForm.PANEL,
+                                LocalModalSheetDismiss provides close,
+                            ) {
+                                content()
+                            }
                         }
                     }
                 }
+
+                SoftcoverSnackbarHost(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .navigationBarsPadding()
+                        .padding(Spacing.md)
+                        .widthIn(max = 420.dp),
+                )
             }
         }
     }

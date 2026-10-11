@@ -21,7 +21,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
  * staged removal. A process kill inside the window loses the remote delete, and the book returns
  * on the next sync.
  */
-class UndoableBookRemover(
+class UndoableBookRemover internal constructor(
     private val stageBookRemovalUseCase: StageBookRemovalUseCase,
     private val undoBookRemovalUseCase: UndoBookRemovalUseCase,
     private val commitBookRemovalUseCase: CommitBookRemovalUseCase,

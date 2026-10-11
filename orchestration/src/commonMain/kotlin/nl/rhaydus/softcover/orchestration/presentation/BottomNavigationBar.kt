@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import nl.rhaydus.designsystem.component.RhaydusIconToggleButton
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.model.IconToggleButtonStyle
@@ -27,7 +26,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 @Composable
 internal fun DockedBottomNavigationBar() {
     val navItems = rememberNavItems()
-    val tabNavigator = LocalTabNavigator.current
+    val onNavItemClick = rememberNavItemClick()
 
     NavigationBar {
         navItems.forEach { item ->
@@ -35,7 +34,7 @@ internal fun DockedBottomNavigationBar() {
 
             NavigationBarItem(
                 selected = item.selected,
-                onClick = { tabNavigator.current = item.tab },
+                onClick = { onNavItemClick(item) },
                 icon = {
                     NavItemIcon(
                         item = item,
@@ -52,7 +51,7 @@ internal fun DockedBottomNavigationBar() {
 @Composable
 internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
     val navItems = rememberNavItems()
-    val tabNavigator = LocalTabNavigator.current
+    val onNavItemClick = rememberNavItemClick()
 
     HorizontalFloatingToolbar(
         expanded = true,
@@ -64,7 +63,7 @@ internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
             Box {
                 RhaydusIconToggleButton(
                     checked = item.selected,
-                    onCheckedChange = { tabNavigator.current = item.tab },
+                    onCheckedChange = { onNavItemClick(item) },
                     icon = RhaydusIconResource.Custom(
                         painter = iconPainter,
                         contentDescription = item.tab.options.title,
