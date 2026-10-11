@@ -15,7 +15,7 @@ and a Perfetto trace. PC turns that check, and a Compose stability check, into r
 | PC-1 | Approved shape (below) — stop for approval | [x] |
 | PC-2 | Idle-frame check: dropped; no automated idle check (neither a debug route plus script nor Compose UI idle tests) | [x] |
 | PC-3 | One-off `dumpsys gfxinfo` sweep: every screen idles at 0 frames except any `EmptyState` (~60 fps from `quoteGlyphSway()`), kept by choice since empty states are short-lived | [x] |
-| PC-4 | Compose stability gate: compiler stability reports plus a baseline that fails on a newly unstable or non-skippable composable | [ ] |
+| PC-4 | Compose stability gate: skydoves analyzer 0.7.5, `androidMain` baselines in 15 modules, `stabilityCheck` in `check` and CI | [x] |
 | PC-5 | Fix or baseline what PC-4 reports | [ ] |
 
 ## PC-1 — decisions

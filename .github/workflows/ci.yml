@@ -45,6 +45,9 @@ jobs:
       - name: detekt
         run: ./gradlew detekt --stacktrace
 
+      - name: Compose stability
+        run: ./gradlew stabilityCheck --stacktrace
+
       - name: Doc budgets
         run: ./gradlew checkDocBudgets --stacktrace
 

@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PC-1 approved, PC-2 dropped (no automated idle check). PC-3 sweep run once on Medium_Phone: every screen idles at 0 frames except any `EmptyState`, which draws ~60 fps because `quoteGlyphSway()` (`core/designsystem/.../modifier/QuoteGlyphSway.kt`) is an infinite animation; kept by choice, since empty states are short-lived. Not measured: reading session / Focus Mode (writes to the account), barcode scanner, onboarding, debug screens. PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
-- **Next:** PC-4: brief `softcover-implementer` for the stability gate per the PC step file's § Approved shape (first verify the skydoves plugin supports KMP / Kotlin 2.3.21).
-- **Open questions:** none.
-- **Verification:** empty-state centring: `styleCheck` and the library / explore compiles passed (JBR 21); reviewed, findings fixed; checked on Medium_Phone (empty DNF shelf, empty Hidden suggestions).
-- **Uncommitted:** tracker edits (this file, the PC step file); empty-state centring (`BookList`, `EditionList`, `HiddenSuggestionsContent`, both `HiddenSuggestionsScreenLayout`s, `layout.md`).
+- **State:** PC-1 to PC-4 done. PC-4: skydoves Compose Stability Analyzer 0.7.5 (0.8.0 needs Gradle 9.3.1) applied by both Compose convention plugins through `StabilityGate.kt`; `androidMain` baselines in 15 modules; `stabilityCheck` in `check` and a CI step; foundation entry F47. The baselines hold ~107 non-skippable of ~570 composables (most: `book_detail` 20, `settings` 14, `component` 13, `explore` / `reading` / `library` 12). PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
+- **Next:** PC-5: triage the baselines' unstable parameters per module (fix, or keep baselined with a reason); the #275 PC box ticks after it.
+- **Open questions:** whether the CI stability step passes on JDK 17 (verified only under JBR 21); watch the first CI run.
+- **Verification:** `stabilityDump`, `stabilityCheck`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck` green (JBR 21); negative test (`MutableList<String>` on `Badge`) fails the gate; reviewed, findings fixed; `document-code` pass done.
+- **Uncommitted:** none. The reviewer agent now flags `.stability` hunks that lose stability or skippability.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

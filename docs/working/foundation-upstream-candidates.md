@@ -458,3 +458,17 @@ clone would fail to *configure* — `build-logic` is not in the foundation's `ma
 - **What to build:** move the fork into the foundation (swipe gate, one-shot latch, a
   `LocalModalSheetClosing` beside `LocalModalSheetDismiss`), release, swap the imports back, and delete the
   local copy and the ban.
+
+### F47 — Compose stability gate in the convention plugins
+
+- **Type:** gate
+- **Home:** `build-logic` Compose convention plugins (Android and KMP)
+- **Status:** **Open — implemented locally.** Softcover's two Compose convention plugins apply the skydoves
+  Compose Stability Analyzer through one shared helper (`includeTests = false`, `failOnStabilityChange = true`),
+  and `stabilityCheck` compares each module with its checked-in `<module>/stability/*.stability` baseline in CI.
+  The foundation's convention plugins should adopt it so every consumer gets the gate.
+- **What to build:** apply the plugin from the shared Compose convention helper. The plugin version must track the
+  Kotlin version (0.7.5 for Kotlin 2.3.x; 0.8.0 pulls AGP `gradle-api` 9.1.1 and needs Gradle 9.3.1). On the AGP
+  KMP Android target the analyzer's per-variant tasks look for `compile<Variant>Kotlin` output and find none, so
+  repoint their `stabilityInputFiles` at `stability/compileAndroidMain/stability-info.json` once the task graph is
+  ready (see `StabilityGate.kt`), or fix it upstream in the analyzer.

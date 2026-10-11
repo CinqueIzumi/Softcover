@@ -52,6 +52,9 @@ as given. If it is absent, run the single command in `## Verify`, or nothing.
    duplicates a fact already stated elsewhere, or puts content in the wrong file per the routing table is 🟡.
 6. **Comments and KDoc:** flag comments that restate the code and missing docs on non-obvious behaviour
    (the `document-code` standard).
+7. **Stability baselines:** a `<module>/stability/*.stability` hunk where a parameter loses `STABLE` or a
+   composable goes from `skippable: true` to `false` is 🔴 unless the change justifies it. Re-dumping the
+   baseline accepts whatever changed, so this diff is the only place a regression is caught.
 
 Check your memory index for recurring traps in the area before you conclude.
 

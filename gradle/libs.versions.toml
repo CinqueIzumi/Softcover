@@ -1,6 +1,9 @@
 [versions]
 agp = "9.0.0"
 kotlin = "2.3.21"
+# Compose Stability Analyzer: 0.7.5 pairs with Kotlin 2.3.x. 0.8.0 pulls AGP gradle-api 9.1.1, which
+# demands Gradle 9.3.1; 0.9+ require Kotlin 2.4.
+stabilityAnalyzer = "0.7.5"
 rhaydusFoundation = "0.3.1"
 ktlint = "1.7.1"
 coreKtx = "1.17.0"
@@ -87,6 +90,7 @@ ktlint-cliRulesetCore = { group = "com.pinterest.ktlint", name = "ktlint-cli-rul
 # Gradle plugin artifacts — consumed by build-logic convention plugins (compileOnly)
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+stability-analyzer-gradlePlugin = { group = "com.github.skydoves", name = "compose-stability-gradle", version.ref = "stabilityAnalyzer" }
 compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { group = "org.jetbrains.compose", name = "compose-gradle-plugin", version.ref = "composeMultiplatform" }
 compose-material3-expressive = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "composeMaterial3Expressive" }
@@ -164,6 +168,7 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", version.ref = "stabilityAnalyzer" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 apollo = { id = "com.apollographql.apollo", version.ref = "apollo" }

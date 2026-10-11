@@ -22,3 +22,7 @@ paths:
   `detekt*` and compile tasks are per-module.
 - After changing a `:detekt-rules` rule, run `./gradlew --stop` and then the detekt tasks with
   `--rerun-tasks`. Otherwise detekt stays UP-TO-DATE and runs the old rule jar.
+- `stabilityCheck` (part of `check`, not `styleCheck`) compares every Compose module with its baseline in
+  `<module>/stability/`, for the `androidMain` target only, so composables in `jvmMain` or `iosMain` are
+  never checked. Any change to a composable fails it, even a new one; refresh the baselines with
+  `./gradlew stabilityDump` and commit them with the change.

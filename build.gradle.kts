@@ -16,6 +16,7 @@ plugins {
     alias(libs.plugins.room) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.detekt) apply false
+    alias(libs.plugins.stability.analyzer) apply false
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.kover)
     id("softcover.doc-budgets")
@@ -489,6 +490,8 @@ dependencyAnalysis {
                     "androidx.compose.ui:ui-tooling",
                     "androidx.compose.material3:material3",
                     "androidx.compose.ui:ui-graphics",
+                    // Added to every Compose module by the stability analyzer plugin.
+                    "com.github.skydoves:compose-stability-runtime",
                     // KMP Compose Multiplatform artifacts provided uniformly by KmpComposeConventionPlugin.
                     "org.jetbrains.compose.runtime:runtime",
                     "org.jetbrains.compose.foundation:foundation",

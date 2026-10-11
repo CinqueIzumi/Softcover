@@ -24,6 +24,7 @@ class KmpComposeConventionPlugin : Plugin<Project> {
             apply("org.jetbrains.kotlin.plugin.compose")
             apply("org.jetbrains.compose")
         }
+        applyComposeStabilityGate()
 
         val compose = extensions.getByType<ComposeExtension>().dependencies
 
