@@ -59,6 +59,7 @@ internal fun WhenReadEditor(
                 icon = SoftcoverIcon.Add,
                 contentDescription = "Later day",
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 1440)) },
+                enabled = model.canShiftLater,
             )
         }
 
@@ -97,6 +98,7 @@ internal fun WhenReadEditor(
                 icon = SoftcoverIcon.Add,
                 contentDescription = "Later 15 minutes",
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 15)) },
+                enabled = model.canShiftLater,
             )
 
             Spacer(modifier = Modifier.width(Spacing.xs))
@@ -105,6 +107,7 @@ internal fun WhenReadEditor(
                 icon = SoftcoverIcon.Add,
                 contentDescription = "Later hour",
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 60)) },
+                enabled = model.canShiftLater,
             )
         }
     }

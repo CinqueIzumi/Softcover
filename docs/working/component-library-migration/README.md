@@ -14,12 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-22 done and signed off after the user's full device run. #275 tracks S11 only at stage level, so no sub-step box there. F42 / S12-4 waits unchanged.
-- **Next:** S11-23 (`StepperCircle`: press scale, a tick per step, accelerating auto-repeat); read its step-file section first.
-- **Then:** the remaining open S11 sub-steps in table order.
-- **Open questions:** none. `upsert_book` may share the mismatch (probing writes to the account).
-- **Verification:** JBR 21 after the last Kotlin edit: `styleCheck`, `:feature:session:testAndroidHostTest`, `:app:assembleDebug` passed; earlier all-module compiles, `assembleDebug`, desktop, `checkModuleGraph`, core lists/book/network + plugin tests. Reviewer: no blockers (KDoc wraps fixed).
-- **Uncommitted:** S11-22 Kotlin (`:core:component` `field/`, `progress/`; `:core:designsystem` theme error families; book_detail, library, orchestration; onboarding, lists, scan, session + tests); `:apollo-schema-corrections` + wiring; `schema.graphqls`; `ListsRemoteDataSource` + test; `components.md`, `module-structure.md`, `foundations.md`; tracker docs.
+- **State:** S11-23 (`StepperCircle` press scale, tickle per step, accelerating hold-repeat, `enabled` dims at a limit) is done, signed off on device and committed. #275 tracks S11 only at stage level, so sub-steps get no box there. F42 / S12-4 waits unchanged.
+- **Next:** S11-24 (progress-sheet tab crossfade + page past-the-end shake); read its step-file section first.
+- **Open questions:** none. `upsert_book` may share the `ListIdType.errors` schema mismatch.
+- **Verification:** JBR 21: `:core:component`, `:core:uibinding`, `:feature:reading`, `:feature:book_detail` compiles, `checkModuleGraph`, `:core:component:projectHealth`, `styleCheck` passed; `:core:uibinding` progress tests pass (7 new); AAA markers complete, no glommed closers; reviewer no blockers (its `reading.md` drift fixed).
+- **Uncommitted:** nothing.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

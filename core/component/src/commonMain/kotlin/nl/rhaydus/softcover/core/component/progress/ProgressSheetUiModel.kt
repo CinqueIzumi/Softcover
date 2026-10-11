@@ -92,6 +92,7 @@ data class ProgressSheetUiModel(
                 ),
                 dayLabel = "Today",
                 timeLabel = "09:41",
+                canShiftLater = false,
             ),
             scaffold = SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
@@ -158,6 +159,8 @@ data class ProgressSheetUiModel(
                     ),
                     suffix = "of 27:52:00",
                     fraction = 0.12f,
+                    canDecreaseMinutes = true,
+                    canIncreaseMinutes = true,
                 ),
                 progressPercent = 12,
                 selectedTab = ProgressSheetTab.TIME,
@@ -180,6 +183,8 @@ data class ProgressSheetUiModel(
                     ),
                     suffix = null,
                     fraction = 0f,
+                    canDecreaseMinutes = false,
+                    canIncreaseMinutes = true,
                 ),
                 progressPercent = 0,
                 selectedTab = ProgressSheetTab.TIME,

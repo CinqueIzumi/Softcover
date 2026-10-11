@@ -66,7 +66,7 @@ data class ProgressTimeDraft(
     }
 }
 
-private val ProgressTimeUnit.maximum: Int
+internal val ProgressTimeUnit.maximum: Int
     get() = when (this) {
         ProgressTimeUnit.HOURS -> Int.MAX_VALUE
         ProgressTimeUnit.MINUTES,

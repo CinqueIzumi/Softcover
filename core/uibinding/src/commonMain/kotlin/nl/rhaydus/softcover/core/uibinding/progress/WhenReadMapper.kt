@@ -46,6 +46,7 @@ fun LocalDateTime?.toWhenReadUiModel(now: LocalDateTime): WhenReadUiModel {
         ),
         dayLabel = dayLabel,
         timeLabel = "$hh:$mm",
+        canShiftLater = this != null && this < now,
     )
 }
 

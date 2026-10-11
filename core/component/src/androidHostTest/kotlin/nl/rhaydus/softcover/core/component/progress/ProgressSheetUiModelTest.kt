@@ -23,6 +23,8 @@ class ProgressSheetUiModelTest {
         ),
         suffix = null,
         fraction = 0f,
+        canDecreaseMinutes = false,
+        canIncreaseMinutes = true,
     )
 
     @Nested

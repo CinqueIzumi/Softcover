@@ -87,6 +87,48 @@ class WhenReadMapperTest {
             yesterdayResult.timeLabel shouldBe "09:05"
             earlierResult.dayLabel shouldBe "4 days ago"
         }
+
+        @Test
+        fun `no backdate cannot shift later`() {
+            // ----- Arrange -----
+            val readAt: LocalDateTime? = null
+
+            // ----- Act -----
+            val result = readAt.toWhenReadUiModel(now = now)
+
+            // ----- Assert -----
+            result.canShiftLater shouldBe false
+        }
+
+        @Test
+        fun `a past backdate can shift later`() {
+            // ----- Arrange -----
+            val readAt: LocalDateTime? = LocalDateTime(
+                2024,
+                3,
+                1,
+                9,
+                30,
+            )
+
+            // ----- Act -----
+            val result = readAt.toWhenReadUiModel(now = now)
+
+            // ----- Assert -----
+            result.canShiftLater shouldBe true
+        }
+
+        @Test
+        fun `a backdate equal to now cannot shift later`() {
+            // ----- Arrange -----
+            val readAt: LocalDateTime? = now
+
+            // ----- Act -----
+            val result = readAt.toWhenReadUiModel(now = now)
+
+            // ----- Assert -----
+            result.canShiftLater shouldBe false
+        }
     }
 
     @Nested

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.uibinding.progress
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
@@ -35,6 +36,8 @@ class ProgressSheetMapperTest {
         ),
         suffix = suffix,
         fraction = fraction,
+        canDecreaseMinutes = minutes != "0",
+        canIncreaseMinutes = minutes != "59",
     )
 
     private fun audioBook(currentSeconds: Int?): Book {
@@ -382,6 +385,101 @@ class ProgressSheetMapperTest {
                 currentPage = 0,
                 suffix = "of 100 pages",
             )
+        }
+    }
+
+    @Nested
+    inner class MinuteStepperBounds {
+        @Test
+        fun `minutes at zero can only increase`() {
+            // ----- Arrange -----
+            val book = audioBook(currentSeconds = 600)
+            val draft = ProgressTimeDraft(
+                forSeconds = 600,
+                hours = "0",
+                minutes = "0",
+                seconds = "0",
+            )
+
+            // ----- Act -----
+            val result = book.toProgressSheetUiModel(
+                selectedTab = ProgressSheetTab.TIME,
+                timeDraft = draft,
+            )
+
+            // ----- Assert -----
+            val timed = (result.medium as? ProgressSheetMedium.Timed).shouldNotBeNull()
+            timed.canDecreaseMinutes shouldBe false
+            timed.canIncreaseMinutes shouldBe true
+        }
+
+        @Test
+        fun `minutes at the maximum can only decrease`() {
+            // ----- Arrange -----
+            val book = audioBook(currentSeconds = 600)
+            val draft = ProgressTimeDraft(
+                forSeconds = 600,
+                hours = "0",
+                minutes = "59",
+                seconds = "0",
+            )
+
+            // ----- Act -----
+            val result = book.toProgressSheetUiModel(
+                selectedTab = ProgressSheetTab.TIME,
+                timeDraft = draft,
+            )
+
+            // ----- Assert -----
+            val timed = (result.medium as? ProgressSheetMedium.Timed).shouldNotBeNull()
+            timed.canDecreaseMinutes shouldBe true
+            timed.canIncreaseMinutes shouldBe false
+        }
+
+        @Test
+        fun `minutes between the bounds can step both ways`() {
+            // ----- Arrange -----
+            val book = audioBook(currentSeconds = 600)
+            val draft = ProgressTimeDraft(
+                forSeconds = 600,
+                hours = "0",
+                minutes = "30",
+                seconds = "0",
+            )
+
+            // ----- Act -----
+            val result = book.toProgressSheetUiModel(
+                selectedTab = ProgressSheetTab.TIME,
+                timeDraft = draft,
+            )
+
+            // ----- Assert -----
+            val timed = (result.medium as? ProgressSheetMedium.Timed).shouldNotBeNull()
+            timed.canDecreaseMinutes shouldBe true
+            timed.canIncreaseMinutes shouldBe true
+        }
+
+        @Test
+        fun `a blank minutes draft is treated as zero`() {
+            // ----- Arrange -----
+            val book = audioBook(currentSeconds = 600)
+            val draft = ProgressTimeDraft(
+                forSeconds = 600,
+                hours = "0",
+                minutes = "",
+                seconds = "0",
+            )
+
+            // ----- Act -----
+            val result = book.toProgressSheetUiModel(
+                selectedTab = ProgressSheetTab.TIME,
+                timeDraft = draft,
+            )
+
+            // ----- Assert -----
+            val timed = (result.medium as? ProgressSheetMedium.Timed).shouldNotBeNull()
+            timed.canDecreaseMinutes shouldBe false
+            timed.canIncreaseMinutes shouldBe true
         }
     }
 

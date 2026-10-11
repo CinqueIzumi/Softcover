@@ -116,6 +116,7 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
             contentDescription = "Decrease minutes",
             onClick = { onEvent(ProgressSheetEvent.MinutesStepped(delta = -1)) },
             modifier = Modifier.padding(end = Spacing.xxs),
+            enabled = medium.canDecreaseMinutes,
         )
 
         TextField(
@@ -128,6 +129,7 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
             contentDescription = "Increase minutes",
             onClick = { onEvent(ProgressSheetEvent.MinutesStepped(delta = 1)) },
             modifier = Modifier.padding(start = Spacing.xxs),
+            enabled = medium.canIncreaseMinutes,
         )
 
         TimeColon()
@@ -203,6 +205,7 @@ private fun ColumnScope.SteppedNumberContent(
             icon = SoftcoverIcon.Remove,
             contentDescription = "Decrease $noun",
             onClick = { stepBy(-1) },
+            enabled = parsed > 0,
         )
 
         Spacer(modifier = Modifier.width(Spacing.lg))
@@ -270,6 +273,7 @@ private fun ColumnScope.SteppedNumberContent(
             icon = SoftcoverIcon.Add,
             contentDescription = "Increase $noun",
             onClick = { stepBy(1) },
+            enabled = max == null || parsed < max,
         )
     }
 

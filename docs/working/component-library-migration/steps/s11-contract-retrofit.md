@@ -36,7 +36,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-20 | Every sheet host leaves on `Dismissed` | S11-19 | [x] |
 | S11-21 | Panel-form `AdaptiveModalSheet` animates in and out, with elevation | SL-15a | [x] |
 | S11-22 | `TextFieldUiModel` error state: outline, shake and `reject` | S11-6 | [x] |
-| S11-23 | `StepperCircle`: press scale, a tick per step, accelerating auto-repeat | S11-6 | [ ] |
+| S11-23 | `StepperCircle`: press scale, a tick per step, accelerating auto-repeat | S11-6 | [x] |
 | S11-24 | Progress-sheet tab body crossfades with a size transform | SL-15a | [ ] |
 | S11-25 | Add-to-list: bookmark, chip and spinner animate; `select` fires | S11-6 | [ ] |
 | S11-26 | Search chrome: press, border, slot crossfade, scroll lift, Refresh text | SL-15a | [ ] |
@@ -98,6 +98,14 @@ S11-22 (`shakeOnError` fires `reject` itself; screens drop their own `reject` fo
 - Focus Mode: a page past the end is rejected (the draft keeps its last valid value, so a typo never commits the last page and finishes the book); `pageDraftRejected` + `OnPageShakeEndedAction`; `FocusPageEditor` shakes `HeroStatNumberField`. The progress-sheet page clamp goes to S11-24.
 - No mapper, no helpers. Tests: the changed actions in onboarding, lists, scan, session.
 - Every palette owns an `ErrorFamily` (tones 20/30/40/70/86) in `PaletteColors`, distinct from its accents and AA against its surfaces; built and reviewed.
+
+S11-23 (signature otherwise unchanged; all 12 call sites in `progress/`):
+- One `MutableInteractionSource` drives `pressScale` and the ripple.
+- A private `repeatingPress` modifier in `StepperCircle.kt` replaces the Surface's `onClick`: a step and a `tickle` on press, repeats after ~400 ms from 150 ms down to a 40 ms floor over ~2 s, each with a `tickle`; release or leaving the bounds stops it. Foundation candidate, not moved now.
+- `clearAndSetSemantics` stays; the accessibility click is one step.
+- `enabled: Boolean = true`: disabled dims, takes no press and stops a running repeat.
+- Bounds: the number stepper from its local `parsed` / `max`; `ProgressSheetMedium.Timed` gains `canDecreaseMinutes` / `canIncreaseMinutes` (0..`MINUTES.maximum`) and `WhenReadUiModel` gains `canShiftLater` (a backdate before `now`), both set by their `:core:uibinding` mappers. Earlier has no bound.
+- No new events. Tests: the two mappers' new flags, via test-writer.
 
 ## R10 edges
 

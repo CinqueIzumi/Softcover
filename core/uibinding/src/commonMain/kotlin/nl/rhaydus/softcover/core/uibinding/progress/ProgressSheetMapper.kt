@@ -44,8 +44,10 @@ fun Book.toProgressSheetUiModel(
 
         val totalSeconds = edition.audioSeconds ?: 0
 
+        val enteredMinutes = draft.minutes.toIntOrNull() ?: 0
+
         val enteredSeconds = (draft.hours.toIntOrNull() ?: 0) * 3600 +
-            (draft.minutes.toIntOrNull() ?: 0) * 60 +
+            enteredMinutes * 60 +
             (draft.seconds.toIntOrNull() ?: 0)
 
         ProgressSheetMedium.Timed(
@@ -64,6 +66,8 @@ fun Book.toProgressSheetUiModel(
             ),
             suffix = if (totalSeconds > 0) "of ${totalSeconds.toClockText()}" else null,
             fraction = if (totalSeconds > 0) enteredSeconds.toFloat() / totalSeconds else 0f,
+            canDecreaseMinutes = enteredMinutes > 0,
+            canIncreaseMinutes = enteredMinutes < ProgressTimeUnit.MINUTES.maximum,
         )
     } else {
         val totalPages = edition?.pages ?: defaultEdition?.pages ?: 0

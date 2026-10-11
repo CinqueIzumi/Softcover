@@ -41,6 +41,8 @@ sealed interface ProgressSheetMedium {
         val seconds: TextFieldUiModel,
         val suffix: String?,
         val fraction: Float,
+        val canDecreaseMinutes: Boolean,
+        val canIncreaseMinutes: Boolean,
     ) : ProgressSheetMedium {
         override val hasKnownTotal: Boolean
             get() = totalSeconds > 0
