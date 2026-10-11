@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
+import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 
 /**
  * Everything [Cover] renders: what to load, what to fall back to when nothing loads, and which
@@ -26,7 +27,7 @@ data class CoverUiModel(
     val coverlessTitle: String?,
     val variant: CoverVariant,
     val isLoading: Boolean = false,
-    val sharedTransitionKey: String? = null,
+    val sharedTransitionKey: BookTransitionKey? = null,
 ) {
     companion object : UiModelPreviews<CoverUiModel> {
         /**

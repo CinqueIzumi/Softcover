@@ -1,10 +1,7 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -21,9 +18,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
@@ -36,7 +33,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import nl.rhaydus.designsystem.layout.BottomBarPlacement
@@ -44,7 +40,6 @@ import nl.rhaydus.designsystem.layout.BottomBarScaffold
 import nl.rhaydus.designsystem.layout.TwoPaneScaffold
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
@@ -310,22 +305,17 @@ private fun TabRootHost() {
     val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
     val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
 
-    if (playDecorativeMotion().not()) {
-        CurrentTab()
-        return
-    }
-
     AnimatedContent(
         targetState = tabNavigator.current,
         contentKey = { it.key },
         transitionSpec = {
-            val enter = fadeIn(animationSpec = effectsSpec) +
-                slideInVertically(
+            navFadeThrough(
+                effectsSpec = effectsSpec,
+                enterMotion = slideInVertically(
                     animationSpec = spatialSpec,
                     initialOffsetY = { driftPx },
-                )
-
-            enter.togetherWith(fadeOut(animationSpec = effectsSpec))
+                ),
+            )
         },
         label = "TabRootCrossfade",
     ) { tab ->

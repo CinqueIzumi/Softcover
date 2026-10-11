@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
@@ -37,8 +38,8 @@ class ReadingSheetScaffoldBuilderTest {
             val result = streakSheetScaffoldFor(activity = activity)
 
             // ----- Assert -----
-            result.header.section.headlineText shouldBe "No reading logged yet"
-            result.header.section.eyebrow shouldBe "Last 0 days"
+            result.header.shouldNotBeNull().section.headlineText shouldBe "No reading logged yet"
+            result.header.shouldNotBeNull().section.eyebrow shouldBe "Last 0 days"
         }
 
         @Test
@@ -54,7 +55,7 @@ class ReadingSheetScaffoldBuilderTest {
             val result = streakSheetScaffoldFor(activity = activity)
 
             // ----- Assert -----
-            result.header.section.headlineText shouldBe "You read on 1 of the last 3 days"
+            result.header.shouldNotBeNull().section.headlineText shouldBe "You read on 1 of the last 3 days"
         }
 
         @Test
@@ -72,8 +73,8 @@ class ReadingSheetScaffoldBuilderTest {
             val result = streakSheetScaffoldFor(activity = activity)
 
             // ----- Assert -----
-            result.header.section.headlineText shouldBe "You read on 3 of the last 5 days"
-            result.header.section.eyebrow shouldBe "Last 5 days"
+            result.header.shouldNotBeNull().section.headlineText shouldBe "You read on 3 of the last 5 days"
+            result.header.shouldNotBeNull().section.eyebrow shouldBe "Last 5 days"
         }
     }
 }

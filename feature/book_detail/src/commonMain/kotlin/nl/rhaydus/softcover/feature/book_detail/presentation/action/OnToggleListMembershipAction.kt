@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -46,7 +47,9 @@ internal class OnToggleListMembershipAction(
 
             result
                 .onSuccess {
-                    scope.sendEvent(BookDetailEvent.MutationSucceededEvent())
+                    val feedback = if (isMember) null else Feedback.Routine
+
+                    scope.sendEvent(BookDetailEvent.MutationSucceededEvent(feedback = feedback))
                 }
                 .onFailure { error ->
                     AppLog.e(

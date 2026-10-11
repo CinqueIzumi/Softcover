@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core.uibinding.book
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEyebrow
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
+import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 
 /** The "By X" byline for [author], or `null` when it is `null` or blank. */
 fun byline(author: String?): String? = author
@@ -12,7 +13,7 @@ fun byline(author: String?): String? = author
 /** A rating part reading "4.5" with the description "Rated 4.5 out of 5". */
 fun ratingPart(
     rating: Double,
-    transitionKey: String? = null,
+    transitionKey: BookTransitionKey? = null,
 ): BookCardLinePart.Rating {
     val label = formatDecimalNumber(
         rating,

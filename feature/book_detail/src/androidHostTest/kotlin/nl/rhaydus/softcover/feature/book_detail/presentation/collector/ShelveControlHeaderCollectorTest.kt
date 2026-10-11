@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.header.SectionHeaderTone
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -27,7 +28,7 @@ class ShelveControlHeaderCollectorTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -48,7 +49,7 @@ class ShelveControlHeaderCollectorTest {
         fun `sets shelveControlHeader to the default Inline header when there is no failed mutation`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                stateFlow.value = BookDetailUiState(
+                stateFlow.value = buildBookDetailUiState().copy(
                     book = stubBook(id = 1),
                     failedMutationBookIds = emptySet(),
                 )
@@ -71,7 +72,7 @@ class ShelveControlHeaderCollectorTest {
         fun `sets shelveControlHeader to an Error-toned retry header when the book's last mutation failed`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                stateFlow.value = BookDetailUiState(
+                stateFlow.value = buildBookDetailUiState().copy(
                     book = stubBook(id = 1),
                     failedMutationBookIds = setOf(1),
                 )
@@ -97,7 +98,7 @@ class ShelveControlHeaderCollectorTest {
         fun `sets shelveControlHeader to the default Inline header when a different book's mutation failed`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                stateFlow.value = BookDetailUiState(
+                stateFlow.value = buildBookDetailUiState().copy(
                     book = stubBook(id = 1),
                     failedMutationBookIds = setOf(2),
                 )
@@ -120,7 +121,7 @@ class ShelveControlHeaderCollectorTest {
         fun `sets shelveControlHeader to the default Inline header when state book is null`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                stateFlow.value = BookDetailUiState(
+                stateFlow.value = buildBookDetailUiState().copy(
                     book = null,
                     failedMutationBookIds = setOf(1),
                 )

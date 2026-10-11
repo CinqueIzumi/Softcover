@@ -6,6 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -24,7 +25,7 @@ class OnClearMutationFailureActionTest {
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(
-            BookDetailUiState(
+            buildBookDetailUiState().copy(
                 failedMutationBookIds = setOf(1, 2),
                 failedMutationEditionIds = setOf(10, 20),
             ),

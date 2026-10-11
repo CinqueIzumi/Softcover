@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -26,7 +27,7 @@ class OnProgressMinutesSteppedActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -72,7 +73,7 @@ class OnProgressMinutesSteppedActionTest {
         @Test
         fun `steps minutes up by one from the seeded book position`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = bookAt(currentSeconds = 3725))
+            stateFlow.value = buildBookDetailUiState().copy(book = bookAt(currentSeconds = 3725))
             val action = OnProgressMinutesSteppedAction(delta = 1)
 
             // ----- Act -----
@@ -88,7 +89,7 @@ class OnProgressMinutesSteppedActionTest {
         @Test
         fun `does not step below zero`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = bookAt(currentSeconds = 3725),
                 progressTimeDraft = draftWithMinutes("0"),
             )
@@ -107,7 +108,7 @@ class OnProgressMinutesSteppedActionTest {
         @Test
         fun `does not step above 59`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = bookAt(currentSeconds = 3725),
                 progressTimeDraft = draftWithMinutes("59"),
             )
@@ -126,7 +127,7 @@ class OnProgressMinutesSteppedActionTest {
         @Test
         fun `treats a cleared minutes field as zero when stepping up`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = bookAt(currentSeconds = 3725),
                 progressTimeDraft = draftWithMinutes(""),
             )
@@ -145,7 +146,7 @@ class OnProgressMinutesSteppedActionTest {
         @Test
         fun `steps from a fresh seed when the stored draft is stale`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = bookAt(currentSeconds = 3725),
                 progressTimeDraft = draftWithMinutes("40").copy(forSeconds = 100),
             )

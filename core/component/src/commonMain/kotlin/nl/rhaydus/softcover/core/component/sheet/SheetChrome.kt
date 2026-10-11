@@ -10,7 +10,7 @@ import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 /**
  * What the scaffold's tappable regions need to know about busy and dismissing state. [close] latches
  * [dismissStarted] and hides the sheet once, so a second tap during the animated hide cannot emit a second
- * event.
+ * event. [dismissStarted] is also true once the sheet itself starts closing by scrim, back or swipe.
  */
 @Stable
 internal class SheetChrome(
@@ -24,7 +24,7 @@ internal class SheetChrome(
 
     /** Starts the animated hide unless the sheet is not dismissible. */
     fun dismiss() {
-        if (canDismiss) {
+        if (canDismiss && unlocked) {
             close()
         }
     }
@@ -36,11 +36,12 @@ internal fun rememberSheetChrome(
     dismissStarted: MutableState<Boolean>,
 ): SheetChrome {
     val hide by rememberUpdatedState(LocalModalSheetDismiss.current)
+    val sheetClosing = LocalSheetClosing.current
 
     return SheetChrome(
         busy = model.busy,
         canDismiss = model.dismissible && model.busy.not(),
-        dismissStarted = dismissStarted.value,
+        dismissStarted = dismissStarted.value || sheetClosing,
         close = {
             if (dismissStarted.value.not()) {
                 dismissStarted.value = true

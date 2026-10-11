@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -32,7 +33,7 @@ class UserTagsCollectorTest {
     @BeforeEach
     fun setUp() {
         getUserTagsUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),

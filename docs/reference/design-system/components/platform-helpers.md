@@ -12,16 +12,26 @@
 
 The single entry point for haptic feedback. Exposes eight semantic cases. Call sites read it with `LocalHaptics.current`, which `SoftcoverTheme` provides once; `rememberHaptics()` is called nowhere else. No ad-hoc haptics — never call `performHapticFeedback` from a call site; always go through the helper. The "no mixed icon families" rule (§2.6) has a sibling here.
 
-Outcome haptics (*commit*, *select* after a change, *reject*) fire from the action's success or failure `UiEvent`, never from the click handler. Remove fires none.
+Outcome haptics fire from the action's success or failure `UiEvent`, never from the click handler. A `UiEvent` that asks for one implements `FeedbackEvent` and carries a `Feedback` (`:core:component`, `haptics/`), and the screen plays it through the one helper, `LocalHaptics.current.play(feedback)`. A null `Feedback` plays nothing, so an action that chose silence needs no branch.
 
-- **commit** — a milestone succeeded: finishing a book, creating a list, signing in. Celebratory in texture; never a routine save.
-- **reject** — a mutation failed or rolled back, or an action was refused. Pair with the shake-on-error visual (§2.5).
-- **select** — a soft tick on a routine change that succeeded (a shelf move, a progress update, a list toggle, a session start or stop) or on a neutral selection (a segmented switch, a selection toggle). Distinct from *commit* (which celebrates) and *reject* (which rolls back).
+| `Feedback` | Plays | For |
+|---|---|---|
+| `Routine` | *select* | A routine change that succeeded: a shelf move, a progress update, a list toggle, a session start, a share or save. |
+| `Milestone` | *commit* | An accomplishment: marking a book as read, creating a list, stopping a session (the recap). |
+| `Failure` | *reject* | A mutation that failed or was refused, with no card or hero that already shakes for it. |
+
+Removals carry no `Feedback`. A failure the card or hero already shakes for carries no `Failure` either, because the shake fires *reject* itself (`Modifier.shakeOnError`). Update download completion is silent; its failure plays `Failure`. A `SessionOutcome` carries its own `Feedback` and the root screen plays it.
+
+Drag-to-reorder uses `rememberReorderHaptics()` (`haptics/`), which gives `lift()` on pickup, `moved(toIndex)` per reported target and `drop()` on settle. It remembers the last target and ticks only when it changes, so a list just reports the new index.
+
+- **commit** — played for `Feedback.Milestone`: finishing a book, creating a list, stopping a session. Celebratory in texture; never a routine save.
+- **reject** — played for `Feedback.Failure` and by the shake: a mutation failed or rolled back, or an action was refused. Pair with the shake-on-error visual (§2.5).
+- **select** — played for `Feedback.Routine`: a soft tick on a routine change that succeeded (a shelf move, a progress update, a list toggle, a session start, a share or save) or on a neutral selection (a segmented switch, a selection toggle). Distinct from *commit* (which celebrates) and *reject* (which rolls back).
 - **threshold** — a single firm tap when the user crosses a meaningful boundary: pull-to-refresh trigger point, drag-to-reorder pickup, long-press peek activation. No celebratory texture.
 - **tickle** — a per-integer tick during a slider or picker drag. Each integer crossing on the rating control or progress page-number input fires one tick.
 - **lift** — drag-to-reorder pickup. Says the item has left the page; pair with the visual lift.
 - **drop** — drag-to-reorder settle. Distinguishable from *lift* so the item's return to the page is felt.
-- **milestone** — a two-pulse haptic above *commit* for natural progress events: completing a year-end reading goal, hitting a 30-day streak, finishing the last book in a series. Reserved for moments that are bigger than a save.
+- **milestone** — the foundation's two-pulse haptic above *commit*, not played by `Feedback`, for natural progress events: completing a year-end reading goal, hitting a 30-day streak, finishing the last book in a series. Reserved for moments that are bigger than a save.
 
 ### Lazy-item mutation animator
 
@@ -33,7 +43,7 @@ The canonical welcome-moment animator for carousels and lazy lists. `rememberSta
 
 ### Nav shared bounds
 
-`Modifier.navSharedBounds(key, resizeMode)` (`:core:component`) is the one way to put a navigation shared element on a node. It applies `sharedBounds` on the motion scheme's spatial spec when `key` is non-null, decorative motion plays, and `RootScreen` provides both shared scopes; otherwise it is a no-op. Text passes `ScaleToBounds` so a smaller style scales into a larger one without reflow. Keys come from the model (§7 R7), never from the component.
+`Modifier.navSharedBounds(key, resizeMode)` (`:core:component`; `key` is a nullable `BookTransitionKey`) is the one way to put a navigation shared element on a node. It applies `sharedBounds` on the motion scheme's spatial spec when `key` is non-null, decorative motion plays, and `RootScreen` provides both shared scopes; otherwise it is a no-op. Text passes `ScaleToBounds` so a smaller style scales into a larger one without reflow. Keys come from the model (§7 R7), never from the component.
 
 ### Barcode scanner
 

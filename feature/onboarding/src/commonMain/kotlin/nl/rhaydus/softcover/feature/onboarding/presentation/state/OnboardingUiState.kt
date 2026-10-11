@@ -6,8 +6,7 @@ import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
 import nl.rhaydus.toad.UiState
 
@@ -21,21 +20,13 @@ internal data class OnboardingUiState(
     ),
     val saveApiKeyButtonEnabled: Boolean = false,
     val submissionError: String? = null,
-    val signInPending: Boolean = false,
-    val loadingSheet: LoadingSheetUiModel = LoadingSheetUiModel(
-        scaffold = SheetScaffoldUiModel(
-            header = SheetHeaderUiModel(
-                section = SectionHeaderUiModel.Section(
-                    eyebrow = "Setting up",
-                    headline = "Pulling your library together.",
-                    description = "Depending on its size, this might take a moment.",
-                ),
-            ),
-            dismissible = false,
-        ),
-        progress = null,
-        isLoading = false,
-    ),
+    val loadingSheet: SheetSession<LoadingSheetUiModel, SignInCompleted> = SheetSession.Closed,
+
+    /**
+     * True once a sign-in attempt has failed; the next loading sheet then opens at a determinate 0%.
+     * Deliberately never reset, so every retry opens determinate.
+     */
+    val signInFailedBefore: Boolean = false,
 
     /** The persistent top bar's header for each pager page. */
     val pageHeaders: ImmutableMap<IntroScreen, SectionHeaderUiModel.Section> = persistentMapOf(

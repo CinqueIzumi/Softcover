@@ -14,7 +14,7 @@ internal class OnShelvesSheetCloseRequestedAction : LibraryAction {
         scope.setState {
             it.copy(
                 isShelvesSheetPickPending = false,
-                isShelvesSheetCloseRequested = true,
+                isShelvesSheetRequested = false,
             )
         }
     }

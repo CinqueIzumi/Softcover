@@ -1,27 +1,17 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
-import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,48 +22,23 @@ import androidx.compose.ui.layout.layout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.combine
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.component.callout.Banner
+import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
 import nl.rhaydus.softcover.core.presentation.navigation.CreateListPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
-import nl.rhaydus.softcover.core.presentation.session.SessionOutcome
 import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListSheet
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 import nl.rhaydus.softcover.orchestration.presentation.screenmodel.RootScreenModel
 import org.koin.compose.koinInject
 
-private const val PUSH_SCALE_FROM = 0.92f
-
-private fun rootFadeThrough(
-    isPop: Boolean,
-    effectsSpec: FiniteAnimationSpec<Float>,
-    spatialSpec: FiniteAnimationSpec<Float>,
-): ContentTransform = if (isPop) {
-    val shrinkOut = scaleOut(
-        animationSpec = spatialSpec,
-        targetScale = PUSH_SCALE_FROM,
-    )
-    val exit = fadeOut(animationSpec = effectsSpec) + shrinkOut
-
-    (fadeIn(animationSpec = effectsSpec) togetherWith exit).apply { targetContentZIndex = -1f }
-} else {
-    val growIn = scaleIn(
-        animationSpec = spatialSpec,
-        initialScale = PUSH_SCALE_FROM,
-    )
-    val enter = fadeIn(animationSpec = effectsSpec) + growIn
-
-    enter togetherWith fadeOut(animationSpec = effectsSpec)
-}
-
 internal object RootScreen : Screen {
-    @OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3ExpressiveApi::class)
+    @OptIn(ExperimentalSharedTransitionApi::class)
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<RootScreenModel>()
@@ -85,13 +50,7 @@ internal object RootScreen : Screen {
         val haptics = LocalHaptics.current
 
         ObserveAsEvents(flow = activeSessionController.outcomes) { outcome ->
-            when (outcome) {
-                SessionOutcome.Started,
-                SessionOutcome.Stopped -> haptics.select()
-
-                SessionOutcome.StartFailed,
-                SessionOutcome.StopFailed -> haptics.reject()
-            }
+            haptics.play(outcome.feedback)
         }
 
         // Hosted here, above the root Navigator, rather than inside BottomBarScreen: a pushed
@@ -160,52 +119,36 @@ internal object RootScreen : Screen {
                         }
 
                         Box(modifier = Modifier.consumeWindowInsets(bannerCoveredInsets)) {
-                            Navigator(
-                                screen = BottomBarScreen,
-                                onBackPressed = null,
-                            ) { navigator ->
-                                LaunchedEffect(navigator) {
-                                    // Push Focus Mode only once a session is actually present. On a
-                                    // cold start the deep-link flag is set before the session flow has
-                                    // loaded, so we wait for both rather than consuming the request
-                                    // against a not-yet-loaded (null) session.
-                                    combine(
-                                        activeSessionController.pendingFocusMode,
-                                        activeSessionController.activeSession,
-                                    ) { pending, active -> pending && active != null }
-                                        .collect { ready ->
-                                            if (ready.not()) return@collect
+                            SharedTransitionLayout {
+                                val sharedTransitionScope = this
 
-                                            if (navigator.lastItem !is FocusModeScreen) {
-                                                navigator.push(item = FocusModeScreen)
+                                RootStackTransition(
+                                    screen = BottomBarScreen,
+                                    navigatorEffect = { navigator ->
+                                        // Push Focus Mode only once a session is actually present. On a
+                                        // cold start the deep-link flag is set before the session flow has
+                                        // loaded, so we wait for both rather than consuming the request
+                                        // against a not-yet-loaded (null) session.
+                                        combine(
+                                            activeSessionController.pendingFocusMode,
+                                            activeSessionController.activeSession,
+                                        ) { pending, active -> pending && active != null }
+                                            .collect { ready ->
+                                                if (ready.not()) return@collect
+
+                                                if (navigator.lastItem !is FocusModeScreen) {
+                                                    navigator.push(item = FocusModeScreen)
+                                                }
+
+                                                activeSessionController.consumeFocusModeRequest()
                                             }
-
-                                            activeSessionController.consumeFocusModeRequest()
-                                        }
-                                }
-
-                                val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
-                                val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
-
-                                SharedTransitionLayout {
-                                    val sharedTransitionScope = this
-
-                                    RootStackTransition(
-                                        navigator = navigator,
-                                        transitionSpec = { isPop ->
-                                            rootFadeThrough(
-                                                isPop = isPop,
-                                                effectsSpec = effectsSpec,
-                                                spatialSpec = spatialSpec,
-                                            )
-                                        },
-                                    ) { screen ->
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionScope provides sharedTransitionScope,
-                                            LocalNavAnimatedVisibilityScope provides this,
-                                        ) {
-                                            screen.Content()
-                                        }
+                                    },
+                                ) { screen ->
+                                    CompositionLocalProvider(
+                                        LocalSharedTransitionScope provides sharedTransitionScope,
+                                        LocalNavAnimatedVisibilityScope provides this,
+                                    ) {
+                                        screen.Content()
                                     }
                                 }
                             }

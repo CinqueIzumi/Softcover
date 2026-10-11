@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLens
@@ -28,7 +29,7 @@ class LensToggleCollectorTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -48,7 +49,7 @@ class LensToggleCollectorTest {
         @Test
         fun `disables Yours when there is no book yet`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null)
+            stateFlow.value = buildBookDetailUiState().copy(book = null)
             val collector = LensToggleCollector()
 
             // ----- Act -----
@@ -70,7 +71,7 @@ class LensToggleCollectorTest {
         @Test
         fun `disables Yours when the book has no user copy`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = stubBook(userBook = null))
+            stateFlow.value = buildBookDetailUiState().copy(book = stubBook(userBook = null))
             val collector = LensToggleCollector()
 
             // ----- Act -----
@@ -92,7 +93,7 @@ class LensToggleCollectorTest {
         @Test
         fun `enables Yours when the book has a user copy`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = stubBook(userBook = mockk()))
+            stateFlow.value = buildBookDetailUiState().copy(book = stubBook(userBook = mockk()))
             val collector = LensToggleCollector()
 
             // ----- Act -----
@@ -114,7 +115,7 @@ class LensToggleCollectorTest {
         @Test
         fun `reflects the selected lens already in state`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(userBook = mockk()),
                 selectedLens = BookDetailLens.YOURS,
             )

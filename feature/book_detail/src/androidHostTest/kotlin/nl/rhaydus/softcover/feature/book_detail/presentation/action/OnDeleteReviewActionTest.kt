@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -30,7 +31,7 @@ class OnDeleteReviewActionTest {
     @BeforeEach
     fun setUp() {
         updateBookReviewUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState(verdictSheetContext = VerdictSheetContext.EDIT))
+        stateFlow = MutableStateFlow(buildBookDetailUiState().copy(verdictSheetContext = VerdictSheetContext.EDIT))
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -107,7 +108,7 @@ class OnDeleteReviewActionTest {
         fun `adds book id to failedMutationBookIds without losing prior entries when use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
-            stateFlow.value = BookDetailUiState(failedMutationBookIds = setOf(1, 2))
+            stateFlow.value = buildBookDetailUiState().copy(failedMutationBookIds = setOf(1, 2))
 
             coEvery {
                 updateBookReviewUseCase(

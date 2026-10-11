@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -29,7 +30,7 @@ class OnClearDeadlineActionTest {
     @BeforeEach
     fun setUp() {
         clearBookDeadlineUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -70,7 +71,7 @@ class OnClearDeadlineActionTest {
         fun `calls clearBookDeadlineUseCase with the book id from state`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 99)
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -94,7 +95,7 @@ class OnClearDeadlineActionTest {
         @Test
         fun `does nothing when state has no book`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null)
+            stateFlow.value = buildBookDetailUiState().copy(book = null)
             dependencies = stubDependencies(this)
             val action = OnClearDeadlineAction()
 

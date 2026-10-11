@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.state.EmptyStateButtonUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateVariant
@@ -48,12 +49,11 @@ internal data class ReadingScreenUiState(
 
     /** The reader's uncommitted time entry; `null` seeds the sheet's fields from the book. */
     val progressTimeDraft: ProgressTimeDraft? = null,
-    val showProgressSheet: Boolean = false,
 
     /** The reader's backdate for the next logged action; `null` is "just now". */
     val readAt: LocalDateTime? = null,
 
-    val progressSheet: ProgressSheetUiModel? = null,
+    val progressSheet: SheetSession<ProgressSheetUiModel, Nothing> = SheetSession.Closed,
 
     val deadlines: Map<Int, BookDeadline> = emptyMap(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,

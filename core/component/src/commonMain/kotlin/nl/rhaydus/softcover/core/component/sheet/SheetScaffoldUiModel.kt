@@ -10,19 +10,22 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 
 /**
- * The chrome around a sheet's feature body. [closeRequested] hides the sheet even when [dismissible] is
- * false; while [busy] both footer buttons and the dismiss label are disabled and tapping outside or
- * pressing back does not dismiss.
+ * The chrome around a sheet's feature body. A null [header] renders none, for a body that carries its own
+ * title page. [closeRequested] hides the sheet even when [dismissible] is false; while [busy] both footer
+ * buttons and the dismiss label are disabled, and tapping outside, pressing back or swiping down does not
+ * dismiss.
  */
 @Immutable
 data class SheetScaffoldUiModel(
-    val header: SheetHeaderUiModel,
+    val header: SheetHeaderUiModel?,
     val dismissLabel: String? = null,
     val footer: SheetFooterUiModel? = null,
     val layout: SheetLayout = SheetLayout.Scrolling,
     val dismissible: Boolean = true,
-    val closeRequested: Boolean = false,
-) {
+    override val closeRequested: Boolean = false,
+) : SheetModel<SheetScaffoldUiModel> {
+    override fun requestingClose(): SheetScaffoldUiModel = copy(closeRequested = true)
+
     val busy: Boolean get() = footer?.primary?.running == true || footer?.secondary?.running == true
 
     companion object : UiModelPreviews<SheetScaffoldUiModel> {
@@ -35,6 +38,15 @@ data class SheetScaffoldUiModel(
                     ),
                 ),
                 footer = SheetFooterUiModel.previews.getValue("Stacked"),
+            ),
+            "Scrolling, outlined footer button" to SheetScaffoldUiModel(
+                header = SheetHeaderUiModel(
+                    section = SectionHeaderUiModel.Section(
+                        eyebrow = "Reading progress",
+                        headline = "Piranesi",
+                    ),
+                ),
+                footer = SheetFooterUiModel.previews.getValue("Stacked, outlined secondary with icon"),
             ),
             "Scrolling, dismiss label and jacket" to SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(

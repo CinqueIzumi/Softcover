@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.core.component.control
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,17 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.hoverHighlight
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
+import nl.rhaydus.softcover.core.component.modifier.tactileSelectable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -75,8 +69,6 @@ private fun <K> TrackSegments(
     onEvent: (SegmentedControlEvent<K>) -> Unit,
     modifier: Modifier,
 ) {
-    val haptics = LocalHaptics.current
-
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainer,
@@ -88,7 +80,6 @@ private fun <K> TrackSegments(
                     option = option,
                     isSelected = option.key == model.selected,
                     onSelect = {
-                        haptics.select()
                         onEvent(SegmentedControlEvent.Selected(key = option.key))
                     },
                 )
@@ -132,15 +123,17 @@ private fun <K> RowScope.TrackSegment(
         modifier = Modifier
             .weight(1f)
             .alpha(disabledAlpha)
-            .semantics {
-                role = Role.Tab
-                selected = isSelected
-            },
+            .minimumInteractiveComponentSize()
+            .tactileSelectable(
+                selected = isSelected,
+                onClick = { if (isSelected.not()) onSelect() },
+                role = Role.RadioButton,
+                enabled = option.enabled,
+                hoverShape = Corners.pill,
+            ),
         color = containerColor,
         contentColor = contentColor,
         shape = Corners.pill,
-        onClick = { if (isSelected.not()) onSelect() },
-        enabled = option.enabled,
     ) {
         Box(
             modifier = Modifier.padding(vertical = Spacing.xs),
@@ -163,8 +156,6 @@ private fun <K> ProseSegments(
     onEvent: (SegmentedControlEvent<K>) -> Unit,
     modifier: Modifier,
 ) {
-    val haptics = LocalHaptics.current
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.selectableGroup(),
@@ -189,7 +180,6 @@ private fun <K> ProseSegments(
                 isSelected = option.key == model.selected,
                 enabled = option.enabled,
                 onSelect = {
-                    haptics.select()
                     onEvent(SegmentedControlEvent.Selected(key = option.key))
                 },
             )
@@ -239,18 +229,14 @@ private fun ProseWord(
         modifier = Modifier
             .minimumInteractiveComponentSize()
             .alpha(disabledAlpha)
-            .pointerHandCursor()
-            .pressScale(interactionSource)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = enabled,
+            .tactileSelectable(
+                selected = isSelected,
                 onClick = { if (isSelected.not()) onSelect() },
-            )
-            .semantics {
-                role = Role.RadioButton
-                selected = isSelected
-            },
+                role = Role.RadioButton,
+                enabled = enabled,
+                hoverShape = null,
+                interactionSource = interactionSource,
+            ),
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -32,16 +30,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.conditional
-import nl.rhaydus.designsystem.modifier.hoverHighlight
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.control.glyphSwapTransition
 import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -134,21 +133,13 @@ private fun ChooseListsRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .conditional(
-                    condition = row.isPending.not(),
-                    ifTrue = {
-                        Modifier
-                            .pointerHandCursor()
-                            .pressScale(interactionSource)
-                            .hoverHighlight(interactionSource = interactionSource)
-                            .triStateToggleable(
-                                state = row.membership.toToggleableState(),
-                                interactionSource = interactionSource,
-                                indication = null,
-                                onClick = onClick,
-                            )
-                    },
+                .tactileClickable(
+                    onClick = onClick,
+                    role = Role.Checkbox,
+                    enabled = row.isPending.not(),
+                    interactionSource = interactionSource,
                 )
+                .semantics { toggleableState = row.membership.toToggleableState() }
                 .padding(vertical = Spacing.md),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -225,17 +216,10 @@ private fun BookmarkGlyph(membership: ListMembership) {
     AnimatedContent(
         targetState = membership,
         transitionSpec = {
-            if (targetState == ListMembership.ALL) {
-                val pop = scaleIn(
-                    initialScale = 0.6f,
-                    animationSpec = motionScheme.defaultSpatialSpec(),
-                ) + fadeIn(animationSpec = motionScheme.fastEffectsSpec())
-
-                pop togetherWith fadeOut(animationSpec = motionScheme.fastEffectsSpec())
-            } else {
-                fadeIn(animationSpec = motionScheme.fastEffectsSpec()) togetherWith
-                    fadeOut(animationSpec = motionScheme.fastEffectsSpec())
-            }
+            glyphSwapTransition(
+                popsIn = targetState == ListMembership.ALL,
+                motionScheme = motionScheme,
+            )
         },
         label = "BookmarkGlyph",
     ) { target ->

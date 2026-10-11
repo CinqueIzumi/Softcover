@@ -2,21 +2,14 @@ package nl.rhaydus.softcover.core.component.control
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -25,10 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
-import nl.rhaydus.designsystem.modifier.hoverHighlight
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
+import nl.rhaydus.softcover.core.component.modifier.tactileToggleable
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 
@@ -66,7 +57,6 @@ fun Toggle(
         animationSpec = colorSpec,
         label = "IconToggleTint",
     )
-    val interactionSource = remember { MutableInteractionSource() }
     val motionScheme = MaterialTheme.motionScheme
 
     DesktopTooltip(text = model.description) {
@@ -75,40 +65,26 @@ fun Toggle(
                 .minimumInteractiveComponentSize()
                 .alpha(if (model.enabled) 1f else DISABLED_ALPHA)
                 .size(size)
-                .pressScale(interactionSource)
-                .clip(shape)
-                .background(container)
-                .hoverHighlight(
-                    interactionSource = interactionSource,
-                    shape = shape,
-                )
-                .pointerHandCursor()
-                .toggleable(
+                .tactileToggleable(
                     value = model.checked,
-                    interactionSource = interactionSource,
-                    indication = null,
-                    enabled = model.enabled,
-                    role = Role.Switch,
                     onValueChange = { checked ->
                         onEvent(ToggleEvent.Toggled(checked = checked))
                     },
-                ),
+                    role = Role.Switch,
+                    enabled = model.enabled,
+                    hoverShape = shape,
+                )
+                .clip(shape)
+                .background(container),
             contentAlignment = Alignment.Center,
         ) {
             AnimatedContent(
                 targetState = model.checked,
                 transitionSpec = {
-                    if (targetState) {
-                        val pop = scaleIn(
-                            initialScale = 0.6f,
-                            animationSpec = motionScheme.defaultSpatialSpec(),
-                        ) + fadeIn(animationSpec = motionScheme.fastEffectsSpec())
-
-                        pop togetherWith fadeOut(animationSpec = motionScheme.fastEffectsSpec())
-                    } else {
-                        fadeIn(animationSpec = motionScheme.fastEffectsSpec()) togetherWith
-                            fadeOut(animationSpec = motionScheme.fastEffectsSpec())
-                    }
+                    glyphSwapTransition(
+                        popsIn = targetState,
+                        motionScheme = motionScheme,
+                    )
                 },
                 label = "ToggleGlyph",
             ) { checked ->

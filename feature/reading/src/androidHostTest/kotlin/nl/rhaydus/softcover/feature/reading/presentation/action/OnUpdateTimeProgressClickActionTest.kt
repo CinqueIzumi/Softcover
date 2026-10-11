@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -17,6 +18,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
@@ -31,6 +34,10 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnUpdateTimeProgressClickActionTest {
+    private val openProgressSheet: SheetSession<ProgressSheetUiModel, Nothing> = SheetSession.Open(
+        model = ProgressSheetUiModel.previews.values.first(),
+    )
+
     private lateinit var updateBookProgress: RecordBookProgressUseCase
     private val eventChannel = Channel<ReadingScreenEvent>(Channel.BUFFERED)
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
@@ -107,7 +114,7 @@ class OnUpdateTimeProgressClickActionTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = stubBookWithAudioSeconds(audioSeconds = 7200),
-                showProgressSheet = true,
+                progressSheet = openProgressSheet,
                 progressTimeDraft = ProgressTimeDraft(
                     forSeconds = 3725,
                     hours = "1",
@@ -131,7 +138,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.progressTimeDraft.shouldNotBeNull()
-            stateFlow.value.showProgressSheet shouldBe true
+            stateFlow.value.progressSheet shouldBe openProgressSheet
             stateFlow.value.bookToUpdate.shouldNotBeNull()
         }
 
@@ -140,7 +147,7 @@ class OnUpdateTimeProgressClickActionTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
                 bookToUpdate = null,
-                showProgressSheet = true,
+                progressSheet = openProgressSheet,
             )
             val dependencies = stubDependencies(this)
             val action = OnUpdateTimeProgressClickAction(
@@ -163,7 +170,7 @@ class OnUpdateTimeProgressClickActionTest {
                     any(),
                 )
             }
-            stateFlow.value.showProgressSheet shouldBe true
+            stateFlow.value.progressSheet shouldBe openProgressSheet
         }
 
         @Test
@@ -450,7 +457,8 @@ class OnUpdateTimeProgressClickActionTest {
             )
 
             // ----- Assert -----
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ReadingScreenEvent.ProgressUpdatedEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<ReadingScreenEvent.ProgressUpdatedEvent>()
         }
 
         @Test
@@ -487,7 +495,7 @@ class OnUpdateTimeProgressClickActionTest {
         }
 
         @Test
-        fun `sends ProgressUpdateFailedEvent when updateBookProgress fails`() = runTest {
+        fun `sends no event when updateBookProgress fails`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithAudioSeconds(
                 audioSeconds = 7200,
@@ -516,7 +524,7 @@ class OnUpdateTimeProgressClickActionTest {
             )
 
             // ----- Assert -----
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ReadingScreenEvent.ProgressUpdateFailedEvent>()
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
 
         @Test

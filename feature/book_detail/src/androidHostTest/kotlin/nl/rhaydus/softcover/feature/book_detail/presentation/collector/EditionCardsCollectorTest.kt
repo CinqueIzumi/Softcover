@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.editionSheetWithQuery
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
@@ -31,7 +32,7 @@ class EditionCardsCollectorTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -50,7 +51,7 @@ class EditionCardsCollectorTest {
         @Test
         fun `maps one card per edition in filteredEditions order and counts them in the header`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 editions = listOf(
                     buildEdition(id = 3),
                     buildEdition(id = 1),
@@ -80,7 +81,7 @@ class EditionCardsCollectorTest {
         @Test
         fun `only maps the editions matching the search query`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 editions = listOf(
                     buildEdition(id = 1).copy(publisher = "Tor"),
                     buildEdition(id = 2).copy(publisher = "Penguin"),
@@ -105,7 +106,7 @@ class EditionCardsCollectorTest {
         @Test
         fun `updates the selection mark when selectedEditionId changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 editions = listOf(
                     buildEdition(id = 1),
                     buildEdition(id = 2),
@@ -134,7 +135,7 @@ class EditionCardsCollectorTest {
         fun `trails a tracking badge on the displayed edition`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val displayed = buildEdition(id = 2)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 editions = listOf(
                     buildEdition(id = 1),
                     displayed,
@@ -163,7 +164,7 @@ class EditionCardsCollectorTest {
         @Test
         fun `header counts zero cards when there are no editions`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 editions = emptyList(),
             )
             val collector = EditionCardsCollector()
@@ -185,7 +186,7 @@ class EditionCardsCollectorTest {
         @Test
         fun `header counts only the search-filtered subset`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 editions = listOf(
                     buildEdition(id = 1).copy(publisher = "Tor"),
                     buildEdition(id = 2).copy(publisher = "Penguin"),

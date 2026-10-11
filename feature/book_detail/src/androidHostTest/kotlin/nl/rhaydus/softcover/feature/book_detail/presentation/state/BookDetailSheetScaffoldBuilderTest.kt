@@ -31,7 +31,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.header.section.description.shouldNotBeNull().filterIsInstance<HeaderTextSegment.Emphasised>()
+            result.header.shouldNotBeNull().section.description.shouldNotBeNull().filterIsInstance<HeaderTextSegment.Emphasised>()
                 .single().text shouldBe "Dune"
         }
 
@@ -47,7 +47,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.header.trailing shouldBe SheetHeaderTrailing.Jacket(cover = cover)
+            result.header.shouldNotBeNull().trailing shouldBe SheetHeaderTrailing.Jacket(cover = cover)
         }
 
         @Test
@@ -62,7 +62,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.header.trailing.shouldBeNull()
+            result.header.shouldNotBeNull().trailing.shouldBeNull()
         }
     }
 
@@ -152,9 +152,9 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.header.section.descriptionText() shouldContain "Dune"
-            result.header.section.descriptionText() shouldContain "Frank Herbert"
-            result.header.section.descriptionText() shouldContain "Brian Herbert"
+            result.header.shouldNotBeNull().section.descriptionText() shouldContain "Dune"
+            result.header.shouldNotBeNull().section.descriptionText() shouldContain "Frank Herbert"
+            result.header.shouldNotBeNull().section.descriptionText() shouldContain "Brian Herbert"
         }
 
         @Test
@@ -173,7 +173,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.header.section.descriptionText() shouldBe "Dune"
+            result.header.shouldNotBeNull().section.descriptionText() shouldBe "Dune"
         }
 
         @Test
@@ -200,7 +200,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.header.section.descriptionText() shouldBe "Dune"
+            result.header.shouldNotBeNull().section.descriptionText() shouldBe "Dune"
         }
 
         @Test
@@ -218,7 +218,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.header.trailing shouldBe SheetHeaderTrailing.Jacket(cover = cover)
+            result.header.shouldNotBeNull().trailing shouldBe SheetHeaderTrailing.Jacket(cover = cover)
         }
 
         @Test
@@ -237,7 +237,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.header.trailing.shouldBeNull()
+            result.header.shouldNotBeNull().trailing.shouldBeNull()
         }
     }
 
@@ -273,9 +273,11 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            book.sheet.scaffold.header.section.descriptionText().shouldNotBeNull() shouldContain "Dune"
-            update.sheet.scaffold.header.section.descriptionText().shouldNotBeNull() shouldContain "Dune"
-            book.sheet.scaffold.header.section.descriptionText() shouldNotBe update.sheet.scaffold.header.section.descriptionText()
+            book.sheet.scaffold.header.shouldNotBeNull().section.descriptionText().shouldNotBeNull() shouldContain "Dune"
+            update.sheet.scaffold.header.shouldNotBeNull().section.descriptionText().shouldNotBeNull() shouldContain "Dune"
+            val bookDescription = book.sheet.scaffold.header.shouldNotBeNull().section.descriptionText()
+            val updateDescription = update.sheet.scaffold.header.shouldNotBeNull().section.descriptionText()
+            bookDescription shouldNotBe updateDescription
         }
 
         @Test

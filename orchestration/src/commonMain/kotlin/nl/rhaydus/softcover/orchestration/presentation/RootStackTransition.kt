@@ -1,18 +1,22 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.SeekableTransitionState
 import androidx.compose.animation.core.rememberTransition
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.navigationevent.NavigationEventInfo
@@ -26,146 +30,186 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
+
+private const val PUSH_SCALE_FROM = 0.92f
 
 /**
- * Renders [navigator]'s top screen like Voyager's `ScreenTransition`, but owns the back gesture:
- * Voyager's own handler pops on release and cannot report progress, so the caller turns it off
- * (`onBackPressed = null`) and this drives a [SeekableTransitionState] from the gesture instead.
- * Where [backGestureSeeksTransition] is false the gesture just pops and the plain transition plays.
+ * Hosts a [Navigator] rooted at [screen] and renders its top screen like Voyager's `ScreenTransition`,
+ * but owns the back gesture: Voyager's own handler pops on release and cannot report progress, so the
+ * navigator is created without it (`onBackPressed = null`) and a [SeekableTransitionState] is driven
+ * from the gesture instead. Where [backGestureSeeksTransition] is false, or the transition has no
+ * duration (reduced motion, read from `playDecorativeMotion()`), the gesture just pops and the plain
+ * transition plays.
+ *
+ * A back press that lands while the commit animation is still running is swallowed: the pop it
+ * would trigger is already under way.
+ *
+ * [navigatorEffect] runs for as long as the navigator lives.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun RootStackTransition(
-    navigator: Navigator,
-    transitionSpec: AnimatedContentTransitionScope<Screen>.(isPop: Boolean) -> ContentTransform,
+    screen: Screen,
+    navigatorEffect: suspend (Navigator) -> Unit,
     content: @Composable AnimatedVisibilityScope.(Screen) -> Unit,
 ) {
-    val seekState = remember { SeekableTransitionState(navigator.lastItem) }
-
-    var session by remember { mutableStateOf<BackGestureSession?>(null) }
-
-    var committing by remember { mutableStateOf(false) }
-
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(navigator.lastItem) {
-        session?.let { live ->
-            if (live.from != navigator.lastItem) session = live.copy(abandoned = true)
+    Navigator(
+        screen = screen,
+        onBackPressed = null,
+    ) { navigator ->
+        LaunchedEffect(navigator) {
+            navigatorEffect(navigator)
         }
 
-        seekState.animateTo(navigator.lastItem)
-    }
+        val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+        val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
 
-    DisposableEffect(Unit) {
-        onDispose { session = null }
-    }
+        val seekState = remember { SeekableTransitionState(navigator.lastItem) }
 
-    val backState = rememberNavigationEventState(NavigationEventInfo.None)
+        val playMotion by rememberUpdatedState(playDecorativeMotion())
 
-    if (backGestureSeeksTransition) {
-        LaunchedEffect(backState) {
-            var idleSeen = false
+        var session by remember { mutableStateOf<BackGestureSession?>(null) }
 
-            snapshotFlow { backState.transitionState }.collectLatest { transitionState ->
-                if (transitionState !is NavigationEventTransitionState.InProgress) {
-                    idleSeen = true
+        val scope = rememberCoroutineScope()
 
-                    return@collectLatest
-                }
+        LaunchedEffect(navigator.lastItem) {
+            session = session?.following(navigator.lastItem)
 
-                if (committing) return@collectLatest
-
-                if (idleSeen) {
-                    idleSeen = false
-
-                    session = null
-                }
-
-                val live = session ?: run {
-                    if (navigator.canPop.not()) return@collectLatest
-
-                    BackGestureSession(
-                        from = navigator.lastItem,
-                        target = navigator.items[navigator.items.size - 2],
-                    ).also { session = it }
-                }
-
-                if (live.abandoned) return@collectLatest
-
-                if (live.from != navigator.lastItem) {
-                    session = live.copy(abandoned = true)
-
-                    return@collectLatest
-                }
-
-                seekState.seekTo(
-                    fraction = transitionState.latestEvent.progress,
-                    targetState = live.target,
-                )
-            }
+            seekState.animateTo(navigator.lastItem)
         }
-    }
 
-    NavigationBackHandler(
-        state = backState,
-        isBackEnabled = navigator.canPop,
-        onBackCancelled = {
-            val live = session
+        val backState = rememberNavigationEventState(NavigationEventInfo.None)
 
-            if (committing || live == null) return@NavigationBackHandler
+        if (backGestureSeeksTransition) {
+            LaunchedEffect(backState) {
+                snapshotFlow { backState.transitionState }.collectLatest { transitionState ->
+                    if (transitionState !is NavigationEventTransitionState.InProgress) {
+                        session = session?.released()
 
-            if (live.abandoned) {
-                session = null
+                        return@collectLatest
+                    }
 
-                return@NavigationBackHandler
-            }
+                    val current = session
 
-            scope.launch {
-                try {
-                    seekState.animateTo(live.from)
-                } finally {
-                    if (session === live && committing.not()) session = null
-                }
-            }
-        },
-        onBackCompleted = {
-            val live = session
+                    if (current is BackGestureSession.Committing) return@collectLatest
 
-            when {
-                committing -> Unit
-
-                live == null -> if (navigator.canPop) navigator.pop()
-
-                live.abandoned -> session = null
-
-                else -> {
-                    committing = true
-
-                    scope.launch {
-                        try {
-                            seekState.animateTo(live.target)
-                        } finally {
-                            withContext(NonCancellable) {
-                                if (navigator.lastItem == live.from && navigator.canPop) navigator.pop()
-                            }
-
-                            session = null
-
-                            committing = false
+                    val live = current?.takeUnless { it.isReleased } ?: run {
+                        if (navigator.canPop.not() || playMotion.not()) {
+                            return@collectLatest
                         }
+
+                        BackGestureSession.Seeking(
+                            from = navigator.lastItem,
+                            target = navigator.items[navigator.items.size - 2],
+                        )
+                    }
+
+                    val next = live.following(navigator.lastItem)
+
+                    session = next
+
+                    if (next is BackGestureSession.Seeking) {
+                        seekState.seekTo(
+                            fraction = transitionState.latestEvent.progress,
+                            targetState = next.target,
+                        )
                     }
                 }
             }
-        },
-    )
+        }
 
-    rememberTransition(seekState).AnimatedContent(
-        transitionSpec = {
-            transitionSpec(session?.abandoned == false || navigator.lastEvent == StackEvent.Pop)
-        },
-        contentKey = { it.key },
-    ) { screen ->
-        navigator.saveableState("transition", screen) {
-            content(screen)
+        NavigationBackHandler(
+            state = backState,
+            isBackEnabled = navigator.canPop,
+            onBackCancelled = {
+                when (val live = session) {
+                    is BackGestureSession.Seeking -> scope.launch {
+                        try {
+                            seekState.animateTo(live.from)
+                        } finally {
+                            if (session?.isReleased == true) session = null
+                        }
+                    }
+
+                    is BackGestureSession.Abandoned -> session = null
+
+                    is BackGestureSession.Committing,
+                    null -> Unit
+                }
+            },
+            onBackCompleted = {
+                when (val live = session) {
+                    is BackGestureSession.Seeking -> {
+                        val committing = live.commit()
+
+                        session = committing
+
+                        scope.launch {
+                            try {
+                                seekState.animateTo(committing.target)
+                            } finally {
+                                withContext(NonCancellable) {
+                                    if (navigator.lastItem == committing.from && navigator.canPop) {
+                                        navigator.pop()
+                                    }
+                                }
+
+                                session = null
+                            }
+                        }
+                    }
+
+                    is BackGestureSession.Abandoned -> session = null
+
+                    is BackGestureSession.Committing -> Unit
+
+                    null -> if (navigator.canPop) navigator.pop()
+                }
+            },
+        )
+
+        rememberTransition(seekState).AnimatedContent(
+            transitionSpec = {
+                val liveGesture = session.let { it != null && it !is BackGestureSession.Abandoned }
+
+                rootFadeThrough(
+                    isPop = liveGesture || navigator.lastEvent == StackEvent.Pop,
+                    effectsSpec = effectsSpec,
+                    spatialSpec = spatialSpec,
+                )
+            },
+            contentKey = { it.key },
+        ) { current ->
+            navigator.saveableState("transition", current) {
+                content(current)
+            }
         }
     }
+}
+
+private fun rootFadeThrough(
+    isPop: Boolean,
+    effectsSpec: FiniteAnimationSpec<Float>,
+    spatialSpec: FiniteAnimationSpec<Float>,
+): ContentTransform = if (isPop) {
+    val shrinkOut = scaleOut(
+        animationSpec = spatialSpec,
+        targetScale = PUSH_SCALE_FROM,
+    )
+
+    navFadeThrough(
+        effectsSpec = effectsSpec,
+        exitMotion = shrinkOut,
+    ).apply { targetContentZIndex = -1f }
+} else {
+    val growIn = scaleIn(
+        animationSpec = spatialSpec,
+        initialScale = PUSH_SCALE_FROM,
+    )
+
+    navFadeThrough(
+        effectsSpec = effectsSpec,
+        enterMotion = growIn,
+    )
 }

@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.scan.presentation.state
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.toad.UiState
 
@@ -25,12 +26,9 @@ internal data class ScanUiState(
         submittable = true,
     ),
 
-    /** Asks the shown unknown-ISBN sheet to hide; cleared by its `Dismissed` event. */
-    val isUnknownIsbnCloseRequested: Boolean = false,
-    val unknownIsbnSheet: UnknownIsbnSheetUiModel? = null,
+    val unknownIsbn: String? = null,
 
-    /** The book added through the unknown-ISBN sheet; opened once the sheet has finished hiding. */
-    val resolvedUnknownIsbn: ResolvedScan? = null,
+    val unknownIsbnSheet: SheetSession<UnknownIsbnSheetUiModel, ResolvedScan> = SheetSession.Closed,
     val manualEntryHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "By ISBN",
         headline = "Enter the ISBN.",

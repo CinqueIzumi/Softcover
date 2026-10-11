@@ -8,8 +8,6 @@ import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependenci
 import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
-import nl.rhaydus.softcover.feature.scan.presentation.state.UnknownIsbnSheetUiModel
-import nl.rhaydus.softcover.feature.scan.presentation.state.unknownIsbnSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
 
 internal class OnIsbnSubmittedAction(
@@ -42,10 +40,7 @@ internal class OnIsbnSubmittedAction(
                         scope.setState {
                             it.copy(
                                 isResolving = false,
-                                unknownIsbnSheet = UnknownIsbnSheetUiModel(
-                                    isbn = result.normalizedIsbn,
-                                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
-                                ),
+                                unknownIsbn = result.normalizedIsbn,
                             )
                         }
                     }

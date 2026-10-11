@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.softcover.core.component.modifier.shakeOnError
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState

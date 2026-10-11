@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
 import nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
@@ -35,9 +36,9 @@ internal data class ProfileUiState(
     val userProfileData: UserProfileData? = null,
     val readingLife: ReadingLife? = null,
 
-    /** `null` until the reading life and profile have both loaded. */
-    val shareSheet: ShareCardSheetUiModel? = null,
-    val isShareSheetVisible: Boolean = false,
+    val shareSheet: SheetSession<ShareCardSheetUiModel, Nothing> = SheetSession.Closed,
+
+    val isShareSheetRequested: Boolean = false,
     val shareCapture: ShareCaptureState = ShareCaptureState(),
     val recentlyLoved: BookCardSet<LovedBook> = BookCardSet.standIns(RECENTLY_LOVED_STAND_IN_CARDS),
     val hideUntaggedAuthors: Boolean = false,
@@ -99,12 +100,13 @@ internal data class ProfileUiState(
     ),
     val ratingsHistogramHeader: SectionHeaderUiModel = RatingBand.NEW_READER.toRatingsHistogramHeader(),
     val ratingsHistogramCaption: String = RatingBand.NEW_READER.toRatingsHistogramCaption(),
-    val logOutSheetScaffold: SheetScaffoldUiModel = logOutSheetScaffold(),
-    val logOutPending: Boolean = false,
+    val logOutSheet: SheetSession<SheetScaffoldUiModel, LogOut> = SheetSession.Closed,
 
     /** Both bars carry no title — the page's own masthead names it. */
     val topBar: TopBarUiModel = TopBarUiModel(),
 ) : UiState {
+    val canShare: Boolean get() = readingLife != null && userProfileData != null
+
     private val allAuthorDemographics: AuthorDemographics
         get() = readingLife?.authorDemographics ?: AuthorDemographics()
 

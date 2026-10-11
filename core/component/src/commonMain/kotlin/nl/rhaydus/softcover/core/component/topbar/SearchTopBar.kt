@@ -10,7 +10,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,10 +57,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -377,17 +375,15 @@ private fun SearchChromeInputArea(
 
 @Composable
 private fun SearchChromeBarcodeButton(onClick: () -> Unit) {
-    val interactionSource = remember { MutableInteractionSource() }
-
     Surface(
-        onClick = onClick,
         modifier = Modifier
             .size(48.dp)
-            .pressScale(interactionSource)
-            .pointerHandCursor(),
+            .tactileClickable(
+                onClick = onClick,
+                hoverShape = Corners.lg,
+            ),
         shape = Corners.lg,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        interactionSource = interactionSource,
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),

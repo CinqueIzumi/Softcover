@@ -5,6 +5,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -39,7 +40,6 @@ class OnTabSelectedActionTest {
                 selectionMode = true,
                 selectedBookIds = setOf(1, 2),
                 isRearranging = true,
-                isBulkRemoveSheetShown = true,
                 listsBeingMutated = setOf(5),
             )
 
@@ -54,16 +54,16 @@ class OnTabSelectedActionTest {
             stateFlow.value.selectionMode shouldBe false
             stateFlow.value.selectedBookIds shouldBe emptySet()
             stateFlow.value.isRearranging shouldBe false
-            stateFlow.value.isBulkRemoveSheetShown shouldBe false
             stateFlow.value.listsBeingMutated shouldBe emptySet()
         }
 
         @Test
-        fun `closes the bulk move menu and the bulk add-to-list sheet`() = runTest {
+        fun `closes the bulk move menu and withdraws the bulk sheet requests`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 isBulkMoveMenuExpanded = true,
-                isBulkAddToListSheetShown = true,
+                isBulkRemoveSheetRequested = true,
+                isChooseListsSheetRequested = true,
             )
 
             // ----- Act -----
@@ -74,7 +74,24 @@ class OnTabSelectedActionTest {
 
             // ----- Assert -----
             stateFlow.value.isBulkMoveMenuExpanded shouldBe false
-            stateFlow.value.isBulkAddToListSheetShown shouldBe false
+            stateFlow.value.isBulkRemoveSheetRequested shouldBe false
+            stateFlow.value.isChooseListsSheetRequested shouldBe false
+        }
+
+        @Test
+        fun `leaves the bulk sheet sessions closed`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState()
+
+            // ----- Act -----
+            OnTabSelectedAction(tabId = "want-to-read").execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.bulkRemoveSheet shouldBe SheetSession.Closed
+            stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
         }
     }
 }

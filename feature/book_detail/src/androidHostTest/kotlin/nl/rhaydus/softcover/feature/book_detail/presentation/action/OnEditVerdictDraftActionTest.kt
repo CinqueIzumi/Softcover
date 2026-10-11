@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.core.uibinding.verdict.toVerdictSheetUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -28,7 +29,7 @@ class OnEditVerdictDraftActionTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -52,7 +53,7 @@ class OnEditVerdictDraftActionTest {
         @Test
         fun `folds a rating change into the open sheet`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 verdictSheet = stubBook().toVerdictSheetUiModel(
                     context = VerdictSheetContext.EDIT,
                     review = null,
@@ -73,7 +74,7 @@ class OnEditVerdictDraftActionTest {
         @Test
         fun `folds a spoiler toggle into the open sheet`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 verdictSheet = stubBook().toVerdictSheetUiModel(
                     context = VerdictSheetContext.EDIT,
                     review = null,
@@ -94,7 +95,7 @@ class OnEditVerdictDraftActionTest {
         @Test
         fun `leaves the sheet null when no verdict sheet is open`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(verdictSheet = null)
+            stateFlow.value = buildBookDetailUiState().copy(verdictSheet = null)
 
             // ----- Act -----
             OnEditVerdictDraftAction(event = VerdictDraftEvent.RatingChanged(rating = 4.0)).execute(

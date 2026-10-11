@@ -6,6 +6,7 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDiscardLibraryVisibilityChangesAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDismissDiscardSheetAction
@@ -27,9 +28,9 @@ internal fun LibraryVisibilityDiscardGuard(
         onBackCompleted = { runAction(OnLibraryVisibilityBackClickAction()) },
     )
 
-    if (state.showDiscardSheet) {
+    state.discardSheet.modelOrNull?.let { scaffold ->
         SheetScaffold(
-            model = state.discardSheetScaffold,
+            model = scaffold,
             onEvent = { event ->
                 when (event) {
                     SheetScaffoldEvent.PrimaryClicked -> runAction(OnSaveLibraryVisibilityAction(leaveAfterSave = true))

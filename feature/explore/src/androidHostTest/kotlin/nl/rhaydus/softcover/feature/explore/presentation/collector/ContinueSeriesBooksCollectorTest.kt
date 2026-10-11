@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase
@@ -183,50 +182,6 @@ class ContinueSeriesBooksCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.continueSeriesBooks shouldBe listOf(fetchedBook)
-            job.cancel()
-        }
-
-        @Test
-        fun `builds one continueSeriesMenuSheets entry per book`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val firstBook = stubBook(
-                id = 1,
-                title = "Mistborn",
-                bookSeries = BookSeries(
-                    id = 1,
-                    name = "Mistborn Era",
-                    amountOfBooks = 3,
-                ),
-            )
-            val secondBook = stubBook(
-                id = 2,
-                title = "Elantris",
-            )
-            val collector = ContinueSeriesBooksCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            continueSeriesBooksFlow.emit(listOf(firstBook, secondBook))
-            allUserBooksFlow.emit(emptyList())
-
-            // ----- Assert -----
-            val menuSheets = stateFlow.value.continueSeriesMenuSheets
-            menuSheets.keys.toList() shouldBe listOf(1, 2)
-            menuSheets.values.map { it.scaffold.header.section } shouldBe listOf(
-                SectionHeaderUiModel.Section(
-                    eyebrow = "Mistborn Era",
-                    headline = "Mistborn",
-                ),
-                SectionHeaderUiModel.Section(
-                    eyebrow = "Up next",
-                    headline = "Elantris",
-                ),
-            )
             job.cancel()
         }
     }

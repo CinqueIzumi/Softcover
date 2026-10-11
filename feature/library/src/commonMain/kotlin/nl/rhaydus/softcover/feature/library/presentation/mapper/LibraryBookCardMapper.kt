@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -22,9 +23,8 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.uibinding.book.bookStatsLine
 import nl.rhaydus.softcover.core.uibinding.book.byline
-import nl.rhaydus.softcover.core.uibinding.book.ratingTransitionKey
 import nl.rhaydus.softcover.core.uibinding.book.seriesEyebrow
-import nl.rhaydus.softcover.core.uibinding.book.titleTransitionKey
+import nl.rhaydus.softcover.core.uibinding.book.transitionKey
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toBadgeUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
@@ -79,7 +79,9 @@ internal fun Book.toBookCard(
                 text = BookCardContent(
                     title = title,
                     byline = byline(author = authorString),
-                    titleTransitionKey = titleTransitionKey(),
+                    titleTransitionKey = transitionKey(
+                        element = BookTransitionElement.Title,
+                    ),
                 ),
             )
             decorations = gridDecorations(
@@ -93,7 +95,9 @@ internal fun Book.toBookCard(
                 text = BookCardContent(
                     title = title,
                     byline = byline(author = authorString),
-                    titleTransitionKey = titleTransitionKey(),
+                    titleTransitionKey = transitionKey(
+                        element = BookTransitionElement.Title,
+                    ),
                 ),
                 trailing = deadlineProgress?.toBadgeUiModel()?.let { BookCardTrailing.Badge(model = it) },
             )
@@ -117,12 +121,16 @@ internal fun Book.toBookCard(
                     title = title,
                     eyebrow = seriesEyebrow(seriesText = seriesText),
                     byline = byline(author = authorString),
-                    titleTransitionKey = titleTransitionKey(),
+                    titleTransitionKey = transitionKey(
+                        element = BookTransitionElement.Title,
+                    ),
                     supportingLines = bookStatsLine(
                         releaseYear = releaseYear,
                         usersCount = usersCount,
                         rating = rating,
-                        ratingTransitionKey = ratingTransitionKey(),
+                        ratingTransitionKey = transitionKey(
+                            element = BookTransitionElement.Rating,
+                        ),
                     )?.let { persistentListOf(it) } ?: persistentListOf(),
                 ),
                 deadline = deadlineProgress?.toDeadlineSummaryUiModel(

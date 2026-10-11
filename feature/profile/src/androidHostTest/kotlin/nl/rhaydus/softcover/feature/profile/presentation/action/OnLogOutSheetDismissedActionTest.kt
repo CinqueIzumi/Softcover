@@ -14,11 +14,15 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
+import nl.rhaydus.softcover.feature.profile.presentation.state.LogOut
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.state.logOutSheetScaffold
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -51,6 +55,12 @@ class OnLogOutSheetDismissedActionTest {
         Dispatchers.resetMain()
     }
 
+    private fun closingWithLogOut(): SheetSession<SheetScaffoldUiModel, LogOut> =
+        SheetSession.Open(
+            model = logOutSheetScaffold().requestingClose(),
+            pending = LogOut,
+        )
+
     private fun stubDependencies(testScope: TestScope): ProfileDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<ProfileDependencies>(relaxed = true).also { mock ->
@@ -75,10 +85,10 @@ class OnLogOutSheetDismissedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `resets user data, clears the pending flag and sends LogOutUserEvent when a log-out was recorded`() = runTest {
+        fun `resets user data, closes the sheet and sends LogOutUserEvent when a log-out was recorded`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
-            stateFlow.value = ProfileUiState(logOutPending = true)
+            stateFlow.value = ProfileUiState(logOutSheet = closingWithLogOut())
 
             coEvery {
                 resetUserDataUseCase()
@@ -93,16 +103,16 @@ class OnLogOutSheetDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.logOutPending shouldBe false
+            stateFlow.value.logOutSheet shouldBe SheetSession.Closed
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ProfileEvent.LogOutUserEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
-        fun `clears the pending flag and sends only LogOutFailedEvent when the reset fails`() = runTest {
+        fun `closes the sheet and sends only LogOutFailedEvent when the reset fails`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
-            stateFlow.value = ProfileUiState(logOutPending = true)
+            stateFlow.value = ProfileUiState(logOutSheet = closingWithLogOut())
 
             coEvery {
                 resetUserDataUseCase()
@@ -117,17 +127,16 @@ class OnLogOutSheetDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.logOutPending shouldBe false
+            stateFlow.value.logOutSheet shouldBe SheetSession.Closed
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ProfileEvent.LogOutFailedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
-        fun `does not reset user data or send an event when no log-out was recorded`() = runTest {
+        fun `closes the sheet without resetting user data or sending an event when no log-out was recorded`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
-            val untouched = ProfileUiState(logOutPending = false)
-            stateFlow.value = untouched
+            stateFlow.value = ProfileUiState(logOutSheet = SheetSession.Open(model = logOutSheetScaffold()))
 
             val action = OnLogOutSheetDismissedAction()
 
@@ -139,7 +148,7 @@ class OnLogOutSheetDismissedActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) { resetUserDataUseCase() }
-            stateFlow.value shouldBe untouched
+            stateFlow.value.logOutSheet shouldBe SheetSession.Closed
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }

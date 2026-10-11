@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.scan.presentation.action
 
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
@@ -13,7 +14,7 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
         dependencies: ScanDependencies,
         scope: ActionScope<ScanUiState, ScanEvent, LocalScanVariables>,
     ) {
-        val isbn = scope.currentState.unknownIsbnSheet?.isbn ?: return
+        val isbn = scope.currentState.unknownIsbn ?: return
 
         if (scope.currentState.isAddingBook) return
 
@@ -25,11 +26,13 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
             .onSuccess { result ->
                 scope.setState {
                     it.copy(
-                        isUnknownIsbnCloseRequested = true,
                         isAddingBook = false,
-                        resolvedUnknownIsbn = ResolvedScan(
-                            book = result.book,
-                            editionId = result.editionId,
+                        unknownIsbn = null,
+                        unknownIsbnSheet = it.unknownIsbnSheet.requestClose(
+                            pending = ResolvedScan(
+                                book = result.book,
+                                editionId = result.editionId,
+                            ),
                         ),
                     )
                 }

@@ -13,12 +13,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -57,7 +59,7 @@ class OnToggleListMembershipActionTest {
                 bookId = any(),
             )
         } returns Result.success(Unit)
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -111,7 +113,7 @@ class OnToggleListMembershipActionTest {
         @Test
         fun `adds the book with its current edition when it is not a member`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = stubBook())
+            stateFlow.value = buildBookDetailUiState().copy(book = stubBook())
             val action = OnToggleListMembershipAction(
                 listId = 3,
                 isMember = false,
@@ -137,13 +139,14 @@ class OnToggleListMembershipActionTest {
                     bookId = any(),
                 )
             }
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>().feedback shouldBe Feedback.Routine
         }
 
         @Test
         fun `falls back to the default edition when there is no current edition`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = stubBook(current = null))
+            stateFlow.value = buildBookDetailUiState().copy(book = stubBook(current = null))
             val action = OnToggleListMembershipAction(
                 listId = 3,
                 isMember = false,
@@ -168,7 +171,7 @@ class OnToggleListMembershipActionTest {
         @Test
         fun `removes the book when it is already a member`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = stubBook())
+            stateFlow.value = buildBookDetailUiState().copy(book = stubBook())
             val action = OnToggleListMembershipAction(
                 listId = 3,
                 isMember = true,
@@ -194,7 +197,8 @@ class OnToggleListMembershipActionTest {
                     edition = any(),
                 )
             }
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>().feedback shouldBe null
         }
 
         @Test
@@ -225,7 +229,7 @@ class OnToggleListMembershipActionTest {
         @Test
         fun `does nothing when the book has no edition at all`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(
                     current = null,
                     default = null,
@@ -255,7 +259,7 @@ class OnToggleListMembershipActionTest {
         @Test
         fun `ignores a second toggle while the same list is being mutated`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
                 listsBeingMutated = setOf(3),
             )
@@ -284,7 +288,7 @@ class OnToggleListMembershipActionTest {
         @Test
         fun `mutates a list while another list is being mutated`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
                 listsBeingMutated = setOf(4),
             )
@@ -313,7 +317,7 @@ class OnToggleListMembershipActionTest {
         @Test
         fun `releases the list again after a failed mutation`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = stubBook())
+            stateFlow.value = buildBookDetailUiState().copy(book = stubBook())
             coEvery {
                 addBookToListUseCase(
                     listId = any(),
@@ -334,13 +338,14 @@ class OnToggleListMembershipActionTest {
 
             // ----- Assert -----
             stateFlow.value.listsBeingMutated shouldBe emptySet()
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
 
         @Test
         fun `the list stays mutated until its book ids change and then clears`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
                 userLists = listOf(stubList()),
             )
@@ -368,13 +373,14 @@ class OnToggleListMembershipActionTest {
             completedBeforeChange shouldBe false
             job.isCompleted shouldBe true
             stateFlow.value.listsBeingMutated shouldBe emptySet()
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>().feedback shouldBe Feedback.Routine
         }
 
         @Test
         fun `the list clears when it disappears from state`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
                 userLists = listOf(stubList()),
             )
@@ -403,7 +409,7 @@ class OnToggleListMembershipActionTest {
         @Test
         fun `a success that leaves the list data unchanged clears the list only after the timeout`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
                 userLists = listOf(stubList()),
             )
@@ -436,7 +442,7 @@ class OnToggleListMembershipActionTest {
         @Test
         fun `cancelling the action while it waits for list data clears the list`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
                 userLists = listOf(stubList()),
             )
@@ -465,7 +471,7 @@ class OnToggleListMembershipActionTest {
         @Test
         fun `a failed mutation clears the list at once without waiting for list data`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(),
                 userLists = listOf(stubList()),
             )

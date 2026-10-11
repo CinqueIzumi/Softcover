@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.editionSheetWithQuery
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
@@ -34,7 +35,7 @@ class EditionSheetCollectorTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -69,7 +70,7 @@ class EditionSheetCollectorTest {
         @Test
         fun `leaves editionSheet null while there is no displayed edition`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = offShelfBook("Dune"))
+            stateFlow.value = buildBookDetailUiState().copy(book = offShelfBook("Dune"))
 
             // ----- Act -----
             launchCollector()
@@ -83,7 +84,7 @@ class EditionSheetCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val current = buildEdition(id = 1)
-                stateFlow.value = BookDetailUiState(
+                stateFlow.value = buildBookDetailUiState().copy(
                     book = offShelfBook("Dune"),
                     previewEdition = current,
                     editions = listOf(current, buildEdition(id = 2)),
@@ -107,7 +108,7 @@ class EditionSheetCollectorTest {
             // ----- Arrange -----
             val current = buildEdition(id = 1)
             val other = buildEdition(id = 2)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = offShelfBook("Dune"),
                 previewEdition = current,
                 editions = listOf(current, other),
@@ -132,7 +133,7 @@ class EditionSheetCollectorTest {
             // ----- Arrange -----
             val current = buildEdition(id = 1)
             val other = buildEdition(id = 2)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = offShelfBook("Dune"),
                 previewEdition = current,
                 editions = listOf(current, other),
@@ -156,7 +157,7 @@ class EditionSheetCollectorTest {
         @Test
         fun `clears editionSheet when the book goes away`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = offShelfBook("Dune"),
                 previewEdition = buildEdition(id = 1),
             )
@@ -176,7 +177,7 @@ class EditionSheetCollectorTest {
                 val current = buildEdition(id = 1)
                 val cards = persistentListOf(mockk<BookCardUiModel>())
                 val countHeader = SectionHeaderUiModel.Label(eyebrow = "1 EDITIONS")
-                stateFlow.value = BookDetailUiState(
+                stateFlow.value = buildBookDetailUiState().copy(
                     book = offShelfBook("Dune"),
                     previewEdition = current,
                     editions = listOf(current),
@@ -199,7 +200,7 @@ class EditionSheetCollectorTest {
         fun `follows the search query as it changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val current = buildEdition(id = 1)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = offShelfBook("Dune"),
                 previewEdition = current,
                 editions = listOf(current),
@@ -217,7 +218,7 @@ class EditionSheetCollectorTest {
         fun `shows search and empty-state copy once the sheet is built`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val current = buildEdition(id = 1)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = offShelfBook("Dune"),
                 previewEdition = current,
                 editions = listOf(current),

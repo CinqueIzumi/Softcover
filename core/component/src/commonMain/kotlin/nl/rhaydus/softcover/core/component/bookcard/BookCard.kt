@@ -1,8 +1,5 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -19,17 +16,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
-import nl.rhaydus.designsystem.modifier.hoverHighlight
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScale
-import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.softcover.core.component.modifier.shakeOnError
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -155,7 +151,6 @@ private fun BookCardCoverScaffold(
  * menu or [content] never reads as a card press.
  */
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
 internal fun Modifier.bookCardInteraction(
     model: BookCardUiModel,
     onEvent: (BookCardEvent) -> Unit,
@@ -170,38 +165,37 @@ internal fun Modifier.bookCardInteraction(
     val interactive = decorations.pressBehaviour != BookCardDecorations.Press.None
     val selection = decorations.selection
 
-    val hover = if (hoverWash && interactive) {
-        Modifier.hoverHighlight(interactionSource = interactionSource)
+    val haptics = LocalHaptics.current
+    val semantics = bookCardSemantics(
+        interactive = interactive,
+        selection = selection,
+    )
+    val press = if (interactive) {
+        Modifier.tactileClickable(
+            role = semantics.role,
+            onClick = {
+                if (selection is BookCardSelection.Multiple) haptics.select()
+                latestOnEvent(BookCardEvent.Clicked(key = key))
+            },
+            onLongClick = if (decorations.pressBehaviour == BookCardDecorations.Press.TapAndLongPress) {
+                { latestOnEvent(BookCardEvent.LongClicked(key = key)) }
+            } else {
+                null
+            },
+            hoverShape = if (hoverWash) RectangleShape else null,
+            interactionSource = interactionSource,
+        )
     } else {
         Modifier
     }
 
-    val press = when (decorations.pressBehaviour) {
-        BookCardDecorations.Press.Tap -> Modifier.clickable(
-            interactionSource = interactionSource,
-            indication = null,
-            onClick = { latestOnEvent(BookCardEvent.Clicked(key = key)) },
-        )
-
-        BookCardDecorations.Press.TapAndLongPress -> Modifier.combinedClickable(
-            interactionSource = interactionSource,
-            indication = null,
-            onClick = { latestOnEvent(BookCardEvent.Clicked(key = key)) },
-            onLongClick = { latestOnEvent(BookCardEvent.LongClicked(key = key)) },
-        )
-
-        BookCardDecorations.Press.None -> Modifier
-    }
-
     val pressStarted = if (interactive) {
-        Modifier
-            .pointerHandCursor()
-            .pointerInput(key) {
-                awaitEachGesture {
-                    awaitFirstDown(requireUnconsumed = true)
-                    latestOnEvent(BookCardEvent.PressStarted(key = key))
-                }
+        Modifier.pointerInput(key) {
+            awaitEachGesture {
+                awaitFirstDown(requireUnconsumed = true)
+                latestOnEvent(BookCardEvent.PressStarted(key = key))
             }
+        }
     } else {
         Modifier
     }
@@ -211,17 +205,9 @@ internal fun Modifier.bookCardInteraction(
             trigger = decorations.shakeOnError,
             onShakeEnd = { latestOnEvent(BookCardEvent.ShakeEnded(key = key)) },
         )
-        .pressScale(interactionSource)
-        .then(hover)
         .then(press)
         .then(pressStarted)
         .semantics {
-            val semantics = bookCardSemantics(
-                interactive = interactive,
-                selection = selection,
-            )
-
-            semantics.role?.let { role = it }
             semantics.selected?.let { selected = it }
             semantics.toggleableState?.let { toggleableState = it }
         }

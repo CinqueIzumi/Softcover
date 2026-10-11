@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
@@ -16,6 +14,7 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadSubtitle
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.mood.MoodTileUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -74,10 +73,10 @@ internal data class ExploreScreenUiState(
         eyebrow = "Pick up where you left off",
         headline = "Up next in your series",
     ),
-    val continueSeriesMenuSheets: ImmutableMap<Int, ContinueSeriesMenuSheetUiModel> = persistentMapOf(),
 
-    /** The option picked in the continue-series menu; run once the sheet has finished hiding. */
-    val pendingContinueSeriesDismissal: PendingContinueSeriesDismissal? = null,
+    val continueSeriesMenuBookId: Int? = null,
+
+    val continueSeriesMenu: SheetSession<ContinueSeriesMenuSheetUiModel, PendingContinueSeriesDismissal> = SheetSession.Closed,
     /** `null` until the library's offline copy has resolved. */
     val offlineEmptyState: EmptyStateUiModel? = null,
     val masthead: PageMastheadUiModel = PageMastheadUiModel(

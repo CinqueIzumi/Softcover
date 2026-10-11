@@ -15,10 +15,15 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.IsbnLookupResult
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.dismissed
+import nl.rhaydus.softcover.core.component.sheet.isClosing
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
+import nl.rhaydus.softcover.feature.scan.presentation.state.ResolvedScan
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import nl.rhaydus.softcover.feature.scan.presentation.state.UnknownIsbnSheetUiModel
 import nl.rhaydus.softcover.feature.scan.presentation.state.unknownIsbnSheetScaffoldFor
@@ -67,12 +72,19 @@ class OnAddUnknownIsbnConfirmedActionTest {
         }
     }
 
+    private fun openSession(isbn: String): SheetSession<UnknownIsbnSheetUiModel, ResolvedScan> = SheetSession.Open(
+        model = UnknownIsbnSheetUiModel(
+            isbn = isbn,
+            scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
+        ),
+    )
+
     @Nested
     inner class Execute {
         @Test
-        fun `does nothing when there is no unknown isbn sheet`() = runTest {
+        fun `does nothing when no unknown isbn is requested`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbnSheet = null)
+            stateFlow.value = ScanUiState(unknownIsbn = null)
             val dependencies = stubDependencies(this)
             val stateBefore = stateFlow.value
             val action = OnAddUnknownIsbnConfirmedAction()
@@ -94,10 +106,8 @@ class OnAddUnknownIsbnConfirmedActionTest {
         fun `does nothing when isAddingBook is already true`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(
-                unknownIsbnSheet = UnknownIsbnSheetUiModel(
-                    isbn = "9780451524935",
-                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
-                ),
+                unknownIsbn = "9780451524935",
+                unknownIsbnSheet = openSession(isbn = "9780451524935"),
                 isAddingBook = true,
             )
             val dependencies = stubDependencies(this)
@@ -118,13 +128,11 @@ class OnAddUnknownIsbnConfirmedActionTest {
         }
 
         @Test
-        fun `adds the book using the isbn of the unknown isbn sheet`() = runTest {
+        fun `adds the book using the requested unknown isbn`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(
-                unknownIsbnSheet = UnknownIsbnSheetUiModel(
-                    isbn = "9781111111111",
-                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
-                ),
+                unknownIsbn = "9781111111111",
+                unknownIsbnSheet = openSession(isbn = "9781111111111"),
             )
             val dependencies = stubDependencies(this)
 
@@ -150,10 +158,8 @@ class OnAddUnknownIsbnConfirmedActionTest {
         fun `marks the book as being added while the use case runs`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(
-                unknownIsbnSheet = UnknownIsbnSheetUiModel(
-                    isbn = "9780451524935",
-                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
-                ),
+                unknownIsbn = "9780451524935",
+                unknownIsbnSheet = openSession(isbn = "9780451524935"),
             )
             val dependencies = stubDependencies(this)
             var stateAtInvocation: ScanUiState? = null
@@ -183,10 +189,8 @@ class OnAddUnknownIsbnConfirmedActionTest {
             val book = PreviewData.baseBook
             val editionId = 7
             stateFlow.value = ScanUiState(
-                unknownIsbnSheet = UnknownIsbnSheetUiModel(
-                    isbn = "9780451524935",
-                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
-                ),
+                unknownIsbn = "9780451524935",
+                unknownIsbnSheet = openSession(isbn = "9780451524935"),
             )
             val dependencies = stubDependencies(this)
 
@@ -208,11 +212,12 @@ class OnAddUnknownIsbnConfirmedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isUnknownIsbnCloseRequested shouldBe true
-            stateFlow.value.unknownIsbnSheet.shouldNotBeNull().isbn shouldBe "9780451524935"
+            stateFlow.value.unknownIsbnSheet.isClosing shouldBe true
+            stateFlow.value.unknownIsbnSheet.modelOrNull.shouldNotBeNull().isbn shouldBe "9780451524935"
             stateFlow.value.isAddingBook shouldBe false
+            stateFlow.value.unknownIsbn.shouldBeNull()
 
-            val resolved = stateFlow.value.resolvedUnknownIsbn.shouldNotBeNull()
+            val resolved = stateFlow.value.unknownIsbnSheet.dismissed().shouldNotBeNull()
             resolved.book shouldBe book
             resolved.editionId shouldBe editionId
             eventChannel.tryReceive().getOrNull().shouldBeNull()
@@ -222,10 +227,8 @@ class OnAddUnknownIsbnConfirmedActionTest {
         fun `keeps the sheet open and sends AddBookFailedEvent on failure`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(
-                unknownIsbnSheet = UnknownIsbnSheetUiModel(
-                    isbn = "9780451524935",
-                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
-                ),
+                unknownIsbn = "9780451524935",
+                unknownIsbnSheet = openSession(isbn = "9780451524935"),
             )
             val dependencies = stubDependencies(this)
 
@@ -243,9 +246,10 @@ class OnAddUnknownIsbnConfirmedActionTest {
 
             // ----- Assert -----
             stateFlow.value.isAddingBook shouldBe false
-            stateFlow.value.unknownIsbnSheet.shouldNotBeNull().isbn shouldBe "9780451524935"
-            stateFlow.value.isUnknownIsbnCloseRequested shouldBe false
-            stateFlow.value.resolvedUnknownIsbn.shouldBeNull()
+            stateFlow.value.unknownIsbnSheet.modelOrNull.shouldNotBeNull().isbn shouldBe "9780451524935"
+            stateFlow.value.unknownIsbn shouldBe "9780451524935"
+            stateFlow.value.unknownIsbnSheet.isClosing shouldBe false
+            stateFlow.value.unknownIsbnSheet.dismissed().shouldBeNull()
 
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ScanEvent.AddBookFailedEvent>()
         }

@@ -1,11 +1,24 @@
 package nl.rhaydus.softcover.core.presentation.session
 
+import nl.rhaydus.softcover.core.component.haptics.Feedback
+
 sealed interface SessionOutcome {
-    data object Started : SessionOutcome
+    val feedback: Feedback
 
-    data object StartFailed : SessionOutcome
+    data object Started : SessionOutcome {
+        override val feedback = Feedback.Routine
+    }
 
-    data object Stopped : SessionOutcome
+    data object StartFailed : SessionOutcome {
+        override val feedback = Feedback.Failure
+    }
 
-    data object StopFailed : SessionOutcome
+    /** The session recap is shown, so stopping is felt as a milestone. */
+    data object Stopped : SessionOutcome {
+        override val feedback = Feedback.Milestone
+    }
+
+    data object StopFailed : SessionOutcome {
+        override val feedback = Feedback.Failure
+    }
 }

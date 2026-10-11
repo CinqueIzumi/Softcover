@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.orchestration.session
 
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -27,6 +26,9 @@ import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.presentation.session.ReadingSessionLauncher
 import nl.rhaydus.softcover.core.presentation.session.SessionOutcome
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
+import kotlin.coroutines.cancellation.CancellationException
+
+private const val SESSION_TRANSITION_SURFACE = "session"
 
 internal class ActiveSessionControllerImpl(
     private val observeActiveSessionUseCase: ObserveActiveSessionUseCase,
@@ -55,12 +57,12 @@ internal class ActiveSessionControllerImpl(
                         peekBarCover = book.toCoverUiModel(
                             variant = CoverVariant.Flat,
                             shareTransition = true,
-                            transitionSurface = "session",
+                            transitionSurface = SESSION_TRANSITION_SURFACE,
                         ),
                         focusCover = book.toCoverUiModel(
                             variant = CoverVariant.Spotlight,
                             shareTransition = true,
-                            transitionSurface = "session",
+                            transitionSurface = SESSION_TRANSITION_SURFACE,
                         ),
                     )
                 }

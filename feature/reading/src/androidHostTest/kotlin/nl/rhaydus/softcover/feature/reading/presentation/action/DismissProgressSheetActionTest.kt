@@ -1,10 +1,14 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -37,7 +41,7 @@ class DismissProgressSheetActionTest {
         fun `discards the time draft so the next open reseeds from the book`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
-                showProgressSheet = true,
+                progressSheet = SheetSession.Open(model = ProgressSheetUiModel.previews.values.first()),
                 progressTimeDraft = ProgressTimeDraft(
                     forSeconds = 3725,
                     hours = "1",
@@ -54,6 +58,57 @@ class DismissProgressSheetActionTest {
 
             // ----- Assert -----
             stateFlow.value.progressTimeDraft.shouldBeNull()
+        }
+
+        @Test
+        fun `closes the progress sheet session`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(
+                progressSheet = SheetSession.Open(model = ProgressSheetUiModel.previews.values.first()),
+            )
+
+            // ----- Act -----
+            DismissProgressSheetAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.progressSheet shouldBe SheetSession.Closed
+        }
+
+        @Test
+        fun `closes a session that is already closing`() = runTest {
+            // ----- Arrange -----
+            val closingModel = ProgressSheetUiModel.previews.values.first().requestingClose()
+            stateFlow.value = ReadingScreenUiState(progressSheet = SheetSession.Open(model = closingModel))
+
+            // ----- Act -----
+            DismissProgressSheetAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.progressSheet shouldBe SheetSession.Closed
+        }
+
+        @Test
+        fun `clears the book to update`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(
+                bookToUpdate = PreviewData.baseBook,
+                progressSheet = SheetSession.Open(model = ProgressSheetUiModel.previews.values.first()),
+            )
+
+            // ----- Act -----
+            DismissProgressSheetAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.bookToUpdate.shouldBeNull()
         }
     }
 }

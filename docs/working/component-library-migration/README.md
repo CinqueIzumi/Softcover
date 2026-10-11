@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11 sessions 1–4 done and committed (session 4: S11-39 `2ea98ddf`, S11-40 the commit after it). S11-39: `bookTransitionKey(element, …)`, `Modifier.navSharedBounds`, title/rating keys on card mappers and the detail hero. S11-40: `RootStackTransition` (seekable root transition, one root `NavigationBackHandler`, `BackGestureSession`), `Navigator(onBackPressed = null)`, `backGestureSeeksTransition` (Android only); untested by rule (navigation glue; the device check is the test). #275 tracks S11 at stage level. F42 / S12-4 waits.
-- **Next:** `steps/s11-contract-retrofit.md` § Sessions, session 5 (S11-C, convergence pass).
+- **State:** S11 is done: S11-C session A reviewed and its findings fixed, `document-code` sweep run, S11 ticked here and on #275, both S11 step files deleted, agent memory pruned. PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
+- **Next:** PC-1 in `steps/pc-performance-checks.md` § PC-1: propose the idle-frame check and stability gate shape, then stop for approval (PC runs before S12).
 - **Open questions:** none.
-- **Verification:** JBR 21, after the last Kotlin edit: `styleCheck`, `checkDocBudgets`, full `testAndroidHostTest` of every touched module, `:app:installDebug` on Medium_Phone, `:orchestration:compileKotlinIosSimulatorArm64` (whole graph), `:desktopApp:compileKotlin` passed; no glomming, no `!!`, AAA complete. User's device check on Medium_Phone (morphs, gesture, nested navigator, back-to-home) passed.
-- **Uncommitted:** nothing.
+- **Verification:** after the last Kotlin edit, under JBR 21: `ktlintCheck`, `styleCheck`, `:core:component:compileKotlinJvm`, `:feature:book_detail:compileKotlinJvm` passed; glommed-closer grep clean. Earlier on the merged tree: every module's `compileKotlinJvm` / `testAndroidHostTest`, platform compiles, `checkModuleGraph`, `checkDocBudgets`, `:app:installDebug` passed.
+- **Uncommitted:** all of S11-C (about 440 paths): `core/component` (sheet fork, `SheetSession`, `modifier/` tactile / shake / pulse, `haptics/` `Feedback`, `transition/`); `core/designsystem` `Motion` / `Theme`; `core/uibinding`; `core/presentation`; every feature's sheet hosts, events and host tests; `orchestration` (back gesture, `NavFadeThrough`, re-auth); `config/detekt/detekt.yml`; design-system docs and `module-structure.md`; tracker docs (S11 step files deleted, two copy-audit rows); agent-memory notes.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:
@@ -73,7 +73,7 @@ every sub-step's Verify.
 | S10 | — (shelf teardown) | S10-1–S10-5, S10-C | [x] |
 | SP | — (spacing scale) | SP-1–SP-5, SP-C; after S10, before S11 | [x] |
 | SH | — (shape scale) | SH-1–SH-4, SH-C; after S10, before S11 | [x] |
-| S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-40, S11-C | [ ] |
+| S11 | — (contract retrofit) | S11-1–S11-40, S11-C | [x] |
 | PC | [steps/pc-performance-checks.md](steps/pc-performance-checks.md) | PC-1–PC-5 | [ ] |
 | S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-1–S12-5 | [ ] |
 

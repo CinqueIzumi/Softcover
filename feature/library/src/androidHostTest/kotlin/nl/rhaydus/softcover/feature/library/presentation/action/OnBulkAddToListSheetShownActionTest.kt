@@ -5,8 +5,11 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.openChooseListsSession
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.CreateList
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
@@ -35,10 +38,32 @@ class OnBulkAddToListSheetShownActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets isBulkAddToListSheetShown to true`() = runTest {
+        fun `requests the chooser without building its model when shown is true`() = runTest {
             // ----- Arrange -----
+            stateFlow.value = LibraryUiState(selectedBookIds = setOf(1, 2))
+
+            // ----- Act -----
+            OnBulkAddToListSheetShownAction(shown = true).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isChooseListsSheetRequested shouldBe true
+            stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `leaves a closing session for the collector to replace when shown is true`() = runTest {
+            // ----- Arrange -----
+            val closing = openChooseListsSession(
+                closing = true,
+                pending = CreateList,
+            )
             stateFlow.value = LibraryUiState(
-                isBulkAddToListSheetShown = false,
+                selectedBookIds = setOf(1),
+                chooseListsSheet = closing,
             )
 
             // ----- Act -----
@@ -48,15 +73,17 @@ class OnBulkAddToListSheetShownActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isBulkAddToListSheetShown shouldBe true
-            eventChannel.tryReceive().getOrNull() shouldBe null
+            stateFlow.value.isChooseListsSheetRequested shouldBe true
+            stateFlow.value.chooseListsSheet shouldBe closing
         }
 
         @Test
-        fun `sets isBulkAddToListSheetShown to false`() = runTest {
+        fun `closes the session and withdraws the request when shown is false`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                isBulkAddToListSheetShown = true,
+                selectedBookIds = setOf(1),
+                chooseListsSheet = openChooseListsSession(closing = true),
+                isChooseListsSheetRequested = true,
             )
 
             // ----- Act -----
@@ -66,61 +93,8 @@ class OnBulkAddToListSheetShownActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isBulkAddToListSheetShown shouldBe false
-            eventChannel.tryReceive().getOrNull() shouldBe null
-        }
-
-        @Test
-        fun `clears isCreateListPending when shown is true`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isCreateListPending = true,
-            )
-
-            // ----- Act -----
-            OnBulkAddToListSheetShownAction(shown = true).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isCreateListPending shouldBe false
-            eventChannel.tryReceive().getOrNull() shouldBe null
-        }
-
-        @Test
-        fun `keeps isCreateListPending when shown is false`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isCreateListPending = true,
-            )
-
-            // ----- Act -----
-            OnBulkAddToListSheetShownAction(shown = false).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isCreateListPending shouldBe true
-            eventChannel.tryReceive().getOrNull() shouldBe null
-        }
-
-        @Test
-        fun `leaves isCreateListPending false when shown is true`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isCreateListPending = false,
-            )
-
-            // ----- Act -----
-            OnBulkAddToListSheetShownAction(shown = true).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isCreateListPending shouldBe false
+            stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
+            stateFlow.value.isChooseListsSheetRequested shouldBe false
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }

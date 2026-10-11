@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen.section
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -8,18 +7,16 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScale
-import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.callout.Banner
 import nl.rhaydus.softcover.core.component.callout.BannerEvent
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.component.modifier.shakeOnError
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -52,21 +49,16 @@ internal fun FeaturedBookCard(
     isLoading: Boolean = false,
 ) {
     val shape = Corners.xl
-    val interactionSource = remember { MutableInteractionSource() }
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = Spacing.gutter)
             .then(if (isLoading) Modifier else Modifier.prefetchBookDetailOnPress(book.id))
-            .then(
-                if (isLoading) {
-                    Modifier
-                } else {
-                    Modifier
-                        .pointerHandCursor()
-                        .pressScale(interactionSource)
-                },
+            .tactileClickable(
+                onClick = { onBookClick(book) },
+                enabled = isLoading.not(),
+                hoverShape = null,
             )
             .shakeOnError(
                 trigger = mutationFailed,
@@ -78,9 +70,6 @@ internal fun FeaturedBookCard(
         color = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
         shape = shape,
-        onClick = { onBookClick(book) },
-        enabled = isLoading.not(),
-        interactionSource = interactionSource,
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             if (paceNudge != null) {

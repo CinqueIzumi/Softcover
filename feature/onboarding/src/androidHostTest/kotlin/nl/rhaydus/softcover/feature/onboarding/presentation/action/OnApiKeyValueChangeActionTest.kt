@@ -9,10 +9,12 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.field.TextFieldError
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
+import nl.rhaydus.softcover.feature.onboarding.presentation.state.onboardingLoadingSheet
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -107,7 +109,9 @@ class OnApiKeyValueChangeActionTest {
         fun `keeps the save button disabled for a non-blank value while loading`() = runTest {
             // ----- Arrange -----
             val base = stateWithApiKey(text = "old-key")
-            stateFlow.value = base.copy(loadingSheet = base.loadingSheet.copy(isLoading = true))
+            stateFlow.value = base.copy(
+                loadingSheet = SheetSession.Open(model = onboardingLoadingSheet(progress = null)),
+            )
             dependencies = stubDependencies(this)
             val action = OnApiKeyValueChangeAction(newValue = "new-key")
 
@@ -119,6 +123,43 @@ class OnApiKeyValueChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value.saveApiKeyButtonEnabled shouldBe false
+        }
+
+        @Test
+        fun `keeps the save button disabled while the sheet is still closing`() = runTest {
+            // ----- Arrange -----
+            val base = stateWithApiKey(text = "old-key")
+            stateFlow.value = base.copy(
+                loadingSheet = SheetSession.Open(
+                    model = onboardingLoadingSheet(progress = 0f).requestingClose(),
+                ),
+            )
+            dependencies = stubDependencies(this)
+
+            // ----- Act -----
+            OnApiKeyValueChangeAction(newValue = "new-key").execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.saveApiKeyButtonEnabled shouldBe false
+        }
+
+        @Test
+        fun `enables the save button for a non-blank value once the sheet is closed`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWithApiKey(text = "old-key").copy(loadingSheet = SheetSession.Closed)
+            dependencies = stubDependencies(this)
+
+            // ----- Act -----
+            OnApiKeyValueChangeAction(newValue = "new-key").execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.saveApiKeyButtonEnabled shouldBe true
         }
 
         @Test

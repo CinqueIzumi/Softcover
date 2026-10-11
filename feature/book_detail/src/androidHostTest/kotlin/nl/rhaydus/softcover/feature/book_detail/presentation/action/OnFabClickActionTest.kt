@@ -5,6 +5,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -21,7 +22,7 @@ class OnFabClickActionTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -35,7 +36,7 @@ class OnFabClickActionTest {
         @Test
         fun `sets fabMenuExpanded to true when it starts as false`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(fabMenuExpanded = false)
+            stateFlow.value = buildBookDetailUiState().copy(fabMenuExpanded = false)
             val action = OnFabClickAction()
 
             // ----- Act -----
@@ -51,7 +52,7 @@ class OnFabClickActionTest {
         @Test
         fun `sets fabMenuExpanded to false when it starts as true`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(fabMenuExpanded = true)
+            stateFlow.value = buildBookDetailUiState().copy(fabMenuExpanded = true)
             val action = OnFabClickAction()
 
             // ----- Act -----

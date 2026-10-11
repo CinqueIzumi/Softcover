@@ -13,6 +13,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.dismissed
+import nl.rhaydus.softcover.core.component.sheet.isOpen
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
+import nl.rhaydus.softcover.core.component.sheet.open
+import nl.rhaydus.softcover.core.component.sheet.requestClose
+import nl.rhaydus.softcover.core.component.sheet.withModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
@@ -28,6 +35,7 @@ import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 import nl.rhaydus.softcover.core.presentation.state.SplashState
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
+import nl.rhaydus.softcover.orchestration.presentation.ReAuthLogOut
 import nl.rhaydus.softcover.orchestration.presentation.ReAuthSheetUiModel
 import nl.rhaydus.softcover.orchestration.presentation.toSheetUiModel
 
@@ -62,13 +70,11 @@ internal class MainActivityViewModel(
             initialValue = ThemeConfiguration().colorPalette.toSpinePalette(),
         )
 
-    private val _reAuthState = MutableStateFlow(ReAuthState())
-
-    private var reAuthLogOutPending = false
+    private val reAuthSession = MutableStateFlow<SheetSession<ReAuthState, ReAuthLogOut>>(SheetSession.Closed)
 
     /** The re-auth sheet's model, or null while the sheet is not showing. */
-    val reAuthSheet: StateFlow<ReAuthSheetUiModel?> = _reAuthState
-        .map { if (it.visible) it.toSheetUiModel() else null }
+    val reAuthSheet: StateFlow<ReAuthSheetUiModel?> = reAuthSession
+        .map { it.toSheetUiModel() }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
@@ -96,7 +102,9 @@ internal class MainActivityViewModel(
             // While onboarding (unauthenticated) the API-key screen already owns token entry.
             SessionExpiredNotifier.events.collect {
                 if (_state.value.authenticated) {
-                    _reAuthState.update { state -> state.copy(visible = true) }
+                    reAuthSession.update { session ->
+                        if (session.isOpen) session else session.open(model = ReAuthState())
+                    }
                 }
             }
         }
@@ -107,7 +115,7 @@ internal class MainActivityViewModel(
     }
 
     fun onReAuthApiKeyChanged(value: String) {
-        _reAuthState.update { it.copy(apiKey = value) }
+        reAuthSession.update { it.withModel { form -> form.copy(apiKey = value) } }
     }
 
     /**
@@ -116,46 +124,46 @@ internal class MainActivityViewModel(
      * failure it stays open with an inline error so the user can retry.
      */
     fun reAuthenticate() {
-        val apiKey = _reAuthState.value.apiKey
+        val apiKey = reAuthSession.value.modelOrNull?.apiKey ?: return
 
         viewModelScope.launch {
-            _reAuthState.update {
-                it.copy(
-                    isSubmitting = true,
-                    errorMessage = null,
-                )
+            reAuthSession.update {
+                it.withModel { form ->
+                    form.copy(
+                        isSubmitting = true,
+                        errorMessage = null,
+                    )
+                }
             }
 
             reAuthenticateUseCase(apiKey)
-                .onSuccess { _reAuthState.update { it.copy(closeRequested = true) } }
+                .onSuccess { reAuthSession.update { it.requestClose() } }
                 .onFailure { error ->
                     AppLog.e("Re-authentication failed $error")
 
-                    _reAuthState.update {
-                        it.copy(
-                            isSubmitting = false,
-                            errorMessage = "That token didn't work. Check it and try again.",
-                        )
+                    reAuthSession.update {
+                        it.withModel { form ->
+                            form.copy(
+                                isSubmitting = false,
+                                errorMessage = "That token didn't work. Check it and try again.",
+                            )
+                        }
                     }
                 }
         }
     }
 
     fun onReAuthDismissed() {
-        _reAuthState.update { ReAuthState() }
+        val pending = reAuthSession.value.dismissed()
 
-        if (reAuthLogOutPending) {
-            reAuthLogOutPending = false
+        reAuthSession.value = SheetSession.Closed
 
-            logOut()
-        }
+        if (pending != null) logOut()
     }
 
     /** Escape hatch from the re-auth dialog: hides the sheet, then [onReAuthDismissed] logs out back to onboarding. */
     fun logOutFromReAuth() {
-        reAuthLogOutPending = true
-
-        _reAuthState.update { it.copy(closeRequested = true) }
+        reAuthSession.update { it.requestClose(pending = ReAuthLogOut) }
     }
 
     private fun logOut() {

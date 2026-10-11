@@ -32,6 +32,8 @@ import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.haptics.Feedback
+import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.component.snackbar.SoftcoverSnackbarHost
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -113,8 +115,6 @@ internal fun App() {
                         }
 
                         AppUpdateState.Downloaded -> {
-                            if (wasDownloading) haptics.commit()
-
                             SnackBarManager.showSnackBar(
                                 title = "Update downloaded. Restart to finish installing.",
                                 actionLabel = "Restart",
@@ -126,7 +126,7 @@ internal fun App() {
                         }
 
                         AppUpdateState.Failed -> {
-                            if (wasDownloading) haptics.reject()
+                            if (wasDownloading) haptics.play(Feedback.Failure)
 
                             SnackBarManager.showSnackbar(title = "Update failed. Please try again later.")
                         }
@@ -166,6 +166,7 @@ internal fun App() {
                                 CompositionLocalProvider(LocalBottomChromeAnchor provides bottomChromeAnchor) {
                                     Navigator(
                                         screen = if (state.authenticated) RootScreen else OnboardingScreen,
+                                        onBackPressed = null,
                                     )
                                 }
                             }

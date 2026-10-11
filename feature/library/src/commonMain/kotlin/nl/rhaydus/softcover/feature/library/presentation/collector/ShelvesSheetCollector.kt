@@ -6,8 +6,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.sheet.SheetRowCount
-import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel
+import nl.rhaydus.softcover.core.component.sheet.openOrUpdate
+import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -15,7 +16,7 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryTabStats
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.library.presentation.state.shelvesSheetScaffold
+import nl.rhaydus.softcover.feature.library.presentation.state.shelvesSheetUiModel
 import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
 import nl.rhaydus.toad.ActionScope
 
@@ -32,17 +33,17 @@ internal class ShelvesSheetCollector : LibraryCollector {
                     tabStatsByTab = state.tabStatsByTab,
                 )
 
-                rows to state.isShelvesSheetCloseRequested
+                rows.takeIf { state.isShelvesSheetRequested }
             }
             .distinctUntilChanged()
-            .collectLatest { (rows, closeRequested) ->
+            .collectLatest { rows ->
                 scope.setState {
                     it.copy(
-                        shelvesSheet = shelvesSheetScaffold().copy(closeRequested = closeRequested),
-                        shelvesSheetGroup = SheetRowGroupUiModel(
-                            rows = rows,
-                            dismissesSheet = false,
-                        ),
+                        shelvesSheet = if (rows == null || it.isShelvesSheetRequested.not()) {
+                            it.shelvesSheet.requestClose()
+                        } else {
+                            it.shelvesSheet.openOrUpdate(model = shelvesSheetUiModel(rows = rows))
+                        },
                     )
                 }
             }

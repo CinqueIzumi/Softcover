@@ -15,8 +15,8 @@ internal class OnShareBookClickAction : BookDetailAction {
     ) {
         scope.setState {
             it.copy(
-                isShareSheetVisible = true,
                 chosenShareVariant = null,
+                shareSheetRequested = true,
             ).withShareCapture(ShareCaptureState())
         }
     }

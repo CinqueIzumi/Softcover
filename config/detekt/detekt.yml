@@ -94,6 +94,15 @@ style:
       - 'cafe.adriel.voyager.**'
       - 'com.apollographql.apollo.**'
       - 'nl.rhaydus.softcover.core.domain.**'
+      # Forked into :core:component (swipe gate, one-shot dismiss, closing signal); use the local AdaptiveModalSheet.
+      - 'nl.rhaydus.designsystem.component.AdaptiveModalSheet'
+      # Forked into :core:component's modifier/ package; the foundation versions ignore the motion scheme.
+      - 'nl.rhaydus.designsystem.modifier.shakeOnError'
+      - 'nl.rhaydus.designsystem.nav.rememberPulseScale'
+      # Forked as tactileClickable / tactileSelectable / tactileToggleable (modifier/Tactile.kt); the foundation press modifiers ignore the motion scheme and hide their source.
+      - 'nl.rhaydus.designsystem.modifier.pressScale'
+      - 'nl.rhaydus.designsystem.modifier.pressScaleClickable'
+      - 'nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable'
   UnusedPrivateMember:
     # The shared baseline also exempts `Composable`. Softcover deliberately does not: an unused private
     # @Composable is dead UI code and should be caught. Only previews are exempt (they are entry points).

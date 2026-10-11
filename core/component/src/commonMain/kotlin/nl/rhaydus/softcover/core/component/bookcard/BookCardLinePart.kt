@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
 import androidx.compose.runtime.Immutable
+import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 
 @Immutable
 sealed interface BookCardLinePart {
@@ -9,6 +10,6 @@ sealed interface BookCardLinePart {
     data class Rating(
         val label: String,
         val contentDescription: String,
-        val transitionKey: String? = null,
+        val transitionKey: BookTransitionKey? = null,
     ) : BookCardLinePart
 }

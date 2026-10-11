@@ -1,6 +1,5 @@
 - [onStart + StateFlow double-emit](feedback_onstart_stateflow_double_emit.md) — an `.onStart{ check-and-fire }` guard on a StateFlow collector double-fires on startup; confirm with an instrumented test run
 - [Full-height sheet pinning is safe](architecture_full_height_sheet_pinning.md) — pinned rows + `weight(1f)+verticalScroll` body in AdaptiveModalSheet fills height on both forms; don't re-litigate
-- [Foundation press/click modifiers](architecture_foundation_press_modifiers.md) — pressScaleClickable hides its InteractionSource; hand-rolling pressScale+clickable is correct when the source is shared
 - [Design-system doc drift](project_design_system_doc_drift_pattern.md) — one UI fact/component is stated in several sections incl. patterns/*.md; grep the old value/name everywhere
 - [Staged vs unstaged review scope](feedback_staged_vs_unstaged_review_scope.md) — "unstaged changes" may mean everything uncommitted; reconcile `git diff HEAD` against the brief's prose
 - [Hook script not registered](project_hook_script_not_registered.md) — a new `.claude/hooks/*.sh` does nothing until `.claude/settings.json` wires its matcher; always check both
@@ -18,4 +17,4 @@
 - [Default-param chaining hides a redundant override](architecture_default_param_chaining_redundant_override.md) — a UiState default deriving from an earlier param auto-updates when that param is passed; a ScreenModel also setting the derived field explicitly is dead duplication, not defensiveness
 - [New shared component missing catalogue line](architecture_new_shared_component_missing_catalogue_line.md) — module-structure.md can get its new row while components.md never mentions the component; check both
 - [R9 citation covers R10 ground](architecture_r9_citation_covers_r10_ground.md) — "off the composition (R9)" on a stored UiState model list is house shorthand, not a wrong rule number
-- [Self-emitting foundation modifiers](architecture_foundation_self_emitting_modifiers.md) — clickable already emits hover (no extra hoverable); shakeOnError already fires reject haptic and ignores reduced motion
+- [Self-emitting click modifiers](architecture_foundation_self_emitting_modifiers.md) — clickable already emits hover; an extra hoverable on the same source doubles up

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,10 +24,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.hoverHighlight
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScale
+import nl.rhaydus.softcover.core.component.modifier.tactileSelectable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -46,8 +43,7 @@ private const val TILE_ASPECT_RATIO = 0.78f
  *
  * Selection is carried by a `primary` ring (2dp, against 1dp `outlineVariant` at rest) plus the
  * `primary` label beneath — no check badge, since the ring already says it once — and by
- * [Role.RadioButton] semantics for the reader who can see neither. Press feedback is `pressScale` on
- * the tile's own interaction source, with `pointerHandCursor` for desktop.
+ * [Role.RadioButton] semantics for the reader who can see neither.
  */
 @Composable
 internal fun PreviewTileFrame(
@@ -57,9 +53,7 @@ internal fun PreviewTileFrame(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val haptics = LocalHaptics.current
     val interactionSource = remember { MutableInteractionSource() }
-
     val motionScheme = MaterialTheme.motionScheme
     val accentColor by animateColorAsState(
         targetValue = if (selected) {
@@ -84,20 +78,12 @@ internal fun PreviewTileFrame(
 
     Column(
         modifier = modifier
-            .pointerHandCursor()
-            .pressScale(interactionSource)
-            .selectable(
+            .tactileSelectable(
                 selected = selected,
-                interactionSource = interactionSource,
-                indication = null,
+                onClick = onClick,
                 role = Role.RadioButton,
-                onClick = {
-                    if (selected.not()) {
-                        haptics.select()
-                    }
-
-                    onClick()
-                },
+                hoverShape = null,
+                interactionSource = interactionSource,
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

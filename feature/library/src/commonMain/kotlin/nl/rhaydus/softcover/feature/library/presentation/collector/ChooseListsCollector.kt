@@ -3,10 +3,10 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
-import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
-import nl.rhaydus.softcover.core.uibinding.lists.toBulkChooseListsUiModel
+import nl.rhaydus.softcover.core.component.sheet.isClosing
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
+import nl.rhaydus.softcover.core.component.sheet.openOrUpdate
+import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -19,35 +19,19 @@ internal class ChooseListsCollector : LibraryCollector {
         dependencies: LibraryDependencies,
     ) {
         scope.state
-            .map { state ->
-                ChooseListsSnapshot(
-                    selectedBookIds = state.selectedBookIds,
-                    customLists = state.customLists,
-                    listsBeingMutated = state.listsBeingMutated,
-                    jacketBooks = state.resolveSelectedBooks().take(SheetHeaderTrailing.JacketStack.MAX_COVERS),
-                )
-            }
+            .map { state -> state.isChooseListsSheetRequested to state.chooseListsSnapshot() }
             .distinctUntilChanged()
-            .collectLatest { snapshot ->
-                // Nothing selected means the sheet cannot be open, so there is no model to build.
-                // Selection mode itself is what prepares the model, so it is always ready by the
-                // time the sheet is raised.
-                val model = if (snapshot.selectedBookIds.isEmpty()) {
-                    null
-                } else {
-                    val covers = snapshot.jacketBooks.map { book ->
-                        book.toCoverUiModel(variant = CoverVariant.StackedJacket)
+            .collectLatest { (_, snapshot) ->
+                scope.setState {
+                    val sheet = it.chooseListsSheet
+                    val model = snapshot.toUiModel(previous = sheet.modelOrNull.takeUnless { sheet.isClosing })
+
+                    when {
+                        it.isChooseListsSheetRequested.not() -> it.copy(chooseListsSheet = sheet.requestClose())
+                        model == null -> it
+                        else -> it.copy(chooseListsSheet = sheet.openOrUpdate(model = model))
                     }
-
-                    snapshot.customLists.toBulkChooseListsUiModel(
-                        bookIds = snapshot.selectedBookIds,
-                        covers = covers,
-                        listsBeingMutated = snapshot.listsBeingMutated,
-                        previous = scope.currentState.chooseListsSheet,
-                    )
                 }
-
-                scope.setState { it.copy(chooseListsSheet = model) }
             }
     }
 }

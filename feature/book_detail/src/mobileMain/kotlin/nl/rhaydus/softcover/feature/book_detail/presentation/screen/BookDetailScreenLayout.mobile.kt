@@ -144,6 +144,7 @@ private fun BookDetailScreenReadingPreview() {
 
             BookDetailScreenLayout(
                 state = BookDetailUiState(
+                    bookId = book.id,
                     book = book,
                     topBar = topBarFor(book = book),
                     loadingBookDetails = true,
@@ -172,6 +173,7 @@ private fun BookDetailScreenNonePreview() {
 
             BookDetailScreenLayout(
                 state = BookDetailUiState(
+                    bookId = book.id,
                     book = book,
                     topBar = topBarFor(book = book),
                     loadingBookDetails = false,
@@ -200,6 +202,7 @@ private fun BookDetailScreenDnfPreview() {
 
             BookDetailScreenLayout(
                 state = BookDetailUiState(
+                    bookId = book.id,
                     book = book,
                     topBar = topBarFor(book = book),
                     loadingBookDetails = false,
@@ -228,6 +231,7 @@ private fun BookDetailScreenWantToReadPreview() {
 
             BookDetailScreenLayout(
                 state = BookDetailUiState(
+                    bookId = book.id,
                     book = book,
                     topBar = topBarFor(book = book),
                     loadingBookDetails = false,
@@ -256,6 +260,7 @@ private fun BookDetailScreenReadPreview() {
 
             BookDetailScreenLayout(
                 state = BookDetailUiState(
+                    bookId = book.id,
                     book = book,
                     topBar = topBarFor(book = book),
                     loadingBookDetails = false,

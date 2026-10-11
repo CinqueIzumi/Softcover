@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.profile.presentation.action
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -9,6 +8,8 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.share.ShareCaptureProgress
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
 import nl.rhaydus.softcover.core.component.share.ShareCardSheetEvent
+import nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
@@ -54,39 +55,8 @@ class OnShareCaptureEventActionTest {
         }
 
         @Test
-        fun `marks the held sheet busy with a sharing label for ShareStarted`() = runTest {
+        fun `records saving progress for SaveStarted`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
-                shareSheet = profileShareSheetFor(
-                    card = buildShareCard(),
-                    progress = ShareCaptureProgress.Idle,
-                    closeRequested = false,
-                ),
-            )
-            val action = OnShareCaptureEventAction(captureEvent = ShareCardSheetEvent.ShareStarted)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            val scaffold = stateFlow.value.shareSheet.shouldNotBeNull().scaffold
-            scaffold.busy shouldBe true
-            scaffold.footer.shouldNotBeNull().primary.shouldNotBeNull().label shouldBe "Sharing…"
-        }
-
-        @Test
-        fun `marks the held sheet busy and running the secondary button for SaveStarted`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
-                shareSheet = profileShareSheetFor(
-                    card = buildShareCard(),
-                    progress = ShareCaptureProgress.Idle,
-                    closeRequested = false,
-                ),
-            )
             val action = OnShareCaptureEventAction(captureEvent = ShareCardSheetEvent.SaveStarted)
 
             // ----- Act -----
@@ -96,21 +66,14 @@ class OnShareCaptureEventActionTest {
             )
 
             // ----- Assert -----
-            val scaffold = stateFlow.value.shareSheet.shouldNotBeNull().scaffold
-            scaffold.busy shouldBe true
-            scaffold.footer.shouldNotBeNull().secondary.shouldNotBeNull().running shouldBe true
+            stateFlow.value.shareCapture shouldBe ShareCaptureState(progress = ShareCaptureProgress.Saving)
         }
 
         @Test
-        fun `returns the held sheet to idle for CaptureFinished`() = runTest {
+        fun `returns the capture to idle for CaptureFinished`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
                 shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Sharing),
-                shareSheet = profileShareSheetFor(
-                    card = buildShareCard(),
-                    progress = ShareCaptureProgress.Sharing,
-                    closeRequested = false,
-                ),
             )
             val action = OnShareCaptureEventAction(captureEvent = ShareCardSheetEvent.CaptureFinished)
 
@@ -121,22 +84,29 @@ class OnShareCaptureEventActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.shareCapture.progress shouldBe ShareCaptureProgress.Idle
-            val scaffold = stateFlow.value.shareSheet.shouldNotBeNull().scaffold
-            scaffold.busy shouldBe false
-            scaffold.footer.shouldNotBeNull().primary.shouldNotBeNull().label shouldBe "Share"
+            stateFlow.value.shareCapture shouldBe ShareCaptureState()
         }
 
         @Test
-        fun `requests close on the held sheet for Shared`() = runTest {
+        fun `keeps the sheet requested while a capture runs`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
-                shareSheet = profileShareSheetFor(
-                    card = buildShareCard(),
-                    progress = ShareCaptureProgress.Idle,
-                    closeRequested = false,
-                ),
+            stateFlow.value = ProfileUiState(isShareSheetRequested = true)
+            val action = OnShareCaptureEventAction(captureEvent = ShareCardSheetEvent.ShareStarted)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
             )
+
+            // ----- Assert -----
+            stateFlow.value.isShareSheetRequested shouldBe true
+        }
+
+        @Test
+        fun `withdraws the sheet request for Shared`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ProfileUiState(isShareSheetRequested = true)
             val action = OnShareCaptureEventAction(captureEvent = ShareCardSheetEvent.Shared)
 
             // ----- Act -----
@@ -146,20 +116,15 @@ class OnShareCaptureEventActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.shareCapture.closeRequested shouldBe true
-            stateFlow.value.shareSheet.shouldNotBeNull().scaffold.closeRequested shouldBe true
+            stateFlow.value.isShareSheetRequested shouldBe false
         }
 
         @Test
-        fun `leaves capture state and visibility unchanged for Dismissed`() = runTest {
+        fun `leaves the capture and the request unchanged for Dismissed`() = runTest {
             // ----- Arrange -----
-            val capture = ShareCaptureState(
-                progress = ShareCaptureProgress.Saving,
-                closeRequested = true,
-            )
             stateFlow.value = ProfileUiState(
-                isShareSheetVisible = true,
-                shareCapture = capture,
+                isShareSheetRequested = true,
+                shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Saving),
             )
             val action = OnShareCaptureEventAction(captureEvent = ShareCardSheetEvent.Dismissed)
 
@@ -170,14 +135,21 @@ class OnShareCaptureEventActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.shareCapture shouldBe capture
-            stateFlow.value.isShareSheetVisible shouldBe true
+            stateFlow.value.isShareSheetRequested shouldBe true
+            stateFlow.value.shareCapture shouldBe ShareCaptureState(progress = ShareCaptureProgress.Saving)
         }
 
         @Test
-        fun `records the capture without a sheet when none is held`() = runTest {
+        fun `leaves the open share session to the collector for Shared`() = runTest {
             // ----- Arrange -----
-            val action = OnShareCaptureEventAction(captureEvent = ShareCardSheetEvent.SaveStarted)
+            val open: SheetSession<ShareCardSheetUiModel, Nothing> = SheetSession.Open(
+                model = profileShareSheetFor(
+                    card = buildShareCard(),
+                    progress = ShareCaptureProgress.Idle,
+                ),
+            )
+            stateFlow.value = ProfileUiState(shareSheet = open)
+            val action = OnShareCaptureEventAction(captureEvent = ShareCardSheetEvent.Shared)
 
             // ----- Act -----
             action.execute(
@@ -186,8 +158,7 @@ class OnShareCaptureEventActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.shareCapture.progress shouldBe ShareCaptureProgress.Saving
-            stateFlow.value.shareSheet shouldBe null
+            stateFlow.value.shareSheet shouldBe open
         }
     }
 }

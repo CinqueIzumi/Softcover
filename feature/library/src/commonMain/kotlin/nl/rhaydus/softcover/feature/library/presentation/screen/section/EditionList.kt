@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen.section
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -9,12 +11,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.fillMaxWidth
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyGridState
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
@@ -22,6 +19,7 @@ import nl.rhaydus.softcover.core.component.bookcard.bookCardHandOver
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
+import nl.rhaydus.softcover.core.component.haptics.rememberReorderHaptics
 import nl.rhaydus.softcover.core.component.reorder.reorderLift
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -32,6 +30,8 @@ import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReorderListBooksAction
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.state.isEditionListRearranging
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyGridState
 
 @Composable
 internal fun EditionList(
@@ -108,7 +108,7 @@ internal fun EditionList(
         gridState = gridState,
     )
 
-    val haptics = LocalHaptics.current
+    val reorderHaptics = rememberReorderHaptics()
 
     // Live shadow the reorder library mutates during a drag. Eagerly seeded and kept in
     // lock-step with the canonical list so the first frame is already correct — an empty seed
@@ -174,7 +174,7 @@ internal fun EditionList(
             orderedKeys.removeAt(fromIndex),
         )
 
-        haptics.tickle()
+        reorderHaptics.moved(toIndex)
 
         val current = minTouchedIndex.intValue
 
@@ -226,10 +226,10 @@ internal fun EditionList(
                         minTouchedIndex.intValue = -1
                         maxTouchedIndex.intValue = -1
 
-                        haptics.lift()
+                        reorderHaptics.lift()
                     },
                     onDragStopped = {
-                        haptics.drop()
+                        reorderHaptics.drop()
 
                         val min = minTouchedIndex.intValue
                         val max = maxTouchedIndex.intValue

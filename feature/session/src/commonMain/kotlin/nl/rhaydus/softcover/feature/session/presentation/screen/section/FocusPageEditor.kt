@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
 import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
-import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.softcover.core.component.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction

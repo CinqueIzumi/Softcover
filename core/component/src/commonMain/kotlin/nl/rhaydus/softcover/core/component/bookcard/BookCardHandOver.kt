@@ -1,17 +1,16 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.LazyItemMutationAnimator
 import nl.rhaydus.designsystem.component.StaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.mutationAnimated
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
-
-private const val STAND_IN_FADE_OUT_MILLIS = 150
+import nl.rhaydus.designsystem.component.staggeredEntry
 
 @Composable
 fun Modifier.bookCardHandOver(
@@ -20,31 +19,27 @@ fun Modifier.bookCardHandOver(
     animator: LazyItemMutationAnimator,
     coordinator: StaggeredEntryCoordinator,
     index: Int,
-): Modifier {
-    if (card.isLoading.not()) {
-        return mutationAnimated(
+): Modifier = handOver(
+    card = card,
+    coordinator = coordinator,
+    index = index,
+    realCard = {
+        mutationAnimated(
             scope = scope,
             animator = animator,
             itemKey = card.key.lazyKey,
-        ).bookCardStaggeredEntry(
-            card = card,
-            coordinator = coordinator,
-            index = index,
         )
-    }
-
-    if (playDecorativeMotion().not()) return this
-
-    return then(
+    },
+    standIn = { fadeOutSpec ->
         with(scope) {
             Modifier.animateItem(
                 fadeInSpec = null,
                 placementSpec = null,
-                fadeOutSpec = tween(durationMillis = STAND_IN_FADE_OUT_MILLIS),
+                fadeOutSpec = fadeOutSpec,
             )
-        },
-    )
-}
+        }
+    },
+)
 
 @Composable
 fun Modifier.bookCardHandOver(
@@ -53,30 +48,44 @@ fun Modifier.bookCardHandOver(
     animator: LazyItemMutationAnimator,
     coordinator: StaggeredEntryCoordinator,
     index: Int,
-): Modifier {
-    if (card.isLoading.not()) {
-        return mutationAnimated(
+): Modifier = handOver(
+    card = card,
+    coordinator = coordinator,
+    index = index,
+    realCard = {
+        mutationAnimated(
             scope = scope,
             animator = animator,
             itemKey = card.key.lazyKey,
-        ).bookCardStaggeredEntry(
-            card = card,
+        )
+    },
+    standIn = { fadeOutSpec ->
+        with(scope) {
+            Modifier.animateItem(
+                fadeInSpec = null,
+                placementSpec = null,
+                fadeOutSpec = fadeOutSpec,
+            )
+        }
+    },
+)
+
+@Composable
+private fun Modifier.handOver(
+    card: BookCardUiModel,
+    coordinator: StaggeredEntryCoordinator,
+    index: Int,
+    realCard: @Composable Modifier.() -> Modifier,
+    standIn: (FiniteAnimationSpec<Float>) -> Modifier,
+): Modifier {
+    if (card.isLoading.not()) {
+        return realCard().staggeredEntry(
             coordinator = coordinator,
             index = index,
         )
     }
 
-    if (playDecorativeMotion().not()) return this
-
-    return then(
-        with(scope) {
-            Modifier.animateItem(
-                fadeInSpec = null,
-                placementSpec = null,
-                fadeOutSpec = tween(durationMillis = STAND_IN_FADE_OUT_MILLIS),
-            )
-        },
-    )
+    return then(standIn(MaterialTheme.motionScheme.fastEffectsSpec()))
 }
 
 /**

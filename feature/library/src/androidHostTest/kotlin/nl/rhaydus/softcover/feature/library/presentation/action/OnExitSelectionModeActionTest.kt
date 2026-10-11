@@ -5,8 +5,12 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.dismissed
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.openChooseListsSession
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.CreateList
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
@@ -33,14 +37,12 @@ class OnExitSelectionModeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `leaves selection mode, clears the selection and dismisses every bulk surface`() = runTest {
+        fun `leaves selection mode and clears the selection and the in-flight lists`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
                 selectedBookIds = setOf(1, 2),
                 isBulkMoveMenuExpanded = true,
-                isBulkRemoveSheetShown = true,
-                isBulkAddToListSheetShown = true,
                 listsBeingMutated = setOf(5),
             )
 
@@ -54,9 +56,66 @@ class OnExitSelectionModeActionTest {
             stateFlow.value.selectionMode shouldBe false
             stateFlow.value.selectedBookIds shouldBe emptySet()
             stateFlow.value.isBulkMoveMenuExpanded shouldBe false
-            stateFlow.value.isBulkRemoveSheetShown shouldBe false
-            stateFlow.value.isBulkAddToListSheetShown shouldBe false
             stateFlow.value.listsBeingMutated shouldBe emptySet()
+        }
+
+        @Test
+        fun `withdraws the bulk sheet requests so the collectors hide them`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = setOf(1, 2),
+                isBulkRemoveSheetRequested = true,
+                isChooseListsSheetRequested = true,
+            )
+
+            // ----- Act -----
+            OnExitSelectionModeAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isBulkRemoveSheetRequested shouldBe false
+            stateFlow.value.isChooseListsSheetRequested shouldBe false
+        }
+
+        @Test
+        fun `keeps a create-list request recorded on the chooser`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = setOf(1),
+                chooseListsSheet = openChooseListsSession(pending = CreateList),
+            )
+
+            // ----- Act -----
+            OnExitSelectionModeAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.chooseListsSheet.dismissed() shouldBe CreateList
+        }
+
+        @Test
+        fun `leaves closed bulk surfaces closed`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = setOf(1),
+            )
+
+            // ----- Act -----
+            OnExitSelectionModeAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.bulkRemoveSheet shouldBe SheetSession.Closed
+            stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
         }
     }
 }

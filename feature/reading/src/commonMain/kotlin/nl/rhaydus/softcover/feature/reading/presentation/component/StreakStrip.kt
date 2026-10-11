@@ -28,7 +28,7 @@ import kotlinx.datetime.plus
 import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.component.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.state.skeletonMask
@@ -66,7 +66,7 @@ internal fun StreakStrip(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .pressScaleClickable(
+                .tactileClickable(
                     onClick = {
                         haptics.select()
 

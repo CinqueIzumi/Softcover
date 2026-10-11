@@ -16,6 +16,10 @@ internal class OnShareCaptureEventAction(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.withShareCapture(it.shareCapture.reduce(captureEvent)) }
+        scope.setState {
+            it.copy(
+                shareSheetRequested = it.shareSheetRequested && captureEvent != ShareCardSheetEvent.Shared,
+            ).withShareCapture(it.shareCapture.reduce(captureEvent))
+        }
     }
 }

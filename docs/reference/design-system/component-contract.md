@@ -118,9 +118,10 @@ noise.
 `:core:uibinding` when a second feature needs the **identical** mapping. Two features mapping differently
 onto the same UI model (`explore` → `Column`, `library` → `Row`) keep two mappers, permanently.
 
-**R7 — Shared-element keys travel in the model.** `bookTransitionKey(element, editionId, bookId, surface)`
-stays in `:core:designsystem` as a token. The mapper resolves the key string once and stores it on the model
-of the component that runs the transition (`CoverUiModel.sharedTransitionKey`,
+**R7 — Shared-element keys travel in the model.** `bookTransitionKey(element, bookId, surface)`
+returns a `BookTransitionKey`, built only by that builder in `:core:component` (the type's constructor is
+internal); keys are keyed on the book id alone. The mapper resolves a `BookTransitionKey` and stores it on the
+model of the component that runs the transition (`CoverUiModel.sharedTransitionKey`,
 `BookCardContent.titleTransitionKey`, `BookCardLinePart.Rating.transitionKey`). A component never computes a
 transition key; it does not know which surface it is on.
 

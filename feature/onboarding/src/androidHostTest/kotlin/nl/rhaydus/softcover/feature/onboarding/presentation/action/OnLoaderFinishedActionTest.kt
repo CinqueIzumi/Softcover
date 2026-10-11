@@ -1,14 +1,22 @@
 package nl.rhaydus.softcover.feature.onboarding.presentation.action
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.dismissed
+import nl.rhaydus.softcover.core.component.sheet.isClosing
+import nl.rhaydus.softcover.core.component.sheet.isOpen
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
+import nl.rhaydus.softcover.feature.onboarding.presentation.state.SignInCompleted
+import nl.rhaydus.softcover.feature.onboarding.presentation.state.onboardingLoadingSheet
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -35,13 +43,10 @@ class OnLoaderFinishedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `requests the sheet to close and records the sign-in without sending an event`() = runTest {
+        fun `requests the sheet to close, records the sign-in and sends no event`() = runTest {
             // ----- Arrange -----
-            val initial = stateFlow.value
-            stateFlow.value = initial.copy(
-                loadingSheet = initial.loadingSheet.copy(isLoading = true),
-                signInPending = false,
-            )
+            val model = onboardingLoadingSheet(progress = 1f)
+            stateFlow.value = stateFlow.value.copy(loadingSheet = SheetSession.Open(model = model))
 
             // ----- Act -----
             OnLoaderFinishedAction.execute(
@@ -50,10 +55,26 @@ class OnLoaderFinishedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe true
-            stateFlow.value.loadingSheet.isLoading shouldBe true
-            stateFlow.value.signInPending shouldBe true
+            stateFlow.value.loadingSheet.isClosing shouldBe true
+            stateFlow.value.loadingSheet.modelOrNull.shouldNotBeNull() shouldBe model.requestingClose()
+            stateFlow.value.loadingSheet.dismissed() shouldBe SignInCompleted
             eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `leaves a closed sheet closed`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(loadingSheet = SheetSession.Closed)
+
+            // ----- Act -----
+            OnLoaderFinishedAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.loadingSheet.isOpen shouldBe false
+            stateFlow.value.loadingSheet.dismissed() shouldBe null
         }
     }
 }

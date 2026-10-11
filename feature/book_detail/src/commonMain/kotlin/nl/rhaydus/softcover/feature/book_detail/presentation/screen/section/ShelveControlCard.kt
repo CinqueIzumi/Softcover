@@ -35,10 +35,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
-import nl.rhaydus.designsystem.modifier.shakeOnError
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.modifier.rememberPulseScale
+import nl.rhaydus.softcover.core.component.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.state.clippedSkeletonMask
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -188,7 +188,6 @@ private fun ShelveRow(
     val selectedContent = MaterialTheme.colorScheme.onPrimary
     val unselectedContent = MaterialTheme.colorScheme.onSurfaceVariant
 
-    val playMotion = playDecorativeMotion()
     val wipeSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
     val celebrationSpec = MaterialTheme.motionScheme.slowEffectsSpec<Float>()
 
@@ -229,8 +228,10 @@ private fun ShelveRow(
 
     val celebration = remember { Animatable(initialValue = 1f) }
 
+    val initialCelebrationKey = remember { celebrationKey }
+
     LaunchedEffect(celebrationKey) {
-        if (celebrationKey == 0 || playMotion.not()) return@LaunchedEffect
+        if (celebrationKey == initialCelebrationKey) return@LaunchedEffect
 
         celebration.snapTo(targetValue = 0f)
         celebration.animateTo(
@@ -241,11 +242,10 @@ private fun ShelveRow(
 
     val progress = celebration.value
 
-    val iconScale = if (progress < 0.5f) {
-        1f + progress * 2f * 0.25f
-    } else {
-        1.25f - (progress - 0.5f) * 2f * 0.25f
-    }
+    val iconScale = rememberPulseScale(
+        trigger = celebrationKey,
+        peakScale = 1.25f,
+    )
 
     val iconReveal = (progress / 0.6f).coerceIn(
         minimumValue = 0f,

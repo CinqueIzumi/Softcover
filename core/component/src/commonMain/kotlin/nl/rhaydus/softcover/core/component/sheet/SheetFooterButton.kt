@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.component.sheet
 
 import androidx.compose.runtime.Immutable
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
  * [running] shows a spinner on this button while its work is in flight and disables the whole footer.
@@ -14,4 +15,6 @@ data class SheetFooterButton(
     val enabled: Boolean = true,
     val dismissesSheet: Boolean = false,
     val running: Boolean = false,
+    val emphasis: SheetFooterEmphasis = SheetFooterEmphasis.Default,
+    val icon: SoftcoverIcon? = null,
 )

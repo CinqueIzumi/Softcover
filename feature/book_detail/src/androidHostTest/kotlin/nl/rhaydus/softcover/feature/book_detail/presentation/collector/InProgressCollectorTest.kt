@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -30,7 +31,7 @@ class InProgressCollectorTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -64,7 +65,7 @@ class InProgressCollectorTest {
         @Test
         fun `sets inProgress from the book in state`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = stubBook(progress = 10f))
+            stateFlow.value = buildBookDetailUiState().copy(book = stubBook(progress = 10f))
             val collector = InProgressCollector()
 
             // ----- Act -----
@@ -85,7 +86,7 @@ class InProgressCollectorTest {
         @Test
         fun `clears inProgress when the book is removed`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = stubBook(progress = 10f))
+            stateFlow.value = buildBookDetailUiState().copy(book = stubBook(progress = 10f))
             val collector = InProgressCollector()
             val job = launch {
                 collector.onLaunch(

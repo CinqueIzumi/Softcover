@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnApplyFiltersAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSheetExpandedChangeAction
@@ -59,9 +60,9 @@ internal fun LibrarySheets(
         )
     }
 
-    if (state.isBulkRemoveSheetShown) {
+    state.bulkRemoveSheet.modelOrNull?.let { scaffold ->
         SheetScaffold(
-            model = state.bulkRemoveSheet,
+            model = scaffold,
             onEvent = { event ->
                 when (event) {
                     SheetScaffoldEvent.PrimaryClicked -> {
@@ -78,9 +79,7 @@ internal fun LibrarySheets(
         )
     }
 
-    val chooseListsSheet = state.chooseListsSheet
-
-    if (state.isBulkAddToListSheetShown && state.selectedBookIds.isNotEmpty() && chooseListsSheet != null) {
+    state.chooseListsSheet.modelOrNull?.let { chooseListsSheet ->
         ChooseListsBottomSheet(
             model = chooseListsSheet,
             onEvent = { event ->

@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -32,7 +33,7 @@ class OnShowEditEditionSheetClickActionTest {
     @BeforeEach
     fun setUp() {
         getEditionsByBookIdUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -96,7 +97,7 @@ class OnShowEditEditionSheetClickActionTest {
                 id = bookId,
                 currentEdition = currentEdition,
             )
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -120,7 +121,7 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Arrange -----
             val bookId = 42
             val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -145,7 +146,7 @@ class OnShowEditEditionSheetClickActionTest {
             val bookId = 42
             val book = stubBook(id = bookId)
             val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -170,7 +171,7 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Arrange -----
             val bookId = 42
             val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -194,7 +195,7 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Arrange -----
             val bookId = 7
             val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             var loadingAtInvocation: Boolean? = null
@@ -224,7 +225,7 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Arrange -----
             val bookId = 5
             val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             localVariablesFlow.value = BookDetailLocalVariables(editionsLoadedForBookId = bookId)
             dependencies = stubDependencies(this)
 
@@ -247,7 +248,7 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Arrange -----
             val bookId = 5
             val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 showEditEditionSheet = false,
             )
@@ -271,7 +272,7 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Arrange -----
             val bookId = 99
             val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -296,7 +297,7 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Arrange -----
             val bookId = 99
             val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -318,7 +319,7 @@ class OnShowEditEditionSheetClickActionTest {
         @Test
         fun `is a no-op when book in state is null`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null)
+            stateFlow.value = buildBookDetailUiState().copy(book = null)
             dependencies = stubDependencies(this)
 
             val action = OnShowEditEditionSheetClickAction()

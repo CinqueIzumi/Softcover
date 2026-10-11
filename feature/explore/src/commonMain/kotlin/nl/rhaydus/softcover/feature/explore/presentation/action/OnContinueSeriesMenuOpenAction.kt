@@ -6,11 +6,13 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVaria
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ActionScope
 
-internal class OnContinueSeriesMenuOpenAction : ExploreAction {
+internal class OnContinueSeriesMenuOpenAction(
+    val bookId: Int,
+) : ExploreAction {
     override suspend fun execute(
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        scope.setState { it.copy(pendingContinueSeriesDismissal = null) }
+        scope.setState { it.copy(continueSeriesMenuBookId = bookId) }
     }
 }

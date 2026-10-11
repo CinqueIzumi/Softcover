@@ -9,8 +9,11 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.designsystem.util.rememberClipboardReader
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoaderFinishedAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoadingSheetDismissedAction
@@ -35,14 +38,15 @@ object OnboardingScreen : Screen {
         val haptics = LocalHaptics.current
 
         ObserveAsEvents(flow = screenModel.events) {
+            if (it is FeedbackEvent) haptics.play(it.feedback)
+
             when (it) {
-                is OnboardingEvent.SignedInEvent -> haptics.commit()
-
-                is OnboardingEvent.ApiKeyRejectedEvent -> haptics.reject()
-
                 is OnboardingEvent.SignInCompletedEvent -> {
                     sessionAuthenticator.setUserAuthenticated(authenticated = true)
                 }
+
+                is OnboardingEvent.SignedInEvent,
+                is OnboardingEvent.SignInFailedEvent -> Unit
             }
         }
 
@@ -53,16 +57,18 @@ object OnboardingScreen : Screen {
             getCopiedText = clipboardReader::read,
         )
 
-        LoadingSheet(
-            model = state.loadingSheet,
-            onEvent = { event ->
-                when (event) {
-                    LoadingSheetEvent.LoaderFinished -> screenModel.runAction(OnLoaderFinishedAction)
+        state.loadingSheet.modelOrNull?.let { loadingSheet ->
+            LoadingSheet(
+                model = loadingSheet,
+                onEvent = { event ->
+                    when (event) {
+                        LoadingSheetEvent.LoaderFinished -> screenModel.runAction(OnLoaderFinishedAction)
 
-                    LoadingSheetEvent.Dismissed -> screenModel.runAction(OnLoadingSheetDismissedAction)
-                }
-            },
-        )
+                        LoadingSheetEvent.Dismissed -> screenModel.runAction(OnLoadingSheetDismissedAction)
+                    }
+                },
+            )
+        }
     }
 }
 

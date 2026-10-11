@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.component.button.PillButtonContent
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -79,7 +80,7 @@ class TagNamingFieldBuilderTest {
         @Test
         fun `stores the draft and mirrors it onto the naming field text`() {
             // ----- Arrange -----
-            val state = BookDetailUiState()
+            val state = buildBookDetailUiState()
 
             // ----- Act -----
             val result = state.withTagDraft(input = "slow burn")
@@ -92,7 +93,7 @@ class TagNamingFieldBuilderTest {
         @Test
         fun `keeps the naming field placeholder and variant`() {
             // ----- Arrange -----
-            val state = BookDetailUiState()
+            val state = buildBookDetailUiState()
 
             // ----- Act -----
             val result = state.withTagDraft(input = "slow burn")

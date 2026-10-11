@@ -17,7 +17,6 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
@@ -29,7 +28,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
-import nl.rhaydus.softcover.core.presentation.util.TabReselectEffect
+import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.core.presentation.util.scrollToTop
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
@@ -127,16 +126,14 @@ internal actual fun ExploreScreenLayout(
         }
     }
 
-    val animateScroll = playDecorativeMotion()
-
     val pullToRefreshState = rememberPullToRefreshState()
 
-    TabReselectEffect(tab = ExploreTab) {
+    TabReselectScrollToTopEffect(tab = ExploreTab) { animate ->
         when {
             isOnline.not() -> false
-            state.searchPhase == ExploreSearchPhase.FEED -> editorialScrollState.scrollToTop(animateScroll)
-            state.searchPhase == ExploreSearchPhase.FOCUS -> focusScrollState.scrollToTop(animateScroll)
-            showsResultsList -> resultsListState.scrollToTop(animateScroll)
+            state.searchPhase == ExploreSearchPhase.FEED -> editorialScrollState.scrollToTop(animate)
+            state.searchPhase == ExploreSearchPhase.FOCUS -> focusScrollState.scrollToTop(animate)
+            showsResultsList -> resultsListState.scrollToTop(animate)
             else -> false
         }
     }
@@ -213,6 +210,7 @@ private fun List<Book>.toPreviewTrendingSet(): BookCardSet<Book> = map { book ->
             transitionSurface = SURFACE_TRENDING,
         ),
         coverBadge = null,
+        transitionSurface = SURFACE_TRENDING,
     ) to book
 }.toBookCardSet()
 
@@ -305,7 +303,9 @@ private fun LoadingTrendingExploreScreenPreview() {
                 continueSeriesBooks = ExploreMockData.continueSeries,
                 loadingContinueSeriesBooks = false,
                 previousSearchQueries = listOf("Bubblegum", "Earthlings"),
-                recentSearchChips = RecentSearchChipsSnapshot(previousSearchQueries = listOf("Bubblegum", "Earthlings")).compute(),
+                recentSearchChips = RecentSearchChipsSnapshot(
+                    previousSearchQueries = listOf("Bubblegum", "Earthlings"),
+                ).compute(),
                 loadingFeaturedUpcomingRelease = false,
                 loadingBecauseYouReadBooks = false,
                 loadingMoodTags = false,

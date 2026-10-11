@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.component.chart
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -23,7 +21,6 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -53,7 +50,6 @@ internal fun ColumnReadout(
         if (centerX != null) lastCenterX = centerX
     }
 
-    val decorative = playDecorativeMotion()
     val effects = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
     val spatial = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
     val gap = Spacing.xs
@@ -81,22 +77,14 @@ internal fun ColumnReadout(
     ) {
         AnimatedVisibility(
             visible = text != null,
-            enter = if (decorative) {
-                fadeIn(effects) + scaleIn(
-                    spatial,
-                    initialScale = 0.9f,
-                )
-            } else {
-                EnterTransition.None
-            },
-            exit = if (decorative) {
-                fadeOut(effects) + scaleOut(
-                    spatial,
-                    targetScale = 0.9f,
-                )
-            } else {
-                ExitTransition.None
-            },
+            enter = fadeIn(effects) + scaleIn(
+                spatial,
+                initialScale = 0.9f,
+            ),
+            exit = fadeOut(effects) + scaleOut(
+                spatial,
+                targetScale = 0.9f,
+            ),
         ) {
             SoftcoverText(
                 text = text ?: lastText,

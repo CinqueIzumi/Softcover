@@ -12,13 +12,13 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.book.bookStatsLine
 import nl.rhaydus.softcover.core.uibinding.book.byline
 import nl.rhaydus.softcover.core.uibinding.book.ratingPart
-import nl.rhaydus.softcover.core.uibinding.book.ratingTransitionKey
 import nl.rhaydus.softcover.core.uibinding.book.seriesEyebrow
-import nl.rhaydus.softcover.core.uibinding.book.titleTransitionKey
+import nl.rhaydus.softcover.core.uibinding.book.transitionKey
 
 /** Trending's card: no byline, and a rating line only for a rated book. */
 internal fun Book.toTrendingCard(
@@ -30,7 +30,10 @@ internal fun Book.toTrendingCard(
     coverBadge = coverBadge,
     text = BookCardContent(
         title = title,
-        titleTransitionKey = titleTransitionKey(surface = transitionSurface),
+        titleTransitionKey = transitionKey(
+            element = BookTransitionElement.Title,
+            surface = transitionSurface,
+        ),
         supportingLines = if (rating == 0.0) {
             persistentListOf()
         } else {
@@ -38,7 +41,10 @@ internal fun Book.toTrendingCard(
                 persistentListOf(
                     ratingPart(
                         rating = rating,
-                        transitionKey = ratingTransitionKey(surface = transitionSurface),
+                        transitionKey = transitionKey(
+                            element = BookTransitionElement.Rating,
+                            surface = transitionSurface,
+                        ),
                     ),
                 ),
             )
@@ -56,7 +62,10 @@ internal fun Book.toBecauseYouReadCard(
     coverBadge = coverBadge,
     text = BookCardContent(
         title = title,
-        titleTransitionKey = titleTransitionKey(surface = transitionSurface),
+        titleTransitionKey = transitionKey(
+            element = BookTransitionElement.Title,
+            surface = transitionSurface,
+        ),
         byline = byline(author = authorString),
     ),
 )
@@ -71,7 +80,10 @@ internal fun Book.toUpNextCard(
     coverBadge = coverBadge,
     text = BookCardContent(
         title = title,
-        titleTransitionKey = titleTransitionKey(surface = transitionSurface),
+        titleTransitionKey = transitionKey(
+            element = BookTransitionElement.Title,
+            surface = transitionSurface,
+        ),
         eyebrow = seriesEyebrow(seriesText = bookSeries?.name),
         supportingLines = positionInSeriesDisplay
             ?.let { position ->
@@ -95,7 +107,10 @@ internal fun Book.toSearchResultCard(
             lead = BookCardLead.Cover(cover = BookCardCover(model = cover)),
             text = BookCardContent(
                 title = title,
-                titleTransitionKey = titleTransitionKey(surface = transitionSurface),
+                titleTransitionKey = transitionKey(
+                    element = BookTransitionElement.Title,
+                    surface = transitionSurface,
+                ),
                 eyebrow = seriesEyebrow(seriesText = seriesText),
                 byline = byline(author = authorString),
                 supportingLines = listOfNotNull(
@@ -103,7 +118,10 @@ internal fun Book.toSearchResultCard(
                         releaseYear = releaseYear,
                         usersCount = usersCount,
                         rating = rating,
-                        ratingTransitionKey = ratingTransitionKey(surface = transitionSurface),
+                        ratingTransitionKey = transitionKey(
+                            element = BookTransitionElement.Rating,
+                            surface = transitionSurface,
+                        ),
                     ),
                 ).toImmutableList(),
             ),

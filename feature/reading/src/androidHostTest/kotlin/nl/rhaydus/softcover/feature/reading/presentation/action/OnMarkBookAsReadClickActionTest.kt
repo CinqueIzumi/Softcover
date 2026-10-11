@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -180,7 +180,7 @@ class OnMarkBookAsReadClickActionTest {
         }
 
         @Test
-        fun `sends MarkAsReadFailedEvent when the use case fails`() = runTest {
+        fun `sends no event when the use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
             val dependencies = stubDependencies(this)
@@ -198,7 +198,7 @@ class OnMarkBookAsReadClickActionTest {
             )
 
             // ----- Assert -----
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ReadingScreenEvent.MarkAsReadFailedEvent>()
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
 
         @Test

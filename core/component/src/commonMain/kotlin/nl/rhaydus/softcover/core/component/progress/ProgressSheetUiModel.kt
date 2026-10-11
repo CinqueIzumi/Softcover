@@ -10,7 +10,11 @@ import nl.rhaydus.softcover.core.component.control.SegmentUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
+import nl.rhaydus.softcover.core.component.sheet.SheetFooterEmphasis
+import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
@@ -36,7 +40,11 @@ data class ProgressSheetUiModel(
     val tabs: SegmentedControlUiModel<ProgressSheetTab>,
     val whenRead: WhenReadUiModel,
     val scaffold: SheetScaffoldUiModel,
-) {
+) : SheetModel<ProgressSheetUiModel> {
+    override val closeRequested: Boolean get() = scaffold.closeRequested
+
+    override fun requestingClose(): ProgressSheetUiModel = copy(scaffold = scaffold.requestingClose())
+
     companion object : UiModelPreviews<ProgressSheetUiModel> {
         /**
          * Percentage entry needs a known total to convert a fraction into pages (or seconds); without one
@@ -72,6 +80,27 @@ data class ProgressSheetUiModel(
             )
         }
 
+        fun scaffoldFor(bookTitle: String): SheetScaffoldUiModel = SheetScaffoldUiModel(
+            header = SheetHeaderUiModel(
+                section = SectionHeaderUiModel.Section(
+                    eyebrow = "Reading progress",
+                    headline = bookTitle,
+                ),
+            ),
+            footer = SheetFooterUiModel.Stacked(
+                primary = SheetFooterButton(
+                    label = "Update progress",
+                    dismissesSheet = true,
+                ),
+                secondary = SheetFooterButton(
+                    label = "Mark as read",
+                    dismissesSheet = true,
+                    emphasis = SheetFooterEmphasis.Outlined,
+                    icon = SoftcoverIcon.Check,
+                ),
+            ),
+        )
+
         private fun fixture(
             bookTitle: String,
             medium: ProgressSheetMedium,
@@ -94,14 +123,7 @@ data class ProgressSheetUiModel(
                 timeLabel = "09:41",
                 canShiftLater = false,
             ),
-            scaffold = SheetScaffoldUiModel(
-                header = SheetHeaderUiModel(
-                    section = SectionHeaderUiModel.Section(
-                        eyebrow = "Reading progress",
-                        headline = bookTitle,
-                    ),
-                ),
-            ),
+            scaffold = scaffoldFor(bookTitle = bookTitle),
         )
 
         /**

@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlin.time.Clock
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,7 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineRowUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -32,7 +34,6 @@ import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import kotlin.time.Clock
 
 class BookDeadlineCollectorTest {
     private lateinit var observeBookDeadlineUseCase: ObserveBookDeadlineUseCase
@@ -45,7 +46,7 @@ class BookDeadlineCollectorTest {
     fun setUp() {
         deadlineFlow = MutableSharedFlow()
         observeBookDeadlineUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -132,14 +133,14 @@ class BookDeadlineCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `publishes the deadline and its row computed from progress and the date style`() = runTest(UnconfinedTestDispatcher()) {
+        fun `publishes the deadline and its row from progress and date style`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(
                 id = 1,
                 pages = 300,
                 currentPage = 0,
             )
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             val deadline = buildDeadline(
                 bookId = 1,
                 initialPerDay = 10f,
@@ -176,7 +177,7 @@ class BookDeadlineCollectorTest {
                     pages = null,
                     currentPage = 0,
                 )
-                stateFlow.value = BookDetailUiState(book = book)
+                stateFlow.value = buildBookDetailUiState().copy(book = book)
                 val deadline = buildDeadline(bookId = 1)
 
                 val collector = BookDeadlineCollector()
@@ -204,7 +205,7 @@ class BookDeadlineCollectorTest {
                 pages = 300,
                 currentPage = 0,
             )
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
 
             val collector = BookDeadlineCollector()
             val job = launch {
@@ -235,7 +236,7 @@ class BookDeadlineCollectorTest {
                 pages = totalPages,
                 currentPage = 0,
             )
-            stateFlow.value = BookDetailUiState(book = bookBefore)
+            stateFlow.value = buildBookDetailUiState().copy(book = bookBefore)
 
             val deadline = buildDeadline(
                 bookId = bookId,
@@ -272,7 +273,7 @@ class BookDeadlineCollectorTest {
         @Test
         fun `deadlineRow is null when book is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null)
+            stateFlow.value = buildBookDetailUiState().copy(book = null)
 
             val collector = BookDeadlineCollector()
             val job = launch {

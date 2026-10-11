@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.profile.presentation.action
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -8,12 +7,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.share.ShareCaptureProgress
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
-import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareCard
-import nl.rhaydus.softcover.feature.profile.presentation.state.profileShareSheetFor
+import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareProfile
+import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareReadingLife
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -38,8 +38,12 @@ class OnShareSheetOpenActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `shows the sheet`() = runTest {
+        fun `requests the sheet when the reading life and profile are loaded`() = runTest {
             // ----- Arrange -----
+            stateFlow.value = ProfileUiState(
+                readingLife = buildShareReadingLife(),
+                userProfileData = buildShareProfile(),
+            )
             val action = OnShareSheetOpenAction()
 
             // ----- Act -----
@@ -49,17 +53,35 @@ class OnShareSheetOpenActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isShareSheetVisible shouldBe true
+            stateFlow.value.isShareSheetRequested shouldBe true
         }
 
         @Test
-        fun `resets leftover capture progress and close request`() = runTest {
+        fun `leaves opening the session to the collector`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
-                shareCapture = ShareCaptureState(
-                    progress = ShareCaptureProgress.Saving,
-                    closeRequested = true,
-                ),
+                readingLife = buildShareReadingLife(),
+                userProfileData = buildShareProfile(),
+            )
+            val action = OnShareSheetOpenAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe SheetSession.Closed
+        }
+
+        @Test
+        fun `resets leftover capture progress from an earlier opening`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ProfileUiState(
+                readingLife = buildShareReadingLife(),
+                userProfileData = buildShareProfile(),
+                shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Saving),
             )
             val action = OnShareSheetOpenAction()
 
@@ -74,15 +96,9 @@ class OnShareSheetOpenActionTest {
         }
 
         @Test
-        fun `resets the held sheet scaffold to idle`() = runTest {
+        fun `stays unrequested when only the reading life has loaded`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
-                shareSheet = profileShareSheetFor(
-                    card = buildShareCard(),
-                    progress = ShareCaptureProgress.Sharing,
-                    closeRequested = true,
-                ),
-            )
+            stateFlow.value = ProfileUiState(readingLife = buildShareReadingLife())
             val action = OnShareSheetOpenAction()
 
             // ----- Act -----
@@ -92,14 +108,13 @@ class OnShareSheetOpenActionTest {
             )
 
             // ----- Assert -----
-            val scaffold = stateFlow.value.shareSheet.shouldNotBeNull().scaffold
-            scaffold.busy shouldBe false
-            scaffold.closeRequested shouldBe false
+            stateFlow.value.isShareSheetRequested shouldBe false
         }
 
         @Test
-        fun `leaves the sheet null when none is held`() = runTest {
+        fun `stays unrequested when only the profile has loaded`() = runTest {
             // ----- Arrange -----
+            stateFlow.value = ProfileUiState(userProfileData = buildShareProfile())
             val action = OnShareSheetOpenAction()
 
             // ----- Act -----
@@ -109,7 +124,7 @@ class OnShareSheetOpenActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.shareSheet shouldBe null
+            stateFlow.value.isShareSheetRequested shouldBe false
         }
     }
 }

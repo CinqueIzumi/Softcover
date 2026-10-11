@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -34,7 +35,7 @@ class OnNewEditionSaveClickActionTest {
     @BeforeEach
     fun setUp() {
         updateBookEditionUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -97,7 +98,7 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editions = listOf(edition),
                 selectedEditionId = edition.id,
@@ -122,7 +123,8 @@ class OnNewEditionSaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.selectedEditionId shouldBe null
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
         }
 
         @Test
@@ -131,7 +133,7 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition(id = 99)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editions = listOf(edition),
                 selectedEditionId = edition.id,
@@ -165,7 +167,7 @@ class OnNewEditionSaveClickActionTest {
         @Test
         fun `does not invoke use case when book is null`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = null,
                 showEditEditionSheet = true,
             )
@@ -195,7 +197,7 @@ class OnNewEditionSaveClickActionTest {
                 userBook = stubUserBook(),
                 currentEdition = null,
             )
-            val initialState = BookDetailUiState(
+            val initialState = buildBookDetailUiState().copy(
                 book = book,
                 editions = listOf(stubEdition(id = 5)),
                 selectedEditionId = 5,
@@ -228,7 +230,7 @@ class OnNewEditionSaveClickActionTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val current = stubEdition(id = 1)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(
                     userBook = userBook,
                     currentEdition = current,
@@ -267,7 +269,7 @@ class OnNewEditionSaveClickActionTest {
             // ----- Arrange -----
             val book = stubBook(userBook = null)
             val edition = stubEdition(id = 77)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editions = listOf(edition),
                 selectedEditionId = edition.id,
@@ -300,7 +302,7 @@ class OnNewEditionSaveClickActionTest {
             // ----- Arrange -----
             val book = stubBook(userBook = null)
             val edition = stubEdition(id = 77)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editions = listOf(edition),
                 selectedEditionId = edition.id,
@@ -327,7 +329,7 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editions = listOf(edition),
                 selectedEditionId = edition.id,
@@ -352,7 +354,8 @@ class OnNewEditionSaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.loadingBookDetails shouldBe false
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
 
         @Test
@@ -361,7 +364,7 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 editions = listOf(edition),
                 selectedEditionId = edition.id,

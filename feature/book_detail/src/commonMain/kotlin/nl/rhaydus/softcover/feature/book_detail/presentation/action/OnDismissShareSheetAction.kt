@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -15,7 +16,8 @@ internal class OnDismissShareSheetAction : BookDetailAction {
     ) {
         scope.setState {
             it.copy(
-                isShareSheetVisible = false,
+                shareSheet = SheetSession.Closed,
+                shareSheetRequested = false,
                 chosenShareVariant = null,
             ).withShareCapture(ShareCaptureState())
         }

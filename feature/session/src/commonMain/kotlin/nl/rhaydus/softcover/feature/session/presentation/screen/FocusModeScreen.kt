@@ -13,6 +13,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
@@ -43,8 +45,10 @@ object FocusModeScreen : Screen {
         val haptics = LocalHaptics.current
 
         ObserveAsEvents(flow = screenModel.events) { event ->
+            if (event is FeedbackEvent) haptics.play(event.feedback)
+
             when (event) {
-                is FocusModeEvent.PageCommittedEvent -> haptics.select()
+                is FocusModeEvent.PageCommittedEvent -> Unit
             }
         }
 

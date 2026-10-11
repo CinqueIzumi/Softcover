@@ -6,8 +6,11 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.openChooseListsSession
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.CreateList
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
@@ -36,11 +39,14 @@ class OnChooseListsSheetDismissedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `hides the sheet, clears the flag and sends CreateListRequestedEvent when a create-list was recorded`() = runTest {
+        fun `closes the session and sends CreateListRequestedEvent when a create-list was recorded`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                isBulkAddToListSheetShown = true,
-                isCreateListPending = true,
+                chooseListsSheet = openChooseListsSession(
+                    closing = true,
+                    pending = CreateList,
+                ),
+                isChooseListsSheetRequested = true,
             )
 
             // ----- Act -----
@@ -50,19 +56,16 @@ class OnChooseListsSheetDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isBulkAddToListSheetShown shouldBe false
-            stateFlow.value.isCreateListPending shouldBe false
+            stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
+            stateFlow.value.isChooseListsSheetRequested shouldBe false
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.CreateListRequestedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
-        fun `hides the sheet and sends no event when no create-list was recorded`() = runTest {
+        fun `closes the session and sends no event when no create-list was recorded`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isBulkAddToListSheetShown = true,
-                isCreateListPending = false,
-            )
+            stateFlow.value = LibraryUiState(chooseListsSheet = openChooseListsSession(closing = true))
 
             // ----- Act -----
             OnChooseListsSheetDismissedAction().execute(
@@ -71,8 +74,23 @@ class OnChooseListsSheetDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isBulkAddToListSheetShown shouldBe false
-            stateFlow.value.isCreateListPending shouldBe false
+            stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `sends no event when the session was already closed`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(chooseListsSheet = SheetSession.Closed)
+
+            // ----- Act -----
+            OnChooseListsSheetDismissedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }

@@ -12,6 +12,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
@@ -21,7 +23,6 @@ import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
-import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import org.koin.compose.koinInject
@@ -41,14 +42,7 @@ object ReadingScreen : Screen {
         val haptics = LocalHaptics.current
 
         ObserveAsEvents(flow = screenModel.events) { event ->
-            when (event) {
-                is ReadingScreenEvent.ProgressUpdatedEvent,
-                is ReadingScreenEvent.VerdictSavedEvent -> haptics.select()
-
-                is ReadingScreenEvent.MarkAsReadFailedEvent,
-                is ReadingScreenEvent.ProgressUpdateFailedEvent,
-                is ReadingScreenEvent.VerdictSaveFailedEvent -> haptics.reject()
-            }
+            if (event is FeedbackEvent) haptics.play(event.feedback)
         }
 
         val prefetcher = if (LocalInspectionMode.current) null else rememberBookDetailPrefetcher()

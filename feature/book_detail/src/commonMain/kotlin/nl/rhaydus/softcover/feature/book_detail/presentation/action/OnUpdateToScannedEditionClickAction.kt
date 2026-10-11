@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -33,7 +34,7 @@ internal class OnUpdateToScannedEditionClickAction : BookDetailAction {
                 newEditionId = scannedEditionId,
             )
                 .onSuccess {
-                    scope.sendEvent(BookDetailEvent.MutationSucceededEvent())
+                    scope.sendEvent(BookDetailEvent.MutationSucceededEvent(feedback = Feedback.Routine))
                 }
                 .onFailure {
                     AppLog.e("Failed to update shelved edition to scanned edition $it")

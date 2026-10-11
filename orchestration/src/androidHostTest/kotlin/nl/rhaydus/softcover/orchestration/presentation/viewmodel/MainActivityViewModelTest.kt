@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
@@ -98,6 +99,35 @@ class MainActivityViewModelTest {
             // ----- Assert -----
             viewModel.reAuthSheet.value.shouldNotBeNull()
         }
+
+        @Test
+        fun `keeps the typed key when the session expires again while the sheet is open`() {
+            // ----- Arrange -----
+            showReAuthSheet()
+            viewModel.onReAuthApiKeyChanged("abc")
+
+            // ----- Act -----
+            SessionExpiredNotifier.notifySessionExpired()
+
+            // ----- Assert -----
+            viewModel.reAuthSheet.value.shouldNotBeNull().apiKeyField.text shouldBe "abc"
+        }
+
+        @Test
+        fun `reopens with an empty form after an earlier sheet was dismissed`() {
+            // ----- Arrange -----
+            showReAuthSheet()
+            viewModel.onReAuthApiKeyChanged("abc")
+            viewModel.onReAuthDismissed()
+
+            // ----- Act -----
+            SessionExpiredNotifier.notifySessionExpired()
+
+            // ----- Assert -----
+            val sheet = viewModel.reAuthSheet.value.shouldNotBeNull()
+            sheet.apiKeyField.text shouldBe ""
+            sheet.scaffold.closeRequested shouldBe false
+        }
     }
 
     @Nested
@@ -171,6 +201,22 @@ class MainActivityViewModelTest {
     }
 
     @Nested
+    inner class ReAuthenticateWithoutSheet {
+        @Test
+        fun `does not call the use case when no sheet is open`() {
+            // ----- Arrange -----
+            viewModel.setUserAuthenticated(authenticated = true)
+
+            // ----- Act -----
+            viewModel.reAuthenticate()
+
+            // ----- Assert -----
+            coVerify(exactly = 0) { reAuthenticateUseCase(any()) }
+            viewModel.reAuthSheet.value.shouldBeNull()
+        }
+    }
+
+    @Nested
     inner class OnReAuthDismissed {
         @Test
         fun `resets the whole state once the sheet finished hiding`() {
@@ -220,6 +266,48 @@ class MainActivityViewModelTest {
         }
 
         @Test
+        fun `does not log out after a successful re-authentication`() {
+            // ----- Arrange -----
+            coEvery {
+                reAuthenticateUseCase("abc")
+            } returns Result.success(Unit)
+            showReAuthSheet()
+            viewModel.onReAuthApiKeyChanged("abc")
+            viewModel.reAuthenticate()
+
+            // ----- Act -----
+            viewModel.onReAuthDismissed()
+
+            // ----- Assert -----
+            coVerify(exactly = 0) { resetUserDataUseCase() }
+            viewModel.state.value.authenticated shouldBe true
+        }
+
+        @Test
+        fun `log out tapped while re-auth validates, then success, still logs out after dismissal`() {
+            // ----- Arrange -----
+            val validation = CompletableDeferred<Result<Unit>>()
+            coEvery {
+                reAuthenticateUseCase("abc")
+            } coAnswers { validation.await() }
+            coEvery {
+                resetUserDataUseCase()
+            } returns Result.success(Unit)
+            showReAuthSheet()
+            viewModel.onReAuthApiKeyChanged("abc")
+            viewModel.reAuthenticate()
+            viewModel.logOutFromReAuth()
+
+            // ----- Act -----
+            validation.complete(Result.success(Unit))
+            viewModel.onReAuthDismissed()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { resetUserDataUseCase() }
+            viewModel.reAuthSheet.value.shouldBeNull()
+        }
+
+        @Test
         fun `logs out only once when the sheet is dismissed twice`() {
             // ----- Arrange -----
             coEvery {
@@ -250,6 +338,33 @@ class MainActivityViewModelTest {
             // ----- Assert -----
             val sheet = viewModel.reAuthSheet.value.shouldNotBeNull()
             sheet.scaffold.closeRequested shouldBe true
+            coVerify(exactly = 0) { resetUserDataUseCase() }
+        }
+
+        @Test
+        fun `keeps the typed key while the sheet hides`() {
+            // ----- Arrange -----
+            showReAuthSheet()
+            viewModel.onReAuthApiKeyChanged("abc")
+
+            // ----- Act -----
+            viewModel.logOutFromReAuth()
+
+            // ----- Assert -----
+            viewModel.reAuthSheet.value.shouldNotBeNull().apiKeyField.text shouldBe "abc"
+        }
+
+        @Test
+        fun `does nothing and never logs out later when no sheet is open`() {
+            // ----- Arrange -----
+            viewModel.setUserAuthenticated(authenticated = true)
+
+            // ----- Act -----
+            viewModel.logOutFromReAuth()
+            viewModel.onReAuthDismissed()
+
+            // ----- Assert -----
+            viewModel.reAuthSheet.value.shouldBeNull()
             coVerify(exactly = 0) { resetUserDataUseCase() }
         }
     }

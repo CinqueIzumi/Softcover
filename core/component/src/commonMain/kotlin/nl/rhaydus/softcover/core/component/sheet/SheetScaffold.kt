@@ -27,8 +27,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +49,7 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
@@ -97,7 +98,7 @@ internal fun SheetScaffoldContent(
     }
 
     val scrollState = rememberScrollState()
-    val paneTitle = model.header.section.headlineText ?: model.header.section.eyebrow
+    val paneTitle = model.header?.let { header -> header.section.headlineText ?: header.section.eyebrow }
 
     Column(
         modifier = modifier
@@ -109,7 +110,11 @@ internal fun SheetScaffoldContent(
                 top = Spacing.xs,
                 bottom = Spacing.md,
             )
-            .semantics { this.paneTitle = paneTitle },
+            .semantics {
+                if (paneTitle != null) {
+                    this.paneTitle = paneTitle
+                }
+            },
     ) {
         SheetTop(
             model = model,
@@ -190,13 +195,15 @@ private fun SheetTop(
         }
     }
 
-    SheetHeader(
-        model = model.header,
-        chrome = chrome,
-        onEvent = onEvent,
-    )
+    if (model.header != null) {
+        SheetHeader(
+            model = model.header,
+            chrome = chrome,
+            onEvent = onEvent,
+        )
 
-    Spacer(modifier = Modifier.height(Spacing.xl))
+        Spacer(modifier = Modifier.height(Spacing.xl))
+    }
 }
 
 @Composable
@@ -243,13 +250,15 @@ private fun RowScope.SheetHeaderTrailingContent(
             label = trailing.label,
             style = ButtonStyle.TEXT,
             onClick = {
-                onEvent(SheetScaffoldEvent.HeaderActionClicked)
+                if (chrome.unlocked && chrome.busy.not()) {
+                    onEvent(SheetScaffoldEvent.HeaderActionClicked)
 
-                if (trailing.dismissesSheet) {
-                    chrome.dismiss()
+                    if (trailing.dismissesSheet) {
+                        chrome.dismiss()
+                    }
                 }
             },
-            enabled = chrome.unlocked,
+            enabled = chrome.unlocked && chrome.busy.not(),
         )
     }
 }
@@ -366,12 +375,24 @@ private fun FooterButton(
     ) {
         RhaydusButton(
             label = button.label,
-            style = if (primary) ButtonStyle.FILLED else ButtonStyle.TEXT,
+            style = when {
+                button.emphasis == SheetFooterEmphasis.Outlined -> ButtonStyle.OUTLINED
+                primary -> ButtonStyle.FILLED
+                else -> ButtonStyle.TEXT
+            },
+            icon = button.icon?.let { icon ->
+                drawableIconResource(
+                    icon = icon,
+                    contentDescription = "",
+                )
+            },
             onClick = {
-                onEvent(if (primary) SheetScaffoldEvent.PrimaryClicked else SheetScaffoldEvent.SecondaryClicked)
+                if (chrome.unlocked) {
+                    onEvent(if (primary) SheetScaffoldEvent.PrimaryClicked else SheetScaffoldEvent.SecondaryClicked)
 
-                if (button.dismissesSheet) {
-                    chrome.dismiss()
+                    if (button.dismissesSheet) {
+                        chrome.dismiss()
+                    }
                 }
             },
             modifier = if (fillWidth) Modifier.fillMaxWidth() else Modifier.alpha(labelAlpha),

@@ -207,7 +207,8 @@ class OnSetListRankedActionTest {
                     )
                 }
 
-                eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ListRankedChangeFailedEvent>()
+                val sentEvent = eventChannel.tryReceive().getOrNull()
+                sentEvent.shouldBeInstanceOf<LibraryEvent.ListRankedChangeFailedEvent>()
                 eventChannel.tryReceive().getOrNull() shouldBe null
             }
 

@@ -25,9 +25,11 @@ import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
+import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -53,7 +55,7 @@ internal data class BookDetailUiState(
      * the state because the hero's shared-element key is resolved by a collector, which cannot see a
      * nav argument that only exists as a screen parameter.
      */
-    val bookId: Int? = null,
+    val bookId: Int,
     val transitionSurface: String? = null,
 
     val loadingBookDetails: Boolean = true,
@@ -85,7 +87,6 @@ internal data class BookDetailUiState(
     val scannedEditionId: Int? = null,
     val scannedEditionBannerDismissed: Boolean = false,
     val isUpdatingScannedEdition: Boolean = false,
-    val showUpdateProgressSheet: Boolean = false,
     val selectedProgressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
 
     /** The reader's uncommitted time entry; `null` seeds the sheet's fields from the book. */
@@ -98,7 +99,9 @@ internal data class BookDetailUiState(
      * What the progress sheet renders, derived from [book] and [selectedProgressSheetTab]. The tab's
      * stored home is [selectedProgressSheetTab], so the two cannot disagree.
      */
-    val progressSheet: ProgressSheetUiModel? = null,
+    val progressSheet: SheetSession<ProgressSheetUiModel, Nothing> = SheetSession.Closed,
+
+    val progressSheetRequested: Boolean = false,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     val selectedLens: BookDetailLens = BookDetailLens.THE_BOOK,
 
@@ -115,7 +118,10 @@ internal data class BookDetailUiState(
     /** The "Shelve this book" opener; the retry label when the last shelve write for this book failed. */
     val shelveControlHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(eyebrow = "Shelve this book"),
 
-    /** The sticky lens switch, mapped by `LensToggleCollector` off [selectedLens] and whether [book] has a user copy. */
+    /**
+     * The sticky lens switch, mapped by `LensToggleCollector` off [selectedLens] and whether [book] has a user
+     * copy.
+     */
     val lensToggle: SegmentedControlUiModel<BookDetailLens> = lensToggleFor(
         selectedLens = BookDetailLens.THE_BOOK,
         yoursEnabled = false,
@@ -178,12 +184,13 @@ internal data class BookDetailUiState(
     val failedMutationBookIds: Set<Int> = emptySet(),
     val failedMutationEditionIds: Set<Int> = emptySet(),
 
-    val isShareSheetVisible: Boolean = false,
     val currentUsername: String? = null,
     val currentUserAvatarUrl: String? = null,
 
-    /** The share sheet for the chosen variant; `null` while there is no book to share. */
-    val shareSheet: ShareSheetUiModel? = null,
+    /** The share sheet for the chosen variant. */
+    val shareSheet: SheetSession<ShareSheetUiModel, Nothing> = SheetSession.Closed,
+
+    val shareSheetRequested: Boolean = false,
 
     val chosenShareVariant: ShareCardVariant? = null,
 
@@ -197,8 +204,8 @@ internal data class BookDetailUiState(
     val heroCover: CoverUiModel? = null,
     val heroBackdropCover: CoverUiModel? = null,
     val fullScreenCover: CoverUiModel? = null,
-    val heroTitleTransitionKey: String? = null,
-    val heroRatingTransitionKey: String? = null,
+    val heroTitleTransitionKey: BookTransitionKey? = null,
+    val heroRatingTransitionKey: BookTransitionKey? = null,
     val verdictCover: CoverUiModel? = null,
     val editionSheetHeaderCover: CoverUiModel? = null,
 
@@ -244,7 +251,10 @@ internal data class BookDetailUiState(
 
     val communityTagGroups: List<TagCategoryChipGroup> = emptyList(),
 
-    /** Community content-warning tag keys `OnRevealTagSpoilerAction` has revealed, for the rest of this screen instance. */
+    /**
+     * Community content-warning tag keys `OnRevealTagSpoilerAction` has revealed, for the rest of this screen
+     * instance.
+     */
     val revealedTagKeys: ImmutableSet<String> = persistentSetOf(),
 
     val tagEditorOpenerChip: ChipUiModel? = null,

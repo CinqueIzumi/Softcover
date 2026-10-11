@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
@@ -16,6 +17,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -455,8 +457,31 @@ class OnBulkToggleListMembershipActionTest {
             )
 
             // ----- Assert -----
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ListMembershipChangedEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<LibraryEvent.ListMembershipChangedEvent>().feedback shouldBe Feedback.Routine
             eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `a fully successful removal sends a silent ListMembershipChangedEvent`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWith(
+                list = stubList(1),
+                selected = listOf(stubBook(id = 1)),
+            )
+
+            // ----- Act -----
+            OnBulkToggleListMembershipAction(
+                listId = listId,
+                currentMembership = ListMembership.ALL,
+            ).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<LibraryEvent.ListMembershipChangedEvent>().feedback.shouldBeNull()
         }
 
         @Test
@@ -485,7 +510,8 @@ class OnBulkToggleListMembershipActionTest {
             )
 
             // ----- Assert -----
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ListMembershipChangeFailedEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<LibraryEvent.ListMembershipChangeFailedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
@@ -528,7 +554,8 @@ class OnBulkToggleListMembershipActionTest {
             completedBeforeChange shouldBe false
             job.isCompleted shouldBe true
             stateFlow.value.listsBeingMutated shouldBe emptySet()
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ListMembershipChangedEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<LibraryEvent.ListMembershipChangedEvent>().feedback shouldBe Feedback.Routine
         }
 
         @Test

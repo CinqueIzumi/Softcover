@@ -1,6 +1,9 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -11,10 +14,10 @@ class ReAuthSheetMapperTest {
         @Test
         fun `primary is disabled when apiKey is only whitespace`() {
             // ----- Arrange -----
-            val state = ReAuthState(apiKey = "   ")
+            val session = SheetSession.Open<ReAuthState, ReAuthLogOut>(model = ReAuthState(apiKey = "   "))
 
             // ----- Act -----
-            val result = state.toSheetUiModel()
+            val result = session.toSheetUiModel().shouldNotBeNull()
 
             // ----- Assert -----
             result.scaffold.footer?.primary?.enabled shouldBe false
@@ -23,10 +26,10 @@ class ReAuthSheetMapperTest {
         @Test
         fun `primary is enabled when apiKey is not blank`() {
             // ----- Arrange -----
-            val state = ReAuthState(apiKey = "token")
+            val session = SheetSession.Open<ReAuthState, ReAuthLogOut>(model = ReAuthState(apiKey = "token"))
 
             // ----- Act -----
-            val result = state.toSheetUiModel()
+            val result = session.toSheetUiModel().shouldNotBeNull()
 
             // ----- Assert -----
             result.scaffold.footer?.primary?.enabled shouldBe true
@@ -35,13 +38,15 @@ class ReAuthSheetMapperTest {
         @Test
         fun `submitting marks the sheet busy and disables the field`() {
             // ----- Arrange -----
-            val state = ReAuthState(
-                apiKey = "token",
-                isSubmitting = true,
+            val session = SheetSession.Open<ReAuthState, ReAuthLogOut>(
+                model = ReAuthState(
+                    apiKey = "token",
+                    isSubmitting = true,
+                ),
             )
 
             // ----- Act -----
-            val result = state.toSheetUiModel()
+            val result = session.toSheetUiModel().shouldNotBeNull()
 
             // ----- Assert -----
             result.scaffold.busy shouldBe true
@@ -51,13 +56,15 @@ class ReAuthSheetMapperTest {
         @Test
         fun `apiKey and errorMessage are carried through`() {
             // ----- Arrange -----
-            val state = ReAuthState(
-                apiKey = "abc",
-                errorMessage = "bad",
+            val session = SheetSession.Open<ReAuthState, ReAuthLogOut>(
+                model = ReAuthState(
+                    apiKey = "abc",
+                    errorMessage = "bad",
+                ),
             )
 
             // ----- Act -----
-            val result = state.toSheetUiModel()
+            val result = session.toSheetUiModel().shouldNotBeNull()
 
             // ----- Assert -----
             result.apiKeyField.text shouldBe "abc"
@@ -65,15 +72,41 @@ class ReAuthSheetMapperTest {
         }
 
         @Test
-        fun `a close request on the state is carried onto the scaffold`() {
+        fun `a requested close is carried onto the scaffold`() {
             // ----- Arrange -----
-            val state = ReAuthState(closeRequested = true)
+            val session = SheetSession.Open<ReAuthState, ReAuthLogOut>(
+                model = ReAuthState(closeRequested = true),
+            )
 
             // ----- Act -----
-            val result = state.toSheetUiModel()
+            val result = session.toSheetUiModel().shouldNotBeNull()
 
             // ----- Assert -----
             result.scaffold.closeRequested shouldBe true
+        }
+
+        @Test
+        fun `an open session without a requested close leaves the scaffold open`() {
+            // ----- Arrange -----
+            val session = SheetSession.Open<ReAuthState, ReAuthLogOut>(model = ReAuthState())
+
+            // ----- Act -----
+            val result = session.toSheetUiModel().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.scaffold.closeRequested shouldBe false
+        }
+
+        @Test
+        fun `a closed session has no sheet`() {
+            // ----- Arrange -----
+            val session: SheetSession<ReAuthState, ReAuthLogOut> = SheetSession.Closed
+
+            // ----- Act -----
+            val result = session.toSheetUiModel()
+
+            // ----- Assert -----
+            result.shouldBeNull()
         }
     }
 }

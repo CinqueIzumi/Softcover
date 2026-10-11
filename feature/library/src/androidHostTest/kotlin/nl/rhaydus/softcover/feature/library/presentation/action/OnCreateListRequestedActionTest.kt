@@ -5,8 +5,13 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.dismissed
+import nl.rhaydus.softcover.core.component.sheet.isClosing
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.openChooseListsSession
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.CreateList
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
@@ -35,11 +40,11 @@ class OnCreateListRequestedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `records the create-list request without hiding the sheet or sending an event`() = runTest {
+        fun `asks the open sheet to close and records the create-list request without sending an event`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                isBulkAddToListSheetShown = true,
-                isCreateListPending = false,
+                chooseListsSheet = openChooseListsSession(),
+                isChooseListsSheetRequested = true,
             )
 
             // ----- Act -----
@@ -49,9 +54,43 @@ class OnCreateListRequestedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isCreateListPending shouldBe true
-            stateFlow.value.isBulkAddToListSheetShown shouldBe true
+            stateFlow.value.chooseListsSheet.isClosing shouldBe true
+            stateFlow.value.isChooseListsSheetRequested shouldBe false
+            stateFlow.value.chooseListsSheet.dismissed() shouldBe CreateList
             eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `keeps the sheet model while it hides`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(chooseListsSheet = openChooseListsSession())
+
+            // ----- Act -----
+            OnCreateListRequestedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.chooseListsSheet shouldBe openChooseListsSession(
+                closing = true,
+                pending = CreateList,
+            )
+        }
+
+        @Test
+        fun `stays closed and records nothing when the sheet is not open`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(chooseListsSheet = SheetSession.Closed)
+
+            // ----- Act -----
+            OnCreateListRequestedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
         }
     }
 }

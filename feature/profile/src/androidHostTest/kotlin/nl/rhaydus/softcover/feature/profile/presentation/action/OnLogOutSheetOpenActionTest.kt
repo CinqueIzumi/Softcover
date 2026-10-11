@@ -5,10 +5,13 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
+import nl.rhaydus.softcover.feature.profile.presentation.state.LogOut
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.state.logOutSheetScaffold
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -33,33 +36,39 @@ class OnLogOutSheetOpenActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `clears a log-out recorded by an earlier sheet`() = runTest {
+        fun `opens the log-out sheet fresh from closed`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(logOutPending = true)
+            val action = OnLogOutSheetOpenAction()
 
             // ----- Act -----
-            OnLogOutSheetOpenAction().execute(
+            action.execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.logOutPending shouldBe false
+            stateFlow.value.logOutSheet shouldBe SheetSession.Open(model = logOutSheetScaffold())
         }
 
         @Test
-        fun `leaves the flag cleared when nothing was recorded`() = runTest {
+        fun `drops a log-out recorded by a sheet that was still closing`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(logOutPending = false)
+            stateFlow.value = ProfileUiState(
+                logOutSheet = SheetSession.Open(
+                    model = logOutSheetScaffold().requestingClose(),
+                    pending = LogOut,
+                ),
+            )
+            val action = OnLogOutSheetOpenAction()
 
             // ----- Act -----
-            OnLogOutSheetOpenAction().execute(
+            action.execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.logOutPending shouldBe false
+            stateFlow.value.logOutSheet shouldBe SheetSession.Open(model = logOutSheetScaffold())
         }
     }
 }

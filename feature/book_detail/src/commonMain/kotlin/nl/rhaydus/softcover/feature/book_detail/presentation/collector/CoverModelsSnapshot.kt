@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
+import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -20,7 +20,7 @@ internal data class CoverModelsSnapshot(
     val editions: List<BookEdition>,
     val initialCover: BookInitialCover?,
     val loadingBookDetails: Boolean,
-    val bookId: Int?,
+    val bookId: Int,
     val transitionSurface: String?,
 )
 
@@ -44,18 +44,20 @@ internal fun CoverModelsSnapshot.toCoverModels(): CoverModels {
     val coverHasContent = edition != null || fallbackEdition != null || fallbackCoverUrl != null
     val coverIsLoading = loadingBookDetails && book == null && coverHasContent.not()
 
+    // Hero and full-screen cover share one key so the cover morphs into the viewer it opens.
+    val coverKey = bookTransitionKey(
+        element = BookTransitionElement.Cover,
+        bookId = bookId,
+        surface = transitionSurface,
+    )
+
     val hero = edition.toCoverUiModel(
         defaultEdition = fallbackEdition,
         coverlessTitle = book?.title,
         variant = CoverVariant.Rounded,
         fallbackCoverUrl = fallbackCoverUrl,
         isLoading = coverIsLoading,
-        sharedTransitionKey = bookTransitionKey(
-            element = BookTransitionElement.Cover,
-            editionId = edition?.id,
-            bookId = bookId,
-            surface = transitionSurface,
-        ),
+        sharedTransitionKey = coverKey,
     )
 
     // No coverlessTitle on purpose: this is the blurred decorative layer behind the hero, not a
@@ -74,12 +76,7 @@ internal fun CoverModelsSnapshot.toCoverModels(): CoverModels {
         variant = CoverVariant.Flat,
         fallbackCoverUrl = fallbackCoverUrl,
         isLoading = coverIsLoading,
-        sharedTransitionKey = bookTransitionKey(
-            element = BookTransitionElement.Cover,
-            editionId = edition?.id,
-            bookId = bookId,
-            surface = transitionSurface,
-        ),
+        sharedTransitionKey = coverKey,
     )
 
     return CoverModels(
@@ -88,13 +85,11 @@ internal fun CoverModelsSnapshot.toCoverModels(): CoverModels {
         fullScreen = fullScreen,
         heroTitleTransitionKey = bookTransitionKey(
             element = BookTransitionElement.Title,
-            editionId = edition?.id,
             bookId = bookId,
             surface = transitionSurface,
         ),
         heroRatingTransitionKey = bookTransitionKey(
             element = BookTransitionElement.Rating,
-            editionId = edition?.id,
             bookId = bookId,
             surface = transitionSurface,
         ),

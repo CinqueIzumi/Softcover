@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -14,10 +15,14 @@ internal class OnBulkRemoveSheetExpandedChangeAction(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
         scope.setState {
-            it.copy(
-                isBulkRemoveSheetShown = shown,
-                isBulkRemoveCloseRequested = false,
-            )
+            if (shown) {
+                it.copy(isBulkRemoveSheetRequested = true)
+            } else {
+                it.copy(
+                    bulkRemoveSheet = SheetSession.Closed,
+                    isBulkRemoveSheetRequested = false,
+                )
+            }
         }
     }
 }

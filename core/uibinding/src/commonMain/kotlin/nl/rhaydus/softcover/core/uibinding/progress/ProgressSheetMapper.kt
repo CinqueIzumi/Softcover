@@ -3,14 +3,11 @@ package nl.rhaydus.softcover.core.uibinding.progress
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.common.currentLocalDateTime
 import nl.rhaydus.common.toHoursMinutesSeconds
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressTimeUnit
 import nl.rhaydus.softcover.core.component.progress.progressTimeField
-import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import kotlin.math.roundToInt
 
@@ -87,14 +84,7 @@ fun Book.toProgressSheetUiModel(
             selectedTab = selectedTab,
         ),
         whenRead = readAt.toWhenReadUiModel(now = now),
-        scaffold = SheetScaffoldUiModel(
-            header = SheetHeaderUiModel(
-                section = SectionHeaderUiModel.Section(
-                    eyebrow = "Reading progress",
-                    headline = title,
-                ),
-            ),
-        ),
+        scaffold = ProgressSheetUiModel.scaffoldFor(bookTitle = title),
     )
 }
 

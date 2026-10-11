@@ -38,8 +38,8 @@ class VerdictSheetMapperTest {
             )
 
             // ----- Assert -----
-            result.scaffold.header.section.headlineText shouldBe "You finished ${book.title}."
-            result.scaffold.header.section.description.shouldNotBeNull()
+            result.scaffold.header.shouldNotBeNull().section.headlineText shouldBe "You finished ${book.title}."
+            result.scaffold.header.shouldNotBeNull().section.description.shouldNotBeNull()
             result.scaffold.dismissLabel shouldBe "Not now"
             result.scaffold.footer?.primary?.label shouldBe "Save"
         }
@@ -59,8 +59,8 @@ class VerdictSheetMapperTest {
             )
 
             // ----- Assert -----
-            result.scaffold.header.section.headlineText shouldBe "Your take on ${book.title}."
-            result.scaffold.header.section.description.shouldBeNull()
+            result.scaffold.header.shouldNotBeNull().section.headlineText shouldBe "Your take on ${book.title}."
+            result.scaffold.header.shouldNotBeNull().section.description.shouldBeNull()
             result.scaffold.dismissLabel shouldBe "Cancel"
             result.scaffold.footer?.primary?.label shouldBe "Save changes"
         }
@@ -246,7 +246,7 @@ class VerdictSheetMapperTest {
             )
 
             // ----- Assert -----
-            result.scaffold.header.trailing shouldBe SheetHeaderTrailing.Jacket(cover = cover)
+            result.scaffold.header.shouldNotBeNull().trailing shouldBe SheetHeaderTrailing.Jacket(cover = cover)
         }
 
         @Test
@@ -264,7 +264,7 @@ class VerdictSheetMapperTest {
             )
 
             // ----- Assert -----
-            result.scaffold.header.trailing.shouldBeNull()
+            result.scaffold.header.shouldNotBeNull().trailing.shouldBeNull()
         }
     }
 }

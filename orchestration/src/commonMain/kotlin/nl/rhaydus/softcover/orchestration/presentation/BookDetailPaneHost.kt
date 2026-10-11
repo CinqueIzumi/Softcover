@@ -54,6 +54,7 @@ internal fun BookDetailPaneHost(
                     initialCover = destination.initialCover,
                     transitionSurface = destination.transitionSurface,
                 ),
+                onBackPressed = null,
             )
         }
     }

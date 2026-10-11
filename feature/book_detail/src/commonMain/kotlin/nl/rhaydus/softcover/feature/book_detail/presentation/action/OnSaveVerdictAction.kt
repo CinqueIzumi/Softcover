@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.richtext.toReviewDocument
 import nl.rhaydus.softcover.core.uibinding.verdict.draftReview
@@ -26,14 +27,12 @@ internal data class OnSaveVerdictAction(
             hasSpoilers = draft.spoilers.checked,
         )
             .onSuccess {
-                scope.sendEvent(BookDetailEvent.MutationSucceededEvent())
+                scope.sendEvent(BookDetailEvent.MutationSucceededEvent(feedback = Feedback.Routine))
             }
             .onFailure { error ->
                 AppLog.e("$error")
 
                 scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
-
-                scope.sendEvent(BookDetailEvent.MutationFailedEvent())
             }
     }
 }

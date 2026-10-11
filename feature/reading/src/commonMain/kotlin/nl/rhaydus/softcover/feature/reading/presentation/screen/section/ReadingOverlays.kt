@@ -4,8 +4,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.softcover.core.component.haptics.Feedback
+import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
@@ -44,11 +47,10 @@ internal fun ReadingOverlays(
 ) {
     val haptics = LocalHaptics.current
 
-    val progressSheet = state.progressSheet
+    val updatingBook = state.bookToUpdate
+    val progressSheet = state.progressSheet.modelOrNull
 
-    if (state.bookToUpdate != null && state.showProgressSheet && progressSheet != null) {
-        val updatingBook = state.bookToUpdate
-
+    if (updatingBook != null && progressSheet != null) {
         UpdateProgressBottomSheet(
             model = progressSheet,
             onEvent = { event ->
@@ -113,7 +115,7 @@ internal fun ReadingOverlays(
     LaunchedEffect(verdictBook?.id) {
         if (verdictBook == null) return@LaunchedEffect
 
-        haptics.commit()
+        haptics.play(Feedback.Milestone)
 
         if (controller.consumeExplicitBurstFired().not()) {
             controller.celebrate()

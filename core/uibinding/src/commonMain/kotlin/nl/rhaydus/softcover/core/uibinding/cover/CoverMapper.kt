@@ -2,18 +2,19 @@ package nl.rhaydus.softcover.core.uibinding.cover
 
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
+import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.uibinding.book.transitionKey
 
 /**
  * Maps the receiver (preferring [defaultEdition] as its fallback) onto the [CoverUiModel] a cover
  * surface renders, resolving [CoverUiModel.source] through [resolveCoverSource]'s ladder: the
  * receiver's own local file, then its remote URL, then [fallbackCoverUrl].
  *
- * The shared-element [sharedTransitionKey] travels in as a parameter rather than being computed
- * here, since only the caller knows which surface it is on.
+ * An edition carries no book id to build a key from, so the shared-element [sharedTransitionKey]
+ * travels in as a parameter; a caller that has the [Book] gets it from [Book.toCoverUiModel].
  */
 fun BookEdition?.toCoverUiModel(
     defaultEdition: BookEdition?,
@@ -21,7 +22,7 @@ fun BookEdition?.toCoverUiModel(
     variant: CoverVariant,
     fallbackCoverUrl: String? = null,
     isLoading: Boolean = false,
-    sharedTransitionKey: String? = null,
+    sharedTransitionKey: BookTransitionKey? = null,
 ): CoverUiModel = CoverUiModel(
     source = resolveCoverSource(
         edition = this,
@@ -53,10 +54,8 @@ fun Book.toCoverUiModel(
     variant = variant,
     fallbackCoverUrl = coverUrl,
     sharedTransitionKey = if (shareTransition) {
-        bookTransitionKey(
+        transitionKey(
             element = BookTransitionElement.Cover,
-            editionId = currentEdition?.id,
-            bookId = id,
             surface = transitionSurface,
         )
     } else {

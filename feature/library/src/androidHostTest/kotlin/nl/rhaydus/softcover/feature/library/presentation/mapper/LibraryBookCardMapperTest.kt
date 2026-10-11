@@ -13,8 +13,9 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardProgress
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
+import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
+import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
@@ -292,13 +293,13 @@ class LibraryBookCardMapperTest {
 
     @Nested
     inner class TransitionKeys {
-        private fun BookCardVariant.titleKey(): String? = when (this) {
+        private fun BookCardVariant.titleKey(): BookTransitionKey? = when (this) {
             is BookCardVariant.Column -> text.titleTransitionKey
             is BookCardVariant.Row -> text.titleTransitionKey
             is BookCardVariant.CoverOnly -> null
         }
 
-        private fun BookCardVariant.ratingKeys(): List<String?> = (this as? BookCardVariant.Row)
+        private fun BookCardVariant.ratingKeys(): List<BookTransitionKey?> = (this as? BookCardVariant.Row)
             ?.text
             ?.supportingLines
             .orEmpty()
@@ -318,12 +319,10 @@ class LibraryBookCardMapperTest {
             val column = variant.shouldBeInstanceOf<BookCardVariant.Column>()
             val expectedTitle = bookTransitionKey(
                 element = BookTransitionElement.Title,
-                editionId = 7,
                 bookId = 1,
             )
             val expectedCover = bookTransitionKey(
                 element = BookTransitionElement.Cover,
-                editionId = 7,
                 bookId = 1,
             )
             column.text.titleTransitionKey.shouldNotBeNull() shouldBe expectedTitle
@@ -343,12 +342,10 @@ class LibraryBookCardMapperTest {
             val lead = row.lead.shouldBeInstanceOf<BookCardLead.Cover>()
             row.text.titleTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Title,
-                editionId = 7,
                 bookId = 1,
             )
             lead.cover.model.sharedTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Cover,
-                editionId = 7,
                 bookId = 1,
             )
         }
@@ -366,7 +363,6 @@ class LibraryBookCardMapperTest {
             row.lead.shouldBeNull()
             row.text.titleTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Title,
-                editionId = 7,
                 bookId = 1,
             )
         }
@@ -383,7 +379,6 @@ class LibraryBookCardMapperTest {
             keys shouldBe listOf(
                 bookTransitionKey(
                     element = BookTransitionElement.Rating,
-                    editionId = 7,
                     bookId = 1,
                 ),
             )
@@ -415,7 +410,6 @@ class LibraryBookCardMapperTest {
             // ----- Assert -----
             titleKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Title,
-                editionId = null,
                 bookId = 1,
             )
         }

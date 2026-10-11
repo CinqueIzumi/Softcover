@@ -1,21 +1,33 @@
 package nl.rhaydus.softcover.feature.library.presentation.event
 
+import nl.rhaydus.softcover.core.component.haptics.Feedback
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
 import nl.rhaydus.toad.UiEvent
 
 internal sealed interface LibraryEvent : UiEvent {
-    class BulkMoveAppliedEvent : LibraryEvent
+    class BulkMoveAppliedEvent(override val feedback: Feedback) : LibraryEvent, FeedbackEvent
 
-    class BulkMoveFailedEvent : LibraryEvent
+    class BulkMoveFailedEvent : LibraryEvent, FeedbackEvent {
+        override val feedback = Feedback.Failure
+    }
 
-    class ListMembershipChangedEvent : LibraryEvent
+    class ListMembershipChangedEvent(override val feedback: Feedback?) : LibraryEvent, FeedbackEvent
 
-    class ListMembershipChangeFailedEvent : LibraryEvent
+    class ListMembershipChangeFailedEvent : LibraryEvent, FeedbackEvent {
+        override val feedback = Feedback.Failure
+    }
 
-    class NewListBooksAddFailedEvent : LibraryEvent
+    class NewListBooksAddFailedEvent : LibraryEvent, FeedbackEvent {
+        override val feedback = Feedback.Failure
+    }
 
-    class ListReorderFailedEvent : LibraryEvent
+    class ListReorderFailedEvent : LibraryEvent, FeedbackEvent {
+        override val feedback = Feedback.Failure
+    }
 
-    class ListRankedChangeFailedEvent : LibraryEvent
+    class ListRankedChangeFailedEvent : LibraryEvent, FeedbackEvent {
+        override val feedback = Feedback.Failure
+    }
 
     class ManageShelvesRequestedEvent : LibraryEvent
 

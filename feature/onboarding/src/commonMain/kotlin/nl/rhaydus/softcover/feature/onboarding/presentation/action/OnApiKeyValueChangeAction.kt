@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.onboarding.presentation.action
 
+import nl.rhaydus.softcover.core.component.sheet.isOpen
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
@@ -17,7 +18,7 @@ internal data class OnApiKeyValueChangeAction(val newValue: String) : Onboarding
                     text = newValue,
                     error = null,
                 ),
-                saveApiKeyButtonEnabled = newValue.isNotBlank() && it.loadingSheet.isLoading.not(),
+                saveApiKeyButtonEnabled = newValue.isNotBlank() && it.loadingSheet.isOpen.not(),
                 submissionError = null,
             )
         }

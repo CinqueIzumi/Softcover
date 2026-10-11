@@ -23,6 +23,7 @@ import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.modifier.navSharedBounds
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -213,7 +214,7 @@ private fun SupportingLine(
 private fun RatingLabel(
     label: String,
     contentDescription: String,
-    transitionKey: String?,
+    transitionKey: BookTransitionKey?,
     style: TextStyle,
     color: Color,
     isLoading: Boolean,

@@ -1,15 +1,13 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.transition
+package nl.rhaydus.softcover.core.component.transition
 
-import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class SharedElementScopesTest {
+class BookTransitionKeyBuilderTest {
     @Nested
-    inner class Elements {
+    inner class BookTransitionKeyFunction {
         @Test
         fun `the three elements of one book get three distinct keys`() {
             // ----- Arrange -----
@@ -19,13 +17,11 @@ class SharedElementScopesTest {
             val keys = elements.map { element ->
                 bookTransitionKey(
                     element = element,
-                    editionId = 3,
                     bookId = 42,
                 )
             }
 
             // ----- Assert -----
-            keys.forEach { it.shouldNotBeNull() }
             keys.toSet().size shouldBe elements.size
         }
 
@@ -37,17 +33,14 @@ class SharedElementScopesTest {
             // ----- Act -----
             val first = bookTransitionKey(
                 element = element,
-                editionId = 3,
                 bookId = 42,
             )
             val second = bookTransitionKey(
                 element = element,
-                editionId = 3,
                 bookId = 42,
             )
 
             // ----- Assert -----
-            first.shouldNotBeNull()
             first shouldBe second
         }
 
@@ -59,93 +52,48 @@ class SharedElementScopesTest {
             // ----- Act -----
             val first = bookTransitionKey(
                 element = element,
-                editionId = null,
                 bookId = 1,
             )
             val second = bookTransitionKey(
                 element = element,
-                editionId = null,
                 bookId = 2,
             )
 
             // ----- Assert -----
-            first.shouldNotBeNull()
-            first shouldNotBe second
-        }
-    }
-
-    @Nested
-    inner class Identity {
-        @Test
-        fun `the bookId wins so the key is stable when the edition changes`() {
-            // ----- Arrange -----
-            val element = BookTransitionElement.Title
-
-            // ----- Act -----
-            val withFirstEdition = bookTransitionKey(
-                element = element,
-                editionId = 1,
-                bookId = 42,
-            )
-            val withSecondEdition = bookTransitionKey(
-                element = element,
-                editionId = 2,
-                bookId = 42,
-            )
-            val withoutEdition = bookTransitionKey(
-                element = element,
-                editionId = null,
-                bookId = 42,
-            )
-
-            // ----- Assert -----
-            withFirstEdition.shouldNotBeNull()
-            withFirstEdition shouldBe withSecondEdition
-            withFirstEdition shouldBe withoutEdition
-        }
-
-        @Test
-        fun `the editionId is the fallback when the bookId is null`() {
-            // ----- Arrange -----
-            val element = BookTransitionElement.Cover
-
-            // ----- Act -----
-            val first = bookTransitionKey(
-                element = element,
-                editionId = 1,
-                bookId = null,
-            )
-            val second = bookTransitionKey(
-                element = element,
-                editionId = 2,
-                bookId = null,
-            )
-
-            // ----- Assert -----
-            first.shouldNotBeNull()
             first shouldNotBe second
         }
 
         @Test
-        fun `no ids yields no key`() {
+        fun `the key string carries the element part and the book id`() {
             // ----- Arrange -----
             val element = BookTransitionElement.Cover
 
             // ----- Act -----
             val key = bookTransitionKey(
                 element = element,
-                editionId = null,
-                bookId = null,
-                surface = "home",
+                bookId = 42,
             )
 
             // ----- Assert -----
-            key.shouldBeNull()
+            key.value shouldBe "book-${element.keyPart}-book-42"
         }
-    }
 
-    @Nested
-    inner class Surface {
+        @Test
+        fun `a surface is appended to the key string`() {
+            // ----- Arrange -----
+            val element = BookTransitionElement.Title
+
+            // ----- Act -----
+            val key = bookTransitionKey(
+                element = element,
+                bookId = 42,
+                surface = "rail",
+            )
+
+            // ----- Assert -----
+            key.value shouldBe "book-${element.keyPart}-book-42-rail"
+        }
+
         @Test
         fun `different surfaces keep one book's key distinct`() {
             // ----- Arrange -----
@@ -154,19 +102,16 @@ class SharedElementScopesTest {
             // ----- Act -----
             val rail = bookTransitionKey(
                 element = element,
-                editionId = null,
                 bookId = 42,
                 surface = "rail",
             )
             val grid = bookTransitionKey(
                 element = element,
-                editionId = null,
                 bookId = 42,
                 surface = "grid",
             )
 
             // ----- Assert -----
-            rail.shouldNotBeNull()
             rail shouldNotBe grid
         }
 
@@ -178,44 +123,17 @@ class SharedElementScopesTest {
             // ----- Act -----
             val bare = bookTransitionKey(
                 element = element,
-                editionId = null,
                 bookId = 42,
                 surface = null,
             )
             val surfaced = bookTransitionKey(
                 element = element,
-                editionId = null,
                 bookId = 42,
                 surface = "rail",
             )
 
             // ----- Assert -----
-            bare.shouldNotBeNull()
             bare shouldNotBe surfaced
-        }
-
-        @Test
-        fun `the surface also applies to the edition fallback`() {
-            // ----- Arrange -----
-            val element = BookTransitionElement.Cover
-
-            // ----- Act -----
-            val rail = bookTransitionKey(
-                element = element,
-                editionId = 5,
-                bookId = null,
-                surface = "rail",
-            )
-            val grid = bookTransitionKey(
-                element = element,
-                editionId = 5,
-                bookId = null,
-                surface = "grid",
-            )
-
-            // ----- Assert -----
-            rail.shouldNotBeNull()
-            rail shouldNotBe grid
         }
     }
 }

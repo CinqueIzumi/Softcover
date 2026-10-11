@@ -10,10 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -22,7 +19,8 @@ import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.softcover.core.component.modifier.rememberShakeTrigger
+import nl.rhaydus.softcover.core.component.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
@@ -35,12 +33,10 @@ fun TextField(
     val focusRequester = remember { FocusRequester() }
     val centred = model.variant is TextFieldVariant.Hero || model.variant is TextFieldVariant.Numeral
 
-    // The foundation shake cannot be cancelled cleanly, so latch it: a mid-shake edit clears the
-    // error but the shake still completes and recentres.
-    var shaking by remember { mutableStateOf(false) }
+    val shake = rememberShakeTrigger()
 
     LaunchedEffect(model.error?.shaking) {
-        if (model.error?.shaking == true) shaking = true
+        if (model.error?.shaking == true) shake.shake()
     }
 
     LaunchedEffect(model.autoFocus) {
@@ -51,11 +47,8 @@ fun TextField(
         horizontalAlignment = if (centred) Alignment.CenterHorizontally else Alignment.Start,
         modifier = modifier
             .shakeOnError(
-                trigger = shaking,
-                onShakeEnd = {
-                    shaking = false
-                    onEvent(TextFieldEvent.ShakeEnded(key = model.key))
-                },
+                trigger = shake,
+                onShakeEnd = { onEvent(TextFieldEvent.ShakeEnded(key = model.key)) },
             )
             .semantics { model.error?.let { error(it.message) } },
     ) {

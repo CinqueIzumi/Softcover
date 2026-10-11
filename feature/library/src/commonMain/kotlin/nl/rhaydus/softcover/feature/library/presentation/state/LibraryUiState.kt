@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
@@ -12,8 +11,8 @@ import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
@@ -116,18 +115,12 @@ internal data class LibraryUiState(
     val arrangeMakeOrderedListId: Int? = null,
 
     /** The Shelves sheet — the tab switcher on mobile; desktop keeps its permanent sidebar. */
-    val isShelvesSheetExpanded: Boolean = false,
+    val shelvesSheet: SheetSession<ShelvesSheetUiModel, ManageShelves> = SheetSession.Closed,
 
-    val isManageShelvesPending: Boolean = false,
+    val isShelvesSheetRequested: Boolean = false,
 
     /** Set when a shelf is picked in the Shelves sheet; the layout clears it once the pager has shown that shelf. */
     val isShelvesSheetPickPending: Boolean = false,
-
-    val isShelvesSheetCloseRequested: Boolean = false,
-
-    val shelvesSheet: SheetScaffoldUiModel = shelvesSheetScaffold(),
-
-    val shelvesSheetGroup: SheetRowGroupUiModel<String> = SheetRowGroupUiModel(rows = persistentListOf()),
 
     val filtersByTab: Map<String, LibraryFilters> = emptyMap(),
     val isFilterSheetExpanded: Boolean = false,
@@ -246,18 +239,9 @@ internal data class LibraryUiState(
     val isRearranging: Boolean = false,
     val bulkActionInProgress: Boolean = false,
     val isBulkMoveMenuExpanded: Boolean = false,
-    val isBulkRemoveSheetShown: Boolean = false,
+    val bulkRemoveSheet: SheetSession<SheetScaffoldUiModel, Nothing> = SheetSession.Closed,
 
-    /** Asks the shown bulk-remove sheet to hide; cleared by its `Dismissed` event or on reopening. */
-    val isBulkRemoveCloseRequested: Boolean = false,
-
-    val bulkRemoveSheet: SheetScaffoldUiModel = bulkRemoveSheetScaffoldFor(
-        bookCount = 0,
-        inProgress = false,
-    ),
-    val isBulkAddToListSheetShown: Boolean = false,
-
-    val isCreateListPending: Boolean = false,
+    val isBulkRemoveSheetRequested: Boolean = false,
 
     /**
      * The user's full set of custom lists (unfiltered by the enabled-tabs setting), populated by
@@ -269,7 +253,9 @@ internal data class LibraryUiState(
     /** List ids whose bulk add/remove mutation is in flight; rows render a spinner instead of the indicator. */
     val listsBeingMutated: Set<Int> = emptySet(),
 
-    val chooseListsSheet: ChooseListsUiModel? = null,
+    val chooseListsSheet: SheetSession<ChooseListsUiModel, CreateList> = SheetSession.Closed,
+
+    val isChooseListsSheetRequested: Boolean = false,
 ) : UiState {
     fun sortModeFor(tabId: String): LibrarySortMode =
         resolveSortMode(

@@ -11,8 +11,8 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverSource
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
+import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -206,12 +206,10 @@ class RecentlyLovedCardMapperTest {
             // ----- Assert -----
             column.text.titleTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Title,
-                editionId = null,
                 bookId = 42,
             )
             column.cover.shouldNotBeNull().model.sharedTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Cover,
-                editionId = null,
                 bookId = 42,
             )
         }

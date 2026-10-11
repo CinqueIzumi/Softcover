@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
@@ -39,7 +40,7 @@ internal class OnDeadlinePickedAction(
             unit = unit,
         )
             .onSuccess {
-                scope.sendEvent(BookDetailEvent.MutationSucceededEvent())
+                scope.sendEvent(BookDetailEvent.MutationSucceededEvent(feedback = Feedback.Routine))
             }
             .onApiFailure()
             .onFailure {

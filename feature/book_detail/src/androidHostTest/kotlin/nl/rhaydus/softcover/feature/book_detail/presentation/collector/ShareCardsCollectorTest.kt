@@ -16,17 +16,22 @@ import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCaptureProgress
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.isClosing
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareCardVariant
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.shareSheetFor
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
@@ -40,7 +45,7 @@ class ShareCardsCollectorTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -48,6 +53,25 @@ class ShareCardsCollectorTest {
         )
 
         dependencies = mockk<BookDetailDependencies>(relaxed = true)
+    }
+
+    private fun openShareSheet(
+        closing: Boolean = false,
+    ): SheetSession<ShareSheetUiModel, Nothing> {
+        val sheet = shareSheetFor(
+            card = BookShareCardUiModel(
+                coverUrl = null,
+                title = "Placeholder",
+                author = "Nobody",
+                statsLine = null,
+                description = null,
+            ),
+            bookTitle = "Placeholder",
+            variant = ShareCardVariant.BOOK,
+            hasUpdateCard = false,
+        )
+
+        return SheetSession.Open(model = if (closing) sheet.requestingClose() else sheet)
     }
 
     private fun TestScope.launchCollector() {
@@ -63,12 +87,16 @@ class ShareCardsCollectorTest {
         book: Book,
         userTags: List<UserTag> = emptyList(),
         chosenShareVariant: ShareCardVariant? = null,
-    ): BookDetailUiState = BookDetailUiState(
+        shareSheet: SheetSession<ShareSheetUiModel, Nothing> = SheetSession.Closed,
+        shareSheetRequested: Boolean = true,
+    ): BookDetailUiState = buildBookDetailUiState().copy(
         book = book,
         currentUsername = "reader",
         currentUserAvatarUrl = "https://example.com/avatar.png",
         userTags = userTags,
         chosenShareVariant = chosenShareVariant,
+        shareSheet = shareSheet,
+        shareSheetRequested = shareSheetRequested,
     )
 
     private fun stubUserBook(
@@ -153,7 +181,7 @@ class ShareCardsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `clears the share sheet when the book goes away`() = runTest(UnconfinedTestDispatcher()) {
+        fun `asks the open share sheet to close when the book goes away`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = readerState(book = stubBook())
             launchCollector()
@@ -162,7 +190,109 @@ class ShareCardsCollectorTest {
             stateFlow.value = stateFlow.value.copy(book = null)
 
             // ----- Assert -----
-            stateFlow.value.shareSheet.shouldBeNull()
+            stateFlow.value.shareSheet.isClosing shouldBe true
+        }
+
+        @Test
+        fun `asks the open share sheet to close when the request clears`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = readerState(book = stubBook())
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(shareSheetRequested = false)
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet.isClosing shouldBe true
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull()
+        }
+
+        @Test
+        fun `leaves a closed session closed when the book goes away without a request`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = readerState(
+                book = stubBook(),
+                shareSheetRequested = false,
+            )
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = null)
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe SheetSession.Closed
+        }
+
+        @Test
+        fun `leaves a closed session closed when a book arrives without a request`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(shareSheet = SheetSession.Closed)
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = stubBook())
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe SheetSession.Closed
+        }
+
+        @Test
+        fun `opens the sheet once the request arrives with a book`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(book = stubBook(title = "Dune"))
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(shareSheetRequested = true)
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet.isClosing shouldBe false
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.displayName shouldBe "Dune"
+        }
+
+        @Test
+        fun `does not open the sheet for a request without a book`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(book = null)
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(shareSheetRequested = true)
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe SheetSession.Closed
+        }
+
+        @Test
+        fun `updates the open sheet in place when the book changes`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = readerState(book = stubBook(title = "Dune"))
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = stubBook(title = "Emma"))
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet.isClosing shouldBe false
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.displayName shouldBe "Emma"
+        }
+
+        @Test
+        fun `reopens the sheet while a close is in flight`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = readerState(
+                book = stubBook(title = "Dune"),
+                shareSheet = openShareSheet(closing = true),
+                shareSheetRequested = false,
+            )
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(shareSheetRequested = true)
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet.isClosing shouldBe false
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.displayName shouldBe "Dune"
         }
 
         @Test
@@ -184,13 +314,16 @@ class ShareCardsCollectorTest {
                 // ----- Act -----
                 // The inputs arrive one at a time, as they do from separate state sources (the book load,
                 // the session, and UserTagsCollector).
-                stateFlow.value = stateFlow.value.copy(book = book)
+                stateFlow.value = stateFlow.value.copy(
+                    book = book,
+                    shareSheetRequested = true,
+                )
                 stateFlow.value = stateFlow.value.copy(currentUsername = "frodo")
                 stateFlow.value = stateFlow.value.copy(currentUserAvatarUrl = "https://example.com/avatar.png")
                 stateFlow.value = stateFlow.value.copy(userTags = listOf(tag))
 
                 // ----- Assert -----
-                val card = stateFlow.value.shareSheet.shouldNotBeNull().sheet.card
+                val card = stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.card
                     .shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Finished>()
                 card.username shouldBe "frodo"
                 card.tags.map { it.label } shouldBe listOf("epic fantasy")
@@ -223,7 +356,10 @@ class ShareCardsCollectorTest {
             )
 
             // ----- Assert -----
-            val card = stateFlow.value.shareSheet.shouldNotBeNull().sheet.card.shouldBeInstanceOf<ReadingUpdateShareCardUiModel>()
+            val card = stateFlow.value.shareSheet.modelOrNull
+                .shouldNotBeNull()
+                .sheet.card
+                .shouldBeInstanceOf<ReadingUpdateShareCardUiModel>()
             card.tags.map { it.label } shouldBe listOf("cozy mystery")
         }
     }
@@ -241,13 +377,16 @@ class ShareCardsCollectorTest {
             launchCollector()
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(book = book)
+            stateFlow.value = stateFlow.value.copy(
+                book = book,
+                shareSheetRequested = true,
+            )
 
             // ----- Assert -----
-            val card = stateFlow.value.shareSheet.shouldNotBeNull().sheet.card.shouldBeInstanceOf<BookShareCardUiModel>()
+            val card = stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.card.shouldBeInstanceOf<BookShareCardUiModel>()
             card.title shouldBe "The Fellowship"
             card.author shouldBe "J.R.R. Tolkien"
-            stateFlow.value.shareSheet.shouldNotBeNull().variantToggle.shouldBeNull()
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().variantToggle.shouldBeNull()
         }
 
         @Test
@@ -259,8 +398,8 @@ class ShareCardsCollectorTest {
             launchCollector()
 
             // ----- Assert -----
-            stateFlow.value.shareSheet.shouldNotBeNull().sheet.card.shouldBeInstanceOf<BookShareCardUiModel>()
-            stateFlow.value.shareSheet.shouldNotBeNull().variantToggle.shouldBeNull()
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.card.shouldBeInstanceOf<BookShareCardUiModel>()
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().variantToggle.shouldBeNull()
         }
 
         @Test
@@ -273,7 +412,7 @@ class ShareCardsCollectorTest {
             launchCollector()
 
             // ----- Assert -----
-            stateFlow.value.shareSheet.shouldNotBeNull().sheet.card.shouldBeInstanceOf<BookShareCardUiModel>()
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.card.shouldBeInstanceOf<BookShareCardUiModel>()
         }
 
         @Test
@@ -286,8 +425,8 @@ class ShareCardsCollectorTest {
             launchCollector()
 
             // ----- Assert -----
-            stateFlow.value.shareSheet.shouldNotBeNull().sheet.card.shouldBeInstanceOf<ReadingUpdateShareCardUiModel>()
-            stateFlow.value.shareSheet.shouldNotBeNull().variantToggle.shouldNotBeNull().selected shouldBe
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.card.shouldBeInstanceOf<ReadingUpdateShareCardUiModel>()
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().variantToggle.shouldNotBeNull().selected shouldBe
                 ShareCardVariant.MY_UPDATE
         }
 
@@ -302,8 +441,8 @@ class ShareCardsCollectorTest {
             stateFlow.value = stateFlow.value.copy(chosenShareVariant = ShareCardVariant.BOOK)
 
             // ----- Assert -----
-            stateFlow.value.shareSheet.shouldNotBeNull().sheet.card.shouldBeInstanceOf<BookShareCardUiModel>()
-            stateFlow.value.shareSheet.shouldNotBeNull().variantToggle.shouldNotBeNull().selected shouldBe
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.card.shouldBeInstanceOf<BookShareCardUiModel>()
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().variantToggle.shouldNotBeNull().selected shouldBe
                 ShareCardVariant.BOOK
         }
 
@@ -320,8 +459,8 @@ class ShareCardsCollectorTest {
                 launchCollector()
 
                 // ----- Assert -----
-                stateFlow.value.shareSheet.shouldNotBeNull().sheet.card.shouldBeInstanceOf<BookShareCardUiModel>()
-                val sheet = stateFlow.value.shareSheet.shouldNotBeNull()
+                stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.card.shouldBeInstanceOf<BookShareCardUiModel>()
+                val sheet = stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull()
                 sheet.sheet.scaffold shouldBe shareSheetFor(
                     card = sheet.sheet.card,
                     bookTitle = "Sample Book",
@@ -334,30 +473,27 @@ class ShareCardsCollectorTest {
     @Nested
     inner class Sheet {
         @Test
-        fun `keeps the capture progress and close request when a variant switch rebuilds the sheet`() =
+        fun `keeps the capture progress and stays open when a variant switch rebuilds the sheet`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val book = stubBook(userBook = stubUserBook(status = BookStatus.Read))
                 stateFlow.value = readerState(book = book)
                 launchCollector()
-                val capture = ShareCaptureState(
-                    progress = ShareCaptureProgress.Sharing,
-                    closeRequested = true,
-                )
+                val capture = ShareCaptureState(progress = ShareCaptureProgress.Sharing)
                 stateFlow.value = stateFlow.value.copy(shareCapture = capture)
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(chosenShareVariant = ShareCardVariant.BOOK)
 
                 // ----- Assert -----
-                val sheet = stateFlow.value.shareSheet.shouldNotBeNull()
-                sheet.sheet.scaffold shouldBe shareSheetFor(
-                    card = sheet.sheet.card,
+                val model = stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull()
+                stateFlow.value.shareSheet.isClosing shouldBe false
+                model.sheet.scaffold shouldBe shareSheetFor(
+                    card = model.sheet.card,
                     bookTitle = "Sample Book",
                     variant = ShareCardVariant.BOOK,
                     hasUpdateCard = true,
                     progress = ShareCaptureProgress.Sharing,
-                    closeRequested = true,
                 ).sheet.scaffold
                 stateFlow.value.shareCapture shouldBe capture
             }
@@ -371,8 +507,8 @@ class ShareCardsCollectorTest {
             launchCollector()
 
             // ----- Assert -----
-            stateFlow.value.shareSheet.shouldNotBeNull().sheet.displayName shouldBe "Dune"
-            val sheet = stateFlow.value.shareSheet.shouldNotBeNull()
+            stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.displayName shouldBe "Dune"
+            val sheet = stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull()
             sheet.sheet.scaffold shouldBe shareSheetFor(
                 card = sheet.sheet.card,
                 bookTitle = "Dune",
@@ -395,7 +531,7 @@ class ShareCardsCollectorTest {
                 launchCollector()
 
                 // ----- Assert -----
-                val sheet = stateFlow.value.shareSheet.shouldNotBeNull()
+                val sheet = stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull()
                 sheet.sheet.scaffold shouldBe shareSheetFor(
                     card = sheet.sheet.card,
                     bookTitle = "Dune",

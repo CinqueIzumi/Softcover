@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.lists.presentation.action
 
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.component.field.TextFieldError
+import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.core.presentation.error.toUserMessage
 import nl.rhaydus.softcover.feature.lists.presentation.event.CreateListEvent
@@ -29,7 +30,11 @@ internal class OnSubmitAction : CreateListAction {
                 privacy = privacy,
             )
         }.onSuccess { created ->
-            scope.setState { it.withSubmitting(submitting = false) }
+            scope.setState {
+                val idle = it.withSubmitting(submitting = false)
+
+                idle.copy(sheet = idle.sheet.requestClose())
+            }
 
             scope.sendEvent(
                 event = CreateListEvent.ListCreatedEvent(

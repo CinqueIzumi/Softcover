@@ -10,6 +10,7 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.mockk.every
 import io.mockk.mockk
+import kotlin.time.Clock
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Job
@@ -33,8 +34,8 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
+import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -57,7 +58,6 @@ import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import kotlin.time.Clock
 
 class BookCardModelsCollectorTest {
     private lateinit var dependencies: LibraryDependencies
@@ -1094,7 +1094,6 @@ class BookCardModelsCollectorTest {
                         contentDescription = "Rated 4.2 out of 5",
                         transitionKey = bookTransitionKey(
                             element = BookTransitionElement.Rating,
-                            editionId = null,
                             bookId = 1,
                         ),
                     ),

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
@@ -16,6 +17,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -37,7 +39,7 @@ class OnMarkBookAsWantToReadClickActionTest {
     fun setUp() {
         markBookAsWantToReadUseCase = mockk()
         eventChannel = Channel(Channel.BUFFERED)
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -149,7 +151,7 @@ class OnMarkBookAsWantToReadClickActionTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
             val preview = stubEdition(id = 55)
-            stateFlow.value = BookDetailUiState(previewEdition = preview)
+            stateFlow.value = buildBookDetailUiState().copy(previewEdition = preview)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -180,7 +182,7 @@ class OnMarkBookAsWantToReadClickActionTest {
         fun `uses scannedEditionId as editionId when previewEdition is null`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = null,
                 scannedEditionId = 555,
             )
@@ -214,7 +216,7 @@ class OnMarkBookAsWantToReadClickActionTest {
         fun `forwards null as editionId when no preview is set`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
-            stateFlow.value = BookDetailUiState(previewEdition = null)
+            stateFlow.value = buildBookDetailUiState().copy(previewEdition = null)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -268,7 +270,7 @@ class OnMarkBookAsWantToReadClickActionTest {
         }
 
         @Test
-        fun `sends MutationFailedEvent when use case fails`() = runTest {
+        fun `sends no event when use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
             dependencies = stubDependencies(this)
@@ -289,8 +291,7 @@ class OnMarkBookAsWantToReadClickActionTest {
             )
 
             // ----- Assert -----
-            val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
     }
 }

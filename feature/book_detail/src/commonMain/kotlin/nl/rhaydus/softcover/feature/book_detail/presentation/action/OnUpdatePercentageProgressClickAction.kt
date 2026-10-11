@@ -68,8 +68,6 @@ internal data class OnUpdatePercentageProgressClickAction(
                     scope.setState {
                         it.copy(failedMutationBookIds = it.failedMutationBookIds + bookToUpdate.id)
                     }
-
-                    scope.sendEvent(BookDetailEvent.MutationFailedEvent())
                 }
         }
 

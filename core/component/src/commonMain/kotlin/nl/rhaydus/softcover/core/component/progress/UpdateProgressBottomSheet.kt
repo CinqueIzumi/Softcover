@@ -5,29 +5,29 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
-import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.model.ButtonSize
-import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.control.SegmentedControl
 import nl.rhaydus.softcover.core.component.control.SegmentedControlEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldContent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * The modal sheet for editing reading progress: a `pages | percentage | time` segmented switcher over
  * a hero numeric input, an editorial suffix line and a wavy progress bar, plus the "when did you read
- * this?" backdating row and a "Mark as read" action ([ProgressSheetEvent.MarkAsReadRequested]).
+ * this?" backdating row, with the scaffold's footer carrying "Update progress" and "Mark as read"
+ * ([ProgressSheetEvent.MarkAsReadRequested]).
  * Percentage is offered only when [ProgressSheetMedium.hasKnownTotal] is true — without a total a
  * fraction can only ever resolve to 0, so the tab is hidden rather than shown broken.
  *
@@ -35,10 +35,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
  * progress bar — and accepts free numeric/time entry with no clamp to a total. Reach for this sheet
  * before inventing a new "edit a single number on a book" surface.
  *
- * "Mark as read" is a standard secondary action present on every progress sheet: an outlined button
- * below the tab content's own filled "Update progress" action. Both actions emit their event and then
- * dismiss the sheet through its animated hide; the host only records the result and clears its flag on
- * [ProgressSheetEvent.Dismissed].
+ * Both footer buttons dismiss the sheet through its animated hide after emitting their event; the host
+ * only records the result and closes its session on [ProgressSheetEvent.Dismissed].
  */
 @Composable
 fun UpdateProgressBottomSheet(
@@ -46,14 +44,18 @@ fun UpdateProgressBottomSheet(
     onEvent: (ProgressSheetEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var enteredNumber by remember(model.tabs.selected) { mutableStateOf("") }
+
     SheetScaffold(
         model = model.scaffold,
         onEvent = { event ->
             when (event) {
+                SheetScaffoldEvent.PrimaryClicked -> onEvent(model.submitEvent(enteredNumber = enteredNumber))
+
+                SheetScaffoldEvent.SecondaryClicked -> onEvent(ProgressSheetEvent.MarkAsReadRequested)
+
                 SheetScaffoldEvent.Dismissed -> onEvent(ProgressSheetEvent.Dismissed)
 
-                SheetScaffoldEvent.PrimaryClicked,
-                SheetScaffoldEvent.SecondaryClicked,
                 SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
@@ -62,6 +64,23 @@ fun UpdateProgressBottomSheet(
         ProgressBottomSheetContent(
             model = model,
             onEvent = onEvent,
+            onNumberChange = { enteredNumber = it },
+        )
+    }
+}
+
+private fun ProgressSheetUiModel.submitEvent(enteredNumber: String): ProgressSheetEvent {
+    if (tabs.selected == ProgressSheetTab.PERCENTAGE) {
+        return ProgressSheetEvent.PercentageSubmitted(percentage = enteredNumber)
+    }
+
+    return when (medium) {
+        is ProgressSheetMedium.Paged -> ProgressSheetEvent.PagesSubmitted(page = enteredNumber)
+
+        is ProgressSheetMedium.Timed -> ProgressSheetEvent.TimeSubmitted(
+            hours = medium.hours.text,
+            minutes = medium.minutes.text,
+            seconds = medium.seconds.text,
         )
     }
 }
@@ -70,6 +89,7 @@ fun UpdateProgressBottomSheet(
 private fun ProgressBottomSheetContent(
     model: ProgressSheetUiModel,
     onEvent: (ProgressSheetEvent) -> Unit,
+    onNumberChange: (String) -> Unit,
 ) {
     val medium = model.medium
 
@@ -77,14 +97,13 @@ private fun ProgressBottomSheetContent(
 
     val focusManager = LocalFocusManager.current
 
-    val dismiss = LocalModalSheetDismiss.current
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .pointerInput(Unit) {
                 detectTapGestures(onTap = { focusManager.clearFocus() })
-            },
+            }
+            .padding(bottom = Spacing.xxs),
     ) {
         SegmentedControl(
             model = model.tabs,
@@ -111,13 +130,13 @@ private fun ProgressBottomSheetContent(
         if (activeTab == ProgressSheetTab.PERCENTAGE) {
             ProgressBottomSheetPercentageContent(
                 progressPercent = model.progressPercent,
-                onEvent = onEvent,
+                onNumberChange = onNumberChange,
             )
         } else {
             when (medium) {
                 is ProgressSheetMedium.Paged -> ProgressBottomSheetPageContent(
                     medium = medium,
-                    onEvent = onEvent,
+                    onNumberChange = onNumberChange,
                 )
 
                 is ProgressSheetMedium.Timed -> ProgressBottomSheetTimeContent(
@@ -126,24 +145,6 @@ private fun ProgressBottomSheetContent(
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(Spacing.sm))
-
-        RhaydusButton(
-            label = "Mark as read",
-            style = ButtonStyle.OUTLINED,
-            size = ButtonSize.M,
-            icon = drawableIconResource(
-                icon = SoftcoverIcon.Check,
-                contentDescription = "",
-            ),
-            onClick = {
-                onEvent(ProgressSheetEvent.MarkAsReadRequested)
-
-                dismiss()
-            },
-            modifier = Modifier.fillMaxWidth(),
-        )
     }
 }
 
@@ -197,6 +198,7 @@ private fun ProgressSheetPreview(model: ProgressSheetUiModel) {
             ProgressBottomSheetContent(
                 model = model,
                 onEvent = {},
+                onNumberChange = {},
             )
         }
     }

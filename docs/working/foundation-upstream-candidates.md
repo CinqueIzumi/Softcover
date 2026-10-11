@@ -176,7 +176,7 @@ Filed but not yet implemented in the foundation.
 
 - **Type:** bug
 - **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.component.AdaptiveModalSheet`)
-- **Status:** **Open.** The bottom-sheet form builds `rememberModalBottomSheetState(skipPartiallyExpanded =
+- **Status:** **Open — forked locally (F46).** The bottom-sheet form builds `rememberModalBottomSheetState(skipPartiallyExpanded =
   true)` with no `confirmValueChange` and passes no `sheetGesturesEnabled`, so a drag-down hides the sheet
   and fires `onDismissRequest` even when `dismissOnTapOutside` and `dismissOnBackPress` are both false.
 - **Impact in the app:** Softcover's re-auth sheet and `LoadingSheet` are meant to be non-dismissible; a
@@ -249,15 +249,21 @@ Filed but not yet implemented in the foundation.
 - **What to build:** a `SaveOutcome.Cancelled`, and a `ShareOutcome.CopiedToClipboard`, so the caller can
   confirm "Copied to clipboard"; release, swap Softcover's imports back and delete the local copy.
 
-### F45 — `pressScaleClickable` has no hover
+### F45 — `pressScale` ignores the motion scheme and `pressScaleClickable` has no hover
 
 - **Type:** enhancement
 - **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.modifier`)
-- **Status:** **Open — built locally first.** `pressScaleClickable` / `pressScaleCombinedClickable` remember
-  their interaction source internally, so `hoverHighlight` cannot share it. Softcover's `:core:component`
-  `modifier/` defines both under the same names with hover built in.
-- **What to build:** `hoverHighlight` on the internal source, with an optional `hoverShape`;
-  release, swap Softcover's imports back and delete the local copy.
+- **Status:** **Open — built locally first.** The foundation `pressScale` animates on a default spring, not
+  `MaterialTheme.motionScheme`, and is gated by `playDecorativeMotion()`. `pressScaleClickable` /
+  `pressScaleCombinedClickable` hide their interaction source, so `hoverHighlight` cannot share it, and they
+  have no role, enabled, selectable or toggleable forms. Softcover forked it as `tactileClickable` /
+  `tactileSelectable` / `tactileToggleable` in `:core:component` `modifier/Tactile.kt`, and the detekt
+  `ForbiddenImport` rule bans the three foundation names there.
+- **What to build:** a `pressScale` driven by `motionScheme.fastSpatialSpec()` with no decorative-motion gate
+  (the reduced-motion scheme already snaps); click, selectable and toggleable forms taking `role`, `enabled`,
+  `hoverShape` and an optional shared `interactionSource`, bundling press scale, `hoverHighlight` and the hand
+  cursor. Release, swap the `tactile*` imports back to the foundation names, delete `Tactile.kt` and the
+  `ForbiddenImport` entries.
 
 ### F37 — ktlint-rules has no unused-imports rule
 
@@ -328,6 +334,30 @@ Filed but not yet implemented in the foundation.
 - **Status:** **Open.** `SoftcoverTheme` calls `playDecorativeMotion()` once and passes `RhaydusTheme` either `MotionScheme.expressive()` or a scheme whose six specs all `snap()`.
 - **Impact in the app:** without it every app repeats that choice, and a call site that reads a scheme spec still animates under reduced motion.
 - **What to build:** `RhaydusTheme` provides a snapping `MotionScheme` itself when reduced motion is on, so `motionScheme` parameters default to the right scheme. Once adopted, drop the app-local `ReducedMotionScheme`.
+
+### F47 — `shakeOnError` ignores reduced motion and hand-writes its timing
+
+- **Type:** bug
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Open.** Softcover forks it as `Modifier.shakeOnError` plus `rememberShakeTrigger()` in `:core:component`'s `modifier/`, and a detekt `ForbiddenImport` entry bans the foundation import in the core modules. `ForbiddenMethodCall` cannot ban it app-wide: detekt does not resolve foundation symbols, so it never matches them.
+- **Impact in the app:** the foundation shake plays under reduced motion and times its half-periods with hand-written `tween`s, so it ignores the motion scheme. It also reads `rememberHaptics()` instead of `LocalHaptics`, and every caller keeps its own latch flag so a shake finishes after the error clears.
+- **What to build:** take the half-period specs from `MaterialTheme.motionScheme`, skip the offsets under reduced motion while still firing `reject` and calling `onShakeEnd`, read `LocalHaptics`, and ship the latch as `rememberShakeTrigger()`. Once adopted, drop the fork and the ban.
+
+### F48 — `rememberPulseScale` hand-writes its timing and only takes a `NavPulse`
+
+- **Type:** bug
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Open.** Softcover forks it as `rememberPulseScale` in `:core:component`'s `modifier/`, and a detekt `ForbiddenImport` entry bans the foundation import.
+- **Impact in the app:** the peak and settle use hand-written `tween`s (180 ms and 240 ms) instead of the motion scheme, and the pulse cannot be driven by a plain counter, so a row celebration hand-rolls its own scale.
+- **What to build:** peak and settle from `MaterialTheme.motionScheme`'s spatial specs, plus an overload that pulses whenever an `Int` trigger changes. Once adopted, drop the fork and the ban.
+
+### F49 — `StarRatingInput` and `PullToRefreshEyebrow` read `rememberHaptics()` instead of `LocalHaptics`
+
+- **Type:** bug
+- **Home:** `nl.rhaydus:designsystem-core`, `nl.rhaydus:designsystem-editorial`
+- **Status:** **Open.** No fork: the theme provides the same platform haptics, so a copy would carry no behaviour change.
+- **Impact in the app:** none today. Both components build their own haptics rather than reading the one the theme provides, so a test or preview that supplies a different `LocalHaptics` does not reach them.
+- **What to build:** read `LocalHaptics.current` in both components, as `Modifier.shakeOnError` and every other call site do.
 
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
@@ -413,3 +443,18 @@ clone would fail to *configure* — `build-logic` is not in the foundation's `ma
   (`NewerVersionAvailable` / `GradleDependency` / `AndroidGradlePluginVersion` = `informational`) so a newer
   upstream release never breaks a build pinned to the foundation catalog. Softcover already had the freshness
   policy in its own `lint.xml`; adoption is a no-op on the app side beyond inheriting the shared helper.
+
+### F46 — `AdaptiveModalSheet`'s bottom sheet ignores its dismiss flags on swipe and can notify twice
+
+- **Type:** bug
+- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.component.AdaptiveModalSheet`)
+- **Status:** **Open — forked locally.** Beyond F31 (a swipe closes a sheet whose tap-outside and back are
+  off), `dismiss` sends `onDismissRequest` from `invokeOnCompletion`, so a second call or the sheet's own
+  dismiss can send it twice, and nothing tells the body a close has started. Softcover's `:core:component`
+  `AdaptiveModalSheet` (same signature) owns the bottom sheet: `sheetGesturesEnabled` follows
+  `dismissOnTapOutside` and `confirmValueChange` only records the close, `onDismissRequest` is latched to once (also when `hide()` is cancelled),
+  and a closing signal reaches the scaffold so scrim, back and swipe lock its chrome. A detekt
+  `ForbiddenImport` bans the foundation symbol in every module.
+- **What to build:** move the fork into the foundation (swipe gate, one-shot latch, a
+  `LocalModalSheetClosing` beside `LocalModalSheetDismiss`), release, swap the imports back, and delete the
+  local copy and the ban.

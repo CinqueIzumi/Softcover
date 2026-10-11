@@ -28,8 +28,8 @@ internal fun LibraryUiState.withTabSelected(tabId: String): LibraryUiState =
         selectionMode = false,
         selectedBookIds = emptySet(),
         isBulkMoveMenuExpanded = false,
-        isBulkRemoveSheetShown = false,
-        isBulkAddToListSheetShown = false,
+        isBulkRemoveSheetRequested = false,
+        isChooseListsSheetRequested = false,
         listsBeingMutated = emptySet(),
         isRearranging = false,
     )

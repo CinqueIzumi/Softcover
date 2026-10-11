@@ -32,7 +32,6 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -74,7 +73,7 @@ internal fun BookCardCoverLayout(
         animationSpec = motionScheme.defaultSpatialSpec(),
     )
     val liftProgress by animateFloatAsState(
-        targetValue = if (lifted && playDecorativeMotion()) 1f else 0f,
+        targetValue = if (lifted) 1f else 0f,
         animationSpec = motionScheme.defaultSpatialSpec(),
     )
     val ringFraction by animateFloatAsState(

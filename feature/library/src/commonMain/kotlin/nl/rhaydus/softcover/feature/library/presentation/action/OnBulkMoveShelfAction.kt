@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
@@ -62,7 +63,9 @@ internal class OnBulkMoveShelfAction(
 
             scope.sendEvent(LibraryEvent.BulkMoveFailedEvent())
         } else {
-            scope.sendEvent(LibraryEvent.BulkMoveAppliedEvent())
+            val feedback = if (status == UserBookStatus.READ) Feedback.Milestone else Feedback.Routine
+
+            scope.sendEvent(LibraryEvent.BulkMoveAppliedEvent(feedback = feedback))
         }
 
         scope.setState {
@@ -71,8 +74,8 @@ internal class OnBulkMoveShelfAction(
                 selectedBookIds = emptySet(),
                 bulkActionInProgress = false,
                 isBulkMoveMenuExpanded = false,
-                isBulkRemoveSheetShown = false,
-                isBulkAddToListSheetShown = false,
+                isBulkRemoveSheetRequested = false,
+                isChooseListsSheetRequested = false,
                 listsBeingMutated = emptySet(),
             )
         }

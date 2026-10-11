@@ -5,10 +5,13 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.dismissed
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.openShelvesSession
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.ManageShelves
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -35,12 +38,12 @@ class OnShelvesSheetCloseRequestedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `requests the sheet to close and cancels a pending pick without sending an event`() = runTest {
+        fun `withdraws the sheet request, cancels a pending pick and sends no event`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                isShelvesSheetExpanded = true,
+                shelvesSheet = openShelvesSession(),
+                isShelvesSheetRequested = true,
                 isShelvesSheetPickPending = true,
-                isShelvesSheetCloseRequested = false,
             )
 
             // ----- Act -----
@@ -50,10 +53,29 @@ class OnShelvesSheetCloseRequestedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isShelvesSheetCloseRequested shouldBe true
+            stateFlow.value.isShelvesSheetRequested shouldBe false
             stateFlow.value.isShelvesSheetPickPending shouldBe false
-            stateFlow.value.isShelvesSheetExpanded shouldBe true
             eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `leaves the session for the collector to hide and keeps a manage-shelves request`() = runTest {
+            // ----- Arrange -----
+            val open = openShelvesSession(pending = ManageShelves)
+            stateFlow.value = LibraryUiState(
+                shelvesSheet = open,
+                isShelvesSheetRequested = true,
+            )
+
+            // ----- Act -----
+            OnShelvesSheetCloseRequestedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.shelvesSheet shouldBe open
+            stateFlow.value.shelvesSheet.dismissed() shouldBe ManageShelves
         }
     }
 }

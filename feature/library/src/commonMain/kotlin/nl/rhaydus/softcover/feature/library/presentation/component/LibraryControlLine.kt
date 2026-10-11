@@ -12,11 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
-import nl.rhaydus.softcover.core.component.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -115,8 +114,7 @@ private fun SortLabelControl(
 
     Row(
         modifier = Modifier
-            .pointerHandCursor()
-            .pressScaleClickable(
+            .tactileClickable(
                 onClick = { runAction(OnArrangeSheetExpandedChangeAction(expanded = true)) },
             )
             .padding(vertical = Spacing.xs),

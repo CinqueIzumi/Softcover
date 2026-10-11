@@ -4,6 +4,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
+import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 
 /**
  * The "year · N readers · rating" line under a book's byline. A part is left out when its source is
@@ -14,7 +15,7 @@ fun bookStatsLine(
     releaseYear: Int?,
     usersCount: Int?,
     rating: Double?,
-    ratingTransitionKey: String? = null,
+    ratingTransitionKey: BookTransitionKey? = null,
 ): ImmutableList<BookCardLinePart>? {
     val parts = listOfNotNull(
         releaseYear?.takeIf { it != -1 }?.let { BookCardLinePart.Text(text = it.toString()) },

@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.dismissed
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesDismissalKind
@@ -13,11 +15,16 @@ internal class OnContinueSeriesMenuDismissedAction : ExploreAction {
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        val pending = scope.currentState.pendingContinueSeriesDismissal ?: return
+        val pending = scope.currentState.continueSeriesMenu.dismissed()
 
         scope.setState {
-            it.copy(pendingContinueSeriesDismissal = null)
+            it.copy(
+                continueSeriesMenu = SheetSession.Closed,
+                continueSeriesMenuBookId = null,
+            )
         }
+
+        if (pending == null) return
 
         val book = scope.currentState.continueSeriesBooks.find { it.id == pending.bookId } ?: return
 

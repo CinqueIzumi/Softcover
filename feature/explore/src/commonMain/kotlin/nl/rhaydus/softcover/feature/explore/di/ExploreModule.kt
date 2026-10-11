@@ -40,6 +40,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.BecauseYouRea
 import nl.rhaydus.softcover.feature.explore.presentation.collector.BecauseYouReadGenreSheetCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.BookCardModelsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ContinueSeriesBooksCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.ContinueSeriesMenuCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.CoverModelsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedSeriesCollector
@@ -126,6 +127,7 @@ val exploreModule = module {
     factory { TrendingBooksCollector() } bind ExploreCollector::class
 
     factory { ContinueSeriesBooksCollector() } bind ExploreCollector::class
+    factory { ContinueSeriesMenuCollector() } bind ExploreCollector::class
 
     factory { EnrichDismissedMetadataCollector() } bind ExploreCollector::class
 

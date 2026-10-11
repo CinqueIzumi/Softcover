@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -38,7 +39,7 @@ class EditionSelectionCollectorTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -89,7 +90,7 @@ class EditionSelectionCollectorTest {
         fun `sets ownedCoverBadge when the displayed edition is owned`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val displayed = buildEdition(id = 1)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = displayed,
                 userLists = listOf(buildOwnedList(editionId = displayed.id)),
             )
@@ -113,7 +114,7 @@ class EditionSelectionCollectorTest {
             // ----- Arrange -----
             val displayed = buildEdition(id = 1)
             val ownedElsewhere = buildEdition(id = 2)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = displayed,
                 userLists = listOf(buildOwnedList(editionId = ownedElsewhere.id)),
             )

@@ -6,4 +6,5 @@
 - [Kotlin block comments nest](feedback_kotlin_block_comments_nest.md) — a literal `/*` inside KDoc opens a nested comment; "Unclosed comment" errors often point far from the real cause
 - [:app lacks toad/voyager-koin by default](feedback_app_module_lacks_toad_voyager_koin.md) — add both to debugImplementation before wiring a TOAD ScreenModel into an app/src/debug screen; also detekt task is `detektDebug`, not `detektAndroidDebug`
 - [Component migration can drop more than the flagged style](project_component_migration_style_drops.md) — diff old vs new for every property (color, weight, size, spacing), not just the one named in the brief
+- [Import order is not auto-fixed](feedback_import_order_not_autofixed.md) — ktlintFormat skips project-import-order and one-type-per-file; sort imports by script
 - [MatchingDeclarationName ignores sibling functions](feedback_matching_declaration_name_ignores_sibling_functions.md) — a lone enum in a composable's file fails detekt even with no second type; give it its own file

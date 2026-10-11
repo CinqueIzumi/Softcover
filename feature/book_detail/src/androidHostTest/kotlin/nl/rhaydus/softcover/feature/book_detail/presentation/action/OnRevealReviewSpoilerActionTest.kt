@@ -7,6 +7,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -26,7 +27,7 @@ class OnRevealReviewSpoilerActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -54,7 +55,7 @@ class OnRevealReviewSpoilerActionTest {
         @Test
         fun `reveals only the review with the matching id`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 reviews = persistentListOf(review(id = 1), review(id = 2), review(id = 3)),
             )
             val action = OnRevealReviewSpoilerAction(reviewId = 2)
@@ -73,7 +74,7 @@ class OnRevealReviewSpoilerActionTest {
         fun `leaves the reviews untouched when no id matches`() = runTest {
             // ----- Arrange -----
             val reviews = persistentListOf(review(id = 1), review(id = 2))
-            stateFlow.value = BookDetailUiState(reviews = reviews)
+            stateFlow.value = buildBookDetailUiState().copy(reviews = reviews)
             val action = OnRevealReviewSpoilerAction(reviewId = 99)
 
             // ----- Act -----

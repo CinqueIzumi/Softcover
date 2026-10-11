@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.bookCardHandOver
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
+import nl.rhaydus.softcover.core.component.haptics.rememberReorderHaptics
 import nl.rhaydus.softcover.core.component.reorder.reorderLift
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -132,6 +133,7 @@ internal fun BookList(
     )
 
     val haptics = LocalHaptics.current
+    val reorderHaptics = rememberReorderHaptics()
 
     // One handler for the whole grid; the cards route their events here by key.
     val onCardEvent = rememberPrefetchingBookCardEventHandler(
@@ -140,8 +142,6 @@ internal fun BookList(
     ) { event, book ->
         when (event) {
             is BookCardEvent.Clicked -> if (selectionMode) {
-                haptics.select()
-
                 runAction(OnToggleBookSelectionAction(bookId = book.id))
             } else {
                 onBookClick(book)
@@ -194,7 +194,7 @@ internal fun BookList(
             orderedKeys.removeAt(fromIndex),
         )
 
-        haptics.tickle()
+        reorderHaptics.moved(toIndex)
 
         maxTouchedIndex.intValue = maxOf(
             maxTouchedIndex.intValue,
@@ -235,10 +235,10 @@ internal fun BookList(
                     onDragStarted = {
                         maxTouchedIndex.intValue = -1
 
-                        haptics.lift()
+                        reorderHaptics.lift()
                     },
                     onDragStopped = {
-                        haptics.drop()
+                        reorderHaptics.drop()
 
                         val touchedDepth = maxTouchedIndex.intValue
 
@@ -302,6 +302,8 @@ internal fun BookList(
                         onOpen = { cardSet[card.key]?.let(onBookClick) },
                         onSelect = onCtrlClick,
                         onToggleSelection = {
+                            haptics.select()
+
                             runAction(OnToggleBookSelectionAction(bookId = bookId))
                         },
                         onMarkAsRead = {

@@ -15,6 +15,9 @@ import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
@@ -65,10 +68,10 @@ class BarcodeScannerScreen : Screen {
         val haptics = LocalHaptics.current
 
         ObserveAsEvents(flow = screenModel.events) { event ->
+            if (event is FeedbackEvent) haptics.play(event.feedback)
+
             when (event) {
                 is ScanEvent.BookResolvedEvent -> {
-                    haptics.select()
-
                     val scannedEdition = event.book.editions.firstOrNull { it.id == event.editionId }
 
                     navigator.pop()
@@ -89,20 +92,14 @@ class BarcodeScannerScreen : Screen {
                 }
 
                 is ScanEvent.InvalidIsbnEvent -> {
-                    haptics.reject()
-
                     SnackBarManager.showSnackbar(title = "That doesn't look like a valid ISBN.")
                 }
 
                 is ScanEvent.ResolutionFailedEvent -> {
-                    haptics.reject()
-
                     SnackBarManager.showSnackbar(title = "Couldn't look that up — try again.")
                 }
 
                 is ScanEvent.AddBookFailedEvent -> {
-                    haptics.reject()
-
                     SnackBarManager.showSnackbar(title = "Couldn't add it — try again.")
                 }
             }
@@ -134,7 +131,7 @@ class BarcodeScannerScreen : Screen {
             onNavigateBack = navigator::pop,
         )
 
-        state.unknownIsbnSheet?.let { unknownIsbnSheet ->
+        state.unknownIsbnSheet.modelOrNull?.let { unknownIsbnSheet ->
             UnknownIsbnSheet(
                 model = unknownIsbnSheet,
                 onConfirm = { screenModel.runAction(OnAddUnknownIsbnConfirmedAction()) },

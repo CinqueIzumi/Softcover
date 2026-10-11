@@ -7,6 +7,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
@@ -26,6 +27,21 @@ class OnAddUnknownIsbnDismissedActionTest {
     private lateinit var eventChannel: Channel<ScanEvent>
     private lateinit var scope: ActionScope<ScanUiState, ScanEvent, LocalScanVariables>
 
+    private fun openSession(
+        closing: Boolean = false,
+        pending: ResolvedScan? = null,
+    ): SheetSession<UnknownIsbnSheetUiModel, ResolvedScan> {
+        val model = UnknownIsbnSheetUiModel(
+            isbn = "9780451524935",
+            scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
+        )
+
+        return SheetSession.Open(
+            model = if (closing) model.requestingClose() else model,
+            pending = pending,
+        )
+    }
+
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
@@ -41,14 +57,11 @@ class OnAddUnknownIsbnDismissedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `clears the unknown isbn sheet and the pending close request so the sheet can open again`() = runTest {
+        fun `closes the session and sends no event when nothing was resolved`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(
-                unknownIsbnSheet = UnknownIsbnSheetUiModel(
-                    isbn = "9780451524935",
-                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
-                ),
-                isUnknownIsbnCloseRequested = true,
+                unknownIsbn = "9780451524935",
+                unknownIsbnSheet = openSession(closing = true),
             )
             val action = OnAddUnknownIsbnDismissedAction()
 
@@ -59,8 +72,25 @@ class OnAddUnknownIsbnDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.unknownIsbnSheet.shouldBeNull()
-            stateFlow.value.isUnknownIsbnCloseRequested shouldBe false
+            stateFlow.value.unknownIsbnSheet shouldBe SheetSession.Closed
+            stateFlow.value.unknownIsbn.shouldBeNull()
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
+        }
+
+        @Test
+        fun `closes a sheet the user swiped away without a close request`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ScanUiState(unknownIsbnSheet = openSession())
+            val action = OnAddUnknownIsbnDismissedAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.unknownIsbnSheet shouldBe SheetSession.Closed
             eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
 
@@ -68,10 +98,7 @@ class OnAddUnknownIsbnDismissedActionTest {
         fun `leaves state unchanged and sends no event while a book is being added`() = runTest {
             // ----- Arrange -----
             val addingState = ScanUiState(
-                unknownIsbnSheet = UnknownIsbnSheetUiModel(
-                    isbn = "9780451524935",
-                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
-                ),
+                unknownIsbnSheet = openSession(),
                 isAddingBook = true,
             )
             stateFlow.value = addingState
@@ -89,18 +116,16 @@ class OnAddUnknownIsbnDismissedActionTest {
         }
 
         @Test
-        fun `sends BookResolvedEvent for the resolved scan and clears it`() = runTest {
+        fun `hands back the pending resolved scan as BookResolvedEvent and closes the session`() = runTest {
             // ----- Arrange -----
             val book = PreviewData.baseBook
             stateFlow.value = ScanUiState(
-                unknownIsbnSheet = UnknownIsbnSheetUiModel(
-                    isbn = "9780451524935",
-                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
-                ),
-                isUnknownIsbnCloseRequested = true,
-                resolvedUnknownIsbn = ResolvedScan(
-                    book = book,
-                    editionId = 7,
+                unknownIsbnSheet = openSession(
+                    closing = true,
+                    pending = ResolvedScan(
+                        book = book,
+                        editionId = 7,
+                    ),
                 ),
             )
             val action = OnAddUnknownIsbnDismissedAction()
@@ -112,8 +137,7 @@ class OnAddUnknownIsbnDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.resolvedUnknownIsbn.shouldBeNull()
-            stateFlow.value.unknownIsbnSheet.shouldBeNull()
+            stateFlow.value.unknownIsbnSheet shouldBe SheetSession.Closed
             val event = eventChannel.tryReceive().getOrNull()
             event.shouldBeInstanceOf<ScanEvent.BookResolvedEvent>()
             event.book shouldBe book
@@ -122,14 +146,17 @@ class OnAddUnknownIsbnDismissedActionTest {
         }
 
         @Test
-        fun `keeps the resolved scan and sends no event while a book is being added`() = runTest {
+        fun `keeps the pending resolved scan and sends no event while a book is being added`() = runTest {
             // ----- Arrange -----
             val resolving = ScanUiState(
-                isAddingBook = true,
-                resolvedUnknownIsbn = ResolvedScan(
-                    book = PreviewData.baseBook,
-                    editionId = null,
+                unknownIsbnSheet = openSession(
+                    closing = true,
+                    pending = ResolvedScan(
+                        book = PreviewData.baseBook,
+                        editionId = null,
+                    ),
                 ),
+                isAddingBook = true,
             )
             stateFlow.value = resolving
             val action = OnAddUnknownIsbnDismissedAction()

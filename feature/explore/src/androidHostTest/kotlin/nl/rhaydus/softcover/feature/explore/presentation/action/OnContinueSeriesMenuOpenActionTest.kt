@@ -1,16 +1,14 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
-import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
-import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesDismissalKind
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
-import nl.rhaydus.softcover.feature.explore.presentation.state.PendingContinueSeriesDismissal
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -35,23 +33,34 @@ class OnContinueSeriesMenuOpenActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `clears a leftover pending dismissal`() = runTest {
+        fun `requests the menu for the tapped book`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(
-                pendingContinueSeriesDismissal = PendingContinueSeriesDismissal(
-                    bookId = 1,
-                    kind = ContinueSeriesDismissalKind.THIS_BOOK,
-                ),
-            )
+            val action = OnContinueSeriesMenuOpenAction(bookId = 5)
 
             // ----- Act -----
-            OnContinueSeriesMenuOpenAction().execute(
+            action.execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.pendingContinueSeriesDismissal.shouldBeNull()
+            stateFlow.value.continueSeriesMenuBookId shouldBe 5
+        }
+
+        @Test
+        fun `replaces an earlier request`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(continueSeriesMenuBookId = 1)
+            val action = OnContinueSeriesMenuOpenAction(bookId = 5)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.continueSeriesMenuBookId shouldBe 5
         }
     }
 }

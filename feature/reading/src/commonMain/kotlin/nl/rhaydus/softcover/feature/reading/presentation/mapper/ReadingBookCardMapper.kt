@@ -12,13 +12,14 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.uibinding.book.byline
 import nl.rhaydus.softcover.core.uibinding.book.seriesEyebrow
-import nl.rhaydus.softcover.core.uibinding.book.titleTransitionKey
+import nl.rhaydus.softcover.core.uibinding.book.transitionKey
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.uibinding.format.percentLabel
@@ -58,7 +59,9 @@ internal fun Book.toAlsoReadingCard(
             ),
             text = BookCardContent(
                 title = title,
-                titleTransitionKey = titleTransitionKey(),
+                titleTransitionKey = transitionKey(
+                    element = BookTransitionElement.Title,
+                ),
                 eyebrow = eyebrow,
                 byline = byline(author = authorString),
             ),
@@ -91,7 +94,9 @@ internal fun Book.toPickUpNextCard(): BookCardUiModel = BookCardUiModel(
         ),
         text = BookCardContent(
             title = title,
-            titleTransitionKey = titleTransitionKey(),
+            titleTransitionKey = transitionKey(
+                element = BookTransitionElement.Title,
+            ),
         ),
     ),
 )

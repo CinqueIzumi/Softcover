@@ -5,10 +5,12 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.discardSheetScaffold
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -55,7 +57,7 @@ class OnLibraryVisibilityBackClickActionTest {
 
             // ----- Assert -----
             eventChannel.tryReceive().getOrNull() shouldBe null
-            stateFlow.value.showDiscardSheet shouldBe true
+            stateFlow.value.discardSheet shouldBe SheetSession.Open(model = discardSheetScaffold())
         }
 
         @Test
@@ -74,7 +76,7 @@ class OnLibraryVisibilityBackClickActionTest {
 
             // ----- Assert -----
             eventChannel.tryReceive().getOrNull() shouldBe LibraryVisibilitySettingsEvent.NavigateBack
-            stateFlow.value.showDiscardSheet shouldBe false
+            stateFlow.value.discardSheet shouldBe SheetSession.Closed
         }
 
         @Test
@@ -95,7 +97,7 @@ class OnLibraryVisibilityBackClickActionTest {
 
             // ----- Assert -----
             eventChannel.tryReceive().getOrNull() shouldBe LibraryVisibilitySettingsEvent.NavigateBack
-            stateFlow.value.showDiscardSheet shouldBe false
+            stateFlow.value.discardSheet shouldBe SheetSession.Closed
         }
     }
 }

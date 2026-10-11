@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -27,7 +28,7 @@ class OnEditionSearchQueryChangeActionTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -50,7 +51,7 @@ class OnEditionSearchQueryChangeActionTest {
         @Test
         fun `writes the query to the open sheet`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(editionSheet = openSheet(query = "old"))
+            stateFlow.value = buildBookDetailUiState().copy(editionSheet = openSheet(query = "old"))
 
             // ----- Act -----
             OnEditionSearchQueryChangeAction(query = "978").execute(
@@ -65,7 +66,7 @@ class OnEditionSearchQueryChangeActionTest {
         @Test
         fun `leaves the sheet null when none is open`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(editionSheet = null)
+            stateFlow.value = buildBookDetailUiState().copy(editionSheet = null)
 
             // ----- Act -----
             OnEditionSearchQueryChangeAction(query = "penguin").execute(

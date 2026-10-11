@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.transition
+package nl.rhaydus.softcover.core.component.transition
 
 enum class BookTransitionElement(val keyPart: String) {
     Cover("cover"),

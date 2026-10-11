@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 @Immutable
 sealed interface SheetFooterUiModel {
@@ -35,6 +36,14 @@ sealed interface SheetFooterUiModel {
             "Stacked, no secondary" to Stacked(
                 primary = SheetFooterButton(label = "Save"),
                 secondary = null,
+            ),
+            "Stacked, outlined secondary with icon" to Stacked(
+                primary = SheetFooterButton(label = "Update progress"),
+                secondary = SheetFooterButton(
+                    label = "Mark as read",
+                    emphasis = SheetFooterEmphasis.Outlined,
+                    icon = SoftcoverIcon.Check,
+                ),
             ),
             "Inline" to Inline(
                 primary = SheetFooterButton(label = "Apply filters"),

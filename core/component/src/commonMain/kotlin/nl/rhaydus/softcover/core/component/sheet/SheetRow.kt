@@ -1,19 +1,16 @@
 package nl.rhaydus.softcover.core.component.sheet
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,10 +20,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.designsystem.modifier.hoverHighlight
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.modifier.tactileSelectable
 import nl.rhaydus.softcover.core.component.selection.SelectionCheck
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -39,26 +34,16 @@ internal fun <K> SheetRow(
     onEvent: (SheetRowEvent<K>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val haptics = LocalHaptics.current
-    val interactionSource = remember { MutableInteractionSource() }
-
     Column(modifier = modifier) {
         Divider()
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .pointerHandCursor()
-                .hoverHighlight(interactionSource = interactionSource)
-                .selectable(
+                .tactileSelectable(
                     selected = model.selected,
-                    interactionSource = interactionSource,
                     role = Role.RadioButton,
                     onClick = {
-                        if (model.selected.not()) {
-                            haptics.select()
-                        }
-
                         onEvent(SheetRowEvent.Selected(key = model.key))
                     },
                 )

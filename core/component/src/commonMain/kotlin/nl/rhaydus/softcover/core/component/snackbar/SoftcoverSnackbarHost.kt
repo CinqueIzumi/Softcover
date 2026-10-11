@@ -1,9 +1,6 @@
 package nl.rhaydus.softcover.core.component.snackbar
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -26,7 +23,6 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import kotlin.time.TimeSource
 import kotlinx.coroutines.delay
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.util.SnackBarManager
 
 private const val SHORT_DURATION_MILLIS = 4_000L
@@ -41,10 +37,14 @@ private val clockOrigin = TimeSource.Monotonic.markNow()
  * [nl.rhaydus.softcover.core.component.sheet.AdaptiveModalSheet] adds its own. Only the host with the
  * highest [LocalSnackbarHostLevel] draws, so a snackbar appears above the topmost window. When the
  * topmost host changes mid-display, the new one continues the same snackbar without an entrance and
- * counts down only the time that is left.
+ * counts down only the time that is left. [modifier] sizes the host; [snackbarModifier] applies to the
+ * snackbar only, so spacing around it is not reserved while none shows.
  */
 @Composable
-fun SoftcoverSnackbarHost(modifier: Modifier = Modifier) {
+fun SoftcoverSnackbarHost(
+    modifier: Modifier = Modifier,
+    snackbarModifier: Modifier = Modifier,
+) {
     val token = remember { Any() }
     val level = LocalSnackbarHostLevel.current
 
@@ -63,7 +63,6 @@ fun SoftcoverSnackbarHost(modifier: Modifier = Modifier) {
 
         SnackbarTimeout(data = data)
 
-        val playMotion = playDecorativeMotion()
         val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
         val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
 
@@ -71,25 +70,18 @@ fun SoftcoverSnackbarHost(modifier: Modifier = Modifier) {
             targetState = data,
             modifier = modifier,
             transitionSpec = {
-                if (playMotion) {
-                    val enter = fadeIn(effectsSpec) + scaleIn(
-                        animationSpec = spatialSpec,
-                        initialScale = ENTER_SCALE,
-                    )
+                val enter = fadeIn(effectsSpec) + scaleIn(
+                    animationSpec = spatialSpec,
+                    initialScale = ENTER_SCALE,
+                )
 
-                    enter togetherWith fadeOut(effectsSpec)
-                } else {
-                    ContentTransform(
-                        targetContentEnter = EnterTransition.None,
-                        initialContentExit = ExitTransition.None,
-                    )
-                }
+                enter togetherWith fadeOut(effectsSpec)
             },
         ) { target ->
             if (target != null) {
                 Snackbar(
                     snackbarData = target,
-                    modifier = Modifier.semantics {
+                    modifier = snackbarModifier.semantics {
                         liveRegion = LiveRegionMode.Polite
                         dismiss {
                             target.dismiss()

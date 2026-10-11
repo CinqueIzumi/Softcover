@@ -6,10 +6,16 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.LoadingSheetUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.isOpen
+import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
+import nl.rhaydus.softcover.feature.onboarding.presentation.state.SignInCompleted
+import nl.rhaydus.softcover.feature.onboarding.presentation.state.onboardingLoadingSheet
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -33,18 +39,15 @@ class OnLoadingSheetDismissedActionTest {
         )
     }
 
+    private fun openSheet(): SheetSession<LoadingSheetUiModel, SignInCompleted> =
+        SheetSession.Open(model = onboardingLoadingSheet(progress = 1f))
+
     @Nested
     inner class Execute {
         @Test
-        fun `hides the sheet and clears the close request once its dismiss animation finished`() = runTest {
+        fun `closes the session once the dismiss animation finished`() = runTest {
             // ----- Arrange -----
-            val initial = stateFlow.value
-            stateFlow.value = initial.copy(
-                loadingSheet = initial.loadingSheet.copy(
-                    isLoading = true,
-                    scaffold = initial.loadingSheet.scaffold.copy(closeRequested = true),
-                ),
-            )
+            stateFlow.value = stateFlow.value.copy(loadingSheet = openSheet().requestClose())
 
             // ----- Act -----
             OnLoadingSheetDismissedAction.execute(
@@ -53,14 +56,16 @@ class OnLoadingSheetDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.loadingSheet.isLoading shouldBe false
-            stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe false
+            stateFlow.value.loadingSheet shouldBe SheetSession.Closed
+            stateFlow.value.loadingSheet.isOpen shouldBe false
         }
 
         @Test
-        fun `sends SignInCompletedEvent and clears the pending flag when the sign-in was recorded`() = runTest {
+        fun `sends SignInCompletedEvent exactly once when the sign-in was recorded`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(signInPending = true)
+            stateFlow.value = stateFlow.value.copy(
+                loadingSheet = openSheet().requestClose(pending = SignInCompleted),
+            )
 
             // ----- Act -----
             OnLoadingSheetDismissedAction.execute(
@@ -69,15 +74,29 @@ class OnLoadingSheetDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.signInPending shouldBe false
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.SignInCompletedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
-        fun `sends no event when no sign-in was recorded`() = runTest {
+        fun `sends no event when the sheet closed after a failed sign-in`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(signInPending = false)
+            stateFlow.value = stateFlow.value.copy(loadingSheet = openSheet().requestClose())
+
+            // ----- Act -----
+            OnLoadingSheetDismissedAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `sends no event when the session is already closed`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(loadingSheet = SheetSession.Closed)
 
             // ----- Act -----
             OnLoadingSheetDismissedAction.execute(

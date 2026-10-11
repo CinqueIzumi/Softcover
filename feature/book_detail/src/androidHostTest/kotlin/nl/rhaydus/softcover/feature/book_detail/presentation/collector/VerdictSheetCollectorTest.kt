@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.core.uibinding.verdict.reduce
 import nl.rhaydus.softcover.core.uibinding.verdict.toVerdictSheetUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -41,7 +42,7 @@ class VerdictSheetCollectorTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -209,7 +210,7 @@ class VerdictSheetCollectorTest {
                 val sheet = stateFlow.value.verdictSheet.shouldNotBeNull()
                 sheet.rating shouldBe 4.5
                 sheet.spoilers.checked shouldBe true
-                sheet.scaffold.header.trailing.shouldNotBeNull()
+                sheet.scaffold.header.shouldNotBeNull().trailing.shouldNotBeNull()
             }
 
         @Test

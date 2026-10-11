@@ -75,7 +75,6 @@ internal fun shareSheetFor(
     variant: ShareCardVariant,
     hasUpdateCard: Boolean,
     progress: ShareCaptureProgress = ShareCaptureProgress.Idle,
-    closeRequested: Boolean = false,
 ): ShareSheetUiModel =
     ShareSheetUiModel(
         sheet = ShareCardSheetUiModel(
@@ -83,10 +82,7 @@ internal fun shareSheetFor(
             scaffold = shareSheetScaffoldFor(
                 bookTitle = bookTitle,
                 variant = variant,
-            ).withShareCapture(
-                progress = progress,
-                closeRequested = closeRequested,
-            ),
+            ).withShareCapture(progress = progress),
             displayName = bookTitle,
         ),
         variantToggle = if (hasUpdateCard) {

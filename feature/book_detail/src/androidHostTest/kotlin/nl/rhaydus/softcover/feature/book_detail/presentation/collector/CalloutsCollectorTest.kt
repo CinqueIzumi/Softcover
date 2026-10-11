@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.component.callout.CalloutActionUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -30,7 +31,7 @@ class CalloutsCollectorTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -70,7 +71,7 @@ class CalloutsCollectorTest {
         fun `sets both callouts for a shelved book whose edition differs from the scanned one`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                stateFlow.value = BookDetailUiState(
+                stateFlow.value = buildBookDetailUiState().copy(
                     book = stubBook(
                         status = BookStatus.WantToRead,
                         shelvedEditionId = 10,
@@ -96,7 +97,7 @@ class CalloutsCollectorTest {
         @Test
         fun `both callouts are null when there is no book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null)
+            stateFlow.value = buildBookDetailUiState().copy(book = null)
             val collector = CalloutsCollector()
 
             // ----- Act -----
@@ -116,7 +117,7 @@ class CalloutsCollectorTest {
         @Test
         fun `scanEditionCallout disappears when the banner is dismissed`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = stubBook(
                     status = BookStatus.Reading,
                     shelvedEditionId = 10,
@@ -144,7 +145,7 @@ class CalloutsCollectorTest {
         fun `scanEditionCallout switches to Busy while the scanned edition is updating`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                stateFlow.value = BookDetailUiState(
+                stateFlow.value = buildBookDetailUiState().copy(
                     book = stubBook(
                         status = BookStatus.Reading,
                         shelvedEditionId = 10,
@@ -158,13 +159,15 @@ class CalloutsCollectorTest {
                         dependencies = dependencies,
                     )
                 }
-                stateFlow.value.scanEditionCallout.shouldNotBeNull().callToAction.shouldBeInstanceOf<CalloutActionUiModel.Button>()
+                stateFlow.value.scanEditionCallout.shouldNotBeNull().callToAction
+                    .shouldBeInstanceOf<CalloutActionUiModel.Button>()
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(isUpdatingScannedEdition = true)
 
                 // ----- Assert -----
-                stateFlow.value.scanEditionCallout.shouldNotBeNull().callToAction.shouldBeInstanceOf<CalloutActionUiModel.Busy>()
+                stateFlow.value.scanEditionCallout.shouldNotBeNull().callToAction
+                    .shouldBeInstanceOf<CalloutActionUiModel.Busy>()
                 job.cancel()
             }
     }

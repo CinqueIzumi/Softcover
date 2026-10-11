@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -31,7 +32,7 @@ class InitializeBookWithIdActionTest {
     @BeforeEach
     fun setUp() {
         fetchBookByIdUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -110,8 +111,7 @@ class InitializeBookWithIdActionTest {
         }
 
         @Test
-        fun `sets book to null, clears loadingBookDetails, leaves editions empty, skips editionsLoadedForBookId on use case failure`() =
-            runTest {
+        fun `leaves book null, clears loadingBookDetails, leaves editions empty on use case failure`() = runTest {
             // ----- Arrange -----
             val bookId = 7
             dependencies = stubDependencies(this)

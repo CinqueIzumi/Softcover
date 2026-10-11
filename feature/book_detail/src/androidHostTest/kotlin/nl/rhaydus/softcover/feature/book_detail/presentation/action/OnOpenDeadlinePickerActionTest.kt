@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -29,7 +30,7 @@ class OnOpenDeadlinePickerActionTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -98,7 +99,7 @@ class OnOpenDeadlinePickerActionTest {
                 12,
                 24,
             )
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 deadline = BookDeadline(
                     bookId = 1,
                     deadlineDate = deadlineDate,
@@ -155,7 +156,7 @@ class OnOpenDeadlinePickerActionTest {
         @Test
         fun `sets fabMenuExpanded to false`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(fabMenuExpanded = true)
+            stateFlow.value = buildBookDetailUiState().copy(fabMenuExpanded = true)
             dependencies = stubDependencies(this)
             val action = OnOpenDeadlinePickerAction()
 

@@ -3,9 +3,13 @@ package nl.rhaydus.softcover.feature.settings.presentation.action
 import kotlinx.coroutines.async
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.sheet.isOpen
+import nl.rhaydus.softcover.core.component.sheet.requestClose
+import nl.rhaydus.softcover.core.component.sheet.withModel
 import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
+import nl.rhaydus.softcover.feature.settings.presentation.state.LeaveScreen
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.discardSheetScaffold
@@ -23,10 +27,7 @@ internal class OnSaveLibraryVisibilityAction(
         if (current.isDirty.not() || current.isSaving) {
             if (leaveAfterSave) {
                 scope.setState {
-                    it.copy(
-                        discardSheetScaffold = it.discardSheetScaffold.copy(closeRequested = true),
-                        leaveOnSheetDismissed = true,
-                    )
+                    it.copy(discardSheet = it.discardSheet.requestClose(pending = LeaveScreen))
                 }
             }
 
@@ -36,9 +37,7 @@ internal class OnSaveLibraryVisibilityAction(
         scope.setState {
             it.copy(
                 isSaving = true,
-                discardSheetScaffold = discardSheetScaffold(saving = leaveAfterSave).copy(
-                    closeRequested = it.discardSheetScaffold.closeRequested,
-                ),
+                discardSheet = it.discardSheet.withModel { discardSheetScaffold(saving = leaveAfterSave) },
             )
         }
 
@@ -66,9 +65,7 @@ internal class OnSaveLibraryVisibilityAction(
             scope.setState {
                 it.copy(
                     isSaving = false,
-                    discardSheetScaffold = discardSheetScaffold(saving = false).copy(
-                        closeRequested = it.discardSheetScaffold.closeRequested,
-                    ),
+                    discardSheet = it.discardSheet.withModel { discardSheetScaffold(saving = false) },
                 )
             }
 
@@ -80,11 +77,10 @@ internal class OnSaveLibraryVisibilityAction(
         val allSaved = save.await()
 
         scope.setState {
-            if (it.showDiscardSheet.not()) return@setState it
+            if (it.discardSheet.isOpen.not()) return@setState it
 
             it.copy(
-                discardSheetScaffold = it.discardSheetScaffold.copy(closeRequested = true),
-                leaveOnSheetDismissed = allSaved,
+                discardSheet = it.discardSheet.requestClose(pending = LeaveScreen.takeIf { allSaved }),
             )
         }
     }

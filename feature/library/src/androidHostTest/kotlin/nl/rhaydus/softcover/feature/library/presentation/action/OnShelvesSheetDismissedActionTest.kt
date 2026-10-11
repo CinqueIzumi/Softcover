@@ -6,10 +6,13 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.openShelvesSession
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.ManageShelves
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -36,13 +39,38 @@ class OnShelvesSheetDismissedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `hides the sheet, resets every pending flag and sends ManageShelvesRequestedEvent when manage was recorded`() = runTest {
+        fun `closes the session, resets the pick flag and sends ManageShelvesRequestedEvent when manage was recorded`() =
+            runTest {
+                // ----- Arrange -----
+                stateFlow.value = LibraryUiState(
+                    shelvesSheet = openShelvesSession(
+                        closing = true,
+                        pending = ManageShelves,
+                    ),
+                    isShelvesSheetRequested = true,
+                    isShelvesSheetPickPending = true,
+                )
+
+                // ----- Act -----
+                OnShelvesSheetDismissedAction().execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+
+                // ----- Assert -----
+                stateFlow.value.shelvesSheet shouldBe SheetSession.Closed
+                stateFlow.value.isShelvesSheetRequested shouldBe false
+                stateFlow.value.isShelvesSheetPickPending shouldBe false
+                eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ManageShelvesRequestedEvent>()
+                eventChannel.tryReceive().getOrNull() shouldBe null
+            }
+
+        @Test
+        fun `closes the session, resets the pick flag and sends no event after a tab pick`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                isShelvesSheetExpanded = true,
-                isManageShelvesPending = true,
+                shelvesSheet = openShelvesSession(closing = true),
                 isShelvesSheetPickPending = true,
-                isShelvesSheetCloseRequested = true,
             )
 
             // ----- Act -----
@@ -52,23 +80,15 @@ class OnShelvesSheetDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isShelvesSheetExpanded shouldBe false
-            stateFlow.value.isManageShelvesPending shouldBe false
+            stateFlow.value.shelvesSheet shouldBe SheetSession.Closed
             stateFlow.value.isShelvesSheetPickPending shouldBe false
-            stateFlow.value.isShelvesSheetCloseRequested shouldBe false
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ManageShelvesRequestedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
-        fun `hides the sheet, resets the pick and close flags and sends no event after a tab pick`() = runTest {
+        fun `closes a sheet the user swiped away without a close request and sends no event`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isShelvesSheetExpanded = true,
-                isManageShelvesPending = false,
-                isShelvesSheetPickPending = true,
-                isShelvesSheetCloseRequested = true,
-            )
+            stateFlow.value = LibraryUiState(shelvesSheet = openShelvesSession())
 
             // ----- Act -----
             OnShelvesSheetDismissedAction().execute(
@@ -77,9 +97,23 @@ class OnShelvesSheetDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isShelvesSheetExpanded shouldBe false
-            stateFlow.value.isShelvesSheetPickPending shouldBe false
-            stateFlow.value.isShelvesSheetCloseRequested shouldBe false
+            stateFlow.value.shelvesSheet shouldBe SheetSession.Closed
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `sends no event when the session was already closed`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(shelvesSheet = SheetSession.Closed)
+
+            // ----- Act -----
+            OnShelvesSheetDismissedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.shelvesSheet shouldBe SheetSession.Closed
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }

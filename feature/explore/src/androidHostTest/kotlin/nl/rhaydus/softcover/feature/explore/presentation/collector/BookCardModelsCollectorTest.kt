@@ -25,8 +25,9 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
+import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
+import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
@@ -482,9 +483,8 @@ class BookCardModelsCollectorTest {
         private fun titleKey(
             bookId: Int,
             surface: String?,
-        ): String? = bookTransitionKey(
+        ): BookTransitionKey = bookTransitionKey(
             element = BookTransitionElement.Title,
-            editionId = null,
             bookId = bookId,
             surface = surface,
         )
@@ -492,14 +492,13 @@ class BookCardModelsCollectorTest {
         private fun ratingKey(
             bookId: Int,
             surface: String?,
-        ): String? = bookTransitionKey(
+        ): BookTransitionKey = bookTransitionKey(
             element = BookTransitionElement.Rating,
-            editionId = null,
             bookId = bookId,
             surface = surface,
         )
 
-        private fun BookCardUiModel.ratingKeys(): List<String?> = columnOf(this).text.supportingLines
+        private fun BookCardUiModel.ratingKeys(): List<BookTransitionKey?> = columnOf(this).text.supportingLines
             .flatten()
             .filterIsInstance<BookCardLinePart.Rating>()
             .map { it.transitionKey }
@@ -541,7 +540,6 @@ class BookCardModelsCollectorTest {
                 )
                 trending.cover.shouldNotBeNull().model.sharedTransitionKey shouldBe bookTransitionKey(
                     element = BookTransitionElement.Cover,
-                    editionId = null,
                     bookId = 1,
                     surface = SURFACE_TRENDING,
                 )

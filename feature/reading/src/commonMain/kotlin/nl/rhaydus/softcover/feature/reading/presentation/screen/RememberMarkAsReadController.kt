@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,6 +23,7 @@ internal fun rememberMarkAsReadController(
     val density = LocalDensity.current
     val slideDistancePx = remember(density) { with(density) { 96.dp.toPx() } }
     val navPulse = koinInject<NavPulse>()
+    val slideSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
 
     val currentBooks by rememberUpdatedState(books)
     val currentRunAction by rememberUpdatedState(runAction)
@@ -36,7 +38,10 @@ internal fun rememberMarkAsReadController(
     }
 
     LaunchedEffect(controller, controller.slidingBookId) {
-        controller.runSlide(books = currentBooks)
+        controller.runSlide(
+            books = currentBooks,
+            slideSpec = slideSpec,
+        )
     }
 
     return controller

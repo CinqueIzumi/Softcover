@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -41,7 +42,7 @@ class ExploreSheetScaffoldBuilderTest {
             val result = continueSeriesMenuSheetScaffoldFor(book)
 
             // ----- Assert -----
-            result.header.section shouldBe SectionHeaderUiModel.Section(
+            result.header.shouldNotBeNull().section shouldBe SectionHeaderUiModel.Section(
                 eyebrow = "Mistborn Era",
                 headline = "The Final Empire",
             )
@@ -59,7 +60,7 @@ class ExploreSheetScaffoldBuilderTest {
             val result = continueSeriesMenuSheetScaffoldFor(book)
 
             // ----- Assert -----
-            result.header.section shouldBe SectionHeaderUiModel.Section(
+            result.header.shouldNotBeNull().section shouldBe SectionHeaderUiModel.Section(
                 eyebrow = "Up next",
                 headline = "Elantris",
             )

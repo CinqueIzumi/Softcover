@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.common.currentLocalDateTime
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -28,7 +29,7 @@ class OnWhenReadShiftedActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -48,7 +49,7 @@ class OnWhenReadShiftedActionTest {
                 9,
                 15,
             )
-            stateFlow.value = BookDetailUiState(readAt = readAt)
+            stateFlow.value = buildBookDetailUiState().copy(readAt = readAt)
             val action = OnWhenReadShiftedAction(minutes = 30)
 
             // ----- Act -----
@@ -107,7 +108,7 @@ class OnWhenReadShiftedActionTest {
         fun `clamps to now when a backdate near now is shifted past it`() = runTest {
             // ----- Arrange -----
             val nearNow = currentLocalDateTime()
-            stateFlow.value = BookDetailUiState(readAt = nearNow)
+            stateFlow.value = buildBookDetailUiState().copy(readAt = nearNow)
             val action = OnWhenReadShiftedAction(minutes = 600)
 
             // ----- Act -----

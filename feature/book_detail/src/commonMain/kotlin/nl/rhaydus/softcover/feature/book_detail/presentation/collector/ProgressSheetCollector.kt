@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.sheet.openOrUpdate
+import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.core.uibinding.progress.toProgressSheetUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -12,7 +14,7 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * Maps the book and the reader's stored progress unit to the progress sheet's UI model off the
- * composition (R9), so `BookDetailShelf` only ever forwards `BookDetailUiState.progressSheet`.
+ * composition, so `BookDetailShelf` only ever forwards `BookDetailUiState.progressSheet`.
  *
  * A collector rather than a patch to each action that assigns `book`: eight actions plus
  * `UserBooksFlowCollector` write that field, and a derived field one of them forgets to update is a
@@ -26,7 +28,7 @@ internal class ProgressSheetCollector : BookDetailCollector {
         scope.state
             .map {
                 ProgressSheetSnapshot(
-                    book = it.book,
+                    book = it.book.takeIf { _ -> it.progressSheetRequested },
                     selectedTab = it.selectedProgressSheetTab,
                     timeDraft = it.progressTimeDraft,
                     readAt = it.readAt,
@@ -34,13 +36,21 @@ internal class ProgressSheetCollector : BookDetailCollector {
             }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
+                val book = snapshot.book
+
                 scope.setState {
                     it.copy(
-                        progressSheet = snapshot.book?.toProgressSheetUiModel(
-                            selectedTab = snapshot.selectedTab,
-                            timeDraft = snapshot.timeDraft,
-                            readAt = snapshot.readAt,
-                        ),
+                        progressSheet = if (book == null || it.progressSheetRequested.not()) {
+                            it.progressSheet.requestClose()
+                        } else {
+                            it.progressSheet.openOrUpdate(
+                                model = book.toProgressSheetUiModel(
+                                    selectedTab = snapshot.selectedTab,
+                                    timeDraft = snapshot.timeDraft,
+                                    readAt = snapshot.readAt,
+                                ),
+                            )
+                        },
                     )
                 }
             }

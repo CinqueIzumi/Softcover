@@ -7,13 +7,13 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import nl.rhaydus.softcover.core.component.cover.CoverSource
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
+import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -33,8 +33,7 @@ class CoverModelsSnapshotTest {
         @Test
         fun `seeds hero and backdrop from initialCover with the transition key on the hero only`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
-                bookId = BOOK_ID,
+            val state = buildBookDetailUiState(bookId = BOOK_ID).copy(
                 transitionSurface = SURFACE,
                 initialCover = initialCover(COVER_URL),
             )
@@ -48,7 +47,6 @@ class CoverModelsSnapshotTest {
 
             hero.sharedTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Cover,
-                editionId = null,
                 bookId = BOOK_ID,
                 surface = SURFACE,
             )
@@ -63,8 +61,7 @@ class CoverModelsSnapshotTest {
         @Test
         fun `seeds the full-screen cover from the same initialCover as the hero`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
-                bookId = BOOK_ID,
+            val state = buildBookDetailUiState(bookId = BOOK_ID).copy(
                 transitionSurface = SURFACE,
                 initialCover = initialCover(COVER_URL),
             )
@@ -81,8 +78,7 @@ class CoverModelsSnapshotTest {
         @Test
         fun `without initialCover or book the covers have no source and are loading while details load`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
-                bookId = BOOK_ID,
+            val state = buildBookDetailUiState(bookId = BOOK_ID).copy(
                 loadingBookDetails = true,
                 initialCover = null,
             )
@@ -102,8 +98,7 @@ class CoverModelsSnapshotTest {
         @Test
         fun `without initialCover or book the covers are not loading once details finished loading`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
-                bookId = BOOK_ID,
+            val state = buildBookDetailUiState(bookId = BOOK_ID).copy(
                 loadingBookDetails = false,
                 initialCover = null,
             )
@@ -119,8 +114,7 @@ class CoverModelsSnapshotTest {
         @Test
         fun `a resolvable initialCover paints immediately even while details are loading`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
-                bookId = BOOK_ID,
+            val state = buildBookDetailUiState(bookId = BOOK_ID).copy(
                 loadingBookDetails = true,
                 initialCover = initialCover(COVER_URL),
             )
@@ -134,26 +128,9 @@ class CoverModelsSnapshotTest {
         }
 
         @Test
-        fun `without a bookId or edition the hero has no transition key`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                bookId = null,
-                transitionSurface = SURFACE,
-                initialCover = initialCover(COVER_URL),
-            )
-
-            // ----- Act -----
-            val result = state.withCoverModels()
-
-            // ----- Assert -----
-            result.heroCover.shouldNotBeNull().sharedTransitionKey.shouldBeNull()
-        }
-
-        @Test
         fun `seeds the hero title and rating keys on the first frame`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
-                bookId = BOOK_ID,
+            val state = buildBookDetailUiState(bookId = BOOK_ID).copy(
                 transitionSurface = SURFACE,
                 initialCover = initialCover(COVER_URL),
             )
@@ -164,34 +141,15 @@ class CoverModelsSnapshotTest {
             // ----- Assert -----
             result.heroTitleTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Title,
-                editionId = null,
                 bookId = BOOK_ID,
                 surface = SURFACE,
             )
             result.heroRatingTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Rating,
-                editionId = null,
                 bookId = BOOK_ID,
                 surface = SURFACE,
             )
             result.heroTitleTransitionKey.shouldNotBeNull()
-        }
-
-        @Test
-        fun `without a bookId or edition the hero title and rating have no key`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                bookId = null,
-                transitionSurface = SURFACE,
-                initialCover = initialCover(COVER_URL),
-            )
-
-            // ----- Act -----
-            val result = state.withCoverModels()
-
-            // ----- Assert -----
-            result.heroTitleTransitionKey.shouldBeNull()
-            result.heroRatingTransitionKey.shouldBeNull()
         }
     }
 
@@ -200,7 +158,7 @@ class CoverModelsSnapshotTest {
         private fun snapshot(
             book: Book?,
             loadingBookDetails: Boolean,
-            bookId: Int? = BOOK_ID,
+            bookId: Int = BOOK_ID,
             transitionSurface: String? = null,
             displayedEdition: BookEdition? = null,
         ): CoverModelsSnapshot = CoverModelsSnapshot(
@@ -339,13 +297,11 @@ class CoverModelsSnapshotTest {
             // ----- Assert -----
             covers.heroTitleTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Title,
-                editionId = null,
                 bookId = BOOK_ID,
                 surface = SURFACE,
             )
             covers.heroRatingTransitionKey shouldBe bookTransitionKey(
                 element = BookTransitionElement.Rating,
-                editionId = null,
                 bookId = BOOK_ID,
                 surface = SURFACE,
             )
@@ -396,49 +352,6 @@ class CoverModelsSnapshotTest {
             surfaced.hero.sharedTransitionKey shouldNotBe unsurfaced.hero.sharedTransitionKey
             surfaced.heroTitleTransitionKey shouldNotBe unsurfaced.heroTitleTransitionKey
             surfaced.heroRatingTransitionKey shouldNotBe unsurfaced.heroRatingTransitionKey
-        }
-
-        @Test
-        fun `without a bookId or displayed edition the title and rating keys are null`() {
-            // ----- Arrange -----
-            val snapshot = snapshot(
-                book = stubBook(),
-                loadingBookDetails = false,
-                bookId = null,
-            )
-
-            // ----- Act -----
-            val covers = snapshot.toCoverModels()
-
-            // ----- Assert -----
-            covers.heroTitleTransitionKey.shouldBeNull()
-            covers.heroRatingTransitionKey.shouldBeNull()
-        }
-
-        @Test
-        fun `the displayed edition keys the title and rating when there is no bookId`() {
-            // ----- Arrange -----
-            val snapshot = snapshot(
-                book = stubBook(),
-                loadingBookDetails = false,
-                bookId = null,
-                displayedEdition = PreviewData.baseEdition.copy(id = 9),
-            )
-
-            // ----- Act -----
-            val covers = snapshot.toCoverModels()
-
-            // ----- Assert -----
-            covers.heroTitleTransitionKey shouldBe bookTransitionKey(
-                element = BookTransitionElement.Title,
-                editionId = 9,
-                bookId = null,
-            )
-            covers.heroRatingTransitionKey shouldBe bookTransitionKey(
-                element = BookTransitionElement.Rating,
-                editionId = 9,
-                bookId = null,
-            )
         }
 
         @Test

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -13,7 +14,8 @@ internal class OnDismissProgressSheetAction : BookDetailAction {
     ) {
         scope.setState {
             it.copy(
-                showUpdateProgressSheet = false,
+                progressSheet = SheetSession.Closed,
+                progressSheetRequested = false,
                 progressTimeDraft = null,
             )
         }

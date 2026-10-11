@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlin.time.Clock
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.TimeZone
@@ -22,8 +23,9 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardProgress
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.BookTransitionElement
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookTransitionKey
+import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
+import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
+import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -35,7 +37,6 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import kotlin.time.Clock
 
 class ReadingBookCardMapperTest {
     private val overlay = CoverOverlayUiModel(
@@ -432,11 +433,9 @@ class ReadingBookCardMapperTest {
     inner class TransitionKeys {
         private fun key(
             element: BookTransitionElement,
-            editionId: Int?,
             bookId: Int,
-        ): String? = bookTransitionKey(
+        ): BookTransitionKey = bookTransitionKey(
             element = element,
-            editionId = editionId,
             bookId = bookId,
         )
 
@@ -452,12 +451,10 @@ class ReadingBookCardMapperTest {
             val lead = row.lead.shouldBeInstanceOf<BookCardLead.Cover>()
             row.text.titleTransitionKey shouldBe key(
                 element = BookTransitionElement.Title,
-                editionId = 50,
                 bookId = 7,
             )
             lead.cover.model.sharedTransitionKey shouldBe key(
                 element = BookTransitionElement.Cover,
-                editionId = 50,
                 bookId = 7,
             )
         }
@@ -488,7 +485,6 @@ class ReadingBookCardMapperTest {
             // ----- Assert -----
             row.text.titleTransitionKey shouldBe key(
                 element = BookTransitionElement.Title,
-                editionId = null,
                 bookId = 7,
             )
         }
@@ -504,12 +500,10 @@ class ReadingBookCardMapperTest {
             // ----- Assert -----
             column.text.titleTransitionKey shouldBe key(
                 element = BookTransitionElement.Title,
-                editionId = 50,
                 bookId = 3,
             )
             column.cover.shouldNotBeNull().model.sharedTransitionKey shouldBe key(
                 element = BookTransitionElement.Cover,
-                editionId = 50,
                 bookId = 3,
             )
         }

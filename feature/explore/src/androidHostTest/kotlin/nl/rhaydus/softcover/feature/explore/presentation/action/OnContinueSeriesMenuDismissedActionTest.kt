@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -11,13 +12,16 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.continueSeriesMenuSheetFor
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesDismissalKind
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -41,6 +45,8 @@ class OnContinueSeriesMenuDismissedActionTest {
         name = "Earthsea",
         amountOfBooks = 6,
     )
+
+    private val menu = continueSeriesMenuSheetFor(book = PreviewData.baseBook)
 
     @BeforeEach
     fun setUp() {
@@ -112,9 +118,12 @@ class OnContinueSeriesMenuDismissedActionTest {
     ) {
         stateFlow.value = stateFlow.value.copy(
             continueSeriesBooks = books,
-            pendingContinueSeriesDismissal = PendingContinueSeriesDismissal(
-                bookId = bookId,
-                kind = kind,
+            continueSeriesMenu = SheetSession.Open(
+                model = menu.requestingClose(),
+                pending = PendingContinueSeriesDismissal(
+                    bookId = bookId,
+                    kind = kind,
+                ),
             ),
         )
     }
@@ -278,7 +287,7 @@ class OnContinueSeriesMenuDismissedActionTest {
         }
 
         @Test
-        fun `clears the pending dismissal after resolving it`() = runTest {
+        fun `closes the session after resolving the pending dismissal`() = runTest {
             // ----- Arrange -----
             pend(
                 bookId = 3,
@@ -293,11 +302,33 @@ class OnContinueSeriesMenuDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.pendingContinueSeriesDismissal.shouldBeNull()
+            stateFlow.value.continueSeriesMenu shouldBe SheetSession.Closed
+            stateFlow.value.continueSeriesMenuBookId.shouldBeNull()
         }
 
         @Test
-        fun `does nothing when nothing is pending`() = runTest {
+        fun `closes the session and hides nothing when the sheet was swiped away without a choice`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(
+                continueSeriesBooks = listOf(book()),
+                continueSeriesMenu = SheetSession.Open(model = menu),
+                continueSeriesMenuBookId = 3,
+            )
+
+            // ----- Act -----
+            OnContinueSeriesMenuDismissedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) { dismissBookUseCase(book = any()) }
+            stateFlow.value.continueSeriesMenu shouldBe SheetSession.Closed
+            stateFlow.value.continueSeriesMenuBookId.shouldBeNull()
+        }
+
+        @Test
+        fun `does nothing when the session is already closed`() = runTest {
             // ----- Arrange -----
             stateFlow.value = stateFlow.value.copy(continueSeriesBooks = listOf(book()))
 
@@ -309,10 +340,11 @@ class OnContinueSeriesMenuDismissedActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) { dismissBookUseCase(book = any()) }
+            stateFlow.value.continueSeriesMenu shouldBe SheetSession.Closed
         }
 
         @Test
-        fun `clears the pending dismissal but hides nothing when the book is no longer listed`() = runTest {
+        fun `closes the session but hides nothing when the book is no longer listed`() = runTest {
             // ----- Arrange -----
             pend(
                 bookId = 99,
@@ -328,7 +360,7 @@ class OnContinueSeriesMenuDismissedActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) { dismissBookUseCase(book = any()) }
-            stateFlow.value.pendingContinueSeriesDismissal.shouldBeNull()
+            stateFlow.value.continueSeriesMenu shouldBe SheetSession.Closed
         }
     }
 }

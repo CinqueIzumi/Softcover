@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -36,7 +37,7 @@ class TagEditorSheetCollectorTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -66,7 +67,7 @@ class TagEditorSheetCollectorTest {
         fun `builds tagEditorSheet from the book title and cover`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val cover = mockk<CoverUiModel>()
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = bookTitled("Dune"),
                 tagEditorCover = cover,
             )
@@ -85,7 +86,7 @@ class TagEditorSheetCollectorTest {
         fun `updates tagEditorSheet when the cover arrives`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val cover = mockk<CoverUiModel>()
-            stateFlow.value = BookDetailUiState(book = bookTitled("Dune"))
+            stateFlow.value = buildBookDetailUiState().copy(book = bookTitled("Dune"))
             launchCollector()
 
             // ----- Act -----
@@ -101,7 +102,7 @@ class TagEditorSheetCollectorTest {
         @Test
         fun `clears tagEditorSheet when the book goes away`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = bookTitled("Dune"))
+            stateFlow.value = buildBookDetailUiState().copy(book = bookTitled("Dune"))
             launchCollector()
 
             // ----- Act -----
@@ -115,27 +116,28 @@ class TagEditorSheetCollectorTest {
         fun `carries the add block and the tag groups from state into tagEditorSheet`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                val categoryChips = persistentListOf(ChipUiModel(
+                val moodChip = ChipUiModel(
                     key = "MOOD",
                     label = "Mood",
-                ),)
+                )
+                val categoryChips = persistentListOf(moodChip)
                 val suggestion = ChipUiModel(
                     key = "suggestion",
                     label = "cozy",
+                )
+                val cozyTag = UserTag(
+                    name = "cozy",
+                    category = TagCategory.MOOD,
                 )
                 val emptyState = EmptyStateUiModel(
                     title = "Nothing",
                     body = "Add one",
                 )
-                stateFlow.value = BookDetailUiState(
+                stateFlow.value = buildBookDetailUiState().copy(
                     book = bookTitled("Dune"),
                     tagEditorCategory = TagCategory.MOOD,
                     tagEditorCategoryChips = categoryChips,
-                    tagSuggestionChips = listOf(suggestion to UserTag(
-                        name = "cozy",
-                        category = TagCategory.MOOD,
-                    ),)
-                        .toChipSet(),
+                    tagSuggestionChips = listOf(suggestion to cozyTag).toChipSet(),
                     tagEditorEmptyState = emptyState,
                     newlyAddedTagKey = "MOOD:cozy",
                 )
@@ -155,7 +157,7 @@ class TagEditorSheetCollectorTest {
         @Test
         fun `follows the selected category as it changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = bookTitled("Dune"))
+            stateFlow.value = buildBookDetailUiState().copy(book = bookTitled("Dune"))
             launchCollector()
 
             // ----- Act -----

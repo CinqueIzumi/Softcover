@@ -14,7 +14,7 @@ import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.nav.NavPulse
-import nl.rhaydus.designsystem.nav.rememberPulseScale
+import nl.rhaydus.softcover.core.component.modifier.rememberPulseScale
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.LibraryNavPulseKey
 import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState

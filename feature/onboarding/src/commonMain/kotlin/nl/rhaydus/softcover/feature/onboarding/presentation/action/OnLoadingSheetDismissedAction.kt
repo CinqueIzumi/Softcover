@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.onboarding.presentation.action
 
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.dismissed
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
@@ -11,19 +13,11 @@ internal data object OnLoadingSheetDismissedAction : OnboardingAction {
         dependencies: OnboardingDependencies,
         scope: ActionScope<OnboardingUiState, OnboardingEvent, LocalOnboardingVariables>,
     ) {
-        val signInPending = scope.currentState.signInPending
+        val pending = scope.currentState.loadingSheet.dismissed()
 
-        scope.setState {
-            it.copy(
-                loadingSheet = it.loadingSheet.copy(
-                    isLoading = false,
-                    scaffold = it.loadingSheet.scaffold.copy(closeRequested = false),
-                ),
-                signInPending = false,
-            )
-        }
+        scope.setState { it.copy(loadingSheet = SheetSession.Closed) }
 
-        if (signInPending) {
+        if (pending != null) {
             scope.sendEvent(event = OnboardingEvent.SignInCompletedEvent())
         }
     }

@@ -1,25 +1,26 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
-import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.share.ShareCaptureProgress
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
-import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
-import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.toReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareCard
+import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareProfile
+import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareReadingLife
+import nl.rhaydus.softcover.feature.profile.presentation.state.profileShareSheetFor
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -41,189 +42,203 @@ class ReadingLifeShareCardCollectorTest {
         )
     }
 
-    private fun buildProfileData(name: String = "Jane Doe"): UserProfileData = UserProfileData(
-        profileImageUrl = "https://example.com/avatar.png",
-        name = name,
-        username = "cinque",
-        bio = "Avid reader",
-        booksRead = 42,
-        totalPagesRead = 12000,
-        averageRating = 4.2,
-        readingStreak = 7,
-    )
+    private fun openSheet(
+        name: String = "Jane Doe",
+        progress: ShareCaptureProgress = ShareCaptureProgress.Idle,
+        closing: Boolean = false,
+    ): SheetSession<ShareCardSheetUiModel, Nothing> {
+        val model = profileShareSheetFor(
+            card = buildShareCard(name = name),
+            progress = progress,
+        )
 
-    private fun buildReadingLife(trackedYears: Int = 3): ReadingLife = ReadingLife(
-        booksByYear = emptyList(),
-        pagesByYear = emptyList(),
-        pagesByMonth = emptyList(),
-        genres = GenreBreakdown(),
-        ratings = RatingsDistribution(),
-        recentlyLoved = emptyList(),
-        trackedYears = trackedYears,
-    )
+        return SheetSession.Open(model = if (closing) model.requestingClose() else model)
+    }
+
+    private fun requestedState(
+        shareSheet: SheetSession<ShareCardSheetUiModel, Nothing> = SheetSession.Closed,
+        shareCapture: ShareCaptureState = ShareCaptureState(),
+    ): ProfileUiState =
+        ProfileUiState(
+            readingLife = buildShareReadingLife(),
+            userProfileData = buildShareProfile(),
+            isShareSheetRequested = true,
+            shareSheet = shareSheet,
+            shareCapture = shareCapture,
+        )
+
+    private fun TestScope.launchCollector(): Job =
+        launch {
+            ReadingLifeShareCardCollector().onLaunch(
+                scope = scope,
+                dependencies = mockk<ProfileDependencies>(relaxed = true),
+            )
+        }
 
     @Nested
     inner class OnLaunch {
         @Test
-        fun `leaves the card null when only the reading life has arrived`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ProfileUiState(readingLife = buildReadingLife())
-            val collector = ReadingLifeShareCardCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.shareSheet.shouldBeNull()
-            job.cancel()
-        }
-
-        @Test
-        fun `leaves the card null when only the profile has arrived`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ProfileUiState(userProfileData = buildProfileData())
-            val collector = ReadingLifeShareCardCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.shareSheet.shouldBeNull()
-            job.cancel()
-        }
-
-        @Test
-        fun `maps the card once both the reading life and profile are held`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val readingLife = buildReadingLife()
-            val profile = buildProfileData()
-            stateFlow.value = ProfileUiState(
-                readingLife = readingLife,
-                userProfileData = profile,
-            )
-            val collector = ReadingLifeShareCardCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.shareSheet.shouldNotBeNull().card shouldBe readingLife.toReadingLifeShareCardUiModel(profile)
-            job.cancel()
-        }
-
-        @Test
-        fun `builds the card when the profile arrives after the reading life`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val readingLife = buildReadingLife()
-            val profile = buildProfileData()
-            stateFlow.value = ProfileUiState(readingLife = readingLife)
-            val collector = ReadingLifeShareCardCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userProfileData = profile)
-
-            // ----- Assert -----
-            stateFlow.value.shareSheet.shouldNotBeNull().card shouldBe readingLife.toReadingLifeShareCardUiModel(profile)
-            job.cancel()
-        }
-
-        @Test
-        fun `clears the card when the reading life goes away`() = runTest(UnconfinedTestDispatcher()) {
+        fun `leaves a closed session closed while the sheet is not requested`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
-                readingLife = buildReadingLife(),
-                userProfileData = buildProfileData(),
+                readingLife = buildShareReadingLife(),
+                userProfileData = buildShareProfile(),
             )
-            val collector = ReadingLifeShareCardCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe SheetSession.Closed
+            job.cancel()
+        }
+
+        @Test
+        fun `opens the sheet once it is requested with both sources held`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = requestedState()
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe openSheet()
+            job.cancel()
+        }
+
+        @Test
+        fun `stays closed while only the reading life has arrived`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ProfileUiState(
+                readingLife = buildShareReadingLife(),
+                isShareSheetRequested = true,
+            )
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe SheetSession.Closed
+            job.cancel()
+        }
+
+        @Test
+        fun `opens when the request arrives after the collector started`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ProfileUiState(
+                readingLife = buildShareReadingLife(),
+                userProfileData = buildShareProfile(),
+            )
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isShareSheetRequested = true)
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe openSheet()
+            job.cancel()
+        }
+
+        @Test
+        fun `asks the open sheet to close when the request clears`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = requestedState()
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isShareSheetRequested = false)
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe openSheet(closing = true)
+            job.cancel()
+        }
+
+        @Test
+        fun `asks the open sheet to close when the reading life goes away`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = requestedState()
+            val job = launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(readingLife = null)
 
             // ----- Assert -----
-            stateFlow.value.shareSheet.shouldBeNull()
+            stateFlow.value.shareSheet shouldBe openSheet(closing = true)
             job.cancel()
         }
 
         @Test
-        fun `keeps the capture progress and close request when the profile changes mid-capture`() = runTest(UnconfinedTestDispatcher()) {
+        fun `updates the open sheet when the profile changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
-                readingLife = buildReadingLife(),
-                userProfileData = buildProfileData(),
-                shareCapture = ShareCaptureState(
-                    progress = ShareCaptureProgress.Sharing,
-                    closeRequested = true,
-                ),
-            )
-            val collector = ReadingLifeShareCardCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
+            stateFlow.value = requestedState()
+            val job = launchCollector()
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userProfileData = buildProfileData(name = "John Roe"))
+            stateFlow.value = stateFlow.value.copy(userProfileData = buildShareProfile(name = "John Roe"))
 
             // ----- Assert -----
-            val sheet = stateFlow.value.shareSheet.shouldNotBeNull()
-            sheet.displayName shouldBe "John Roe-reading-life"
-            sheet.scaffold.busy shouldBe true
-            sheet.scaffold.closeRequested shouldBe true
-            stateFlow.value.shareCapture shouldBe ShareCaptureState(
-                ShareCaptureProgress.Sharing,
-                true,
-            )
+            stateFlow.value.shareSheet shouldBe openSheet(name = "John Roe")
             job.cancel()
         }
 
         @Test
-        fun `names the sheet after the reader`() = runTest(UnconfinedTestDispatcher()) {
+        fun `carries the capture progress into the open sheet`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
-                readingLife = buildReadingLife(),
-                userProfileData = buildProfileData(name = "Jane Doe"),
-            )
-            val collector = ReadingLifeShareCardCollector()
+            stateFlow.value = requestedState()
+            val job = launchCollector()
 
             // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
+            stateFlow.value = stateFlow.value.copy(
+                shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Sharing),
+            )
 
             // ----- Assert -----
-            stateFlow.value.shareSheet.shouldNotBeNull().displayName shouldBe "Jane Doe-reading-life"
+            stateFlow.value.shareSheet shouldBe openSheet(progress = ShareCaptureProgress.Sharing)
+            job.cancel()
+        }
+
+        @Test
+        fun `returns the sheet to idle when the capture finishes`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = requestedState(shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Saving))
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(shareCapture = ShareCaptureState())
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe openSheet()
+            job.cancel()
+        }
+
+        @Test
+        fun `reopens a closing sheet when it is requested again`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = requestedState(shareSheet = openSheet(closing = true))
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe openSheet()
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps a closing sheet closing while the request stays cleared`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ProfileUiState(
+                readingLife = buildShareReadingLife(),
+                userProfileData = buildShareProfile(),
+                shareSheet = openSheet(closing = true),
+            )
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(userProfileData = buildShareProfile(name = "John Roe"))
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe openSheet(closing = true)
             job.cancel()
         }
     }

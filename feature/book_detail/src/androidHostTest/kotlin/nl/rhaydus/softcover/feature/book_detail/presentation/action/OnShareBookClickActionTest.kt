@@ -1,8 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.nulls.shouldNotBeNull
-
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,11 +9,16 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCaptureProgress
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.isClosing
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareCardVariant
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.shareSheetFor
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +32,7 @@ class OnShareBookClickActionTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -37,34 +41,44 @@ class OnShareBookClickActionTest {
         dependencies = mockk<BookDetailDependencies>(relaxed = true)
     }
 
+    private fun heldSheet(
+        progress: ShareCaptureProgress = ShareCaptureProgress.Idle,
+    ): ShareSheetUiModel = shareSheetFor(
+        card = BookShareCardUiModel(
+            coverUrl = null,
+            title = "Piranesi",
+            author = "Susanna Clarke",
+            statsLine = null,
+            description = null,
+        ),
+        bookTitle = "Piranesi",
+        variant = ShareCardVariant.BOOK,
+        hasUpdateCard = false,
+        progress = progress,
+    )
+
     private fun openSheetState(
         capture: ShareCaptureState = ShareCaptureState(),
-    ): BookDetailUiState = BookDetailUiState(
-        isShareSheetVisible = true,
-        chosenShareVariant = ShareCardVariant.BOOK,
-        shareCapture = capture,
-        shareSheet = shareSheetFor(
-            card = BookShareCardUiModel(
-                coverUrl = null,
-                title = "Piranesi",
-                author = "Susanna Clarke",
-                statsLine = null,
-                description = null,
-            ),
-            bookTitle = "Piranesi",
-            variant = ShareCardVariant.BOOK,
-            hasUpdateCard = false,
-            progress = capture.progress,
-            closeRequested = capture.closeRequested,
-        ),
-    )
+        closing: Boolean = false,
+    ): BookDetailUiState {
+        val sheet = heldSheet(progress = capture.progress)
+
+        return buildBookDetailUiState().copy(
+            chosenShareVariant = ShareCardVariant.BOOK,
+            shareCapture = capture,
+            shareSheet = SheetSession.Open(model = if (closing) sheet.requestingClose() else sheet),
+        )
+    }
 
     @Nested
     inner class Execute {
         @Test
-        fun `shows the share sheet and clears the chosen variant`() = runTest {
+        fun `requests the share sheet and clears the chosen variant`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(chosenShareVariant = ShareCardVariant.BOOK)
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = PreviewData.baseBook,
+                chosenShareVariant = ShareCardVariant.BOOK,
+            )
 
             // ----- Act -----
             OnShareBookClickAction().execute(
@@ -73,18 +87,52 @@ class OnShareBookClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isShareSheetVisible shouldBe true
-            stateFlow.value.chosenShareVariant shouldBe null
+            stateFlow.value.shareSheetRequested shouldBe true
+            stateFlow.value.chosenShareVariant.shouldBeNull()
         }
 
         @Test
-        fun `resets the capture progress and close request, and the held sheet's busy state`() = runTest {
+        fun `leaves the session to the collector`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = openSheetState(
-                capture = ShareCaptureState(
-                    progress = ShareCaptureProgress.Sharing,
-                    closeRequested = true,
-                ),
+            stateFlow.value = buildBookDetailUiState().copy(book = PreviewData.baseBook)
+
+            // ----- Act -----
+            OnShareBookClickAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.shareSheet shouldBe SheetSession.Closed
+        }
+
+        @Test
+        fun `resets the capture progress and leaves a closing session for the collector to reopen`() = runTest {
+            // ----- Arrange -----
+            val busyState = openSheetState(
+                capture = ShareCaptureState(progress = ShareCaptureProgress.Sharing),
+                closing = true,
+            )
+            stateFlow.value = busyState.copy(book = PreviewData.baseBook)
+
+            // ----- Act -----
+            OnShareBookClickAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.shareCapture shouldBe ShareCaptureState()
+            stateFlow.value.shareSheetRequested shouldBe true
+            stateFlow.value.shareSheet.isClosing shouldBe true
+        }
+
+        @Test
+        fun `resets the capture progress even when there is no book`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = null,
+                shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Saving),
             )
 
             // ----- Act -----
@@ -95,9 +143,6 @@ class OnShareBookClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.shareCapture shouldBe ShareCaptureState()
-            val scaffold = stateFlow.value.shareSheet.shouldNotBeNull().sheet.scaffold
-            scaffold.busy shouldBe false
-            scaffold.closeRequested shouldBe false
         }
     }
 }

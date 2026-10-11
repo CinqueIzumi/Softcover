@@ -5,8 +5,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
+import nl.rhaydus.softcover.feature.settings.presentation.state.LeaveScreen
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.discardSheetScaffold
@@ -40,14 +42,13 @@ class OnDismissDiscardSheetActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `resets the sheet state and the leave flag`() = runTest {
+        fun `closes the session`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                showDiscardSheet = true,
-                discardSheetScaffold = discardSheetScaffold(saving = true).copy(
-                    closeRequested = true,
+                discardSheet = SheetSession.Open(
+                    model = discardSheetScaffold(saving = true).requestingClose(),
+                    pending = LeaveScreen,
                 ),
-                leaveOnSheetDismissed = true,
             )
             val action = OnDismissDiscardSheetAction()
 
@@ -58,18 +59,17 @@ class OnDismissDiscardSheetActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showDiscardSheet shouldBe false
-            stateFlow.value.discardSheetScaffold.busy shouldBe false
-            stateFlow.value.discardSheetScaffold.closeRequested shouldBe false
-            stateFlow.value.leaveOnSheetDismissed shouldBe false
+            stateFlow.value.discardSheet shouldBe SheetSession.Closed
         }
 
         @Test
-        fun `sends NavigateBack when leaving was requested`() = runTest {
+        fun `sends NavigateBack when leaving was recorded`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                showDiscardSheet = true,
-                leaveOnSheetDismissed = true,
+                discardSheet = SheetSession.Open(
+                    model = discardSheetScaffold().requestingClose(),
+                    pending = LeaveScreen,
+                ),
             )
             val action = OnDismissDiscardSheetAction()
 
@@ -84,11 +84,12 @@ class OnDismissDiscardSheetActionTest {
         }
 
         @Test
-        fun `sends no event when leaving was not requested`() = runTest {
+        fun `closes without an event when no leave was recorded`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                showDiscardSheet = true,
-                leaveOnSheetDismissed = false,
+                discardSheet = SheetSession.Open(
+                    model = discardSheetScaffold().requestingClose(),
+                ),
             )
             val action = OnDismissDiscardSheetAction()
 
@@ -100,6 +101,7 @@ class OnDismissDiscardSheetActionTest {
 
             // ----- Assert -----
             eventChannel.tryReceive().getOrNull() shouldBe null
+            stateFlow.value.discardSheet shouldBe SheetSession.Closed
         }
     }
 }

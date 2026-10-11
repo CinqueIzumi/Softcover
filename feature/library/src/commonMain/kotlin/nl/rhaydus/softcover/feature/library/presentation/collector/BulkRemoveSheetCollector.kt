@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.sheet.openOrUpdate
+import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -20,24 +22,24 @@ internal class BulkRemoveSheetCollector : LibraryCollector {
                 Triple(
                     state.selectedBookIds.size,
                     state.bulkActionInProgress,
-                    state.isBulkRemoveCloseRequested,
+                    state.isBulkRemoveSheetRequested,
                 )
             }
             .distinctUntilChanged()
-            .collectLatest { (bookCount, inProgress, closeRequested) ->
+            .collectLatest { (bookCount, inProgress, requested) ->
                 scope.setState {
-                    // Keep the content frozen while the sheet hides, so the emptied selection does not
-                    // rewrite the headline mid-animation.
-                    val sheet = if (closeRequested) {
-                        it.bulkRemoveSheet.copy(closeRequested = true)
-                    } else {
-                        bulkRemoveSheetScaffoldFor(
-                            bookCount = bookCount,
-                            inProgress = inProgress,
-                        )
-                    }
-
-                    it.copy(bulkRemoveSheet = sheet)
+                    it.copy(
+                        bulkRemoveSheet = if (requested && it.isBulkRemoveSheetRequested) {
+                            it.bulkRemoveSheet.openOrUpdate(
+                                model = bulkRemoveSheetScaffoldFor(
+                                    bookCount = bookCount,
+                                    inProgress = inProgress,
+                                ),
+                            )
+                        } else {
+                            it.bulkRemoveSheet.requestClose()
+                        },
+                    )
                 }
             }
     }

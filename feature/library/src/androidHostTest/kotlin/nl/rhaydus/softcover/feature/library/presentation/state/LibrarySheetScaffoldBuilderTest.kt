@@ -175,8 +175,8 @@ class LibrarySheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            one.header.section.headlineText shouldBe "Remove 1 book?"
-            many.header.section.headlineText shouldBe "Remove 4 books?"
+            one.header.shouldNotBeNull().section.headlineText shouldBe "Remove 1 book?"
+            many.header.shouldNotBeNull().section.headlineText shouldBe "Remove 4 books?"
         }
     }
 

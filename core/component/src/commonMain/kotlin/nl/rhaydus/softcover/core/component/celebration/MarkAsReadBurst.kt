@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.component.celebration
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -16,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.min
@@ -33,7 +32,7 @@ import kotlin.random.Random
  * Suppressed when the user has disabled system animations. [MarkAsReadBurstUiModel.scale] sets the
  * particle count and duration.
  *
- * Pair every trigger with a single `commit` haptic so the visual and haptic land together — read is
+ * The burst plays no haptic: pair every trigger with `Feedback.Milestone` so the two land together. Read is
  * deliberately the only shelf-status change with this celebration; no other transition should reuse it.
  */
 @Composable
@@ -59,6 +58,7 @@ fun MarkAsReadBurst(
     val color = MaterialTheme.colorScheme.primary
     val secondaryColor = MaterialTheme.colorScheme.tertiary
     val playMotion = playDecorativeMotion()
+    val celebration = MaterialTheme.motion.celebration(durationMillis = durationMillis)
 
     val progress = remember { Animatable(initialValue = 0f) }
 
@@ -74,10 +74,7 @@ fun MarkAsReadBurst(
         progress.snapTo(targetValue = 0f)
         progress.animateTo(
             targetValue = 1f,
-            animationSpec = tween(
-                durationMillis = durationMillis,
-                easing = FastOutSlowInEasing,
-            ),
+            animationSpec = celebration,
         )
     }
 

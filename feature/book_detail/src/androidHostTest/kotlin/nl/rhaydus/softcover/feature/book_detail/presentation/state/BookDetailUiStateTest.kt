@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.editionSheetWithQuery
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -69,7 +70,7 @@ class BookDetailUiStateTest {
                 userBook = null,
                 currentEdition = bookEdition,
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = book,
                 previewEdition = preview,
             )
@@ -89,7 +90,7 @@ class BookDetailUiStateTest {
                 userBook = null,
                 currentEdition = bookEdition,
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = book,
                 previewEdition = null,
             )
@@ -110,7 +111,7 @@ class BookDetailUiStateTest {
                 defaultEdition = null,
                 fallbackCoverUrl = null,
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = null,
                 previewEdition = null,
                 initialCover = initialCover,
@@ -133,7 +134,7 @@ class BookDetailUiStateTest {
                 userBook = userBook,
                 currentEdition = bookEdition,
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = book,
                 previewEdition = preview,
             )
@@ -156,7 +157,7 @@ class BookDetailUiStateTest {
                 currentEdition = shelvedEdition,
                 editions = listOf(scannedEdition, shelvedEdition),
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = 42,
             )
@@ -177,7 +178,7 @@ class BookDetailUiStateTest {
                 userBook = userBook,
                 currentEdition = bookEdition,
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = null,
             )
@@ -198,7 +199,7 @@ class BookDetailUiStateTest {
                 defaultEdition = null,
                 fallbackCoverUrl = null,
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = null,
                 editions = emptyList(),
                 initialCover = initialCover,
@@ -236,7 +237,7 @@ class BookDetailUiStateTest {
         @Test
         fun `returns all editions when query is empty`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 editions = listOf(editionWithIsbn, editionWithoutIsbn),
                 editionSheet = editionSheetWithQuery(query = ""),
             )
@@ -251,7 +252,7 @@ class BookDetailUiStateTest {
         @Test
         fun `filters by publisher substring match`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 editions = listOf(editionWithIsbn, editionWithoutIsbn),
                 editionSheet = editionSheetWithQuery(query = "Penguin"),
             )
@@ -266,7 +267,7 @@ class BookDetailUiStateTest {
         @Test
         fun `edition with both isbn10 and publisher null does not crash and is excluded`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 editions = listOf(editionNullBoth),
                 editionSheet = editionSheetWithQuery(query = "anything"),
             )
@@ -299,7 +300,7 @@ class BookDetailUiStateTest {
         fun `isEditionOwned returns true when edition id is in the owned list`() {
             // ----- Arrange -----
             val edition = stubEdition(id = 77)
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 userLists = listOf(ownedList(77)),
             )
 
@@ -314,7 +315,7 @@ class BookDetailUiStateTest {
         fun `isEditionOwned returns false when edition id is not in the owned list`() {
             // ----- Arrange -----
             val edition = stubEdition(id = 99)
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 userLists = listOf(ownedList(77)),
             )
 
@@ -335,7 +336,7 @@ class BookDetailUiStateTest {
                 slug = "favorites",
                 books = listOf(listBook(77)),
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 userLists = listOf(nonOwnedList),
             )
 
@@ -349,7 +350,7 @@ class BookDetailUiStateTest {
         @Test
         fun `isEditionOwned returns false when edition is null`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 userLists = listOf(ownedList(77)),
             )
 
@@ -395,7 +396,7 @@ class BookDetailUiStateTest {
         @Test
         fun `falls back to initialCover values when book is null`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = null,
                 initialCover = heroInitialCover(),
             )
@@ -414,7 +415,7 @@ class BookDetailUiStateTest {
         @Test
         fun `loaded book title and rating win over initialCover`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = stubHeroBook(
                     title = "Dune",
                     rating = 4.5,
@@ -434,7 +435,7 @@ class BookDetailUiStateTest {
         @Test
         fun `loaded book without series gives empty heroSeriesText instead of initialCover value`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = stubHeroBook(seriesText = null),
                 initialCover = heroInitialCover(seriesText = "Seed series #1"),
             )
@@ -449,7 +450,7 @@ class BookDetailUiStateTest {
         @Test
         fun `loaded book with series gives its seriesText`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = stubHeroBook(seriesText = "Dune #1"),
                 initialCover = heroInitialCover(),
             )
@@ -464,7 +465,7 @@ class BookDetailUiStateTest {
         @Test
         fun `all hero fields are null without a book or initialCover`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = null,
                 initialCover = null,
             )
@@ -487,7 +488,7 @@ class BookDetailUiStateTest {
                 currentEdition = edition,
                 releaseYear = 1999,
             )
-            val state = BookDetailUiState(book = book)
+            val state = buildBookDetailUiState().copy(book = book)
 
             // ----- Act -----
             val result = state.heroReleaseYear
@@ -505,7 +506,7 @@ class BookDetailUiStateTest {
                 currentEdition = edition,
                 releaseYear = 1999,
             )
-            val state = BookDetailUiState(book = book)
+            val state = buildBookDetailUiState().copy(book = book)
 
             // ----- Act -----
             val result = state.heroReleaseYear
@@ -522,7 +523,7 @@ class BookDetailUiStateTest {
                 currentEdition = null,
                 releaseYear = 1999,
             )
-            val state = BookDetailUiState(book = book)
+            val state = buildBookDetailUiState().copy(book = book)
 
             // ----- Act -----
             val result = state.heroReleaseYear
@@ -534,7 +535,7 @@ class BookDetailUiStateTest {
         @Test
         fun `is null when there is no book and no edition`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = null,
                 initialCover = null,
             )
@@ -556,7 +557,7 @@ class BookDetailUiStateTest {
                 userBook = null,
                 currentEdition = stubEdition(id = 7),
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = book,
                 failedMutationEditionIds = setOf(
                     7,
@@ -578,7 +579,7 @@ class BookDetailUiStateTest {
                 userBook = null,
                 currentEdition = stubEdition(id = 7),
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = book,
                 failedMutationEditionIds = setOf(8),
             )
@@ -593,7 +594,7 @@ class BookDetailUiStateTest {
         @Test
         fun `is null when there is no book`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = null,
                 failedMutationEditionIds = setOf(7),
             )
@@ -621,7 +622,7 @@ class BookDetailUiStateTest {
             }
 
             // ----- Act -----
-            val result = BookDetailUiState().withBook(book = book)
+            val result = buildBookDetailUiState().withBook(book = book)
 
             // ----- Assert -----
             result.book shouldBe book
@@ -640,7 +641,7 @@ class BookDetailUiStateTest {
                     mock.title
                 } returns "Piranesi"
             }
-            val state = BookDetailUiState().withBook(book = book)
+            val state = buildBookDetailUiState().withBook(book = book)
 
             // ----- Act -----
             val result = state.withBook(book = null)

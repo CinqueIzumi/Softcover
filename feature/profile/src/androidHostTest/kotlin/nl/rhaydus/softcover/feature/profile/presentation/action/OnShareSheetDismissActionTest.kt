@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.profile.presentation.action
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -8,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.share.ShareCaptureProgress
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
@@ -38,9 +38,16 @@ class OnShareSheetDismissActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `hides the sheet`() = runTest {
+        fun `closes the session`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(isShareSheetVisible = true)
+            stateFlow.value = ProfileUiState(
+                shareSheet = SheetSession.Open(
+                    model = profileShareSheetFor(
+                        card = buildShareCard(),
+                        progress = ShareCaptureProgress.Idle,
+                    ).requestingClose(),
+                ),
+            )
             val action = OnShareSheetDismissAction()
 
             // ----- Act -----
@@ -50,18 +57,30 @@ class OnShareSheetDismissActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isShareSheetVisible shouldBe false
+            stateFlow.value.shareSheet shouldBe SheetSession.Closed
         }
 
         @Test
-        fun `clears the capture and close state`() = runTest {
+        fun `withdraws the sheet request so the collector does not reopen it`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ProfileUiState(isShareSheetRequested = true)
+            val action = OnShareSheetDismissAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isShareSheetRequested shouldBe false
+        }
+
+        @Test
+        fun `clears the capture for the next opening`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
-                isShareSheetVisible = true,
-                shareCapture = ShareCaptureState(
-                    progress = ShareCaptureProgress.Sharing,
-                    closeRequested = true,
-                ),
+                shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Sharing),
             )
             val action = OnShareSheetDismissAction()
 
@@ -73,31 +92,6 @@ class OnShareSheetDismissActionTest {
 
             // ----- Assert -----
             stateFlow.value.shareCapture shouldBe ShareCaptureState()
-        }
-
-        @Test
-        fun `clears the held sheet scaffold busy and close request`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
-                isShareSheetVisible = true,
-                shareSheet = profileShareSheetFor(
-                    card = buildShareCard(),
-                    progress = ShareCaptureProgress.Saving,
-                    closeRequested = true,
-                ),
-            )
-            val action = OnShareSheetDismissAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            val scaffold = stateFlow.value.shareSheet.shouldNotBeNull().scaffold
-            scaffold.busy shouldBe false
-            scaffold.closeRequested shouldBe false
         }
     }
 }

@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -34,7 +35,7 @@ class OnAddUserTagActionTest {
     @BeforeEach
     fun setUp() {
         saveUserTagsUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
@@ -361,7 +362,8 @@ class OnAddUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe originalTags
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
 
         @Test

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
@@ -21,9 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
-import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.designsystem.modifier.hoverHighlight
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.modifier.tactileToggleable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -39,7 +36,6 @@ fun <K> ToggleRow(
     onEvent: (ToggleEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val haptics = LocalHaptics.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val wash by animateColorAsState(
@@ -55,18 +51,14 @@ fun <K> ToggleRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .pointerHandCursor()
-            .hoverHighlight(interactionSource = interactionSource)
-            .toggleable(
+            .tactileToggleable(
                 value = model.checked,
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = model.enabled,
-                role = Role.Switch,
                 onValueChange = { checked ->
-                    haptics.select()
                     onEvent(ToggleEvent.Toggled(checked = checked))
                 },
+                role = Role.Switch,
+                enabled = model.enabled,
+                interactionSource = interactionSource,
             )
             .background(wash)
             .then(

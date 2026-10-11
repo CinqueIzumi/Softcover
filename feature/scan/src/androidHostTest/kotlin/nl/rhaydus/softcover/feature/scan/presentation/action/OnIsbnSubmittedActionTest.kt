@@ -16,11 +16,13 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.IsbnLookupResult
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
 import nl.rhaydus.softcover.core.component.field.TextFieldError
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
+import nl.rhaydus.softcover.feature.scan.presentation.state.ResolvedScan
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import nl.rhaydus.softcover.feature.scan.presentation.state.UnknownIsbnSheetUiModel
 import nl.rhaydus.softcover.feature.scan.presentation.state.unknownIsbnSheetScaffoldFor
@@ -75,6 +77,30 @@ class OnIsbnSubmittedActionTest {
         fun `does nothing when isResolving is already true`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(isResolving = true)
+            val dependencies = stubDependencies(this)
+            val stateBefore = stateFlow.value
+            val action = OnIsbnSubmittedAction(
+                isbn = "9780451524935",
+                origin = IsbnOrigin.Camera,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                resolveBookByIsbnUseCase(isbn = any())
+            }
+            stateFlow.value shouldBe stateBefore
+        }
+
+        @Test
+        fun `does nothing when a book is already being added`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ScanUiState(isAddingBook = true)
             val dependencies = stubDependencies(this)
             val stateBefore = stateFlow.value
             val action = OnIsbnSubmittedAction(
@@ -160,7 +186,7 @@ class OnIsbnSubmittedActionTest {
         }
 
         @Test
-        fun `builds the unknown isbn sheet with the normalized isbn and sends no event when result is UnknownEdition`() = runTest {
+        fun `requests the unknown isbn sheet for the normalized isbn and sends no event when result is UnknownEdition`() = runTest {
             // ----- Arrange -----
             val normalizedIsbn = "9780451524935"
             val dependencies = stubDependencies(this)
@@ -182,9 +208,7 @@ class OnIsbnSubmittedActionTest {
 
             // ----- Assert -----
             stateFlow.value.isResolving shouldBe false
-            val sheet = stateFlow.value.unknownIsbnSheet.shouldNotBeNull()
-            sheet.isbn shouldBe normalizedIsbn
-            sheet.scaffold shouldBe unknownIsbnSheetScaffoldFor(isAdding = false)
+            stateFlow.value.unknownIsbn shouldBe normalizedIsbn
             eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
 
@@ -249,7 +273,8 @@ class OnIsbnSubmittedActionTest {
                 isbn = "9780451524935",
                 scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
             )
-            stateFlow.value = ScanUiState(unknownIsbnSheet = existingSheet)
+            val existingSession = SheetSession.Open<UnknownIsbnSheetUiModel, ResolvedScan>(model = existingSheet)
+            stateFlow.value = ScanUiState(unknownIsbnSheet = existingSession)
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -269,7 +294,7 @@ class OnIsbnSubmittedActionTest {
 
             // ----- Assert -----
             stateFlow.value.isResolving shouldBe false
-            stateFlow.value.unknownIsbnSheet shouldBe existingSheet
+            stateFlow.value.unknownIsbnSheet shouldBe existingSession
 
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ScanEvent.ResolutionFailedEvent>()
         }

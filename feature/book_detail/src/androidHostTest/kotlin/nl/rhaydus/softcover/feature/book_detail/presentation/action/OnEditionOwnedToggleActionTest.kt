@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
@@ -12,8 +13,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -34,7 +37,7 @@ class OnEditionOwnedToggleActionTest {
     @BeforeEach
     fun setUp() {
         setEditionAsOwnedUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
@@ -143,7 +146,37 @@ class OnEditionOwnedToggleActionTest {
                     owned = false,
                 )
             }
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>().feedback shouldBe null
+        }
+
+        @Test
+        fun `sends a Routine MutationSucceededEvent when the edition becomes owned`() = runTest {
+            // ----- Arrange -----
+            val edition = stubEdition(owned = false)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                setEditionAsOwnedUseCase(
+                    edition = edition,
+                    owned = true,
+                )
+            } returns Result.success(Unit)
+
+            val action = OnEditionOwnedToggleAction(
+                edition = edition,
+                owned = true,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>().feedback shouldBe Feedback.Routine
         }
 
         @Test
@@ -175,7 +208,7 @@ class OnEditionOwnedToggleActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationEditionIds.contains(99) shouldBe true
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
 
         @Test

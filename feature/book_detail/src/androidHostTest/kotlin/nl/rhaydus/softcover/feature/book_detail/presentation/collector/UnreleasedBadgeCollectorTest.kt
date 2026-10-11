@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.release.toProminentUnreleasedBadgeUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -33,7 +34,7 @@ class UnreleasedBadgeCollectorTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -65,7 +66,7 @@ class UnreleasedBadgeCollectorTest {
                     isUnreleased = true,
                     effectiveReleaseDate = RELEASE_DATE,
                 )
-                stateFlow.value = BookDetailUiState(book = book)
+                stateFlow.value = buildBookDetailUiState().copy(book = book)
                 val collector = UnreleasedBadgeCollector()
 
                 // ----- Act -----
@@ -88,7 +89,7 @@ class UnreleasedBadgeCollectorTest {
                 isUnreleased = false,
                 effectiveReleaseDate = RELEASE_DATE,
             )
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             val collector = UnreleasedBadgeCollector()
 
             // ----- Act -----
@@ -111,7 +112,7 @@ class UnreleasedBadgeCollectorTest {
                 isUnreleased = true,
                 effectiveReleaseDate = null,
             )
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             val collector = UnreleasedBadgeCollector()
 
             // ----- Act -----
@@ -130,7 +131,7 @@ class UnreleasedBadgeCollectorTest {
         @Test
         fun `unreleasedBadge is null when state book is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null)
+            stateFlow.value = buildBookDetailUiState().copy(book = null)
             val collector = UnreleasedBadgeCollector()
 
             // ----- Act -----

@@ -8,6 +8,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.AMAZON_KEY
@@ -31,7 +32,7 @@ class OnExternalLinkClickActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
@@ -46,7 +47,7 @@ class OnExternalLinkClickActionTest {
         @Test
         fun `sends OpenExternalLinkEvent with the url of the known key`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
             )
             val action = OnExternalLinkClickAction(key = AMAZON_KEY)
@@ -67,7 +68,7 @@ class OnExternalLinkClickActionTest {
         @Test
         fun `sends no event when the key is unknown`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
             )
             val action = OnExternalLinkClickAction(key = "missing")
@@ -86,7 +87,7 @@ class OnExternalLinkClickActionTest {
         @Test
         fun `sends no event when the edition has no ISBN`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(
                     isbn10 = null,
                     isbn13 = null,
@@ -108,7 +109,7 @@ class OnExternalLinkClickActionTest {
         @Test
         fun `sends the bookshop search url for the bookshop key`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
             )
             val action = OnExternalLinkClickAction(key = BOOKSHOP_KEY)
@@ -120,14 +121,15 @@ class OnExternalLinkClickActionTest {
             )
 
             // ----- Assert -----
-            val event = eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.OpenExternalLinkEvent>()
+            val event = eventChannel.tryReceive().getOrNull()
+                .shouldBeInstanceOf<BookDetailEvent.OpenExternalLinkEvent>()
             event.url shouldBe "https://bookshop.org/search?keywords=9780306406157"
         }
 
         @Test
         fun `sends the open library search url for the open library key`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
             )
             val action = OnExternalLinkClickAction(key = OPEN_LIBRARY_KEY)
@@ -139,14 +141,15 @@ class OnExternalLinkClickActionTest {
             )
 
             // ----- Assert -----
-            val event = eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.OpenExternalLinkEvent>()
+            val event = eventChannel.tryReceive().getOrNull()
+                .shouldBeInstanceOf<BookDetailEvent.OpenExternalLinkEvent>()
             event.url shouldBe "https://openlibrary.org/search?isbn=9780306406157"
         }
 
         @Test
         fun `searches by the ISBN10 when the edition has no ISBN13`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(
                     isbn10 = "0306406152",
                     isbn13 = null,
@@ -161,7 +164,8 @@ class OnExternalLinkClickActionTest {
             )
 
             // ----- Assert -----
-            val event = eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.OpenExternalLinkEvent>()
+            val event = eventChannel.tryReceive().getOrNull()
+                .shouldBeInstanceOf<BookDetailEvent.OpenExternalLinkEvent>()
             event.url shouldBe "https://www.amazon.com/s?k=0306406152"
         }
 

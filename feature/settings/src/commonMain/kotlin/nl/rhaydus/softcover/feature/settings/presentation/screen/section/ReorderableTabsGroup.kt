@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,8 +23,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.launch
-import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
+import nl.rhaydus.softcover.core.component.haptics.rememberReorderHaptics
 import nl.rhaydus.softcover.core.component.reorder.reorderLift
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnListToggleAction
@@ -49,7 +48,7 @@ internal fun ReorderableTabsGroup(
         return
     }
 
-    val haptics = LocalHaptics.current
+    val reorderHaptics = rememberReorderHaptics()
 
     var workingOrder by remember(state.initialized) { mutableStateOf(entries) }
 
@@ -61,7 +60,6 @@ internal fun ReorderableTabsGroup(
     val settleOffsetY = remember { Animatable(0f) }
     val settleScope = rememberCoroutineScope()
     val settleSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
-    var lastHoverIndex by remember { mutableIntStateOf(-1) }
 
     LaunchedEffect(entries) {
         if (draggingId == null) {
@@ -92,15 +90,7 @@ internal fun ReorderableTabsGroup(
     }
 
     LaunchedEffect(hoverTargetIndex) {
-        if (hoverTargetIndex < 0) {
-            lastHoverIndex = -1
-        } else {
-            if (lastHoverIndex >= 0 && lastHoverIndex != hoverTargetIndex) {
-                haptics.tickle()
-            }
-
-            lastHoverIndex = hoverTargetIndex
-        }
+        if (hoverTargetIndex >= 0) reorderHaptics.moved(hoverTargetIndex)
     }
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -174,7 +164,7 @@ internal fun ReorderableTabsGroup(
 
                                 draggingId = entry.id
                                 dragOffsetY = 0f
-                                haptics.lift()
+                                reorderHaptics.lift(fromIndex = index)
                             },
                             onDragStopped = {
                                 val currentIdx = workingOrder.indexOfFirst { it.id == entry.id }
@@ -225,7 +215,7 @@ internal fun ReorderableTabsGroup(
                                 draggingId = null
                                 dragOffsetY = 0f
 
-                                haptics.drop()
+                                reorderHaptics.drop()
 
                                 settleScope.launch {
                                     settleOffsetY.animateTo(

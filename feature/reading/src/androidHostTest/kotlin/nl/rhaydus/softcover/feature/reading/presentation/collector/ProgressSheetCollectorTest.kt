@@ -13,6 +13,10 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.isClosing
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
@@ -54,7 +58,7 @@ class ProgressSheetCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets progressSheet to the mapped model when bookToUpdate arrives`() = runTest(UnconfinedTestDispatcher()) {
+        fun `opens the sheet on the mapped model when bookToUpdate arrives`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = PreviewData.baseBook
             val collector = ProgressSheetCollector()
@@ -70,13 +74,13 @@ class ProgressSheetCollectorTest {
 
             // ----- Assert -----
             val expected = book.toProgressSheetUiModel(selectedTab = stateFlow.value.progressSheetTab)
-            val sheet = stateFlow.value.progressSheet.shouldNotBeNull()
+            val sheet = stateFlow.value.progressSheet.modelOrNull.shouldNotBeNull()
             sheet.copy(whenRead = expected.whenRead) shouldBe expected
             job.cancel()
         }
 
         @Test
-        fun `progressSheet clears back to null when bookToUpdate becomes null again`() = runTest(UnconfinedTestDispatcher()) {
+        fun `book going null closes an Open session`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = PreviewData.baseBook
             val collector = ProgressSheetCollector()
@@ -88,15 +92,78 @@ class ProgressSheetCollectorTest {
             }
 
             stateFlow.value = stateFlow.value.copy(bookToUpdate = book)
-            val expected = book.toProgressSheetUiModel(selectedTab = stateFlow.value.progressSheetTab)
-            val sheet = stateFlow.value.progressSheet.shouldNotBeNull()
-            sheet.copy(whenRead = expected.whenRead) shouldBe expected
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(bookToUpdate = null)
 
             // ----- Assert -----
-            stateFlow.value.progressSheet shouldBe null
+            stateFlow.value.progressSheet.isClosing shouldBe true
+            stateFlow.value.progressSheet.modelOrNull.shouldNotBeNull()
+            job.cancel()
+        }
+
+        @Test
+        fun `reopens with a fresh model when bookToUpdate arrives while a close is in flight`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook
+            val closingModel = ProgressSheetUiModel.previews.values.first().requestingClose()
+            stateFlow.value = ReadingScreenUiState(progressSheet = SheetSession.Open(model = closingModel))
+            val collector = ProgressSheetCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(bookToUpdate = book)
+
+            // ----- Assert -----
+            stateFlow.value.progressSheet.isClosing shouldBe false
+            val expected = book.toProgressSheetUiModel(selectedTab = stateFlow.value.progressSheetTab)
+            val sheet = stateFlow.value.progressSheet.modelOrNull.shouldNotBeNull()
+            sheet.copy(whenRead = expected.whenRead) shouldBe expected
+            job.cancel()
+        }
+
+        @Test
+        fun `leaves a closed session closed while there is no bookToUpdate`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = ProgressSheetCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(progressSheetTab = ProgressSheetTab.PERCENTAGE)
+
+            // ----- Assert -----
+            stateFlow.value.progressSheet shouldBe SheetSession.Closed
+            job.cancel()
+        }
+
+        @Test
+        fun `a model update keeps the open sheet open`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = ProgressSheetCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            stateFlow.value = stateFlow.value.copy(bookToUpdate = PreviewData.baseBook)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(progressSheetTab = ProgressSheetTab.PERCENTAGE)
+
+            // ----- Assert -----
+            stateFlow.value.progressSheet.isClosing shouldBe false
             job.cancel()
         }
 
@@ -116,13 +183,13 @@ class ProgressSheetCollectorTest {
                 bookToUpdate = book,
                 progressSheetTab = ProgressSheetTab.PAGE,
             )
-            stateFlow.value.progressSheet?.tabs?.selected shouldBe ProgressSheetTab.PAGE
+            stateFlow.value.progressSheet.modelOrNull?.tabs?.selected shouldBe ProgressSheetTab.PAGE
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(progressSheetTab = ProgressSheetTab.PERCENTAGE)
 
             // ----- Assert -----
-            stateFlow.value.progressSheet?.tabs?.selected shouldBe stateFlow.value.progressSheetTab
+            stateFlow.value.progressSheet.modelOrNull?.tabs?.selected shouldBe stateFlow.value.progressSheetTab
             job.cancel()
         }
 
@@ -159,7 +226,7 @@ class ProgressSheetCollectorTest {
             )
 
             // ----- Assert -----
-            val medium = stateFlow.value.progressSheet?.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
+            val medium = stateFlow.value.progressSheet.modelOrNull?.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
             medium.hours.text shouldBe "4"
             medium.minutes.text shouldBe "30"
             medium.seconds.text shouldBe "15"
@@ -200,7 +267,7 @@ class ProgressSheetCollectorTest {
             stateFlow.value = stateFlow.value.copy(progressTimeDraft = null)
 
             // ----- Assert -----
-            val medium = stateFlow.value.progressSheet?.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
+            val medium = stateFlow.value.progressSheet.modelOrNull?.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
             medium.hours.text shouldBe "0"
             medium.minutes.text shouldBe "0"
             medium.seconds.text shouldBe "0"
@@ -224,7 +291,7 @@ class ProgressSheetCollectorTest {
             stateFlow.value = stateFlow.value.copy(readAt = pastReadAt)
 
             // ----- Assert -----
-            val whenRead = stateFlow.value.progressSheet.shouldNotBeNull().whenRead
+            val whenRead = stateFlow.value.progressSheet.modelOrNull.shouldNotBeNull().whenRead
             whenRead.timeLabel shouldBe "09:15"
             whenRead.chip.selected shouldBe true
             whenRead.chip.label shouldEndWith ", 09:15"
@@ -251,7 +318,7 @@ class ProgressSheetCollectorTest {
             stateFlow.value = stateFlow.value.copy(readAt = null)
 
             // ----- Assert -----
-            val whenRead = stateFlow.value.progressSheet.shouldNotBeNull().whenRead
+            val whenRead = stateFlow.value.progressSheet.modelOrNull.shouldNotBeNull().whenRead
             whenRead.chip.selected shouldBe false
             job.cancel()
         }
@@ -291,7 +358,7 @@ class ProgressSheetCollectorTest {
             stateFlow.value = stateFlow.value.copy(readAt = pastReadAt)
 
             // ----- Assert -----
-            val medium = stateFlow.value.progressSheet?.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
+            val medium = stateFlow.value.progressSheet.modelOrNull?.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
             medium.hours.text shouldBe "2"
             medium.minutes.text shouldBe "20"
             medium.seconds.text shouldBe "5"

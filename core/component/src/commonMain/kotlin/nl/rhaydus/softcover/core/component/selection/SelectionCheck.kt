@@ -12,17 +12,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
-/** An accent check that keeps its space when unselected. Inert: the caller owns the selection. */
 @Composable
 fun SelectionCheck(
     selected: Boolean,
     modifier: Modifier = Modifier,
     size: Dp = 18.dp,
+    tint: Color = MaterialTheme.colorScheme.primary,
 ) {
     val motionScheme = MaterialTheme.motionScheme
 
@@ -34,7 +35,7 @@ fun SelectionCheck(
             visible = selected,
             enter = scaleIn(animationSpec = motionScheme.defaultSpatialSpec()) +
                 fadeIn(animationSpec = motionScheme.fastEffectsSpec()),
-            exit = scaleOut(animationSpec = motionScheme.fastEffectsSpec()) +
+            exit = scaleOut(animationSpec = motionScheme.defaultSpatialSpec()) +
                 fadeOut(animationSpec = motionScheme.fastEffectsSpec()),
         ) {
             val icon = drawableIconResource(
@@ -45,7 +46,7 @@ fun SelectionCheck(
             Icon(
                 painter = icon.getIconPainter(),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = tint,
                 modifier = Modifier.size(size),
             )
         }

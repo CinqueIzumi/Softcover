@@ -7,9 +7,13 @@ import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 
-internal fun ReAuthState.toSheetUiModel(): ReAuthSheetUiModel = ReAuthSheetUiModel(
+internal fun SheetSession<ReAuthState, *>.toSheetUiModel(): ReAuthSheetUiModel? = modelOrNull?.toSheetUiModel()
+
+private fun ReAuthState.toSheetUiModel(): ReAuthSheetUiModel = ReAuthSheetUiModel(
     scaffold = SheetScaffoldUiModel(
         header = SheetHeaderUiModel(
             section = SectionHeaderUiModel.Section(

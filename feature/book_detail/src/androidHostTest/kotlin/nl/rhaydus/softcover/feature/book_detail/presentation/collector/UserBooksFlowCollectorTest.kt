@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -37,7 +38,7 @@ class UserBooksFlowCollectorTest {
     fun setUp() {
         userBooksFlow = MutableSharedFlow()
         getAllUserBooksUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -140,7 +141,7 @@ class UserBooksFlowCollectorTest {
         fun `does not change state when book in state is null and flow emits a list`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val emittedBook = buildBook(id = 3)
-            stateFlow.value = BookDetailUiState(book = null)
+            stateFlow.value = buildBookDetailUiState().copy(book = null)
             val collector = UserBooksFlowCollector()
             val job = launch {
                 collector.onLaunch(
@@ -169,7 +170,7 @@ class UserBooksFlowCollectorTest {
                 id = 10,
                 userBook = localUserBook,
             )
-            stateFlow.value = BookDetailUiState(book = remoteBook)
+            stateFlow.value = buildBookDetailUiState().copy(book = remoteBook)
             val collector = UserBooksFlowCollector()
             val job = launch {
                 collector.onLaunch(
@@ -198,7 +199,7 @@ class UserBooksFlowCollectorTest {
                 id = 10,
                 userBookRead = localUserBookRead,
             )
-            stateFlow.value = BookDetailUiState(book = remoteBook)
+            stateFlow.value = buildBookDetailUiState().copy(book = remoteBook)
             val collector = UserBooksFlowCollector()
             val job = launch {
                 collector.onLaunch(
@@ -231,7 +232,7 @@ class UserBooksFlowCollectorTest {
                 description = "Local description Should Be Ignored",
                 userBook = buildUserBook(),
             )
-            stateFlow.value = BookDetailUiState(book = remoteBook)
+            stateFlow.value = buildBookDetailUiState().copy(book = remoteBook)
             val collector = UserBooksFlowCollector()
             val job = launch {
                 collector.onLaunch(
@@ -270,7 +271,7 @@ class UserBooksFlowCollectorTest {
                 id = 2,
                 editions = listOf(localEdition),
             )
-            stateFlow.value = BookDetailUiState(book = remoteBook)
+            stateFlow.value = buildBookDetailUiState().copy(book = remoteBook)
             val collector = UserBooksFlowCollector()
             val job = launch {
                 collector.onLaunch(
@@ -310,7 +311,7 @@ class UserBooksFlowCollectorTest {
                     ),
                 ),
             )
-            stateFlow.value = BookDetailUiState(book = remoteBook)
+            stateFlow.value = buildBookDetailUiState().copy(book = remoteBook)
             val collector = UserBooksFlowCollector()
             val job = launch {
                 collector.onLaunch(
@@ -361,7 +362,7 @@ class UserBooksFlowCollectorTest {
                 id = 4,
                 editions = localEditions,
             )
-            stateFlow.value = BookDetailUiState(book = remoteBook)
+            stateFlow.value = buildBookDetailUiState().copy(book = remoteBook)
             val collector = UserBooksFlowCollector()
             val job = launch {
                 collector.onLaunch(
@@ -386,7 +387,7 @@ class UserBooksFlowCollectorTest {
             // ----- Arrange -----
             val remoteBook = buildBook(id = 1)
             val unrelatedBook = buildBook(id = 99)
-            stateFlow.value = BookDetailUiState(book = remoteBook)
+            stateFlow.value = buildBookDetailUiState().copy(book = remoteBook)
             val collector = UserBooksFlowCollector()
             val job = launch {
                 collector.onLaunch(
@@ -415,7 +416,7 @@ class UserBooksFlowCollectorTest {
                 userBook = secondLocalUserBook,
             )
 
-            stateFlow.value = BookDetailUiState(book = firstBook)
+            stateFlow.value = buildBookDetailUiState().copy(book = firstBook)
             val collector = UserBooksFlowCollector()
             val job = launch {
                 collector.onLaunch(

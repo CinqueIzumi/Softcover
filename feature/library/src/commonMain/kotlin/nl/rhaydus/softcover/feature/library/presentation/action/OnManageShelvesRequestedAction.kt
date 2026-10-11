@@ -1,9 +1,11 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.ManageShelves
 import nl.rhaydus.toad.ActionScope
 
 internal class OnManageShelvesRequestedAction : LibraryAction {
@@ -11,6 +13,11 @@ internal class OnManageShelvesRequestedAction : LibraryAction {
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
-        scope.setState { it.copy(isManageShelvesPending = true) }
+        scope.setState {
+            it.copy(
+                shelvesSheet = it.shelvesSheet.requestClose(pending = ManageShelves),
+                isShelvesSheetRequested = false,
+            )
+        }
     }
 }

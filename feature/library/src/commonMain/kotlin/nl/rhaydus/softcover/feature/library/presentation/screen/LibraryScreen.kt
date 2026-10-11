@@ -13,6 +13,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -25,6 +27,7 @@ import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetc
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToNewListAction
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.mapper.editionTransitionSurface
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import org.koin.compose.koinInject
@@ -47,16 +50,9 @@ object LibraryScreen : Screen {
         val haptics = LocalHaptics.current
 
         ObserveAsEvents(flow = screenModel.events) { event ->
+            if (event is FeedbackEvent) haptics.play(event.feedback)
+
             when (event) {
-                is LibraryEvent.BulkMoveAppliedEvent,
-                is LibraryEvent.ListMembershipChangedEvent -> haptics.select()
-
-                is LibraryEvent.BulkMoveFailedEvent,
-                is LibraryEvent.ListMembershipChangeFailedEvent,
-                is LibraryEvent.NewListBooksAddFailedEvent,
-                is LibraryEvent.ListReorderFailedEvent,
-                is LibraryEvent.ListRankedChangeFailedEvent -> haptics.reject()
-
                 is LibraryEvent.ManageShelvesRequestedEvent -> {
                     navigator.parent?.push(
                         item = appNavigator.screen(ScreenDestination.LibraryVisibilitySettings),
@@ -64,21 +60,29 @@ object LibraryScreen : Screen {
                 }
 
                 is LibraryEvent.CreateListRequestedEvent -> {
-                // Creating a list is a detour out of "put these books on a list", not a new task,
-                // so finishing it returns here: the selection lands on the new list and the chooser
-                // reopens with it ticked. Without this the chooser closes, the list is created
-                // empty, and the reader's original intent is silently dropped.
-                createListPresenter?.open(
-                    onListCreated = { listId, listName ->
-                        screenModel.runAction(
-                            OnBulkAddToNewListAction(
-                                listId = listId,
-                                listName = listName,
-                            ),
-                        )
-                    },
-                )
+                    // Creating a list is a detour out of "put these books on a list", not a new task,
+                    // so finishing it returns here: the selection lands on the new list and the chooser
+                    // reopens with it ticked. Without this the chooser closes, the list is created
+                    // empty, and the reader's original intent is silently dropped.
+                    createListPresenter?.open(
+                        onListCreated = { listId, listName ->
+                            screenModel.runAction(
+                                OnBulkAddToNewListAction(
+                                    listId = listId,
+                                    listName = listName,
+                                ),
+                            )
+                        },
+                    )
                 }
+
+                is LibraryEvent.BulkMoveAppliedEvent,
+                is LibraryEvent.BulkMoveFailedEvent,
+                is LibraryEvent.ListMembershipChangedEvent,
+                is LibraryEvent.ListMembershipChangeFailedEvent,
+                is LibraryEvent.NewListBooksAddFailedEvent,
+                is LibraryEvent.ListReorderFailedEvent,
+                is LibraryEvent.ListRankedChangeFailedEvent -> Unit
             }
         }
 
@@ -106,7 +110,7 @@ object LibraryScreen : Screen {
                     val destination = ScreenDestination.BookDetail(
                         id = it.bookId,
                         initialCover = BookInitialCover.fromEdition(edition = it),
-                        transitionSurface = "edition-${it.id}",
+                        transitionSurface = editionTransitionSurface(editionId = it.id),
                     )
 
                     if (bookDetailPresenter != null) {

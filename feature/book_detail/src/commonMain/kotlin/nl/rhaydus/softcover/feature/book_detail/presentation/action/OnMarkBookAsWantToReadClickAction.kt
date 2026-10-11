@@ -30,8 +30,6 @@ internal class OnMarkBookAsWantToReadClickAction(private val book: Book) : BookD
                     AppLog.e("$error")
 
                     scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
-
-                    scope.sendEvent(BookDetailEvent.MutationFailedEvent())
                 }
         }
 

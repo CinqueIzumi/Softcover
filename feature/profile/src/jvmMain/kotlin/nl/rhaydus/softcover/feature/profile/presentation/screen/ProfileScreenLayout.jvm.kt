@@ -17,10 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -76,8 +72,6 @@ private fun ProfileContent(
     onNavigateUp: () -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
 ) {
-    var showLogOutConfirm by remember { mutableStateOf(false) }
-
     Column(modifier = Modifier.fillMaxSize()) {
         EditorialTopBar(
             model = state.topBar,
@@ -90,7 +84,7 @@ private fun ProfileContent(
                 DesktopTooltip(text = "Share your reading year") {
                     ProfileShareButton(
                         onClick = { runAction(OnShareSheetOpenAction()) },
-                        enabled = state.shareSheet != null,
+                        enabled = state.canShare,
                         modifier = Modifier.pointerHandCursor(),
                     )
                 }
@@ -107,10 +101,7 @@ private fun ProfileContent(
                     state = state,
                     runAction = runAction,
                     onShareClick = { runAction(OnShareSheetOpenAction()) },
-                    onLogOutClick = {
-                        runAction(OnLogOutSheetOpenAction())
-                        showLogOutConfirm = true
-                    },
+                    onLogOutClick = { runAction(OnLogOutSheetOpenAction()) },
                     onBookCardEvent = onBookCardEvent,
                 )
             } else {
@@ -118,10 +109,7 @@ private fun ProfileContent(
                     state = state,
                     runAction = runAction,
                     onShareClick = { runAction(OnShareSheetOpenAction()) },
-                    onLogOutClick = {
-                        runAction(OnLogOutSheetOpenAction())
-                        showLogOutConfirm = true
-                    },
+                    onLogOutClick = { runAction(OnLogOutSheetOpenAction()) },
                     onBookCardEvent = onBookCardEvent,
                 )
             }
@@ -130,8 +118,6 @@ private fun ProfileContent(
 
     ProfileSheets(
         state = state,
-        showLogOutConfirm = showLogOutConfirm,
-        onLogOutDismiss = { showLogOutConfirm = false },
         runAction = runAction,
     )
 }

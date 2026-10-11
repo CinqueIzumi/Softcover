@@ -10,6 +10,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -41,10 +43,11 @@ object ExploreScreen : Screen {
         val haptics = LocalHaptics.current
 
         ObserveAsEvents(flow = screenModel.events) { event ->
-            when (event) {
-                is ExploreEvent.BookAddedEvent -> haptics.select()
+            if (event is FeedbackEvent) haptics.play(event.feedback)
 
-                is ExploreEvent.AddBookFailedEvent -> haptics.reject()
+            when (event) {
+                is ExploreEvent.BookAddedEvent,
+                is ExploreEvent.AddBookFailedEvent -> Unit
             }
         }
 

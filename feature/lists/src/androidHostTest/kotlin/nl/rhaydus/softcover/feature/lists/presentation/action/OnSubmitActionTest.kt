@@ -10,6 +10,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.isClosing
+import nl.rhaydus.softcover.core.component.sheet.isOpen
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -303,6 +305,78 @@ class OnSubmitActionTest {
 
             event.shouldBeInstanceOf<CreateListEvent.ListCreationFailedEvent>()
             event.message shouldBe null
+        }
+
+        @Test
+        fun `asks the sheet to close once the list is created`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState().withName(newName = "Favourites")
+
+            coEvery {
+                createListUseCase(
+                    name = "Favourites",
+                    privacy = any(),
+                )
+            } returns bookList(
+                id = 1,
+                name = "Favourites",
+            )
+
+            // ----- Act -----
+            OnSubmitAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.sheet.isOpen shouldBe true
+            stateFlow.value.sheet.isClosing shouldBe true
+        }
+
+        @Test
+        fun `keeps the sheet open and not closing when the creation fails`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState().withName(newName = "Summer")
+
+            coEvery {
+                createListUseCase(
+                    name = "Summer",
+                    privacy = any(),
+                )
+            } throws UnexpectedApiException("API error")
+
+            // ----- Act -----
+            OnSubmitAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.sheet.isOpen shouldBe true
+            stateFlow.value.sheet.isClosing shouldBe false
+        }
+
+        @Test
+        fun `keeps the sheet open and not closing when the name is taken`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState().withName(newName = "Summer")
+
+            coEvery {
+                createListUseCase(
+                    name = "Summer",
+                    privacy = any(),
+                )
+            } throws ListNameTakenException(name = "Summer")
+
+            // ----- Act -----
+            OnSubmitAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.sheet.isOpen shouldBe true
+            stateFlow.value.sheet.isClosing shouldBe false
         }
     }
 }

@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -269,7 +270,7 @@ class OnBulkMoveShelfActionTest {
         }
 
         @Test
-        fun `zero failures sends BulkMoveAppliedEvent`() = runTest {
+        fun `moving to READ sends a Milestone BulkMoveAppliedEvent`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
@@ -288,8 +289,33 @@ class OnBulkMoveShelfActionTest {
             )
 
             // ----- Assert -----
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.BulkMoveAppliedEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<LibraryEvent.BulkMoveAppliedEvent>().feedback shouldBe Feedback.Milestone
             eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `moving to a status other than READ sends a Routine BulkMoveAppliedEvent`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1),
+                booksByTab = mapOf(tabKey to listOf(book)),
+            )
+
+            coEvery {
+                markBookAsReadingUseCase(book = book)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(status = UserBookStatus.CURRENTLY_READING).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.BulkMoveAppliedEvent>()
+                .feedback shouldBe Feedback.Routine
         }
 
         @Test
@@ -319,8 +345,63 @@ class OnBulkMoveShelfActionTest {
             )
 
             // ----- Assert -----
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.BulkMoveFailedEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<LibraryEvent.BulkMoveFailedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `after the move it withdraws the bulk sheet requests`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = setOf(1),
+                booksByTab = mapOf(tabKey to listOf(book)),
+                isBulkRemoveSheetRequested = true,
+                isChooseListsSheetRequested = true,
+            )
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(status = UserBookStatus.READ).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isBulkRemoveSheetRequested shouldBe false
+            stateFlow.value.isChooseListsSheetRequested shouldBe false
+        }
+
+        @Test
+        fun `a failed move still withdraws the bulk sheet requests`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1),
+                booksByTab = mapOf(tabKey to listOf(book)),
+                isChooseListsSheetRequested = true,
+            )
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.failure(RuntimeException("boom"))
+            every {
+                SnackBarManager.showSnackbar(title = any())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(status = UserBookStatus.READ).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isChooseListsSheetRequested shouldBe false
         }
     }
 }

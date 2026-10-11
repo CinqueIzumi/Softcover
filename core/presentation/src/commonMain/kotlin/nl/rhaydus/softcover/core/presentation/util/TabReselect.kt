@@ -38,14 +38,26 @@ fun TabReselectEffect(
     }
 }
 
+/**
+ * Scrolls to the top on a reselect through [scrollToTop], which receives whether to animate and returns
+ * whether it scrolled. Use it when the scrolling state depends on the screen's phase.
+ */
+@Composable
+fun TabReselectScrollToTopEffect(
+    tab: Any,
+    scrollToTop: suspend (animate: Boolean) -> Boolean,
+) {
+    val animate = playDecorativeMotion()
+
+    TabReselectEffect(tab) { scrollToTop(animate) }
+}
+
 @Composable
 fun TabReselectScrollToTopEffect(
     tab: Any,
     state: ScrollState,
 ) {
-    val animate = playDecorativeMotion()
-
-    TabReselectEffect(tab) { state.scrollToTop(animate) }
+    TabReselectScrollToTopEffect(tab) { animate -> state.scrollToTop(animate) }
 }
 
 @Composable
@@ -53,9 +65,7 @@ fun TabReselectScrollToTopEffect(
     tab: Any,
     state: LazyListState,
 ) {
-    val animate = playDecorativeMotion()
-
-    TabReselectEffect(tab) { state.scrollToTop(animate) }
+    TabReselectScrollToTopEffect(tab) { animate -> state.scrollToTop(animate) }
 }
 
 @Composable
@@ -63,9 +73,7 @@ fun TabReselectScrollToTopEffect(
     tab: Any,
     state: LazyGridState,
 ) {
-    val animate = playDecorativeMotion()
-
-    TabReselectEffect(tab) { state.scrollToTop(animate) }
+    TabReselectScrollToTopEffect(tab) { animate -> state.scrollToTop(animate) }
 }
 
 suspend fun ScrollState.scrollToTop(animate: Boolean): Boolean {

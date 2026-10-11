@@ -2,10 +2,14 @@ package nl.rhaydus.softcover.core.uibinding.progress
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressTimeUnit
 import nl.rhaydus.softcover.core.component.progress.progressTimeField
+import nl.rhaydus.softcover.core.component.sheet.SheetFooterEmphasis
+import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
@@ -256,7 +260,23 @@ class ProgressSheetMapperTest {
             val scaffold = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE).scaffold
 
             // ----- Assert -----
-            scaffold.header.section.headlineText shouldBe "The Starless Sea"
+            scaffold.header.shouldNotBeNull().section.headlineText shouldBe "The Starless Sea"
+        }
+
+        @Test
+        fun `secondary footer button is an outlined Mark as read with the check icon that dismisses the sheet`() {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook
+
+            // ----- Act -----
+            val footer = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE).scaffold.footer
+
+            // ----- Assert -----
+            val secondary = footer.shouldBeInstanceOf<SheetFooterUiModel.Stacked>().secondary.shouldNotBeNull()
+            secondary.label shouldBe "Mark as read"
+            secondary.dismissesSheet shouldBe true
+            secondary.emphasis shouldBe SheetFooterEmphasis.Outlined
+            secondary.icon shouldBe SoftcoverIcon.Check
         }
     }
 

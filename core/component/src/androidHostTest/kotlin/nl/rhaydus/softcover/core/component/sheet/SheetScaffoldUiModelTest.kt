@@ -26,7 +26,7 @@ class SheetScaffoldUiModelTest {
 
             // ----- Act -----
             val trailingKinds = fixtures
-                .mapNotNull { it.header.trailing }
+                .mapNotNull { it.header?.trailing }
                 .map { it::class }
                 .toSet()
 

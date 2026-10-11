@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.profile.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.sheet.openOrUpdate
+import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
@@ -17,22 +19,33 @@ internal class ReadingLifeShareCardCollector : ProfileCollector {
         dependencies: ProfileDependencies,
     ) {
         scope.state
-            .map { it.readingLife to it.userProfileData }
+            .map { state ->
+                val readingLife = state.readingLife
+                val profile = state.userProfileData
+
+                ShareSheetSnapshot(
+                    card = if (state.isShareSheetRequested && readingLife != null && profile != null) {
+                        readingLife.toReadingLifeShareCardUiModel(profile)
+                    } else {
+                        null
+                    },
+                    progress = state.shareCapture.progress,
+                )
+            }
             .distinctUntilChanged()
-            .collectLatest { (readingLife, profile) ->
-                val card = if (readingLife != null && profile != null) {
-                    readingLife.toReadingLifeShareCardUiModel(profile)
-                } else {
-                    null
-                }
+            .collectLatest { snapshot ->
+                val card = snapshot.card
 
                 scope.setState {
                     it.copy(
-                        shareSheet = card?.let { shareCard ->
-                            profileShareSheetFor(
-                                card = shareCard,
-                                progress = it.shareCapture.progress,
-                                closeRequested = it.shareCapture.closeRequested,
+                        shareSheet = if (card == null || it.isShareSheetRequested.not()) {
+                            it.shareSheet.requestClose()
+                        } else {
+                            it.shareSheet.openOrUpdate(
+                                model = profileShareSheetFor(
+                                    card = card,
+                                    progress = snapshot.progress,
+                                ),
                             )
                         },
                     )

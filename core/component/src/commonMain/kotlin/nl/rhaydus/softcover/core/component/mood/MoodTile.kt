@@ -20,8 +20,7 @@ import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.component.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -94,12 +93,10 @@ fun MoodTile(
                 if (isLoading) {
                     Modifier
                 } else {
-                    Modifier
-                        .pointerHandCursor()
-                        .pressScaleClickable(
-                            onClick = { onEvent(MoodTileEvent.Clicked(key = model.key)) },
-                            hoverShape = Corners.lg,
-                        )
+                    Modifier.tactileClickable(
+                        onClick = { onEvent(MoodTileEvent.Clicked(key = model.key)) },
+                        hoverShape = Corners.lg,
+                    )
                 },
             )
             .padding(Spacing.md),

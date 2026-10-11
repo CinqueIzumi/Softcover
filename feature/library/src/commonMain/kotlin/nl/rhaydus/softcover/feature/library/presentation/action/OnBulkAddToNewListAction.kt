@@ -32,7 +32,7 @@ internal class OnBulkAddToNewListAction(
 
         // Reopened first so the chooser is already back by the time the writes land — the rows show
         // their own in-flight state, which is the feedback this path wants.
-        scope.setState { it.copy(isBulkAddToListSheetShown = true) }
+        scope.setState { it.copy(isChooseListsSheetRequested = true) }
 
         if (books.isEmpty()) return
 

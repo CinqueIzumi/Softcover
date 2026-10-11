@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
@@ -21,6 +22,7 @@ import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.core.uibinding.verdict.draftReview
 import nl.rhaydus.softcover.core.uibinding.verdict.reduce
 import nl.rhaydus.softcover.core.uibinding.verdict.toVerdictSheetUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -41,7 +43,7 @@ class OnSaveVerdictActionTest {
     @BeforeEach
     fun setUp() {
         saveBookVerdictUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState(verdictSheetContext = VerdictSheetContext.EDIT))
+        stateFlow = MutableStateFlow(buildBookDetailUiState().copy(verdictSheetContext = VerdictSheetContext.EDIT))
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
@@ -51,11 +53,12 @@ class OnSaveVerdictActionTest {
         )
     }
 
-    private fun stubDependencies(): BookDetailDependencies = mockk<BookDetailDependencies>(relaxed = true).also { mock ->
-        every {
-            mock.saveBookVerdictUseCase
-        } returns saveBookVerdictUseCase
-    }
+    private fun stubDependencies(): BookDetailDependencies =
+        mockk<BookDetailDependencies>(relaxed = true).also { mock ->
+            every {
+                mock.saveBookVerdictUseCase
+            } returns saveBookVerdictUseCase
+        }
 
     private fun stubBook(id: Int = 42): Book = mockk<Book>().also { mock ->
         every {
@@ -231,7 +234,8 @@ class OnSaveVerdictActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
         }
 
         @Test
@@ -244,7 +248,7 @@ class OnSaveVerdictActionTest {
                 reviewText = "A great read",
                 hasSpoilers = false,
             )
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 failedMutationBookIds = setOf(1, 2),
                 verdictSheet = sheet,
             )
@@ -269,7 +273,7 @@ class OnSaveVerdictActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds shouldBe setOf(1, 2, 42)
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
     }
 }

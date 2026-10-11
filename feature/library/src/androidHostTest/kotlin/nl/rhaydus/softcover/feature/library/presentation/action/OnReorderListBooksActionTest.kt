@@ -169,7 +169,8 @@ class OnReorderListBooksActionTest {
                 SnackBarManager.showSnackbar(title = match { it.contains(listName) })
             }
 
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ListReorderFailedEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<LibraryEvent.ListReorderFailedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 

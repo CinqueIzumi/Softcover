@@ -9,10 +9,14 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.dismissed
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.openChooseListsSession
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.CreateList
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
@@ -77,7 +81,7 @@ class OnBulkRemoveFromLibraryActionTest {
                 selectionMode = true,
                 selectedBookIds = setOf(1),
                 booksByTab = mapOf(tabKey to listOf(selectedBook, unselectedBook)),
-                isBulkRemoveSheetShown = true,
+                isBulkRemoveSheetRequested = true,
             )
 
             coEvery {
@@ -98,7 +102,8 @@ class OnBulkRemoveFromLibraryActionTest {
             stateFlow.value.selectionMode shouldBe false
             stateFlow.value.selectedBookIds shouldBe emptySet()
             stateFlow.value.bulkActionInProgress shouldBe false
-            stateFlow.value.isBulkRemoveCloseRequested shouldBe true
+            stateFlow.value.isBulkRemoveSheetRequested shouldBe false
+            stateFlow.value.isChooseListsSheetRequested shouldBe false
         }
 
         @Test
@@ -130,13 +135,13 @@ class OnBulkRemoveFromLibraryActionTest {
         }
 
         @Test
-        fun `keeps the bulk remove sheet open with progress on while the stage runs`() = runTest {
+        fun `keeps the bulk remove sheet requested with progress on while the stage runs`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
                 selectedBookIds = setOf(1),
                 booksByTab = mapOf(tabKey to listOf(book)),
-                isBulkRemoveSheetShown = true,
+                isBulkRemoveSheetRequested = true,
             )
             var stateDuringRemoval: LibraryUiState? = null
 
@@ -158,20 +163,19 @@ class OnBulkRemoveFromLibraryActionTest {
 
             // ----- Assert -----
             val during = stateDuringRemoval.shouldNotBeNull()
-            during.isBulkRemoveSheetShown shouldBe true
-            during.isBulkRemoveCloseRequested shouldBe false
+            during.isBulkRemoveSheetRequested shouldBe true
             during.bulkActionInProgress shouldBe true
         }
 
         @Test
-        fun `a failed stage still resets selection and requests the sheet to close`() = runTest {
+        fun `a failed stage still resets selection and withdraws the sheet request`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
                 selectedBookIds = setOf(1),
                 booksByTab = mapOf(tabKey to listOf(book)),
-                isBulkRemoveSheetShown = true,
+                isBulkRemoveSheetRequested = true,
             )
 
             coEvery {
@@ -189,16 +193,16 @@ class OnBulkRemoveFromLibraryActionTest {
             // ----- Assert -----
             stateFlow.value.selectionMode shouldBe false
             stateFlow.value.selectedBookIds shouldBe emptySet()
-            stateFlow.value.isBulkRemoveCloseRequested shouldBe true
+            stateFlow.value.isBulkRemoveSheetRequested shouldBe false
             stateFlow.value.bulkActionInProgress shouldBe false
         }
 
         @Test
-        fun `no books resolved requests the close without calling the remover`() = runTest {
+        fun `no books resolved withdraws the sheet request without calling the remover`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 selectedBookIds = emptySet(),
-                isBulkRemoveSheetShown = true,
+                isBulkRemoveSheetRequested = true,
             )
 
             val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
@@ -211,9 +215,55 @@ class OnBulkRemoveFromLibraryActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) { undoableBookRemover.remove(books = any()) }
-            stateFlow.value.isBulkRemoveCloseRequested shouldBe true
-            stateFlow.value.isBulkRemoveSheetShown shouldBe true
+            stateFlow.value.isBulkRemoveSheetRequested shouldBe false
             stateFlow.value.bulkActionInProgress shouldBe false
+        }
+
+        @Test
+        fun `a successful stage also withdraws the choose-lists request and keeps its create-list request`() =
+            runTest {
+                // ----- Arrange -----
+                val book = buildBook(id = 1)
+                stateFlow.value = LibraryUiState(
+                    selectionMode = true,
+                    selectedBookIds = setOf(1),
+                    booksByTab = mapOf(tabKey to listOf(book)),
+                    isBulkRemoveSheetRequested = true,
+                    chooseListsSheet = openChooseListsSession(pending = CreateList),
+                )
+
+                coEvery {
+                    undoableBookRemover.remove(books = listOf(book))
+                } returns Result.success(Unit)
+
+                val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
+
+                // ----- Act -----
+                action.execute(
+                    dependencies = stubDependencies(),
+                    scope = scope,
+                )
+
+                // ----- Assert -----
+                stateFlow.value.isChooseListsSheetRequested shouldBe false
+                stateFlow.value.chooseListsSheet.dismissed() shouldBe CreateList
+            }
+
+        @Test
+        fun `leaves the bulk remove session closed when nothing is shown and nothing resolves`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(selectedBookIds = emptySet())
+
+            val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.bulkRemoveSheet shouldBe SheetSession.Closed
         }
     }
 }

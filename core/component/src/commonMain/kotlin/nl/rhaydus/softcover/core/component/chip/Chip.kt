@@ -3,9 +3,13 @@ package nl.rhaydus.softcover.core.component.chip
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,11 +37,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
-import nl.rhaydus.softcover.core.component.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
+import nl.rhaydus.softcover.core.component.modifier.tactileToggleable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -76,7 +80,6 @@ private fun ChipScaffold(
     onEvent: (ChipEvent) -> Unit,
     modifier: Modifier,
 ) {
-    val haptics = LocalHaptics.current
     val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
     val container by animateColorAsState(
         targetValue = style.container,
@@ -101,12 +104,11 @@ private fun ChipScaffold(
             tone = model.tone,
             scheme = MaterialTheme.colorScheme,
         )
-        .then(if (selectable) Modifier.semantics { selected = model.selected } else Modifier)
-        .chipInteraction(interaction = model.interaction) {
-            if (selectable) {
-                haptics.select()
-            }
-
+        .chipInteraction(
+            interaction = model.interaction,
+            selectable = selectable,
+            selected = model.selected,
+        ) {
             onEvent(ChipEvent.Clicked(key = model.key))
         }
         .then(
@@ -119,18 +121,18 @@ private fun ChipScaffold(
                 Modifier
             },
         )
-        .padding(
-            when (model.size) {
-                ChipSize.Regular -> PaddingValues(
-                    horizontal = Spacing.sm,
-                    vertical = Spacing.xs,
-                )
-                ChipSize.Compact -> PaddingValues(
-                    horizontal = Spacing.xs,
-                    vertical = Spacing.xxs,
-                )
-            },
+        .height(IntrinsicSize.Min)
+
+    val padding = when (model.size) {
+        ChipSize.Regular -> PaddingValues(
+            horizontal = Spacing.sm,
+            vertical = Spacing.xs,
         )
+        ChipSize.Compact -> PaddingValues(
+            horizontal = Spacing.xs,
+            vertical = Spacing.xxs,
+        )
+    }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -139,17 +141,20 @@ private fun ChipScaffold(
         ChipLeadingSlot(
             leading = model.leading,
             style = animatedStyle,
+            padding = padding,
             onToggle = { onEvent(ChipEvent.SpoilerToggled(key = model.key)) },
         )
 
         ChipLabel(
             model = model,
             style = animatedStyle,
+            padding = padding,
         )
 
         ChipTrailingSlot(
             trailing = model.trailing,
             style = animatedStyle,
+            padding = padding,
             onDismiss = { onEvent(ChipEvent.Dismissed(key = model.key)) },
         )
     }
@@ -180,24 +185,47 @@ private fun Modifier.thenChipBorder(
 @Composable
 private fun Modifier.chipInteraction(
     interaction: ChipInteraction,
+    selectable: Boolean,
+    selected: Boolean,
     onClick: () -> Unit,
 ): Modifier = when (interaction) {
-    ChipInteraction.Clickable -> pointerHandCursor().pressScaleClickable(
-        onClick = onClick,
-        hoverShape = Corners.pill,
-    )
-    ChipInteraction.Disabled -> alpha(DISABLED_ALPHA)
-    ChipInteraction.Inert -> this
+    ChipInteraction.Inert -> if (selectable) semantics { this.selected = selected } else this
+    ChipInteraction.Clickable, ChipInteraction.Disabled -> {
+        val enabled = interaction == ChipInteraction.Clickable
+
+        this
+            .let { base -> if (enabled) base else base.alpha(DISABLED_ALPHA) }
+            .let { base ->
+                if (selectable) {
+                    base.tactileToggleable(
+                        value = selected,
+                        onValueChange = { onClick() },
+                        role = Role.Checkbox,
+                        enabled = enabled,
+                        hoverShape = Corners.pill,
+                    )
+                } else {
+                    base.tactileClickable(
+                        onClick = onClick,
+                        enabled = enabled,
+                        hoverShape = Corners.pill,
+                    )
+                }
+            }
+    }
 }
 
 @Composable
 private fun ChipLeadingSlot(
     leading: ChipLeading?,
     style: ChipStyle,
+    padding: PaddingValues,
     onToggle: () -> Unit,
 ) {
+    val start = padding.calculateLeftPadding(LayoutDirection.Ltr)
+
     when (leading) {
-        null -> Unit
+        null -> Spacer(modifier = Modifier.width(start))
 
         is ChipLeading.Icon -> {
             ChipIconSlot(
@@ -205,9 +233,14 @@ private fun ChipLeadingSlot(
                 contentDescription = null,
                 tint = style.ink,
                 size = 18.dp,
+                insets = PaddingValues(
+                    start = start,
+                    top = padding.calculateTopPadding(),
+                    end = Spacing.xs,
+                    bottom = padding.calculateBottomPadding(),
+                ),
                 onClick = null,
             )
-            Spacer(modifier = Modifier.width(Spacing.xs))
         }
 
         is ChipLeading.SpoilerToggle -> {
@@ -216,9 +249,14 @@ private fun ChipLeadingSlot(
                 contentDescription = leading.label,
                 tint = if (leading.marked) MaterialTheme.colorScheme.primary else style.ink,
                 size = 18.dp,
+                insets = PaddingValues(
+                    start = start,
+                    top = padding.calculateTopPadding(),
+                    end = Spacing.xs,
+                    bottom = padding.calculateBottomPadding(),
+                ),
                 onClick = onToggle,
             )
-            Spacer(modifier = Modifier.width(Spacing.xs))
         }
     }
 }
@@ -227,6 +265,7 @@ private fun ChipLeadingSlot(
 private fun ChipLabel(
     model: ChipUiModel,
     style: ChipStyle,
+    padding: PaddingValues,
 ) {
     val textStyle = MaterialTheme.typography.labelMedium.copy(
         fontWeight = if (model.face == ChipFace.Bold) FontWeight.Bold else style.weight,
@@ -242,6 +281,7 @@ private fun ChipLabel(
         overflow = TextOverflow.Ellipsis,
         modifier = if (spoilerWash) {
             Modifier
+                .padding(vertical = padding.calculateTopPadding())
                 .clip(Corners.xxs)
                 .background(MaterialTheme.colorScheme.spoilerEditorHighlight)
                 .padding(
@@ -249,7 +289,7 @@ private fun ChipLabel(
                     vertical = Spacing.xxxs,
                 )
         } else {
-            Modifier
+            Modifier.padding(vertical = padding.calculateTopPadding())
         },
     )
 }
@@ -258,29 +298,38 @@ private fun ChipLabel(
 private fun ChipTrailingSlot(
     trailing: ChipTrailing?,
     style: ChipStyle,
+    padding: PaddingValues,
     onDismiss: () -> Unit,
 ) {
+    val end = padding.calculateRightPadding(LayoutDirection.Ltr)
+    val insets = PaddingValues(
+        start = Spacing.xs,
+        top = padding.calculateTopPadding(),
+        end = end,
+        bottom = padding.calculateBottomPadding(),
+    )
+
     when (trailing) {
-        null -> Unit
+        null -> Spacer(modifier = Modifier.width(end))
 
         is ChipTrailing.Icon -> {
-            Spacer(modifier = Modifier.width(Spacing.xs))
             ChipIconSlot(
                 icon = trailing.icon,
                 contentDescription = trailing.description,
                 tint = style.ink,
                 size = 18.dp,
+                insets = insets,
                 onClick = null,
             )
         }
 
         is ChipTrailing.Dismiss -> {
-            Spacer(modifier = Modifier.width(Spacing.xs))
             ChipIconSlot(
                 icon = SoftcoverIcon.Close,
                 contentDescription = trailing.label,
                 tint = style.ink,
                 size = 16.dp,
+                insets = insets,
                 onClick = onDismiss,
             )
         }
@@ -293,6 +342,7 @@ private fun ChipIconSlot(
     contentDescription: String?,
     tint: Color,
     size: Dp,
+    insets: PaddingValues,
     onClick: (() -> Unit)?,
 ) {
     val resource = drawableIconResource(
@@ -300,21 +350,28 @@ private fun ChipIconSlot(
         contentDescription = contentDescription.orEmpty(),
     )
 
-    Icon(
-        painter = resource.getIconPainter(),
-        contentDescription = resource.contentDescription,
-        tint = tint,
+    Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(size)
             .let { base ->
                 if (onClick != null) {
-                    base.pointerHandCursor().pressScaleClickable(
-                        onClick = onClick,
-                        hoverShape = Corners.pill,
-                    )
+                    base
+                        .fillMaxHeight()
+                        .tactileClickable(
+                            onClick = onClick,
+                            hoverShape = Corners.pill,
+                        )
                 } else {
                     base
                 }
-            },
-    )
+            }
+            .padding(insets),
+    ) {
+        Icon(
+            painter = resource.getIconPainter(),
+            contentDescription = resource.contentDescription,
+            tint = tint,
+            modifier = Modifier.size(size),
+        )
+    }
 }

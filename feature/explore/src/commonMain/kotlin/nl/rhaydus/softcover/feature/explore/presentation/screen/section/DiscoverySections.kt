@@ -23,7 +23,6 @@ internal fun DiscoverySections(
 
     UpNextSection(
         set = state.upNext,
-        menuSheets = state.continueSeriesMenuSheets,
         header = state.upNextHeader,
         onBookClick = onBookClick,
         runAction = runAction,

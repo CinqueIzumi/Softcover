@@ -61,7 +61,7 @@ class ShareCaptureStateTest {
         }
 
         @Test
-        fun `Shared requests close and keeps the progress`() {
+        fun `Shared keeps the progress because closing belongs to the session`() {
             // ----- Arrange -----
             val state = ShareCaptureState(progress = ShareCaptureProgress.Sharing)
 
@@ -69,19 +69,13 @@ class ShareCaptureStateTest {
             val result = state.reduce(ShareCardSheetEvent.Shared)
 
             // ----- Assert -----
-            result shouldBe ShareCaptureState(
-                progress = ShareCaptureProgress.Sharing,
-                closeRequested = true,
-            )
+            result shouldBe state
         }
 
         @Test
         fun `Dismissed changes nothing`() {
             // ----- Arrange -----
-            val state = ShareCaptureState(
-                progress = ShareCaptureProgress.Saving,
-                closeRequested = true,
-            )
+            val state = ShareCaptureState(progress = ShareCaptureProgress.Saving)
 
             // ----- Act -----
             val result = state.reduce(ShareCardSheetEvent.Dismissed)
@@ -91,7 +85,7 @@ class ShareCaptureStateTest {
         }
 
         @Test
-        fun `a full share flow ends idle with close requested`() {
+        fun `a full share flow ends idle`() {
             // ----- Arrange -----
             val events = listOf(
                 ShareCardSheetEvent.ShareStarted,
@@ -103,10 +97,7 @@ class ShareCaptureStateTest {
             val result = events.fold(ShareCaptureState()) { state, event -> state.reduce(event) }
 
             // ----- Assert -----
-            result shouldBe ShareCaptureState(
-                progress = ShareCaptureProgress.Idle,
-                closeRequested = true,
-            )
+            result shouldBe ShareCaptureState(progress = ShareCaptureProgress.Idle)
         }
     }
 
@@ -125,7 +116,6 @@ class ShareCaptureStateTest {
             footer.primary.label shouldBe "Share"
             footer.secondary.label shouldBe "Save to gallery"
             result.busy shouldBe false
-            result.closeRequested shouldBe false
         }
 
         @Test
@@ -158,18 +148,6 @@ class ShareCaptureStateTest {
             footer.secondary.label shouldBe "Save to gallery"
             footer.secondary.running shouldBe true
             result.busy shouldBe true
-        }
-
-        @Test
-        fun `closeRequested is carried onto the scaffold`() {
-            // ----- Arrange -----
-            val capture = ShareCaptureState(closeRequested = true)
-
-            // ----- Act -----
-            val result = scaffold.withShareCapture(capture)
-
-            // ----- Assert -----
-            result.closeRequested shouldBe true
         }
 
         @Test

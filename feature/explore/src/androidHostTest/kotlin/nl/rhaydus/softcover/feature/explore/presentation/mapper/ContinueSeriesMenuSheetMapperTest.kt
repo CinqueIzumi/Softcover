@@ -2,10 +2,12 @@ package nl.rhaydus.softcover.feature.explore.presentation.mapper
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldNotBeBlank
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesDismissalKind
+import nl.rhaydus.softcover.feature.explore.presentation.state.continueSeriesMenuSheetScaffoldFor
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -51,9 +53,21 @@ class ContinueSeriesMenuSheetMapperTest {
 
             // ----- Assert -----
             options shouldHaveSize 2
-            options[0].kind shouldBe ContinueSeriesDismissalKind.THIS_BOOK
-            options[1].kind shouldBe ContinueSeriesDismissalKind.WHOLE_SERIES
+            options[0].key shouldBe ContinueSeriesDismissalKind.THIS_BOOK
+            options[1].key shouldBe ContinueSeriesDismissalKind.WHOLE_SERIES
             options[1].label shouldBe "Hide everything from Earthsea"
+        }
+
+        @Test
+        fun `describes every option it offers`() {
+            // ----- Arrange -----
+            val input = book()
+
+            // ----- Act -----
+            val options = continueSeriesMenuSheetFor(book = input).options
+
+            // ----- Assert -----
+            options.forEach { it.description.shouldNotBeBlank() }
         }
 
         @Test
@@ -66,7 +80,21 @@ class ContinueSeriesMenuSheetMapperTest {
 
             // ----- Assert -----
             options shouldHaveSize 1
-            options.single().kind shouldBe ContinueSeriesDismissalKind.THIS_BOOK
+            options.single().key shouldBe ContinueSeriesDismissalKind.THIS_BOOK
+            options.single().description.shouldNotBeBlank()
+        }
+
+        @Test
+        fun `carries the book id and the scaffold built for the book`() {
+            // ----- Arrange -----
+            val input = book()
+
+            // ----- Act -----
+            val sheet = continueSeriesMenuSheetFor(book = input)
+
+            // ----- Assert -----
+            sheet.bookId shouldBe 3
+            sheet.scaffold shouldBe continueSeriesMenuSheetScaffoldFor(book = input)
         }
     }
 }

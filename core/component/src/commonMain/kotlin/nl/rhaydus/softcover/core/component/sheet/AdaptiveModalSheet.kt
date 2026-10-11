@@ -13,14 +13,21 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalBottomSheetProperties
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,7 +38,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet as FoundationAdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.LocalModalSheetForm
 import nl.rhaydus.designsystem.layout.WindowWidthClass
@@ -44,15 +50,21 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 private const val PANEL_ENTER_SCALE = 0.92f
 
+/** True from the first close path (scrim, back, swipe, a body's dismiss or a host's close) until the sheet is gone. */
+internal val LocalSheetClosing = compositionLocalOf { false }
+
 /**
  * A modal surface that is a bottom sheet below expanded widths and an animated, elevated panel at
- * expanded widths. Below expanded it delegates to the foundation's `AdaptiveModalSheet` unchanged.
+ * expanded widths.
  *
- * Every close path of the panel (outside tap, back, Esc and [LocalModalSheetDismiss]) plays the
- * exit animation first and calls [onDismissRequest] once, after it finishes. The host must remove the
- * sheet in response; the panel does not reset itself, as with the foundation bottom sheet.
+ * Every close path (outside tap, back, swipe on the bottom sheet, Esc on the panel and
+ * [LocalModalSheetDismiss]) plays the exit animation first and calls [onDismissRequest] once, after it
+ * finishes. The host must remove the sheet in response; neither form resets itself. Outside tap and swipe
+ * are refused while [dismissOnTapOutside] is false, and back while [dismissOnBackPress] is false. A
+ * [LocalModalSheetDismiss] hide still plays when both are refused.
  *
- * Each sheet window hosts the app snackbar, so callers never add their own.
+ * Each sheet window hosts the app snackbar, below the content on the bottom sheet, so callers never add
+ * their own and it never covers a footer.
  */
 @Composable
 fun AdaptiveModalSheet(
@@ -76,24 +88,82 @@ fun AdaptiveModalSheet(
             content = content,
         )
     } else {
-        FoundationAdaptiveModalSheet(
+        BottomSheetForm(
             onDismissRequest = onDismissRequest,
-            modifier = modifier,
+            sheetLevel = sheetLevel,
             dismissOnTapOutside = dismissOnTapOutside,
             dismissOnBackPress = dismissOnBackPress,
-        ) {
-            CompositionLocalProvider(LocalSnackbarHostLevel provides sheetLevel) {
-                Box {
-                    Column { content() }
+            modifier = modifier,
+            content = content,
+        )
+    }
+}
 
-                    SoftcoverSnackbarHost(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .navigationBarsPadding()
-                            .padding(Spacing.md),
-                    )
-                }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BottomSheetForm(
+    onDismissRequest: () -> Unit,
+    sheetLevel: Int,
+    dismissOnTapOutside: Boolean,
+    dismissOnBackPress: Boolean,
+    modifier: Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
+    var closing by remember { mutableStateOf(false) }
+    var dismissSent by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { target ->
+            if (target == SheetValue.Hidden) {
+                closing = true
             }
+
+            true
+        },
+    )
+    val notifyDismissed: () -> Unit = remember {
+        {
+            if (dismissSent.not()) {
+                dismissSent = true
+                currentOnDismissRequest()
+            }
+        }
+    }
+    val dismiss: () -> Unit = remember(sheetState, coroutineScope) {
+        {
+            if (closing.not()) {
+                closing = true
+
+                coroutineScope.launch { sheetState.hide() }.invokeOnCompletion { notifyDismissed() }
+            }
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = notifyDismissed,
+        modifier = modifier,
+        sheetState = sheetState,
+        sheetGesturesEnabled = dismissOnTapOutside,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        properties = ModalBottomSheetProperties(
+            shouldDismissOnBackPress = dismissOnBackPress,
+            shouldDismissOnClickOutside = dismissOnTapOutside,
+        ),
+    ) {
+        CompositionLocalProvider(
+            LocalModalSheetForm provides ModalSheetForm.SHEET,
+            LocalSnackbarHostLevel provides sheetLevel,
+            LocalSheetClosing provides closing,
+            LocalModalSheetDismiss provides dismiss,
+        ) {
+            content()
+
+            SheetSnackbar(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                insetNavigationBars = false,
+            )
         }
     }
 }
@@ -174,6 +244,7 @@ private fun AnimatedSheetPanel(
                             CompositionLocalProvider(
                                 LocalModalSheetForm provides ModalSheetForm.PANEL,
                                 LocalModalSheetDismiss provides close,
+                                LocalSheetClosing provides closing,
                             ) {
                                 content()
                             }
@@ -181,14 +252,29 @@ private fun AnimatedSheetPanel(
                     }
                 }
 
-                SoftcoverSnackbarHost(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .navigationBarsPadding()
-                        .padding(Spacing.md)
-                        .widthIn(max = 420.dp),
+                SheetSnackbar(
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    insetNavigationBars = true,
                 )
             }
         }
     }
+}
+
+/** The panel sits under the system bars, so it adds the navigation-bar inset; the bottom sheet already applies it. */
+@Composable
+private fun SheetSnackbar(
+    modifier: Modifier,
+    insetNavigationBars: Boolean,
+) {
+    SoftcoverSnackbarHost(
+        modifier = modifier.widthIn(max = 420.dp),
+        snackbarModifier = if (insetNavigationBars) {
+            Modifier
+                .navigationBarsPadding()
+                .padding(Spacing.md)
+        } else {
+            Modifier.padding(Spacing.md)
+        },
+    )
 }

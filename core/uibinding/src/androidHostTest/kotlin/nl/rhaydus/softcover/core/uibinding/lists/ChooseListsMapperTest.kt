@@ -77,7 +77,7 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            val header = result.scaffold.header
+            val header = result.scaffold.header.shouldNotBeNull()
             header.section.headline shouldBe persistentListOf(
                 HeaderTextSegment.Plain(text = "Shelve "),
                 HeaderTextSegment.Emphasised(text = "Piranesi"),
@@ -413,7 +413,9 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            val trailing = result.scaffold.header.trailing as SheetHeaderTrailing.JacketStack
+            val trailing = result.scaffold.header
+                .shouldNotBeNull()
+                .trailing as SheetHeaderTrailing.JacketStack
             trailing.covers.toList() shouldBe covers.take(3)
         }
 
@@ -439,7 +441,9 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            val trailing = result.scaffold.header.trailing as SheetHeaderTrailing.Jacket
+            val trailing = result.scaffold.header
+                .shouldNotBeNull()
+                .trailing as SheetHeaderTrailing.Jacket
             trailing.cover shouldBe CoverUiModel(
                 source = null,
                 coverlessTitle = "1 book",
@@ -461,7 +465,9 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            val trailing = result.scaffold.header.trailing as SheetHeaderTrailing.JacketStack
+            val trailing = result.scaffold.header
+                .shouldNotBeNull()
+                .trailing as SheetHeaderTrailing.JacketStack
             trailing.covers.toList() shouldBe covers
         }
 
@@ -481,7 +487,9 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            val section = result.scaffold.header.section
+            val section = result.scaffold.header
+                .shouldNotBeNull()
+                .section
             section.headline shouldBe persistentListOf(
                 HeaderTextSegment.Plain(text = "Shelve "),
                 HeaderTextSegment.Emphasised(text = "3 books"),
@@ -499,7 +507,9 @@ class ChooseListsMapperTest {
                 previous = null,
             )
 
-            return result.scaffold.header.section.description
+            return result.scaffold.header
+                .shouldNotBeNull()
+                .section.description
                 .shouldNotBeNull()
                 .joinToString(separator = "") { it.text }
         }
@@ -520,7 +530,7 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.scaffold.header.section.headlineText shouldBe "Shelve 1 book"
+            result.scaffold.header.shouldNotBeNull().section.headlineText shouldBe "Shelve 1 book"
             descriptionOf(count = 1) shouldContain "takes it off"
         }
 

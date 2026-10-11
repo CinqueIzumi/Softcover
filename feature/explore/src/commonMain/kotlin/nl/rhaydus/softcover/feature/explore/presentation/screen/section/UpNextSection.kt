@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -13,12 +12,10 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
-import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesMenuSheetUiModel
 
 @Composable
 internal fun UpNextSection(
     set: BookCardSet<Book>,
-    menuSheets: ImmutableMap<Int, ContinueSeriesMenuSheetUiModel>,
     header: SectionHeaderUiModel,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -28,7 +25,6 @@ internal fun UpNextSection(
 
     UpNextCardsHost(
         set = set,
-        menuSheets = menuSheets,
         onBookClick = onBookClick,
         runAction = runAction,
     ) { onCardEvent ->

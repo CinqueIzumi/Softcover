@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -21,9 +20,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.haptics.Feedback
+import nl.rhaydus.softcover.core.component.haptics.play
+import nl.rhaydus.softcover.core.component.modifier.rememberShakeTrigger
+import nl.rhaydus.softcover.core.component.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -33,7 +35,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
  * [ShareCardSheetUiModel.card] with the platform's save and share actions as its inline footer.
  *
  * The capture runs here because it needs composition, but progress is reported through [onEvent]:
- * the host holds the capture progress and close state and passes it back in [ShareCardSheetUiModel.scaffold].
+ * the host folds it into a [ShareCaptureState], passes it back in [ShareCardSheetUiModel.scaffold], and on
+ * [ShareCardSheetEvent.Shared] closes the sheet through its [nl.rhaydus.softcover.core.component.sheet.SheetSession].
  * A second capture is ignored until the running one ends; the scaffold's busy state only locks the
  * footer. Outcome snackbars, haptics and the preview's settle or shake are handled here.
  * [aboveCard] renders over the preview, in the sheet's centred column.
@@ -50,13 +53,12 @@ fun ShareCardSheetContent(
     val currentOnEvent by rememberUpdatedState(onEvent)
     val haptics = LocalHaptics.current
     val playMotion = playDecorativeMotion()
-    var isCaptureRunning by remember { mutableStateOf(false) }
-    var shaking by remember { mutableStateOf(false) }
+    val shake = rememberShakeTrigger()
     val settleScale = remember { Animatable(initialValue = 1f) }
     val settleSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
 
     fun succeed() {
-        haptics.commit()
+        haptics.play(Feedback.Routine)
 
         if (playMotion.not()) return
 
@@ -73,23 +75,11 @@ fun ShareCardSheetContent(
         }
     }
 
-    fun fail() {
-        if (playMotion) {
-            shaking = true
-        } else {
-            haptics.reject()
-        }
-    }
-
     fun runCapture(
         started: ShareCardSheetEvent,
         failureMessage: String,
         block: suspend () -> Unit,
     ) {
-        if (isCaptureRunning) return
-
-        isCaptureRunning = true
-
         currentOnEvent(started)
 
         coroutineScope.launch {
@@ -101,11 +91,9 @@ fun ShareCardSheetContent(
 
                     SnackBarManager.showSnackbar(title = failureMessage)
 
-                    fail()
+                    shake.shake()
                 }
             } finally {
-                isCaptureRunning = false
-
                 currentOnEvent(ShareCardSheetEvent.CaptureFinished)
             }
         }
@@ -143,7 +131,7 @@ fun ShareCardSheetContent(
 
                             SnackBarManager.showSnackbar(title = "Couldn't share — try again")
 
-                            fail()
+                            shake.shake()
                         }
                     }
                 }
@@ -164,7 +152,7 @@ fun ShareCardSheetContent(
                         is SaveOutcome.Cached -> {
                             SnackBarManager.showSnackbar(title = shareCaptureCopy.saveFailedMessage)
 
-                            fail()
+                            shake.shake()
                         }
 
                         is SaveOutcome.Failure -> {
@@ -172,7 +160,7 @@ fun ShareCardSheetContent(
 
                             SnackBarManager.showSnackbar(title = shareCaptureCopy.saveFailedMessage)
 
-                            fail()
+                            shake.shake()
                         }
                     }
                 }
@@ -195,10 +183,7 @@ fun ShareCardSheetContent(
                 maxWidth = model.previewMaxWidth,
                 maxHeight = model.previewMaxHeight,
                 modifier = Modifier
-                    .shakeOnError(
-                        trigger = shaking,
-                        onShakeEnd = { shaking = false },
-                    )
+                    .shakeOnError(trigger = shake)
                     .graphicsLayer {
                         scaleX = settleScale.value
                         scaleY = settleScale.value

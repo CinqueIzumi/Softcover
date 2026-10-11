@@ -3,10 +3,13 @@ package nl.rhaydus.softcover.feature.scan.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.sheet.openOrUpdate
+import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
+import nl.rhaydus.softcover.feature.scan.presentation.state.UnknownIsbnSheetUiModel
 import nl.rhaydus.softcover.feature.scan.presentation.state.unknownIsbnSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
 
@@ -16,24 +19,22 @@ internal class UnknownIsbnSheetCollector : ScanCollector {
         dependencies: ScanDependencies,
     ) {
         scope.state
-            .map { state -> state.isAddingBook to state.isUnknownIsbnCloseRequested }
+            .map { state -> state.unknownIsbn to state.isAddingBook }
             .distinctUntilChanged()
-            .collectLatest { (isAdding, closeRequested) ->
+            .collectLatest { (isbn, isAdding) ->
                 scope.setState {
-                    val current = it.unknownIsbnSheet
-
-                    if (current == null) {
-                        it
-                    } else {
-                        // Keep the footer as it was while the sheet hides, instead of flashing back to idle.
-                        val scaffold = if (closeRequested) {
-                            current.scaffold.copy(closeRequested = true)
+                    it.copy(
+                        unknownIsbnSheet = if (isbn == null || it.unknownIsbn == null) {
+                            it.unknownIsbnSheet.requestClose()
                         } else {
-                            unknownIsbnSheetScaffoldFor(isAdding = isAdding)
-                        }
-
-                        it.copy(unknownIsbnSheet = current.copy(scaffold = scaffold))
-                    }
+                            it.unknownIsbnSheet.openOrUpdate(
+                                model = UnknownIsbnSheetUiModel(
+                                    isbn = isbn,
+                                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = isAdding),
+                                ),
+                            )
+                        },
+                    )
                 }
             }
     }

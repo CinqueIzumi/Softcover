@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.setMain
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -37,7 +38,7 @@ class OnUpdateToScannedEditionClickActionTest {
     @BeforeEach
     fun setUp() {
         updateBookEditionUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -88,7 +89,7 @@ class OnUpdateToScannedEditionClickActionTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = 42,
             )
@@ -118,7 +119,8 @@ class OnUpdateToScannedEditionClickActionTest {
             }
 
             scope.currentState.isUpdatingScannedEdition shouldBe false
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
         }
 
         @Test
@@ -126,7 +128,7 @@ class OnUpdateToScannedEditionClickActionTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = 42,
             )
@@ -149,7 +151,8 @@ class OnUpdateToScannedEditionClickActionTest {
             )
 
             // ----- Assert -----
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
             scope.currentState.isUpdatingScannedEdition shouldBe false
         }
 
@@ -158,7 +161,7 @@ class OnUpdateToScannedEditionClickActionTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = 42,
                 isUpdatingScannedEdition = true,
@@ -186,7 +189,7 @@ class OnUpdateToScannedEditionClickActionTest {
         fun `does not invoke use case when userBook is null`() = runTest {
             // ----- Arrange -----
             val book = stubBook(userBook = null)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = 42,
             )
@@ -214,7 +217,7 @@ class OnUpdateToScannedEditionClickActionTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = null,
             )

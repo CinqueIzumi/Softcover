@@ -13,6 +13,9 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.field.TextFieldError
+import nl.rhaydus.softcover.core.component.sheet.isClosing
+import nl.rhaydus.softcover.core.component.sheet.isOpen
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
@@ -160,7 +163,8 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateAtReset.shouldNotBeNull().saveApiKeyButtonEnabled shouldBe false
-            stateAtReset.shouldNotBeNull().loadingSheet.isLoading shouldBe true
+            stateAtReset.shouldNotBeNull().loadingSheet.isOpen shouldBe true
+            stateAtReset.shouldNotBeNull().loadingSheet.isClosing shouldBe false
             stateAtReset.shouldNotBeNull().submissionError shouldBe null
         }
 
@@ -222,11 +226,94 @@ class OnApiKeySaveClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.loadingSheet.progress shouldBe 1f
-            stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe false
+            stateFlow.value.loadingSheet.modelOrNull.shouldNotBeNull().progress shouldBe 1f
+            stateFlow.value.loadingSheet.isOpen shouldBe true
+            stateFlow.value.loadingSheet.isClosing shouldBe false
+            stateFlow.value.signInFailedBefore shouldBe false
             stateFlow.value.submissionError shouldBe null
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.SignedInEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `opens the loading sheet indeterminate on the first attempt`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWithApiKey(text = "my-key")
+            dependencies = stubDependencies(this)
+            stubUseCases()
+
+            var progressAtReset: Float? = 1f
+            coEvery {
+                resetUserDataUseCase()
+            } coAnswers {
+                progressAtReset = stateFlow.value.loadingSheet.modelOrNull.shouldNotBeNull().progress
+                Result.success(Unit)
+            }
+
+            // ----- Act -----
+            OnApiKeySaveClickAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            progressAtReset shouldBe null
+        }
+
+        @Test
+        fun `opens the loading sheet at zero percent on a retry after a failure`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWithApiKey(text = "my-key").copy(signInFailedBefore = true)
+            dependencies = stubDependencies(this)
+            stubUseCases()
+
+            var progressAtReset: Float? = null
+            coEvery {
+                resetUserDataUseCase()
+            } coAnswers {
+                progressAtReset = stateFlow.value.loadingSheet.modelOrNull.shouldNotBeNull().progress
+                Result.success(Unit)
+            }
+
+            // ----- Act -----
+            OnApiKeySaveClickAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            progressAtReset shouldBe 0f
+        }
+
+        @Test
+        fun `advances the progress through each completed step`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWithApiKey(text = "my-key")
+            dependencies = stubDependencies(this)
+            stubUseCases()
+
+            val progressAtStep = mutableListOf<Float?>()
+            coEvery {
+                updateApiKeyUseCase(key = any())
+            } coAnswers {
+                progressAtStep += stateFlow.value.loadingSheet.modelOrNull.shouldNotBeNull().progress
+                Result.success(Unit)
+            }
+            coEvery {
+                initializeUserIdAndBooksUseCase()
+            } coAnswers {
+                progressAtStep += stateFlow.value.loadingSheet.modelOrNull.shouldNotBeNull().progress
+                Result.success(Unit)
+            }
+
+            // ----- Act -----
+            OnApiKeySaveClickAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            progressAtStep shouldBe listOf(0.1f, 0.2f)
         }
 
         @Test
@@ -246,13 +333,14 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-            stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe true
-            stateFlow.value.loadingSheet.progress shouldBe 0f
+            stateFlow.value.loadingSheet.isClosing shouldBe true
+            stateFlow.value.loadingSheet.modelOrNull.shouldNotBeNull().progress shouldBe 0f
+            stateFlow.value.signInFailedBefore shouldBe true
             stateFlow.value.submissionError.shouldNotBeNull()
             coVerify(exactly = 0) {
                 updateApiKeyUseCase(key = any())
             }
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.ApiKeyRejectedEvent>()
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.SignInFailedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
@@ -273,8 +361,9 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-            stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe true
-            stateFlow.value.loadingSheet.progress shouldBe 0f
+            stateFlow.value.loadingSheet.isClosing shouldBe true
+            stateFlow.value.loadingSheet.modelOrNull.shouldNotBeNull().progress shouldBe 0f
+            stateFlow.value.signInFailedBefore shouldBe true
             stateFlow.value.apiKeyField.error shouldBe TextFieldError(message = REJECTED_KEY_MESSAGE)
             stateFlow.value.submissionError shouldBe null
             coVerify(exactly = 0) {
@@ -321,10 +410,11 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-            stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe true
-            stateFlow.value.loadingSheet.progress shouldBe 0f
+            stateFlow.value.loadingSheet.isClosing shouldBe true
+            stateFlow.value.loadingSheet.modelOrNull.shouldNotBeNull().progress shouldBe 0f
+            stateFlow.value.signInFailedBefore shouldBe true
             stateFlow.value.submissionError shouldBe "Something went wrong setting up your account. Please try again."
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.ApiKeyRejectedEvent>()
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.SignInFailedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
@@ -367,7 +457,7 @@ class OnApiKeySaveClickActionTest {
             // ----- Assert -----
             stateFlow.value.apiKeyField.error shouldBe null
             stateFlow.value.submissionError.shouldNotBeNull()
-            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.ApiKeyRejectedEvent>()
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.SignInFailedEvent>()
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }

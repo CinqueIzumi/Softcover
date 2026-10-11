@@ -1,7 +1,7 @@
 # Copy audit
 
 PF-5 output (see `steps/pf-premium-feel.md`). Every user-facing string that reads as AI-generated, with
-one replacement each: 140 rows. Replacements keep the app's editorial voice and drop the AI tells
+one replacement each: 142 rows. Replacements keep the app's editorial voice and drop the AI tells
 (em-dash asides, personification, purple metaphors, tidy triplets, cheerleading); errors and status lines
 stay plain. "Keep as is" means the line reads naturally on a second look. Text that already reads
 naturally is left out. PF-6 walks this screen by screen and records a verdict per row (**approve**,
@@ -239,6 +239,12 @@ Paths are relative to `feature/book_detail/src/commonMain/kotlin/nl/rhaydus/soft
 |---|---|---|---|---|
 | Shelve card header after a failed write: `BD/presentation/collector/ShelveControlHeaderCollector.kt:27` | "Couldn't save — tap to retry" | em-dash "X — Y" construction | "Couldn't save. Tap to retry" | approve |
 
+### Book detail: rating badge (accessibility)
+
+| Where | Current | Why | Replacement | Verdict |
+|---|---|---|---|---|
+| Rating badge content description: `BD/presentation/mapper/RatingBadge.kt` `ratingBadge` | "Rated {label}" | no scale; book cards say "out of 5" | "Rated {label} out of 5" | approve |
+
 ### Book detail: reviews section (The Book lens)
 
 | Where | Current | Why | Replacement | Verdict |
@@ -383,6 +389,7 @@ Paths are abbreviated. `S/` = `feature/settings/src/commonMain/kotlin/nl/rhaydus
 | Where | Current | Why | Replacement | Verdict |
 |---|---|---|---|---|
 | Share failure snackbar (Book detail share, Profile share) — `core/component/src/commonMain/kotlin/nl/rhaydus/softcover/core/component/share/ShareCardSheetContent.kt:97` and `:108` | "Couldn't share — try again" | em-dash construction | "Couldn't share. Try again." | approve |
+| Save success snackbar, desktop — `core/component/src/jvmMain/kotlin/nl/rhaydus/softcover/core/component/share/ShareCaptureCopy.jvm.kt` `savedMessage` | "Saved image" | reads as a heading, not a confirmation | "Image saved" | approve |
 
 ### Reading life share card
 

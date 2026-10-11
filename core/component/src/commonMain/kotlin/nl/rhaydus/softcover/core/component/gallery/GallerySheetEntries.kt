@@ -6,6 +6,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.sheet.SheetActionRow
+import nl.rhaydus.softcover.core.component.sheet.SheetActionRowUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetRow
 import nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel
@@ -48,6 +50,20 @@ internal val sheetEntries: ImmutableList<GalleryEntry> = persistentListOf(
         previews = SheetRowUiModel,
         content = { model, modifier ->
             SheetRow(
+                model = model,
+                onEvent = {},
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
+        name = "SheetActionRow",
+        family = GalleryFamily.SHEET,
+        blurb = "One plain action row of a sheet menu: primary-tinted icon, sans label and a " +
+            "muted description. It runs an action and holds no selection.",
+        previews = SheetActionRowUiModel,
+        content = { model, modifier ->
+            SheetActionRow(
                 model = model,
                 onEvent = {},
                 modifier = modifier,

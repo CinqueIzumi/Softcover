@@ -13,6 +13,10 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.isClosing
+import nl.rhaydus.softcover.core.component.sheet.isOpen
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
@@ -20,8 +24,10 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCode
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
+import nl.rhaydus.softcover.feature.settings.presentation.state.LeaveScreen
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.discardSheetScaffold
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -424,7 +430,7 @@ class OnSaveLibraryVisibilityActionTest {
                 persistedEnabledStatusCodes = emptySet(),
                 draftEnabledStatusCodes = setOf(1),
                 initialized = true,
-                showDiscardSheet = true,
+                discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
             val dependencies = stubDependencies(this)
 
@@ -454,25 +460,71 @@ class OnSaveLibraryVisibilityActionTest {
 
             // ----- Assert -----
             eventChannel.tryReceive().getOrNull() shouldBe null
-            stateFlow.value.discardSheetScaffold.closeRequested shouldBe true
-            stateFlow.value.leaveOnSheetDismissed shouldBe true
+            stateFlow.value.discardSheet shouldBe SheetSession.Open(
+                model = discardSheetScaffold(saving = false).requestingClose(),
+                pending = LeaveScreen,
+            )
             coVerify(exactly = 1) { setEnabledStatusCodesUseCase(codes = setOf(1)) }
         }
 
         @Test
-        fun `does not touch the discard sheet flag when leaveAfterSave is true`() = runTest {
+        fun `leaves the sheet open and not closing after a save without leaveAfterSave`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
                 persistedEnabledStatusCodes = emptySet(),
                 draftEnabledStatusCodes = setOf(1),
                 initialized = true,
-                showDiscardSheet = true,
+                discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
             val dependencies = stubDependencies(this)
 
             coEvery {
                 setEnabledStatusCodesUseCase(codes = any())
             } returns Result.success(Unit)
+
+            coEvery {
+                setEnabledListIdsUseCase(ids = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setLibraryTabOrderUseCase(order = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
+            val action = OnSaveLibraryVisibilityAction(leaveAfterSave = false)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.discardSheet.isOpen shouldBe true
+            stateFlow.value.discardSheet.isClosing shouldBe false
+        }
+
+        @Test
+        fun `shows the open sheet as busy while the save runs under leaveAfterSave`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                persistedEnabledStatusCodes = emptySet(),
+                draftEnabledStatusCodes = setOf(1),
+                initialized = true,
+                discardSheet = SheetSession.Open(model = discardSheetScaffold()),
+            )
+            val dependencies = stubDependencies(this)
+            var sheetDuringSave: SheetSession<*, *>? = null
+
+            coEvery {
+                setEnabledStatusCodesUseCase(codes = any())
+            } coAnswers {
+                sheetDuringSave = stateFlow.value.discardSheet
+                Result.success(Unit)
+            }
 
             coEvery {
                 setEnabledListIdsUseCase(ids = any())
@@ -495,7 +547,7 @@ class OnSaveLibraryVisibilityActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showDiscardSheet shouldBe true
+            sheetDuringSave shouldBe SheetSession.Open<SheetScaffoldUiModel, LeaveScreen>(model = discardSheetScaffold(saving = true))
         }
 
         @Test
@@ -505,7 +557,7 @@ class OnSaveLibraryVisibilityActionTest {
                 persistedEnabledStatusCodes = emptySet(),
                 draftEnabledStatusCodes = setOf(1),
                 initialized = true,
-                showDiscardSheet = true,
+                discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
             val dependencies = stubDependencies(this)
 
@@ -537,9 +589,9 @@ class OnSaveLibraryVisibilityActionTest {
             eventChannel.tryReceive().getOrNull() shouldBe LibraryVisibilitySettingsEvent.SaveFailed
             eventChannel.tryReceive().getOrNull() shouldBe null
             stateFlow.value.isSaving shouldBe false
-            stateFlow.value.discardSheetScaffold.busy shouldBe false
-            stateFlow.value.discardSheetScaffold.closeRequested shouldBe true
-            stateFlow.value.leaveOnSheetDismissed shouldBe false
+            stateFlow.value.discardSheet shouldBe SheetSession.Open(
+                model = discardSheetScaffold(saving = false).requestingClose(),
+            )
         }
 
         @Test
@@ -549,14 +601,14 @@ class OnSaveLibraryVisibilityActionTest {
                 persistedEnabledStatusCodes = emptySet(),
                 draftEnabledStatusCodes = setOf(1),
                 initialized = true,
-                showDiscardSheet = true,
+                discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
             val dependencies = stubDependencies(this)
 
             coEvery {
                 setEnabledStatusCodesUseCase(codes = any())
             } coAnswers {
-                stateFlow.value = stateFlow.value.copy(showDiscardSheet = false)
+                stateFlow.value = stateFlow.value.copy(discardSheet = SheetSession.Closed)
                 Result.success(Unit)
             }
 
@@ -582,8 +634,7 @@ class OnSaveLibraryVisibilityActionTest {
 
             // ----- Assert -----
             stateFlow.value.isSaving shouldBe false
-            stateFlow.value.discardSheetScaffold.closeRequested shouldBe false
-            stateFlow.value.leaveOnSheetDismissed shouldBe false
+            stateFlow.value.discardSheet shouldBe SheetSession.Closed
         }
 
         @Test
@@ -591,6 +642,7 @@ class OnSaveLibraryVisibilityActionTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
                 initialized = true,
+                discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
             val dependencies = stubDependencies(this)
             val action = OnSaveLibraryVisibilityAction(leaveAfterSave = true)
@@ -603,8 +655,10 @@ class OnSaveLibraryVisibilityActionTest {
 
             // ----- Assert -----
             eventChannel.tryReceive().getOrNull() shouldBe null
-            stateFlow.value.discardSheetScaffold.closeRequested shouldBe true
-            stateFlow.value.leaveOnSheetDismissed shouldBe true
+            stateFlow.value.discardSheet shouldBe SheetSession.Open(
+                model = discardSheetScaffold().requestingClose(),
+                pending = LeaveScreen,
+            )
             coVerify(exactly = 0) { setEnabledStatusCodesUseCase(codes = any()) }
             coVerify(exactly = 0) { setEnabledListIdsUseCase(ids = any()) }
             coVerify(exactly = 0) { setLibraryTabOrderUseCase(order = any()) }
@@ -618,6 +672,7 @@ class OnSaveLibraryVisibilityActionTest {
                 draftEnabledStatusCodes = setOf(1),
                 initialized = true,
                 isSaving = true,
+                discardSheet = SheetSession.Open(model = discardSheetScaffold()),
             )
             val dependencies = stubDependencies(this)
             val action = OnSaveLibraryVisibilityAction(leaveAfterSave = true)
@@ -630,8 +685,10 @@ class OnSaveLibraryVisibilityActionTest {
 
             // ----- Assert -----
             eventChannel.tryReceive().getOrNull() shouldBe null
-            stateFlow.value.discardSheetScaffold.closeRequested shouldBe true
-            stateFlow.value.leaveOnSheetDismissed shouldBe true
+            stateFlow.value.discardSheet shouldBe SheetSession.Open(
+                model = discardSheetScaffold().requestingClose(),
+                pending = LeaveScreen,
+            )
             coVerify(exactly = 0) { setEnabledStatusCodesUseCase(codes = any()) }
             coVerify(exactly = 0) { setEnabledListIdsUseCase(ids = any()) }
             coVerify(exactly = 0) { setLibraryTabOrderUseCase(order = any()) }

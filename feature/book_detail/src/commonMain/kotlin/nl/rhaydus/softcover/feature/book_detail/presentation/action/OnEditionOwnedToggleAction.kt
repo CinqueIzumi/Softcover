@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -29,7 +30,9 @@ internal class OnEditionOwnedToggleAction(
                 owned = owned,
             )
                 .onSuccess {
-                    scope.sendEvent(BookDetailEvent.MutationSucceededEvent())
+                    val feedback = if (owned) Feedback.Routine else null
+
+                    scope.sendEvent(BookDetailEvent.MutationSucceededEvent(feedback = feedback))
                 }
                 .onFailure { error ->
                     AppLog.e("$error")
@@ -37,8 +40,6 @@ internal class OnEditionOwnedToggleAction(
                     scope.setState {
                         it.copy(failedMutationEditionIds = it.failedMutationEditionIds + edition.id)
                     }
-
-                    scope.sendEvent(BookDetailEvent.MutationFailedEvent())
                 }
         }
 

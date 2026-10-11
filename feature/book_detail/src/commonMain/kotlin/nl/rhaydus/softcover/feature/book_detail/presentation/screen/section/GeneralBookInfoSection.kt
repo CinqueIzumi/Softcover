@@ -20,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -29,6 +28,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -47,9 +47,10 @@ import nl.rhaydus.softcover.core.component.cover.shape
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.modifier.navSharedBounds
-import nl.rhaydus.softcover.core.component.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
@@ -65,8 +66,8 @@ internal fun GeneralBookInfoSection(
     heroCover: CoverUiModel?,
     backdropCover: CoverUiModel?,
     title: String?,
-    titleTransitionKey: String?,
-    ratingTransitionKey: String?,
+    titleTransitionKey: BookTransitionKey?,
+    ratingTransitionKey: BookTransitionKey?,
     seriesText: String?,
     rating: Double?,
     releaseYear: Int?,
@@ -124,7 +125,7 @@ internal fun GeneralBookInfoSection(
         ) {
             Box(
                 modifier = if (isLoading.not()) {
-                    Modifier.pressScaleClickable(
+                    Modifier.tactileClickable(
                         onClick = onCoverClick,
                         hoverShape = heroCover?.variant?.shape() ?: RectangleShape,
                     )
@@ -145,6 +146,7 @@ internal fun GeneralBookInfoSection(
                 if (ownedCoverBadge != null) {
                     val badgeAlpha by animateFloatAsState(
                         targetValue = if (enterSettled) 1f else 0f,
+                        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
                         label = "OwnedCoverBadgeAlpha",
                     )
 

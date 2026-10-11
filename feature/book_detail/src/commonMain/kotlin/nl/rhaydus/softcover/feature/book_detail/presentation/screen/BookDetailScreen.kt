@@ -11,6 +11,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailOverlayNavigator
@@ -72,6 +74,8 @@ class BookDetailScreen(
         val uriHandler = LocalUriHandler.current
 
         ObserveAsEvents(flow = screenModel.events) {
+            if (it is FeedbackEvent) haptics.play(it.feedback)
+
             when (it) {
                 is BookDetailEvent.RefreshDetailBookEvent -> {
                     screenModel.runAction(
@@ -84,19 +88,12 @@ class BookDetailScreen(
                 }
 
                 is BookDetailEvent.BookMarkedAsReadEvent -> {
-                    haptics.commit()
                     screenModel.runAction(action = OnCelebrateMarkedAsReadAction())
 
                     screenModel.runAction(
                         action = OnOpenVerdictSheetAction(context = VerdictSheetContext.FINISHED),
                     )
                 }
-
-                is BookDetailEvent.ShelfChangedEvent,
-                is BookDetailEvent.ProgressUpdatedEvent,
-                is BookDetailEvent.MutationSucceededEvent -> haptics.select()
-
-                is BookDetailEvent.MutationFailedEvent -> haptics.reject()
 
                 is BookDetailEvent.OpenExternalLinkEvent -> {
                     uriHandler.openUri(uri = it.url)
@@ -121,6 +118,11 @@ class BookDetailScreen(
                         },
                     )
                 }
+
+                is BookDetailEvent.ShelfChangedEvent,
+                is BookDetailEvent.ProgressUpdatedEvent,
+                is BookDetailEvent.MutationSucceededEvent,
+                is BookDetailEvent.MutationFailedEvent -> Unit
             }
         }
 

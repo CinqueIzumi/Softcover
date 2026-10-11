@@ -12,6 +12,8 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -23,6 +25,10 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class CurrentlyReadingBooksCollectorTest {
+    private val openProgressSheet: SheetSession<ProgressSheetUiModel, Nothing> = SheetSession.Open(
+        model = ProgressSheetUiModel.previews.values.first(),
+    )
+
     private lateinit var getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase
     private lateinit var dependencies: ReadingScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
@@ -60,7 +66,7 @@ class CurrentlyReadingBooksCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
                 isLoading = true,
-                showProgressSheet = true,
+                progressSheet = openProgressSheet,
             )
             val books = listOf(stubBook(), stubBook())
             val collector = CurrentlyReadingBooksCollector()
@@ -77,7 +83,7 @@ class CurrentlyReadingBooksCollectorTest {
             // ----- Assert -----
             stateFlow.value.books shouldBe books
             stateFlow.value.hasLoadedBooks shouldBe true
-            stateFlow.value.showProgressSheet shouldBe true
+            stateFlow.value.progressSheet shouldBe openProgressSheet
             job.cancel()
         }
 

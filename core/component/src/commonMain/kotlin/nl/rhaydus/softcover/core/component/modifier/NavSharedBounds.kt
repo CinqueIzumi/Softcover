@@ -8,13 +8,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
 
 /**
- * Registers this node as a shared element under [key] across a navigation transition. A `null` [key],
- * decorative motion turned off, or a missing transition scope leaves the modifier untouched.
+ * Registers this node as a shared element under [key] across a navigation transition. A `null` [key]
+ * or a missing transition scope leaves the modifier untouched.
  *
  * Text passes `ResizeMode.scaleToBounds()` so a smaller style scales into a larger one without
  * reflowing mid-flight.
@@ -22,26 +22,18 @@ import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalShare
 @OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun Modifier.navSharedBounds(
-    key: String?,
+    key: BookTransitionKey?,
     resizeMode: ResizeMode = ResizeMode.scaleToBounds(),
 ): Modifier {
-    val playMotion = playDecorativeMotion()
     val sharedScope = LocalSharedTransitionScope.current
     val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
     val boundsSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Rect>()
 
-    if (
-        playMotion.not() ||
-        key == null ||
-        sharedScope == null ||
-        animatedVisibilityScope == null
-    ) {
-        return this
-    }
+    if (key == null || sharedScope == null || animatedVisibilityScope == null) return this
 
     return with(sharedScope) {
         sharedBounds(
-            sharedContentState = rememberSharedContentState(key = key),
+            sharedContentState = rememberSharedContentState(key = key.value),
             animatedVisibilityScope = animatedVisibilityScope,
             boundsTransform = BoundsTransform { _, _ -> boundsSpec },
             resizeMode = resizeMode,

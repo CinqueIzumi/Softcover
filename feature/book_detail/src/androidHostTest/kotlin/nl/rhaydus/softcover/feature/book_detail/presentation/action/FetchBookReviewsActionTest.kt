@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import io.kotest.matchers.collections.shouldNotBeEmpty
-import io.kotest.matchers.nulls.shouldNotBeNull
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReviewer
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toBookReviewUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
@@ -39,7 +40,7 @@ class FetchBookReviewsActionTest {
     @BeforeEach
     fun setUp() {
         getTopBookReviewsUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -95,7 +96,7 @@ class FetchBookReviewsActionTest {
         @Test
         fun `shows the stand-ins while the use case is still running`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(reviews = persistentListOf())
+            stateFlow.value = buildBookDetailUiState().copy(reviews = persistentListOf())
             dependencies = stubDependencies(this)
 
             var reviewsAtInvocation: List<BookReviewUiModel>? = null

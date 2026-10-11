@@ -1,8 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -87,16 +86,16 @@ internal class MarkAsReadController(
         }
     }
 
-    suspend fun runSlide(books: List<Book>) {
+    suspend fun runSlide(
+        books: List<Book>,
+        slideSpec: FiniteAnimationSpec<Float>,
+    ) {
         val targetId = slidingBookId ?: return
 
         slideProgress.snapTo(targetValue = 0f)
         slideProgress.animateTo(
             targetValue = 1f,
-            animationSpec = tween(
-                durationMillis = 320,
-                easing = FastOutLinearInEasing,
-            ),
+            animationSpec = slideSpec,
         )
 
         books.firstOrNull { it.id == targetId }?.let { book ->

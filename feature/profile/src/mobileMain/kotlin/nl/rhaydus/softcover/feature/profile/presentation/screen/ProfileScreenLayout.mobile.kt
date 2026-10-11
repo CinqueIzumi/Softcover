@@ -10,10 +10,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -42,8 +38,6 @@ internal actual fun ProfileScreenLayout(
     onNavigateUp: () -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
 ) {
-    var showLogOutConfirm by remember { mutableStateOf(false) }
-
     Scaffold(
         topBar = {
             TopBar(
@@ -56,7 +50,7 @@ internal actual fun ProfileScreenLayout(
                 actions = {
                     ProfileShareButton(
                         onClick = { runAction(OnShareSheetOpenAction()) },
-                        enabled = state.shareSheet != null,
+                        enabled = state.canShare,
                     )
                 },
             )
@@ -88,10 +82,7 @@ internal actual fun ProfileScreenLayout(
             Spacer(modifier = Modifier.height(Spacing.section))
 
             AccountFootSection(
-                onLogOutClick = {
-                    runAction(OnLogOutSheetOpenAction())
-                    showLogOutConfirm = true
-                },
+                onLogOutClick = { runAction(OnLogOutSheetOpenAction()) },
                 enabled = state.isLoading.not(),
                 modifier = Modifier.padding(bottom = Spacing.xl),
             )
@@ -100,8 +91,6 @@ internal actual fun ProfileScreenLayout(
 
     ProfileSheets(
         state = state,
-        showLogOutConfirm = showLogOutConfirm,
-        onLogOutDismiss = { showLogOutConfirm = false },
         runAction = runAction,
     )
 }

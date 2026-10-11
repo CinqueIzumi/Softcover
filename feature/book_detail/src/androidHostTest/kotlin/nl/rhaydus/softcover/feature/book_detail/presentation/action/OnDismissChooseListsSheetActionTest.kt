@@ -6,6 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -24,7 +25,7 @@ class OnDismissChooseListsSheetActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk<BookDetailDependencies>(relaxed = true)
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -36,9 +37,9 @@ class OnDismissChooseListsSheetActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `hides the sheet, clears the flag and sends CreateListRequestedEvent when a create-list was recorded`() = runTest {
+        fun `hides the sheet, clears the flag and sends CreateListRequestedEvent on create-list`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 showChooseListsSheet = true,
                 createListPending = true,
             )
@@ -59,7 +60,7 @@ class OnDismissChooseListsSheetActionTest {
         @Test
         fun `hides the sheet and sends no event when no create-list was recorded`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 showChooseListsSheet = true,
                 createListPending = false,
             )

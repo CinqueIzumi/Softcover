@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.mapper
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -41,7 +42,7 @@ class ShelfCoverMapperTest {
             val cover = edition.toShelfEditionCover()
 
             // ----- Assert -----
-            cover.sharedTransitionKey shouldBe "book-cover-book-12-edition-7"
+            cover.sharedTransitionKey.shouldNotBeNull().value shouldBe "book-cover-book-12-edition-7"
         }
 
         @Test

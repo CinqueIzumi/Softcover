@@ -9,6 +9,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
@@ -30,10 +32,12 @@ class LibraryVisibilitySettingsScreen : Screen {
         val haptics = LocalHaptics.current
 
         ObserveAsEvents(flow = screenModel.events) {
-            when (it) {
-                LibraryVisibilitySettingsEvent.NavigateBack -> navigator.pop()
+            if (it is FeedbackEvent) haptics.play(it.feedback)
 
-                LibraryVisibilitySettingsEvent.SaveFailed -> haptics.reject()
+            when (it) {
+                is LibraryVisibilitySettingsEvent.NavigateBack -> navigator.pop()
+
+                is LibraryVisibilitySettingsEvent.SaveFailed -> Unit
             }
         }
 

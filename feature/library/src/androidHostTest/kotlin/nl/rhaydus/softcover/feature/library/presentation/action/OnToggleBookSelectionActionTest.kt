@@ -71,14 +71,12 @@ class OnToggleBookSelectionActionTest {
         }
 
         @Test
-        fun `deselecting the last book leaves selection mode and closes the bulk surfaces`() = runTest {
+        fun `deselecting the last book leaves selection mode and clears the in-flight lists`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
                 selectedBookIds = setOf(1),
                 isBulkMoveMenuExpanded = true,
-                isBulkRemoveSheetShown = true,
-                isBulkAddToListSheetShown = true,
                 listsBeingMutated = setOf(5),
             )
 
@@ -92,9 +90,49 @@ class OnToggleBookSelectionActionTest {
             stateFlow.value.selectionMode shouldBe false
             stateFlow.value.selectedBookIds shouldBe emptySet()
             stateFlow.value.isBulkMoveMenuExpanded shouldBe false
-            stateFlow.value.isBulkRemoveSheetShown shouldBe false
-            stateFlow.value.isBulkAddToListSheetShown shouldBe false
             stateFlow.value.listsBeingMutated shouldBe emptySet()
+        }
+
+        @Test
+        fun `deselecting the last book withdraws the bulk sheet requests`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = setOf(1),
+                isBulkRemoveSheetRequested = true,
+                isChooseListsSheetRequested = true,
+            )
+
+            // ----- Act -----
+            OnToggleBookSelectionAction(bookId = 1).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isBulkRemoveSheetRequested shouldBe false
+            stateFlow.value.isChooseListsSheetRequested shouldBe false
+        }
+
+        @Test
+        fun `deselecting one of several books keeps the bulk sheet requests`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = setOf(1, 2),
+                isBulkRemoveSheetRequested = true,
+                isChooseListsSheetRequested = true,
+            )
+
+            // ----- Act -----
+            OnToggleBookSelectionAction(bookId = 1).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isBulkRemoveSheetRequested shouldBe true
+            stateFlow.value.isChooseListsSheetRequested shouldBe true
         }
     }
 }

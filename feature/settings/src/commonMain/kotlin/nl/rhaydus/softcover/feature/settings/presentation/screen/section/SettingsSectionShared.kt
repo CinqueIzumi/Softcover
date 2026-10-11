@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.settings.presentation.screen.section
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -12,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.softcover.core.component.modifier.tactileSelectable
 import nl.rhaydus.softcover.core.component.selection.SelectionCheck
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsChoiceRowUiModel
@@ -26,7 +25,6 @@ internal fun SettingsSelectableRow(
     model: SettingsChoiceRowUiModel<*>,
     onClick: () -> Unit,
 ) {
-    val haptics = LocalHaptics.current
     val interactionSource = remember { MutableInteractionSource() }
     val titleColor by animateColorAsState(
         targetValue = if (model.selected) {
@@ -52,18 +50,11 @@ internal fun SettingsSelectableRow(
             )
         },
         interactionSource = interactionSource,
-        semantics = Modifier.selectable(
+        semantics = Modifier.tactileSelectable(
             selected = model.selected,
-            interactionSource = interactionSource,
-            indication = null,
+            onClick = onClick,
             role = Role.RadioButton,
-            onClick = {
-                if (model.selected.not()) {
-                    haptics.select()
-                }
-
-                onClick()
-            },
+            interactionSource = interactionSource,
         ),
     )
 }

@@ -21,5 +21,6 @@ fun CreateListSheet(
             onDismissRequest = onDismissRequest,
             onListCreated = onListCreated,
         ),
+        onBackPressed = null,
     )
 }

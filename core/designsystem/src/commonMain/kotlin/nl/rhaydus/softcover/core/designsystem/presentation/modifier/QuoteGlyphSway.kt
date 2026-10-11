@@ -1,16 +1,16 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.modifier
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
 
 private const val SWAY_DEGREES = 2f
 private const val SWAY_HALF_PERIOD_MS = 6_800
@@ -36,10 +36,7 @@ fun Modifier.quoteGlyphSway(): Modifier {
         initialValue = -SWAY_DEGREES,
         targetValue = SWAY_DEGREES,
         animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = SWAY_HALF_PERIOD_MS,
-                easing = FastOutSlowInEasing,
-            ),
+            animation = MaterialTheme.motion.ambientLoop(durationMillis = SWAY_HALF_PERIOD_MS),
             repeatMode = RepeatMode.Reverse,
         ),
         label = "QuoteGlyphSwayRotation",

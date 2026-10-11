@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
@@ -68,8 +69,7 @@ internal fun BookDetailOverlays(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
 ) {
-    val shareSheet = state.shareSheet
-    if (state.isShareSheetVisible && shareSheet != null) {
+    state.shareSheet.modelOrNull?.let { shareSheet ->
         ShareBookBottomSheet(
             model = shareSheet,
             onEvent = { event ->
@@ -196,9 +196,9 @@ internal fun BookDetailOverlays(
     }
 
     val bookToUpdate = state.book
-    val progressSheet = state.progressSheet
+    val progressSheet = state.progressSheet.modelOrNull
 
-    if (state.showUpdateProgressSheet && bookToUpdate != null && progressSheet != null) {
+    if (bookToUpdate != null && progressSheet != null) {
         UpdateProgressBottomSheet(
             model = progressSheet,
             onEvent = { event ->

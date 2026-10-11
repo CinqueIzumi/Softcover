@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.component.lists
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
+import nl.rhaydus.softcover.core.component.sheet.SheetModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateVariant
@@ -22,4 +23,8 @@ data class ChooseListsUiModel(
         body = "Create your first list below.",
         variant = EmptyStateVariant.Inline,
     ),
-)
+) : SheetModel<ChooseListsUiModel> {
+    override val closeRequested: Boolean get() = scaffold.closeRequested
+
+    override fun requestingClose(): ChooseListsUiModel = copy(scaffold = scaffold.requestingClose())
+}

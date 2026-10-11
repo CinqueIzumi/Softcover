@@ -5,10 +5,15 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.dismissed
+import nl.rhaydus.softcover.core.component.sheet.isClosing
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.openShelvesSession
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.ManageShelves
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -35,11 +40,11 @@ class OnManageShelvesRequestedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `records the manage-shelves request without hiding the sheet or sending an event`() = runTest {
+        fun `asks the open sheet to close and records the manage-shelves request without sending an event`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                isShelvesSheetExpanded = true,
-                isManageShelvesPending = false,
+                shelvesSheet = openShelvesSession(),
+                isShelvesSheetRequested = true,
             )
 
             // ----- Act -----
@@ -49,9 +54,44 @@ class OnManageShelvesRequestedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isManageShelvesPending shouldBe true
-            stateFlow.value.isShelvesSheetExpanded shouldBe true
+            stateFlow.value.shelvesSheet.isClosing shouldBe true
+            stateFlow.value.isShelvesSheetRequested shouldBe false
+            stateFlow.value.shelvesSheet.dismissed() shouldBe ManageShelves
             eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `keeps the sheet model while it hides`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(shelvesSheet = openShelvesSession())
+
+            // ----- Act -----
+            OnManageShelvesRequestedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.shelvesSheet shouldBe openShelvesSession(
+                closing = true,
+                pending = ManageShelves,
+            )
+        }
+
+        @Test
+        fun `stays closed and records nothing when the sheet is not open`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(shelvesSheet = SheetSession.Closed)
+
+            // ----- Act -----
+            OnManageShelvesRequestedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.shelvesSheet shouldBe SheetSession.Closed
+            stateFlow.value.shelvesSheet.dismissed() shouldBe null
         }
     }
 }

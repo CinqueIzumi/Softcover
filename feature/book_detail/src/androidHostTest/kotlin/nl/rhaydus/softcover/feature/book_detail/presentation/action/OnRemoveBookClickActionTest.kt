@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLens
@@ -35,7 +36,7 @@ class OnRemoveBookClickActionTest {
     @BeforeEach
     fun setUp() {
         undoableBookRemover = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
@@ -98,7 +99,7 @@ class OnRemoveBookClickActionTest {
         fun `on success switches to THE_BOOK lens and clears the user book and read`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 42)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 selectedLens = BookDetailLens.YOURS,
                 book = book,
             )
@@ -149,7 +150,7 @@ class OnRemoveBookClickActionTest {
         fun `on failure marks the book as failed and keeps lens and user book`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 42)
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 selectedLens = BookDetailLens.YOURS,
                 book = book,
             )

@@ -1,11 +1,9 @@
 package nl.rhaydus.softcover.core.component.state
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,12 +28,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
 
 internal const val SKELETON_GRACE_MILLIS = 250L
 
 internal const val SKELETON_MINIMUM_VISIBLE_MILLIS = 300L
-
-internal const val SKELETON_FADE_MILLIS = 150
 
 private const val SHIMMER_SWEEP_MILLIS = 1600
 
@@ -81,7 +78,7 @@ internal fun skeletonRevealPhase(
 /**
  * Masks the content while [visible], timed by [skeletonRevealPhase]: nothing is drawn for the first
  * [SKELETON_GRACE_MILLIS] of a first load, then a shimmer that stays at least [SKELETON_MINIMUM_VISIBLE_MILLIS], then
- * a crossfade to the content over [SKELETON_FADE_MILLIS] (a plain fade-in when loading ends within the grace).
+ * a crossfade to the content on the scheme's fast effects spec (a plain fade-in when loading ends within the grace).
  * The grace is skipped when the skeleton replaces content this mask, or its [SkeletonRevealGroup], already showed.
  * The content still measures and lays out, so a stand-in value sizes the slot the real one will fill.
  *
@@ -158,6 +155,7 @@ fun Modifier.skeletonMask(
     }
 
     val playMotion = playDecorativeMotion()
+    val fadeSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
     val reveal = remember { Animatable(1f) }
     var fadesFromShimmer by remember { mutableStateOf(false) }
 
@@ -169,14 +167,10 @@ fun Modifier.skeletonMask(
             return@LaunchedEffect
         }
 
-        if (playMotion) {
-            reveal.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(durationMillis = SKELETON_FADE_MILLIS),
-            )
-        } else {
-            reveal.snapTo(1f)
-        }
+        reveal.animateTo(
+            targetValue = 1f,
+            animationSpec = fadeSpec,
+        )
 
         fadesFromShimmer = false
     }
@@ -244,12 +238,7 @@ private fun rememberShimmerSweep(): State<Float> = rememberInfiniteTransition(la
     .animateFloat(
         initialValue = 0f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = SHIMMER_SWEEP_MILLIS,
-                easing = FastOutSlowInEasing,
-            ),
-        ),
+        animationSpec = infiniteRepeatable(animation = MaterialTheme.motion.ambientLoop(durationMillis = SHIMMER_SWEEP_MILLIS)),
         label = "skeletonShimmerSweep",
     )
 

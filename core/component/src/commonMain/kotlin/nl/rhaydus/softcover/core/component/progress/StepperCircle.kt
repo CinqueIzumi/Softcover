@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.core.component.progress
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
@@ -12,7 +11,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -20,16 +18,12 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.disabled
-import androidx.compose.ui.semantics.onClick
-import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
@@ -41,7 +35,8 @@ private const val RAMP_MS = 2000L
 /**
  * A 44dp circle button flanking a hero number field: `surfaceContainerHigh` fill, primary [icon].
  * Pressing calls [onClick] with a tickle haptic and holding repeats it, faster the longer it is held;
- * the circle holds no value of its own. While not [enabled] the glyph dims and a running repeat stops.
+ * the circle holds no value of its own. A pointer press is consumed by the repeat, so the click here only
+ * serves the keyboard and accessibility.
  */
 @Composable
 internal fun StepperCircle(
@@ -58,23 +53,16 @@ internal fun StepperCircle(
     Surface(
         modifier = modifier
             .size(44.dp)
-            .pressScale(interactionSource)
-            // The visible glyph would otherwise merge into the announced label alongside
-            // the content description; clear it and re-declare only what a screen reader should
-            // say, the description plus the button role and a single-step click action.
-            .clearAndSetSemantics {
-                role = Role.Button
-                this.contentDescription = contentDescription
-                if (enabled) {
-                    onClick(label = null) {
-                        currentOnClick()
-                        haptics.tickle()
-                        true
-                    }
-                } else {
-                    disabled()
-                }
-            },
+            .tactileClickable(
+                onClick = {
+                    currentOnClick()
+                    haptics.tickle()
+                },
+                enabled = enabled,
+                hoverShape = CircleShape,
+                interactionSource = interactionSource,
+            )
+            .semantics { this.contentDescription = contentDescription },
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         contentColor = if (enabled) {
@@ -85,10 +73,6 @@ internal fun StepperCircle(
     ) {
         Box(
             modifier = Modifier
-                .indication(
-                    interactionSource = interactionSource,
-                    indication = ripple(),
-                )
                 .repeatingPress(
                     interactionSource = interactionSource,
                     enabled = enabled,

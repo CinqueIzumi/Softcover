@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.component.chart
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.FadeThroughText
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -93,7 +91,6 @@ private fun ColumnChartRow(
     modifier: Modifier = Modifier,
 ) {
     val shape = Corners.xxs
-    val decorative = playDecorativeMotion()
 
     Row(
         modifier = modifier,
@@ -119,7 +116,7 @@ private fun ColumnChartRow(
             val dimmed = activeIndex >= 0 && index != activeIndex
             val barAlpha = animateFloatAsState(
                 targetValue = if (dimmed) 0.35f else 1f,
-                animationSpec = if (decorative) MaterialTheme.motionScheme.defaultEffectsSpec() else snap(),
+                animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
                 label = "ColumnChartDim",
             )
 

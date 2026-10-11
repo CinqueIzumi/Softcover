@@ -10,23 +10,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
-import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
 import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
-import nl.rhaydus.designsystem.model.ButtonSize
-import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
+import nl.rhaydus.softcover.core.component.modifier.rememberShakeTrigger
+import nl.rhaydus.softcover.core.component.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -35,7 +36,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 @Composable
 internal fun ColumnScope.ProgressBottomSheetPageContent(
     medium: ProgressSheetMedium.Paged,
-    onEvent: (ProgressSheetEvent) -> Unit,
+    onNumberChange: (String) -> Unit,
 ) {
     SteppedNumberContent(
         initial = medium.currentPage,
@@ -44,20 +45,14 @@ internal fun ColumnScope.ProgressBottomSheetPageContent(
         noun = "page",
         unitSymbol = null,
         suffix = medium.suffix,
-        onSubmit = { page ->
-            onEvent(
-                ProgressSheetEvent.PagesSubmitted(
-                    page = page,
-                ),
-            )
-        },
+        onNumberChange = onNumberChange,
     )
 }
 
 @Composable
 internal fun ColumnScope.ProgressBottomSheetPercentageContent(
     progressPercent: Int,
-    onEvent: (ProgressSheetEvent) -> Unit,
+    onNumberChange: (String) -> Unit,
 ) {
     SteppedNumberContent(
         initial = progressPercent,
@@ -66,13 +61,7 @@ internal fun ColumnScope.ProgressBottomSheetPercentageContent(
         noun = "percentage",
         unitSymbol = "%",
         suffix = "of the way through",
-        onSubmit = { percentage ->
-            onEvent(
-                ProgressSheetEvent.PercentageSubmitted(
-                    percentage = percentage,
-                ),
-            )
-        },
+        onNumberChange = onNumberChange,
     )
 }
 
@@ -122,6 +111,7 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
         TextField(
             model = medium.minutes,
             onEvent = onTimeFieldEvent,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
         )
 
         StepperCircle(
@@ -140,18 +130,9 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
         )
     }
 
-    ProgressSheetFooter(
+    ProgressSuffixAndBar(
         suffix = medium.suffix,
         fraction = medium.fraction,
-        onSubmit = {
-            onEvent(
-                ProgressSheetEvent.TimeSubmitted(
-                    hours = medium.hours.text,
-                    minutes = medium.minutes.text,
-                    seconds = medium.seconds.text,
-                ),
-            )
-        },
     )
 }
 
@@ -168,15 +149,17 @@ private fun ColumnScope.SteppedNumberContent(
     noun: String,
     unitSymbol: String?,
     suffix: String?,
-    onSubmit: (String) -> Unit,
+    onNumberChange: (String) -> Unit,
 ) {
     var number by remember {
         mutableStateOf(TextFieldValue(text = initial.toString()))
     }
 
+    LaunchedEffect(number.text) { onNumberChange(number.text) }
+
     var firstTimeFocusedGained by remember { mutableStateOf(true) }
 
-    var rejected by remember { mutableStateOf(false) }
+    val shake = rememberShakeTrigger()
 
     val parsed = number.text.toIntOrNull() ?: 0
 
@@ -240,7 +223,7 @@ private fun ColumnScope.SteppedNumberContent(
                     }
 
                     if (max != null && newNumber > max) {
-                        rejected = true
+                        shake.shake()
                         return@HeroStatNumberField
                     }
 
@@ -258,10 +241,9 @@ private fun ColumnScope.SteppedNumberContent(
                         ),
                     )
                 },
-                modifier = Modifier.shakeOnError(
-                    trigger = rejected,
-                    onShakeEnd = { rejected = false },
-                ),
+                modifier = Modifier
+                    .shakeOnError(trigger = shake)
+                    .semantics { liveRegion = LiveRegionMode.Polite },
             )
 
             if (unitSymbol != null) {
@@ -284,25 +266,17 @@ private fun ColumnScope.SteppedNumberContent(
         )
     }
 
-    ProgressSheetFooter(
+    ProgressSuffixAndBar(
         suffix = suffix,
         fraction = fraction,
-        onSubmit = { onSubmit(number.text) },
     )
 }
 
-/**
- * The suffix line and bar (only when [suffix] is set) above the "Update progress" action every tab ends
- * with. The action submits, then dismisses the sheet through its animated hide.
- */
 @Composable
-private fun ColumnScope.ProgressSheetFooter(
+private fun ColumnScope.ProgressSuffixAndBar(
     suffix: String?,
     fraction: Float,
-    onSubmit: () -> Unit,
 ) {
-    val dismiss = LocalModalSheetDismiss.current
-
     if (suffix != null) {
         Spacer(modifier = Modifier.height(Spacing.xs))
 
@@ -312,22 +286,6 @@ private fun ColumnScope.ProgressSheetFooter(
 
         ProgressBar(fraction = fraction)
     }
-
-    Spacer(modifier = Modifier.height(Spacing.xxl))
-
-    RhaydusButton(
-        label = "Update progress",
-        onClick = {
-            onSubmit()
-
-            dismiss()
-        },
-        modifier = Modifier.fillMaxWidth(),
-        style = ButtonStyle.FILLED,
-        size = ButtonSize.M,
-    )
-
-    Spacer(modifier = Modifier.height(Spacing.xxs))
 }
 
 @Composable

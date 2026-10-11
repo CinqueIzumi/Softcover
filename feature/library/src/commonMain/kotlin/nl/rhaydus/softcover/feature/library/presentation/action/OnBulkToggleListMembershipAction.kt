@@ -6,6 +6,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
@@ -131,7 +132,9 @@ internal class OnBulkToggleListMembershipAction(
 
             scope.sendEvent(LibraryEvent.ListMembershipChangeFailedEvent())
         } else {
-            scope.sendEvent(LibraryEvent.ListMembershipChangedEvent())
+            val feedback = if (isRemove) null else Feedback.Routine
+
+            scope.sendEvent(LibraryEvent.ListMembershipChangedEvent(feedback = feedback))
         }
     }
 }

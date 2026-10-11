@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.component.sidebar
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,17 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.designsystem.modifier.hoverHighlight
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -88,7 +83,6 @@ private fun <K> SidebarSection(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun <K> SidebarRow(
     model: SidebarRowUiModel<K>,
@@ -132,24 +126,18 @@ private fun <K> SidebarRow(
                 horizontal = Spacing.sm,
                 vertical = Spacing.xxxs,
             )
-            .pointerHandCursor()
-            .pressScale(interactionSource)
-            .hoverHighlight(
+            .tactileClickable(
+                onClick = { onEvent(SidebarEvent.Clicked(key = model.key)) },
+                role = rowRole,
+                onLongClick = onLongClick,
+                hoverShape = Corners.md,
                 interactionSource = interactionSource,
-                shape = Corners.md,
             )
             .semantics {
-                role = rowRole
                 if (variant is SidebarRowVariant.Destination) {
                     selected = variant.selected
                 }
-            }
-            .combinedClickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = { onEvent(SidebarEvent.Clicked(key = model.key)) },
-                onLongClick = onLongClick,
-            ),
+            },
         color = container,
         contentColor = content,
         shape = Corners.md,
