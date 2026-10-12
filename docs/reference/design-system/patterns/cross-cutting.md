@@ -2,32 +2,90 @@
 
 ### List-detail two-pane
 
-On expanded windows (§2.7) a root list surface (library, reading, explore) keeps its list/grid in a fixed-width leading pane and renders the selected book's detail in the trailing pane, backed by `TwoPaneScaffold` (§3.6). Selecting a book swaps the trailing pane **instantly** — the cover-to-detail morph (§2.5) is a property of the compact full-screen push, not the pane swap, so the pane host suppresses it. Before a book is chosen the trailing pane shows a quiet editorial placeholder, never a blank surface. The pattern is **expanded-only**: at compact and medium widths the same tap pushes the detail full-screen as before — the shell's `BookDetailPresenter` (not the feature) owns the push-vs-pane decision, so a list screen stays unaware of which it gets. Tabs that don't open book detail (Settings) stay single-surface in the *shell* sense (they never take the book-detail trailing pane), and full-screen pushed surfaces (focus mode, scanner, full-screen cover) plus onboarding are exempt — they render outside the shell and stay full-bleed.
+- On expanded windows (§2.7) a root list surface keeps its list in a fixed-width leading pane and the
+  selected book's detail in the trailing pane (`TwoPaneScaffold`, §3.6). The pane swaps instantly, with no
+  cover morph; before a pick it shows a quiet editorial placeholder.
+- `BookDetailPresenter` owns push-vs-pane: compact and medium widths, and a tab that is not detail-capable,
+  push the detail full-screen. Focus Mode, the scanner, the full-screen cover and onboarding stay full-bleed.
 
-### Reserved-row card
+### Section footprint reserved while loading
 
-Carousel and grid cards reserve vertical space for every optional row they may show, so the row of cards never reflows as data streams in.
+- A section driven by its own `isLoading` keeps its footprint for the whole loading phase (real header,
+  masked leaves), so it never pops in from zero height.
+- Collapse to nothing only on `isLoading.not() && <nothing to show>`, never "any unresolved value means
+  loading". Example: `BecauseYouReadGenreControl` (`model.isLoading.not() && model.hasOptions.not()`).
+- A section or trailing line that arrives on its own timer and often never arrives reserves nothing and
+  reveals in place (`RevealedWhenPresent`) instead of popping in.
 
-### Tonal grouping
+### Sheet host
 
-When two regions need to feel distinct on the same page, step the container shade rather than drawing a divider or adding a card outline.
+- The open action sets a request input on UiState (a flag or an id) and does nothing else.
+- One collector per sheet builds the model from that input and its data and is the only writer of the
+  `SheetSession`: `openOrUpdate` while the input is set, `requestClose()` otherwise. It re-reads the input
+  inside its `setState` lambda, so a stale snapshot cannot reopen a sheet an action has closed.
+- An action that closes a collector-owned sheet clears the request input and leaves the hide to the
+  collector; one that must record a `pending` intent calls `requestClose(pending)` in the same `setState`.
+- The screen renders from `session.modelOrNull`, sends `Dismissed` to an action that sets the session to
+  `Closed`, then runs `dismissed()`'s pending intent. It never copies state into the model at render time.
+
+### Blocking loading sheet
+
+- A long blocking wait is a non-dismissible sheet, never a dialog: onboarding's
+  `onboardingLoadingSheet(progress)` builds a `LoadingSheetUiModel` over
+  `SheetScaffoldUiModel(dismissible = false)` with the canonical header (eyebrow "Setting up", headline
+  "Getting your shelves ready…", a short description), then wavy progress. No close button.
+
+### App-shell navigation chrome
+
+- `:orchestration` (`orchestration/presentation/`). Compact: `CompactNavShell` renders one foundation
+  `BottomBarScaffold` and maps the `BottomBarStyle` preference onto `BottomBarPlacement.DOCKED` / `.OVERLAY`,
+  so switching re-places the bar without rebuilding the tab body (`DockedBottomNavigationBar`,
+  `BottomFloatingBar`, whose transparent tap shield keeps gap taps off the content beneath).
+- Medium (600–840dp): `NavigationRail`. Expanded (≥ 840dp): a permanent sidebar, wordmark in `pageTitle`
+  over the four destinations, active row `secondaryContainer` / `onSecondaryContainer`, idle
+  `onSurfaceVariant`.
+- All three read one `rememberNavItems()` source, so selection, the app-update badge and the library pulse
+  never drift. They enumerate feature tabs, so they are app-shell code, not `:core:component`.
+
+### Barcode scanner
+
+- `:feature:scan`, `BarcodeScanner`: full-bleed CameraX back-camera preview into bundled ML Kit,
+  `FORMAT_EAN_13` / `FORMAT_EAN_8` only; emits the first raw value once via `onIsbnDetected(raw)`, then
+  stops analysing. Resolution belongs to the scan ScreenModel.
+- Chrome: a white `SCANNING` eyebrow and `headlineMedium` instruction over a scrim (the one light-on-media
+  copy surface) and a centred rounded reticle.
+- Permission via `rememberCameraPermissionRequester`; denied or no camera falls back to manual ISBN entry.
 
 ### Inline filter chip strip
 
-A horizontally scrolling `Row` of pill-shaped chips placed directly above a grid or list to scope its contents. Selected chip swaps to `secondaryContainer` / `onSecondaryContainer`; unselected sits on `surfaceContainer` / `onSurfaceVariant`. Always include a leading "All …" chip that clears the filter. Reuse the same chip anatomy as the shelf tab pills (§3.4); do not apply the carousel page-edge serif hint (§3.4) — the chip strip is a filter affordance, not a peek-affordance. On an **expanded** (desktop / large) window the strip **wraps** (`FlowRow`) rather than scrolling horizontally, since a pointer can't fling a chip row sideways on a fixed-width pane; compact/medium keep the horizontal scroll.
+- A row of `Chip`s directly above a grid or list that scopes it, led by an "All …" chip that clears the
+  filter. Selected `secondaryContainer` / `onSecondaryContainer`, idle `surfaceContainer` /
+  `onSurfaceVariant`.
+- Compact and medium scroll horizontally; expanded wraps (`FlowRow`).
 
 ### Active-filter chip row
 
-Distinct from the inline filter chip strip above: this row renders only the *currently applied* filters as removable input chips, with the picker living in a separate modal sheet. The label sits on the start, and a trailing `ic_close` glyph (14dp) marks it removable on tap. Chips enter and leave via `expandHorizontally` + `fadeIn` / `shrinkHorizontally` + `fadeOut` so the mutation reads as part of the surface's editorial register, not as a pop-in. When more than one chip is active, append a tonal "Clear all" chip on `surfaceContainer` / `onSurfaceVariant` as the row's final element. On an **expanded** (desktop / large) window the row **wraps** (`FlowRow`) instead of scrolling horizontally — a fixed-width pane can't fling a chip row sideways with a pointer — while compact/medium keep the horizontal scroll; this mirrors the filter sheet's panel-form wrap (§3.5). Reach for this row whenever the picker UI is decoupled from the active set — multi-facet library filters, future faceted searches, anywhere the question "what's narrowing my view right now?" needs to be one-tap reversible. The picker itself follows §3.5's modal sheet anatomy with one `FacetSection` per facet (Title label + horizontal pill row), populated only from facet values actually present in the surface's source content so chips never narrow to empty. **Chip fill is a per-consumer choice, not fixed by the pattern:** Library's row uses `primaryContainer` / `onPrimaryContainer`; a future consumer may keep `secondaryContainer` / `onSecondaryContainer` if that reads better against its own chrome — pick whichever container/on-container pair contrasts against the surface the chips sit on.
+- Only the currently applied filters, as removable chips (trailing close glyph), with the picker in a
+  separate sheet; chips enter and leave with `expandHorizontally` + fade. Two or more active chips append a
+  tonal "Clear all" chip.
+- Compact and medium scroll horizontally; expanded wraps (`FlowRow`). Library fills them `primaryContainer`
+  / `onPrimaryContainer`; another consumer picks the container pair that contrasts with its own surface.
 
 ### Pace-nudge ribbon
 
-A dismissable `Banner` in the `Highlight` tone and `Editorial` variant, **fused to the top of the card it speaks to** — not an in-flow row above it, so the message reads as the card's own voice rather than page chrome. Used on the Reading screen's featured-hero card to surface a per-day pacing target derived from the featured book's active deadline. Persistence is per-book-per-day; once dismissed, the ribbon stays gone until the local date rolls over. Reach for it when a single sentence of guidance derives from existing state, is scoped to one card, and should not earn the weight of a sheet.
+- A dismissable `Banner` fused to the top of the card it speaks to, never an in-flow row above it.
+- Reading's featured-hero card uses it for a per-day pace target from the book's deadline; dismissal holds
+  per book per day.
 
 ### Actionable inline banner
 
-The nudge's heavier sibling: when an in-flow prompt needs a *primary action* (not just acknowledgement), it is a dismissable `Callout` with one `Button` action, on a 24dp page gutter. Used on book detail when arriving from a barcode scan and the book is already on a shelf with a *different* edition; the action updates the shelved edition (shown `Busy` while in flight; the action also self-guards on its in-progress flag), and dismiss hides the offer while the scanned edition stays displayed. It is its own list item, **directly beneath the shelf-action section** it speaks to, not above it. Reach for it when a transient, condition-gated prompt carries a concrete next step; reach for the lighter pacing nudge when no action is offered.
+- A dismissable `Callout` with one action, for a transient, condition-gated prompt with a concrete next
+  step; its own list item, directly beneath the section it speaks to.
+- Book detail's `ScanEditionCallout`: arriving from a scan on a book shelved with a different edition, the
+  action switches the shelved edition; dismiss hides the offer and keeps the scanned edition displayed.
 
 ### Adaptive empty state
 
-When a root surface is empty, surface the next-best content rather than a static "nothing here" panel. The empty Reading screen demonstrates the rule: if Want-to-Read has entries, render the top three as a "Pick up next" tile row (96dp covers + title only); else, render a single "Trending now" tile that links into book detail. Pair with the existing empty-state quote glyph + headline (see "Editorial quote", editorial.md, empty-state variant); do not stack three carousels — the empty state is a moment of orientation, not a discovery surface.
+- An empty root surface shows the next-best content, not a static panel. Empty Reading: the top three
+  Want-to-Read books as a "Pick up next" row, else one "Trending now" tile into book detail.
+- Paired with `EmptyState`'s quote glyph and headline; never three stacked carousels.

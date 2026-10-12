@@ -8,22 +8,10 @@ has landed. **Delegation:** user
 
 | Sub | Scope | Status |
 |---|---|---|
-| S12-2 | The `docs/reference/design-system/` rewrite, the `foundations.md` budget restore, the `CLAUDE.md` parenthetical | [ ] |
+| S12-2 | The `docs/reference/design-system/` rewrite, the `foundations.md` budget restore, the `CLAUDE.md` parenthetical | [x] |
 | S12-3 | The open decisions (cover radius, `"tnum"`), the fixture-size measurement, the gallery completeness pass | [ ] |
 | S12-4 | G7 — human walkthrough of every screen on device | [ ] |
 | S12-5 | G6 (`check` green) and deleting this directory | [ ] |
-
-## S12-2 — doc rewrite, budget restore, `CLAUDE.md`
-
-- Rewrite `docs/reference/design-system/` (`components.md`, `patterns.md`, `component-contract.md`)
-  against the finished library — every family's `[detail]` entries should already be gone per each
-  step's Standard acceptance; this pass is the final sweep, not the first one.
-- Restore `foundations.md`'s pinned budget in `docs/doc-budgets.txt` from the token-hygiene-gate value
-  back to the generic `docs/reference/**/*.md 30KB`.
-- Re-pin `components.md`'s budget in `docs/doc-budgets.txt` from 10KB (headroom for the S7–S9 index
-  lines) to its post-rewrite size rounded up to the next KB.
-- Trim the `(where that file exists)` parenthetical in `CLAUDE.md`'s routing table — every component
-  now has a contract, so the qualifier no longer applies.
 
 ## S12-3 — open decisions, fixture size, gallery
 

@@ -8,6 +8,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
  * The copy an [EmptyState] renders in place of content a surface has nothing to draw for.
+ *
+ * [EmptyState] adds no gutter of its own: the caller pads a full-pane placement, or an in-flow one.
  */
 @Immutable
 data class EmptyStateUiModel(

@@ -14,8 +14,10 @@ sealed interface SearchTopBarEvent {
 
     data object SearchActivated : SearchTopBarEvent
 
+    /** The field lost platform focus. */
     data object SearchDismissed : SearchTopBarEvent
 
+    /** The clear (×) affordance was tapped; it is a dismissal, so it sits outside the tap-to-search region. */
     data object SearchCleared : SearchTopBarEvent
 
     data object ScanRequested : SearchTopBarEvent

@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S12-1 dropped: the composable-count gate (G4) was written, then removed on review because it fails legitimate screen splits; see `## Decisions`. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
-- **Next:** S12-2 in `steps/s12-close-out.md` § S12-2: the `docs/reference/design-system/` rewrite, the budget re-pins, the `CLAUDE.md` parenthetical.
+- **State:** S12-2 done: design-system docs rewritten against `:core:component` (ten `components/*.md` deleted, contract moved to KDoc, foundation copies replaced by links, every pattern entry ≤12 lines), budgets re-pinned, `CLAUDE.md` and `compose-ui.md` maintenance rule updated. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
+- **Next:** S12-3 in `steps/s12-close-out.md` § S12-3: cover-radius and `"tnum"` decisions, fixture size, gallery completeness.
 - **Open questions:** where to track the double screen-reader announcement on icons inside labelled buttons (`FeaturedSessionButton`, `FeaturedBackdropCard` "Update progress"): the icon repeats the button label, and silencing it needs `drawableIconResource` to accept no description (a design-system API change). Roadmap issue or an S12 sub-step.
-- **Verification:** no code change; `build.gradle.kts`, `build-wiring.md` and `module-structure.md` match HEAD.
-- **Uncommitted:** this README (G4 removed, decision added) and `steps/s12-close-out.md` (S12-1 removed).
+- **Verification:** `checkDocBudgets` and `styleCheck` passed; stale-name grep and relative-link check clean; one `softcover-reviewer` round, findings fixed.
+- **Uncommitted:** S12-2 (docs, KDoc-only Kotlin edits, budgets, `CLAUDE.md`, rules, reviewer memory) and these tracker ticks.
 ## Local verification
 
 The Gradle daemon runs on JDK 17 (`gradle/gradle-daemon-jvm.properties`), whatever `JAVA_HOME` is; no

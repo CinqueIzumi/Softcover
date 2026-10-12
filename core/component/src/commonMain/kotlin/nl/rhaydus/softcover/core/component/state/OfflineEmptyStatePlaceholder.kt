@@ -6,6 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
+/**
+ * The full-pane [EmptyState] for a screen whose content cannot load offline. It fills its parent and
+ * owns its own padding, so a caller adds only its own inset or bottom-chrome padding.
+ */
 @Composable
 fun OfflineEmptyStatePlaceholder(
     model: EmptyStateUiModel,

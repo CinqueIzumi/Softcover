@@ -7,6 +7,10 @@ import nl.rhaydus.designsystem.haptics.LocalHaptics
 
 private const val NO_INDEX = -1
 
+/**
+ * The haptics of a drag-to-reorder gesture. It remembers the last reported target and ticks only when
+ * that target changes, so a list reports every new index without filtering.
+ */
 class ReorderHaptics internal constructor(private val haptics: Haptics) {
     private var lastIndex = NO_INDEX
 

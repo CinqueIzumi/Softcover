@@ -17,4 +17,5 @@
 - [Default-param chaining hides a redundant override](architecture_default_param_chaining_redundant_override.md) — a UiState default deriving from an earlier param auto-updates when that param is passed; a ScreenModel also setting the derived field explicitly is dead duplication, not defensiveness
 - [New shared component missing catalogue line](architecture_new_shared_component_missing_catalogue_line.md) — module-structure.md can get its new row while components.md never mentions the component; check both
 - [R9 citation covers R10 ground](architecture_r9_citation_covers_r10_ground.md) — "off the composition (R9)" on a stored UiState model list is house shorthand, not a wrong rule number
+- [UiState field never populated](project_uistate_field_never_populated.md) — a declared, rendered field with no writer passes every gate; grep for its writes
 - [Self-emitting click modifiers](architecture_foundation_self_emitting_modifiers.md) — clickable already emits hover; an extra hoverable on the same source doubles up

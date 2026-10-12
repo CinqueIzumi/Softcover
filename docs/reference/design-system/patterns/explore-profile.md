@@ -2,18 +2,78 @@
 
 ### Profile screen
 
-Profile's "reading life" reads top-to-bottom: the reader's portrait/name/bio header, "Reading atlas" (the hero pages-read card + volumes/avg-rating/streak tiles), a **share entry row** (a `surfaceContainer` card — primary glyph tile, two-line prompt, trailing chevron — opening the share sheet below), "The shape of the years" (the peak-annotated bar-column chart, components.md, behind a Books/Pages `SingleChoiceSegmentedButtonRow` toggle that is pure composable-local state, not a TOAD action), "The genres you read most" (the genre proportion stack, components.md), "Who you read" (the author-representation section: a gender proportion stack plus BIPOC/LGBTQ+ three-way Yes/No/Unknown bars, components.md, under a persisted "Hide untagged authors" switch that renormalises every bar over its own tagged authors — the section's only control, and the only toggle anywhere in the reading-life spread), "How you score" (the half-star ratings histogram, components.md, under a headline/caption pair chosen from the reader's classified rating band — never from the bare average), "Recently loved" (up to three real 4★+ reads, cover + title + author + `rating★ · month`), and the demoted **account foot** (a tonal Log out button over a quiet "— · —" colophon). The five new sections (year chart, genre stack, author representation, ratings, recently loved) each open with the standard eyebrow + italic headline pair (§3.2); the reader header and "Reading atlas" keep their eyebrow-only `SectionHeader` (no headline) as a deliberate exception, not a second register. The hero pages card remains the screen's one primary-filled surface (§2.1).
+- Reading life, top to bottom: the reader header; "Reading atlas" (hero pages card plus tiles); a share
+  entry row card; "The shape of the years" (`ColumnChart` behind a Books / Pages `SegmentedControl`,
+  `OnYearMetricSelectedAction`); "The genres you read most"; "Who you read"; "How you score" (headline
+  from the reader's rating band, never the bare average); "Recently loved" (up to three 4★+ reads); the
+  account foot (tonal Log out over a "— · —" colophon).
+- Chart sections open with eyebrow + italic headline (§3.2); the header and "Reading atlas" keep an
+  eyebrow-only `SectionHeader`. The hero pages card is the screen's one `primary`-filled surface.
+
+### Statistics charts
+
+- Monochrome `primary` with `ChartTone` alphas; shape carries the data. Flat bars, never the wavy indicator.
+- `ProportionChart` only for exclusive, exhaustive categories (gender: up to three ranked slices plus
+  `Unknown` last, muted). `RankedBars` for overlapping ones (top five genres, each a share of genre-tagged
+  books, track always 100%); the caption names the denominator.
+- `ColumnChart`: books per year (peak `Lead`, others `Second`, zero a `Fifth` stub) and the half-star
+  ratings histogram (whole stars `Lead`, halves `Fourth`, labels under whole stars only).
+- "Who you read" BIPOC / LGBTQ+ bars: fixed Yes / No / Unknown, a zero bucket draws nothing, caption
+  "Yes 2 · No 5 · Unknown 23 · of 30 authors". The persisted "Hide untagged authors" `ToggleRow`
+  renormalises over tagged authors ("of N tagged authors"), shows only when an untagged bucket exists,
+  and sits outside the empty branch.
 
 ### Profile share sheet
 
-The reading-life share sheet (`AdaptiveModalSheet`, §3.5): a mini accent-bar + eyebrow ("SHARE YOUR YEAR") + a prose line, then a scaled, non-interactive preview of the exportable **reading-life share card** (components.md Share card) centred in the sheet, then an actions row — a primary "Save image" pill (`RhaydusButton`, flex) beside a circular `surfaceContainerHigh` share button (`DesktopTooltip`-wrapped, since it is icon-only) — both driving `:core:component` `share/` `ShareCardCapture` (`capture.saveToGallery` / `capture.share`) exactly as the book-detail share sheet does. On desktop a cancelled save is silent, Share copies the image to the clipboard and says so, and the buttons carry desktop labels. Success settles the preview with a commit haptic; failure shakes it. Opened from two places that must stay in sync: the top bar's share glyph action and the share entry row card; both simply flip the same composable-local sheet-visibility boolean, no TOAD action or event.
+- Opened from the top bar's share glyph and the share entry row, both `OnShareSheetOpenAction`; dismissed
+  through `OnShareSheetDismissAction`.
+- A scaled, non-interactive preview of the reading-life share card with "Save image" and share actions,
+  through `ShareCardCapture` like the book-detail share sheet. Desktop: a cancelled save is silent; Share
+  copies to the clipboard and says so. Success settles with a commit haptic; failure shakes.
 
 ### Log-out confirm sheet
 
-A destructive-confirm `AdaptiveModalSheet` (§3.5) that gates the account foot's Log out button — Profile's Log out is demoted to plumbing (the Settings menu row, components/navigation.md, is the sibling convention: navigational chrome, never a headline action), so it never fires directly. Anatomy: an italic `headlineMedium` "Leaving so soon?" over a short prose line, a primary `RhaydusButton` "Log out" pill that dispatches the existing log-out action and then dismisses, and a text "Stay" affordance that just dismisses. The sheet is a `SheetSession` on Profile's UiState: "Log out" records the log-out as the session's pending intent and closes the sheet, and the log-out runs once the sheet has finished hiding.
+- Gates the account foot's Log out: an italic "Leaving so soon?" over a prose line, a primary "Log out"
+  and a "Stay" text affordance.
+- A `SheetSession` on Profile's UiState: "Log out" records the log-out as the pending intent and closes;
+  the log-out runs once the sheet has hidden.
 
 ### Title-page sheet (Create list)
 
-A centred, single-field modal composition for a surface so small that the usual eyebrow-plus-headline sheet header would outweigh its own content — currently the create-list sheet, "List Creation 1a." Anatomy: a `SheetScaffold` whose header is a bare `eyebrow` ("A new list", no headline) and whose footer is one primary "Create list" button, running while the list is created and closing the sheet through the host's `SheetSession` once it exists; between them, centred: a full-width hairline broken in the middle by a small `quoteGlyph` at the `primary` @ 0.28 tint exception (§2.2); a borderless, label-less name hero at display scale, carrying the platform text cursor tinted `primary` and a real-title placeholder (not an instructional label — the placeholder shows the reader what a good entry looks like, e.g. "Summer reads" rather than "List name"); an inset (not full-bleed) hairline divider; the privacy prose toggle sentence (see "Prose toggle", editorial.md). There is no separate headline — the name field itself carries that weight, which is what makes this composition an exception rather than a shorter version of the canonical header (§3.5). Reach for this pattern only when a sheet's entire job is naming or capturing one short piece of text as an act of authorship; a sheet with more than one field, or a field alongside settings/options, wants the canonical `SectionHeader` (Section register) opening instead.
+- A `SheetScaffold` whose header is a bare eyebrow ("A new list") and footer one primary "Create list";
+  between them, centred: a hairline broken by a small `quoteGlyph` (`primary` @ 0.28), a
+  `TextFieldVariant.Hero` name field with a real-title placeholder ("Summer reads"), an inset hairline,
+  and the privacy prose toggle.
+- Only for a sheet whose whole job is naming one short thing; more fields want the canonical header.
 
-The hero is **sized to its own characters**: it holds one line and steps its type size down to fit the width available, rather than wrapping or clipping. Three consequences are load-bearing, not incidental. The placeholder must sit *beside* the input rather than stacked behind it — a centred placeholder overlaid on a centred empty field puts the caret in the middle of the placeholder word. It must share the hero's fitted size and stay single-line, or it wraps to a height the single-line field does not have and the caret drifts off the text entirely. And the caret must sit at the placeholder's **leading** edge, not its trailing one: the placeholder is a hint the first keystroke replaces wholesale, so a caret after it promises that typing appends to the example. A caret anywhere but where the next character will land is the tell that this pattern has been rebuilt as a plain centred text field with a placeholder layered over it.
+### Browse-by-mood grid
+
+- `MoodGrid`: two columns of `MoodTile`, each row at `IntrinsicSize.Max` so wrapped titles share a height.
+  Ink by index mod 4; titles title-cased by the mapper (`toTitleCaseWords`). A tap runs a mood-filtered
+  search. Loading: four loading tiles in the same two rows.
+
+### Because-you-read genre picker
+
+- Anchor: uppercase `eyebrowSmall` "Genre · {genre}" with a trailing `primary` chevron; hidden with no
+  genre options. Opens a collector-driven "Pick a genre" sheet of `SheetRowGroup` rows: "Auto
+  (most-read)" first, then one row per genre.
+
+### Search results pagination
+
+- No server total: results append as the visible window nears the fetched end, gated on `hasMore`; a
+  tail wavy progress row (full-span on the desktop grid) shows while appending. No "N of M" count.
+
+### Explore search back ladder (mobile)
+
+- Back leaves search before the screen, one rung per press, each its own `NavigationBackHandler`
+  (`androidx.navigationevent.compose`) with mutually exclusive `isBackEnabled`: `hasActiveSearch` (query
+  or mood browse) → `OnClearSearchAction`; `searchPhase == FOCUS` → `OnSearchDismissedAction`; `FEED` → no
+  handler, back belongs to the shell.
+- A handler dispatches what the on-screen control dispatches and never clears field focus itself. With
+  the keyboard up, the platform's first press hides it.
+
+### Explore search Esc (desktop)
+
+- One rung: `Modifier.dismissOnEscape` on the layout root, always enabled; the callback acts only when
+  `hasActiveSearch`, dispatching `OnQueryChangeAction(newQuery = "")` as the field's × does. Gating
+  `enabled` would steal focus from the field on the first keystroke.

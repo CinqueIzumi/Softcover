@@ -23,6 +23,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 /**
  * The desktop scroll page: slots for an optional [topBar], [masthead] and docked [bottomBar] around a
  * scroll area whose content is held to the reading measure while its scrollbar stays at the window edge.
+ *
+ * The shell's bottom-bar padding goes to the docked [bottomBar] when there is one, otherwise to the end of
+ * the scroll column.
  */
 @Composable
 fun DesktopScrollPage(

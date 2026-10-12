@@ -56,9 +56,9 @@ internal actual fun ExploreScreenLayout(
         return
     }
 
-    // Esc clears the search - the desktop counterpart of mobile's back rung (DS §3.1 "Back leaves
-    // search before it leaves the screen"). Only the one rung exists here: the field is persistent,
-    // so there is no focus surface to close underneath it, and it dispatches what the field's own ×
+    // Esc clears the search - the desktop counterpart of mobile's back rung. Only the one rung
+    // exists here: the field is persistent, so there is no focus surface to close underneath it, and
+    // it dispatches what the field's own ×
     // dispatches rather than OnClearSearchAction, whose focus drop means nothing to a field that is
     // never focus-driven.
     //

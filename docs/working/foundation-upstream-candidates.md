@@ -148,8 +148,8 @@ Filed but not yet implemented in the foundation.
   the subtree, which is the persistent-field case). The gated form should also stop consuming the event
   when it does nothing, so a disabled rung leaves Esc for whatever else wants it.
 - **Doc impact:** the foundation design-system §"Desktop Esc-to-dismiss" gains the gate-vs-guard rule;
-  Softcover's own copy carries it today (`docs/reference/design-system/foundations.md` §2.5, and the
-  search-chrome block in `design-system/layout.md` §3.1).
+  Softcover's own copy carries it today (`docs/reference/design-system/foundations.md` §2.5, and
+  "Explore search Esc (desktop)" in `design-system/patterns/explore-profile.md`).
 
 ### F27 — `ExpandableFlowRow` composes every item, including the ones it never places
 

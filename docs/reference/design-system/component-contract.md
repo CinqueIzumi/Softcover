@@ -5,10 +5,8 @@
 Every component in `:core:component` is driven by a **UI model**. This contract fixes what a component's
 signature looks like, what its model may hold, and where the domain → UI mapping lives.
 
-It is normative. A component that does not satisfy R1–R12 does not belong in `:core:component`; three of the
-rules are build gates (§ 7.4), and the standing exceptions are in § 7.4a. R10 and R11 are satisfied by the whole
-app. Why the rules exist is in § 7.7, which
-is optional reading.
+It is normative. A component that does not satisfy R1–R12 does not belong in `:core:component`. The build
+gates R10, R4 and the ban on DI, navigation and the network (§ 7.4); the standing exceptions are in § 7.4a.
 
 > **Read `share/` before writing a new component.** `ShareCard` is the reference implementation (§ 7.3).
 
@@ -86,12 +84,12 @@ layout.
 internally, sized to what call sites need (`StatNumberFormat`'s `Grouped` / `Plain` / `Decimal`).
 
 **R4 — Presentation-ready values only.** A UI model holds formatted strings, resolved icon tokens and
-computed fractions — no domain type, no `Instant`, no `Duration`, no enum from `:core:domain`.
-`DeadlineBadge(status: DeadlineStatus)` becomes `Badge(model: BadgeUiModel)`, with the label and tone
-decided by the feature. When a component seems to need a domain type, give it a library-owned model of the
-same shape (`RichTextUiModel` in place of `ReviewDocument`). R4 governs `:core:component`, not a feature's
-own presentation models: a feature-local model may carry a domain enum as an event payload (a `ColorPalettePreviewTileUiModel<ColorPalette>`
-keyed by its `ColorPalette`) as long as R9 holds — the render neither maps nor labels it, only forwards it.
+computed fractions — no domain type, no `Instant`, no `Duration`, no enum from `:core:domain`. A deadline
+status renders as `Badge(model: BadgeUiModel)`, with the label and tone decided by the feature's mapper.
+When a component seems to need a domain type, give it a library-owned model of the same shape
+(`RichTextUiModel` in place of `ReviewDocument`). A component that echoes a caller's identity back in its
+events takes a generic key: `ColorPalettePreviewTileUiModel<K>` is built by `feature:settings` as
+`ColorPalettePreviewTileUiModel<ColorPalette>`, and the component only forwards the key (R9).
 `kotlinx.datetime.LocalDate` is an allowed value type: a plain calendar day carries no domain vocabulary
 (`DatePickerUiModel.initialDate`).
 
@@ -120,7 +118,8 @@ onto the same UI model (`explore` → `Column`, `library` → `Row`) keep two ma
 
 **R7 — Shared-element keys travel in the model.** `bookTransitionKey(element, bookId, surface)`
 returns a `BookTransitionKey`, built only by that builder in `:core:component` (the type's constructor is
-internal); keys are keyed on the book id alone. The mapper resolves a `BookTransitionKey` and stores it on the
+internal). A key is built from the book id, never an edition id, plus a `surface` when the same book can
+appear in several visible carousels on one screen. The mapper resolves a `BookTransitionKey` and stores it on the
 model of the component that runs the transition (`CoverUiModel.sharedTransitionKey`,
 `BookCardContent.titleTransitionKey`, `BookCardLinePart.Rating.transitionKey`). A component never computes a
 transition key; it does not know which surface it is on.
@@ -184,8 +183,8 @@ TopBar(model = state.topBar)
 
 **R11 — The signature is the model, the event lambda and the modifier. Nothing else.** Anything a call site
 would otherwise pass — a `TextStyle`, a `Color`, `maxLines`, an autosize spec, a particle count, a
-duration — is a property of the UI model. Where the treatment differs per surface, name the surfaces in a
-variant and resolve them in a table (as R2); where it does not, the component decides.
+duration — is a property of the UI model. Where the treatment differs per surface, name the looks in a
+variant and resolve each in a private per-variant `when` (as R2); where it does not, the component decides.
 
 ```kotlin
 // WRONG — the surface hands the component its treatment
@@ -227,8 +226,8 @@ data class BookShareCardUiModel(
     val coverUrl: String?,
     val title: String,
     val author: String,
-    val communityRating: Double?,
-    …
+    val statsLine: String?,
+    val description: String?,
 ) : ShareCardUiModel
 
 // ONE public symbol; `when` dispatch to private per-variant bodies
@@ -240,8 +239,8 @@ It shows R1 (no callbacks — a share card is inert), R2 (sealed variant, one pu
 private per-variant sizing `when`), R3, R4 (`RichTextUiModel` on the reading-update card), R5 (its
 `UiModelPreviews` companion feeds both the gallery and its `@Preview` functions) and R8. A share card sets
 its own width, because it is an export artefact at fixed dimensions. When a component genuinely owns its
-metrics, put them in a per-variant table and let the surrounding surface adapt (the gallery pans it); never
-add a "gallery mode" parameter.
+metrics, resolve them in a private per-variant `when` and let the surrounding surface adapt (the gallery
+pans it); never add a "gallery mode" parameter.
 
 ### 7.4 What the build enforces
 
@@ -259,10 +258,7 @@ Consequences:
 - **A component cannot take a domain type**, so R4 is a compile-time fact in `:core:component` and a review
   matter for components still in a feature.
 - **detekt does not scan `iosMain`.** Components live in `commonMain`; one in `iosMain` is not gated.
-- **R9 has no mechanical gate.** It is enforced by review only (§ 7.7).
-- **A `UiState` field can be declared and never populated with every gate passing.** After a state change,
-  grep that every new field is both declared and assigned; prefer deriving a field with `map` over writing
-  it from a second place.
+- **R9 has no mechanical gate.** It is enforced by review only.
 
 ### 7.4a Known exceptions
 
@@ -274,16 +270,16 @@ Consequences:
   primitive only; a component that renders data still carries its treatment on its model.
 - **Debug screens (`app/src/debug/`) are exempt from R10.** They may build UI models in composition or hold
   file-level `*UiModel` constants.
-- **No migrated sheet or dialog has a gallery entry**, because a fixture tile cannot render a modal inline. Their
-  models ship `previews` where R5 requires it (rendered or tested), and the components' own `@Preview`
-  functions render from that map. A
-  "tap to open" fixture is a gallery feature to design once for all sheets, not per sheet.
+- **A modal host (a sheet or dialog component) has no gallery entry**, because a fixture tile cannot render
+  a modal inline; the sheet parts (`SheetScaffold`, `SheetRow`, `SheetActionRow`) do. A modal host's model
+  ships `previews` where R5 requires it (rendered or tested), and its own `@Preview` functions render from
+  that map.
 
 ### 7.5 The Component Gallery
 
 The gallery is the library's **visual acceptance surface**: every UI model's `previews`, rendered across
-both brightnesses and all five spine colours (§ 2.1). There are no Compose UI tests and none are planned —
-the gallery is the visual check. Unit tests cover model logic and fixture coverage, never copied style
+both brightnesses and all five spine colours (§ 2.1). There are no Compose UI tests; the gallery is the
+visual check. Unit tests cover model logic and fixture coverage, never copied style
 values or defaults (`.claude/rules/tests.md`).
 
 It is a **shipped easter egg**, rendered on Android, iOS and desktop from `commonMain`:
@@ -295,7 +291,6 @@ It is a **shipped easter egg**, rendered on Android, iOS and desktop from `commo
   component with its family and fixtures. A new component adds its entry in the same change.
 - **The screen lives in `feature:settings`**, which pushes it itself from the tap gesture. It has no nav
   destination and no sidebar row.
-- **It is a user-visible surface**, so it gets a design pass like any other screen.
 
 **Anatomy.** An intro line, then a "Preview controls" region opened by a `SectionHeader` (Section register) with two
 override chip rows, **Brightness** (`ThemeMode`) and **Spine colour** (`ColorPalette`), each a wrapping row
@@ -308,13 +303,8 @@ Below sits the **themed region**: a `SoftcoverTheme` resolved from the overrides
 `LocalThemeConfiguration` when `null`; dynamic colour forced off whenever a palette override is set),
 wrapping a hairline-bordered, rounded surface filled with that theme's `background`. Inside, each visible
 family gets a `SectionHeader` (Section register), then per component its name and blurb, then each fixture as a small
-label over a tonal tile that constrains the fixture's width and lets it size its own height.
-
-The registry is never empty, so the frame has no empty state of its own. The library's `EmptyState` is a
-registry entry like any other: `Centered` (with and without a button) and `Inline` fixtures, where
-`Centered` takes its button from the variant (`EmptyStateVariant.Centered(button)`) and `Inline` has none.
-A caller gives a full pane `fillMaxSize().padding(24.dp)` and an in-flow placement
-`fillMaxWidth().padding(top = 40.dp)`; the component adds no gutter of its own.
+label over a tonal tile that constrains the fixture's width and lets it size its own height. The registry is
+never empty, so the frame has no empty state of its own.
 
 ### 7.6 Where consolidation is the wrong call
 
@@ -322,8 +312,8 @@ Families consolidate on **shared anatomy, not shared category name.**
 
 | Collapse | Keep separate | Why |
 |---|---|---|
-| The four `*InfoCallout`s → one `Callout` with a tone variant | `TopBar`, `EditorialTopBar` and `SearchTopBar` | The search bar's focus contract (§ 3.1) — caller-driven `focused`, intents for activate/dismiss/clear — has no counterpart on the plain bar. `EditorialTopBar` is a plain row with a start-aligned editorial headline, not a Material app bar: no scroll behaviour, subtitle, surface or autosizing. Merged, each is one component with disjoint parameter sets. |
-| The 21 book cards → one `BookCard` with a sealed variant | The 18 sheet **bodies** | Consolidate sheet *chrome* (`SheetScaffold` / `SheetHeader` / `SheetRow` / `SheetFooter`) and leave each body a feature composable built from those parts. `LibraryFilterSheet` and `TagEditorBottomSheet` share no anatomy. |
+| Every in-flow condition card is one `Callout` with a tone variant | `TopBar`, `EditorialTopBar` and `SearchTopBar` | The search bar's focus contract (`SearchTopBar` KDoc) — caller-driven `focused`, intents for activate/dismiss/clear — has no counterpart on the plain bar. `EditorialTopBar` is a plain row with a start-aligned editorial headline, not a Material app bar: no scroll behaviour, subtitle, surface or autosizing. Merged, each is one component with disjoint parameter sets. |
+| Every book and series card is one `BookCard` with a sealed variant | Sheet **bodies** | Sheet *chrome* is shared (`SheetScaffold`, `SheetRowGroup`, `SheetActionRow`); each body is a feature composable built from those parts. `LibraryFilterSheet` and `TagEditorBottomSheet` share no anatomy. |
 
 The test: **can the two share a layout, with the variant choosing only which parts appear?** If yes, one
 component. If the variant would choose *which parameters mean anything*, two components.
@@ -343,26 +333,3 @@ are rejected at design time, in briefs and in review:
   uses.
 - A mapper, helper, handler factory or seam with one caller that adds a layer without removing repetition.
 - State fields that duplicate each other, or one derived value written in more than one place.
-
-### 7.7 Rationale (optional reading)
-
-Read this only when a rule looks arbitrary; each note prevents a wrong turn that has been taken before.
-
-- **R1 is a performance rule.** A per-item lambda allocates on every recomposition and defeats skipping
-  across a 500-item grid; one hoisted lambda plus a key does not.
-- **R2 names variants after looks.** A variant per call site multiplies identical tuples and lets them
-  drift apart unseen; one variant per look keeps the looks a short, readable list.
-- **R3 is compiler-checked on purpose.** A stability config file drifts silently; an `ImmutableList`
-  parameter does not. A `List` field makes the whole model unstable, so every card in a grid recomposes
-  every frame; a lambda field is never equal to itself and does the same.
-- **R9 has three reasons.** Layering: a mapper in a composable puts *what* to show inside the code that
-  decides *how*. The reverse direction: an editor's output travels back out to be persisted, and if the
-  `Action` maps there is one place for that. Performance: a mapper in composition re-runs and allocates a
-  fresh model on every recomposition, which breaks the equality check that lets Compose skip; `remember`
-  hides the symptom. A detekt rule for R9 was considered and declined as hard to express precisely without
-  false positives — do not add one.
-- **R10 goes further than R9** because the model exists to be the single, testable description of what a
-  component shows. One assembled at the call site cannot be asserted in a unit test or reused by a second
-  surface, which leaves the model decorative.
-- **R11: a loose render parameter is drift with a default value.** It is invisible to the model, so nothing
-  can enumerate or test it, and surfaces that should look alike diverge.

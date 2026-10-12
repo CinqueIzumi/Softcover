@@ -212,7 +212,7 @@ internal actual fun LibraryScreenLayout(
  * A long-press routes to the shelf-visibility settings, mirroring the mobile Shelves sheet's own
  * "Manage" affordance. Desktop keeps this permanent sidebar rather than the mobile title-as-switcher
  * + Shelves sheet — a wide window already has room for a source list, which is the native desktop
- * switcher pattern (design-system.md §2.7/§5).
+ * switcher pattern.
  */
 @Composable
 private fun ShelfSidebar(

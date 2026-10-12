@@ -2,48 +2,102 @@
 
 ### Book-detail tag block
 
-The read-only display of a book's tags, in the **The Book lens's `Tags` section**, grouped into the three Hardcover tag categories — in order **Genre**, **Mood**, **Content warning** — each showing the top 5 tags by popularity (`taggable_counts.count`). It sits after the About section. A bar-less in-flow `TAGS` label (§2.3's no-bar register) heads the block; each category gets a `labelLarge` semibold `onSurfaceVariant` sub-label over a **wrapping `FlowRow`** (8dp horizontal + vertical spacing) of read-only `Chip`s — *not* the horizontally-scrolling `Row` the library facet sections use. The wrap is deliberate: the set is capped at 5 per category and lives in a full-width scrolling column, so all chips should be visible at once rather than hidden behind a scroll affordance. Reach for the same wrapping block for any capped, full-width set of label chips. **Content-warning chips are concealed by default:** each renders at its true size but under a solid `spoilerCover` block (clipped to the pill shape, `ChipVariant.Spoiler`), revealed in place — one chip per tap — exactly like the inline review spoiler reveal (see "Spoiler reveal" below / `RichText`), since a content warning can itself be a spoiler. Revealed keys live in `BookDetailUiState.revealedTagKeys`, so an unveiled chip stays unveiled for the rest of the screen instance. Genre and Mood chips are shown plainly. The section folds in the **edition colophon line** (below) as its trailing element rather than as a separate strip; the whole section — chips and colophon both — is skipped only when there are neither tags nor a known colophon fact, so a book with only a colophon still gets a `Tags` section.
+- The Book lens's `Tags` section, after About: Genre, Mood and Content warning, each the top five tags by
+  popularity (`taggable_counts.count`) as a `labelLarge` sub-label over a wrapping `FlowRow` of read-only
+  `Chip`s, under a bar-less `TAGS` label.
+- Content-warning chips render as `ChipTone.Spoiler` and reveal in place one per tap (the inline spoiler
+  reveal); revealed keys live in `BookDetailUiState.revealedTagKeys` for the screen instance.
+- The edition colophon line closes the section; the section is skipped only with neither tags nor a
+  colophon fact.
 
 ### Your tags section
 
-The book-detail display of the user's *own* tags, in the **Yours lens** — distinct from the read-only, popularity-ranked editorial **Book-detail tag block** above. It sits **directly below the in-progress/status block and above the review**, and renders **only when the book is on a shelf** (`book.userBook != null`) — tagging is offered for shelved books only. A bar-less in-flow `YOUR TAGS` label (§2.3's no-bar register) heads it; the tags render as a **single flat wrapping `FlowRow`** of read-only `Chip`s (8dp spacing) — *not* grouped per category like the editorial block, since a reader's set is small and personal. The user's own tags show **plainly** (spoiler-flagged ones included — this is the reader's private view; the spoiler flag only hides them from *other* readers on the share card). The row ends with a `Chip` using `ChipVariant.Dashed` (a 1dp dashed `primary` stroke, transparent fill, primary `labelMedium` text — chip contract in `core:component/chip`) reading **`Edit tags`**, that opens the **Tag editor sheet** (components.md); when the user has no tags yet the section shows a single dashed **`+ Add tags`** opener instead — distinct from the plain `Chip` used for the read-only tags themselves, so the "add/manage" affordance never reads as just another tag. Edits are **optimistic**: the new full set lands in state at once, then the whole set is re-sent through the `upsert_tags` mutation (the backend replaces the complete set, so a removal is "save without it" and a spoiler toggle is "save with the flag flipped"), and the canonical server response overwrites state on success or rolls back on failure (the global error toast already fires). Reach for this pattern for any user-owned tagging surface; keep it separate from the editorial tag block.
+- The Yours lens, between the in-progress/status block and the review, only for a shelved book
+  (`book.userBook != null`): a bar-less `YOUR TAGS` label over one flat wrapping `FlowRow` of the reader's
+  own tags, spoiler-flagged ones shown plainly.
+- The row ends with a `ChipTone.Dashed` chip, "Edit tags" (or "+ Add tags" with no tags yet), opening the
+  tag editor sheet. Edits are optimistic and roll back on failure.
+
+### Tag editor sheet
+
+- `TagEditorBottomSheet`: `SheetScaffold`, `SheetLayout.Pinned`, dismiss label "Done". Add block: four
+  category chips (Genre / Mood / Tag / Content warning), a `TextField` `Pill` naming field whose Add pill
+  exists only for a non-blank draft (IME Done commits too), then a category-scoped suggestion cloud of the
+  reader's own tags in an `ExpandableFlowRow` (`Progressive(linesPerExpand = 3)`), ranked by usage and
+  narrowed by substring, prefix matches first (`computeTagSuggestions`).
+- The collection groups Genre → Mood → Tag → Content warning (others under "Other") as `Chip`s with
+  `ChipTrailing.Dismiss`; a new chip rises in, tracked by `newlyAddedTagKey`. Add block and collection
+  share one scroll region, never a nested scroller.
+
+### Change edition sheet
+
+- `EditionBottomSheetSelector`: `SheetScaffold`, `SheetLayout.PinnedLazy`, primary "Track this edition"
+  (enabled once a different edition is picked). `EditorialSearchField` ("Search by ISBN or publisher"), an
+  "{n} EDITIONS" count, then one `BookCard` row per edition: the format as title with a format icon, a meta
+  line (publisher · year · pages or duration), "ISBN …"; single choice. Owned editions carry "Owned", the
+  tracked one a "Tracking now" badge.
 
 ### Shelve control
 
-The book-detail shelf-status control: a bar-less inline-bar-headed (§2.3) `SHELVE THIS BOOK` label over a `surfaceContainerLow`, 16dp-radius card with 5dp inner padding and a 2dp gap between three **vertical rows** — Want to read / Reading / Read. Each row is a 12dp-radius, 11×13dp-padded `Row` (18dp leading icon, `labelLarge` name, optional trailing live status) that fills `primary`/`onPrimary` when active and otherwise sits transparent on the card. The active **Reading** row shows a live trailing status (`{pct}% · p. {page}`, time-based for audiobooks); the active **Read** row shows the read date when known. Writes are optimistic; `Modifier.shakeOnError` (from `:core:component`'s `modifier/`) + "Couldn't save — tap to retry" shows on the card label on failure; the **Read** row plays the `MarkAsReadBurst` + commit haptic celebration. **All three rows are enabled even for a not-yet-shelved book (`status == None`):** tapping **Reading** (or **Read**) on an off-shelf book creates the user book directly on that shelf in one step. (Under the hood, Reading has an `insert_user_book` create path alongside its existing `update_user_book` path, matching the want-to-read / read create paths.) While the book is loading, the real card renders with each row masked whole and not tappable.
+- A bar-less `SHELVE THIS BOOK` label over a `surfaceContainerLow` card of three rows: Want to read /
+  Reading / Read. The active row fills `primary` / `onPrimary`; active Reading shows `{pct}% · p. {page}`
+  (time-based for audiobooks), active Read the read date when known.
+- All three rows are enabled for an off-shelf book: Reading or Read shelves it there in one step.
+- Writes are optimistic; failure shakes the card (`Modifier.shakeOnError`) with "Couldn't save — tap to
+  retry". Read plays the mark-as-read celebration. While loading, each row is masked and inert.
 
 ### Lens toggle
 
-A sticky, full-width segmented pill (`surfaceContainer` track, `999` radius, 4dp padding) that switches book detail's lower content between two lenses, leading with **The Book** (the book's own facts: about, tags, find-it, voices) then **Yours** (the reader's own copy: in-progress/status, rating, tags, review) — the always-available segment leads since Yours can be disabled — riding a `stickyHeader` immediately under the top bar so it stays pinned while the lens content scrolls beneath it. Both segments are always visible; **Yours is disabled** (dimmed, non-interactive) until the book has a user copy (`book.userBook != null`), and **The Book** is the default selection. The active segment fills `primary`/`onPrimary` and crossfades on the theme's effects spec; switching fires a `select` haptic. The content beneath crossfades on the same spec — sections belonging to the inactive lens are simply not composed, not hidden. Reach for this pattern wherever a detail surface needs to separate a reader's private data from the entity's public facts without splitting into two screens; do not build a second bespoke segmented switcher.
+- A sticky `SegmentedControl` (Track) in a `stickyHeader` under the top bar: The Book (default) then
+  Yours. Yours is disabled until the book has a user copy.
+- The inactive lens's sections are not composed.
 
 ### Book-detail in-progress stat
 
-The Reading-shelf specialization of the **Hero stat** pattern (editorial.md): an "In progress" `SectionHeader` opener with a trailing `Update` pill (`surfaceContainerHigh` fill, `primary` content, 15dp pencil icon, opens the Update progress sheet — whose "Mark as read" action Book Detail dispatches through the same path its Shelve control's "Read" row fires, so the sheet gets that control's screen-wide commit haptic + `MarkAsReadBurst` celebration for free) beside it, then the percentage as a `statHero` numeral, an M3-expressive **`LinearWavyProgressIndicator`** immediately beneath it (never the flat `LinearProgressIndicator` — the app-wide "wavy always" rule, §6, applies here too), a `p. {x} of {y}` / `{n} pages to go` counts row (italic `bodySmall`, `onSurfaceVariant`, space-between), an optional **reading-pace forecast** line ("Finish in {x} reading days", derived from the reader's actual per-reading-day pace and hidden entirely when a forecast can't be computed — fewer than one logged reading day, no progress, or already finished), and the existing `DeadlineRow` beneath when a deadline is set. Bar and number read as one motion, as the Hero stat pattern requires. The pace-forecast line and `DeadlineRow` each arrive on their own timer (a separate network round trip and a separate collector, respectively) well after the progress block above has settled, and either may never arrive at all for a given book — so **neither reserves height**; both reveal in place with `expandVertically() + fadeIn()` / `shrinkVertically() + fadeOut()` (on the theme's motion scheme, so they snap under reduced motion) rather than popping in and shoving whatever follows down in a single frame. This is the general rule for any optional trailing line that frequently never arrives: animate the reveal, don't reserve it; a line that (almost) always arrives, or whose absence would otherwise leave a jarring blank run, reserves its height instead. **The underlying reading-pace forecast (`ReadingPaceForecast.compute`, its use case, repository, and remote data source) is a shared `core:personal` capability**, not a book_detail internal — the Reading screen's featured-hero card (reading.md) consumes the same forecast for its own "Your pace" line; each screen still owns its own copy phrasing and reveal choreography for the number.
+- The Reading-shelf hero stat: an "In progress" `SectionHeader` with a trailing `Update` pill (opens the
+  Update progress sheet, whose "Mark as read" runs the shelve control's Read path), the percentage in
+  `statHero`, a `ProgressBar`, a `p. {x} of {y}` / `{n} pages to go` row, an optional pace forecast
+  ("Finish in {x} reading days"), and the `DeadlineRow` when a deadline is set.
+- The forecast and `DeadlineRow` reveal in place; The Book lens's Tags and Find it sections do the same.
+  Voices and About reserve their footprint with masked stand-ins while loading (see "Section footprint
+  reserved while loading", cross-cutting.md).
+- `ReadingPaceForecast` is a `:core:personal` capability shared with Reading's featured-hero card.
 
 ### Edition colophon line
 
-A single-line `bodySmall` / `onSurfaceVariant` string that surfaces print-edition specifics — publisher, format + release year, and ISBN-13 today, scoped to the user's currently-selected edition — folded in as the trailing element of the **Book-detail tag block**'s `Tags` section (above), not a standalone strip. Parts are joined with a ` · ` separator; the ISBN-13 carries its own inline `ISBN-13` label as a prefix on the value (no eyebrow, no separate metadata table). Any part whose fact is unknown is dropped rather than shown blank; the whole line is omitted when none of the three parts is known. Reach for this pattern when a screen needs to name a physical-edition fact in passing without earning a section header or its own card; do not promote it to a labelled metadata table.
+- One `bodySmall` / `onSurfaceVariant` line for the selected edition: publisher, format + release year,
+  and `ISBN-13`-prefixed ISBN, joined with ` · `. Unknown parts drop; with none known the line is omitted.
+- It closes the book-detail tag block; never a labelled metadata table.
 
 ### External-links strip (labeled pills)
 
-A bar-less in-flow `FIND IT` label (§2.3's no-bar register) followed by a wrapping `FlowRow` of **labeled outline pills** — not icon-only buttons — that hand off to off-app destinations. Used on book detail (The Book lens) under the tags/colophon stack to route the reader to a print/library lookup for the currently-selected edition — Bookshop, Amazon, OpenLibrary, all keyed off the edition's ISBN as a search query (prefer `edition.isbn13`, fall back to `edition.isbn10`). Each pill is a fully-rounded (`999`) transparent `Surface` with a hairline `outlineVariant` border, a 16dp primary-tinted leading icon (`ic_storefront`, `ic_shopping_bag`, `ic_library_books`), and a `labelMedium` `onSurface` destination name (`Bookshop` / `Amazon` / `OpenLibrary`) — 16×10dp padding, 8dp icon-label gap. Naming the destination in text matters because the brand identity isn't carried by the glyph alone; the label carries that legibility visually, and the `contentDescription` stays as the accessibility-only backstop. The handoff itself goes through a `UiEvent` (the section dispatches an `OnExternalLinkClickAction` carrying the URL; the screen's top-level `Content()` collects the resulting `OpenExternalLinkEvent` and invokes `LocalUriHandler.openUri` there) — never call `LocalUriHandler` from inside the section, or any other leaf composable. The entire section — label included — is suppressed when the current edition has no ISBN, since every pill would be dead. Reach for this pattern wherever a detail surface needs to launch the reader into a small, fixed set of off-app lookups for the entity in view; do not stretch it into a generic "share/open in…" sheet — for that, reach for the share-sheet pattern.
-
-### Book-detail lens-section reveal
-
-The Book lens's Tags and Find it sections are both condition-gated — neither ISBN nor community tags/colophon are known before the book resolves, and either may genuinely never exist for a given book — so, like the scanned-edition callout, neither reserves a skeleton. What they don't get away with is popping straight into an otherwise-settled column: each wraps its content in `AnimatedVisibility(enter = expandVertically() + fadeIn(), exit = ExitTransition.None)` (specs from the theme's motion scheme), composed unconditionally so the false→true flip actually plays the enter transition rather than materializing pre-visible. Voices is the opposite case — a book (almost) always has *some* community reception once it resolves, and its own fetch trails the rest of the book by a separate round trip — so it reserves instead: until the fetch lands, `reviews` holds two mapper-built stand-in `BookReviewUiModel`s (`isLoading = true`), each masking its own leaves at real size with spoiler and expand inert, collapsing to nothing only once loading finishes with zero reviews. The section does not wait on the book details. About lays out its real headline and drop-cap description over masked stand-in text the same way, and the overflow menu keeps its disabled "More actions" button while the book loads.
-
-### Lens-toggle enable fade
-
-The toggle's disabled "Yours" segment (above) flips enabled the instant a shelved book lands — a data-driven change arriving alongside everything else on the page settling at once. Its dim state is not a bare `Modifier.alpha` snap: the alpha rides `animateFloatAsState` on the same tween/snap spec as the segment's own selection crossfade, so the flip reads as a settle, not a flash.
+- A bar-less `FIND IT` label over a wrapping `FlowRow` of labelled outline pills (Bookshop, Amazon,
+  OpenLibrary), each searching the selected edition's ISBN (`isbn13`, else `isbn10`).
+- A tap dispatches `OnExternalLinkClickAction`; the screen's `Content()` collects `OpenExternalLinkEvent`
+  and calls `LocalUriHandler.openUri`. No leaf composable touches `LocalUriHandler`.
+- The section, label included, is omitted when the edition has no ISBN.
 
 ### Verdict (rating and review)
 
-A book's personal rating and personal review are **never** two separate surfaces — one half-star `StarRatingInput` plus one optional written review, edited together in one `VerdictSheet` (components.md) and shown together in one `VerdictBlock` (components.md) on the book page, both answers to the same question ("what did you think?"). `VerdictSheetContext` (`FINISHED` / `EDIT`) is the input to the shared `Book.toVerdictSheetUiModel` mapper in `:core:uibinding`, not a sheet parameter: it swaps the copy that rides on the model's scaffold — the eyebrow, the headline naming the book, the description, the dismiss label, and the save label — and whether Delete is offered, never the anatomy, so the sheet reads as one component with two voices rather than two components. Both the rating and the review are a **draft held by the host's UiState** (each edit is a `VerdictDraftEvent` folded in by `VerdictSheetUiModel.reduce` in `:core:uibinding`): nothing is written until Save, so a reader can leave with just a rating, just a review, both, or neither. `VerdictBlock` is read-only end to end — it never lets the reader change the rating or the review inline; tapping it (or its "Edit" link, once a verdict exists) is the only way back into the sheet, always in `EDIT` context.
+- Rating and review are one verdict: edited together in `VerdictSheet`, shown together in the read-only
+  `VerdictBlock`; never two surfaces.
+- `Book.toVerdictSheetUiModel` (`:core:uibinding`) takes a `VerdictSheetContext` (`FINISHED` / `EDIT`) that
+  swaps the copy and whether Delete is offered, never the anatomy.
+- Tapping `VerdictBlock` (or its "Edit" link) is the only way back into the sheet, always in `EDIT`.
 
 ### Verdict prompt (open-on-finish)
 
-`VerdictSheet` in `FINISHED` context is **cross-feature** — the one modal surface openable from both `feature/book_detail` (reopened from the book page) and `feature/reading` (raised once, automatically, right after the reader marks a book Read). It rises only on a **genuine** `ShelfMutationOutcome.Applied` transition — re-tapping an already-Read book (a no-op mutation) must never reopen it — so both features inspect the mark-as-read use case's outcome before flipping the state that opens the sheet, rather than opening unconditionally on click. On Reading, the prompt opens *after* the existing mark-as-read celebration (haptic + confetti +, when motion is enabled, the row's slide-to-shelf animation) settles, never fighting it for the frame; there is no Delete action in this context (a book that just finished has no existing review yet). It is deliberately **not** wired to the bulk mark-as-read path (Library's multi-select) — prompting once per book in a batch action would be a wall of sheets, not a moment. Because the sheet is a shared `core:component` component fed by each feature's own TOAD state (the same shared-stateless-component shape as `ChooseListsBottomSheet`), and the combined rating+review save is centralised in `core:book`'s `SaveBookVerdictUseCase`, neither feature re-implements the two-call save or the sheet's anatomy — only the trigger (mark-as-read outcome) and the hosting state differ.
+- `VerdictSheet` in `FINISHED` context opens from book detail and, automatically, from Reading right after
+  a mark-as-read, only on a genuine `ShelfMutationOutcome.Applied` transition.
+- On Reading it opens after the mark-as-read celebration settles. No Delete action. Library's bulk
+  mark-as-read never raises it.
+- The save is `SaveBookVerdictUseCase` (`:core:book`); each feature owns only the trigger and the hosting
+  state.
 
 ### Spoiler reveal
 
-A review hides its spoilers at two independent granularities. The **whole-review gate** is for a review flagged as containing spoilers: the body is withheld behind a quiet "Show spoiler" text button (reveal state held transiently per review id) — used on community review cards. The **inline span reveal** is for individual spoiler runs *inside* an otherwise-visible review: the run is rendered as a solid `spoilerCover` block (text drawn transparent) and reveals in place when the reader taps that span (see `RichText`, components.md). The two compose — a review can be gated as a whole *and* contain inline spoiler spans — but they are separate affordances; never collapse one into the other. In the editor, the same inline mark previews as the translucent `spoilerEditorHighlight` wash so the author keeps reading their words.
+- Whole-review gate: a review flagged as containing spoilers withholds its body behind a quiet "Show
+  spoiler" text button (reveal held transiently per review id); used on community review cards.
+- Inline span reveal: a spoiler run inside a visible review renders as a solid `spoilerCover` block and
+  reveals in place on tap (`RichText`). The two compose but stay separate affordances.
+- In the editor the same mark previews as the translucent `spoilerEditorHighlight` wash.

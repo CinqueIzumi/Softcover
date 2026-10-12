@@ -66,7 +66,7 @@ descriptions — never hand-edit it. The full rules are in `.claude/rules/roadma
 | Adding a module, feature, ScreenModel / Action / Collector, or changing data flow | [`docs/rhaydus/0.3.1/architecture.md`](docs/rhaydus/0.3.1/architecture.md), [`toad-architecture.md`](docs/rhaydus/0.3.1/toad-architecture.md), then [`docs/reference/architecture.md`](docs/reference/architecture.md) |
 | Deciding where a module / type belongs, or wiring a cross-feature dependency | [`docs/reference/module-structure.md`](docs/reference/module-structure.md) |
 | Designing or changing any UI surface | [`docs/rhaydus/0.3.1/design-system-foundations.md`](docs/rhaydus/0.3.1/design-system-foundations.md), then the one section you need behind [`docs/reference/design-system.md`](docs/reference/design-system.md) |
-| Building a component under `:core:component` | `docs/reference/design-system/component-contract.md` (where that file exists) |
+| Building a component under `:core:component` | [`docs/reference/design-system/component-contract.md`](docs/reference/design-system/component-contract.md) |
 | Writing Kotlin | [`docs/rhaydus/0.3.1/code-style.md`](docs/rhaydus/0.3.1/code-style.md), then [`docs/reference/code-style.md`](docs/reference/code-style.md) |
 | Looking for an existing component, modifier or util | [`docs/rhaydus/0.3.1/CAPABILITIES.md`](docs/rhaydus/0.3.1/CAPABILITIES.md) |
 

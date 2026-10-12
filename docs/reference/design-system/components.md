@@ -1,123 +1,115 @@
 # Design System — Components
 
-Shared components; a `detail` link opens the family file with the full contract.
+One line per `:core:component` component, with its package. Its contract is the KDoc on its UI model; the
+rules all components follow are in [component-contract.md](component-contract.md).
 
 ## Navigation & chrome
 
-- **Top app bar** — `core:component/topbar` — page title, back/trailing actions, opaque or over-media.
-- **Editorial top bar** — `core:component/topbar` — desktop page bar: back affordance, start-aligned editorial headline, trailing actions.
-- **Search top app bar** — `core:component/topbar` — mobile search chrome.
-- **Chrome icon button** — `core:component/chrome` — icon-only bar button with tooltip; `overMediaIconButtonColors()` for one floating over media.
-- **Section header** — `core:component/header` — region opener in three accent-bar registers.
-- **Page masthead** — `core:component/header` — a page's title block; `PageMastheadSubtitle` is plain text or springing title and page counts.
-- **Masthead refresh action** — `core:component/header` — trailing refresh button.
-- **Sidebar** — `core:component/sidebar` — a desktop source list of grouped, selectable rows.
-- **DesktopScrollPage** — `core:component/layout` (jvmMain) — desktop scroll page shell: top bar, masthead and bottom bar slots; anatomy in `layout.md`.
-- **Editorial search field** — [detail](components/navigation.md#editorial-search-field) — persistent search pill for editorial headers.
-- **Bottom navigation** — [detail](components/navigation.md#bottom-navigation) — compact-width tab chrome, docked or floating.
-- **Navigation rail** — [detail](components/navigation.md#navigation-rail) — medium-width tab chrome.
-- **Editorial sidebar** — [detail](components/navigation.md#editorial-sidebar) — expanded-width tab chrome.
-- **Session peek bar** — [detail](components/navigation.md#session-peek-bar) — live-timer bar for a session.
-- **Settings rows** — [detail](components/navigation.md#settings-rows) — one anatomy for every Settings row.
+- **TopBar** — `topbar` — page title, back and trailing actions, opaque or over media.
+- **EditorialTopBar** — `topbar` — desktop page bar with a start-aligned editorial headline.
+- **SearchTopBar** — `topbar` — mobile search chrome.
+- **ChromeIconButton** — `chrome` — icon-only bar button with a tooltip; `overMediaIconButtonColors()` over media.
+- **SectionHeader** — `header` — region opener in three accent-bar registers.
+- **PageMasthead** — `header` — a page's title block; `MastheadSubtitle` is plain text or springing counts.
+- **MastheadRefreshAction** — `header` — the masthead's trailing refresh button.
+- **Sidebar** — `sidebar` — desktop source list of grouped, selectable rows.
+- **DesktopScrollPage** — `layout` (jvmMain) — desktop scroll page shell with top bar, masthead and bottom bar slots.
 
 ## Buttons & controls
 
-- **Button** — [detail](components/buttons-controls.md#button) — five styles/sizes; filled is one primary per region.
-- **Pill button** — `core:component/button` — action pill or icon-only circle in five tones.
-- **Toggle** — `core:component/control` — two-state control: filled or bare icon toggle, or a display-only switch inside a row that owns the tap.
-- **Text field** — `core:component/field` — pill, outlined, hero or numeral input; `TextFieldError` adds error ink, an animated message and a shake.
-- **Segmented control** — `core:component/control` — one-of-N choice as a pill track or as words in a sentence.
-- **Split button** — [detail](components/buttons-controls.md#split-button) — primary action with a chevron menu of variants.
-- **Theme preview tile** — `core:component/control` — mini-page theme choice.
-- **Colour palette preview tile** — `core:component/control` — mini-page spine-colour choice.
-- **Preview tile frame** — `core:component/control` — tiles' frame, `PageMiniature`, `PreviewTileEvent`.
-- **Swipe row actions** — [detail](components/buttons-controls.md#swipe-row-actions) — swipe-to-mark-as-read / swipe-to-remove.
+- **PillButton** — `button` — action pill or icon-only circle in five tones.
+- **Toggle** — `control` — filled or bare icon toggle, or a display-only switch inside a row that owns the tap.
+- **ToggleRow** — `control` — a title over an optional gloss with a trailing switch; the row is the tap target.
+- **TextField** — `field` — pill, outlined, hero or numeral input, with an optional error state.
+- **SegmentedControl** — `control` — one-of-N choice as a pill track or as words in a sentence.
+- **ThemePreviewTile** — `control` — mini-page theme choice.
+- **ColorPalettePreviewTile** — `control` — mini-page spine-colour choice.
 
 ## Chips
 
-- **Pill chip** — `core:component/chip` — tonal/choice/filled/container/outlined/dashed/spoiler tone + slots.
-- **Chip flow** — [detail](components/chips.md#chip-flow) — wrapping row of a `ChipSet`.
-- **Expandable flow row** — [detail](components/chips.md#expandable-flow-row) — wrapping chip/tag container, collapsing past N lines.
+- **Chip** — `chip` — the one chip, in seven tones with leading and trailing slots.
+- **ChipFlow** — `chip` — wraps a `ChipSet` in one flow row.
 
-## Covers
+## Covers & cards
 
-- **Cover** — `core:component/cover` — the app's only book-cover renderer; variant-driven, never blank.
-- **Coverless title cover** — `core:component/cover` — the monogram/title jacket `Cover` falls back to.
-- **Book card** — `core:component/bookcard` — the one book/series card (cover-only, column or row); `bookCardHandOver` fades lazy stand-ins out as the real list staggers in.
-- **Rhaydus shimmer image** — [detail](components/covers.md#rhaydus-shimmer-image) — the loader for every non-cover image.
+- **Cover** — `cover` — the only book-cover renderer; falls back to a coverless title jacket, never blank.
+- **CoverOverlay** — `badge` — pins a `Badge` to a cover's corner, optionally greying the cover.
+- **BookCard** — `bookcard` — the one book or series card: cover-only, column or row.
+- **MoodTile** — `mood` — a mood's title and book count on one of four inks.
 
 ## States & feedback
 
-- **Inline error state** — [detail](components/states-feedback.md#inline-error-state) — message + retry for a `String?` error.
-- **Banner** — `core:component/callout` — full-width slide-in strip for a screen-level condition or a card-fused nudge; `BannerVariant` (`Status`, `Editorial`) sets colour, voice, icon and dismiss.
-- **Empty state** — `core:component/state` — placeholder when a surface has nothing to draw; `EmptyStateVariant.Centered(button?)` (quote glyph, headline, optional button) or `Inline` (start-aligned title and body); the caller pads it full pane or in flow.
-- **SkeletonMask** — `core:component/state` — `Modifier.skeletonMask(visible, shape)`: shimmers a leaf while loading (no grace when replacing content; `SkeletonRevealGroup` covers new leaves), then fades in; `clippedSkeletonMask` clips too.
-- **Divider** — `core:component/divider` — hairline rule, bare, centred, or vertical.
-- **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — exception to the wavy-progress rule.
-- **Pull-to-refresh eyebrow** — [detail](components/states-feedback.md#pull-to-refresh-eyebrow) — eyebrow copy synced to pull progress.
-- **Deadline row** — `core:component/deadline` — "Finish by" card: icon, title, status `Badge`, goal sentence.
-- **Deadline badge / cover overlay / summary line** — `core:component/badge` + `deadline` — deadline marks.
-- **Revealed when present** — `core:component/state` — expands a row vertically while its value is non-null.
-- **Unreleased badge** — `core:component/badge` — `Primary` tone; resolved in `core:uibinding` `release/`.
-- **Selection mark / check** — `core:component/selection` — circle mark for a cover or card; space-keeping check for rows.
-- **Reorder lift** — `core:component/reorder` — `Modifier.reorderLift`: the one drag-to-reorder lift.
-- **Mark-as-read celebration** — `core:component/celebration` — mark-as-read particle burst.
-- **Search results pagination** (feature-owned) — [detail](components/states-feedback.md#search-results-pagination) — append-on-scroll paging.
-- **Connectivity chrome** — [detail](components/states-feedback.md#connectivity-chrome) — `Banner`, `EmptyState` and `rememberIsOnline()` for offline.
-- **Snackbar host** — `core:component/snackbar` — one per window (app root, each sheet); only the topmost draws. The app root rides above the compact bottom chrome via `BottomChromeAnchor`, else the navigation-bar inset.
-- **Callout** — `core:component/callout` — in-flow card for one condition, optionally with a single next step; `CalloutVariant` is `Neutral` or `Highlight`.
+- **Banner** — `callout` — full-width strip for a screen-level condition or a card-fused nudge.
+- **Callout** — `callout` — in-flow card for one condition, optionally with one next step.
+- **EmptyState** — `state` — placeholder when a surface has nothing to draw.
+- **OfflineEmptyStatePlaceholder** — `state` — the full-pane `EmptyState` for content that cannot load offline.
+- **SkeletonMask** — `state` — `Modifier.skeletonMask` shimmers a leaf while loading.
+- **RevealedWhenPresent** — `state` — expands a row while its value is non-null.
+- **Divider** — `divider` — hairline rule, bare, centred or vertical.
+- **Badge** — `badge` — short status or release label in six tones.
+- **DeadlineRow** — `deadline` — "Finish by" card with a status `Badge` and goal sentence.
+- **DeadlineSummaryLine** — `deadline` — the deadline date beside its pace or status.
+- **SelectionMark / SelectionCheck** — `selection` — circle mark on a cover or card; space-keeping check for rows.
+- **Modifier.reorderLift** — `reorder` — the one drag-to-reorder lift.
+- **MarkAsReadBurst** — `celebration` — the mark-as-read particle burst.
+- **SoftcoverSnackbarHost** — `snackbar` — one per window (app root, each sheet); only the topmost draws.
 
-## Sheets
+## Sheets & dialogs
 
-- **Adaptive modal sheet** — `core:component/sheet` — bottom sheet; animated panel if expanded.
-- **Sheet scaffold** — [detail](components/sheet-scaffold.md) — chrome, rows, close.
-- **Sheet row count** — `core:component/sheet` — a row's trailing count and spoken text.
-- **Loading sheet** — `core:component/sheet` — full-screen blocking wavy-progress wait.
-- **Date picker dialog** — `core:component/dialog` — single-day calendar dialog; owns the UTC-millis conversion.
-- **Update progress sheet** — `core:component/progress` — pages/percentage/time reading-progress editor.
-- **Progress bar** — `core:component/progress` — determinate wavy bar; the wave holds still.
-- **Because-you-read genre picker** (feature-owned) — [detail](components/sheets.md#because-you-read-genre-picker) — genre-override sheet.
-- **Tag editor sheet** (feature-local) — [detail](components/sheets.md#tag-editor-sheet) — manages the user's own tags on a book.
-- **Choose-lists sheet** — `core:component/lists` — add/remove one or many books to the user's custom lists.
-- **Change edition sheet** (feature-local) — [detail](components/sheets.md#change-edition-sheet) — picks which edition the reader tracks.
+- **AdaptiveModalSheet** — `sheet` — bottom sheet, or an animated panel when expanded.
+- **SheetScaffold** — `sheet` — chrome every modal sheet shares: header, body, footer and close; `SheetSession` holds its lifetime.
+- **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss the sheet on selection.
+- **SheetActionRow** — `sheet` — a plain tappable menu row that acts at once.
+- **LoadingSheet** — `sheet` — full-screen blocking wait.
+- **SoftcoverDatePickerDialog** — `dialog` — single-day calendar dialog.
+- **UpdateProgressBottomSheet** — `progress` — pages, percentage or time reading-progress editor.
+- **ProgressBar** — `progress` — determinate wavy bar.
+- **ChooseListsBottomSheet** — `lists` — adds or removes one or many books to the user's lists.
 
 ## Statistics
 
-- **Animated stat number** — `core:component/statistic` — springs a number, with optional prefix/suffix (plural-aware), into place.
-- **Stat tile** — `core:component/statistic` — a labelled stat on a hero, standard or compact tile; only the number masks while loading.
-- **Ranked bars** — `core:component/chart` — a bar per category on its own 100% track.
-- **Proportion chart** — `core:component/chart` — a stacked bar with its legend.
-- **Editorial figure / chart** — [detail](components/statistics.md#editorial-figure--chart) — the editorial charts.
+- **StatNumber** — `statistic` — springs a number into place, with an optional prefix or suffix.
+- **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile.
+- **ColumnChart** — `chart` — vertical columns on one baseline with a per-column readout.
+- **RankedBars** — `chart` — a bar per category, each on its own 100% track.
+- **ProportionChart** — `chart` — one stacked bar of parts of a whole, with its legend.
 
 ## Share
 
-- **Share card** — `core:component/share` — one `ShareCardUiModel` renderer; `ScaledShareCardPreview` scales it.
-- **Share card sheet** — `core:component/share` — `ShareCardSheetContent`: the one share sheet; owns capture, busy and snackbars.
+- **ShareCard** — `share` — renders any `ShareCardUiModel`; `ScaledShareCardPreview` scales it.
+- **ShareCardSheetContent** — `share` — the one share sheet; owns capture, busy and snackbars.
 
-## Rich text
+## Text & editorial
 
-- **Softcover text** — `core:component/text` — the one text leaf; lays out `standIn` under `skeletonMask` while loading or `text` is null.
-- **Fade-through text** — `core:component/text` — Softcover text that fades when its text changes.
-- **Clickable text** — `core:component/richtext` — prose with a tappable substring resolved to a link event.
-- **Rich text** — `core:component/richtext` — read-only formatted, spoiler-maskable prose.
-- **Rich-text formatting toolbar** — `core:component/richtext` — bold/italic/spoiler chip row inside `VerdictSheet`.
+- **SoftcoverText** — `text` — the one text leaf; shows a stand-in under the skeleton mask while loading.
+- **FadeThroughText** — `text` — `SoftcoverText` that fades when its text changes.
+- **RichText** — `richtext` — read-only formatted, spoiler-maskable prose.
+- **VerdictSheet** — `verdict` — the combined rating-and-review editor.
+- **VerdictBlock** — `verdict` — book-page rating and review card that opens the verdict sheet.
 
-## Editorial
+## Modifiers & helpers
 
-- **Drop-cap text** — [detail](components/editorial.md#drop-cap-text) — body prose with a 3-line drop cap.
-- **Editable hero-stat field** — [detail](components/editorial.md#editable-hero-stat-field) — hero-numeral input for progress sheets.
-- **Star rating input** — [detail](components/editorial.md#star-rating-input) — half-star interactive/read-only rating control.
-- **Verdict sheet** — `core:component/verdict` — combined rating-and-review surface.
-- **Verdict block** — `core:component/verdict` — book-page rating+review card that opens the verdict sheet.
-- **Personal review section** — [detail](components/editorial.md#personal-review-section) — book-detail entry point to review editor.
-- **Browse-by-mood grid** (feature-owned) — [detail](components/editorial.md#browse-by-mood-grid) — 2-column mood-tile grid.
+- **`tactileClickable` / `Selectable` / `Toggleable`** — `modifier` — the one ripple-less interaction modifier.
+- **`shakeOnError`** — `modifier` — shakes a node and plays *reject* on a failure trigger.
+- **`navSharedBounds`** — `modifier` — the one way to make a node a navigation shared element.
+- **`rememberPulseScale`** — `modifier` — a one-shot scale pulse each time a trigger changes.
+- **`rememberReorderHaptics`** — `haptics` — lift, per-target tick and drop haptics for drag-to-reorder.
+- **`Haptics.play(Feedback)`** — `haptics` — plays the outcome haptic a `FeedbackEvent` carries.
 
-## Platform helpers
+## From the foundation
 
-- **Desktop tooltip** — [detail](components/platform-helpers.md#desktop-tooltip) — hover tooltip on desktop, no-op on touch.
-- **Desktop context menu** — [detail](components/platform-helpers.md#desktop-context-menu) — right-click menu on desktop, no-op on touch.
-- **Haptics helper** — [detail](components/platform-helpers.md#haptics-helper) — eight-case entry point for haptic feedback.
-- **Lazy-item mutation animator** — [detail](components/platform-helpers.md#lazy-item-mutation-animator) — animates list add/move/remove.
-- **Staggered entry coordinator** — [detail](components/platform-helpers.md#staggered-entry-coordinator) — stagger for carousels/lists.
-- **Barcode scanner** (feature-owned) — [detail](components/platform-helpers.md#barcode-scanner) — CameraX/ML Kit ISBN-scan surface.
-- **Active reading session** — [detail](components/platform-helpers.md#active-reading-session) — controller behind peek bar and Focus Mode.
+Foundation components are listed in [`docs/rhaydus/0.3.1/CAPABILITIES.md`](../../rhaydus/0.3.1/CAPABILITIES.md).
+The app's own usage rules:
+
+- `Cover` for book covers; `RhaydusShimmerImage` for every other image.
+- `RhaydusButton`: one filled button per region.
+- `InlineErrorState` takes the editorial `bodySmall` face through `textStyle`.
+- `DropCapText` takes `dropCapFontFamily = displayFontFamily()`.
+- `StarRatingInput` and every rating glyph fill with `RatingGold`.
+- `HeroStatNumberField` for any number edited in a hero context, never a bordered field.
+- `EditorialSearchField` for search inside an editorial header; `SearchTopBar` when search is the app bar.
+- `ExpandableFlowRow` for a wrapping chip set that can run long.
+- Pull-to-refresh draws `PullToRefreshDefaults.LoadingIndicator`, the one exception to wavy progress, under a `PullToRefreshEyebrow`.
+- `DesktopTooltip` on every icon-only desktop control; `DesktopContextMenu` mirrors a touch long-press.
+- Haptics go through `LocalHaptics.current`, never `performHapticFeedback`.
+- Press feedback goes through `tactileClickable`, never the foundation `pressScale` modifiers (detekt `ForbiddenImport`).
