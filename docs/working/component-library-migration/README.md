@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PC done; the Gradle daemon is pinned to JDK 17 (`0d2c50c30`). PF-4 (surface polish) is removed: the user rejected the applied work after a device check, and all of it was discarded. Order from here: PF-7 → S12-1 to S12-5. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
-- **Next:** PF-7 in `steps/pf-premium-feel.md`: apply the approved replacements from `copy-audit.md`.
-- **Open questions:** none.
-- **Verification:** not run: no Kotlin differs from HEAD (the PF-4 code was discarded), only plan docs changed.
-- **Uncommitted:** this block; the PF-4 removal in `steps/pf-premium-feel.md`, `steps/s12-close-out.md` and `## Steps`; `premium-feel-audit.md` deleted (its share-naming row moved to `copy-audit.md`).
+- **State:** PF done: PF-7 applied every approved `copy-audit.md` row (`8dd8842e2`), tests that pinned fixed copy were loosened to assert the branch-defining fields instead. Order from here: S12-1 to S12-5. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
+- **Next:** S12-1 in `steps/s12-close-out.md` § S12-1: write `checkComponentBudget`.
+- **Open questions:** where to track the double screen-reader announcement on icons inside labelled buttons (`FeaturedSessionButton`, `FeaturedBackdropCard` "Update progress"): the icon repeats the button label, and silencing it needs `drawableIconResource` to accept no description (a design-system API change). Roadmap issue or an S12 sub-step.
+- **Verification:** after the last Kotlin edit, `styleCheck`, `testAndroidHostTest`, `:app:compileDebugKotlin` and `:desktopApp:compileKotlin` passed; glommed-closer grep and AAA-marker check on changed files clean; two `softcover-reviewer` rounds, findings fixed.
+- **Uncommitted:** this block, the PF row in `## Steps`, and `steps/pf-premium-feel.md` deleted.
 ## Local verification
 
 The Gradle daemon runs on JDK 17 (`gradle/gradle-daemon-jvm.properties`), whatever `JAVA_HOME` is; no
@@ -65,7 +65,7 @@ every sub-step's Verify.
 | SS | — (simplicity audit) | SS-0–SS-11, SS-C; after S9, before PF / S10 | [x] |
 | TP | — (test prune) | TP-0 timings, TP-1–TP-8 per module group | [x] |
 | SD | — (screen de-duplication) | SD-0 inventory, SD-P shell, SD-1–SD-6 per screen group | [x] |
-| PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7 (no PF-4); PF-7 before S12 | [ ] |
+| PF | — (premium feel) | PF-1–PF-7 (no PF-4); `copy-audit.md` stays for the S12 walkthrough | [x] |
 | S10 | — (shelf teardown) | S10-1–S10-5, S10-C | [x] |
 | SP | — (spacing scale) | SP-1–SP-5, SP-C; after S10, before S11 | [x] |
 | SH | — (shape scale) | SH-1–SH-4, SH-C; after S10, before S11 | [x] |
