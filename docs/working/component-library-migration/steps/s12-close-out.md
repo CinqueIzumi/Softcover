@@ -8,17 +8,10 @@ has landed. **Delegation:** user
 
 | Sub | Scope | Status |
 |---|---|---|
-| S12-1 | G4 `checkComponentBudget` | [ ] |
 | S12-2 | The `docs/reference/design-system/` rewrite, the `foundations.md` budget restore, the `CLAUDE.md` parenthetical | [ ] |
 | S12-3 | The open decisions (cover radius, `"tnum"`), the fixture-size measurement, the gallery completeness pass | [ ] |
 | S12-4 | G7 — human walkthrough of every screen on device | [ ] |
 | S12-5 | G6 (`check` green) and deleting this directory | [ ] |
-
-## S12-1 — G4
-
-Write `checkComponentBudget`: a Gradle task counting `@Composable` declarations outside
-`:core:component` (excluding `*Preview` functions and platform `expect`/`actual`s). Set the ceiling to
-the measured post-migration value; a rise fails the build. Wire into `check`.
 
 ## S12-2 — doc rewrite, budget restore, `CLAUDE.md`
 

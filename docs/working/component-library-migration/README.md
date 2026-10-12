@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PF done: PF-7 applied every approved `copy-audit.md` row (`8dd8842e2`), tests that pinned fixed copy were loosened to assert the branch-defining fields instead. Order from here: S12-1 to S12-5. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
-- **Next:** S12-1 in `steps/s12-close-out.md` § S12-1: write `checkComponentBudget`.
+- **State:** S12-1 dropped: the composable-count gate (G4) was written, then removed on review because it fails legitimate screen splits; see `## Decisions`. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
+- **Next:** S12-2 in `steps/s12-close-out.md` § S12-2: the `docs/reference/design-system/` rewrite, the budget re-pins, the `CLAUDE.md` parenthetical.
 - **Open questions:** where to track the double screen-reader announcement on icons inside labelled buttons (`FeaturedSessionButton`, `FeaturedBackdropCard` "Update progress"): the icon repeats the button label, and silencing it needs `drawableIconResource` to accept no description (a design-system API change). Roadmap issue or an S12 sub-step.
-- **Verification:** after the last Kotlin edit, `styleCheck`, `testAndroidHostTest`, `:app:compileDebugKotlin` and `:desktopApp:compileKotlin` passed; glommed-closer grep and AAA-marker check on changed files clean; two `softcover-reviewer` rounds, findings fixed.
-- **Uncommitted:** this block, the PF row in `## Steps`, and `steps/pf-premium-feel.md` deleted.
+- **Verification:** no code change; `build.gradle.kts`, `build-wiring.md` and `module-structure.md` match HEAD.
+- **Uncommitted:** this README (G4 removed, decision added) and `steps/s12-close-out.md` (S12-1 removed).
 ## Local verification
 
 The Gradle daemon runs on JDK 17 (`gradle/gradle-daemon-jvm.properties`), whatever `JAVA_HOME` is; no
@@ -71,7 +71,7 @@ every sub-step's Verify.
 | SH | — (shape scale) | SH-1–SH-4, SH-C; after S10, before S11 | [x] |
 | S11 | — (contract retrofit) | S11-1–S11-40, S11-C | [x] |
 | PC | — (performance checks) | PC-1–PC-5b; stable UiStates moved to `domain-out-of-uistate` | [x] |
-| S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-1–S12-5 | [ ] |
+| S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-2–S12-5 (S12-1 dropped) | [ ] |
 
 ## Decisions
 
@@ -83,6 +83,7 @@ every sub-step's Verify.
 - A step spanning several sessions splits into sub-steps, one session each, in the step file's `## Sub-steps`.
 - Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost its ellipsis.
 - Accepted gate gaps: `softcover:` typos, dp in branches / vals / model fields, `Foo.Default` reads, `iosMain`.
+- No composable-count gate (G4 dropped): ~210 of the 272 composables outside `:core:component` are screen sections, so a count ceiling punishes splitting screens.
 ## Baseline
 
 Measured 2026-08-21, `release/3.2.0` @ `ada51050`.
@@ -118,10 +119,6 @@ failure.
       `checkModuleGraph`, paired with a detekt `ForbiddenImport` on `core.domain.**` scoped to
       `**/core/designsystem/**`.
 - [x] **G3 — The `:core:designsystem` → `:core:book` api allowlist row is gone.**
-- [ ] **G4 — Composable budget ratchet.** A `checkComponentBudget` task counting `@Composable`
-      declarations outside `:core:component` (excluding `*Preview` functions and platform
-      `expect`/`actual`s). Ceiling set to the post-migration measured value; a rise fails the build.
-      Wire into `check`. `steps/s12-close-out.md` S12-1 writes it.
 - [ ] **G5 — Doc rule.** `docs/reference/design-system/` updated in the same change as any
       design-system change — enforced by `softcover-reviewer`, which treats a design-system change
       with no doc update as a blocker.
@@ -129,8 +126,6 @@ failure.
       module) and `ktlintCheck`.
 - [ ] **G7 — Human walkthrough** of every screen on device, `main` as baseline (S12-4).
 
-**Open:** `checkComponentBudget` (G4) is not written yet — the
-count is still falling.
 
 ## Out of scope
 
@@ -149,7 +144,6 @@ Not components; they stay where they are.
   `:core:presentation`.
 - Share cards keep their own family — never folded into `BookCard` — but migrated in S4 with
   everything else in `:core:designsystem` (§ 7.0's history, closed).
-- `@Preview` functions — excluded from the G4 budget count.
 
 ## Risks
 
