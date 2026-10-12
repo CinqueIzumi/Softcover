@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PC-1 to PC-5b done. PC-5b: no leaf composable takes `Book` / `BookEdition` / `ActiveSession` / a profile breakdown; the approved shape in the step file is built; 15 UNSTABLE params left the baselines, none added. The live session timer and the lock screen share `:core:domain`'s `readingDuration`. `BookDetailPaneHost.destination` stays baselined. PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
-- **Next:** PC-5c in `steps/pc-performance-checks.md` (sections take their slice of state instead of the whole UiState); the #275 PC box ticks after PC-5c.
+- **State:** PC done: idle sweep, `stabilityCheck` gate with per-module baselines, local type fixes, leaf UI models. Stable UiStates moved out of this plan to [`domain-out-of-uistate`](../domain-out-of-uistate/README.md), which starts after it closes. PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
+- **Next:** S12-1 in `steps/s12-close-out.md` (`checkComponentBudget`).
 - **Open questions:** whether the CI stability step passes on JDK 17 (verified only under JBR 21); watch the first CI run.
 - **Verification:** `styleCheck` and `stabilityCheck` passed after the last Kotlin edit (JBR 21); `testAndroidHostTest` green for reading, explore, book_detail, profile, session, orchestration, core:presentation, core:domain; reviewed, findings fixed; documentation pass done; AAA / glommed-closer / `!!` greps clean.
-- **Uncommitted:** this Now-block update only (PC-5b committed in `8e0987619`).
+- **Uncommitted:** PC closed in this file; `steps/pc-performance-checks.md` still to delete; the new `domain-out-of-uistate/README.md`.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:
@@ -74,7 +74,7 @@ every sub-step's Verify.
 | SP | — (spacing scale) | SP-1–SP-5, SP-C; after S10, before S11 | [x] |
 | SH | — (shape scale) | SH-1–SH-4, SH-C; after S10, before S11 | [x] |
 | S11 | — (contract retrofit) | S11-1–S11-40, S11-C | [x] |
-| PC | [steps/pc-performance-checks.md](steps/pc-performance-checks.md) | PC-1–PC-5c | [ ] |
+| PC | — (performance checks) | PC-1–PC-5b; stable UiStates moved to `domain-out-of-uistate` | [x] |
 | S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-1–S12-5 | [ ] |
 
 ## Decisions
