@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.modifier.tactileSelectable
 import nl.rhaydus.softcover.core.component.selection.SelectionCheck
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsChoiceRowUiModel
 
 /**
@@ -41,8 +42,7 @@ internal fun SettingsSelectableRow(
         secondary = model.example,
         secondaryStyle = MaterialTheme.editorialTypography.bodySmall.copy(
             letterSpacing = 0.3.sp,
-            fontFeatureSettings = "tnum",
-        ),
+        ).tabularFigures(),
         trailing = {
             SelectionCheck(
                 selected = model.selected,

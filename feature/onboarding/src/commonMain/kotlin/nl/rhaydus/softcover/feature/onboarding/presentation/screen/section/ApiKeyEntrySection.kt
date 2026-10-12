@@ -41,6 +41,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyPasteAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveClickAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyShakeEndedAction
@@ -348,8 +349,7 @@ private fun ExplainerStepRow(
             style = MaterialTheme.editorialTypography.headlineSmall.copy(
                 fontSize = 17.sp,
                 lineHeight = 17.sp,
-                fontFeatureSettings = "tnum",
-            ),
+            ).tabularFigures(),
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .width(22.dp)

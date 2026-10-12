@@ -13,8 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.editorial.EditorialTypography as FoundationEditorialTypography
 
-private const val TABULAR_NUMS = "tnum"
-
 @Immutable
 data class EditorialTypography(
     val eyebrow: TextStyle,
@@ -110,14 +108,12 @@ internal fun buildEditorialTypography(
             fontWeight = FontWeight.SemiBold,
             fontSize = 72.sp,
             lineHeight = 76.sp,
-            fontFeatureSettings = TABULAR_NUMS,
-        ),
+        ).tabularFigures(),
         statLarge = typography.displayMedium.copy(
             fontStyle = FontStyle.Italic,
             fontWeight = FontWeight.SemiBold,
             lineHeight = 52.sp,
-            fontFeatureSettings = TABULAR_NUMS,
-        ),
+        ).tabularFigures(),
 
         quoteGlyph = typography.displayLarge.copy(
             fontSize = 120.sp,

@@ -29,7 +29,7 @@ Dynamic colour (Android 12+) is off by default. While on, the wallpaper scheme r
 
 Plumbing is [fd §2](../../rhaydus/0.3.1/design-system-foundations.md#2-typography-plumbing). Both families are bundled as Compose Multiplatform font resources:
 
-- **Fraunces** — the editorial serif with true italics: page titles, display, headlines, body prose, stats (tabular figures), the quote glyph.
+- **Fraunces** — the editorial serif with true italics: page titles, display, headlines, body prose, stats, the quote glyph. Tabular figures come from `TextStyle.tabularFigures()`, never a raw OpenType string.
 - **Inter** — the chrome sans, roman only: eyebrows, card and list titles, Material component internals, utility labels. A chrome surface that needs italic belongs in the editorial scale.
 
 | Role            | Where it goes                                                                 | Character                          |

@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S12-2 done: design-system docs rewritten against `:core:component` (ten `components/*.md` deleted, contract moved to KDoc, foundation copies replaced by links, every pattern entry ≤12 lines), budgets re-pinned, `CLAUDE.md` and `compose-ui.md` maintenance rule updated. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
+- **State:** S12-1 dropped (`bc5e6885a`); S12-2 done (`8cb94fcca`): design-system docs rewritten against `:core:component`, budgets re-pinned, `CLAUDE.md` and the `compose-ui.md` maintenance rule updated. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
 - **Next:** S12-3 in `steps/s12-close-out.md` § S12-3: cover-radius and `"tnum"` decisions, fixture size, gallery completeness.
 - **Open questions:** where to track the double screen-reader announcement on icons inside labelled buttons (`FeaturedSessionButton`, `FeaturedBackdropCard` "Update progress"): the icon repeats the button label, and silencing it needs `drawableIconResource` to accept no description (a design-system API change). Roadmap issue or an S12 sub-step.
-- **Verification:** `checkDocBudgets` and `styleCheck` passed; stale-name grep and relative-link check clean; one `softcover-reviewer` round, findings fixed.
-- **Uncommitted:** S12-2 (docs, KDoc-only Kotlin edits, budgets, `CLAUDE.md`, rules, reviewer memory) and these tracker ticks.
+- **Verification:** after the last Kotlin edit, `checkDocBudgets` and `styleCheck` passed; glommed-closer grep on changed `.kt` files clean (no test files changed); stale-name grep and relative-link check clean; one `softcover-reviewer` round, findings fixed.
+- **Uncommitted:** this `## Now` block only.
 ## Local verification
 
 The Gradle daemon runs on JDK 17 (`gradle/gradle-daemon-jvm.properties`), whatever `JAVA_HOME` is; no

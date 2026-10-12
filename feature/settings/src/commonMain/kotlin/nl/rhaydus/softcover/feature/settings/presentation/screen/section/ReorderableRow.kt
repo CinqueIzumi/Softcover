@@ -30,6 +30,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 
 private const val HIDDEN_ROW_ALPHA = 0.52f
@@ -183,8 +184,7 @@ private fun RowCountLine(
         style = MaterialTheme.editorialTypography.bodySmall.copy(
             fontSize = 12.5.sp,
             lineHeight = 16.sp,
-            fontFeatureSettings = "tnum",
-        ),
+        ).tabularFigures(),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }

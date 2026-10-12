@@ -41,6 +41,7 @@ import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 
 @Composable
 internal fun BookCardCoverLayout(
@@ -231,7 +232,7 @@ private fun ProgressLabel(
     label: String,
     isLoading: Boolean,
 ) {
-    val style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum")
+    val style = MaterialTheme.typography.labelMedium.tabularFigures()
     val color = MaterialTheme.colorScheme.onSurfaceVariant
     val density = LocalDensity.current
     val measurer = rememberTextMeasurer()

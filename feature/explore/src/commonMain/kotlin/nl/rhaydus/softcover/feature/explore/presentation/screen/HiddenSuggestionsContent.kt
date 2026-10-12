@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 import nl.rhaydus.softcover.feature.explore.presentation.action.HiddenSuggestionsAction
 import nl.rhaydus.softcover.feature.explore.presentation.model.HiddenGroupHeaderUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
@@ -124,7 +125,7 @@ private fun HiddenSuggestionsGroupHeader(
                 text = model.count,
                 isLoading = isLoading,
                 standIn = "00",
-                style = MaterialTheme.editorialTypography.eyebrowSmall.copy(fontFeatureSettings = "tnum"),
+                style = MaterialTheme.editorialTypography.eyebrowSmall.tabularFigures(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }

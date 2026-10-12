@@ -46,6 +46,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -307,9 +308,7 @@ private fun ShelveRow(
             if (selected && trailingStatus != null) {
                 SoftcoverText(
                     text = trailingStatus,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontFeatureSettings = "tnum",
-                    ),
+                    style = MaterialTheme.typography.labelSmall.tabularFigures(),
                     color = contentColor.copy(alpha = 0.9f),
                 )
             }

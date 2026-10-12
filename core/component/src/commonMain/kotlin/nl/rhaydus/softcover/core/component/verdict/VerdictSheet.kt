@@ -58,6 +58,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 
 private val VERDICT_CAPTIONS = listOf(
     "Awful.",
@@ -283,8 +284,7 @@ internal fun VerdictScoreLine(
         style = MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 1.6.sp,
-            fontFeatureSettings = "tnum",
-        ),
+        ).tabularFigures(),
         color = MaterialTheme.colorScheme.primary,
         modifier = modifier,
     )

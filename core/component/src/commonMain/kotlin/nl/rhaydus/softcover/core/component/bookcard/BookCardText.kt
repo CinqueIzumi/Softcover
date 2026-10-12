@@ -29,6 +29,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 
 @Composable
 internal fun BookCardTextBlock(
@@ -166,7 +167,7 @@ private fun SupportingLine(
     line: ImmutableList<BookCardLinePart>,
     isLoading: Boolean,
 ) {
-    val style = MaterialTheme.editorialTypography.bodySmall.copy(fontFeatureSettings = "tnum")
+    val style = MaterialTheme.editorialTypography.bodySmall.tabularFigures()
     val color = MaterialTheme.colorScheme.onSurfaceVariant
 
     Row(verticalAlignment = Alignment.CenterVertically) {

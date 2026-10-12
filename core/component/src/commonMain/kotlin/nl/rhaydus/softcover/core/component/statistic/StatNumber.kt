@@ -21,8 +21,7 @@ import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
-
-private const val TABULAR_NUMS = "tnum"
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 
 /**
  * The canonical way to render a numeric stat that can change in place. Raw `Text` for a number that
@@ -85,7 +84,7 @@ internal fun StatNumber(
     )
 
     val displayValue = animated.toDouble()
-    val numberStyle = style.copy(fontFeatureSettings = TABULAR_NUMS)
+    val numberStyle = style.tabularFigures()
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
 

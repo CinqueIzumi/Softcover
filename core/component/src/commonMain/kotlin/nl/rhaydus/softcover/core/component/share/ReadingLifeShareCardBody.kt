@@ -42,6 +42,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 
 @Composable
 internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
@@ -417,8 +418,7 @@ private fun ReadingLifeFooterStat(
             style = MaterialTheme.editorialTypography.headlineSmall.copy(
                 fontSize = 22.sp,
                 lineHeight = 24.sp,
-                fontFeatureSettings = "tnum",
-            ),
+            ).tabularFigures(),
             color = LocalContentColor.current,
         )
 

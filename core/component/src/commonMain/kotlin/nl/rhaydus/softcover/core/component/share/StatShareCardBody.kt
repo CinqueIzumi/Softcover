@@ -22,7 +22,7 @@ internal fun StatShareCardBody(content: StatShareCardUiModel) {
 
     SoftcoverText(
         text = content.value.toString(),
-        style = MaterialTheme.editorialTypography.statHero.copy(fontFeatureSettings = "tnum"),
+        style = MaterialTheme.editorialTypography.statHero,
         color = LocalContentColor.current,
     )
 

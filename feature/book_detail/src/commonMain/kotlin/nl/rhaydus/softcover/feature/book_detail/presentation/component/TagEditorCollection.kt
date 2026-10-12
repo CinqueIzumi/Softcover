@@ -35,6 +35,7 @@ import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagEditorChipGroup
 
 @Composable
@@ -97,7 +98,7 @@ private fun TagGroupSection(
 
             SoftcoverText(
                 text = group.chips.size.toString(),
-                style = MaterialTheme.editorialTypography.eyebrowSmall.copy(fontFeatureSettings = "tnum"),
+                style = MaterialTheme.editorialTypography.eyebrowSmall.tabularFigures(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             )
         }

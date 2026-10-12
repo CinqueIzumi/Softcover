@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -50,6 +50,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.section.ApiKeyEntryContent
@@ -198,8 +199,7 @@ private fun FolioIndicator(activePage: Int) {
         text = folioText,
         style = MaterialTheme.editorialTypography.eyebrow.copy(
             letterSpacing = 2.sp,
-            fontFeatureSettings = "tnum",
-        ),
+        ).tabularFigures(),
     )
 }
 
