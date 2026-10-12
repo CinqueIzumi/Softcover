@@ -170,27 +170,44 @@ fun ShareCardSheetContent(
         },
         modifier = modifier,
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        ShareCardSheetBody(
+            model = model,
+            capture = capture,
+            previewModifier = Modifier
+                .shakeOnError(trigger = shake)
+                .graphicsLayer {
+                    scaleX = settleScale.value
+                    scaleY = settleScale.value
+                },
+            aboveCard = aboveCard,
+        )
+    }
+}
+
+/** The sheet's body without the modal container or the capture effects, so the gallery can host it inline. */
+@Composable
+internal fun ShareCardSheetBody(
+    model: ShareCardSheetUiModel,
+    capture: ShareCardCapture,
+    modifier: Modifier = Modifier,
+    previewModifier: Modifier = Modifier,
+    aboveCard: @Composable ColumnScope.() -> Unit = {},
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        aboveCard()
+
+        Spacer(modifier = Modifier.height(Spacing.lg))
+
+        ScaledShareCardPreview(
+            capture = capture,
+            maxWidth = model.previewMaxWidth,
+            maxHeight = model.previewMaxHeight,
+            modifier = previewModifier,
         ) {
-            aboveCard()
-
-            Spacer(modifier = Modifier.height(Spacing.lg))
-
-            ScaledShareCardPreview(
-                capture = capture,
-                maxWidth = model.previewMaxWidth,
-                maxHeight = model.previewMaxHeight,
-                modifier = Modifier
-                    .shakeOnError(trigger = shake)
-                    .graphicsLayer {
-                        scaleX = settleScale.value
-                        scaleY = settleScale.value
-                    },
-            ) {
-                ShareCard(model = model.card)
-            }
+            ShareCard(model = model.card)
         }
     }
 }

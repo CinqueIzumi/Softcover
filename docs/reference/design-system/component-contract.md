@@ -270,10 +270,10 @@ Consequences:
   primitive only; a component that renders data still carries its treatment on its model.
 - **Debug screens (`app/src/debug/`) are exempt from R10.** They may build UI models in composition or hold
   file-level `*UiModel` constants.
-- **A modal host (a sheet or dialog component) has no gallery entry**, because a fixture tile cannot render
-  a modal inline; the sheet parts (`SheetScaffold`, `SheetRow`, `SheetActionRow`) do. A modal host's model
-  ships `previews` where R5 requires it (rendered or tested), and its own `@Preview` functions render from
-  that map.
+- **A modal host's gallery entry renders its `internal` body inline** inside `GallerySheetFrame`, without the
+  modal container; a dialog's entry draws its content (the date picker draws its calendar through
+  `DatePicker`). A modal host's model ships `previews` where R5 requires it, and its own `@Preview`
+  functions render from that map.
 
 ### 7.5 The Component Gallery
 

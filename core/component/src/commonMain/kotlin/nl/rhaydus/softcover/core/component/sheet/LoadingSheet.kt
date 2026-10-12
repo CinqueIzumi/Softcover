@@ -37,27 +37,40 @@ fun LoadingSheet(
         },
         modifier = modifier,
     ) {
-        if (model.progress != null) {
-            val animatedProgress by animateFloatAsState(
-                targetValue = model.progress,
-                animationSpec = MaterialTheme.motion.valueChange,
-                label = "LoadingSheetProgress",
-            )
+        LoadingSheetBody(
+            model = model,
+            onEvent = onEvent,
+        )
+    }
+}
 
-            LaunchedEffect(animatedProgress) {
-                if (animatedProgress >= 1f) {
-                    delay(1.seconds)
+/** The sheet's progress indicator without the modal container, so the gallery can host it inline. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun LoadingSheetBody(
+    model: LoadingSheetUiModel,
+    onEvent: (LoadingSheetEvent) -> Unit,
+) {
+    if (model.progress != null) {
+        val animatedProgress by animateFloatAsState(
+            targetValue = model.progress,
+            animationSpec = MaterialTheme.motion.valueChange,
+            label = "LoadingSheetProgress",
+        )
 
-                    onEvent(LoadingSheetEvent.LoaderFinished)
-                }
+        LaunchedEffect(animatedProgress) {
+            if (animatedProgress >= 1f) {
+                delay(1.seconds)
+
+                onEvent(LoadingSheetEvent.LoaderFinished)
             }
-
-            LinearWavyProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        } else {
-            LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
+
+        LinearWavyProgressIndicator(
+            progress = { animatedProgress },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    } else {
+        LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
     }
 }

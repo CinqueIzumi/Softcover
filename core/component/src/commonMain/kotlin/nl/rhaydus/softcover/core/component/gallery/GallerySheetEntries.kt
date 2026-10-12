@@ -1,8 +1,11 @@
 package nl.rhaydus.softcover.core.component.gallery
 
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -10,6 +13,8 @@ import nl.rhaydus.softcover.core.component.sheet.SheetActionRow
 import nl.rhaydus.softcover.core.component.sheet.SheetActionRowUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetRow
+import nl.rhaydus.softcover.core.component.sheet.SheetRowGroup
+import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldContent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
@@ -25,14 +30,9 @@ internal val sheetEntries: ImmutableList<GalleryEntry> = persistentListOf(
             "inline, without the modal container.",
         previews = SheetScaffoldUiModel,
         content = { model, modifier ->
-            SheetScaffoldContent(
-                model = model,
-                onEvent = {},
-                modifier = if (model.layout != SheetLayout.Scrolling) {
-                    modifier.height(420.dp)
-                } else {
-                    modifier.heightIn(max = 420.dp)
-                },
+            GallerySheetFrame(
+                scaffold = model,
+                modifier = modifier,
             ) {
                 SoftcoverText(
                     text = "The sheet's own body goes here.",
@@ -70,4 +70,40 @@ internal val sheetEntries: ImmutableList<GalleryEntry> = persistentListOf(
             )
         },
     ),
+    galleryEntry(
+        name = "SheetRowGroup",
+        family = GalleryFamily.SHEET,
+        blurb = "A single-choice list of SheetRows grouped for selection semantics; picking a row " +
+            "runs the sheet's animated dismiss unless the host closes it itself.",
+        previews = SheetRowGroupUiModel,
+        content = { model, modifier ->
+            SheetRowGroup(
+                model = model,
+                onEvent = {},
+                modifier = modifier,
+            )
+        },
+    ),
 )
+
+/**
+ * Hosts a sheet's regions inline for the gallery: a scrolling sheet is capped, while a pinned one is
+ * given a fixed height so its body has room to scroll against its pinned header and footer.
+ */
+@Composable
+internal fun GallerySheetFrame(
+    scaffold: SheetScaffoldUiModel,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    SheetScaffoldContent(
+        model = scaffold,
+        onEvent = {},
+        modifier = if (scaffold.layout != SheetLayout.Scrolling) {
+            modifier.height(420.dp)
+        } else {
+            modifier.heightIn(max = 420.dp)
+        },
+        content = content,
+    )
+}

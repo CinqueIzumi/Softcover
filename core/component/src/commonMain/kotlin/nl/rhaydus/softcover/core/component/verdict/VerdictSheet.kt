@@ -90,6 +90,34 @@ fun VerdictSheet(
     onEvent: (VerdictSheetEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    SheetScaffold(
+        model = model.scaffold,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.PrimaryClicked -> onEvent(VerdictSheetEvent.Saved)
+
+                SheetScaffoldEvent.SecondaryClicked -> onEvent(VerdictSheetEvent.DeleteRequested)
+
+                SheetScaffoldEvent.Dismissed -> onEvent(VerdictSheetEvent.Dismissed)
+
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
+            }
+        },
+        modifier = modifier,
+    ) {
+        VerdictSheetBody(
+            model = model,
+            onEvent = onEvent,
+        )
+    }
+}
+
+/** The sheet's body without the modal container, so the gallery can host it inline. */
+@Composable
+internal fun VerdictSheetBody(
+    model: VerdictSheetUiModel,
+    onEvent: (VerdictSheetEvent) -> Unit,
+) {
     val marks = model.marks
 
     val spoilerHighlight: Color = MaterialTheme.colorScheme.spoilerEditorHighlight
@@ -109,116 +137,100 @@ fun VerdictSheet(
         }
     }
 
-    SheetScaffold(
-        model = model.scaffold,
-        onEvent = { event ->
-            when (event) {
-                SheetScaffoldEvent.PrimaryClicked -> onEvent(VerdictSheetEvent.Saved)
-
-                SheetScaffoldEvent.SecondaryClicked -> onEvent(VerdictSheetEvent.DeleteRequested)
-
-                SheetScaffoldEvent.Dismissed -> onEvent(VerdictSheetEvent.Dismissed)
-
-                SheetScaffoldEvent.HeaderActionClicked -> Unit
-            }
-        },
-        modifier = modifier,
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                StarRatingInput(
-                    rating = model.rating,
-                    onRatingChange = { onEvent(VerdictDraftEvent.RatingChanged(rating = it)) },
-                    starIcon = drawableIconResource(
-                        icon = SoftcoverIcon.StarFilled,
-                        contentDescription = "",
-                    ),
-                    filledColor = RatingGold,
-                    starSize = 42.dp,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(Spacing.md))
-
-            VerdictScoreAndCaption(rating = model.rating)
-
-            Spacer(modifier = Modifier.height(Spacing.xxl))
-
-            SoftcoverText(
-                text = "Your review".uppercase(),
-                style = MaterialTheme.editorialTypography.eyebrowSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.semantics(mergeDescendants = true) { heading() },
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
-            BasicTextField(
-                value = model.review,
-                onValueChange = { onEvent(VerdictDraftEvent.ReviewEdited(value = it)) },
-                textStyle = MaterialTheme.editorialTypography.body.copy(
-                    color = onSurfaceColor,
-                    fontStyle = FontStyle.Normal,
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center,
+        ) {
+            StarRatingInput(
+                rating = model.rating,
+                onRatingChange = { onEvent(VerdictDraftEvent.RatingChanged(rating = it)) },
+                starIcon = drawableIconResource(
+                    icon = SoftcoverIcon.StarFilled,
+                    contentDescription = "",
                 ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                visualTransformation = visualTransformation,
-                modifier = Modifier.fillMaxWidth(),
-                decorationBox = { innerTextField ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 120.dp)
-                            .clip(Corners.lg)
-                            .background(color = MaterialTheme.colorScheme.surfaceContainerHigh)
-                            .padding(
-                                horizontal = Spacing.md,
-                                vertical = Spacing.sm,
-                            ),
-                    ) {
-                        if (model.review.text.isEmpty()) {
-                            SoftcoverText(
-                                text = "What stayed with you?",
-                                style = MaterialTheme.editorialTypography.body.copy(
-                                    fontStyle = FontStyle.Normal,
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-
-                        innerTextField()
-                    }
-                },
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
-            MarkToolbar(
-                chips = model.markChips,
-                onMarkToggled = { mark -> onEvent(VerdictDraftEvent.MarkToggled(mark = mark)) },
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.xs))
-
-            SoftcoverText(
-                text = "Select text, then tap Bold, Italic or Spoiler",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.xl))
-
-            ToggleRow(
-                model = model.spoilers,
-                onEvent = { event ->
-                    when (event) {
-                        is ToggleEvent.Toggled -> onEvent(VerdictDraftEvent.SpoilersToggled(checked = event.checked))
-                    }
-                },
+                filledColor = RatingGold,
+                starSize = 42.dp,
             )
         }
+
+        Spacer(modifier = Modifier.height(Spacing.md))
+
+        VerdictScoreAndCaption(rating = model.rating)
+
+        Spacer(modifier = Modifier.height(Spacing.xxl))
+
+        SoftcoverText(
+            text = "Your review".uppercase(),
+            style = MaterialTheme.editorialTypography.eyebrowSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.semantics(mergeDescendants = true) { heading() },
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.sm))
+
+        BasicTextField(
+            value = model.review,
+            onValueChange = { onEvent(VerdictDraftEvent.ReviewEdited(value = it)) },
+            textStyle = MaterialTheme.editorialTypography.body.copy(
+                color = onSurfaceColor,
+                fontStyle = FontStyle.Normal,
+            ),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            visualTransformation = visualTransformation,
+            modifier = Modifier.fillMaxWidth(),
+            decorationBox = { innerTextField ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 120.dp)
+                        .clip(Corners.lg)
+                        .background(color = MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .padding(
+                            horizontal = Spacing.md,
+                            vertical = Spacing.sm,
+                        ),
+                ) {
+                    if (model.review.text.isEmpty()) {
+                        SoftcoverText(
+                            text = "What stayed with you?",
+                            style = MaterialTheme.editorialTypography.body.copy(
+                                fontStyle = FontStyle.Normal,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+
+                    innerTextField()
+                }
+            },
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.sm))
+
+        MarkToolbar(
+            chips = model.markChips,
+            onMarkToggled = { mark -> onEvent(VerdictDraftEvent.MarkToggled(mark = mark)) },
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.xs))
+
+        SoftcoverText(
+            text = "Select text, then tap Bold, Italic or Spoiler",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.xl))
+
+        ToggleRow(
+            model = model.spoilers,
+            onEvent = { event ->
+                when (event) {
+                    is ToggleEvent.Toggled -> onEvent(VerdictDraftEvent.SpoilersToggled(checked = event.checked))
+                }
+            },
+        )
     }
 }
 

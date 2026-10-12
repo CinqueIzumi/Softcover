@@ -87,7 +87,7 @@ internal val controlEntries: ImmutableList<GalleryEntry> = persistentListOf(
     ),
     galleryEntry(
         name = "Sidebar",
-        family = GalleryFamily.ROW,
+        family = GalleryFamily.SIDEBAR,
         blurb = "A desktop source list: sections of rows, each with an optional leading icon, " +
             "a selected tint, a trailing arrow, or a long press.",
         previews = SidebarUiModel,

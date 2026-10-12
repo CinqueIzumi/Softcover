@@ -21,7 +21,6 @@ import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
-import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
@@ -174,7 +173,7 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
     ),
     GalleryEntry(
         name = "SoftcoverText",
-        family = GalleryFamily.RICHTEXT,
+        family = GalleryFamily.TEXT,
         blurb = "The app's text leaf: one style channel, and it masks a stand-in in the real " +
             "style while loading or while the text is null, so the slot never jumps.",
         fixtures = persistentListOf(
@@ -238,36 +237,17 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
             ),
         ),
     ),
-    GalleryEntry(
+    galleryEntry(
         name = "MarkAsReadBurst",
         family = GalleryFamily.CELEBRATION,
         blurb = "The radial particle burst played on a mark-as-read commit. A still fixture " +
             "cannot show it — the motion debug screen is where you watch one.",
-        fixtures = persistentListOf(
-            GalleryFixture(
-                label = "Card",
-                render = { modifier ->
-                    MarkAsReadBurst(
-                        model = MarkAsReadBurstUiModel(
-                            triggerKey = 1,
-                            scale = MarkAsReadBurstScale.Card,
-                        ),
-                        modifier = modifier.size(160.dp),
-                    )
-                },
-            ),
-            GalleryFixture(
-                label = "Screen",
-                render = { modifier ->
-                    MarkAsReadBurst(
-                        model = MarkAsReadBurstUiModel(
-                            triggerKey = 1,
-                            scale = MarkAsReadBurstScale.Screen,
-                        ),
-                        modifier = modifier.size(160.dp),
-                    )
-                },
-            ),
-        ),
+        previews = MarkAsReadBurstUiModel,
+        content = { model, modifier ->
+            MarkAsReadBurst(
+                model = model,
+                modifier = modifier.size(160.dp),
+            )
+        },
     ),
 )

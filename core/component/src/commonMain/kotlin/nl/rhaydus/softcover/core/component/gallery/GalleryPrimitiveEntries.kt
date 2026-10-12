@@ -160,7 +160,7 @@ internal val primitiveEntries: ImmutableList<GalleryEntry> = persistentListOf(
     ),
     galleryEntry(
         name = "DeadlineSummaryLine",
-        family = GalleryFamily.BADGE,
+        family = GalleryFamily.DEADLINE,
         blurb = "The deadline date paired with the pace needed to still make it, or the status " +
             "label alone once the deadline has passed.",
         previews = DeadlineSummaryUiModel,
@@ -173,7 +173,7 @@ internal val primitiveEntries: ImmutableList<GalleryEntry> = persistentListOf(
     ),
     galleryEntry(
         name = "DeadlineRow",
-        family = GalleryFamily.BADGE,
+        family = GalleryFamily.DEADLINE,
         blurb = "Book detail's deadline card: the finish-by date and status badge over the goal " +
             "sentence.",
         previews = DeadlineRowUiModel,

@@ -9,18 +9,20 @@ has landed. **Delegation:** user
 | Sub | Scope | Status |
 |---|---|---|
 | S12-2 | The `docs/reference/design-system/` rewrite, the `foundations.md` budget restore, the `CLAUDE.md` parenthetical | [x] |
-| S12-3 | The open decisions (cover radius, `"tnum"`), the fixture-size measurement, the gallery completeness pass | [ ] |
+| S12-3 | The open decisions (cover radius, `"tnum"`), the fixture-size measurement, the gallery completeness pass | [x] |
 | S12-4 | G7 — human walkthrough of every screen on device | [ ] |
 | S12-5 | G6 (`check` green) and deleting this directory | [ ] |
 
 ## S12-3 — open decisions, fixture size, gallery
 
-- Decide the cover-radius drift: `HiddenSeriesStack`'s 3dp vs. every other flat cover's 4dp; Reading's
-  three thumbnails at 6/8/10dp.
-- Decide the `"tnum"` token (~17 call sites today; one `:core:designsystem` token instead).
-- Measure the fixture size in the release binary.
-- Run the gallery completeness pass: every `:core:component` family has a `GalleryEntry`.
-- Check the Compose compiler metrics report: `BookCardUiModel` and its parts are stable.
+Done. Outcomes for the PR description:
+
+- Cover radius: nothing to decide; every cover clips through `CoverVariant.shape()` to a `Corners` token.
+- `"tnum"`: one `TextStyle.tabularFigures()` in `:core:designsystem`; 14 call sites moved.
+- Fixture size: fixtures + gallery ≈ 62 KB of a 48 MB release dex (0.18%); release has R8 off.
+- Gallery: every visual public component has fixtures and an entry; one `GalleryFamily` per package.
+- Stability: `BookCardUiModel` and all its parts stable; every `BookCard*` composable skippable.
+- Labelled-button icon double announcement: foundation entry F51 in `foundation-upstream-candidates.md`.
 
 ## S12-4 — G7, human walkthrough
 

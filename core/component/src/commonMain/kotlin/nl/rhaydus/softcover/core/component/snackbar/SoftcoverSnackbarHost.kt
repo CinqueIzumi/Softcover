@@ -63,33 +63,50 @@ fun SoftcoverSnackbarHost(
 
         SnackbarTimeout(data = data)
 
-        val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
-        val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
-
-        AnimatedContent(
-            targetState = data,
+        SnackbarSurface(
+            data = data,
             modifier = modifier,
-            transitionSpec = {
-                val enter = fadeIn(effectsSpec) + scaleIn(
-                    animationSpec = spatialSpec,
-                    initialScale = ENTER_SCALE,
-                )
+            snackbarModifier = snackbarModifier,
+        )
+    }
+}
 
-                enter togetherWith fadeOut(effectsSpec)
-            },
-        ) { target ->
-            if (target != null) {
-                Snackbar(
-                    snackbarData = target,
-                    modifier = snackbarModifier.semantics {
-                        liveRegion = LiveRegionMode.Polite
-                        dismiss {
-                            target.dismiss()
-                            true
-                        }
-                    },
-                )
-            }
+/**
+ * Draws [data] with the host's entrance and exit but none of its registry or timeout, so the gallery
+ * can show one still.
+ */
+@Composable
+internal fun SnackbarSurface(
+    data: SnackbarData?,
+    modifier: Modifier = Modifier,
+    snackbarModifier: Modifier = Modifier,
+) {
+    val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+
+    AnimatedContent(
+        targetState = data,
+        modifier = modifier,
+        transitionSpec = {
+            val enter = fadeIn(effectsSpec) + scaleIn(
+                animationSpec = spatialSpec,
+                initialScale = ENTER_SCALE,
+            )
+
+            enter togetherWith fadeOut(effectsSpec)
+        },
+    ) { target ->
+        if (target != null) {
+            Snackbar(
+                snackbarData = target,
+                modifier = snackbarModifier.semantics {
+                    liveRegion = LiveRegionMode.Polite
+                    dismiss {
+                        target.dismiss()
+                        true
+                    }
+                },
+            )
         }
     }
 }

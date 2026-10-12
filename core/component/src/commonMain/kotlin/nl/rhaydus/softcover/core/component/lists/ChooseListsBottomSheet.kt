@@ -11,6 +11,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -85,35 +86,47 @@ fun ChooseListsBottomSheet(
         },
         modifier = modifier,
     ) {
-        if (model.rows.isEmpty()) {
-            EmptyState(
-                model = model.emptyState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.x4l),
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(
-                        weight = 1f,
-                        fill = false,
-                    ),
-            ) {
-                items(items = model.rows, key = { it.listId }) { row ->
-                    ChooseListsRow(
-                        row = row,
-                        onClick = {
-                            onEvent(
-                                ChooseListsEvent.MembershipToggled(
-                                    listId = row.listId,
-                                    membership = row.membership,
-                                ),
-                            )
-                        },
-                    )
-                }
+        ChooseListsBody(
+            model = model,
+            onEvent = onEvent,
+        )
+    }
+}
+
+/** The sheet's list without the modal container, so the gallery can host it inline. */
+@Composable
+internal fun ColumnScope.ChooseListsBody(
+    model: ChooseListsUiModel,
+    onEvent: (ChooseListsEvent) -> Unit,
+) {
+    if (model.rows.isEmpty()) {
+        EmptyState(
+            model = model.emptyState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Spacing.x4l),
+        )
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(
+                    weight = 1f,
+                    fill = false,
+                ),
+        ) {
+            items(items = model.rows, key = { it.listId }) { row ->
+                ChooseListsRow(
+                    row = row,
+                    onClick = {
+                        onEvent(
+                            ChooseListsEvent.MembershipToggled(
+                                listId = row.listId,
+                                membership = row.membership,
+                            ),
+                        )
+                    },
+                )
             }
         }
     }

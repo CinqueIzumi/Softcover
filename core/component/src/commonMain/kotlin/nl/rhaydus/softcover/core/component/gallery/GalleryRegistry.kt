@@ -12,6 +12,6 @@ import kotlinx.collections.immutable.toImmutableList
 object GalleryRegistry {
     val entries: ImmutableList<GalleryEntry> = (
         primitiveEntries + chromeEntries + statisticEntries + controlEntries + fieldEntries +
-            bookEntries + sheetEntries
+            bookEntries + sheetEntries + modalEntries + leafEntries
         ).toImmutableList()
 }

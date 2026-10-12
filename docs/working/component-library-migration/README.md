@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S12-1 dropped (`bc5e6885a`); S12-2 done (`8cb94fcca`): design-system docs rewritten against `:core:component`, budgets re-pinned, `CLAUDE.md` and the `compose-ui.md` maintenance rule updated. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
-- **Next:** S12-3 in `steps/s12-close-out.md` § S12-3: cover-radius and `"tnum"` decisions, fixture size, gallery completeness.
-- **Open questions:** where to track the double screen-reader announcement on icons inside labelled buttons (`FeaturedSessionButton`, `FeaturedBackdropCard` "Update progress"): the icon repeats the button label, and silencing it needs `drawableIconResource` to accept no description (a design-system API change). Roadmap issue or an S12 sub-step.
-- **Verification:** after the last Kotlin edit, `checkDocBudgets` and `styleCheck` passed; glommed-closer grep on changed `.kt` files clean (no test files changed); stale-name grep and relative-link check clean; one `softcover-reviewer` round, findings fixed.
-- **Uncommitted:** this `## Now` block only.
+- **State:** S12-3 done: `TextStyle.tabularFigures()` replaces raw `"tnum"`; gallery complete (new families, fixtures, inline sheet bodies); fixture size and `BookCardUiModel` stability measured (outcomes in `steps/s12-close-out.md` § S12-3). Button-icon double announcement filed upstream as F51. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
+- **Next:** S12-4 in `steps/s12-close-out.md` § S12-4: the user's device walkthrough.
+- **Open questions:** release builds ship with R8 off (`isMinifyEnabled = false`, 45.8 MB APK); enabling it is out of this plan's scope, track separately.
+- **Verification:** after the last Kotlin edit, `ktlintCheck`, `styleCheck` and `checkDocBudgets` passed; glommed-closer grep on changed `.kt` files clean (no test files changed); two `softcover-reviewer` rounds, findings fixed.
+- **Uncommitted:** all of S12-3 (tabular figures staged, gallery unstaged), F51, these tracker edits.
 ## Local verification
 
 The Gradle daemon runs on JDK 17 (`gradle/gradle-daemon-jvm.properties`), whatever `JAVA_HOME` is; no

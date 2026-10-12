@@ -85,8 +85,9 @@ private fun ProgressSheetUiModel.submitEvent(enteredNumber: String): ProgressShe
     }
 }
 
+/** The sheet's body without the modal container, so the gallery and previews can host it inline. */
 @Composable
-private fun ProgressBottomSheetContent(
+internal fun ProgressBottomSheetContent(
     model: ProgressSheetUiModel,
     onEvent: (ProgressSheetEvent) -> Unit,
     onNumberChange: (String) -> Unit,

@@ -17,7 +17,7 @@ import nl.rhaydus.softcover.core.component.statistic.StatTileUiModel
 internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "RankedBars",
-        family = GalleryFamily.STATISTIC,
+        family = GalleryFamily.CHART,
         blurb = "Horizontal bars, each measured against its own full-width track; while loading " +
             "the rows keep their layout and mask.",
         previews = RankedBarsUiModel,
@@ -30,7 +30,7 @@ internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
     ),
     galleryEntry(
         name = "ColumnChart",
-        family = GalleryFamily.STATISTIC,
+        family = GalleryFamily.CHART,
         blurb = "Vertical columns scaled against the tallest, each with an optional label and value; " +
             "while loading the columns keep their layout and mask.",
         previews = ColumnChartUiModel,
@@ -43,7 +43,7 @@ internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
     ),
     galleryEntry(
         name = "ProportionChart",
-        family = GalleryFamily.STATISTIC,
+        family = GalleryFamily.CHART,
         blurb = "A stacked bar of parts of a whole with its legend beneath; an Unknown segment " +
             "renders muted and a zero segment draws nothing.",
         previews = ProportionChartUiModel,

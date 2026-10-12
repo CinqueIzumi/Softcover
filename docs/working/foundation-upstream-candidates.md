@@ -359,6 +359,14 @@ Filed but not yet implemented in the foundation.
 - **Impact in the app:** none today. Both components build their own haptics rather than reading the one the theme provides, so a test or preview that supplies a different `LocalHaptics` does not reach them.
 - **What to build:** read `LocalHaptics.current` in both components, as `Modifier.shakeOnError` and every other call site do.
 
+### F51 — Labelled buttons announce their leading icon as well as their label
+
+- **Type:** bug (accessibility)
+- **Home:** `nl.rhaydus:designsystem-core` (`RhaydusButton`, `RhaydusSplitButton`)
+- **Status:** **Open.** No app workaround: the semantics are set inside the foundation's `Icon` call.
+- **Impact in the app:** both buttons pass `icon.contentDescription` to the leading `Icon`, so a screen reader reads the label twice ("Update progress, Update progress"): Reading's `FeaturedSessionButton` and `FeaturedBackdropCard`, and every other labelled button with an icon.
+- **What to build:** render the leading icon with `contentDescription = null` in `RhaydusButton` and in `RhaydusSplitButton`'s leading half, because the label already names the button. The split button's trailing toggle keeps its description. Note the ignored description in both KDocs.
+
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
 - **Type:** gate (custom Gradle task)

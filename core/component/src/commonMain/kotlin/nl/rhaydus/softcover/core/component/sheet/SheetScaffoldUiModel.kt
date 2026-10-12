@@ -48,6 +48,15 @@ data class SheetScaffoldUiModel(
                 ),
                 footer = SheetFooterUiModel.previews.getValue("Stacked, outlined secondary with icon"),
             ),
+            "Scrolling, single footer button" to SheetScaffoldUiModel(
+                header = SheetHeaderUiModel(
+                    section = SectionHeaderUiModel.Section(
+                        eyebrow = "Reading progress",
+                        headline = "Piranesi",
+                    ),
+                ),
+                footer = SheetFooterUiModel.previews.getValue("Stacked, no secondary"),
+            ),
             "Scrolling, dismiss label and jacket" to SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
                     section = SectionHeaderUiModel.Section(
@@ -83,6 +92,26 @@ data class SheetScaffoldUiModel(
                 ),
                 footer = SheetFooterUiModel.previews.getValue("Inline"),
                 layout = SheetLayout.PinnedLazy,
+            ),
+            "Pinned, inline footer with a disabled button" to SheetScaffoldUiModel(
+                header = SheetHeaderUiModel(
+                    section = SectionHeaderUiModel.Section(
+                        eyebrow = "Filters",
+                        headline = "Narrow the library",
+                    ),
+                ),
+                footer = SheetFooterUiModel.previews.getValue("Inline, primary disabled"),
+                layout = SheetLayout.Pinned,
+            ),
+            "Pinned, inline footer while saving" to SheetScaffoldUiModel(
+                header = SheetHeaderUiModel(
+                    section = SectionHeaderUiModel.Section(
+                        eyebrow = "Share",
+                        headline = "A card for Piranesi",
+                    ),
+                ),
+                footer = SheetFooterUiModel.previews.getValue("Inline, secondary running"),
+                layout = SheetLayout.Pinned,
             ),
             "Pinned, header action" to SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
