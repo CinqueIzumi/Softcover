@@ -38,7 +38,7 @@ scripts/gradle-quiet.sh :core:component:compileKotlinJvm :<feature>:compileKotli
   checkModuleGraph :<module>:projectHealth ktlintCheck styleCheck
 ```
 
-under JBR 21 (see [`README.md`](README.md) § Local verification). Then `softcover-test-writer` for
+(see [`README.md`](README.md) § Local verification). Then `softcover-test-writer` for
 every new UI model and mapper. Then `softcover-reviewer`, with `## Scope` = the sub-step's changes.
 
 Phase 1 and Phase 2 may share a session; hand off between them if the context-budget notice fires.

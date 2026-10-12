@@ -14,27 +14,23 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PC done: idle sweep, `stabilityCheck` gate with per-module baselines, local type fixes, leaf UI models. Stable UiStates moved out of this plan to [`domain-out-of-uistate`](../domain-out-of-uistate/README.md), which starts after it closes. PF stays open (PF-4 / PF-7 run after S12-4). F42 / S12-4 waits.
-- **Next:** S12-1 in `steps/s12-close-out.md` (`checkComponentBudget`).
-- **Open questions:** whether the CI stability step passes on JDK 17 (verified only under JBR 21); watch the first CI run.
-- **Verification:** `styleCheck` and `stabilityCheck` passed after the last Kotlin edit (JBR 21); `testAndroidHostTest` green for reading, explore, book_detail, profile, session, orchestration, core:presentation, core:domain; reviewed, findings fixed; documentation pass done; AAA / glommed-closer / `!!` greps clean.
-- **Uncommitted:** PC closed in this file; `steps/pc-performance-checks.md` still to delete; the new `domain-out-of-uistate/README.md`.
+- **State:** PC done; the Gradle daemon is pinned to JDK 17 (`0d2c50c30`). Order from here: PF-4 → PF-7 → S12-1 to S12-5, so S12's budget, docs and walkthrough see the final UI. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
+- **Next:** PF-4 in `steps/pf-premium-feel.md` § PF-4: split `premium-feel-audit.md`'s approved surface rows into one sub-step per module group, then run the first.
+- **Open questions:** none.
+- **Verification:** on the JDK 17 daemon, `styleCheck`, `stabilityCheck`, `testAndroidHostTest`, `:app:compileDebugJavaWithJavac` and `:app:projectHealth` passed; no Kotlin changed this session.
+- **Uncommitted:** this block, plus moving PF-4 / PF-7 ahead of all of S12 in the step files and `## Steps`.
 ## Local verification
 
-Two pre-existing toolchain problems on this machine:
-
-1. The aggregate `check` lifecycle cannot complete — `:app:compileDebugJavaWithJavac` fails inside
-   `JdkImageTransform` (`jlink` from Homebrew JDK 26.0.2 against `android-37.0`).
-2. detekt cannot run on JDK 26 at all — prefix every Gradle call with JDK 21:
-   `JAVA_HOME=/Users/bartpeereboom/Library/Java/JavaVirtualMachines/jbr-21.0.11/Contents/Home`.
+The Gradle daemon runs on JDK 17 (`gradle/gradle-daemon-jvm.properties`), whatever `JAVA_HOME` is; no
+prefix needed.
 
 Run Gradle through `scripts/gradle-quiet.sh`, not `./gradlew` directly. The plain `test` lifecycle task
-runs no KMP suites (`:app` / `:desktopApp` only); use `testAndroidHostTest --continue` under JDK 21 for
-the KMP suites.
+runs no KMP suites (`:app` / `:desktopApp` only); use `testAndroidHostTest --continue` for the KMP
+suites.
 
 **Reliable per-change gates:** `checkModuleGraph`, `<module>:projectHealth`,
-`<module>:compileKotlinJvm`, `ktlintCheck`, `<module>:detektJvmMain`, and **`styleCheck`** — all under
-JDK 21. `styleCheck` is the only gate that catches detekt `MatchingDeclarationName`; include it in
+`<module>:compileKotlinJvm`, `ktlintCheck`, `<module>:detektJvmMain`, and **`styleCheck`**.
+`styleCheck` is the only gate that catches detekt `MatchingDeclarationName`; include it in
 every sub-step's Verify.
 
 ## How to run a step
@@ -69,7 +65,7 @@ every sub-step's Verify.
 | SS | — (simplicity audit) | SS-0–SS-11, SS-C; after S9, before PF / S10 | [x] |
 | TP | — (test prune) | TP-0 timings, TP-1–TP-8 per module group | [x] |
 | SD | — (screen de-duplication) | SD-0 inventory, SD-P shell, SD-1–SD-6 per screen group | [x] |
-| PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |
+| PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7; PF-4 / PF-7 before S12 | [ ] |
 | S10 | — (shelf teardown) | S10-1–S10-5, S10-C | [x] |
 | SP | — (spacing scale) | SP-1–SP-5, SP-C; after S10, before S11 | [x] |
 | SH | — (shape scale) | SH-1–SH-4, SH-C; after S10, before S11 | [x] |
@@ -133,8 +129,7 @@ failure.
       module) and `ktlintCheck`.
 - [ ] **G7 — Human walkthrough** of every screen on device, `main` as baseline (S12-4).
 
-**Open:** `:app:projectHealth` is unreachable on this machine (the pre-existing `JdkImageTransform`
-failure); CI on a working toolchain covers it. `checkComponentBudget` (G4) is not written yet — the
+**Open:** `checkComponentBudget` (G4) is not written yet — the
 count is still falling.
 
 ## Out of scope

@@ -5,7 +5,7 @@ one replacement each: 142 rows. Replacements keep the app's editorial voice and 
 (em-dash asides, personification, purple metaphors, tidy triplets, cheerleading); errors and status lines
 stay plain. "Keep as is" means the line reads naturally on a second look. Text that already reads
 naturally is left out. PF-6 walks this screen by screen and records a verdict per row (**approve**,
-**cut**, or the user's own rewrite); PF-7 applies the approved rows after S12-4, then deletes this file.
+**cut**, or the user's own rewrite); PF-7 applies the approved rows before S12.
 
 `path:line` is where the string lived on 2026-10-07; re-find by the quoted text if it has drifted.
 

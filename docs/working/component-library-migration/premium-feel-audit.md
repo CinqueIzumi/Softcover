@@ -2,7 +2,7 @@
 
 PF-1 output for [`steps/pf-premium-feel.md`](steps/pf-premium-feel.md), with the PF-2 verdict on each row.
 The approved contract rows landed as S11-5 to S11-40 and
-SL-15a–e; a surface row citing one names that sub-step. PF-4 applies the approved surface rows after S12-4, then deletes this file.
+SL-15a–e; a surface row citing one names that sub-step. PF-4 applies the approved surface rows before S12.
 
 **Columns.** *Today* has been checked against the code. *Touch* names the change, not its API. Each row
 polishes a single screen. Effort is S, M or L. All motion is gated by
