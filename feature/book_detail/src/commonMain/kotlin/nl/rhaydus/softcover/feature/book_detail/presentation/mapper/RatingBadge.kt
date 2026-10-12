@@ -10,5 +10,5 @@ internal fun ratingBadge(label: String): BadgeUiModel = BadgeUiModel(
     tone = BadgeTone.TertiaryContainer,
     size = BadgeSize.Regular,
     icon = SoftcoverIcon.StarFilled,
-    contentDescription = "Rated $label",
+    contentDescription = "Rated $label out of 5",
 )

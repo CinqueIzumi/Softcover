@@ -91,10 +91,10 @@ internal class OnSetListRankedAction(
             }
 
             val suffix = list?.name?.let { " for \"$it\"" }.orEmpty()
-            val verb = if (ranked) "enable manual ordering" else "disable manual ordering"
+            val verb = if (ranked) "turn on manual ordering" else "turn off manual ordering"
 
             SnackBarManager.showSnackbar(
-                title = "Couldn't $verb$suffix — try again.",
+                title = "Couldn't $verb$suffix. Try again.",
             )
 
             scope.sendEvent(event = LibraryEvent.ListRankedChangeFailedEvent())

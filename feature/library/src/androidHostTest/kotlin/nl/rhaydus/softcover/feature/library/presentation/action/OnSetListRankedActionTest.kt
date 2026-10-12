@@ -204,7 +204,7 @@ class OnSetListRankedActionTest {
                 verify {
                     SnackBarManager.showSnackbar(
                         title = match { title ->
-                            title.contains("enable manual ordering") && title.contains(listName)
+                            title.contains("turn on manual ordering") && title.contains(listName)
                         },
                     )
                 }
@@ -273,7 +273,7 @@ class OnSetListRankedActionTest {
         }
 
         @Test
-        fun `ranked=false failure path — snackbar contains disable manual ordering, no sort rollback`() =
+        fun `ranked=false failure path — snackbar contains turn off manual ordering, no sort rollback`() =
             runTest {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
@@ -312,7 +312,7 @@ class OnSetListRankedActionTest {
                 // ----- Assert -----
                 verify {
                     SnackBarManager.showSnackbar(
-                        title = match { it.contains("disable manual ordering") },
+                        title = match { it.contains("turn off manual ordering") },
                     )
                 }
 
@@ -356,7 +356,7 @@ class OnSetListRankedActionTest {
             verify {
                 SnackBarManager.showSnackbar(
                     title = match { title ->
-                        title.contains("enable manual ordering") && title.contains(" for \"").not()
+                        title.contains("turn on manual ordering") && title.contains(" for \"").not()
                     },
                 )
             }

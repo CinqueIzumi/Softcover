@@ -110,7 +110,7 @@ internal data class BookDetailUiState(
     val aboutSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "About"),
     val inProgressSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "In progress"),
     val reviewsSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "Voices",
+        eyebrow = "Reviews",
         headline = "What readers think",
     ),
     val findItLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Find it"),
@@ -266,8 +266,8 @@ internal data class BookDetailUiState(
 
     val userTagEditorGroups: ImmutableList<UserTagEditorChipGroup> = persistentListOf(),
     val tagEditorEmptyState: EmptyStateUiModel = EmptyStateUiModel(
-        title = "Nothing here yet.",
-        body = "Name the first thing this book is to you.",
+        title = "No tags yet",
+        body = "What would you file this under?",
     ),
 
     val userTagByEditorChipKey: ImmutableMap<String, UserTag> = persistentMapOf(),

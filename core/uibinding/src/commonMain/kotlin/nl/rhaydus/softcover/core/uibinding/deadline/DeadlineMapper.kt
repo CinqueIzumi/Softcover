@@ -90,5 +90,5 @@ private fun DeadlineProgress.goalText(): String {
         unit = unit,
     )
 
-    return "You're $behind behind schedule — $base"
+    return "You're $behind behind schedule. $base"
 }

@@ -25,7 +25,7 @@ internal fun Book.toStatusCallout(dateStyle: DateStyle): CalloutUiModel? {
                 )
             ) {
                 null -> "This book has been in your library since ${userBook.getFallbackDateString(style = dateStyle)}."
-                else -> "You finished this on $readDate. A great one to revisit."
+                else -> "You finished this on $readDate."
             },
         )
 
@@ -34,14 +34,14 @@ internal fun Book.toStatusCallout(dateStyle: DateStyle): CalloutUiModel? {
             icon = SoftcoverIcon.Bookmark,
             body = when (val dnfDate = userBook.getDnfDateString(style = dateStyle)) {
                 null -> "This book has been in your library since ${userBook.getFallbackDateString(style = dateStyle)}."
-                else -> "You set this aside on $dnfDate."
+                else -> "You put this down on $dnfDate."
             },
         )
 
         BookStatus.WantToRead -> statusCallout(
             eyebrow = WANT_TO_READ_EYEBROW,
             icon = SoftcoverIcon.BookmarkAdd,
-            body = "On your shelf since ${userBook.getFallbackDateString(style = dateStyle)}. Ready when you are.",
+            body = "On your Want to read shelf since ${userBook.getFallbackDateString(style = dateStyle)}.",
         )
 
         BookStatus.Reading,

@@ -21,7 +21,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.profile.presentation.state.YearMetric
 
-/** "The shape of the years" — a Books/Pages toggle over a peak-annotated column chart. */
 @Composable
 internal fun YearColumnHistorySection(
     chart: ColumnChartUiModel,
@@ -55,7 +54,7 @@ internal fun YearColumnHistorySection(
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 isLoading = isLoading,
-                standIn = "2024 was your busiest year yet — 00 books.",
+                standIn = "2024 was your busiest year yet: 00 books.",
             )
         } else {
             ColumnChart(model = chart)
@@ -71,7 +70,7 @@ internal fun YearColumnHistorySection(
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 isLoading = isLoading,
-                standIn = "2024 was your busiest year yet — 00 books.",
+                standIn = "2024 was your busiest year yet: 00 books.",
             )
         }
     }

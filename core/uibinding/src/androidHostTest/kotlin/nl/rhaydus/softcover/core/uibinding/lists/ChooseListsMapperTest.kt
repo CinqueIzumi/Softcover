@@ -515,7 +515,7 @@ class ChooseListsMapperTest {
         }
 
         @Test
-        fun `a single selected book is named as 1 book and taken off as it`() {
+        fun `a single selected book is named as 1 book and removed as it`() {
             // ----- Arrange -----
             val bookIds = setOf(7)
             val covers = emptyList<CoverUiModel>()
@@ -531,7 +531,7 @@ class ChooseListsMapperTest {
 
             // ----- Assert -----
             result.scaffold.header.shouldNotBeNull().section.headlineText shouldBe "Shelve 1 book"
-            descriptionOf(count = 1) shouldContain "takes it off"
+            descriptionOf(count = 1) shouldContain "removes it."
         }
 
         private fun chipLabelOf(
@@ -586,7 +586,7 @@ class ChooseListsMapperTest {
         }
 
         @Test
-        fun `a selection of 5 books takes all 5 off, never all three`() {
+        fun `a selection of 5 books removes all 5, never all three`() {
             // ----- Arrange -----
             val selectedCount = 5
 
@@ -594,7 +594,7 @@ class ChooseListsMapperTest {
             val description = descriptionOf(count = selectedCount)
 
             // ----- Assert -----
-            description shouldContain "takes all 5 off"
+            description shouldContain "removes all 5."
             description shouldNotContain "three"
         }
     }

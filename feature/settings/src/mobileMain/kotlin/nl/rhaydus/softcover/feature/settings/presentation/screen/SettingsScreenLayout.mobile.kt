@@ -186,7 +186,7 @@ internal actual fun SettingsScreenLayout(
                 row {
                     SettingsMenuRow(
                         title = "Roadmap",
-                        gloss = "What we're building next, in the order we plan to ship it",
+                        gloss = "What's coming next, in the order it's planned",
                         icon = SoftcoverIcon.Explore,
                         target = SettingsMenuRowTarget.SubPage(onClick = navigateToRoadmap),
                     )

@@ -40,7 +40,7 @@ internal fun AppearanceSettingsContent(
 ) {
     Column(modifier = modifier) {
         SoftcoverText(
-            text = "How Softcover looks in your hands, and how it reads dates back to you.",
+            text = "How Softcover looks, and how it shows dates.",
             style = MaterialTheme.editorialTypography.body,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

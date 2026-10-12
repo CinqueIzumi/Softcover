@@ -27,7 +27,7 @@ internal fun tagEditorSheetScaffoldFor(
         header = SheetHeaderUiModel(
             section = SectionHeaderUiModel.Section(
                 eyebrow = "Your tags",
-                headline = persistentListOf(HeaderTextSegment.Plain(text = "Tag it your way.")),
+                headline = persistentListOf(HeaderTextSegment.Plain(text = "Add your own tags.")),
                 description = persistentListOf(
                     HeaderTextSegment.Plain(text = "Your own genres, moods and notes on "),
                     HeaderTextSegment.Emphasised(text = bookTitle),
@@ -113,7 +113,7 @@ private fun shareSheetScaffoldFor(
                 headline = "Share this book",
                 description = when (variant) {
                     ShareCardVariant.MY_UPDATE -> "Your reading update for $bookTitle"
-                    ShareCardVariant.BOOK -> "An editorial card of $bookTitle"
+                    ShareCardVariant.BOOK -> "A share card for $bookTitle"
                 },
             ),
         ),

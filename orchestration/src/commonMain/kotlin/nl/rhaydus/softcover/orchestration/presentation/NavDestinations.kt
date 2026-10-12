@@ -148,7 +148,7 @@ internal fun NavItemIcon(
     ) {
         Icon(
             painter = painter,
-            contentDescription = "${item.tab.options.title} icon",
+            contentDescription = item.tab.options.title,
             modifier = Modifier.graphicsLayer {
                 scaleX = item.iconScale
                 scaleY = item.iconScale

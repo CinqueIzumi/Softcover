@@ -21,7 +21,7 @@ data class StatTileUiModel(
             "Hero" to StatTileUiModel(
                 eyebrow = "Total pages read",
                 stat = StatNumberUiModel(value = 12_481.0),
-                variant = StatTileVariant.Hero(caption = "Every page a step further into the story."),
+                variant = StatTileVariant.Hero(caption = "All the pages you've turned so far."),
             ),
             "Standard" to StatTileUiModel(
                 eyebrow = "Volumes",
@@ -42,7 +42,7 @@ data class StatTileUiModel(
                     value = 0.0,
                     isLoading = true,
                 ),
-                variant = StatTileVariant.Hero(caption = "Every page a step further into the story."),
+                variant = StatTileVariant.Hero(caption = "All the pages you've turned so far."),
             ),
             "Standard, loading" to StatTileUiModel(
                 eyebrow = "Volumes",

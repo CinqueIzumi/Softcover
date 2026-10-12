@@ -85,7 +85,7 @@ internal data class ExploreScreenUiState(
         eyebrow = "Discover",
         title = "Explore",
         subtitle = PageMastheadSubtitle.Text(
-            text = "Trending books, the next in your series, and anything you search for.",
+            text = "What's trending and what's next in your series. Search finds the rest.",
         ),
     ),
     val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = false),

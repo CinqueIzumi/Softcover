@@ -18,10 +18,10 @@ internal fun readingAtlasUiModel(profileData: UserProfileData?): ReadingAtlasUiM
                 value = (profileData?.totalPagesRead ?: 0).toDouble(),
                 isLoading = isLoading,
             ),
-            variant = StatTileVariant.Hero(caption = "Every page a step further into the story."),
+            variant = StatTileVariant.Hero(caption = "All the pages you've turned so far."),
         ),
         volumes = StatTileUiModel(
-            eyebrow = "Volumes",
+            eyebrow = "Books",
             stat = StatNumberUiModel(
                 value = (profileData?.booksRead ?: 0).toDouble(),
                 isLoading = isLoading,

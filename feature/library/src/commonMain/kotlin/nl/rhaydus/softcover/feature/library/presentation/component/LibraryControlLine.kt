@@ -135,7 +135,7 @@ private fun SortLabelControl(
                 } else {
                     SoftcoverIcon.ArrowDropDown
                 },
-                contentDescription = "Sorted ${direction.label} — tap to change",
+                contentDescription = "Sorted ${direction.label}. Tap to change.",
             )
 
             Icon(

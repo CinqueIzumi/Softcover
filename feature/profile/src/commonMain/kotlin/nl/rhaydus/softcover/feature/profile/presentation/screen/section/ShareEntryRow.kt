@@ -86,7 +86,7 @@ internal fun ShareEntryRow(
 
         Column(modifier = Modifier.weight(1f)) {
             SoftcoverText(
-                text = "Share your reading year",
+                text = "Share your profile",
                 style = MaterialTheme.editorialTypography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )

@@ -39,7 +39,7 @@ internal fun UiScaleSection(
         Spacer(modifier = Modifier.height(Spacing.sm))
 
         SoftcoverText(
-            text = "Applies immediately, across the whole app.",
+            text = "Changes apply right away.",
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

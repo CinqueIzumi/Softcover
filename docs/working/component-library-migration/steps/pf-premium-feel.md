@@ -1,6 +1,6 @@
 # PF — Premium-feel audit
 
-**Stage:** PF — app-wide, read-only until PF-3. PF-4 and PF-7 run before S12-1. **Delegation:** parallel
+**Stage:** PF — app-wide, read-only until PF-3. PF-7 runs before S12-1. **Delegation:** parallel
 `general-purpose` agents per feature for PF-1 (the main conversation merges their findings), the user for
 PF-2.
 
@@ -8,8 +8,8 @@ The app reads flat: state changes snap, presses give little feedback, and nothin
 beyond the ripple. PF catalogues every moment where motion, haptics or depth would make it feel
 premium. It splits them into the ones that belong in the component contracts, which S11 builds in once,
 and the surface polish for single screens. **Every finding stays local and lands in this branch.** None
-becomes a GitHub issue. **PF-1 to PF-3, PF-5 and PF-6 change no UI.** The surface polish (PF-4) and copy
-swaps (PF-7) land before S12, so its budget, docs and walkthrough see the final UI once.
+becomes a GitHub issue. **PF-1 to PF-3, PF-5 and PF-6 change no UI.** Surface polish for single screens is
+not applied. The copy swaps (PF-7) land before S12, so its budget, docs and walkthrough see the final UI once.
 
 Much of the app's copy also reads as machine-written. PF-5 to PF-7 audit every user-facing string and
 swap the ones that sound AI-generated for plain, natural text.
@@ -21,10 +21,9 @@ swap the ones that sound AI-generated for plain, natural text.
 | PF-1 | Audit every screen and sheet, plus open suggestions for what's missing; write `premium-feel-audit.md` in this directory (shape below) | — | [x] |
 | PF-2 | Walk the audit with the user: approve, cut or re-tier each finding | PF-1 | [x] |
 | PF-3 | Write the approved contract-level findings into S11 as new sub-steps | PF-2 | [x] |
-| PF-4 | Apply the approved surface-level findings in this branch | PF-3 | [ ] |
 | PF-5 | Audit every user-facing string for AI-sounding copy; write `copy-audit.md` in this directory | — | [x] |
 | PF-6 | Walk the copy audit with the user: approve, cut or reword each proposed replacement | PF-5 | [x] |
-| PF-7 | Apply the approved replacements | PF-4 | [ ] |
+| PF-7 | Apply the approved replacements | PF-6 | [ ] |
 
 ## PF-1 — Audit
 
@@ -52,7 +51,7 @@ and the share flow. Look for:
 - **Open suggestions:** anything else that would make the app feel more complete or premium, beyond
   the categories above: missing features, states or affordances a polished reading app would have,
   rough edges, and additions worth making. These go in their own section of the audit, tiered like the
-  rest; most will be surface-level and land in PF-4.
+  rest.
 
 **Each finding records:** the moment (in user terms, then `file:line`), what happens today, the proposed
 touch, its tier (**contract**: a press modifier, a haptics `expect`/`actual`, motion tokens, a
@@ -71,12 +70,6 @@ each row of `premium-feel-audit.md`.
 ## PF-3 — Into S11
 
 Each approved contract-level finding becomes an S11 sub-step (S11-4 onward), with its scope.
-
-## PF-4 — Surface polish
-
-The approved surface-level findings in `premium-feel-audit.md` are the work list; nothing is filed as a
-GitHub issue. Before S12, one `softcover-implementer` brief per module group applies them,
-with tests through `softcover-test-writer`.
 
 ## PF-5 — Copy audit
 

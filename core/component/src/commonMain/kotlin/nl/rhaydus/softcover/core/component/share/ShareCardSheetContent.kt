@@ -107,7 +107,7 @@ fun ShareCardSheetContent(
 
                 SheetScaffoldEvent.PrimaryClicked -> runCapture(
                     started = ShareCardSheetEvent.ShareStarted,
-                    failureMessage = "Couldn't share — try again",
+                    failureMessage = "Couldn't share. Try again.",
                 ) {
                     when (val outcome = capture.share(displayName = model.displayName)) {
                         is ShareOutcome.Shared -> {
@@ -129,7 +129,7 @@ fun ShareCardSheetContent(
                         is ShareOutcome.Failure -> {
                             AppLog.e("Failed to share card: ${outcome.reason}")
 
-                            SnackBarManager.showSnackbar(title = "Couldn't share — try again")
+                            SnackBarManager.showSnackbar(title = "Couldn't share. Try again.")
 
                             shake.shake()
                         }

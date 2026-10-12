@@ -21,7 +21,7 @@ internal fun ProfileShareButton(
     ) {
         val icon = drawableIconResource(
             icon = SoftcoverIcon.Share,
-            contentDescription = "Share your reading year",
+            contentDescription = "Share your profile",
         )
 
         Icon(

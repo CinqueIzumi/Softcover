@@ -166,7 +166,7 @@ class ReadingPaceForecastCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.featuredBookPace shouldBe "30 pages/day — about 7 days to go"
+            stateFlow.value.featuredBookPace shouldBe "30 pages/day · about 7 days to go"
             job.cancel()
         }
 
@@ -213,7 +213,7 @@ class ReadingPaceForecastCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.featuredBookPace shouldBe "45 pages/day — about 2 days to go"
+            stateFlow.value.featuredBookPace shouldBe "45 pages/day · about 2 days to go"
             job.cancel()
         }
 
@@ -244,7 +244,7 @@ class ReadingPaceForecastCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.featuredBookPace shouldBe "25 pages/day — about 4 days to go"
+            stateFlow.value.featuredBookPace shouldBe "25 pages/day · about 4 days to go"
             job.cancel()
         }
 
@@ -357,7 +357,7 @@ class ReadingPaceForecastCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.featuredBookPace shouldBe "0h 30m/day — about 2 days to go"
+            stateFlow.value.featuredBookPace shouldBe "0h 30m/day · about 2 days to go"
             job.cancel()
         }
 

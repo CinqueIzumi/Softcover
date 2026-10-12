@@ -32,7 +32,7 @@ class ReadingPaceLineMapperTest {
             val line = forecast.toPaceLine()
 
             // ----- Assert -----
-            line shouldBe "35 pages/day — about 5 days to go"
+            line shouldBe "35 pages/day · about 5 days to go"
         }
 
         @Test
@@ -44,7 +44,7 @@ class ReadingPaceLineMapperTest {
             val line = forecast.toPaceLine()
 
             // ----- Assert -----
-            line shouldBe "35 pages/day — about 5 days to go"
+            line shouldBe "35 pages/day · about 5 days to go"
         }
 
         @Test
@@ -56,7 +56,7 @@ class ReadingPaceLineMapperTest {
             val line = forecast.toPaceLine()
 
             // ----- Assert -----
-            line shouldBe "1 page/day — about 5 days to go"
+            line shouldBe "1 page/day · about 5 days to go"
         }
 
         @Test
@@ -68,7 +68,7 @@ class ReadingPaceLineMapperTest {
             val line = forecast.toPaceLine()
 
             // ----- Assert -----
-            line shouldBe "35 pages/day — about 1 day to go"
+            line shouldBe "35 pages/day · about 1 day to go"
         }
 
         @Test
@@ -84,7 +84,7 @@ class ReadingPaceLineMapperTest {
             val line = forecast.toPaceLine()
 
             // ----- Assert -----
-            line shouldBe "1h 5m/day — about 3 days to go"
+            line shouldBe "1h 5m/day · about 3 days to go"
         }
     }
 }

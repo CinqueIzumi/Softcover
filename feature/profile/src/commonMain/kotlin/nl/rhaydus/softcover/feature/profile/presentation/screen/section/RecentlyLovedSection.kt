@@ -20,9 +20,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
- * "The last few that landed" — up to three loved reads, each showing the reader's own rating and the
- * month it landed. While [isLoading] with no loved reads yet, [cards] are masked stand-ins that hold the
- * layout.
+ * While [isLoading] with no loved reads yet, [cards] are masked stand-ins that hold the layout.
  */
 @Composable
 internal fun RecentlyLovedSection(
@@ -40,7 +38,7 @@ internal fun RecentlyLovedSection(
 
         if (hasRecentlyLoved.not() && isLoading.not()) {
             SoftcoverText(
-                text = "Your next favorite is still ahead of you.",
+                text = "Books you rate highly show up here.",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

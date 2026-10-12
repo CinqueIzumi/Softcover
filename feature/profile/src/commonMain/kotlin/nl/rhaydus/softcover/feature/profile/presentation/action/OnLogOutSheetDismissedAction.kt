@@ -26,7 +26,7 @@ internal class OnLogOutSheetDismissedAction : ProfileAction {
             .onFailure {
                 AppLog.e("$it")
 
-                SnackBarManager.showSnackbar(title = "Couldn't log out — try again.")
+                SnackBarManager.showSnackbar(title = "Couldn't log out. Try again.")
 
                 scope.sendEvent(event = ProfileEvent.LogOutFailedEvent())
             }

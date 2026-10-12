@@ -89,7 +89,7 @@ internal fun SpineColourSection(
 
         SoftcoverText(
             text = if (state.dynamicColorToggleRow.checked) {
-                "Dynamic colour is painting the app — pick a spine colour to take it back."
+                "Dynamic colour is on. Pick a spine colour to switch back."
             } else {
                 state.paletteGloss
             },

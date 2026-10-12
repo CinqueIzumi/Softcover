@@ -33,7 +33,7 @@ internal data class LibraryFilterSheetSelection(
     val tagsAvailableLabel: String = "0 available",
     val isEmpty: Boolean = false,
     val emptyTitle: String = "Nothing to filter yet",
-    val emptyBody: String = "This shelf is too sparse for filters to matter — add a few books first.",
+    val emptyBody: String = "Too few books here to filter. Add a few more first.",
     val showOwnershipFormat: Boolean = false,
     val showReleaseYear: Boolean = false,
     val showReadYear: Boolean = false,

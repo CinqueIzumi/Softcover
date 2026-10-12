@@ -31,7 +31,7 @@ internal class JvmSoftcoverNotifier : SoftcoverNotifier, AutoCloseable {
             return
         }
 
-        val caption = content.eyebrow?.let { "$it — ${content.title}" } ?: content.title
+        val caption = content.eyebrow?.let { "$it: ${content.title}" } ?: content.title
 
         icon.displayMessage(
             caption,

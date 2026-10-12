@@ -277,7 +277,7 @@ class YearHistoryMapperTest {
             )
 
             // ----- Assert -----
-            result shouldBe "2023 was your busiest year yet — 12 books."
+            result shouldBe "2023 was your busiest year yet: 12 books."
         }
 
         @Test
@@ -297,7 +297,7 @@ class YearHistoryMapperTest {
             )
 
             // ----- Assert -----
-            result shouldBe "2021 was your busiest year yet — ${formatGroupedNumber(12_345)} pages."
+            result shouldBe "2021 was your busiest year yet: ${formatGroupedNumber(12_345)} pages."
         }
 
         @Test

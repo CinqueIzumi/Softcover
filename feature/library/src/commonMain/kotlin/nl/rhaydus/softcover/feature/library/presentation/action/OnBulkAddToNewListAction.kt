@@ -72,7 +72,7 @@ internal class OnBulkAddToNewListAction(
             val noun = if (failureCount == 1) "book" else "books"
 
             SnackBarManager.showSnackbar(
-                title = "Couldn't add $failureCount $noun to “$listName” — try again.",
+                title = "Couldn't add $failureCount $noun to “$listName”. Try again.",
             )
 
             scope.sendEvent(LibraryEvent.NewListBooksAddFailedEvent())

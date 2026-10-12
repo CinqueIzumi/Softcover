@@ -60,7 +60,7 @@ internal class OnBulkMoveShelfAction(
         if (failureCount > 0) {
             val noun = if (failureCount == 1) "book" else "books"
 
-            SnackBarManager.showSnackbar(title = "Couldn't move $failureCount $noun — try again.")
+            SnackBarManager.showSnackbar(title = "Couldn't move $failureCount $noun. Try again.")
 
             scope.sendEvent(LibraryEvent.BulkMoveFailedEvent())
         } else {

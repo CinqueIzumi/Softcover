@@ -37,7 +37,7 @@ internal fun Book.toAlsoReadingCard(
 
     val eyebrow = if (mutationFailed) {
         BookCardEyebrow(
-            text = "Couldn't save — tap to retry".uppercase(),
+            text = "Couldn't save · tap to retry".uppercase(),
             tone = BookCardEyebrow.Tone.Error,
         )
     } else {

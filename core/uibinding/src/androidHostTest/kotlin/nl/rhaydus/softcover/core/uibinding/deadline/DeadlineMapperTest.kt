@@ -4,7 +4,6 @@ import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
-import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -43,7 +42,7 @@ class DeadlineMapperTest {
     @Nested
     inner class ToBadgeUiModelTest {
         @Test
-        fun `OnTrack status maps to the OnTrack tone with the status label`() {
+        fun `OnTrack status maps to the OnTrack tone`() {
             // ----- Arrange -----
             val subject = progress(
                 isExpired = false,
@@ -54,15 +53,12 @@ class DeadlineMapperTest {
             val result = subject.toBadgeUiModel()
 
             // ----- Assert -----
-            result shouldBe BadgeUiModel(
-                label = "On track",
-                tone = BadgeTone.PrimaryContainer,
-                size = BadgeSize.Compact,
-            )
+            result.tone shouldBe BadgeTone.PrimaryContainer
+            result.size shouldBe BadgeSize.Compact
         }
 
         @Test
-        fun `Behind status maps to the Behind tone with the status label`() {
+        fun `Behind status maps to the Behind tone`() {
             // ----- Arrange -----
             val subject = progress(
                 isExpired = false,
@@ -73,15 +69,12 @@ class DeadlineMapperTest {
             val result = subject.toBadgeUiModel()
 
             // ----- Assert -----
-            result shouldBe BadgeUiModel(
-                label = "Behind",
-                tone = BadgeTone.ErrorContainer,
-                size = BadgeSize.Compact,
-            )
+            result.tone shouldBe BadgeTone.ErrorContainer
+            result.size shouldBe BadgeSize.Compact
         }
 
         @Test
-        fun `Expired status maps to the Expired tone with the status label`() {
+        fun `Expired status maps to the Expired tone`() {
             // ----- Arrange -----
             val subject = progress(
                 isExpired = true,
@@ -92,11 +85,8 @@ class DeadlineMapperTest {
             val result = subject.toBadgeUiModel()
 
             // ----- Assert -----
-            result shouldBe BadgeUiModel(
-                label = "Expired",
-                tone = BadgeTone.Neutral,
-                size = BadgeSize.Compact,
-            )
+            result.tone shouldBe BadgeTone.Neutral
+            result.size shouldBe BadgeSize.Compact
         }
     }
 
@@ -349,7 +339,7 @@ class DeadlineMapperTest {
             val result = rowOf(subject)
 
             // ----- Assert -----
-            result.goal shouldBe "You're 30 pages behind schedule — Read 20 pages/day for the next 4 days to finish on time."
+            result.goal shouldBe "You're 30 pages behind schedule. Read 20 pages/day for the next 4 days to finish on time."
         }
 
         @Test

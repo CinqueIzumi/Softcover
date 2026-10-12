@@ -81,7 +81,7 @@ private fun ProfileContent(
                 }
             },
             actions = {
-                DesktopTooltip(text = "Share your reading year") {
+                DesktopTooltip(text = "Share your profile") {
                     ProfileShareButton(
                         onClick = { runAction(OnShareSheetOpenAction()) },
                         enabled = state.canShare,

@@ -245,7 +245,7 @@ class OnBulkMoveShelfActionTest {
             // ----- Assert -----
             coVerify(exactly = 1) { markBookAsReadUseCase(book = okBook) }
             verify(exactly = 1) {
-                SnackBarManager.showSnackbar(title = "Couldn't move 1 book — try again.")
+                SnackBarManager.showSnackbar(title = "Couldn't move 1 book. Try again.")
             }
 
             stateFlow.value.selectionMode shouldBe false

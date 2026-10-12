@@ -35,7 +35,7 @@ data class DeadlineRowUiModel(
                     label = "Behind",
                     tone = BadgeTone.ErrorContainer,
                 ),
-                goal = "You're 40 pages behind schedule — Read 22 pages/day for the next 12 days to " +
+                goal = "You're 40 pages behind schedule. Read 22 pages/day for the next 12 days to " +
                     "finish on time.",
                 isExpired = false,
             ),

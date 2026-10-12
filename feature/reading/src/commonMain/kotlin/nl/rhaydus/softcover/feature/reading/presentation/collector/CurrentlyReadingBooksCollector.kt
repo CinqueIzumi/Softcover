@@ -23,8 +23,8 @@ internal class CurrentlyReadingBooksCollector : ReadingCollector {
                     books = books.toImmutableList(),
                     hasLoadedBooks = true,
                     alsoReadingHeader = SectionHeaderUiModel.Section(
-                        eyebrow = if (restCount == 1) "One more in motion" else "$restCount more in motion",
-                        headline = "Also between your fingers",
+                        eyebrow = if (restCount == 1) "One more book" else "$restCount more books",
+                        headline = "Also on your nightstand",
                     ),
                 )
             }

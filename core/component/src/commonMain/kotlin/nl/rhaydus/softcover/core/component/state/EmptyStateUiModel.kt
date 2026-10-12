@@ -17,9 +17,9 @@ data class EmptyStateUiModel(
 ) {
     companion object : UiModelPreviews<EmptyStateUiModel> {
         override val previews: ImmutableMap<String, EmptyStateUiModel> = persistentMapOf(
-            "An open page awaits" to EmptyStateUiModel(
-                title = "An open page awaits",
-                body = "Nothing is currently between your fingers. Find a title worth losing an evening to.",
+            "Between books" to EmptyStateUiModel(
+                title = "Between books",
+                body = "Your next one might already be on your Want to read shelf.",
                 variant = EmptyStateVariant.Centered(
                     button = EmptyStateButtonUiModel(
                         label = "Find a book",

@@ -20,7 +20,7 @@ internal fun greetingForNow(): String {
         in 5..11 -> "Good morning."
         in 12..17 -> "Good afternoon."
         in 18..21 -> "Good evening."
-        else -> "Late hours."
+        else -> "Still up?"
     }
 }
 
@@ -29,11 +29,11 @@ internal fun buildSubtitle(
     averageProgress: Float?,
 ): String {
     val countPart = when (bookCount) {
-        1 -> "One title in motion"
-        else -> "$bookCount titles in motion"
+        1 -> "One book on the go"
+        else -> "$bookCount books on the go"
     }
 
-    val progressPart = averageProgress?.let { "${it.roundToInt()}% along, on average" }
+    val progressPart = averageProgress?.let { "${it.roundToInt()}% through, on average" }
 
     return listOfNotNull(countPart, progressPart).joinToString(" · ")
 }

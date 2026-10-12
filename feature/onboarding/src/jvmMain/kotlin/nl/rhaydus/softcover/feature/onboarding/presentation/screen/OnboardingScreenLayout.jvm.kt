@@ -86,8 +86,7 @@ internal actual fun OnboardingScreenLayout(
                     Spacer(modifier = Modifier.height(Spacing.md))
 
                     SoftcoverText(
-                        text = "Track every book you read, share the ones worth sharing — or " +
-                            "don't — and find your next life-changing read.",
+                        text = "Keep a record of every book you read, and find the next one worth reading.",
                         style = MaterialTheme.editorialTypography.bodyLarge.copy(
                             fontSize = 18.sp,
                             lineHeight = 28.sp,

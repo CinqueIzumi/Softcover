@@ -89,11 +89,11 @@ internal data class ProfileUiState(
     val ratingsChart: ColumnChartUiModel = ratingsChartUiModel(null),
     val ratingsAverage: StatNumberUiModel = ratingsAverageUiModel(null),
 
-    val readingAtlasHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Reading atlas"),
-    val theReaderHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "The reader"),
+    val readingAtlasHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "By the numbers"),
+    val theReaderHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Reader"),
     val authorRepresentationHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Who you read",
-        headline = "The authors behind your shelf",
+        headline = "Who you've been reading",
     ),
     val genreRankingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "What you reach for",
@@ -101,10 +101,10 @@ internal data class ProfileUiState(
     ),
     val recentlyLovedHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Recently loved",
-        headline = "The last few that landed",
+        headline = "Recent favourites",
     ),
     val yearColumnHistoryHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "The shape of the years",
+        eyebrow = "Over the years",
         headline = "Reading, year by year",
     ),
     val ratingsHistogramHeader: SectionHeaderUiModel = RatingBand.NEW_READER.toRatingsHistogramHeader(),

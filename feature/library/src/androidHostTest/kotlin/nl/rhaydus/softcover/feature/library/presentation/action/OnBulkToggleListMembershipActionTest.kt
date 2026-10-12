@@ -114,7 +114,7 @@ class OnBulkToggleListMembershipActionTest {
     ) {
         stateFlow.update { current ->
             current.copy(
-                customLists = (current.customLists.map { list ->
+                customLists = current.customLists.map { list ->
                     when {
                         list.id != listId -> list
 
@@ -122,7 +122,8 @@ class OnBulkToggleListMembershipActionTest {
 
                         else -> list.copy(books = list.books.filterNot { it.bookId == bookId })
                     }
-                }).toImmutableList(),
+                }
+                    .toImmutableList(),
             )
         }
     }
@@ -374,7 +375,7 @@ class OnBulkToggleListMembershipActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                SnackBarManager.showSnackbar(title = "Couldn't add 1 book to \"Favourites\" — try again.")
+                SnackBarManager.showSnackbar(title = "Couldn't add 1 book to \"Favourites\". Try again.")
             }
             stateFlow.value.listsBeingMutated shouldBe emptySet()
         }
@@ -405,7 +406,7 @@ class OnBulkToggleListMembershipActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                SnackBarManager.showSnackbar(title = "Couldn't remove 2 books from \"Favourites\" — try again.")
+                SnackBarManager.showSnackbar(title = "Couldn't remove 2 books from \"Favourites\". Try again.")
             }
         }
 
@@ -440,7 +441,7 @@ class OnBulkToggleListMembershipActionTest {
                 )
             }
             coVerify(exactly = 1) {
-                SnackBarManager.showSnackbar(title = "Couldn't add 1 book to \"Favourites\" — try again.")
+                SnackBarManager.showSnackbar(title = "Couldn't add 1 book to \"Favourites\". Try again.")
             }
         }
 

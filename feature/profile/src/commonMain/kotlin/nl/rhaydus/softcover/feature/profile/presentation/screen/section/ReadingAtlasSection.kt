@@ -17,9 +17,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.profile.presentation.state.ReadingAtlasUiModel
 
 /**
- * The "Reading atlas" stat block: the hero total-pages card above a row pairing the volumes tile with a
- * stacked average-rating / streak column. Rendered identically on both platforms; horizontal padding is
- * left to the caller so it can sit inside the mobile content column or the desktop stats column.
+ * Horizontal padding is left to the caller so the block can sit inside the mobile content column or the
+ * desktop stats column.
  */
 @Composable
 internal fun ReadingAtlasSection(

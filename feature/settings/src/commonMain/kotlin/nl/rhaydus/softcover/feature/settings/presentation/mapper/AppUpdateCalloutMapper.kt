@@ -6,22 +6,22 @@ import nl.rhaydus.softcover.core.component.callout.CalloutVariant
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 
 private const val DOWNLOADING_EYEBROW = "Downloading"
-private const val DOWNLOADING_TITLE = "Bringing the update down"
-private const val DOWNLOADING_BODY = "You can keep reading — it'll finish in the background."
+private const val DOWNLOADING_TITLE = "Downloading the update"
+private const val DOWNLOADING_BODY = "You can keep reading. It finishes in the background."
 
 private const val DOWNLOADED_EYEBROW = "Ready to install"
 private const val DOWNLOADED_TITLE = "The update is ready"
-private const val DOWNLOADED_BODY = "Downloaded and waiting. Softcover will restart once."
+private const val DOWNLOADED_BODY = "Downloaded and ready. Softcover restarts once to install it."
 private const val DOWNLOADED_ACTION = "Install & restart"
 
 private const val FAILED_EYEBROW = "Update failed"
-private const val FAILED_TITLE = "That didn't go through"
-private const val FAILED_BODY = "Tap to try again."
+private const val FAILED_TITLE = "The download didn't finish"
+private const val FAILED_BODY = "Check your connection and try again."
 private const val FAILED_ACTION = "Try again"
 
 private const val AVAILABLE_EYEBROW = "Update available"
 private const val AVAILABLE_TITLE = "A new version is ready"
-private const val AVAILABLE_BODY = "A newer Softcover is ready whenever you are."
+private const val AVAILABLE_BODY = "A new version of Softcover is ready to install."
 private const val AVAILABLE_ACTION = "Download update"
 
 /**

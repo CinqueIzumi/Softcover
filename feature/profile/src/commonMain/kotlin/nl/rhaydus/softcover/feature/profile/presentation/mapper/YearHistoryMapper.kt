@@ -16,7 +16,7 @@ private const val YEAR_LABEL_DIGITS = 2
 private const val COMPACT_COUNT_THOUSAND = 1_000
 private const val COMPACT_COUNT_MILLION = 1_000_000
 private const val COMPACT_COUNT_ROUNDS_TO_MILLION = 999_950
-private const val EMPTY_CAPTION = "Your reading years will chart themselves in as books finish."
+private const val EMPTY_CAPTION = "Finish a book and this chart starts filling in."
 
 /** The first busiest year leads; a null [series] yields the loading columns. */
 internal fun yearHistoryChartUiModel(
@@ -92,7 +92,7 @@ internal fun yearHistoryCaption(
         YearMetric.PAGES -> "pages"
     }
 
-    return "${peak.year} was your busiest year yet — ${formatGroupedNumber(peak.count)} $unit."
+    return "${peak.year} was your busiest year yet: ${formatGroupedNumber(peak.count)} $unit."
 }
 
 /** Full Pages counts (7,753) collide across eight narrow columns, so thousands collapse to "7.8k". */

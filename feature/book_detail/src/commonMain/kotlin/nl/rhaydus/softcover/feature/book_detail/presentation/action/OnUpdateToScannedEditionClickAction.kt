@@ -39,7 +39,7 @@ internal class OnUpdateToScannedEditionClickAction : BookDetailAction {
                 .onFailure {
                     AppLog.e("Failed to update shelved edition to scanned edition $it")
 
-                    SnackBarManager.showSnackbar(title = "Couldn't update the edition — try again.")
+                    SnackBarManager.showSnackbar(title = "Couldn't update the edition. Try again.")
 
                     scope.sendEvent(BookDetailEvent.MutationFailedEvent())
                 }

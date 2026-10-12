@@ -75,7 +75,7 @@ class MastheadCollectorTest {
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("0 titles in motion")
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("0 books on the go")
             job.cancel()
         }
 
@@ -91,7 +91,7 @@ class MastheadCollectorTest {
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("One title in motion")
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("One book on the go")
             job.cancel()
         }
 
@@ -107,7 +107,7 @@ class MastheadCollectorTest {
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("3 titles in motion")
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("3 books on the go")
             job.cancel()
         }
 
@@ -128,7 +128,7 @@ class MastheadCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text(
-                "2 titles in motion · 60% along, on average",
+                "2 books on the go · 60% through, on average",
             )
             job.cancel()
         }
@@ -150,7 +150,7 @@ class MastheadCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text(
-                "2 titles in motion · 45% along, on average",
+                "2 books on the go · 45% through, on average",
             )
             job.cancel()
         }
@@ -168,7 +168,7 @@ class MastheadCollectorTest {
             stateFlow.value = stateFlow.value.copy(books = persistentListOf(stubBook()))
 
             // ----- Assert -----
-            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("One title in motion")
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("One book on the go")
             job.cancel()
         }
 

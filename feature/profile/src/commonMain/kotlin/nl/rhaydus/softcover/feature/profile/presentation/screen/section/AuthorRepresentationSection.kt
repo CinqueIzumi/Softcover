@@ -102,7 +102,7 @@ internal fun AuthorRepresentationSection(
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     isLoading = isLoading,
-                    standIn = "Shares of the authors each one is tagged for, untagged authors left out.",
+                    standIn = "Each bar counts only the authors tagged for it.",
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.md))
@@ -126,7 +126,7 @@ internal fun AuthorRepresentationSection(
 }
 
 private fun emptyAuthorDemographicsCaption(hideUntaggedAuthors: Boolean): String = if (hideUntaggedAuthors) {
-    "None of the authors you've read carry this data yet — switch off to see the untagged share."
+    "None of your authors have this data yet. Turn off Hide untagged authors to see them."
 } else {
     "Author demographics will appear here as the authors you read get tagged."
 }
@@ -134,7 +134,7 @@ private fun emptyAuthorDemographicsCaption(hideUntaggedAuthors: Boolean): String
 // Names what the two breakdowns below are a share *of* — the one line that changes meaning wholesale
 // with the switch, since each bar's denominator drops to its own tagged subset.
 private fun demographicScopeCaption(hideUntaggedAuthors: Boolean): String = if (hideUntaggedAuthors) {
-    "Shares of the authors each one is tagged for — untagged authors left out."
+    "Each bar counts only the authors tagged for it."
 } else {
     "Shares of every author you've read, tagged or not."
 }

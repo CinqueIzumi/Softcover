@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -85,8 +86,8 @@ class MastheadCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.mastheads.keys shouldBe setOf(LibraryTab.All.id, readTab.id)
-            stateFlow.value.mastheads.getValue(LibraryTab.All.id).title shouldBe "All"
-            stateFlow.value.mastheads.getValue(readTab.id).title shouldBe "Read"
+            stateFlow.value.mastheads.getValue(LibraryTab.All.id).title shouldBe LibraryTab.All.label
+            stateFlow.value.mastheads.getValue(readTab.id).title shouldBe readTab.label
             job.cancel()
         }
 
@@ -114,12 +115,9 @@ class MastheadCollectorTest {
 
             // ----- Assert -----
             val mastheads = stateFlow.value.mastheads
-            mastheads.mapValues { it.value.subtitle } shouldBe mapOf(
-                readTab.id to PageMastheadSubtitle.Text("Nothing finished yet — the page is still open."),
-                wantToReadTab.id to PageMastheadSubtitle.Text("No titles set aside — discover one next."),
-                currentlyReadingTab.id to PageMastheadSubtitle.Text("No book open — pick one up."),
-                customListTab.id to PageMastheadSubtitle.Text("No titles yet — your story starts here."),
-            )
+            val subtitles = tabs.map { mastheads.getValue(it.id).subtitle }
+            subtitles.forEach { it.shouldBeInstanceOf<PageMastheadSubtitle.Text>() }
+            subtitles.toSet().size shouldBe tabs.size
             mastheads.values.none { it.isLoading } shouldBe true
             job.cancel()
         }

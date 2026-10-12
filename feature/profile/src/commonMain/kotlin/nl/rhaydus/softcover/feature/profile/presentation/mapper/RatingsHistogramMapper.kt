@@ -98,33 +98,29 @@ internal fun RatingBand.toRatingsHistogramHeader(): SectionHeaderUiModel.Section
 
 internal fun RatingBand.toRatingsHistogramCaption(): String = when (this) {
     RatingBand.GENEROUS ->
-        "Half-stars count. Most of yours land between four and five — you round up when a book earns it."
+        "Half stars count. Most of yours land between 4 and 5."
 
     RatingBand.SUPERFAN ->
-        "Your average sits north of four and a half — you finish what you start, and it usually earns the " +
-            "top shelf."
+        "Your average is above 4.5. When you finish a book, you tend to love it."
 
     RatingBand.CENTRIST ->
-        "Your ratings cluster around three and a half — steady and considered, rarely swinging to an " +
-            "extreme."
+        "Most of your ratings sit around 3.5. You rarely go very high or very low."
 
     RatingBand.EXACTING ->
-        "Your average runs low — a five-star read is rare here, which makes the ones you give out mean " +
-            "something."
+        "Your average runs low, so five stars from you means something."
 
     RatingBand.POLARISED ->
-        "Your ratings split into two camps, low and high, with little in between — a book either wins " +
-            "you over or it doesn't."
+        "Your ratings land high or low, with little in between."
 
     RatingBand.NEW_READER ->
-        "Not enough ratings yet to say much about your taste — a few more books will fill this in."
+        "Rate a few more books and a pattern will show up here."
 }
 
 private fun RatingBand.toRatingsHistogramHeadline(): String = when (this) {
-    RatingBand.GENEROUS -> "A generous but honest hand"
-    RatingBand.SUPERFAN -> "Easily, happily impressed"
-    RatingBand.CENTRIST -> "You keep to the middle of the shelf"
-    RatingBand.EXACTING -> "A hard star to earn"
+    RatingBand.GENEROUS -> "A generous rater"
+    RatingBand.SUPERFAN -> "Hard to disappoint"
+    RatingBand.CENTRIST -> "Right down the middle"
+    RatingBand.EXACTING -> "Tough to impress"
     RatingBand.POLARISED -> "Love it or leave it"
-    RatingBand.NEW_READER -> "Still finding your scale"
+    RatingBand.NEW_READER -> "Too early to tell"
 }

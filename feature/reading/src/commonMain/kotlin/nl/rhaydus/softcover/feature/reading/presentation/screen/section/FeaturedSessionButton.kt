@@ -58,7 +58,7 @@ internal fun FeaturedSessionButton(
                 size = ButtonSize.M,
                 icon = drawableIconResource(
                     icon = SoftcoverIcon.Reading,
-                    contentDescription = "Focus mode icon",
+                    contentDescription = "Focus mode",
                 ),
                 onClick = {
                     navigator.parent?.push(item = appNavigator.screen(ScreenDestination.FocusMode))
@@ -80,7 +80,7 @@ internal fun FeaturedSessionButton(
                 size = ButtonSize.M,
                 icon = drawableIconResource(
                     icon = SoftcoverIcon.Play,
-                    contentDescription = "Start reading session icon",
+                    contentDescription = "Start reading session",
                 ),
                 onClick = {
                     if (isLoading.not()) {

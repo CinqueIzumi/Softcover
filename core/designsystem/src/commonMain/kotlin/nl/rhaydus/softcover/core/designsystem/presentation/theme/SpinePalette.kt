@@ -33,23 +33,23 @@ enum class SpinePalette(
 ) {
     SOFTCOVER(
         label = "Softcover",
-        gloss = "The house look — warm clay and old gold, on warm white.",
+        gloss = "The house look. Warm clay and old gold on warm white.",
     ),
     VELLUM(
         label = "Vellum",
-        gloss = "Aged paper — a golden ink with a sage note, on cream.",
+        gloss = "Golden ink with a hint of sage, on cream.",
     ),
     INK(
         label = "Ink",
-        gloss = "Printer's slate blue and an oxblood second pass, on a cool page.",
+        gloss = "Slate blue and oxblood on a cool white page.",
     ),
     FOXED(
         label = "Foxed",
-        gloss = "The walnut brown of a browning page, on tanned paper.",
+        gloss = "Walnut brown on tanned paper.",
     ),
     SEA(
         label = "Sea",
-        gloss = "Deep sea teal and warm sand, on a page washed pale blue.",
+        gloss = "Sea teal and warm sand on pale blue.",
     ),
     ;
 

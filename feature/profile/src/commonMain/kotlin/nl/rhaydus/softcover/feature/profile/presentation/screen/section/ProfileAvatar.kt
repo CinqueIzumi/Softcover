@@ -10,14 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
-import nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreenLayout
-
-/**
- * Shared Profile content reused by both the mobile ([ProfileScreenLayout] in `mobileMain`) and desktop
- * (`jvmMain`) layouts. The cookie-cut avatar, the section headers, and the whole "Reading atlas"
- * stat block are identical on both platforms — only their arrangement (centered single column vs. the
- * desktop identity sidebar beside a wider stats column) differs, which is what each `actual` decides.
- */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ProfileAvatar(

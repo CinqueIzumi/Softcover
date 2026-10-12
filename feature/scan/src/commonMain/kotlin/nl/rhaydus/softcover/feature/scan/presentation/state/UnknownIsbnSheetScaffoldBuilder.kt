@@ -11,8 +11,8 @@ internal fun unknownIsbnSheetScaffoldFor(isAdding: Boolean): SheetScaffoldUiMode
         header = SheetHeaderUiModel(
             section = SectionHeaderUiModel.Section(
                 eyebrow = "Not in Hardcover",
-                headline = "We don't have this one yet.",
-                description = "Double-check the ISBN below — if it's right, add it to Hardcover so you can track it.",
+                headline = "Hardcover doesn't have this one yet.",
+                description = "Check the ISBN below. If it's right, add the book to Hardcover so you can track it.",
             ),
         ),
         footer = SheetFooterUiModel.Stacked(

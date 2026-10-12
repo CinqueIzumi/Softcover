@@ -38,11 +38,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealRevi
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
-/**
- * "Voices" (The Book lens): section-opener bar + eyebrow, the headline from
- * [BookDetailUiState.reviewsSectionHeader], the community review cards, and a footer summary line
- * (`★ avg across N ratings`).
- */
 @Composable
 internal fun ReviewsSection(
     state: BookDetailUiState,

@@ -53,7 +53,7 @@ class BookReviewUiModelMapperTest {
             val model = review.toBookReviewUiModel()
 
             // ----- Assert -----
-            model.rating.shouldNotBeNull().contentDescription shouldBe "Rated 4.0"
+            model.rating.shouldNotBeNull().contentDescription shouldBe "Rated 4.0 out of 5"
         }
 
         @Test

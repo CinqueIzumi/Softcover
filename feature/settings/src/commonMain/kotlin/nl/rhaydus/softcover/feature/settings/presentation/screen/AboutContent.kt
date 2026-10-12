@@ -132,7 +132,7 @@ private fun SourceSection(
             row {
                 SettingsMenuRow(
                     title = "View the code on GitHub",
-                    gloss = "Browse the source, file a pull request, or fork it.",
+                    gloss = "Read the code, or help build it.",
                     icon = SoftcoverIcon.History,
                     target = SettingsMenuRowTarget.ExternalLink(onClick = { openUrl(GITHUB_REPO_URL) }),
                 )
@@ -140,7 +140,7 @@ private fun SourceSection(
             row {
                 SettingsMenuRow(
                     title = "Roadmap",
-                    gloss = "What we're building next, in the order we plan to ship it.",
+                    gloss = "What's coming next, in the order it's planned.",
                     icon = SoftcoverIcon.Explore,
                     target = SettingsMenuRowTarget.SubPage(onClick = onRoadmapClick),
                 )
@@ -167,7 +167,7 @@ private fun ContactSection(
             row {
                 SettingsMenuRow(
                     title = "Report an issue",
-                    gloss = "Found a bug, or something feels off? Tell us on GitHub.",
+                    gloss = "Found a bug? Let us know on GitHub.",
                     icon = SoftcoverIcon.Info,
                     target = SettingsMenuRowTarget.ExternalLink(onClick = { openUrl(GITHUB_ISSUES_URL) }),
                 )

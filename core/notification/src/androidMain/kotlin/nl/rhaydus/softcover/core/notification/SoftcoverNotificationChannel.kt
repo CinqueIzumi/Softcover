@@ -17,7 +17,7 @@ enum class SoftcoverNotificationChannel(
     Milestones(
         id = "softcover.milestones",
         title = "Milestones",
-        description = "Celebrations when you finish a series, hit a streak, or complete a yearly goal.",
+        description = "A note when you finish a series, keep a streak going or reach your yearly goal.",
         importance = NotificationManagerCompat.IMPORTANCE_DEFAULT,
     ),
     // DEFAULT, not LOW: One UI only surfaces *alerting* notifications on the lock screen, and a LOW

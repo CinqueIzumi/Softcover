@@ -46,7 +46,7 @@ fun List<BookList>.toChooseListsUiModel(
     ),
     scaffold = chooseListsScaffold(
         name = bookTitle,
-        description = "Tap a list to file it here — tap a filled one to take it off. Saved as you go.",
+        description = "Tap a list to add this book, and tap again to take it off. Changes save as you go.",
         trailing = SheetHeaderTrailing.Jacket(cover = cover),
     ),
 )
@@ -79,7 +79,7 @@ fun List<BookList>.toBulkChooseListsUiModel(
         ),
         scaffold = chooseListsScaffold(
             name = name,
-            description = "A part-filled list adds the rest first — then a second tap takes $takesOff off.",
+            description = "If a list has some of these books, the first tap adds the rest and a second tap removes $takesOff.",
             trailing = if (stackCovers.isEmpty()) {
                 SheetHeaderTrailing.Jacket(
                     cover = CoverUiModel(

@@ -58,7 +58,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
         Spacer(modifier = Modifier.height(Spacing.xxs))
 
         SoftcoverText(
-            text = "A reading life",
+            text = "My reading life",
             style = MaterialTheme.editorialTypography.bodySmall,
             color = LocalContentColor.current.copy(alpha = 0.7f),
         )
@@ -74,7 +74,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
         Spacer(modifier = Modifier.height(Spacing.sm))
 
         SoftcoverText(
-            text = "THE READER",
+            text = "READER",
             style = MaterialTheme.editorialTypography.eyebrowSmall,
             color = LocalContentColor.current.copy(alpha = 0.75f),
         )
@@ -137,18 +137,9 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
         Spacer(modifier = Modifier.height(Spacing.xxl))
 
         SoftcoverText(
-            text = "THE READING YEAR",
+            text = "PAGES, MONTH BY MONTH",
             style = MaterialTheme.editorialTypography.eyebrow,
             color = LocalContentColor.current.copy(alpha = 0.85f),
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.xxxs))
-
-        SoftcoverText(
-            text = "pages, month by month",
-            style = MaterialTheme.editorialTypography.bodySmall,
-            color = LocalContentColor.current.copy(alpha = 0.75f),
             modifier = Modifier.fillMaxWidth(),
         )
 

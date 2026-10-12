@@ -9,14 +9,14 @@ internal fun LibraryTab.toEmptyStateUiModel(): EmptyStateUiModel {
 
     return if (isDnf) {
         EmptyStateUiModel(
-            title = "Nothing set aside",
-            body = "No books abandoned here — long may it stay that way.",
+            title = "Nothing abandoned",
+            body = "Books you stop reading end up here. So far, none.",
         )
     } else {
         EmptyStateUiModel(
             title = "An empty shelf",
-            body = "Nothing rests on your $label list yet. " +
-                "Find a title worth keeping and it will live here.",
+            body = "Nothing on your $label list yet. " +
+                "Books you add will show up here.",
         )
     }
 }

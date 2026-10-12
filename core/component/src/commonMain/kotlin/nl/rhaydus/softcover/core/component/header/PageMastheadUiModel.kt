@@ -32,11 +32,11 @@ data class PageMastheadUiModel(
             ),
             "Regular" to PageMastheadUiModel(
                 title = "Settings",
-                subtitle = PageMastheadSubtitle.Text("Tune Softcover to match how you read."),
+                subtitle = PageMastheadSubtitle.Text("Set Softcover up the way you like it."),
             ),
             "Compact" to PageMastheadUiModel(
                 title = "Settings",
-                subtitle = PageMastheadSubtitle.Text("Tune Softcover to match how you read."),
+                subtitle = PageMastheadSubtitle.Text("Set Softcover up the way you like it."),
                 size = PageMastheadSize.Compact,
             ),
             "Loading subtitle" to PageMastheadUiModel(
@@ -95,7 +95,7 @@ data class PageMastheadUiModel(
             ),
             "Unknown title" to PageMastheadUiModel(
                 title = null,
-                subtitle = PageMastheadSubtitle.Text("3 titles in motion"),
+                subtitle = PageMastheadSubtitle.Text("3 books on the go"),
                 size = PageMastheadSize.Compact,
                 isLoading = true,
             ),

@@ -75,7 +75,7 @@ sealed interface SectionHeaderUiModel {
             ),
             "Inline" to Inline(eyebrow = "Recently added"),
             "Inline, error" to Inline(
-                eyebrow = "Couldn't save — tap to retry",
+                eyebrow = "Couldn't save. Tap to retry",
                 tone = SectionHeaderTone.Error,
             ),
             "Label" to Label(eyebrow = "Shelves"),

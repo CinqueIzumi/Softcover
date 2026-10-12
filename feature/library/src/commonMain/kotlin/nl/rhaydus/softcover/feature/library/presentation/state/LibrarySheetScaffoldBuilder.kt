@@ -41,7 +41,7 @@ internal fun filterSheetScaffoldFor(
             section = SectionHeaderUiModel.Section(
                 eyebrow = "Filter this shelf",
                 headline = "Narrow this shelf.",
-                description = "Combine facets to find the corner of your library you're after.",
+                description = "Combine filters to narrow this shelf down.",
             ),
         ),
         footer = SheetFooterUiModel.Inline(

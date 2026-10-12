@@ -143,7 +143,7 @@ class UndoableBookRemoverTest {
             result.isFailure.shouldBeTrue()
             verify(exactly = 1) {
                 SnackBarManager.showSnackbar(
-                    title = "Couldn't remove 1 book — try again.",
+                    title = "Couldn't remove 1 book. Try again.",
                     duration = any(),
                 )
             }
@@ -164,7 +164,7 @@ class UndoableBookRemoverTest {
             // ----- Assert -----
             verify(exactly = 1) {
                 SnackBarManager.showSnackbar(
-                    title = "Couldn't remove 2 books — try again.",
+                    title = "Couldn't remove 2 books. Try again.",
                     duration = any(),
                 )
             }
@@ -333,7 +333,7 @@ class UndoableBookRemoverTest {
             // ----- Assert -----
             verify(exactly = 1) {
                 SnackBarManager.showSnackbar(
-                    title = "Couldn't remove 2 books — try again.",
+                    title = "Couldn't remove 2 books. Try again.",
                     duration = any(),
                 )
             }
@@ -359,7 +359,7 @@ class UndoableBookRemoverTest {
             // ----- Assert -----
             verify(exactly = 1) {
                 SnackBarManager.showSnackbar(
-                    title = "Couldn't remove 1 book — try again.",
+                    title = "Couldn't remove 1 book. Try again.",
                     duration = any(),
                 )
             }

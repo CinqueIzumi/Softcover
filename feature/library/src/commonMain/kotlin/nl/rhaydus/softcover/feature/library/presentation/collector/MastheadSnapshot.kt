@@ -65,12 +65,12 @@ private fun subtitleFor(
         return PageMastheadSubtitle.Text(
             text = when {
                 tab is LibraryTab.Status && tab.status == UserBookStatus.READ ->
-                    "Nothing finished yet — the page is still open."
+                    "Nothing finished yet"
                 tab is LibraryTab.Status && tab.status == UserBookStatus.WANT_TO_READ ->
-                    "No titles set aside — discover one next."
+                    "Nothing lined up yet"
                 tab is LibraryTab.Status && tab.status == UserBookStatus.CURRENTLY_READING ->
-                    "No book open — pick one up."
-                else -> "No titles yet — your story starts here."
+                    "Nothing on the go right now"
+                else -> "No books here yet"
             },
         )
     }

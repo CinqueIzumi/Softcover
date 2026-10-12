@@ -98,7 +98,7 @@ data class SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
                     section = SectionHeaderUiModel.Section(
                         eyebrow = "Setting up",
-                        headline = "Pulling your library together.",
+                        headline = "Getting your shelves ready…",
                     ),
                 ),
                 dismissible = false,

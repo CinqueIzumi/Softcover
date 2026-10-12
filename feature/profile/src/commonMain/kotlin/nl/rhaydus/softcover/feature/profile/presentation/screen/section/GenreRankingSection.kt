@@ -47,7 +47,7 @@ internal fun GenreRankingSection(
 
         if (hasGenres.not() && isLoading.not()) {
             SoftcoverText(
-                text = "Once a few books settle onto your shelves, this fills in.",
+                text = "Finish a few books and your top genres show up here.",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -61,9 +61,8 @@ internal fun GenreRankingSection(
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 isLoading = isLoading,
-                standIn = "Your five most-read genres, each as a share of your books, counted over your " +
-                    "finished books that carry genre tags. A book tagged with several counts " +
-                    "toward each, so these overlap.",
+                standIn = "Your top five genres, out of your finished books with genre tags. Books can have more " +
+                    "than one genre, so these add up to more than 100%.",
             )
         }
     }

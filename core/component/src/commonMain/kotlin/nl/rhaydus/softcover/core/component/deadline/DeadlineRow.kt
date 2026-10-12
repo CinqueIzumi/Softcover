@@ -42,7 +42,7 @@ fun DeadlineRow(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val deadlineIcon = drawableIconResource(
                     icon = SoftcoverIcon.DateRange,
-                    contentDescription = "Deadline icon",
+                    contentDescription = "Deadline",
                 )
 
                 Icon(

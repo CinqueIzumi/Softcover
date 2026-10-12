@@ -64,7 +64,7 @@ class UndoableBookRemover internal constructor(
     private fun List<Book>.failureMessage(): String {
         val noun = if (size == 1) "book" else "books"
 
-        return "Couldn't remove $size $noun — try again."
+        return "Couldn't remove $size $noun. Try again."
     }
 
     private fun List<Book>.removedMessage(): String = when (size) {

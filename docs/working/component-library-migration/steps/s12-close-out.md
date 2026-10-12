@@ -1,7 +1,7 @@
 # S12 — Close out
 
-**Stage:** S12 — final gate values, doc rewrite, and deleting this directory. Starts once PF-4 and PF-7
-have landed. **Delegation:** user
+**Stage:** S12 — final gate values, doc rewrite, and deleting this directory. Starts once PF-7
+has landed. **Delegation:** user
 (Phase 1 items), `softcover-implementer` (Phase 2 items).
 
 ## Sub-steps
@@ -59,7 +59,7 @@ gate or gallery check stands in for it. Walk every screen and every navigation p
 - **States:** empty, error, offline and loading on every screen; long titles, missing covers, no data.
 - **Layouts:** compact, medium and expanded widths; light and dark; each palette; larger font scale.
 - **The accepted visual shifts** in [`visual-checks.md`](../visual-checks.md), plus the approved rows
-  of `premium-feel-audit.md` and `copy-audit.md`, already applied by PF-4 / PF-7.
+  of `copy-audit.md`, already applied by PF-7.
 
 Regressions found so far:
 

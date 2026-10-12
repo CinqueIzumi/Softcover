@@ -219,7 +219,7 @@ private fun PasteFromClipboardRow(onClick: () -> Unit) {
             )
 
             SoftcoverText(
-                text = "The quick way in",
+                text = "Paste it from your clipboard",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
             )
@@ -324,7 +324,7 @@ private fun WhereToFindItExplainer() {
             ExplainerStepRow(
                 number = "02",
                 label = "Open Settings → API",
-                sub = "Your access token lives here.",
+                sub = "Your API key is on this page.",
             )
 
             ExplainerStepRow(

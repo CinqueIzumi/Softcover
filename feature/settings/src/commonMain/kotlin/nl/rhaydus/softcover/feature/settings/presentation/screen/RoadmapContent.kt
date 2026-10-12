@@ -114,8 +114,8 @@ private fun RoadmapDocumentBody(
     Column(modifier = Modifier.fillMaxWidth()) {
         if (isBundled) {
             SoftcoverText(
-                text = "Showing the roadmap that shipped with this build — reconnect to see what's " +
-                    "changed since.",
+                text = "This is the roadmap that came with this version. Go online to see " +
+                    "what's changed.",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

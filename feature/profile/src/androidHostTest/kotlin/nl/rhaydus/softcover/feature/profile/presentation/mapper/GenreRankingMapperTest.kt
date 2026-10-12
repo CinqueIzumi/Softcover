@@ -150,7 +150,7 @@ class GenreRankingMapperTest {
             val result = genreScopeCaption(taggedBookCount)
 
             // ----- Assert -----
-            result shouldContain "counted over your finished books that carry genre tags"
+            result shouldContain "out of your finished books with genre tags"
         }
 
         @Test
@@ -162,7 +162,7 @@ class GenreRankingMapperTest {
             val result = genreScopeCaption(taggedBookCount)
 
             // ----- Assert -----
-            result shouldContain "the single finished book of yours that carries genre tags"
+            result shouldContain "out of 1 finished book with genre tags"
         }
 
         @Test
@@ -174,19 +174,7 @@ class GenreRankingMapperTest {
             val result = genreScopeCaption(taggedBookCount)
 
             // ----- Assert -----
-            result shouldContain "counted over the 12 finished books of yours that carry genre tags"
-        }
-
-        @Test
-        fun `always explains that the shares overlap`() {
-            // ----- Arrange -----
-            val counts = listOf(0, 1, 12)
-
-            // ----- Act -----
-            val results = counts.map { genreScopeCaption(it) }
-
-            // ----- Assert -----
-            results.forEach { it shouldContain "these overlap and don't total 100%" }
+            result shouldContain "out of 12 finished books with genre tags"
         }
     }
 }

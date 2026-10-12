@@ -96,11 +96,11 @@ class BarcodeScannerScreen : Screen {
                 }
 
                 is ScanEvent.ResolutionFailedEvent -> {
-                    SnackBarManager.showSnackbar(title = "Couldn't look that up — try again.")
+                    SnackBarManager.showSnackbar(title = "Couldn't look up that ISBN. Try again.")
                 }
 
                 is ScanEvent.AddBookFailedEvent -> {
-                    SnackBarManager.showSnackbar(title = "Couldn't add it — try again.")
+                    SnackBarManager.showSnackbar(title = "Couldn't add the book. Try again.")
                 }
             }
         }

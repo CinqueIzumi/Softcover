@@ -97,7 +97,7 @@ private fun UserTag.toEditorChipUiModel(): ChipUiModel = ChipUiModel(
     size = ChipSize.Compact,
     leading = ChipLeading.SpoilerToggle(
         marked = spoiler,
-        label = if (spoiler) "Marked as spoiler — tap to unmark" else "Mark as spoiler",
+        label = if (spoiler) "Marked as spoiler. Tap to unmark" else "Mark as spoiler",
     ),
     trailing = ChipTrailing.Dismiss(label = "Remove $name"),
 )

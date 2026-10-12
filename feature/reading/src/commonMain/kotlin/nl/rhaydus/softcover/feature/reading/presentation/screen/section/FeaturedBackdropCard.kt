@@ -181,7 +181,7 @@ internal fun FeaturedBackdropCard(
                 size = ButtonSize.M,
                 icon = drawableIconResource(
                     icon = SoftcoverIcon.Edit,
-                    contentDescription = "Update progress icon",
+                    contentDescription = "Update progress",
                 ),
                 onClick = onUpdateProgressClick,
                 enabled = isLoading.not(),
@@ -234,9 +234,9 @@ private fun timeOfDayCaption(): String {
     val hour = currentLocalDateTime().hour
 
     return when (hour) {
-        in 5..11 -> "Mornings are made for a few quiet pages before the day gets loud."
-        in 12..17 -> "A good afternoon for picking up where you left off."
-        in 18..21 -> "Evenings were made for this. Pick up where you stopped."
-        else -> "The late hours are yours. Pick up where you stopped."
+        in 5..11 -> "A chapter with your coffee?"
+        in 12..17 -> "Time for a few pages this afternoon."
+        in 18..21 -> "Settle in with a chapter tonight."
+        else -> "One more chapter before bed?"
     }
 }

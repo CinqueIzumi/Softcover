@@ -23,7 +23,7 @@ internal fun displayToggleRowsFor(
             ToggleRowUiModel(
                 key = DisplayToggle.FLOATING_BOTTOM_BAR,
                 title = "Floating bottom bar",
-                gloss = "Lift the nav off the edge, with rounded corners.",
+                gloss = "Float the navigation bar above the screen edge, with rounded corners.",
                 checked = useFloatingBarChecked,
                 variant = ToggleRowVariant.Inset,
             ),

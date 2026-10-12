@@ -46,7 +46,7 @@ internal class OnReorderListBooksAction(
             val suffix = listName?.let { " in \"$it\"" }.orEmpty()
 
             SnackBarManager.showSnackbar(
-                title = "Couldn't save the new order$suffix — try again.",
+                title = "Couldn't save the new order$suffix. Try again.",
             )
 
             scope.sendEvent(event = LibraryEvent.ListReorderFailedEvent())

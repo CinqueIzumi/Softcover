@@ -68,7 +68,7 @@ internal actual fun RoadmapScreenLayout(
                 PullToRefreshEyebrow(
                     pullToRefreshState = pullToRefreshState,
                     isRefreshing = state.isRefreshing,
-                    baseText = "The plan",
+                    baseText = "Roadmap",
                     refreshingText = "Checking for updates…",
                 )
 

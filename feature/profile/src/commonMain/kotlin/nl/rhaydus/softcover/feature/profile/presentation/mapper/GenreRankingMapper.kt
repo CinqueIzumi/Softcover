@@ -50,11 +50,11 @@ internal fun genreRankingUiModel(genres: GenreBreakdown?): RankedBarsUiModel {
  */
 internal fun genreScopeCaption(taggedBookCount: Int): String {
     val scope = when (taggedBookCount) {
-        0 -> "counted over your finished books that carry genre tags"
-        1 -> "counted over the single finished book of yours that carries genre tags"
-        else -> "counted over the ${formatGroupedNumber(taggedBookCount)} finished books of yours that carry genre tags"
+        0 -> "out of your finished books with genre tags"
+        1 -> "out of 1 finished book with genre tags"
+        else -> "out of ${formatGroupedNumber(taggedBookCount)} finished books with genre tags"
     }
 
-    return "Your five most-read genres, each as a share of your books — $scope. " +
-        "A book tagged with several counts toward each, so these overlap and don't total 100%."
+    return "Your top five genres, $scope. " +
+        "Books can have more than one genre, so these add up to more than 100%."
 }

@@ -128,7 +128,7 @@ internal class OnBulkToggleListMembershipAction(
             val preposition = if (isRemove) "from" else "to"
 
             SnackBarManager.showSnackbar(
-                title = "Couldn't $verb $failureCount $noun $preposition \"${list.name}\" — try again.",
+                title = "Couldn't $verb $failureCount $noun $preposition \"${list.name}\". Try again.",
             )
 
             scope.sendEvent(LibraryEvent.ListMembershipChangeFailedEvent())

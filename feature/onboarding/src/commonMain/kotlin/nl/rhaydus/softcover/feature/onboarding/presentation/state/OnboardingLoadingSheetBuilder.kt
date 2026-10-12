@@ -11,7 +11,7 @@ internal fun onboardingLoadingSheet(progress: Float?): LoadingSheetUiModel =
             header = SheetHeaderUiModel(
                 section = SectionHeaderUiModel.Section(
                     eyebrow = "Setting up",
-                    headline = "Pulling your library together.",
+                    headline = "Getting your shelves ready…",
                     description = "Depending on its size, this might take a moment.",
                 ),
             ),

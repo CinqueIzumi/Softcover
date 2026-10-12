@@ -94,7 +94,7 @@ data class ChipUiModel(
                 size = ChipSize.Compact,
                 leading = ChipLeading.SpoilerToggle(
                     marked = true,
-                    label = "Marked as spoiler — tap to unmark",
+                    label = "Marked as spoiler. Tap to unmark",
                 ),
                 trailing = ChipTrailing.Dismiss(label = "Remove Contains a major death"),
                 interaction = ChipInteraction.Inert,

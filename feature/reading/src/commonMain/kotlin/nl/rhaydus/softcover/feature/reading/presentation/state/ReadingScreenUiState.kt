@@ -48,8 +48,8 @@ internal data class ReadingScreenUiState(
     val hasLoadedBooks: Boolean = false,
 
     val alsoReadingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "0 more in motion",
-        headline = "Also between your fingers",
+        eyebrow = "0 more books",
+        headline = "Also on your nightstand",
     ),
     val bookToUpdate: Book? = null,
     val progressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
@@ -75,8 +75,8 @@ internal data class ReadingScreenUiState(
     val pickUpNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Pick up next"),
     val trendingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Trending now"),
     val emptyCurrentlyReading: EmptyStateUiModel = EmptyStateUiModel(
-        title = "An open page awaits",
-        body = "Nothing is currently between your fingers. Find a title worth losing an evening to.",
+        title = "Between books",
+        body = "Your next one might already be on your Want to read shelf.",
         variant = EmptyStateVariant.Centered(
             button = EmptyStateButtonUiModel(
                 label = "Find a book",
@@ -186,20 +186,20 @@ internal data class ReadingScreenUiState(
         val MASTHEAD_STAND_IN = PageMastheadUiModel(
             eyebrow = mastheadEyebrowFor(isRefreshing = false),
             title = null,
-            subtitle = PageMastheadSubtitle.Text("0 titles in motion"),
+            subtitle = PageMastheadSubtitle.Text("0 books on the go"),
             isLoading = true,
         )
 
         val COMPACT_MASTHEAD_STAND_IN = PageMastheadUiModel(
             title = null,
-            subtitle = PageMastheadSubtitle.Text("0 titles in motion"),
+            subtitle = PageMastheadSubtitle.Text("0 books on the go"),
             size = PageMastheadSize.Compact,
             isLoading = true,
         )
 
         val ALSO_READING_HEADER_STAND_IN = SectionHeaderUiModel.Section(
-            eyebrow = "0 more in motion",
-            headline = "Also between your fingers",
+            eyebrow = "0 more books",
+            headline = "Also on your nightstand",
             isLoading = true,
         )
 

@@ -42,7 +42,7 @@ fun Book.toVerdictSheetUiModel(
             SectionHeaderUiModel.Section(
                 eyebrow = "The last page",
                 headline = "You finished $title.",
-                description = "A rating and a few words, if you like — both are optional.",
+                description = "Add a rating or a few words. Both are optional.",
             ),
             "Not now",
             "Save",

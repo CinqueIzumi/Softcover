@@ -398,6 +398,7 @@ Paths are abbreviated. `S/` = `feature/settings/src/commonMain/kotlin/nl/rhaydus
 | Card title (Profile share) — `core/component/src/commonMain/kotlin/nl/rhaydus/softcover/core/component/share/ReadingLifeShareCardBody.kt:59` | "A reading life" | literary flourish as a title | "My reading life" | approve |
 | Reader eyebrow (Profile share) — `core/component/.../share/ReadingLifeShareCardBody.kt:75` | "THE READER" | cute rather than clear | "READER" | approve |
 | Monthly chart heading + subline (Profile share) — `core/component/.../share/ReadingLifeShareCardBody.kt:138` / `:147` | "THE READING YEAR" / "pages, month by month" | literary heading that needs a second line to explain it | "PAGES, MONTH BY MONTH" (drop the subline) | approve |
+| Profile share row / sheet — `ShareEntryRow.kt:89`, `ProfileSheetScaffoldBuilder.kt:14` | "Share your reading year" / "Share your profile" | two names | "Share your profile" | approve |
 
 ### Book removal snackbar
 

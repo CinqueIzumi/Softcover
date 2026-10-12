@@ -22,7 +22,7 @@ internal data class LibraryVisibilitySettingsUiState(
     val libraryTabsPageHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Library tabs",
         headline = "Arrange your shelves.",
-        description = "Choose which shelves ride along the top of your library — and the order they sit in.",
+        description = "Choose which shelves show as tabs in your library, and in what order.",
     ),
     val libraryTabsHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(
         eyebrow = "Your tabs",

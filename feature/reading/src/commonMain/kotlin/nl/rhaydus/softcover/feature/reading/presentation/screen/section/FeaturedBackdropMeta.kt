@@ -46,7 +46,7 @@ internal fun FeaturedBackdropMeta(
 
     Column(modifier = modifier) {
         val topLineText = if (mutationFailed) {
-            "Couldn't save — tap to retry".uppercase()
+            "Couldn't save · tap to retry".uppercase()
         } else {
             book.seriesText?.takeIf { it.isNotBlank() }?.uppercase()
         }

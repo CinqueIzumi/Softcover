@@ -184,7 +184,7 @@ class CurrentlyReadingBooksCollectorTest {
             booksFlow.emit(emptyList())
 
             // ----- Assert -----
-            stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "0 more in motion"
+            stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "0 more books"
             job.cancel()
         }
 
@@ -203,7 +203,7 @@ class CurrentlyReadingBooksCollectorTest {
             booksFlow.emit(listOf(stubBook()))
 
             // ----- Assert -----
-            stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "0 more in motion"
+            stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "0 more books"
             job.cancel()
         }
 
@@ -223,7 +223,7 @@ class CurrentlyReadingBooksCollectorTest {
                 booksFlow.emit(listOf(stubBook(), stubBook()))
 
                 // ----- Assert -----
-                stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "One more in motion"
+                stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "One more book"
                 job.cancel()
             }
 
@@ -242,7 +242,7 @@ class CurrentlyReadingBooksCollectorTest {
             booksFlow.emit(listOf(stubBook(), stubBook(), stubBook(), stubBook()))
 
             // ----- Assert -----
-            stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "3 more in motion"
+            stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "3 more books"
             job.cancel()
         }
     }

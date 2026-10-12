@@ -17,19 +17,19 @@ internal data class HiddenSuggestionsUiState(
     val hiddenBooksGroupHeader: HiddenGroupHeaderUiModel = HiddenGroupHeaderUiModel(
         header = SectionHeaderUiModel.Inline(eyebrow = "Hidden books"),
         count = "0",
-        subline = "Set aside — tap Restore to shelve them again.",
+        subline = "Hidden from Up next. Tap Restore to bring one back.",
     ),
     val hiddenSeriesGroupHeader: HiddenGroupHeaderUiModel = HiddenGroupHeaderUiModel(
         header = SectionHeaderUiModel.Inline(eyebrow = "Hidden series"),
         count = "0",
-        subline = "A muted series hides every book in it.",
+        subline = "A hidden series hides every book in it.",
     ),
     val emptyState: EmptyStateUiModel = EmptyStateUiModel(
         title = "Nothing hidden",
-        body = "Books and series you mute from “Up next in your series” land here, " +
-            "so you can bring any of them back whenever you like.",
+        body = "Books and series you hide from “Up next in your series” end up here, " +
+            "in case you change your mind.",
     ),
-    val intro: String = "Books and series you’ve muted stay out of your " +
+    val intro: String = "Books and series you’ve hidden stay out of your " +
         "“Up next in your series” suggestions. Restore any of them here.",
     // Loading stand-ins until the surface has loaded; each card's payload is the action that restores it.
     val hiddenBooks: BookCardSet<HiddenSuggestionsAction> = BookCardSet.standIns(HIDDEN_BOOK_STAND_IN_CARDS),

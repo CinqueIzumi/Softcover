@@ -57,7 +57,7 @@ internal class OnSaveLibraryVisibilityAction(
             val allSaved = results.all { it.isSuccess }
 
             if (allSaved.not()) {
-                SnackBarManager.showSnackbar(title = "Couldn't save your tabs — try again.")
+                SnackBarManager.showSnackbar(title = "Couldn't save your tabs. Try again.")
 
                 scope.sendEvent(event = LibraryVisibilitySettingsEvent.SaveFailed)
             }

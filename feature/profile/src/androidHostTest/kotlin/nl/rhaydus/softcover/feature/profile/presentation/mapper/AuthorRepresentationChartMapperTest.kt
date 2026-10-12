@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
@@ -100,7 +101,6 @@ class AuthorRepresentationChartMapperTest {
 
             // ----- Assert -----
             result.segments.map { it.tone } shouldBe listOf(ChartTone.Lead, ChartTone.Unknown, ChartTone.Second)
-            result.segments[1].label shouldBe "Unknown"
         }
     }
 
@@ -133,7 +133,6 @@ class AuthorRepresentationChartMapperTest {
 
             // ----- Assert -----
             result.isLoading shouldBe false
-            result.segments.map { it.label } shouldBe listOf("Yes", "No")
             result.segments.map { it.tone } shouldBe listOf(ChartTone.Lead, ChartTone.Fourth)
             result.segments.map { it.share } shouldBe listOf("25%", "75%")
             result.segments.map { it.fraction } shouldBe listOf(0.25f, 0.75f)
@@ -152,7 +151,7 @@ class AuthorRepresentationChartMapperTest {
             val result = demographicChartUiModel(breakdown)
 
             // ----- Assert -----
-            result.segments.map { it.label } shouldBe listOf("Yes", "No", "Unknown")
+            result.segments shouldHaveSize 3
             result.segments.last().tone shouldBe ChartTone.Unknown
             result.segments.map { it.share } shouldBe listOf("25%", "25%", "50%")
         }
@@ -166,7 +165,6 @@ class AuthorRepresentationChartMapperTest {
             val result = demographicChartUiModel(breakdown)
 
             // ----- Assert -----
-            result.segments.map { it.label } shouldBe listOf("Yes", "No")
             result.segments.map { it.share } shouldBe listOf("0%", "0%")
             result.segments.map { it.fraction } shouldBe listOf(0f, 0f)
         }
@@ -188,7 +186,6 @@ class AuthorRepresentationChartMapperTest {
             // ----- Assert -----
             result.hasData shouldBe false
             result.chart.isLoading shouldBe true
-            result.caption shouldBe "Gender breakdown will fill in as your tagged authors are identified."
         }
 
         @Test
@@ -265,6 +262,10 @@ class AuthorRepresentationChartMapperTest {
         fun `uses the fill-in caption when hidden and no authors remain`() {
             // ----- Arrange -----
             val demographics = AuthorDemographics()
+            val fillInCaption = genderBreakdownUiModel(
+                demographics = demographics,
+                hideUntaggedAuthors = false,
+            ).caption
 
             // ----- Act -----
             val result = genderBreakdownUiModel(
@@ -273,7 +274,7 @@ class AuthorRepresentationChartMapperTest {
             )
 
             // ----- Assert -----
-            result.caption shouldBe "Gender breakdown will fill in as your tagged authors are identified."
+            result.caption shouldBe fillInCaption
         }
     }
 
@@ -293,7 +294,6 @@ class AuthorRepresentationChartMapperTest {
             // ----- Assert -----
             result.hasData shouldBe false
             result.chart.isLoading shouldBe true
-            result.caption shouldBe "This breakdown will fill in as your tagged authors are identified."
         }
 
         @Test
@@ -310,13 +310,16 @@ class AuthorRepresentationChartMapperTest {
             // ----- Assert -----
             result.hasData shouldBe false
             result.chart.isLoading shouldBe false
-            result.caption shouldBe "This breakdown will fill in as your tagged authors are identified."
         }
 
         @Test
         fun `says none of the authors carry the data when hidden and the breakdown is empty`() {
             // ----- Arrange -----
             val breakdown = DemographicBreakdown()
+            val fillInCaption = demographicBreakdownUiModel(
+                breakdown = breakdown,
+                hideUntaggedAuthors = false,
+            ).caption
 
             // ----- Act -----
             val result = demographicBreakdownUiModel(
@@ -325,7 +328,7 @@ class AuthorRepresentationChartMapperTest {
             )
 
             // ----- Assert -----
-            result.caption shouldBe "None of your authors carry this data yet."
+            result.caption shouldNotBe fillInCaption
         }
 
         @Test

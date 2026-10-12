@@ -60,16 +60,16 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 
 private val VERDICT_CAPTIONS = listOf(
-    "A hard finish.",
+    "Awful.",
     "Not for me.",
-    "We didn't click.",
-    "Mostly patience.",
-    "Fair, in the end.",
-    "Quietly worthwhile.",
+    "Didn't click.",
+    "A slog.",
+    "Fine, in the end.",
+    "Worth reading.",
     "A good one.",
-    "One that lingers.",
+    "Really good.",
     "Hard to put down.",
-    "One of the greats.",
+    "An all-time favourite.",
 )
 
 /**
@@ -147,7 +147,7 @@ fun VerdictSheet(
             Spacer(modifier = Modifier.height(Spacing.xxl))
 
             SoftcoverText(
-                text = "In your words".uppercase(),
+                text = "Your review".uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.semantics(mergeDescendants = true) { heading() },
@@ -179,7 +179,7 @@ fun VerdictSheet(
                     ) {
                         if (model.review.text.isEmpty()) {
                             SoftcoverText(
-                                text = "What stayed with you? A line is plenty.",
+                                text = "What stayed with you?",
                                 style = MaterialTheme.editorialTypography.body.copy(
                                     fontStyle = FontStyle.Normal,
                                 ),

@@ -184,7 +184,7 @@ private fun EmptyVerdict() {
         Spacer(modifier = Modifier.height(Spacing.xxs))
 
         SoftcoverText(
-            text = "Out of ten, your ten — spoilers optional.",
+            text = "Rate it out of 10. Spoilers can stay hidden.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

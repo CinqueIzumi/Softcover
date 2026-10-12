@@ -147,7 +147,7 @@ private fun genderCaption(
 ): String {
     val totalAuthorCount = knownGenderCount + unknownGenderCount
 
-    if (totalAuthorCount == 0) return "Gender breakdown will fill in as your tagged authors are identified."
+    if (totalAuthorCount == 0) return "This fills in as your authors get gender data on Hardcover."
 
     if (hideUntaggedAuthors) return "Across $totalAuthorCount authors with a known gender."
 
@@ -161,7 +161,7 @@ private fun demographicCaption(
     if (breakdown.total == 0) {
         if (hideUntaggedAuthors) return "None of your authors carry this data yet."
 
-        return "This breakdown will fill in as your tagged authors are identified."
+        return "This fills in as your authors get tagged on Hardcover."
     }
 
     val counts = listOfNotNull(

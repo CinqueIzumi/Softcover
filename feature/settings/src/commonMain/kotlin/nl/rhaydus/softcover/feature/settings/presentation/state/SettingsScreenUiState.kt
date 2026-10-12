@@ -37,13 +37,13 @@ internal data class SettingsScreenUiState(
     /** Mobile only; desktop uses [settingsSidebarMasthead] instead. */
     val settingsPageMasthead: PageMastheadUiModel = PageMastheadUiModel(
         title = "Settings",
-        subtitle = PageMastheadSubtitle.Text("Tune Softcover to match how you read."),
+        subtitle = PageMastheadSubtitle.Text("Set Softcover up the way you like it."),
     ),
 
     /** Desktop only; mobile uses [settingsPageMasthead] instead. */
     val settingsSidebarMasthead: PageMastheadUiModel = PageMastheadUiModel(
         title = "Settings",
-        subtitle = PageMastheadSubtitle.Text("Tune Softcover to match how you read."),
+        subtitle = PageMastheadSubtitle.Text("Set Softcover up the way you like it."),
         size = PageMastheadSize.Compact,
     ),
 
@@ -53,11 +53,11 @@ internal data class SettingsScreenUiState(
 
     val settingsMenuAccountHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Account",
-        headline = "Your reader",
+        headline = "Your account",
     ),
     val settingsMenuPersonalisationHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Personalisation",
-        headline = "Make it yours",
+        headline = "Look and feel",
     ),
     val settingsMenuAboutHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "About",
@@ -77,7 +77,7 @@ internal data class SettingsScreenUiState(
     ),
     val aboutSourceHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Source",
-        headline = "Built in the open",
+        headline = "Open source",
     ),
     val aboutContactHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Contact",
@@ -92,15 +92,15 @@ internal data class SettingsScreenUiState(
     val appearancePaneMasthead: PageMastheadUiModel = PageMastheadUiModel(
         eyebrow = "Personalisation",
         title = "Appearance",
-        subtitle = PageMastheadSubtitle.Text("Make Softcover yours."),
+        subtitle = PageMastheadSubtitle.Text("Change how Softcover looks."),
     ),
     val themeSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Theme",
-        headline = "The coat it wears",
+        headline = "Light or dark",
     ),
     val spineColourSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Spine colour",
-        headline = "The paper and the ink",
+        headline = "Paper and ink",
     ),
     val uiScaleSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Display scale",
@@ -109,11 +109,11 @@ internal data class SettingsScreenUiState(
     ),
     val dateStyleSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Date notation",
-        headline = "How dates read",
+        headline = "How dates are written",
     ),
     val displaySectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Display",
-        headline = "The look",
+        headline = "Display",
     ),
     val themeMode: ThemeMode = ThemeMode.DEFAULT,
     val colorPalette: ColorPalette = ColorPalette.DEFAULT,

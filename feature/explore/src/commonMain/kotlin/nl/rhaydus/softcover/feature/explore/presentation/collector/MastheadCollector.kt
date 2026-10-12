@@ -28,10 +28,10 @@ internal class MastheadCollector : ExploreCollector {
                 scope.setState { state ->
                     state.copy(
                         masthead = PageMastheadUiModel(
-                            eyebrow = if (isRefreshing) "Finding fresh picks…" else "Discover",
+                            eyebrow = if (isRefreshing) "Looking for something new…" else "Discover",
                             title = "Explore",
                             subtitle = PageMastheadSubtitle.Text(
-                                text = "Trending books, the next in your series, and anything you search for.",
+                                text = "What's trending and what's next in your series. Search finds the rest.",
                             ),
                         ),
                         mastheadRefresh = mastheadRefreshFor(isLoading = isRefreshing),

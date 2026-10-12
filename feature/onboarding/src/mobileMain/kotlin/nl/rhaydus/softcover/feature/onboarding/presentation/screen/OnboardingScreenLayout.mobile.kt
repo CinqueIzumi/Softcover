@@ -245,8 +245,7 @@ private fun FirstIntroScreen(
                 Spacer(modifier = Modifier.height(Spacing.md))
 
                 SoftcoverText(
-                    text = "Track every book you read, share the ones worth sharing — or " +
-                        "don't — and find your next life-changing read.",
+                    text = "Keep a record of every book you read, and find the next one worth reading.",
                     style = MaterialTheme.editorialTypography.bodyLarge.copy(
                         fontSize = 18.sp,
                         lineHeight = 28.sp,
@@ -301,8 +300,7 @@ private fun SecondIntroScreen(
             Spacer(modifier = Modifier.height(Spacing.md))
 
             SoftcoverText(
-                text = "To sync your reading, Softcover connects to your Hardcover account — " +
-                    "the open book database your library actually lives in.",
+                text = "Softcover syncs with Hardcover, the open book database that holds your library.",
                 style = MaterialTheme.editorialTypography.bodyLarge.copy(
                     fontSize = 18.sp,
                     lineHeight = 28.sp,
@@ -452,7 +450,7 @@ private fun ThirdIntroScreen(
             Spacer(modifier = Modifier.height(Spacing.md))
 
             SoftcoverText(
-                text = "One key, once. It only syncs your reading progress — never your password.",
+                text = "You only need to add it once. It syncs your reading progress and never touches your password.",
                 style = MaterialTheme.editorialTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.widthIn(max = 300.dp),

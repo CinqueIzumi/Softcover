@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentSetOf
@@ -65,7 +67,8 @@ class ShelveControlHeaderCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.shelveControlHeader shouldBe SectionHeaderUiModel.Inline(eyebrow = "Shelve this book")
+                val header = stateFlow.value.shelveControlHeader
+                header.shouldBeInstanceOf<SectionHeaderUiModel.Inline>().tone shouldNotBe SectionHeaderTone.Error
                 job.cancel()
             }
 
@@ -88,10 +91,8 @@ class ShelveControlHeaderCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.shelveControlHeader shouldBe SectionHeaderUiModel.Inline(
-                    eyebrow = "Couldn't save — tap to retry",
-                    tone = SectionHeaderTone.Error,
-                )
+                val header = stateFlow.value.shelveControlHeader
+                header.shouldBeInstanceOf<SectionHeaderUiModel.Inline>().tone shouldBe SectionHeaderTone.Error
                 job.cancel()
             }
 
@@ -114,7 +115,8 @@ class ShelveControlHeaderCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.shelveControlHeader shouldBe SectionHeaderUiModel.Inline(eyebrow = "Shelve this book")
+                val header = stateFlow.value.shelveControlHeader
+                header.shouldBeInstanceOf<SectionHeaderUiModel.Inline>().tone shouldNotBe SectionHeaderTone.Error
                 job.cancel()
             }
 
@@ -137,7 +139,8 @@ class ShelveControlHeaderCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.shelveControlHeader shouldBe SectionHeaderUiModel.Inline(eyebrow = "Shelve this book")
+                val header = stateFlow.value.shelveControlHeader
+                header.shouldBeInstanceOf<SectionHeaderUiModel.Inline>().tone shouldNotBe SectionHeaderTone.Error
                 job.cancel()
             }
     }

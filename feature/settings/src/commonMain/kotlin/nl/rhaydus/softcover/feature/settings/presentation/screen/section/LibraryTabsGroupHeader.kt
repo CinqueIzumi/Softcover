@@ -56,7 +56,7 @@ private fun LibraryTabsGroupSubhead() {
     val dotSizeSp = with(LocalDensity.current) { 6.dp.toSp() }
 
     val annotatedText = buildAnnotatedString {
-        append("Drag to reorder — shelves and lists sit in one line. A ")
+        append("Drag to reorder. Shelves and lists share one row. A ")
         appendInlineContent(
             id = LIST_DOT_INLINE_CONTENT_ID,
             alternateText = "•",
