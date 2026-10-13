@@ -3,11 +3,11 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
@@ -52,7 +52,7 @@ internal class BookDetailScreenScreenModel(
     private val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
     private val recordBookProgressUseCase: RecordBookProgressUseCase,
-    private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
+    private val observeUserBookUseCase: ObserveUserBookUseCase,
     private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     private val undoableBookRemover: UndoableBookRemover,
@@ -98,7 +98,7 @@ internal class BookDetailScreenScreenModel(
         getEditionsByBookIdUseCase = getEditionsByBookIdUseCase,
         updateBookEditionUseCase = updateBookEditionUseCase,
         recordBookProgressUseCase = recordBookProgressUseCase,
-        getAllUserBooksUseCase = getAllUserBooksUseCase,
+        observeUserBookUseCase = observeUserBookUseCase,
         markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
         markBookAsReadingUseCase = markBookAsReadingUseCase,
         undoableBookRemover = undoableBookRemover,

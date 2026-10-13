@@ -52,6 +52,8 @@ internal class BooksRepositoryImpl(
 ) : BooksRepository {
     override val books: Flow<List<Book>> = booksLocalDataSource.allUserBooks
 
+    override fun observeUserBook(id: Int): Flow<Book?> = booksLocalDataSource.observeUserBook(id = id)
+
     private val inflightMutex = Mutex()
 
     private val stagedRemovalMutex = Mutex()
@@ -365,7 +367,10 @@ internal class BooksRepositoryImpl(
     ): Book {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsReading()
-        booksLocalDataSource.cacheBook(book = optimistic)
+
+        if (optimistic !== book) {
+            booksLocalDataSource.cacheBook(book = optimistic)
+        }
 
         return runCatching {
             booksRemoteDataSource.markBookAsReading(
@@ -655,7 +660,10 @@ internal class BooksRepositoryImpl(
     ): Book {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsRead(actionAt = actionAt)
-        booksLocalDataSource.cacheBook(book = optimistic)
+
+        if (optimistic !== book) {
+            booksLocalDataSource.cacheBook(book = optimistic)
+        }
 
         if (networkAvailability.isOnline.value) {
             return runCatching {

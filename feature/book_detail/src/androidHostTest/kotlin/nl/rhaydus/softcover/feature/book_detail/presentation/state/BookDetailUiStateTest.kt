@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
@@ -612,6 +613,58 @@ class BookDetailUiStateTest {
     @Nested
     inner class WithBook {
         @Test
+        fun `retires pendingShelfStatus when the incoming book has a user book`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = stubUserBook(),
+                currentEdition = null,
+            ).also { mock ->
+                every {
+                    mock.title
+                } returns "Piranesi"
+            }
+            val state = buildBookDetailUiState().copy(pendingShelfStatus = BookStatus.Reading)
+
+            // ----- Act -----
+            val result = state.withBook(book = book)
+
+            // ----- Assert -----
+            result.pendingShelfStatus.shouldBeNull()
+        }
+
+        @Test
+        fun `keeps pendingShelfStatus when the incoming book has no user book`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = null,
+                currentEdition = null,
+            ).also { mock ->
+                every {
+                    mock.title
+                } returns "Piranesi"
+            }
+            val state = buildBookDetailUiState().copy(pendingShelfStatus = BookStatus.Reading)
+
+            // ----- Act -----
+            val result = state.withBook(book = book)
+
+            // ----- Assert -----
+            result.pendingShelfStatus shouldBe BookStatus.Reading
+        }
+
+        @Test
+        fun `keeps pendingShelfStatus when the book goes away`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState().copy(pendingShelfStatus = BookStatus.Read)
+
+            // ----- Act -----
+            val result = state.withBook(book = null)
+
+            // ----- Assert -----
+            result.pendingShelfStatus shouldBe BookStatus.Read
+        }
+
+        @Test
         fun `writes the book and a top bar titled with it`() {
             // ----- Arrange -----
             val book = stubBook(
@@ -652,6 +705,89 @@ class BookDetailUiStateTest {
             result.book.shouldBeNull()
             result.topBar.title.shouldBeNull()
             result.topBar.surface shouldBe TopBarSurface.Opaque
+        }
+    }
+
+    @Nested
+    inner class ShelfStatus {
+        private fun statusBook(
+            status: BookStatus,
+            userBook: UserBook?,
+        ): Book = mockk<Book>().also { mock ->
+            every {
+                mock.status
+            } returns status
+            every {
+                mock.userBook
+            } returns userBook
+        }
+
+        @Test
+        fun `is null when book is null`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState().copy(pendingShelfStatus = BookStatus.Reading)
+
+            // ----- Act -----
+            val result = state.shelfStatus
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `uses pending status when book is off the shelf and a status is pending`() {
+            // ----- Arrange -----
+            val book = statusBook(
+                status = BookStatus.None,
+                userBook = null,
+            )
+            val state = buildBookDetailUiState()
+                .copy(
+                    book = book,
+                    pendingShelfStatus = BookStatus.Reading,
+                )
+
+            // ----- Act -----
+            val result = state.shelfStatus
+
+            // ----- Assert -----
+            result shouldBe BookStatus.Reading
+        }
+
+        @Test
+        fun `uses book status when book is off the shelf and nothing is pending`() {
+            // ----- Arrange -----
+            val book = statusBook(
+                status = BookStatus.None,
+                userBook = null,
+            )
+            val state = buildBookDetailUiState().copy(book = book)
+
+            // ----- Act -----
+            val result = state.shelfStatus
+
+            // ----- Assert -----
+            result shouldBe BookStatus.None
+        }
+
+        @Test
+        fun `ignores a stale pending status when book is on the shelf`() {
+            // ----- Arrange -----
+            val book = statusBook(
+                status = BookStatus.Read,
+                userBook = stubUserBook(),
+            )
+            val state = buildBookDetailUiState()
+                .copy(
+                    book = book,
+                    pendingShelfStatus = BookStatus.Reading,
+                )
+
+            // ----- Act -----
+            val result = state.shelfStatus
+
+            // ----- Assert -----
+            result shouldBe BookStatus.Read
         }
     }
 }

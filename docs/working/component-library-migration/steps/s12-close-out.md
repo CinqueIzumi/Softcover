@@ -83,9 +83,9 @@ approved by this walkthrough.
   (`HiddenSuggestionsContent.kt` `HiddenGroupSection`), makes the remaining rows jump into place. Fade and
   collapse the removed row, then crossfade to the empty state. Built, plus the Hidden suggestions
   load-flash fix (atomic load, masked loading text, no animation leaving loading); device-confirmed.
-- [ ] **Book detail, review "Show more" snaps open.** (PF S21) Expanding a review jumps to full height.
+- [x] **Book detail, review "Show more" snaps open.** (PF S21) Expanding a review jumps to full height.
   Animate the height change.
-- [ ] **Book detail, shelving fill is choppy.** Adding to or switching shelves doesn't play one smooth fill
+- [x] **Book detail, shelving fill is choppy.** Adding to or switching shelves doesn't play one smooth fill
   from start to end. Profile it first: dropped frames, recompositions or redraws mid-fill, or the animation
   being cancelled and restarted (e.g. by an optimistic state followed by the synced state). Then fix the cause.
 

@@ -14,7 +14,17 @@ private const val DEFAULT_PULSE_PEAK_SCALE = 1.22f
 fun rememberPulseScale(
     trigger: Int,
     peakScale: Float = DEFAULT_PULSE_PEAK_SCALE,
-): Float {
+): Float = rememberPulseScaleProvider(
+    trigger = trigger,
+    peakScale = peakScale,
+)()
+
+/** Same pulse as [rememberPulseScale], read through a lambda so a `graphicsLayer {}` block tracks it without recomposing. */
+@Composable
+fun rememberPulseScaleProvider(
+    trigger: Int,
+    peakScale: Float = DEFAULT_PULSE_PEAK_SCALE,
+): () -> Float {
     val playMotion = playDecorativeMotion()
     val firstTrigger = remember { trigger }
     val scale = remember { Animatable(initialValue = 1f) }
@@ -35,7 +45,7 @@ fun rememberPulseScale(
         )
     }
 
-    return scale.value
+    return { scale.value }
 }
 
 @Composable

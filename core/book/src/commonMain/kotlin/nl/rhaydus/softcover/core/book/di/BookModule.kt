@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCa
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
@@ -79,6 +80,7 @@ val bookModule = module {
         BooksLocalDataSourceImpl(
             dao = get(),
             editionImageStorage = get(),
+            appDispatchers = get(),
         )
     }
 
@@ -88,6 +90,10 @@ val bookModule = module {
 
     factory {
         GetAllUserBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        ObserveUserBookUseCase(booksRepository = get())
     }
 
     factory {

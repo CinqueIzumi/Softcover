@@ -10,9 +10,13 @@ internal fun topBarFor(book: Book?): TopBarUiModel =
         surface = TopBarSurface.Opaque,
     )
 
-/** This state holding [book], with [BookDetailUiState.topBar] rebuilt to carry its title. */
+/**
+ * This state holding [book], with [BookDetailUiState.topBar] rebuilt to carry its title. A book that
+ * arrives shelved retires [BookDetailUiState.pendingShelfStatus], since the stored status now speaks.
+ */
 internal fun BookDetailUiState.withBook(book: Book?): BookDetailUiState =
     copy(
         book = book,
         topBar = topBarFor(book = book),
+        pendingShelfStatus = if (book?.userBook != null) null else pendingShelfStatus,
     )

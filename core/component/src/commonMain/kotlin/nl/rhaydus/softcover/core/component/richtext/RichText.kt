@@ -1,8 +1,10 @@
 package nl.rhaydus.softcover.core.component.richtext
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
@@ -63,6 +65,7 @@ fun RichText(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun CollapsibleRichText(
     model: RichTextUiModel,
@@ -72,7 +75,7 @@ private fun CollapsibleRichText(
     var expanded by rememberSaveable(model) { mutableStateOf(false) }
     var hasOverflow by rememberSaveable(model) { mutableStateOf(false) }
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.animateContentSize(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec())) {
         RichTextBody(
             model = model,
             maxLines = if (expanded) Int.MAX_VALUE else model.variant.lineCap(),

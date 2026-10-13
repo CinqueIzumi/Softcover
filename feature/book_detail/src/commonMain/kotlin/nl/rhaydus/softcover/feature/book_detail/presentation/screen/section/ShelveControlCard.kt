@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.modifier.rememberPulseScale
+import nl.rhaydus.softcover.core.component.modifier.rememberPulseScaleProvider
 import nl.rhaydus.softcover.core.component.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.state.clippedSkeletonMask
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
@@ -70,7 +70,7 @@ internal fun ShelveControlCard(
 
     if (book == null && isLoading.not()) return
 
-    val status = book?.status
+    val status = state.shelfStatus
     val mutationFailed = book != null && book.id in state.failedMutationBookIds
 
     Box(
@@ -189,12 +189,14 @@ private fun ShelveRow(
     val selectedContent = MaterialTheme.colorScheme.onPrimary
     val unselectedContent = MaterialTheme.colorScheme.onSurfaceVariant
 
-    val wipeSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val wipeSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
     val celebrationSpec = MaterialTheme.motionScheme.slowEffectsSpec<Float>()
 
     var settledSelected by remember { mutableStateOf(selected) }
     var wasLoading by remember { mutableStateOf(isLoading) }
-    val wipe = remember { Animatable(initialValue = 1f) }
+    val wipe = remember(selected) {
+        Animatable(initialValue = if (isLoading || wasLoading || selected == settledSelected) 1f else 0f)
+    }
 
     // Landing from the loading state adopts the shelved row as already selected, so it plays no wipe.
     LaunchedEffect(selected, isLoading) {
@@ -208,7 +210,6 @@ private fun ShelveRow(
 
         if (selected == settledSelected) return@LaunchedEffect
 
-        wipe.snapTo(targetValue = 0f)
         wipe.animateTo(
             targetValue = 1f,
             animationSpec = wipeSpec,
@@ -225,8 +226,6 @@ private fun ShelveRow(
         label = "ShelfChipContent",
     )
 
-    val wipeProgress = wipe.value
-
     val celebration = remember { Animatable(initialValue = 1f) }
 
     val initialCelebrationKey = remember { celebrationKey }
@@ -241,16 +240,9 @@ private fun ShelveRow(
         )
     }
 
-    val progress = celebration.value
-
-    val iconScale = rememberPulseScale(
+    val iconScale = rememberPulseScaleProvider(
         trigger = celebrationKey,
         peakScale = 1.25f,
-    )
-
-    val iconReveal = (progress / 0.6f).coerceIn(
-        minimumValue = 0f,
-        maximumValue = 1f,
     )
 
     Surface(
@@ -262,9 +254,14 @@ private fun ShelveRow(
                 shape = Corners.md,
             )
             .drawBehind {
-                drawRect(color = fromContainer)
-                clipRect(right = size.width * wipeProgress) {
+                val edge = size.width * wipe.value
+
+                clipRect(right = edge) {
                     drawRect(color = toContainer)
+                }
+
+                clipRect(left = edge) {
+                    drawRect(color = fromContainer)
                 }
             },
         color = Color.Transparent,
@@ -285,10 +282,17 @@ private fun ShelveRow(
                 modifier = Modifier
                     .size(18.dp)
                     .graphicsLayer {
-                        scaleX = iconScale
-                        scaleY = iconScale
+                        val scale = iconScale()
+
+                        scaleX = scale
+                        scaleY = scale
                     }
                     .drawWithContent {
+                        val iconReveal = (celebration.value / 0.6f).coerceIn(
+                            minimumValue = 0f,
+                            maximumValue = 1f,
+                        )
+
                         clipRect(right = size.width * iconReveal) {
                             this@drawWithContent.drawContent()
                         }

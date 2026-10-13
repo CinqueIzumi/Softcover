@@ -16,6 +16,9 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 interface BooksRepository {
     val books: Flow<List<Book>>
 
+    /** Emits the cached book with [id], or null while it is not cached. Re-emits only when that book changes. */
+    fun observeUserBook(id: Int): Flow<Book?>
+
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
 
     /** Library-screen path: all user books sorted via SQL `ORDER BY`. */

@@ -3,11 +3,11 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
@@ -40,7 +40,7 @@ internal class BookDetailDependencies(
     val updateBookEditionUseCase: UpdateBookEditionUseCase,
     val fetchBookByIdUseCase: FetchBookByIdUseCase,
     val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,
-    val getAllUserBooksUseCase: GetAllUserBooksUseCase,
+    val observeUserBookUseCase: ObserveUserBookUseCase,
     val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     val markBookAsReadUseCase: MarkBookAsReadUseCase,

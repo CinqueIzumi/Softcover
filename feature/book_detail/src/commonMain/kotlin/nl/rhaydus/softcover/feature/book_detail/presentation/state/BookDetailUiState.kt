@@ -39,6 +39,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
@@ -62,6 +63,12 @@ internal data class BookDetailUiState(
 
     val loadingBookDetails: Boolean = true,
     val book: Book? = null,
+
+    /**
+     * The shelf a not-yet-shelved [book] shows as selected from the tap until the stored row arrives;
+     * `null` otherwise. A book that already has a user book is driven by the stored status instead.
+     */
+    val pendingShelfStatus: BookStatus? = null,
 
     val markAsReadBurst: MarkAsReadBurstUiModel = MarkAsReadBurstUiModel(
         triggerKey = 0,
@@ -326,6 +333,13 @@ internal data class BookDetailUiState(
 
     val heroRating: Double?
         get() = book?.rating ?: initialCover?.rating
+
+    val shelfStatus: BookStatus?
+        get() = when {
+            book == null -> null
+            book.userBook == null -> pendingShelfStatus ?: book.status
+            else -> book.status
+        }
 
     /**
      * Edition ids the user owns, sourced from the local "Owned" list rather than the per-shelf

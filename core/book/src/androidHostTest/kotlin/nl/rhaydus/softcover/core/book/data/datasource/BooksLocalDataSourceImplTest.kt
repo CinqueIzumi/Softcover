@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.core.book.data.datasource
 import androidx.room.RoomRawQuery
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import io.mockk.coEvery
@@ -12,7 +14,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.data.storage.EditionImageStorage
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.mapper.toModel
@@ -40,9 +45,15 @@ class BooksLocalDataSourceImplTest {
     fun setUp() {
         dao = mockk(relaxed = true)
         editionImageStorage = mockk(relaxed = true)
+        val dispatcher = UnconfinedTestDispatcher()
         dataSource = BooksLocalDataSourceImpl(
             dao = dao,
             editionImageStorage = editionImageStorage,
+            appDispatchers = AppDispatchers(
+                main = dispatcher,
+                io = dispatcher,
+                default = dispatcher,
+            ),
         )
     }
 
@@ -141,6 +152,79 @@ class BooksLocalDataSourceImplTest {
             // ----- Act & Assert -----
             dataSource.allUserBooks.test {
                 awaitItem() shouldBe listOf(entity.toModel())
+                awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class ObserveUserBook {
+        @Test
+        fun `emits the mapped domain book for the observed row`() = runTest {
+            // ----- Arrange -----
+            val entity = stubBookFullEntity(id = 7)
+
+            every {
+                dao.observeBookById(id = 7)
+            } returns flowOf(entity)
+
+            // ----- Act & Assert -----
+            dataSource.observeUserBook(id = 7).test {
+                awaitItem() shouldBe entity.toModel()
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `emits null when the row is absent`() = runTest {
+            // ----- Arrange -----
+            every {
+                dao.observeBookById(id = 7)
+            } returns flowOf(null)
+
+            // ----- Act & Assert -----
+            dataSource.observeUserBook(id = 7).test {
+                awaitItem() shouldBe null
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `does not re-emit when the row is unchanged`() = runTest {
+            // ----- Arrange -----
+            val entity = stubBookFullEntity(id = 7)
+
+            every {
+                dao.observeBookById(id = 7)
+            } returns flowOf(
+                entity,
+                entity.copy(),
+            )
+
+            // ----- Act & Assert -----
+            dataSource.observeUserBook(id = 7).test {
+                awaitItem() shouldBe entity.toModel()
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `emits again when the row changes`() = runTest {
+            // ----- Arrange -----
+            val first = stubBookFullEntity(id = 7)
+            val second = first.copy(book = first.book.copy(title = "Changed"))
+
+            every {
+                dao.observeBookById(id = 7)
+            } returns flowOf(
+                first,
+                second,
+            )
+
+            // ----- Act & Assert -----
+            dataSource.observeUserBook(id = 7).test {
+                awaitItem() shouldBe first.toModel()
+                awaitItem() shouldBe second.toModel()
                 awaitComplete()
             }
         }
@@ -689,6 +773,162 @@ class BooksLocalDataSourceImplTest {
             // ----- Assert -----
             val sql = querySlot.captured.sql
             sql shouldNotContain "shelf_manual_order"
+        }
+    }
+
+    @Nested
+    inner class ReusingUnchangedBooks {
+        @Test
+        fun `an unchanged entity across two emissions yields the same Book instance`() = runTest {
+            // ----- Arrange -----
+            val first = stubBookFullEntity(id = 1)
+            val second = stubBookFullEntity(id = 2)
+
+            every {
+                dao.observeBooks()
+            } returns flowOf(
+                listOf(first),
+                listOf(first.copy(), second),
+            )
+
+            // ----- Act -----
+            val emissions = dataSource.allUserBooks.toList()
+
+            // ----- Assert -----
+            emissions.size shouldBe 2
+            emissions[1][0] shouldBeSameInstanceAs emissions[0][0]
+        }
+
+        @Test
+        fun `a changed entity yields a new instance while untouched rows keep theirs`() = runTest {
+            // ----- Arrange -----
+            val untouched = stubBookFullEntity(id = 1)
+            val changing = stubBookFullEntity(id = 2)
+            val changed = changing.copy(book = changing.book.copy(title = "Changed"))
+
+            every {
+                dao.observeBooks()
+            } returns flowOf(
+                listOf(untouched, changing),
+                listOf(untouched, changed),
+            )
+
+            // ----- Act -----
+            val emissions = dataSource.allUserBooks.toList()
+
+            // ----- Assert -----
+            emissions[1][0] shouldBeSameInstanceAs emissions[0][0]
+            emissions[1][1] shouldNotBeSameInstanceAs emissions[0][1]
+            emissions[1][1] shouldBe changed.toModel()
+        }
+
+        @Test
+        fun `a row removed then re-added is mapped fresh`() = runTest {
+            // ----- Arrange -----
+            val removed = stubBookFullEntity(id = 1)
+            val kept = stubBookFullEntity(id = 2)
+
+            every {
+                dao.observeBooks()
+            } returns flowOf(
+                listOf(removed, kept),
+                listOf(kept),
+                listOf(removed, kept),
+            )
+
+            // ----- Act -----
+            val emissions = dataSource.allUserBooks.toList()
+
+            // ----- Assert -----
+            emissions[2][0] shouldNotBeSameInstanceAs emissions[0][0]
+            emissions[2][0] shouldBe emissions[0][0]
+            emissions[2][1] shouldBeSameInstanceAs emissions[0][1]
+        }
+
+        @Test
+        fun `two separate collections do not share cache state`() = runTest {
+            // ----- Arrange -----
+            val entity = stubBookFullEntity(id = 1)
+
+            every {
+                dao.observeBooks()
+            } returns flowOf(listOf(entity))
+
+            // ----- Act -----
+            val firstCollection = dataSource.allUserBooks.toList()
+            val secondCollection = dataSource.allUserBooks.toList()
+
+            // ----- Assert -----
+            secondCollection[0][0] shouldNotBeSameInstanceAs firstCollection[0][0]
+            secondCollection[0][0] shouldBe firstCollection[0][0]
+        }
+
+        @Test
+        fun `getSortedAllUserBooks keeps the instance of an unchanged row`() = runTest {
+            // ----- Arrange -----
+            val unchanged = stubBookFullEntity(id = 1)
+            val added = stubBookFullEntity(id = 2)
+
+            every {
+                dao.observeBooksRaw(query = any())
+            } returns flowOf(
+                listOf(unchanged),
+                listOf(unchanged.copy(), added),
+            )
+
+            // ----- Act -----
+            val emissions = dataSource.getSortedAllUserBooks(
+                mode = LibrarySortMode.TITLE,
+                direction = SortDirection.ASCENDING,
+            ).toList()
+
+            // ----- Assert -----
+            emissions[1][0] shouldBeSameInstanceAs emissions[0][0]
+        }
+
+        @Test
+        fun `getSortedBooksByStatus keeps the instance of an unchanged row`() = runTest {
+            // ----- Arrange -----
+            val unchanged = stubBookFullEntity(id = 1)
+            val added = stubBookFullEntity(id = 2)
+
+            every {
+                dao.observeBooksRaw(query = any())
+            } returns flowOf(
+                listOf(unchanged),
+                listOf(unchanged.copy(), added),
+            )
+
+            // ----- Act -----
+            val emissions = dataSource.getSortedBooksByStatus(
+                status = UserBookStatus.READ,
+                mode = LibrarySortMode.TITLE,
+                direction = SortDirection.ASCENDING,
+            ).toList()
+
+            // ----- Assert -----
+            emissions[1][0] shouldBeSameInstanceAs emissions[0][0]
+        }
+
+        @Test
+        fun `getBooksFlowByStatus keeps the instance of an unchanged row`() = runTest {
+            // ----- Arrange -----
+            val status = UserBookStatus.READ
+            val unchanged = stubBookFullEntity(id = 1)
+            val added = stubBookFullEntity(id = 2)
+
+            every {
+                dao.getReadBooks(statusCode = status.code)
+            } returns flowOf(
+                listOf(unchanged),
+                listOf(unchanged.copy(), added),
+            )
+
+            // ----- Act -----
+            val emissions = dataSource.getBooksFlowByStatus(status = status).toList()
+
+            // ----- Assert -----
+            emissions[1][0] shouldBeSameInstanceAs emissions[0][0]
         }
     }
 }

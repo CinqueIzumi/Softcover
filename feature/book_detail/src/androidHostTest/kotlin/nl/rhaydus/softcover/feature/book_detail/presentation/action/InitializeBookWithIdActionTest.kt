@@ -75,6 +75,9 @@ class InitializeBookWithIdActionTest {
         every {
             this@mockk.title
         } returns "Piranesi"
+        every {
+            this@mockk.userBook
+        } returns null
     }
 
     @Nested

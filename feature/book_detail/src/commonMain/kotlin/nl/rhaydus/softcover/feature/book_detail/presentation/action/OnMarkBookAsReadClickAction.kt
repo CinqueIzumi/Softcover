@@ -4,6 +4,7 @@ import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -23,6 +24,10 @@ internal class OnMarkBookAsReadClickAction(
         // A previewed or scanned edition (off-shelf) becomes the created user book's edition.
         val editionId = scope.currentState.previewEdition?.id ?: scope.currentState.scannedEditionId
 
+        if (book.userBook == null) {
+            scope.setState { it.copy(pendingShelfStatus = BookStatus.Read) }
+        }
+
         val job = dependencies.launch {
             dependencies.markBookAsReadUseCase(
                 book = book,
@@ -39,7 +44,12 @@ internal class OnMarkBookAsReadClickAction(
                 .onFailure { error ->
                     AppLog.e("$error")
 
-                    scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds.toPersistentSet().add(book.id)) }
+                    scope.setState {
+                        it.copy(
+                            pendingShelfStatus = it.pendingShelfStatus.takeUnless { pending -> pending == BookStatus.Read },
+                            failedMutationBookIds = it.failedMutationBookIds.toPersistentSet().add(book.id),
+                        )
+                    }
                 }
         }
 

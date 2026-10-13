@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -11,7 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -29,16 +30,16 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UserBooksFlowCollectorTest {
-    private lateinit var getAllUserBooksUseCase: GetAllUserBooksUseCase
+    private lateinit var observeUserBookUseCase: ObserveUserBookUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
-    private lateinit var userBooksFlow: MutableSharedFlow<List<Book>>
+    private lateinit var userBooksFlow: MutableSharedFlow<Book?>
 
     @BeforeEach
     fun setUp() {
         userBooksFlow = MutableSharedFlow()
-        getAllUserBooksUseCase = mockk()
+        observeUserBookUseCase = mockk()
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -47,13 +48,13 @@ class UserBooksFlowCollectorTest {
         )
 
         every {
-            getAllUserBooksUseCase()
+            observeUserBookUseCase(id = any())
         } returns userBooksFlow
 
         dependencies = mockk<BookDetailDependencies>(relaxed = true).also { mock ->
             every {
-                mock.getAllUserBooksUseCase
-            } returns getAllUserBooksUseCase
+                mock.observeUserBookUseCase
+            } returns observeUserBookUseCase
         }
     }
 
@@ -139,7 +140,7 @@ class UserBooksFlowCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `does not change state when book in state is null and flow emits a list`() = runTest(UnconfinedTestDispatcher()) {
+        fun `does not change state when book in state is null and flow emits a book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val emittedBook = buildBook(id = 3)
             stateFlow.value = buildBookDetailUiState().copy(book = null)
@@ -152,7 +153,7 @@ class UserBooksFlowCollectorTest {
             }
 
             // ----- Act -----
-            userBooksFlow.emit(listOf(emittedBook))
+            userBooksFlow.emit(emittedBook)
 
             // ----- Assert -----
             stateFlow.value.book shouldBe null
@@ -181,7 +182,7 @@ class UserBooksFlowCollectorTest {
             }
 
             // ----- Act -----
-            userBooksFlow.emit(listOf(localBook))
+            userBooksFlow.emit(localBook)
 
             // ----- Assert -----
             stateFlow.value.book.shouldNotBeNull().userBook shouldBe localUserBook
@@ -210,7 +211,7 @@ class UserBooksFlowCollectorTest {
             }
 
             // ----- Act -----
-            userBooksFlow.emit(listOf(localBook))
+            userBooksFlow.emit(localBook)
 
             // ----- Assert -----
             stateFlow.value.book.shouldNotBeNull().userBookRead shouldBe localUserBookRead
@@ -243,7 +244,7 @@ class UserBooksFlowCollectorTest {
             }
 
             // ----- Act -----
-            userBooksFlow.emit(listOf(localBook))
+            userBooksFlow.emit(localBook)
 
             // ----- Assert -----
             val resultBook = stateFlow.value.book.shouldNotBeNull()
@@ -282,7 +283,7 @@ class UserBooksFlowCollectorTest {
             }
 
             // ----- Act -----
-            userBooksFlow.emit(listOf(localBook))
+            userBooksFlow.emit(localBook)
 
             // ----- Assert -----
             stateFlow.value.book.shouldNotBeNull().editions.single().owned shouldBe false
@@ -322,7 +323,7 @@ class UserBooksFlowCollectorTest {
             }
 
             // ----- Act -----
-            userBooksFlow.emit(listOf(localBook))
+            userBooksFlow.emit(localBook)
 
             // ----- Assert -----
             stateFlow.value.book.shouldNotBeNull().editions.single().owned shouldBe false
@@ -373,7 +374,7 @@ class UserBooksFlowCollectorTest {
             }
 
             // ----- Act -----
-            userBooksFlow.emit(listOf(localBook))
+            userBooksFlow.emit(localBook)
 
             // ----- Assert -----
             val editions = stateFlow.value.book.shouldNotBeNull().editions
@@ -383,11 +384,10 @@ class UserBooksFlowCollectorTest {
         }
 
         @Test
-        fun `does not change state when emitted book list does not contain a book matching state book id`() =
+        fun `does not change state when the book is not stored locally`() =
             runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val remoteBook = buildBook(id = 1)
-            val unrelatedBook = buildBook(id = 99)
             stateFlow.value = buildBookDetailUiState().copy(book = remoteBook)
             val collector = UserBooksFlowCollector()
             val job = launch {
@@ -398,7 +398,7 @@ class UserBooksFlowCollectorTest {
             }
 
             // ----- Act -----
-            userBooksFlow.emit(listOf(unrelatedBook))
+            userBooksFlow.emit(null)
 
             // ----- Assert -----
             stateFlow.value.book shouldBe remoteBook
@@ -406,17 +406,15 @@ class UserBooksFlowCollectorTest {
         }
 
         @Test
-        fun `re-evaluates overlay when state book id changes to a different book`() = runTest(UnconfinedTestDispatcher()) {
+        fun `observes the new book when state book id changes to a different book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val firstBook = buildBook(id = 100)
             val secondLocalUserBook = buildUserBook()
             val secondBook = buildBook(id = 200)
-            val localFirstBook = buildBook(id = 100)
             val localSecondBook = buildBook(
                 id = 200,
                 userBook = secondLocalUserBook,
             )
-
             stateFlow.value = buildBookDetailUiState().copy(book = firstBook)
             val collector = UserBooksFlowCollector()
             val job = launch {
@@ -426,18 +424,75 @@ class UserBooksFlowCollectorTest {
                 )
             }
 
-            // Emit initial user books list containing both
-            userBooksFlow.emit(listOf(localFirstBook, localSecondBook))
-
             // ----- Act -----
-            // Simulate the state's book being changed to a different book (e.g. by InitializeBookWithIdAction)
             stateFlow.value = stateFlow.value.copy(book = secondBook)
-
-            // Re-emit the same user books list to trigger re-evaluation via combine
-            userBooksFlow.emit(listOf(localFirstBook, localSecondBook))
+            userBooksFlow.emit(localSecondBook)
 
             // ----- Assert -----
+            verify {
+                observeUserBookUseCase(id = 200)
+            }
             stateFlow.value.book.shouldNotBeNull().userBook shouldBe secondLocalUserBook
+            job.cancel()
+        }
+
+        @Test
+        fun `skips setState when the overlaid book equals the current state book`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val localUserBook = buildUserBook()
+            val currentBook = buildBook(
+                id = 10,
+                userBook = localUserBook,
+            )
+            val localBook = buildBook(
+                id = 10,
+                userBook = localUserBook,
+            )
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = currentBook,
+                pendingShelfStatus = BookStatus.Reading,
+            )
+            val collector = UserBooksFlowCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            userBooksFlow.emit(localBook)
+
+            // ----- Assert -----
+            stateFlow.value.pendingShelfStatus shouldBe BookStatus.Reading
+            job.cancel()
+        }
+
+        @Test
+        fun `retires pendingShelfStatus when the overlay brings in a user book`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val currentBook = buildBook(id = 10)
+            val localBook = buildBook(
+                id = 10,
+                userBook = buildUserBook(),
+            )
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = currentBook,
+                pendingShelfStatus = BookStatus.Reading,
+            )
+            val collector = UserBooksFlowCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            userBooksFlow.emit(localBook)
+
+            // ----- Assert -----
+            stateFlow.value.pendingShelfStatus shouldBe null
             job.cancel()
         }
     }

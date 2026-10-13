@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** the Explore and Search items in `steps/s12-close-out.md` § S12-4 are built, reviewed, tested, device-confirmed and ticked. `ExitingItems` (renamed from `ExitFadeItems`) takes `exit` and `animatesExit`; Hidden suggestions loads books and series in one `setState` (`DismissedSuggestionsCollector`) and never animates leaving loading. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
-- **Next:** build the Book detail items in `steps/s12-close-out.md` § S12-4: animate the review "Show more" height change, then profile and fix the choppy shelving fill. Hand the user a Medium_Phone build for the device check, then ask to commit.
+- **State:** every walkthrough finding in `steps/s12-close-out.md` § S12-4 is built and ticked; the Book detail "Show more" and shelving fill are device-confirmed and committed. The S12-4 sub-step row and G7 are not ticked yet.
+- **Next:** ask the user whether the S12-4 walkthrough (Android and desktop) is complete; if so, tick S12-4, G7 and #275, then start S12-5.
 - **Open questions:** release builds ship with R8 off (`isMinifyEnabled = false`, 45.8 MB APK); enabling it is out of this plan's scope, track separately.
-- **Verification:** after the last Kotlin edit: `styleCheck`, `stabilityCheck` (`:core:component` dump refreshed), `checkModuleGraph`, `:core:component` and `:feature:explore` `testAndroidHostTest`, `:feature:explore:compileKotlinJvm` and `assembleDebug` green; glommed-closer / `!!` grep and AAA markers clean.
-- **Uncommitted:** nothing.
+- **Verification:** after the last Kotlin edit: `styleCheck`, `stabilityCheck` (`:core:component` dump refreshed), `checkModuleGraph`, `:core:book` / `:feature:book_detail` `projectHealth`, `:core:database` / `:core:book` / `:core:component` / `:feature:book_detail` `testAndroidHostTest` and `assembleDebug` green; AAA markers, `!!` and glommed-closer greps clean.
+- **Uncommitted:** all of the above (28 files plus `ObserveUserBookUseCase` and its test).
 
 ## Local verification
 

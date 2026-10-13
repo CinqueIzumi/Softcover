@@ -1363,11 +1363,10 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `when userBook is null cacheBook receives the original book unchanged`() = runTest {
+        fun `when userBook is null no optimistic cacheBook happens but the remote write still runs`() = runTest {
             // ----- Arrange -----
             val book = stubBook(userBookId = null)
             val expectedBook = stubBook(userBookId = null)
-            val slot = slot<Book>()
 
             coEvery {
                 booksRemoteDataSource.markBookAsReading(
@@ -1376,15 +1375,20 @@ class BooksRepositoryImplTest {
                 )
             } returns expectedBook
 
-            coEvery {
-                booksLocalDataSource.cacheBook(book = capture(slot))
-            } returns Unit
-
             // ----- Act -----
-            repository.markBookAsReading(book = book)
+            val result = repository.markBookAsReading(book = book)
 
             // ----- Assert -----
-            slot.captured shouldBe book
+            result shouldBe expectedBook
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = book)
+            }
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = any(),
+                )
+            }
         }
 
         @Test
@@ -3522,6 +3526,35 @@ class BooksRepositoryImplTest {
                     book = book,
                     editionId = null,
                     actionAt = actionAt,
+                )
+            }
+        }
+
+        @Test
+        fun `when userBook is null no optimistic cacheBook happens but the remote write still runs`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(userBookId = null)
+            val expectedBook = stubBook(userBookId = null)
+
+            coEvery {
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = null,
+                )
+            } returns expectedBook
+
+            // ----- Act -----
+            val result = repository.markBookAsRead(book = book)
+
+            // ----- Assert -----
+            result shouldBe expectedBook
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = null,
                 )
             }
         }

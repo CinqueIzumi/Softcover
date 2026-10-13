@@ -87,6 +87,12 @@ No tool gates these, so review checks them by hand in every touched file. The re
 - **A KDoc link to a symbol the file does not import is `[Symbol][fully.qualified.Name]`, never
   downgraded to backticks.** After a file split or rename, grep the repo for the old filename — no gate
   catches a stale link.
+- **An animation's start value exists in the composition that changes the state it animates** — never
+  `snapTo(start)` inside a `LaunchedEffect` keyed on that state. The effect runs after the frame that
+  recomposed with the new state is drawn, so that frame renders the end state before the reset lands: a
+  one-frame flash that dropped-frame metrics never show. Key the `Animatable` to the state instead
+  (`remember(selected) { Animatable(start) }`) and only `animateTo` in the effect; `ShelveRow` in
+  `ShelveControlCard.kt` is the reference.
 
 ## Error Handling & Logging (Softcover concretizations)
 

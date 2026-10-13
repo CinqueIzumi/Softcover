@@ -66,6 +66,10 @@ interface BookDao {
     )
     fun observeBooks(): Flow<List<BookFullEntity>>
 
+    @Transaction
+    @Query("SELECT * FROM books WHERE id = :id LIMIT 1")
+    fun observeBookById(id: Int): Flow<BookFullEntity?>
+
     /**
      * Dynamic-sort variant used by the library screen. The caller composes a SELECT against
      * `books` (and joins `user_books`) and supplies the ORDER BY fragment — see

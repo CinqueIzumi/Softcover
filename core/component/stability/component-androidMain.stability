@@ -1017,6 +1017,14 @@ public fun nl.rhaydus.softcover.core.component.modifier.rememberPulseScale(pulse
     - peakScale: STABLE (primitive type)
 
 @Composable
+public fun nl.rhaydus.softcover.core.component.modifier.rememberPulseScaleProvider(trigger: kotlin.Int, peakScale: kotlin.Float): kotlin.Function0<kotlin.Float>
+  skippable: true
+  restartable: true
+  params:
+    - trigger: STABLE (primitive type)
+    - peakScale: STABLE (primitive type)
+
+@Composable
 public fun nl.rhaydus.softcover.core.component.modifier.rememberShakeTrigger(): nl.rhaydus.softcover.core.component.modifier.ShakeTrigger
   skippable: true
   restartable: true
