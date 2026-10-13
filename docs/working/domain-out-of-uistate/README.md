@@ -1,8 +1,7 @@
 # Domain data out of the UiState
 
 Every screen's UiState holds only UI models and primitives. Repositories are the source of truth for domain
-data; collectors map repository flows to UI models; actions take ids. Starts after the component-library
-migration closes. The stability gate (`stabilityCheck`, per-module baselines) already exists; this plan
+data; collectors map repository flows to UI models; actions take ids. The stability gate (`stabilityCheck`, per-module baselines) already exists; this plan
 removes the UiState entries from those baselines.
 
 ## Now

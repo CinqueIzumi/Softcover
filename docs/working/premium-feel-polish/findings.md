@@ -1,8 +1,7 @@
 # Premium-feel findings
 
 The approved surface rows of the premium-feel audit, the work list for [`README.md`](README.md). Rows that were
-fixed, cut or moved to the copy audit are gone. S4, S6, S21, S29, S30, S31 and O33 moved to the S12-4
-walkthrough fixes in [`s12-close-out.md`](../component-library-migration/steps/s12-close-out.md).
+fixed, cut or moved to the copy audit are gone.
 
 > [!WARNING]
 > **Stale and not approved for building.** Re-audit and walk every row with the user first; see the

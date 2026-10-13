@@ -1,1 +1,1 @@
-docs/working/component-library-migration/README.md
+docs/working/domain-out-of-uistate/README.md

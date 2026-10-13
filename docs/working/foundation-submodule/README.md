@@ -16,9 +16,9 @@ one branch, one PR; the second app adopts in its own repo (step 5). Every step b
 ## Now
 
 - **State:** not started; queued behind the current working docs.
-- **Due when:** step 1 in this file — `docs/working/component-library-migration/`,
-  `docs/working/architecture-review.md` and `docs/working/compose-audit-report.md` are all deleted. When that
-  holds, point `docs/working/ACTIVE.md` at this file.
+- **Due when:** step 1 in this file — `docs/working/architecture-review.md` and
+  `docs/working/compose-audit-report.md` are both deleted. When that holds, point `docs/working/ACTIVE.md` at
+  this file.
 - **Next:** step 1 (foundation guardrails).
 - **Open questions:** none.
 - **Verification:** not run.
