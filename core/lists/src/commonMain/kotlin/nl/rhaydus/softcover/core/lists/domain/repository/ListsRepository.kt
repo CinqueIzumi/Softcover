@@ -19,6 +19,8 @@ interface ListsRepository {
         privacy: PrivacySetting = PrivacySetting.PUBLIC,
     ): BookList
 
+    suspend fun drainPendingListWrites()
+
     /**
      * Gated full refresh of the user's lists. Fetches a cheap per-list freshness signature for every
      * list, then deep-fetches the `list_books` only for lists whose signature advanced (or that are

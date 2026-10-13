@@ -103,6 +103,7 @@ interface BooksRemoteDataSource {
     suspend fun initializeBooks(
         userId: Int,
         statusIds: Set<Int>? = null,
+        userBookIds: Set<Int> = emptySet(),
     ): List<Book>
 
     suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
@@ -477,9 +478,13 @@ internal class BooksRemoteDataSourceImpl(
     override suspend fun initializeBooks(
         userId: Int,
         statusIds: Set<Int>?,
+        userBookIds: Set<Int>,
     ): List<Book> = withContext(appDispatchers.io) {
         val result = apolloClient.safeQuery(
-            query = GetUserBooksQuery(statusIds = Optional.presentIfNotNull(statusIds?.toList())),
+            query = GetUserBooksQuery(
+                statusIds = Optional.presentIfNotNull(statusIds?.toList()),
+                userBookIds = Optional.present(userBookIds.toList()),
+            ),
         )
 
         val userBooks = result.me.firstOrNull()?.user_books

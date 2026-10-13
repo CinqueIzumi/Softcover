@@ -18,7 +18,10 @@ import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
+import nl.rhaydus.softcover.core.domain.model.RefreshScope
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.DrainPendingListWritesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import org.junit.jupiter.api.AfterEach
@@ -32,6 +35,7 @@ class MainActivityViewModelTest {
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var getThemeConfigurationUseCase: GetThemeConfigurationUseCase
     private lateinit var refreshReadingActivityUseCase: RefreshReadingActivityUseCase
+    private lateinit var drainPendingListWritesUseCase: DrainPendingListWritesUseCase
     private lateinit var reAuthenticateUseCase: ReAuthenticateUseCase
     private lateinit var resetUserDataUseCase: ResetUserDataUseCase
     private lateinit var viewModel: MainActivityViewModel
@@ -44,6 +48,7 @@ class MainActivityViewModelTest {
         refreshLibraryUseCase = mockk(relaxed = true)
         getThemeConfigurationUseCase = mockk(relaxed = true)
         refreshReadingActivityUseCase = mockk(relaxed = true)
+        drainPendingListWritesUseCase = mockk(relaxed = true)
         reAuthenticateUseCase = mockk(relaxed = true)
         resetUserDataUseCase = mockk(relaxed = true)
 
@@ -59,6 +64,7 @@ class MainActivityViewModelTest {
             refreshLibraryUseCase = refreshLibraryUseCase,
             getThemeConfigurationUseCase = getThemeConfigurationUseCase,
             refreshReadingActivityUseCase = refreshReadingActivityUseCase,
+            drainPendingListWritesUseCase = drainPendingListWritesUseCase,
             reAuthenticateUseCase = reAuthenticateUseCase,
             resetUserDataUseCase = resetUserDataUseCase,
         )
@@ -68,6 +74,16 @@ class MainActivityViewModelTest {
     fun tearDown() {
         Dispatchers.resetMain()
     }
+
+    private fun createViewModel() = MainActivityViewModel(
+        getUserIdUseCase = getUserIdUseCase,
+        refreshLibraryUseCase = refreshLibraryUseCase,
+        getThemeConfigurationUseCase = getThemeConfigurationUseCase,
+        refreshReadingActivityUseCase = refreshReadingActivityUseCase,
+        drainPendingListWritesUseCase = drainPendingListWritesUseCase,
+        reAuthenticateUseCase = reAuthenticateUseCase,
+        resetUserDataUseCase = resetUserDataUseCase,
+    )
 
     private fun showReAuthSheet() {
         viewModel.setUserAuthenticated(authenticated = true)
@@ -366,6 +382,73 @@ class MainActivityViewModelTest {
             // ----- Assert -----
             viewModel.reAuthSheet.value.shouldBeNull()
             coVerify(exactly = 0) { resetUserDataUseCase() }
+        }
+    }
+
+    @Nested
+    inner class ColdStart {
+        @Test
+        fun `refreshes only the currently reading shelf when signed in`() {
+            // ----- Arrange -----
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(42)
+
+            // ----- Act -----
+            createViewModel()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                refreshLibraryUseCase(
+                    scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
+                )
+            }
+            coVerify(exactly = 0) { refreshLibraryUseCase(scope = RefreshScope.All) }
+        }
+
+        @Test
+        fun `drains the pending list writes when signed in`() {
+            // ----- Arrange -----
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(42)
+
+            // ----- Act -----
+            createViewModel()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { drainPendingListWritesUseCase() }
+        }
+
+        @Test
+        fun `refreshes the reading activity when signed in`() {
+            // ----- Arrange -----
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(42)
+
+            // ----- Act -----
+            createViewModel()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { refreshReadingActivityUseCase() }
+        }
+
+        @Test
+        fun `refreshes and drains nothing when no user is signed in`() {
+            // ----- Arrange -----
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(-1)
+
+            // ----- Act -----
+            val model = createViewModel()
+
+            // ----- Assert -----
+            model.state.value.authenticated shouldBe false
+            coVerify(exactly = 0) { refreshLibraryUseCase(any()) }
+            coVerify(exactly = 0) { drainPendingListWritesUseCase() }
+            coVerify(exactly = 0) { refreshReadingActivityUseCase() }
         }
     }
 }

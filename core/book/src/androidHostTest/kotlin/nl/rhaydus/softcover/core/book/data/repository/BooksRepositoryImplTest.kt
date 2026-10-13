@@ -245,6 +245,7 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource.initializeBooks(
                     userId = userId,
                     statusIds = setOf(status.code),
+                    userBookIds = setOf(10, staleLocalId),
                 )
             } returns listOf(fetchedBook)
 
@@ -269,6 +270,7 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource.initializeBooks(
                     userId = userId,
                     statusIds = setOf(status.code),
+                    userBookIds = setOf(10, staleLocalId),
                 )
             }
 
@@ -278,6 +280,191 @@ class BooksRepositoryImplTest {
 
             coVerify {
                 booksLocalDataSource.removeUserBooksById(ids = listOf(staleLocalId))
+            }
+        }
+
+        @Test
+        fun `status-scoped refresh sends the ids stored locally under that status as userBookIds`() = runTest {
+            // ----- Arrange -----
+            val userId = 20
+            val status = UserBookStatus.CURRENTLY_READING
+
+            coEvery {
+                booksLocalDataSource.getUserBookIdsByStatus(status = status)
+            } returns listOf(4, 8)
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(
+                    userId = any(),
+                    statusIds = any(),
+                    userBookIds = any(),
+                )
+            } returns emptyList()
+
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = status,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = setOf(status.code),
+                    userBookIds = setOf(4, 8),
+                )
+            }
+        }
+
+        @Test
+        fun `a book that moved to another status on the server is cached and not removed`() = runTest {
+            // ----- Arrange -----
+            val userId = 20
+            val movedUserBookId = 7
+            val status = UserBookStatus.CURRENTLY_READING
+            val movedBook: Book = mockk(relaxed = true) {
+                every {
+                    this@mockk.userBook
+                } returns mockk<UserBook>(relaxed = true) {
+                    every {
+                        this@mockk.id
+                    } returns movedUserBookId
+
+                    every {
+                        this@mockk.status
+                    } returns BookStatus.Read
+                }
+            }
+
+            coEvery {
+                booksLocalDataSource.getUserBookIdsByStatus(status = status)
+            } returns listOf(movedUserBookId)
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = setOf(status.code),
+                    userBookIds = setOf(movedUserBookId),
+                )
+            } returns listOf(movedBook)
+
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = status,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                booksLocalDataSource.cacheBooks(books = listOf(movedBook))
+            }
+
+            coVerify {
+                booksLocalDataSource.removeUserBooksById(ids = emptyList())
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.removeUserBooksById(
+                    ids = match { movedUserBookId in it },
+                )
+            }
+        }
+
+        @Test
+        fun `a locally stored id under the filtered status that the server no longer returns is removed`() = runTest {
+            // ----- Arrange -----
+            val userId = 20
+            val status = UserBookStatus.READ
+            val keptId = 1
+            val deletedId = 2
+
+            coEvery {
+                booksLocalDataSource.getUserBookIdsByStatus(status = status)
+            } returns listOf(keptId, deletedId)
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = setOf(status.code),
+                    userBookIds = setOf(keptId, deletedId),
+                )
+            } returns listOf(stubBook(userBookId = keptId))
+
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = status,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(deletedId))
+            }
+        }
+
+        @Test
+        fun `null statusFilter sends an empty userBookIds and diffs against all local ids`() = runTest {
+            // ----- Arrange -----
+            val userId = 20
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns listOf(1, 2)
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(
+                    userId = any(),
+                    statusIds = any(),
+                    userBookIds = any(),
+                )
+            } returns listOf(stubBook(userBookId = 1))
+
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = null,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = any(),
+                    userBookIds = emptySet(),
+                )
+            }
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(2))
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.getUserBookIdsByStatus(status = any())
             }
         }
 

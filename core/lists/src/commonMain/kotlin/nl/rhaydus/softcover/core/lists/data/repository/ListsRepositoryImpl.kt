@@ -54,6 +54,10 @@ internal class ListsRepositoryImpl(
         return created
     }
 
+    override suspend fun drainPendingListWrites() {
+        listWriteDrainer.drain()
+    }
+
     override suspend fun refreshUserLists(userId: Int): ListsRefreshResult {
         listWriteDrainer.drain()
 

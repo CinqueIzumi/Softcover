@@ -143,6 +143,13 @@ internal class BooksRepositoryImpl(
             ?.let { setOf(it.code) }
             ?: UserBookStatus.entries.map { it.code }.toSet()
 
+        // A status-scoped query omits books that moved to another status on the server. Their local
+        // rows still hold this status, so ask for them by id; otherwise the diff below would delete
+        // them instead of picking up the new status.
+        val idsStoredUnderStatus: List<Int>? = statusFilter?.let {
+            booksLocalDataSource.getUserBookIdsByStatus(status = it)
+        }
+
         // Drain the offline write queue, fetch fresh server data, and reconcile owned fields in one
         // step; the reconcile never changes the set of userBook ids, so orphan removal below can key
         // off the cached result.
@@ -150,17 +157,15 @@ internal class BooksRepositoryImpl(
             booksRemoteDataSource.initializeBooks(
                 userId = userId,
                 statusIds = statusIds,
+                userBookIds = idsStoredUnderStatus.orEmpty().toSet(),
             )
         }
 
         booksLocalDataSource.cacheBooks(books = booksToCache.withoutStagedRemovals())
 
         val fetchedBookUserBookIds: Set<Int> = booksToCache.mapNotNull { it.userBook?.id }.toSet()
-        val locallyStoredUserBookIds: List<Int> = if (statusFilter == null) {
-            booksLocalDataSource.getAllUserBookIds()
-        } else {
-            booksLocalDataSource.getUserBookIdsByStatus(status = statusFilter)
-        }
+        val locallyStoredUserBookIds: List<Int> = idsStoredUnderStatus
+            ?: booksLocalDataSource.getAllUserBookIds()
 
         val userBookIdsToRemove: List<Int> = locallyStoredUserBookIds
             .filterNot { it in fetchedBookUserBookIds }
