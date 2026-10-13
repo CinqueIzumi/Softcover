@@ -23,7 +23,7 @@ internal fun ReadingLife.toReadingLifeShareCardUiModel(profile: UserProfileData)
         avatarUrl = profile.profileImageUrl.takeIf { it.isNotBlank() },
         readerInitials = profile.name.toInitials(),
         totalPagesRead = formatGroupedNumber(profile.totalPagesRead),
-        totalBooksLine = "across ${profile.booksRead} books",
+        totalBooksLine = "across ${profile.booksRead} ${if (profile.booksRead == 1) "book" else "books"}",
         // Already ranked highest-first by the mapper, so the card's leading row is the top genre.
         topGenres = genres.slices.take(SHARE_CARD_GENRE_LIMIT).map { slice ->
             ReadingLifeGenre(
