@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
-import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -8,12 +7,14 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 import nl.rhaydus.toad.ActionScope
 
 internal class OnRemoveUserTagAction(
-    private val tag: UserTag,
+    private val chipKey: String,
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
+        val tag = scope.currentState.userTagByEditorChipKey[chipKey] ?: return
+
         val newSet = scope.currentState.userTags.filterNot {
             it.category == tag.category && it.name == tag.name
         }

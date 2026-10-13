@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.orchestration.session
 
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,9 +13,6 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ReadingSessionLauncher
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveActiveSessionUseCase
@@ -21,6 +20,11 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.PauseReadingSessionUseC
 import nl.rhaydus.softcover.core.personal.domain.usecase.ResumeReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StartReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StopReadingSessionUseCase
+import nl.rhaydus.softcover.core.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.ReadingSessionLauncher
+import nl.rhaydus.softcover.core.presentation.session.SessionOutcome
+import kotlin.coroutines.cancellation.CancellationException
 
 internal class ActiveSessionControllerImpl(
     private val observeActiveSessionUseCase: ObserveActiveSessionUseCase,
@@ -46,6 +50,10 @@ internal class ActiveSessionControllerImpl(
                     ActiveSession(
                         session = session,
                         book = book,
+                        ui = toActiveSessionUiModel(
+                            session = session,
+                            book = book,
+                        ),
                     )
                 }
         }.stateIn(
@@ -58,6 +66,10 @@ internal class ActiveSessionControllerImpl(
 
     override val pendingFocusMode: StateFlow<Boolean> = _pendingFocusMode.asStateFlow()
 
+    private val _outcomes = MutableSharedFlow<SessionOutcome>(extraBufferCapacity = 1)
+
+    override val outcomes: SharedFlow<SessionOutcome> = _outcomes
+
     override fun start(book: Book) {
         applicationScope.scope.launch(appDispatchers.io) {
             runCatching {
@@ -66,10 +78,16 @@ internal class ActiveSessionControllerImpl(
                     startPage = book.userBookRead?.currentPage,
                     startSeconds = book.userBookRead?.currentSeconds,
                 )
-            }.onSuccess {
+
                 readingSessionLauncher.start()
+            }.onSuccess {
+                _outcomes.emit(SessionOutcome.Started)
             }.onFailure { error ->
+                if (error is CancellationException) throw error
+
                 AppLog.e("$error")
+
+                _outcomes.emit(SessionOutcome.StartFailed)
             }
         }
     }
@@ -97,11 +115,21 @@ internal class ActiveSessionControllerImpl(
         val current = activeSession.value ?: return
 
         applicationScope.scope.launch(appDispatchers.io) {
-            stopReadingSessionUseCase(
-                id = current.session.id,
-                endPage = current.book.userBookRead?.currentPage,
-                endSeconds = current.book.userBookRead?.currentSeconds,
-            )
+            runCatching {
+                stopReadingSessionUseCase(
+                    id = current.session.id,
+                    endPage = current.book.userBookRead?.currentPage,
+                    endSeconds = current.book.userBookRead?.currentSeconds,
+                )
+            }.onSuccess {
+                _outcomes.emit(SessionOutcome.Stopped)
+            }.onFailure { error ->
+                if (error is CancellationException) throw error
+
+                AppLog.e("$error")
+
+                _outcomes.emit(SessionOutcome.StopFailed)
+            }
         }
     }
 

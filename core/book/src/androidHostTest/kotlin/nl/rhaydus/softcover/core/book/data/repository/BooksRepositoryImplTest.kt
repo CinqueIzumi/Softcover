@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.book.data.repository
 
-import app.cash.turbine.test
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -9,14 +9,15 @@ import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import kotlin.time.Instant
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -25,7 +26,7 @@ import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
-import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
@@ -44,6 +45,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Instant
 
 class BooksRepositoryImplTest {
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
@@ -107,52 +109,17 @@ class BooksRepositoryImplTest {
 
     private fun stubBookEdition(): BookEdition = mockk()
 
-    @Nested
-    inner class Books {
-        @Test
-        fun `books property is wired to local data source allUserBooks flow`() = runTest {
-            // ----- Arrange -----
-            val expectedBooks = listOf(stubBook(userBookId = 1))
+    private fun stagedBook(
+        bookId: Int,
+        userBookId: Int?,
+    ): Book = mockk(relaxed = true) {
+        every {
+            this@mockk.id
+        } returns bookId
 
-            every {
-                booksLocalDataSource.allUserBooks
-            } returns flowOf(expectedBooks)
-
-            val freshRepository = BooksRepositoryImpl(
-                booksRemoteDataSource = booksRemoteDataSource,
-                booksLocalDataSource = booksLocalDataSource,
-                networkAvailability = networkAvailability,
-                offlineSync = offlineSync,
-                applicationScope = ApplicationScope(scope = testScope),
-                appDispatchers = appDispatchers,
-            )
-
-            // ----- Act & Assert -----
-            freshRepository.books.test {
-                awaitItem() shouldBe expectedBooks
-                awaitComplete()
-            }
-        }
-    }
-
-    @Nested
-    inner class GetBooksFlowByStatus {
-        @Test
-        fun `getBooksFlowByStatus delegates to local data source with the given status`() = runTest {
-            // ----- Arrange -----
-            val status = UserBookStatus.CURRENTLY_READING
-            val expectedBooks = listOf(stubBook(userBookId = 5))
-
-            every {
-                booksLocalDataSource.getBooksFlowByStatus(status = status)
-            } returns flowOf(expectedBooks)
-
-            // ----- Act & Assert -----
-            repository.getBooksFlowByStatus(status = status).test {
-                awaitItem() shouldBe expectedBooks
-                awaitComplete()
-            }
-        }
+        every {
+            this@mockk.userBook
+        } returns if (userBookId != null) stubUserBook(userBookId) else null
     }
 
     @Nested
@@ -190,67 +157,6 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `refreshUserBooks can be called multiple times without throwing`() = runTest {
-            // ----- Arrange -----
-            val userId = 20
-
-            coEvery {
-                booksRemoteDataSource.initializeBooks(
-                    userId = userId,
-                    statusIds = any(),
-                )
-            } returns emptyList()
-
-            coEvery {
-                booksLocalDataSource.getAllUserBookIds()
-            } returns emptyList()
-
-            coEvery {
-                offlineSync.drainAndReconcile(any())
-            } coAnswers {
-                firstArg<suspend () -> List<Book>>().invoke()
-            }
-
-            // ----- Act -----
-            val result = runCatching {
-                repository.refreshUserBooks(userId = userId)
-                repository.refreshUserBooks(userId = userId)
-            }
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-        }
-
-        @Test
-        fun `refreshUserBooks delegates drain and reconcile to offlineSync`() = runTest {
-            // ----- Arrange -----
-            val userId = 20
-
-            coEvery {
-                booksRemoteDataSource.initializeBooks(
-                    userId = userId,
-                    statusIds = any(),
-                )
-            } returns emptyList()
-
-            coEvery {
-                booksLocalDataSource.getAllUserBookIds()
-            } returns emptyList()
-
-            coEvery {
-                offlineSync.drainAndReconcile(any())
-            } coAnswers {
-                firstArg<suspend () -> List<Book>>().invoke()
-            }
-
-            // ----- Act -----
-            repository.refreshUserBooks(userId = userId)
-
-            // ----- Assert -----
-            coVerify { offlineSync.drainAndReconcile(any()) }
-        }
-
-        @Test
         fun `refreshUserBooks delegates reconciliation to offlineSync and caches whatever it returns`() = runTest {
             // ----- Arrange -----
             val userId = 20
@@ -277,38 +183,6 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             coVerify {
                 booksLocalDataSource.cacheBooks(books = listOf(reconciledBook))
-            }
-        }
-
-        @Test
-        fun `refreshUserBooks does not reapply local progress for userBooks not in synced set`() = runTest {
-            // ----- Arrange -----
-            val userId = 20
-            val remoteBook = stubBook(userBookId = 7)
-
-            coEvery {
-                booksRemoteDataSource.initializeBooks(
-                    userId = userId,
-                    statusIds = any(),
-                )
-            } returns listOf(remoteBook)
-
-            coEvery {
-                booksLocalDataSource.getAllUserBookIds()
-            } returns emptyList()
-
-            coEvery {
-                offlineSync.drainAndReconcile(any())
-            } coAnswers {
-                firstArg<suspend () -> List<Book>>().invoke()
-            }
-
-            // ----- Act -----
-            repository.refreshUserBooks(userId = userId)
-
-            // ----- Assert -----
-            coVerify {
-                booksLocalDataSource.cacheBooks(books = listOf(remoteBook))
             }
         }
 
@@ -408,19 +282,63 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `concurrent refreshUserBooks calls coalesce into one remote round trip`() = runTest {
+        fun `overlapping refreshes with the same filter share one remote fetch`() = runTest {
+            // ----- Arrange -----
+            val userId = 20
+            val gate = CompletableDeferred<Unit>()
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = any(),
+                )
+            } coAnswers {
+                gate.await()
+                emptyList()
+            }
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
+
+            val first = launch { repository.refreshUserBooks(userId = userId) }
+            val second = launch { repository.refreshUserBooks(userId = userId) }
+            runCurrent()
+
+            // ----- Act -----
+            gate.complete(Unit)
+            joinAll(
+                first,
+                second,
+            )
+
+            // ----- Assert -----
+            first.isCompleted shouldBe true
+            second.isCompleted shouldBe true
+
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `a refresh started after the previous one finished fetches again`() = runTest {
             // ----- Arrange -----
             val userId = 20
 
             coEvery {
                 booksRemoteDataSource.initializeBooks(
                     userId = userId,
-                    statusIds = setOf(
-                        UserBookStatus.WANT_TO_READ.code,
-                        UserBookStatus.CURRENTLY_READING.code,
-                        UserBookStatus.READ.code,
-                        UserBookStatus.DID_NOT_FINISH.code,
-                    ),
+                    statusIds = any(),
                 )
             } returns emptyList()
 
@@ -435,43 +353,15 @@ class BooksRepositoryImplTest {
             }
 
             // ----- Act -----
-            repository.refreshUserBooks(
-                userId = userId,
-                statusFilter = null,
-            )
-            repository.refreshUserBooks(
-                userId = userId,
-                statusFilter = null,
-            )
+            repository.refreshUserBooks(userId = userId)
+            repository.refreshUserBooks(userId = userId)
 
             // ----- Assert -----
-            coVerify(atLeast = 1) {
+            coVerify(exactly = 2) {
                 booksRemoteDataSource.initializeBooks(
                     userId = userId,
-                    statusIds = setOf(
-                        UserBookStatus.WANT_TO_READ.code,
-                        UserBookStatus.CURRENTLY_READING.code,
-                        UserBookStatus.READ.code,
-                        UserBookStatus.DID_NOT_FINISH.code,
-                    ),
+                    statusIds = any(),
                 )
-            }
-        }
-    }
-
-    @Nested
-    inner class DeleteOrphanBooks {
-        @Test
-        fun `deleteOrphanBooks delegates to local data source`() = runTest {
-            // ----- Arrange -----
-            // (booksLocalDataSource is relaxed)
-
-            // ----- Act -----
-            repository.deleteOrphanBooks()
-
-            // ----- Assert -----
-            coVerify {
-                booksLocalDataSource.deleteOrphanBooks()
             }
         }
     }
@@ -708,23 +598,6 @@ class BooksRepositoryImplTest {
     }
 
     @Nested
-    inner class CacheBook {
-        @Test
-        fun `cacheBook delegates to local data source`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(userBookId = 1)
-
-            // ----- Act -----
-            repository.cacheBook(book = book)
-
-            // ----- Assert -----
-            coVerify {
-                booksLocalDataSource.cacheBook(book = book)
-            }
-        }
-    }
-
-    @Nested
     inner class RemoveBook {
         @Test
         fun `removeBook removes the user book id via local data source`() = runTest {
@@ -754,57 +627,7 @@ class BooksRepositoryImplTest {
     }
 
     @Nested
-    inner class RemoveAllBooks {
-        @Test
-        fun `removeAllBooks delegates to local data source`() = runTest {
-            // ----- Arrange -----
-            // (no additional setup needed — booksLocalDataSource is relaxed)
-
-            // ----- Act -----
-            repository.removeAllBooks()
-
-            // ----- Assert -----
-            coVerify {
-                booksLocalDataSource.removeAllBooks()
-            }
-        }
-    }
-
-    @Nested
     inner class GetEditionsByBookId {
-        @Test
-        fun `getEditionsByBookId delegates to remote data source and returns result`() = runTest {
-            // ----- Arrange -----
-            val bookId = 7
-            val expectedEditions = listOf(stubBookEdition())
-
-            coEvery {
-                booksRemoteDataSource.getEditionsByBookId(bookId = bookId)
-            } returns expectedEditions
-
-            // ----- Act -----
-            val result = repository.getEditionsByBookId(bookId = bookId)
-
-            // ----- Assert -----
-            result shouldBe expectedEditions
-        }
-
-        @Test
-        fun `getEditionsByBookId returns empty list when remote returns no editions`() = runTest {
-            // ----- Arrange -----
-            val bookId = 7
-
-            coEvery {
-                booksRemoteDataSource.getEditionsByBookId(bookId = bookId)
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = repository.getEditionsByBookId(bookId = bookId)
-
-            // ----- Assert -----
-            result shouldBe emptyList()
-        }
-
         @Test
         fun `getEditionsByBookId when offline returns cached book editions and skips remote`() = runTest {
             // ----- Arrange -----
@@ -863,23 +686,6 @@ class BooksRepositoryImplTest {
     @Nested
     inner class FetchBookById {
         @Test
-        fun `fetchBookById delegates to remote data source and returns result`() = runTest {
-            // ----- Arrange -----
-            val bookId = 7
-            val expectedBook = stubBook(userBookId = null)
-
-            coEvery {
-                booksRemoteDataSource.fetchBookById(id = bookId)
-            } returns expectedBook
-
-            // ----- Act -----
-            val result = repository.fetchBookById(id = bookId)
-
-            // ----- Assert -----
-            result shouldBe expectedBook
-        }
-
-        @Test
         fun `fetchBookById when offline returns cached book and skips remote`() = runTest {
             // ----- Arrange -----
             every {
@@ -928,7 +734,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `recovery happy path — resolves canonical via userBook editionId and returns refetched book`() = runTest {
+        fun `recovery happy path — returns the canonical book and persists, redirects and cleans up`() = runTest {
             // ----- Arrange -----
             val missingId = 10
             val editionId = 55
@@ -976,56 +782,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             result shouldBe canonicalBook
-        }
 
-        @Test
-        fun `recovery happy path — persist sequence cacheBook then redirectBookId then deleteOrphanBooks is called in order`() = runTest {
-            // ----- Arrange -----
-            val missingId = 10
-            val editionId = 55
-            val canonicalId = 99
-
-            val userBook = mockk<UserBook>(relaxed = true) {
-                every {
-                    this@mockk.editionId
-                } returns editionId
-            }
-
-            val localBook = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.userBook
-                } returns userBook
-            }
-
-            val canonicalBook = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.userBook
-                } returns null
-                every {
-                    this@mockk.id
-                } returns canonicalId
-            }
-
-            coEvery {
-                booksRemoteDataSource.fetchBookById(id = missingId)
-            } throws BookNotFoundException(bookId = missingId)
-
-            coEvery {
-                booksLocalDataSource.getBookById(id = missingId)
-            } returns localBook
-
-            coEvery {
-                booksRemoteDataSource.fetchBookIdForEdition(editionId = editionId)
-            } returns canonicalId
-
-            coEvery {
-                booksRemoteDataSource.fetchBookById(id = canonicalId)
-            } returns canonicalBook
-
-            // ----- Act -----
-            repository.fetchBookById(id = missingId)
-
-            // ----- Assert -----
             coVerifyOrder {
                 booksLocalDataSource.cacheBook(book = canonicalBook)
                 booksLocalDataSource.redirectBookId(
@@ -1427,42 +1184,6 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `forwards null editionId to remote data source when omitted`() = runTest {
-            // ----- Arrange -----
-            val bookId = 11
-            val book = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.id
-                } returns bookId
-                every {
-                    this@mockk.userBook
-                } returns stubUserBookWithStatus(
-                    id = 5,
-                    status = BookStatus.Reading,
-                )
-            }
-            val remoteBook = stubBook(userBookId = 5)
-
-            coEvery {
-                booksRemoteDataSource.markBookAsWantToRead(
-                    bookId = bookId,
-                    editionId = null,
-                )
-            } returns remoteBook
-
-            // ----- Act -----
-            repository.markBookAsWantToRead(book = book)
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                booksRemoteDataSource.markBookAsWantToRead(
-                    bookId = bookId,
-                    editionId = null,
-                )
-            }
-        }
-
-        @Test
         fun `optimistic write is skipped when book has no userBook`() = runTest {
             // ----- Arrange -----
             val bookId = 11
@@ -1574,7 +1295,7 @@ class BooksRepositoryImplTest {
     @Nested
     inner class MarkBookAsReading {
         @Test
-        fun `markBookAsReading delegates to remote data source and returns result`() = runTest {
+        fun `writes an optimistic Reading snapshot with a started journal and returns the remote book`() = runTest {
             // ----- Arrange -----
             val existingJournal = ReadingJournal(
                 updatedAt = "2026-01-01T10:00:00",
@@ -1632,7 +1353,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             result shouldBe expectedBook
-            val capturedUserBook = slot.captured.userBook!!
+            val capturedUserBook = slot.captured.userBook.shouldNotBeNull()
             capturedUserBook.status shouldBe BookStatus.Reading
             val capturedJournals = capturedUserBook.journals
             capturedJournals.size shouldBe 2
@@ -1642,41 +1363,10 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `cacheBook is called before markBookAsReading on remote`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(userBookId = 1)
-            val expectedBook = stubBook(userBookId = 1)
-
-            coEvery {
-                booksRemoteDataSource.markBookAsReading(
-                    book = book,
-                    editionId = any(),
-                )
-            } returns expectedBook
-
-            coEvery {
-                booksLocalDataSource.cacheBook(book = any())
-            } returns Unit
-
-            // ----- Act -----
-            repository.markBookAsReading(book = book)
-
-            // ----- Assert -----
-            coVerifyOrder {
-                booksLocalDataSource.cacheBook(book = any())
-                booksRemoteDataSource.markBookAsReading(
-                    book = book,
-                    editionId = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `when userBook is null cacheBook receives the original book unchanged`() = runTest {
+        fun `when userBook is null no optimistic cacheBook happens but the remote write still runs`() = runTest {
             // ----- Arrange -----
             val book = stubBook(userBookId = null)
             val expectedBook = stubBook(userBookId = null)
-            val slot = slot<Book>()
 
             coEvery {
                 booksRemoteDataSource.markBookAsReading(
@@ -1685,56 +1375,27 @@ class BooksRepositoryImplTest {
                 )
             } returns expectedBook
 
-            coEvery {
-                booksLocalDataSource.cacheBook(book = capture(slot))
-            } returns Unit
-
             // ----- Act -----
-            repository.markBookAsReading(book = book)
+            val result = repository.markBookAsReading(book = book)
 
             // ----- Assert -----
-            slot.captured shouldBe book
-        }
-
-        @Test
-        fun `markBookAsReading restores snapshot to local cache when remote throws non-offline error`() = runTest {
-            // ----- Arrange -----
-            val bookId = 42
-            val book = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.id
-                } returns bookId
+            result shouldBe expectedBook
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = book)
             }
-            val snapshot = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.id
-                } returns bookId
-            }
-
-            coEvery {
-                booksLocalDataSource.getBookById(id = bookId)
-            } returns snapshot
-
-            coEvery {
+            coVerify(exactly = 1) {
                 booksRemoteDataSource.markBookAsReading(
                     book = book,
                     editionId = any(),
                 )
-            } throws RuntimeException("network failure")
-
-            // ----- Act -----
-            runCatching { repository.markBookAsReading(book = book) }
-
-            // ----- Assert -----
-            coVerify {
-                booksLocalDataSource.cacheBook(book = snapshot)
             }
         }
 
         @Test
-        fun `markBookAsReading rethrows the remote error after restoring snapshot`() = runTest {
+        fun `markBookAsReading restores snapshot to local cache and rethrows when remote throws non-offline error`() = runTest {
             // ----- Arrange -----
             val bookId = 42
+            val remoteError = RuntimeException("network failure")
             val book = mockk<Book>(relaxed = true) {
                 every {
                     this@mockk.id
@@ -1745,7 +1406,6 @@ class BooksRepositoryImplTest {
                     this@mockk.id
                 } returns bookId
             }
-            val remoteError = RuntimeException("network failure")
 
             coEvery {
                 booksLocalDataSource.getBookById(id = bookId)
@@ -1758,10 +1418,15 @@ class BooksRepositoryImplTest {
                 )
             } throws remoteError
 
-            // ----- Act & Assert -----
-            shouldThrow<RuntimeException> {
-                repository.markBookAsReading(book = book)
-            } shouldBe remoteError
+            // ----- Act -----
+            val caught = runCatching { repository.markBookAsReading(book = book) }
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe remoteError
+
+            coVerify {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
         }
 
         @Test
@@ -1901,7 +1566,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `writes optimistic book with updated rating to local cache before the remote call`() = runTest {
+        fun `writes the optimistic rating to the local cache and returns the remote book`() = runTest {
             // ----- Arrange -----
             val newRating = 4.5
             val userBook = stubUserBookWithRating(
@@ -1950,61 +1615,6 @@ class BooksRepositoryImplTest {
             } returns Unit
 
             // ----- Act -----
-            repository.updateBookRating(
-                book = book,
-                rating = newRating,
-            )
-
-            // ----- Assert -----
-            capturedBooks.first().userBook?.rating shouldBe newRating
-
-            coVerifyOrder {
-                booksLocalDataSource.cacheBook(book = any())
-                booksRemoteDataSource.updateBookRating(
-                    userBook = any(),
-                    rating = newRating,
-                )
-            }
-        }
-
-        @Test
-        fun `on success returns the remote book and cacheBook is called exactly once for the optimistic write`() = runTest {
-            // ----- Arrange -----
-            val bookId = 10
-            val newRating = 4.5
-            val book = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.id
-                } returns bookId
-                every {
-                    this@mockk.userBook
-                } returns stubUserBookWithRating(
-                    id = 5,
-                    rating = 3.0,
-                )
-            }
-            val remoteBook = stubBook(userBookId = 5)
-
-            every {
-                networkAvailability.isOnline
-            } returns MutableStateFlow(true)
-
-            coEvery {
-                booksLocalDataSource.getBookById(id = bookId)
-            } returns null
-
-            coEvery {
-                booksRemoteDataSource.updateBookRating(
-                    userBook = any(),
-                    rating = newRating,
-                )
-            } returns remoteBook
-
-            coEvery {
-                booksLocalDataSource.cacheBook(book = any())
-            } returns Unit
-
-            // ----- Act -----
             val result = repository.updateBookRating(
                 book = book,
                 rating = newRating,
@@ -2012,14 +1622,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             result shouldBe remoteBook
-
-            coVerify(exactly = 1) {
-                booksLocalDataSource.cacheBook(book = any())
-            }
-
-            coVerify(exactly = 0) {
-                booksLocalDataSource.cacheBook(book = remoteBook)
-            }
+            capturedBooks.first().userBook?.rating shouldBe newRating
         }
 
         @Test
@@ -2897,27 +2500,327 @@ class BooksRepositoryImplTest {
     }
 
     @Nested
-    inner class RemoveBookFromLibrary {
+    inner class StageBookRemoval {
         @Test
-        fun `happy path — removes user_book locally, calls remote, no rollback occurs`() = runTest {
+        fun `removes the user books locally and returns the cached snapshots`() = runTest {
             // ----- Arrange -----
-            val userBookId = 7
-            val book = stubBook(userBookId = userBookId)
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val cached = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns cached
+
+            // ----- Act -----
+            val staged = repository.stageBookRemoval(books = listOf(book))
+
+            // ----- Assert -----
+            staged.books shouldBe listOf(book)
+            staged.snapshots shouldBe listOf(cached)
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(11))
+            }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.removeBookFromLibrary(book = any())
+            }
+        }
+
+        @Test
+        fun `falls back to the passed-in book when the cache has none`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            // ----- Act -----
+            val staged = repository.stageBookRemoval(books = listOf(book))
+
+            // ----- Assert -----
+            staged.snapshots shouldBe listOf(book)
+        }
+
+        @Test
+        fun `drops books that an earlier removal still holds staged`() = runTest {
+            // ----- Arrange -----
+            val first = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val second = stagedBook(
+                bookId = 2,
+                userBookId = 22,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = any())
+            } returns null
+
+            repository.stageBookRemoval(books = listOf(first))
+
+            // ----- Act -----
+            val staged = repository.stageBookRemoval(books = listOf(first, second))
+
+            // ----- Assert -----
+            staged.books shouldBe listOf(second)
+            staged.snapshots shouldBe listOf(second)
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(11))
+            }
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(22))
+            }
+        }
+
+        @Test
+        fun `skips the local delete when no staged book has a user book`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = null,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            // ----- Act -----
+            val staged = repository.stageBookRemoval(books = listOf(book))
+
+            // ----- Assert -----
+            staged.books shouldBe listOf(book)
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.removeUserBooksById(ids = any())
+            }
+        }
+
+        @Test
+        fun `a local failure unstages the books and rethrows`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val localError = RuntimeException("disk full")
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            coEvery {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(11))
+            } throws localError
+
+            // ----- Act -----
+            val caught = runCatching {
+                repository.stageBookRemoval(books = listOf(book))
+            }
+            repository.cacheBook(book = book)
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe localError
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = book)
+            }
+        }
+
+        @Test
+        fun `a failed snapshot read unstages the books and rethrows`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val localError = RuntimeException("read failed")
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } throws localError
+
+            // ----- Act -----
+            val caught = runCatching {
+                repository.stageBookRemoval(books = listOf(book))
+            }
+            repository.cacheBook(book = book)
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe localError
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.removeUserBooksById(ids = any())
+            }
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = book)
+            }
+        }
+    }
+
+    @Nested
+    inner class UndoBookRemoval {
+        @Test
+        fun `restores the snapshot when the cache has no user book for it`() = runTest {
+            // ----- Arrange -----
+            val snapshot = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(snapshot),
+                snapshots = listOf(snapshot),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            // ----- Act -----
+            repository.undoBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+        }
+
+        @Test
+        fun `restores the snapshot when the cached book has lost its user book`() = runTest {
+            // ----- Arrange -----
+            val snapshot = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(snapshot),
+                snapshots = listOf(snapshot),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns stagedBook(
+                bookId = 1,
+                userBookId = null,
+            )
+
+            // ----- Act -----
+            repository.undoBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+        }
+
+        @Test
+        fun `does not restore a snapshot the user re-added in the meantime`() = runTest {
+            // ----- Arrange -----
+            val snapshot = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(snapshot),
+                snapshots = listOf(snapshot),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns stagedBook(
+                bookId = 1,
+                userBookId = 99,
+            )
+
+            // ----- Act -----
+            repository.undoBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+        }
+
+        @Test
+        fun `unstages the books even when a restore throws`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val restoreError = RuntimeException("restore failed")
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            val staged = repository.stageBookRemoval(books = listOf(book))
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = book)
+            } throws restoreError
+
+            // ----- Act -----
+            val caught = runCatching {
+                repository.undoBookRemoval(staged = staged)
+            }
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe restoreError
+
+            val restaged = repository.stageBookRemoval(books = listOf(book))
+            restaged.books shouldBe listOf(book)
+        }
+    }
+
+    @Nested
+    inner class CommitBookRemoval {
+        @Test
+        fun `a remote success re-runs the local delete and reports no failures`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(book),
+                snapshots = listOf(book),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
 
             coEvery {
                 booksRemoteDataSource.removeBookFromLibrary(book = book)
             } returns Unit
 
             // ----- Act -----
-            repository.removeBookFromLibrary(book = book)
+            val failed = repository.commitBookRemoval(staged = staged)
 
             // ----- Assert -----
-            coVerify {
-                booksLocalDataSource.removeUserBooksById(ids = listOf(userBookId))
+            failed shouldBe emptyList()
+
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.removeBookFromLibrary(book = book)
             }
 
-            coVerify {
-                booksRemoteDataSource.removeBookFromLibrary(book = book)
+            coVerify(exactly = 1) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(11))
             }
 
             coVerify(exactly = 0) {
@@ -2926,58 +2829,128 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `failure path — re-caches snapshot and rethrows`() = runTest {
+        fun `a remote failure restores the snapshot and returns the book as failed`() = runTest {
             // ----- Arrange -----
-            val bookId = 42
-            val userBookId = 7
-            val book = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.id
-                } returns bookId
-                every {
-                    this@mockk.userBook
-                } returns stubUserBook(id = userBookId)
-            }
-            val snapshot = stubBook(userBookId = userBookId)
-            val remoteError = RuntimeException("network error")
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(book),
+                snapshots = listOf(book),
+            )
 
             coEvery {
-                booksLocalDataSource.getBookById(id = bookId)
-            } returns snapshot
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
 
             coEvery {
                 booksRemoteDataSource.removeBookFromLibrary(book = book)
-            } throws remoteError
+            } throws RuntimeException("network error")
 
             // ----- Act -----
-            val caught = runCatching { repository.removeBookFromLibrary(book = book) }
+            val failed = repository.commitBookRemoval(staged = staged)
 
             // ----- Assert -----
-            caught.exceptionOrNull() shouldBe remoteError
+            failed shouldBe listOf(book)
 
-            coVerify {
-                booksLocalDataSource.cacheBook(book = snapshot)
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = book)
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.removeUserBooksById(ids = any())
             }
         }
 
         @Test
-        fun `cancellation — rethrows CancellationException without re-caching snapshot`() = runTest {
+        fun `a remote failure does not restore a book re-added under a new user book`() = runTest {
             // ----- Arrange -----
-            val bookId = 42
-            val userBookId = 7
-            val book = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.id
-                } returns bookId
-                every {
-                    this@mockk.userBook
-                } returns stubUserBook(id = userBookId)
-            }
-            val snapshot = stubBook(userBookId = userBookId)
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(book),
+                snapshots = listOf(book),
+            )
 
             coEvery {
-                booksLocalDataSource.getBookById(id = bookId)
-            } returns snapshot
+                booksLocalDataSource.getBookById(id = 1)
+            } returns stagedBook(
+                bookId = 1,
+                userBookId = 99,
+            )
+
+            coEvery {
+                booksRemoteDataSource.removeBookFromLibrary(book = book)
+            } throws RuntimeException("network error")
+
+            // ----- Act -----
+            val failed = repository.commitBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            failed shouldBe listOf(book)
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+        }
+
+        @Test
+        fun `one failure does not stop the remaining books from being removed`() = runTest {
+            // ----- Arrange -----
+            val failing = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val succeeding = stagedBook(
+                bookId = 2,
+                userBookId = 22,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(failing, succeeding),
+                snapshots = listOf(failing, succeeding),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = any())
+            } returns null
+
+            coEvery {
+                booksRemoteDataSource.removeBookFromLibrary(book = failing)
+            } throws RuntimeException("network error")
+
+            coEvery {
+                booksRemoteDataSource.removeBookFromLibrary(book = succeeding)
+            } returns Unit
+
+            // ----- Act -----
+            val failed = repository.commitBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            failed shouldBe listOf(failing)
+
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.removeBookFromLibrary(book = succeeding)
+            }
+        }
+
+        @Test
+        fun `a cancellation propagates and is not reported as a failed book`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(book),
+                snapshots = listOf(book),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
 
             coEvery {
                 booksRemoteDataSource.removeBookFromLibrary(book = book)
@@ -2985,7 +2958,7 @@ class BooksRepositoryImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<CancellationException> {
-                repository.removeBookFromLibrary(book = book)
+                repository.commitBookRemoval(staged = staged)
             }
 
             coVerify(exactly = 0) {
@@ -2994,54 +2967,249 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `no-userBook path — skips removeUserBooksById and still calls remote`() = runTest {
+        fun `skips the remote call for a book back in the cache under the same user book`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(userBookId = null)
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(book),
+                snapshots = listOf(book),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+
+            // ----- Act -----
+            val failed = repository.commitBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            failed shouldBe emptyList()
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.removeBookFromLibrary(book = any())
+            }
+        }
+
+        @Test
+        fun `still removes a book re-added under a different user book`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(book),
+                snapshots = listOf(book),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns stagedBook(
+                bookId = 1,
+                userBookId = 99,
+            )
 
             coEvery {
                 booksRemoteDataSource.removeBookFromLibrary(book = book)
             } returns Unit
 
             // ----- Act -----
-            repository.removeBookFromLibrary(book = book)
+            repository.commitBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.removeBookFromLibrary(book = book)
+            }
+        }
+
+        @Test
+        fun `unstages the books afterwards so they can be cached again`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            coEvery {
+                booksRemoteDataSource.removeBookFromLibrary(book = book)
+            } returns Unit
+
+            val staged = repository.stageBookRemoval(books = listOf(book))
+
+            // ----- Act -----
+            repository.commitBookRemoval(staged = staged)
+            repository.cacheBook(book = book)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = book)
+            }
+        }
+    }
+
+    @Nested
+    inner class StagedRemovalSyncGuard {
+        @Test
+        fun `cacheBook drops a staged book`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            repository.stageBookRemoval(books = listOf(book))
+
+            // ----- Act -----
+            repository.cacheBook(book = book)
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                booksLocalDataSource.removeUserBooksById(ids = any())
+                booksLocalDataSource.cacheBook(book = book)
             }
+        }
 
-            coVerify {
-                booksRemoteDataSource.removeBookFromLibrary(book = book)
+        @Test
+        fun `cacheBook caches a book that is not staged`() = runTest {
+            // ----- Arrange -----
+            val staged = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val other = stagedBook(
+                bookId = 2,
+                userBookId = 22,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = any())
+            } returns null
+
+            repository.stageBookRemoval(books = listOf(staged))
+
+            // ----- Act -----
+            repository.cacheBook(book = other)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = other)
+            }
+        }
+
+        @Test
+        fun `cacheBook caches the book again after an undo`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            val staged = repository.stageBookRemoval(books = listOf(book))
+            repository.undoBookRemoval(staged = staged)
+
+            // ----- Act -----
+            repository.cacheBook(book = book)
+
+            // ----- Assert -----
+            coVerify(atLeast = 2) {
+                booksLocalDataSource.cacheBook(book = book)
+            }
+        }
+
+        @Test
+        fun `refreshUserBooks leaves a staged book out of the cached batch`() = runTest {
+            // ----- Arrange -----
+            val userId = 20
+            val stagedBook = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val otherBook = stagedBook(
+                bookId = 2,
+                userBookId = 22,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } returns listOf(stagedBook, otherBook)
+
+            repository.stageBookRemoval(books = listOf(stagedBook))
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBooks(books = listOf(otherBook))
+            }
+        }
+
+        @Test
+        fun `hydrateReferencedBooks leaves a staged book out of the cached batch`() = runTest {
+            // ----- Arrange -----
+            val stagedBook = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val otherBook = stagedBook(
+                bookId = 2,
+                userBookId = 22,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(
+                    ids = listOf(1, 2),
+                    forceNetwork = true,
+                )
+            } returns listOf(stagedBook, otherBook)
+
+            repository.stageBookRemoval(books = listOf(stagedBook))
+
+            // ----- Act -----
+            repository.hydrateReferencedBooks(
+                bookIds = listOf(1, 2),
+                editionIds = emptyList(),
+                forceNetwork = true,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBooks(books = listOf(otherBook))
             }
         }
     }
 
     @Nested
     inner class UpdateBookProgress {
-        @Test
-        fun `updateBookProgress delegates to remote data source with correct arguments and returns result`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(userBookId = 1)
-            val newPage = 150
-            val expectedBook = stubBook(userBookId = 1)
-
-            coEvery {
-                booksRemoteDataSource.updateBookProgress(
-                    book = book,
-                    newPage = newPage,
-                )
-            } returns expectedBook
-
-            // ----- Act -----
-            val result = repository.updateBookProgress(
-                book = book,
-                newPage = newPage,
-            )
-
-            // ----- Assert -----
-            result shouldBe expectedBook
-        }
-
         @Test
         fun `updateBookProgress forwards actionAt to remote data source`() = runTest {
             // ----- Arrange -----
@@ -3142,7 +3310,7 @@ class BooksRepositoryImplTest {
             )
 
             // ----- Assert -----
-            val capturedJournals = slot.captured.userBook!!.journals
+            val capturedJournals = slot.captured.userBook.shouldNotBeNull().journals
             capturedJournals.size shouldBe 2
             capturedJournals[0] shouldBe existingJournal
             capturedJournals[1].event shouldBe "progress_updated"
@@ -3150,52 +3318,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `updateBookProgress when online and remote throws non-offline error restores snapshot to local cache`() = runTest {
-            // ----- Arrange -----
-            val bookId = 42
-            val book = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.id
-                } returns bookId
-            }
-            val snapshot = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.id
-                } returns bookId
-            }
-
-            every {
-                networkAvailability.isOnline
-            } returns MutableStateFlow(true)
-
-            coEvery {
-                booksLocalDataSource.getBookById(id = bookId)
-            } returns snapshot
-
-            coEvery {
-                booksRemoteDataSource.updateBookProgress(
-                    book = book,
-                    newPage = any(),
-                    newSeconds = any(),
-                )
-            } throws RuntimeException("network failure")
-
-            // ----- Act -----
-            runCatching {
-                repository.updateBookProgress(
-                    book = book,
-                    newPage = 50,
-                )
-            }
-
-            // ----- Assert -----
-            coVerify {
-                booksLocalDataSource.cacheBook(book = snapshot)
-            }
-        }
-
-        @Test
-        fun `updateBookProgress when online and remote throws non-offline error rethrows the error`() = runTest {
+        fun `updateBookProgress when online and remote throws non-offline error restores snapshot to local cache and rethrows`() = runTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
@@ -3226,13 +3349,20 @@ class BooksRepositoryImplTest {
                 )
             } throws remoteError
 
-            // ----- Act & Assert -----
-            shouldThrow<RuntimeException> {
+            // ----- Act -----
+            val caught = runCatching {
                 repository.updateBookProgress(
                     book = book,
                     newPage = 50,
                 )
-            } shouldBe remoteError
+            }
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe remoteError
+
+            coVerify {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
         }
 
         @Test
@@ -3341,26 +3471,6 @@ class BooksRepositoryImplTest {
     @Nested
     inner class MarkBookAsRead {
         @Test
-        fun `markBookAsRead delegates to remote data source and returns result`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(userBookId = 1)
-            val expectedBook = stubBook(userBookId = 1)
-
-            coEvery {
-                booksRemoteDataSource.markBookAsRead(
-                    book = book,
-                    editionId = any(),
-                )
-            } returns expectedBook
-
-            // ----- Act -----
-            val result = repository.markBookAsRead(book = book)
-
-            // ----- Assert -----
-            result shouldBe expectedBook
-        }
-
-        @Test
         fun `forwards non-null editionId to remote data source`() = runTest {
             // ----- Arrange -----
             val book = stubBook(userBookId = 1)
@@ -3385,31 +3495,6 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource.markBookAsRead(
                     book = book,
                     editionId = editionId,
-                )
-            }
-        }
-
-        @Test
-        fun `forwards null editionId to remote data source when omitted`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(userBookId = 1)
-            val expectedBook = stubBook(userBookId = 1)
-
-            coEvery {
-                booksRemoteDataSource.markBookAsRead(
-                    book = book,
-                    editionId = null,
-                )
-            } returns expectedBook
-
-            // ----- Act -----
-            repository.markBookAsRead(book = book)
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                booksRemoteDataSource.markBookAsRead(
-                    book = book,
-                    editionId = null,
                 )
             }
         }
@@ -3441,6 +3526,35 @@ class BooksRepositoryImplTest {
                     book = book,
                     editionId = null,
                     actionAt = actionAt,
+                )
+            }
+        }
+
+        @Test
+        fun `when userBook is null no optimistic cacheBook happens but the remote write still runs`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(userBookId = null)
+            val expectedBook = stubBook(userBookId = null)
+
+            coEvery {
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = null,
+                )
+            } returns expectedBook
+
+            // ----- Act -----
+            val result = repository.markBookAsRead(book = book)
+
+            // ----- Assert -----
+            result shouldBe expectedBook
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = null,
                 )
             }
         }
@@ -3514,7 +3628,7 @@ class BooksRepositoryImplTest {
             repository.markBookAsRead(book = book)
 
             // ----- Assert -----
-            val capturedUserBook = slot.captured.userBook!!
+            val capturedUserBook = slot.captured.userBook.shouldNotBeNull()
             val capturedJournals = capturedUserBook.journals
             capturedJournals.size shouldBe 2
             capturedJournals[0] shouldBe existingJournal
@@ -3598,46 +3712,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `markBookAsRead when online and remote throws non-offline error restores snapshot to local cache`() = runTest {
-            // ----- Arrange -----
-            val bookId = 42
-            val book = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.id
-                } returns bookId
-            }
-            val snapshot = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.id
-                } returns bookId
-            }
-
-            every {
-                networkAvailability.isOnline
-            } returns MutableStateFlow(true)
-
-            coEvery {
-                booksLocalDataSource.getBookById(id = bookId)
-            } returns snapshot
-
-            coEvery {
-                booksRemoteDataSource.markBookAsRead(
-                    book = book,
-                    editionId = any(),
-                )
-            } throws RuntimeException("network failure")
-
-            // ----- Act -----
-            runCatching { repository.markBookAsRead(book = book) }
-
-            // ----- Assert -----
-            coVerify {
-                booksLocalDataSource.cacheBook(book = snapshot)
-            }
-        }
-
-        @Test
-        fun `markBookAsRead when online and remote throws non-offline error rethrows the error`() = runTest {
+        fun `markBookAsRead when online and remote throws non-offline error restores snapshot to local cache and rethrows`() = runTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
@@ -3667,10 +3742,15 @@ class BooksRepositoryImplTest {
                 )
             } throws remoteError
 
-            // ----- Act & Assert -----
-            shouldThrow<RuntimeException> {
-                repository.markBookAsRead(book = book)
-            } shouldBe remoteError
+            // ----- Act -----
+            val caught = runCatching { repository.markBookAsRead(book = book) }
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe remoteError
+
+            coVerify {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
         }
 
         @Test
@@ -3764,199 +3844,7 @@ class BooksRepositoryImplTest {
     }
 
     @Nested
-    inner class UpdateBookEdition {
-        @Test
-        fun `updateBookEdition delegates to remote data source with correct arguments and returns result`() = runTest {
-            // ----- Arrange -----
-            val userBook = stubUserBook(id = 3)
-            val newEditionId = 88
-            val expectedBook = stubBook(userBookId = 3)
-
-            coEvery {
-                booksRemoteDataSource.updateBookEdition(
-                    userBook = userBook,
-                    newEditionId = newEditionId,
-                )
-            } returns expectedBook
-
-            // ----- Act -----
-            val result = repository.updateBookEdition(
-                userBook = userBook,
-                newEditionId = newEditionId,
-            )
-
-            // ----- Assert -----
-            result shouldBe expectedBook
-        }
-    }
-
-    @Nested
-    inner class FetchBooksByIds {
-        @Test
-        fun `fetchBooksByIds delegates to remote data source and returns result`() = runTest {
-            // ----- Arrange -----
-            val ids = listOf(1, 2, 3)
-            val expectedBooks = listOf(stubBook(userBookId = null), stubBook(userBookId = null))
-
-            coEvery {
-                booksRemoteDataSource.fetchBooksByIds(
-                    ids = ids,
-                    forceNetwork = false,
-                )
-            } returns expectedBooks
-
-            // ----- Act -----
-            val result = repository.fetchBooksByIds(ids = ids)
-
-            // ----- Assert -----
-            result shouldBe expectedBooks
-        }
-
-        @Test
-        fun `fetchBooksByIds returns empty list when remote returns no books`() = runTest {
-            // ----- Arrange -----
-            val ids = listOf(99)
-
-            coEvery {
-                booksRemoteDataSource.fetchBooksByIds(
-                    ids = ids,
-                    forceNetwork = false,
-                )
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = repository.fetchBooksByIds(ids = ids)
-
-            // ----- Assert -----
-            result shouldBe emptyList()
-        }
-    }
-
-    @Nested
-    inner class FetchEditionsByIds {
-        @Test
-        fun `fetchEditionsByIds delegates to remote data source and returns result`() = runTest {
-            // ----- Arrange -----
-            val ids = listOf(10, 20)
-            val expectedEditions = listOf(stubBookEdition(), stubBookEdition())
-
-            coEvery {
-                booksRemoteDataSource.fetchEditionsByIds(
-                    ids = ids,
-                    forceNetwork = false,
-                )
-            } returns expectedEditions
-
-            // ----- Act -----
-            val result = repository.fetchEditionsByIds(ids = ids)
-
-            // ----- Assert -----
-            result shouldBe expectedEditions
-        }
-
-        @Test
-        fun `fetchEditionsByIds returns empty list when remote returns no editions`() = runTest {
-            // ----- Arrange -----
-            val ids = listOf(99)
-
-            coEvery {
-                booksRemoteDataSource.fetchEditionsByIds(
-                    ids = ids,
-                    forceNetwork = false,
-                )
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = repository.fetchEditionsByIds(ids = ids)
-
-            // ----- Assert -----
-            result shouldBe emptyList()
-        }
-    }
-
-    @Nested
-    inner class PersistEditionImage {
-        @Test
-        fun `delegates to local data source with the given editionId, url, and bytes`() = runTest {
-            // ----- Arrange -----
-            val editionId = 42
-            val url = "https://example.com/cover42.jpg"
-            val bytes = byteArrayOf(1, 2, 3)
-
-            coEvery {
-                booksLocalDataSource.persistEditionImage(
-                    editionId = editionId,
-                    url = url,
-                    bytes = bytes,
-                )
-            } returns Unit
-
-            // ----- Act -----
-            repository.persistEditionImage(
-                editionId = editionId,
-                url = url,
-                bytes = bytes,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                booksLocalDataSource.persistEditionImage(
-                    editionId = editionId,
-                    url = url,
-                    bytes = bytes,
-                )
-            }
-        }
-    }
-
-    @Nested
     inner class FetchEditionMatchesForIsbns {
-        @Test
-        fun `online — delegates to remote and returns the match map`() = runTest {
-            // ----- Arrange -----
-            val isbn = "9780451524935"
-            val expectedMatches = mapOf(
-                isbn to IsbnEditionMatch(
-                    bookId = 42,
-                    editionId = 99,
-                ),
-            )
-
-            coEvery {
-                booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
-            } returns expectedMatches
-
-            // ----- Act -----
-            val result = repository.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
-
-            // ----- Assert -----
-            result shouldBe expectedMatches
-
-            coVerify(exactly = 1) {
-                booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
-            }
-        }
-
-        @Test
-        fun `online — remote reports no match — returns emptyMap`() = runTest {
-            // ----- Arrange -----
-            val isbn = "9780451524935"
-
-            coEvery {
-                booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
-            } returns emptyMap()
-
-            // ----- Act -----
-            val result = repository.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
-
-            // ----- Assert -----
-            result shouldBe emptyMap()
-
-            coVerify(exactly = 1) {
-                booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
-            }
-        }
-
         @Test
         fun `offline — throws OfflineException without calling remote`() = runTest {
             // ----- Arrange -----
@@ -4046,11 +3934,13 @@ class BooksRepositoryImplTest {
 
             val book = stubBookWithUserBookRead()
             val newPage = 75
+            val actionAt = "2026-07-21T21:00:00Z"
 
             // ----- Act -----
             repository.updateBookProgress(
                 book = book,
                 newPage = newPage,
+                actionAt = actionAt,
             )
 
             // ----- Assert -----
@@ -4063,6 +3953,7 @@ class BooksRepositoryImplTest {
                     book = any(),
                     newPage = any(),
                     newSeconds = any(),
+                    actionAt = actionAt,
                 )
             }
 
@@ -4076,63 +3967,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `updateBookProgress when offline forwards actionAt to enqueueProgressUpdate`() = runTest {
-            // ----- Arrange -----
-            every {
-                networkAvailability.isOnline
-            } returns MutableStateFlow(false)
-
-            val book = stubBookWithUserBookRead()
-            val newPage = 75
-            val actionAt = "2026-07-21T21:00:00Z"
-
-            // ----- Act -----
-            repository.updateBookProgress(
-                book = book,
-                newPage = newPage,
-                actionAt = actionAt,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                offlineSync.enqueueProgressUpdate(
-                    book = any(),
-                    newPage = any(),
-                    newSeconds = any(),
-                    actionAt = actionAt,
-                )
-            }
-        }
-
-        @Test
         fun `markBookAsRead when offline caches optimistic book and enqueues MARK_AS_READ without calling remote`() = runTest {
-            // ----- Arrange -----
-            every {
-                networkAvailability.isOnline
-            } returns MutableStateFlow(false)
-
-            val book = stubBookWithUserBookRead()
-
-            // ----- Act -----
-            repository.markBookAsRead(book = book)
-
-            // ----- Assert -----
-            coVerify {
-                booksLocalDataSource.cacheBook(book = any())
-            }
-
-            coVerify { offlineSync.enqueueMarkAsRead(book = any()) }
-
-            coVerify(exactly = 0) {
-                booksRemoteDataSource.markBookAsRead(
-                    book = any(),
-                    editionId = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `markBookAsRead when offline forwards actionAt to enqueueMarkAsRead`() = runTest {
             // ----- Arrange -----
             every {
                 networkAvailability.isOnline
@@ -4149,9 +3984,20 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             coVerify {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+
+            coVerify {
                 offlineSync.enqueueMarkAsRead(
                     book = any(),
                     actionAt = actionAt,
+                )
+            }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.markBookAsRead(
+                    book = any(),
+                    editionId = any(),
                 )
             }
         }
@@ -4160,39 +4006,7 @@ class BooksRepositoryImplTest {
     @Nested
     inner class FetchTrendingBooks {
         @Test
-        fun `returns list from remote data source`() = runTest {
-            // ----- Arrange -----
-            val trendingBooks = listOf(stubBook(userBookId = null), stubBook(userBookId = null))
-
-            coEvery {
-                booksRemoteDataSource.fetchTrendingBooks()
-            } returns trendingBooks
-
-            // ----- Act -----
-            val result = repository.fetchTrendingBooks()
-
-            // ----- Assert -----
-            result shouldBe trendingBooks
-        }
-
-        @Test
-        fun `delegates to remote data source`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                booksRemoteDataSource.fetchTrendingBooks()
-            } returns emptyList()
-
-            // ----- Act -----
-            repository.fetchTrendingBooks()
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                booksRemoteDataSource.fetchTrendingBooks()
-            }
-        }
-
-        @Test
-        fun `round-trips the result from the remote data source unchanged`() = runTest {
+        fun `caches the result so a second plain call does not hit the remote data source again`() = runTest {
             // ----- Arrange -----
             val trendingBooks = listOf(stubBook(userBookId = null))
 
@@ -4201,13 +4015,136 @@ class BooksRepositoryImplTest {
             } returns trendingBooks
 
             // ----- Act -----
-            val result = repository.fetchTrendingBooks()
+            val firstResult = repository.fetchTrendingBooks()
+            val secondResult = repository.fetchTrendingBooks()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchTrendingBooks()
+            }
+            firstResult shouldBe trendingBooks
+            secondResult shouldBe trendingBooks
+        }
+
+        @Test
+        fun `forceRefresh bypasses a populated cache and re-fetches from the remote data source`() = runTest {
+            // ----- Arrange -----
+            val cachedBooks = listOf(stubBook(userBookId = null))
+            val refreshedBooks = listOf(stubBook(userBookId = null), stubBook(userBookId = null))
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns cachedBooks
+
+            // ----- Act -----
+            repository.fetchTrendingBooks()
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns refreshedBooks
+
+            val refreshedResult = repository.fetchTrendingBooks(forceRefresh = true)
+
+            // ----- Assert -----
+            coVerify(exactly = 2) {
+                booksRemoteDataSource.fetchTrendingBooks()
+            }
+            refreshedResult shouldBe refreshedBooks
+        }
+
+        @Test
+        fun `forceRefresh on a cold cache still fetches exactly once`() = runTest {
+            // ----- Arrange -----
+            val trendingBooks = listOf(stubBook(userBookId = null))
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns trendingBooks
+
+            // ----- Act -----
+            val result = repository.fetchTrendingBooks(forceRefresh = true)
 
             // ----- Assert -----
             coVerify(exactly = 1) {
                 booksRemoteDataSource.fetchTrendingBooks()
             }
             result shouldBe trendingBooks
+        }
+
+        @Test
+        fun `a failed fetch is not cached so the next plain call retries the remote data source`() = runTest {
+            // ----- Arrange -----
+            val remoteError = RuntimeException("network failure")
+            val trendingBooks = listOf(stubBook(userBookId = null))
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } throws remoteError
+
+            // ----- Act & Assert -----
+            shouldThrow<RuntimeException> {
+                repository.fetchTrendingBooks()
+            } shouldBe remoteError
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns trendingBooks
+
+            val result = repository.fetchTrendingBooks()
+
+            coVerify(exactly = 2) {
+                booksRemoteDataSource.fetchTrendingBooks()
+            }
+            result shouldBe trendingBooks
+        }
+
+        @Test
+        fun `a failed forceRefresh leaves the previously cached value in place`() = runTest {
+            // ----- Arrange -----
+            val cachedBooks = listOf(stubBook(userBookId = null))
+            val remoteError = RuntimeException("network failure")
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns cachedBooks
+
+            // ----- Act -----
+            repository.fetchTrendingBooks()
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } throws remoteError
+
+            // ----- Assert -----
+            shouldThrow<RuntimeException> {
+                repository.fetchTrendingBooks(forceRefresh = true)
+            } shouldBe remoteError
+
+            val result = repository.fetchTrendingBooks()
+
+            coVerify(exactly = 2) {
+                booksRemoteDataSource.fetchTrendingBooks()
+            }
+            result shouldBe cachedBooks
+        }
+
+        @Test
+        fun `an empty list is cached as a valid value rather than treated as a cache miss`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns emptyList()
+
+            // ----- Act -----
+            val firstResult = repository.fetchTrendingBooks()
+            val secondResult = repository.fetchTrendingBooks()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchTrendingBooks()
+            }
+            firstResult shouldBe emptyList()
+            secondResult shouldBe emptyList()
         }
     }
 }

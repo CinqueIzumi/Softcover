@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.scan.presentation.action
 
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.softcover.feature.scan.presentation.event.AddBookFailedEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
+import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
+import nl.rhaydus.softcover.feature.scan.presentation.state.ResolvedScan
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import nl.rhaydus.toad.ActionScope
 
@@ -18,21 +18,24 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
 
         if (scope.currentState.isAddingBook) return
 
-        scope.setState { it.copy(isAddingBook = true) }
+        scope.setState {
+            it.copy(isAddingBook = true)
+        }
 
         dependencies.addBookByIsbnUseCase(isbn = isbn)
             .onSuccess { result ->
-                scope.setState { it.copy(
-                    unknownIsbn = null,
-                    isAddingBook = false,
-                ) }
-
-                scope.sendEvent(
-                    event = BookResolvedEvent(
-                        book = result.book,
-                        editionId = result.editionId,
-                    ),
-                )
+                scope.setState {
+                    it.copy(
+                        isAddingBook = false,
+                        unknownIsbn = null,
+                        unknownIsbnSheet = it.unknownIsbnSheet.requestClose(
+                            pending = ResolvedScan(
+                                book = result.book,
+                                editionId = result.editionId,
+                            ),
+                        ),
+                    )
+                }
             }
             .onFailure { error ->
                 AppLog.e(
@@ -40,9 +43,11 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
                     "Failed to add scanned ISBN $isbn to Hardcover",
                 )
 
-                scope.setState { it.copy(isAddingBook = false) }
+                scope.setState {
+                    it.copy(isAddingBook = false)
+                }
 
-                scope.sendEvent(event = AddBookFailedEvent())
+                scope.sendEvent(event = ScanEvent.AddBookFailedEvent())
             }
     }
 }

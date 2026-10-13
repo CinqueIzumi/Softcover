@@ -11,14 +11,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,19 +28,21 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import kotlinx.coroutines.delay
-import org.koin.compose.koinInject
-import nl.rhaydus.common.currentInstant
 import nl.rhaydus.designsystem.component.DesktopTooltip
-import nl.rhaydus.designsystem.haptics.rememberHaptics
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
-import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel
+import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
+import org.koin.compose.koinInject
 
 /**
  * Persistent live-timer bar shown above the bottom nav while a reading session is active. Tapping it
@@ -63,14 +62,20 @@ fun SessionPeekBar(
     val navigator = LocalNavigator.currentOrThrow
     val active by controller.activeSession.collectAsStateWithLifecycle()
 
-    var lastActive by remember { mutableStateOf<ActiveSession?>(null) }
+    var lastActive by remember { mutableStateOf<ActiveSessionUiModel?>(null) }
 
-    active?.let { lastActive = it }
+    active?.let { lastActive = it.ui }
 
     AnimatedVisibility(
         visible = active != null,
-        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+        enter = slideInVertically(
+            animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+            initialOffsetY = { it },
+        ) + fadeIn(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
+        exit = slideOutVertically(
+            animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+            targetOffsetY = { it },
+        ) + fadeOut(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
         modifier = modifier,
     ) {
         lastActive?.let { session ->
@@ -79,7 +84,7 @@ fun SessionPeekBar(
                 flush = flush,
                 onOpen = { navigator.parent?.push(item = FocusModeScreen) },
                 onPauseResume = {
-                    if (session.session.isPaused) controller.resume() else controller.pause()
+                    if (session.isPaused) controller.resume() else controller.pause()
                 },
                 onStop = { controller.stop() },
             )
@@ -89,67 +94,52 @@ fun SessionPeekBar(
 
 @Composable
 private fun SessionPeekBarContent(
-    active: ActiveSession,
+    active: ActiveSessionUiModel,
     flush: Boolean,
     onOpen: () -> Unit,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
 ) {
-    val haptics = rememberHaptics()
+    val haptics = LocalHaptics.current
 
-    var now by remember { mutableStateOf(currentInstant()) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            now = currentInstant()
-
-            delay(timeMillis = 1_000)
-        }
-    }
-
-    val elapsed = active.session.readingDuration(now = now)
+    val elapsed = rememberSessionElapsed(active = active)
 
     Column(modifier = Modifier.fillMaxWidth()) {
         // The flush desktop strip is led by a top hairline so it reads as docked chrome rather than
         // a card hovering over the page; the floating form needs none.
         if (flush) {
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Divider()
         }
 
         Surface(
             onClick = onOpen,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            shape = if (flush) RectangleShape else MaterialTheme.shapes.large,
+            shape = if (flush) RectangleShape else Corners.lg,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = if (flush) 0.dp else 12.dp),
+                .padding(horizontal = if (flush) 0.dp else Spacing.sm),
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
-                EditionImage(
-                    edition = active.book.currentEdition,
-                    defaultEdition = active.book.defaultEdition,
-                    isLoading = false,
-                    fallbackCoverUrl = active.book.coverUrl,
-                    coverlessTitle = active.book.title,
-                    cornerRadius = 4.dp,
+                Cover(
+                    model = active.peekBarCover,
                     modifier = Modifier.width(32.dp),
                 )
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = active.book.title,
+                    SoftcoverText(
+                        text = active.title,
                         style = MaterialTheme.editorialTypography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
 
-                    Text(
-                        text = if (active.session.isPaused) {
+                    SoftcoverText(
+                        text = if (active.isPaused) {
                             "Paused · ${formatSessionElapsed(elapsed = elapsed)}"
                         } else {
                             formatSessionElapsed(elapsed = elapsed)
@@ -161,15 +151,15 @@ private fun SessionPeekBarContent(
                 }
 
                 val pauseResumeIcon = drawableIconResource(
-                    icon = if (active.session.isPaused) SoftcoverIcon.Play else SoftcoverIcon.Pause,
-                    contentDescription = if (active.session.isPaused) {
+                    icon = if (active.isPaused) SoftcoverIcon.Play else SoftcoverIcon.Pause,
+                    contentDescription = if (active.isPaused) {
                         "Resume session"
                     } else {
                         "Pause session"
                     },
                 )
 
-                DesktopTooltip(text = if (active.session.isPaused) "Resume" else "Pause") {
+                DesktopTooltip(text = if (active.isPaused) "Resume" else "Pause") {
                     IconButton(
                         onClick = {
                             haptics.select()
@@ -193,8 +183,6 @@ private fun SessionPeekBarContent(
                 DesktopTooltip(text = "Stop") {
                     IconButton(
                         onClick = {
-                            haptics.threshold()
-
                             onStop()
                         },
                     ) {

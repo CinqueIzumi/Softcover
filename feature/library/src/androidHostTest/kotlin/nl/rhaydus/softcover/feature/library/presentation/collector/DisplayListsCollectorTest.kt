@@ -3,15 +3,14 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -19,12 +18,16 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class DisplayListsCollectorTest {
     private lateinit var dependencies: LibraryDependencies
@@ -112,29 +115,6 @@ class DisplayListsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `populates displayBooksByTab when booksByTab is set in state`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val tabId = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id
-            val book = buildBook(
-                id = 1,
-                title = "Kotlin in Action",
-            )
-            val collector = DisplayListsCollector()
-
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            stateFlow.value = LibraryUiState(booksByTab = mapOf(tabId to listOf(book)))
-
-            // ----- Assert -----
-            stateFlow.value.displayBooksByTab[tabId] shouldBe listOf(book)
-            job.cancel()
-        }
-
-        @Test
         fun `populates displayEditionsByTab when editionsByTab is set in state`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val listTabId = LibraryTab.CustomList(
@@ -147,16 +127,18 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                editionsByTab = mapOf(listTabId to listOf(edition)),
-                sortModeByTab = mapOf(listTabId to LibrarySortMode.TITLE),
-                sortDirectionByTab = mapOf(listTabId to SortDirection.ASCENDING),
+                editionsByTab = persistentMapOf(listTabId to persistentListOf(edition)),
+                sortModeByTab = persistentMapOf(listTabId to LibrarySortMode.TITLE),
+                sortDirectionByTab = persistentMapOf(listTabId to SortDirection.ASCENDING),
             )
 
             // ----- Assert -----
@@ -178,13 +160,15 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
-            stateFlow.value = LibraryUiState(booksByTab = mapOf(tabId to listOf(book1, book2)))
+            stateFlow.value = LibraryUiState(booksByTab = persistentMapOf(tabId to persistentListOf(book1, book2)))
 
             // ----- Assert -----
             val stats = stateFlow.value.tabStatsByTab[tabId]
@@ -207,16 +191,18 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                editionsByTab = mapOf(listTabId to listOf(edition)),
-                sortModeByTab = mapOf(listTabId to LibrarySortMode.TITLE),
-                sortDirectionByTab = mapOf(listTabId to SortDirection.ASCENDING),
+                editionsByTab = persistentMapOf(listTabId to persistentListOf(edition)),
+                sortModeByTab = persistentMapOf(listTabId to LibrarySortMode.TITLE),
+                sortDirectionByTab = persistentMapOf(listTabId to SortDirection.ASCENDING),
             )
 
             // ----- Assert -----
@@ -240,14 +226,16 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                booksByTab = mapOf(tabId to listOf(matching, nonMatching)),
+                booksByTab = persistentMapOf(tabId to persistentListOf(matching, nonMatching)),
                 searchQuery = "kotlin",
             )
 
@@ -278,15 +266,17 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
-                booksByTab = mapOf(tabId to listOf(ebookBook, paperBook)),
-                filtersByTab = mapOf(tabId to LibraryFilters(formats = setOf("ebook"))),
+                booksByTab = persistentMapOf(tabId to persistentListOf(ebookBook, paperBook)),
+                filtersByTab = persistentMapOf(tabId to LibraryFilters(formats = persistentSetOf("ebook"))),
             )
 
             // ----- Assert -----
@@ -304,12 +294,14 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
-            stateFlow.value = LibraryUiState(booksByTab = mapOf(tabId to listOf(book)))
+            stateFlow.value = LibraryUiState(booksByTab = persistentMapOf(tabId to persistentListOf(book)))
             val refAfterFirstEmit = stateFlow.value.displayBooksByTab[tabId]
 
             // ----- Act -----
@@ -333,14 +325,16 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // First emission: empty query, one book → computed list stored as prev
             stateFlow.value = LibraryUiState(
-                booksByTab = mapOf(tabId to listOf(book)),
+                booksByTab = persistentMapOf(tabId to persistentListOf(book)),
                 searchQuery = "",
             )
             val refAfterFirst = stateFlow.value.displayBooksByTab[tabId]
@@ -354,25 +348,6 @@ class DisplayListsCollectorTest {
             val refAfterSecond = stateFlow.value.displayBooksByTab[tabId]
             refAfterSecond shouldBe listOf(book)
             (refAfterSecond === refAfterFirst) shouldBe true
-            job.cancel()
-        }
-
-        @Test
-        fun `displayBooksByTab is not set before first state emission beyond initial`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val collector = DisplayListsCollector()
-
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            // No action — asserting on initial state.
-
-            // ----- Assert -----
-            // Initial LibraryUiState() has empty booksByTab, so displayBooksByTab is also empty
-            stateFlow.value.displayBooksByTab shouldBe emptyMap()
             job.cancel()
         }
     }

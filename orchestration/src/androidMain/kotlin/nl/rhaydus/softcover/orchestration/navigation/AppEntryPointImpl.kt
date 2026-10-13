@@ -2,7 +2,7 @@ package nl.rhaydus.softcover.orchestration.navigation
 
 import android.content.Context
 import android.content.Intent
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppEntryPoint
+import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
 import nl.rhaydus.softcover.orchestration.presentation.MainActivity
 
 /**

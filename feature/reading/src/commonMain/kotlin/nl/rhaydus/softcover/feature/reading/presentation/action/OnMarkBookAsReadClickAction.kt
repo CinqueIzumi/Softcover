@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -28,13 +29,17 @@ internal data class OnMarkBookAsReadClickAction(
                     // Only a genuine transition prompts for a verdict - re-tapping an already-Read
                     // book (a no-op) must not reopen the sheet.
                     if (outcome == ShelfMutationOutcome.Applied) {
-                        scope.setState { it.copy(verdictPromptBook = book) }
+                        scope.setState {
+                            it.copy(
+                                verdictPromptBook = book,
+                            )
+                        }
                     }
                 }
                 .onFailure { error ->
                     AppLog.e("$error")
 
-                    scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
+                    scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds.toPersistentSet().add(book.id)) }
                 }
         }
 

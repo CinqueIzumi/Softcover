@@ -1,0 +1,405 @@
+package nl.rhaydus.softcover.core.component.topbar
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
+import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+
+/**
+ * The Explore search chrome: a rounded search field (search glyph,
+ * inline text field, and a trailing clear/loading affordance) beside a square barcode-scan button.
+ *
+ * It stays a component of its own rather than a variant of [TopBar] (§ 7.6): the focus contract
+ * below has no counterpart on the plain bar, so merged they would be one component with two disjoint
+ * parameter sets.
+ *
+ * **The caller's state owns the focus, not the platform field.** [SearchTopBarUiModel.focused] is the
+ * caller's search-chrome state and the field *follows* it: entering it requests focus and shows the
+ * keyboard, leaving it clears focus and hides the keyboard. The events are therefore intents rather
+ * than focus notifications — see [SearchTopBarEvent], which records why the tap intent is what keeps
+ * the chrome recoverable.
+ *
+ * The scan action sits in the outer `Row` *beside* the search field, not inside it — the field's one
+ * trailing slot is already spoken for by the clear/loading affordance.
+ *
+ * [lifted] is caller-derived scroll state, not model data: content sits scrolled under the bar, so a
+ * bottom hairline fades in.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun SearchTopBar(
+    model: SearchTopBarUiModel,
+    onEvent: (SearchTopBarEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    lifted: Boolean = false,
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
+) {
+    val eyebrow = model.eyebrow
+
+    val lift by animateFloatAsState(
+        targetValue = if (lifted) 1f else 0f,
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+    )
+
+    Surface(modifier = modifier.fillMaxWidth()) {
+        Box {
+            Column(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
+                if (eyebrow != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                start = Spacing.gutter,
+                                end = Spacing.gutter,
+                                top = Spacing.xs,
+                                bottom = Spacing.xs,
+                            ),
+                    ) {
+                        PullToRefreshEyebrow(
+                            pullToRefreshState = pullToRefreshState,
+                            isRefreshing = eyebrow.isRefreshing,
+                            baseText = eyebrow.text,
+                            refreshingText = eyebrow.refreshingText,
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = Spacing.md,
+                            end = Spacing.md,
+                            top = if (eyebrow == null) Spacing.sm else 0.dp,
+                            bottom = Spacing.sm,
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    SearchChromeField(
+                        model = model,
+                        onEvent = onEvent,
+                        modifier = Modifier.weight(1f),
+                    )
+
+                    SearchChromeBarcodeButton(onClick = { onEvent(SearchTopBarEvent.ScanRequested) })
+                }
+            }
+
+            Divider(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .graphicsLayer { alpha = lift },
+            )
+        }
+    }
+}
+
+private enum class SearchChromeTrailing {
+    Nothing,
+    Loading,
+    Clear,
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun SearchChromeField(
+    model: SearchTopBarUiModel,
+    onEvent: (SearchTopBarEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+
+    var fieldHoldsFocus by remember { mutableStateOf(false) }
+
+    // Only *transitions* of [focused] drive the platform field. The caller's state outlives this
+    // composition (it lives in a ScreenModel) while the field's platform focus dies with it, so
+    // re-entering the screen with a search still active must not yank the keyboard open unbidden —
+    // only a fresh activation may, and that one is handled by the tap itself (see
+    // SearchChromeInputArea). The explicit show/hide is the belt to that braces: a field can hold
+    // focus with its input session already torn down, and re-showing is what reconnects the
+    // keyboard that would otherwise sit there swallowing keystrokes.
+    var appliedFocus by remember { mutableStateOf(model.focused) }
+
+    LaunchedEffect(model.focused) {
+        if (model.focused == appliedFocus) return@LaunchedEffect
+
+        appliedFocus = model.focused
+
+        if (model.focused) {
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        } else if (fieldHoldsFocus) {
+            focusManager.clearFocus()
+            keyboardController?.hide()
+        }
+    }
+
+    val borderColor by animateColorAsState(
+        targetValue = if (model.active) MaterialTheme.colorScheme.primary else Color.Transparent,
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+    )
+
+    Surface(
+        modifier = modifier.height(48.dp),
+        shape = Corners.lg,
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        border = BorderStroke(
+            1.5.dp,
+            borderColor,
+        ),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = Spacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            SearchChromeInputArea(
+                model = model,
+                onEvent = onEvent,
+                onFieldFocusChange = { fieldHoldsFocus = it },
+                focusRequester = focusRequester,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = Spacing.sm),
+            )
+
+            val trailing = when {
+                model.isLoading -> SearchChromeTrailing.Loading
+                model.active -> SearchChromeTrailing.Clear
+                else -> SearchChromeTrailing.Nothing
+            }
+
+            val fadeSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+            val sizeSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntSize>()
+
+            AnimatedContent(
+                targetState = trailing,
+                transitionSpec = {
+                    fadeIn(fadeSpec) togetherWith
+                        fadeOut(fadeSpec) using
+                        SizeTransform(
+                            clip = false,
+                            sizeAnimationSpec = { _, _ -> sizeSpec },
+                        )
+                },
+                label = "searchChromeTrailing",
+            ) { slot ->
+                if (slot != SearchChromeTrailing.Nothing) {
+                    Box(
+                        modifier = Modifier.size(48.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (slot == SearchChromeTrailing.Loading) {
+                            CircularWavyProgressIndicator(modifier = Modifier.size(18.dp))
+                        } else {
+                            ChromeIconButton(
+                                icon = SoftcoverIcon.Close,
+                                contentDescription = "Clear search",
+                                tooltip = "Clear",
+                                onClick = { onEvent(SearchTopBarEvent.SearchCleared) },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                ),
+                                iconSize = 18.dp,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * `SearchChromeField`'s tap-to-search region: the leading glyph and the text field. The whole
+ * region — not just the field's own hit box — handles the tap, observed on the initial pass and consuming
+ * nothing, so it never interferes with the field's own tap handling. Two things ride on that: the
+ * glyph and the padding around the field stop being dead zones, and a tap on an *already-focused*
+ * field is still an activation, which the edge-triggered [Modifier.onFocusChanged] cannot see. The
+ * trailing clear/loading slot sits deliberately outside this region — tapping × is a dismissal, not
+ * an activation.
+ *
+ * A tap drives the platform side (focus, keyboard) here rather than only reporting
+ * [SearchTopBarEvent.SearchActivated] and waiting for the state to come back, because "activate" is a level, not a
+ * pulse: re-activating while the caller already holds `focused = true` writes an equal state that a
+ * `StateFlow` drops, so nothing downstream would fire. That is not hypothetical — the system back
+ * button hides the keyboard without touching the field's focus, and every tap after that would be
+ * swallowed. Both calls are no-ops when the field is already focused with its keyboard up.
+ */
+@Composable
+private fun SearchChromeInputArea(
+    model: SearchTopBarUiModel,
+    onEvent: (SearchTopBarEvent) -> Unit,
+    onFieldFocusChange: (Boolean) -> Unit,
+    focusRequester: FocusRequester,
+    modifier: Modifier = Modifier,
+) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Row(
+        modifier = modifier.pointerInput(Unit) {
+            awaitEachGesture {
+                awaitFirstDown(
+                    requireUnconsumed = false,
+                    pass = PointerEventPass.Initial,
+                )
+
+                onEvent(SearchTopBarEvent.SearchActivated)
+
+                focusRequester.requestFocus()
+                keyboardController?.show()
+            }
+        },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        val searchIcon = drawableIconResource(
+            icon = SoftcoverIcon.Search,
+            contentDescription = "Search",
+        )
+
+        Icon(
+            painter = searchIcon.getIconPainter(),
+            contentDescription = searchIcon.contentDescription,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp),
+        )
+
+        Box(modifier = Modifier.weight(1f)) {
+            if (model.query.isEmpty()) {
+                SoftcoverText(
+                    text = "Search books, authors…",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            BasicTextField(
+                value = model.query,
+                onValueChange = { query -> onEvent(SearchTopBarEvent.QueryChanged(query = query)) },
+                singleLine = true,
+                textStyle = LocalTextStyle.current.merge(
+                    MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
+                ),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                // The results already stream in on a debounce, so the IME's search key has nothing
+                // left to submit: it just puts the keyboard away over the results it produced.
+                keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { focusState ->
+                        onFieldFocusChange(focusState.isFocused)
+
+                        if (focusState.isFocused) {
+                            onEvent(SearchTopBarEvent.SearchActivated)
+                        } else {
+                            onEvent(SearchTopBarEvent.SearchDismissed)
+                        }
+                    },
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchChromeBarcodeButton(onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .size(48.dp)
+            .tactileClickable(
+                onClick = onClick,
+                hoverShape = Corners.lg,
+            ),
+        shape = Corners.lg,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            val scanIcon = drawableIconResource(
+                icon = SoftcoverIcon.BarcodeScanner,
+                contentDescription = "Scan a book's barcode",
+            )
+
+            Icon(
+                painter = scanIcon.getIconPainter(),
+                contentDescription = scanIcon.contentDescription,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp),
+            )
+        }
+    }
+}

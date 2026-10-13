@@ -59,10 +59,13 @@ apollo {
             pluginArgument("com.apollographql.cache.packageName", "nl.rhaydus.softcover")
         }
 
-        // Refreshes `schema.graphqls` from the live API via `./gradlew :core:network:downloadApolloSchema`.
-        // The Hardcover endpoint requires an authenticated bearer token, so the token is read from the
-        // environment or from `local.properties` (`hardcover.apiToken`) — never committed. Without a token
-        // the block still configures cleanly; only the download task fails, so a normal build is unaffected.
+        plugin(project(":apollo-schema-corrections"))
+
+        // Refreshes `schema.graphqls` from the live API via
+        // `./gradlew :core:network:downloadServiceApolloSchemaFromIntrospection`. The Hardcover endpoint
+        // requires an authenticated bearer token, so the token is read from the environment or from
+        // `local.properties` (`hardcover.apiToken`) — never committed. Without a token the block still
+        // configures cleanly; only the download task fails, so a normal build is unaffected.
         introspection {
             endpointUrl.set("https://api.hardcover.app/v1/graphql")
             headers.put("Authorization", "Bearer $hardcoverApiToken")

@@ -1,0 +1,342 @@
+package nl.rhaydus.softcover.feature.library.presentation.collector
+
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.dismissed
+import nl.rhaydus.softcover.core.component.sheet.isClosing
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
+import nl.rhaydus.softcover.core.component.sheet.requestClose
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.openChooseListsSession
+import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.CreateList
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class ChooseListsCollectorTest {
+    private lateinit var dependencies: LibraryDependencies
+    private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
+    private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
+
+    @BeforeEach
+    fun setUp() {
+        stateFlow = MutableStateFlow(LibraryUiState())
+        scope = ActionScope(
+            stateFlow = stateFlow,
+            localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
+            eventChannel = Channel(Channel.BUFFERED),
+        )
+
+        dependencies = mockk<LibraryDependencies>(relaxed = true)
+    }
+
+    private fun bookWithId(id: Int): Book {
+        val edition = PreviewData.baseEdition.copy(
+            id = id,
+            bookId = id,
+        )
+
+        return PreviewData.baseBook.copy(
+            id = id,
+            editions = listOf(edition),
+            defaultEdition = edition,
+        )
+    }
+
+    private fun ownedList(id: Int = 1): BookList = BookList(
+        id = id,
+        name = "Owned",
+        slug = "owned",
+        books = emptyList(),
+    )
+
+    private fun customList(
+        id: Int,
+        name: String,
+    ): BookList = BookList(
+        id = id,
+        name = name,
+        slug = "custom-$id",
+        books = emptyList(),
+    )
+
+    private fun shownSheet(): ChooseListsUiModel = stateFlow.value.chooseListsSheet.modelOrNull.shouldNotBeNull()
+
+    private fun TestScope.launchCollector(): Job = launch {
+        ChooseListsCollector().onLaunch(
+            scope = scope,
+            dependencies = dependencies,
+        )
+    }
+
+    @Nested
+    inner class OnLaunch {
+        @Test
+        fun `opens on the request with one cover per resolved jacket edition`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(
+                booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1), bookWithId(id = 2))),
+                selectedBookIds = persistentSetOf(1, 2),
+            )
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isChooseListsSheetRequested = true)
+
+            // ----- Assert -----
+            val header = shownSheet().scaffold.header.shouldNotBeNull()
+            header.section.headlineText shouldBe "Shelve 2 books"
+            (header.trailing as SheetHeaderTrailing.JacketStack).covers.size shouldBe 2
+            stateFlow.value.chooseListsSheet.isClosing shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `a selection change rewrites the open sheet`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(
+                booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1), bookWithId(id = 2))),
+                selectedBookIds = persistentSetOf(1),
+                isChooseListsSheetRequested = true,
+            )
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(selectedBookIds = persistentSetOf(1, 2))
+
+            // ----- Assert -----
+            shownSheet().scaffold.header.shouldNotBeNull().section.headlineText shouldBe "Shelve 2 books"
+            job.cancel()
+        }
+
+        @Test
+        fun `a closed session stays closed however the selection changes without a request`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launchCollector()
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1))),
+                    selectedBookIds = persistentSetOf(1),
+                )
+
+                // ----- Assert -----
+                stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
+                job.cancel()
+            }
+
+        @Test
+        fun `a request with an empty selection leaves the session closed`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                customLists = persistentListOf(
+                    customList(
+                        id = 10,
+                        name = "Winter reading",
+                    ),
+                ),
+                selectedBookIds = persistentSetOf(),
+                isChooseListsSheetRequested = true,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
+            job.cancel()
+        }
+
+        @Test
+        fun `an empty selection leaves the open sheet as it was even when custom lists are present`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val sheet = openChooseListsSession()
+                stateFlow.value = stateFlow.value.copy(
+                    chooseListsSheet = sheet,
+                    isChooseListsSheetRequested = true,
+                )
+                val job = launchCollector()
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    customLists = persistentListOf(
+                        customList(
+                            id = 10,
+                            name = "Winter reading",
+                        ),
+                    ),
+                    selectedBookIds = persistentSetOf(),
+                )
+
+                // ----- Assert -----
+                stateFlow.value.chooseListsSheet shouldBe sheet
+                job.cancel()
+            }
+
+        @Test
+        fun `withdrawing the request asks the sheet to close and keeps its content while the selection empties`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                stateFlow.value = stateFlow.value.copy(
+                    booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1))),
+                    selectedBookIds = persistentSetOf(1),
+                    isChooseListsSheetRequested = true,
+                )
+                val job = launchCollector()
+                val contentBefore = shownSheet()
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    selectedBookIds = persistentSetOf(),
+                    isChooseListsSheetRequested = false,
+                )
+
+                // ----- Assert -----
+                stateFlow.value.chooseListsSheet.isClosing shouldBe true
+                shownSheet() shouldBe contentBefore.requestingClose()
+                job.cancel()
+            }
+
+        @Test
+        fun `a withdrawn request keeps the create-list request while later state changes rewrite the sheet`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                stateFlow.value = stateFlow.value.copy(
+                    booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1), bookWithId(id = 2))),
+                    selectedBookIds = persistentSetOf(1),
+                    isChooseListsSheetRequested = true,
+                )
+                val job = launchCollector()
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    chooseListsSheet = stateFlow.value.chooseListsSheet.requestClose(pending = CreateList),
+                    isChooseListsSheetRequested = false,
+                )
+                stateFlow.value = stateFlow.value.copy(listsBeingMutated = persistentSetOf(10))
+
+                // ----- Assert -----
+                stateFlow.value.chooseListsSheet.isClosing shouldBe true
+                stateFlow.value.chooseListsSheet.dismissed() shouldBe CreateList
+                job.cancel()
+            }
+
+        @Test
+        fun `requesting again after a close replaces the closing session and drops its create-list request`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                stateFlow.value = stateFlow.value.copy(
+                    booksByTab = persistentMapOf("all" to persistentListOf(bookWithId(id = 1))),
+                    selectedBookIds = persistentSetOf(1),
+                    chooseListsSheet = openChooseListsSession(
+                        closing = true,
+                        pending = CreateList,
+                    ),
+                )
+                val job = launchCollector()
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(isChooseListsSheetRequested = true)
+
+                // ----- Assert -----
+                stateFlow.value.chooseListsSheet.isClosing shouldBe false
+                stateFlow.value.chooseListsSheet.dismissed() shouldBe null
+                shownSheet().scaffold.header.shouldNotBeNull().section.headlineText shouldBe "Shelve 1 book"
+                job.cancel()
+            }
+
+        @Test
+        fun `jacket editions resolve through booksByTab and are capped at three`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val books = (1..5).map { id -> bookWithId(id = id) }
+            stateFlow.value = stateFlow.value.copy(
+                booksByTab = persistentMapOf("all" to books.toImmutableList()),
+                selectedBookIds = persistentSetOf(1),
+                isChooseListsSheetRequested = true,
+            )
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(selectedBookIds = persistentSetOf(1, 2, 3, 4, 5))
+
+            // ----- Assert -----
+            val trailing = shownSheet().scaffold.header.shouldNotBeNull().trailing
+            (trailing as SheetHeaderTrailing.JacketStack).covers.size shouldBe 3
+            job.cancel()
+        }
+
+        @Test
+        fun `a selected book with no edition still yields a jacket`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val withEdition = bookWithId(id = 1)
+            val withoutEdition = PreviewData.baseBook.copy(
+                id = 2,
+                editions = emptyList(),
+                defaultEdition = null,
+                coverUrl = "https://example.com/cover.jpg",
+            )
+            stateFlow.value = stateFlow.value.copy(
+                booksByTab = persistentMapOf("all" to persistentListOf(withEdition, withoutEdition)),
+                selectedBookIds = persistentSetOf(1),
+                isChooseListsSheetRequested = true,
+            )
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(selectedBookIds = persistentSetOf(1, 2))
+
+            // ----- Assert -----
+            val trailing = shownSheet().scaffold.header.shouldNotBeNull().trailing
+            (trailing as SheetHeaderTrailing.JacketStack).covers.size shouldBe 2
+            job.cancel()
+        }
+
+        @Test
+        fun `the built-in Owned list is excluded from the sheet's rows`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = bookWithId(id = 1)
+            val owned = ownedList(id = 1)
+            val custom = customList(
+                id = 2,
+                name = "Winter reading",
+            )
+            stateFlow.value = stateFlow.value.copy(
+                booksByTab = persistentMapOf("all" to persistentListOf(book)),
+                selectedBookIds = persistentSetOf(1),
+                isChooseListsSheetRequested = true,
+            )
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(customLists = persistentListOf(owned, custom))
+
+            // ----- Assert -----
+            shownSheet().rows.map { it.listId } shouldBe listOf(2)
+            job.cancel()
+        }
+    }
+}

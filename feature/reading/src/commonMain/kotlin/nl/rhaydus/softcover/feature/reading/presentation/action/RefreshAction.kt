@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
-import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -15,7 +15,7 @@ internal data object RefreshAction : ReadingAction {
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
         scope.setState {
-            it.copy(isLoading = true)
+            it.copy(isRefreshing = true)
         }
 
         dependencies
@@ -25,7 +25,7 @@ internal data object RefreshAction : ReadingAction {
             .onApiFailure()
 
         scope.setState {
-            it.copy(isLoading = false)
+            it.copy(isRefreshing = false)
         }
     }
 }

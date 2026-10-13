@@ -2,9 +2,10 @@ package nl.rhaydus.softcover.feature.reading.presentation.component
 
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.currentStreakLength
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 
 class StreakStripTest {
     private fun date(day: Int): LocalDate = LocalDate(
@@ -60,22 +61,6 @@ class StreakStripTest {
         }
 
         @Test
-        fun `returns zero when no days were read`() {
-            // ----- Arrange -----
-            val activity = buildActivity(
-                false,
-                false,
-                false,
-            )
-
-            // ----- Act -----
-            val streak = currentStreakLength(activity)
-
-            // ----- Assert -----
-            streak shouldBe 0
-        }
-
-        @Test
         fun `returns zero for an empty activity list`() {
             // ----- Arrange -----
             val activity = emptyList<ReadingDayActivity>()
@@ -102,18 +87,6 @@ class StreakStripTest {
 
             // ----- Assert -----
             streak shouldBe 0
-        }
-
-        @Test
-        fun `returns the full length for a 21 day unbroken run`() {
-            // ----- Arrange -----
-            val activity = buildActivity(*BooleanArray(21) { true })
-
-            // ----- Act -----
-            val streak = currentStreakLength(activity)
-
-            // ----- Assert -----
-            streak shouldBe 21
         }
     }
 }

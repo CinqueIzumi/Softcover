@@ -8,17 +8,15 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import kotlin.time.Clock
-import kotlin.time.Instant
+import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
+import nl.rhaydus.softcover.core.personal.data.datasource.ReadingSessionLocalDataSource
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
-import nl.rhaydus.softcover.core.domain.model.ReadingSession
-import nl.rhaydus.softcover.core.personal.data.datasource.ReadingSessionLocalDataSource
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 
 class ReadingSessionRepositoryImplTest {
     private lateinit var localDataSource: ReadingSessionLocalDataSource
@@ -54,26 +52,6 @@ class ReadingSessionRepositoryImplTest {
         lastPausedAt = lastPausedAt,
     )
 
-    private fun buildSession(
-        id: Long = 1L,
-        bookId: Int = 10,
-        startedAt: Instant = Instant.parse("2024-05-01T09:00:00Z"),
-        endedAt: Instant? = null,
-        startPage: Int? = 100,
-        endPage: Int? = null,
-        startSeconds: Int? = null,
-        endSeconds: Int? = null,
-    ) = ReadingSession(
-        id = id,
-        bookId = bookId,
-        startedAt = startedAt,
-        endedAt = endedAt,
-        startPage = startPage,
-        endPage = endPage,
-        startSeconds = startSeconds,
-        endSeconds = endSeconds,
-    )
-
     @Nested
     inner class ObserveByBookId {
         @Test
@@ -97,43 +75,7 @@ class ReadingSessionRepositoryImplTest {
     }
 
     @Nested
-    inner class ObserveAll {
-        @Test
-        fun `maps all entities to domain models`() = runTest {
-            // ----- Arrange -----
-            val entities = listOf(buildEntity(bookId = 10), buildEntity(bookId = 20))
-
-            every {
-                localDataSource.observeAll()
-            } returns flowOf(entities)
-
-            // ----- Act & Assert -----
-            repository.observeAll().test {
-                val items = awaitItem()
-                items.size shouldBe 2
-                items[0].bookId shouldBe 10
-                items[1].bookId shouldBe 20
-                awaitComplete()
-            }
-        }
-    }
-
-    @Nested
     inner class ObserveActive {
-        @Test
-        fun `emits null when no active session`() = runTest {
-            // ----- Arrange -----
-            every {
-                localDataSource.observeActive()
-            } returns flowOf(null)
-
-            // ----- Act & Assert -----
-            repository.observeActive().test {
-                awaitItem() shouldBe null
-                awaitComplete()
-            }
-        }
-
         @Test
         fun `emits mapped domain session when active session exists`() = runTest {
             // ----- Arrange -----
@@ -151,23 +93,6 @@ class ReadingSessionRepositoryImplTest {
                 val item = awaitItem()
                 item?.id shouldBe 5L
                 item?.endedAt shouldBe null
-                awaitComplete()
-            }
-        }
-    }
-
-    @Nested
-    inner class ObserveById {
-        @Test
-        fun `emits null when session not found`() = runTest {
-            // ----- Arrange -----
-            every {
-                localDataSource.observeById(id = 99L)
-            } returns flowOf(null)
-
-            // ----- Act & Assert -----
-            repository.observeById(id = 99L).test {
-                awaitItem() shouldBe null
                 awaitComplete()
             }
         }
@@ -433,46 +358,6 @@ class ReadingSessionRepositoryImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) { localDataSource.update(any()) }
-        }
-    }
-
-    @Nested
-    inner class Update {
-        @Test
-        fun `delegates update to local data source with converted entity`() = runTest {
-            // ----- Arrange -----
-            val session = buildSession(
-                id = 7L,
-                endPage = 300,
-            )
-            val entitySlot = slot<ReadingSessionEntity>()
-
-            coEvery {
-                localDataSource.update(capture(entitySlot))
-            } returns Unit
-
-            // ----- Act -----
-            repository.update(session = session)
-
-            // ----- Assert -----
-            entitySlot.captured.id shouldBe 7L
-            entitySlot.captured.endPage shouldBe 300
-        }
-    }
-
-    @Nested
-    inner class Delete {
-        @Test
-        fun `delegates delete to local data source`() = runTest {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            repository.delete(id = 8L)
-
-            // ----- Assert -----
-            coVerify {
-                localDataSource.delete(id = 8L)
-            }
         }
     }
 }

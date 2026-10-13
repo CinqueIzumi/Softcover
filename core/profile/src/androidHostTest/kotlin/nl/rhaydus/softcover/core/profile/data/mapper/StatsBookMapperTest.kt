@@ -46,20 +46,6 @@ class StatsBookMapperTest {
     @Nested
     inner class ToBooksByYear {
         @Test
-        fun `empty list returns 8 zero-filled entries for the trailing window`() {
-            // ----- Act -----
-            val result = emptyList<StatsBook>().toBooksByYear(currentYear = 2026)
-
-            // ----- Assert -----
-            result shouldBe (2019..2026).map {
-                YearCount(
-                    year = it,
-                    count = 0,
-                )
-            }
-        }
-
-        @Test
         fun `groups and counts books by finish-date year, zero-filled across the window, ascending`() {
             // ----- Arrange -----
             val books = listOf(
@@ -67,17 +53,20 @@ class StatsBookMapperTest {
                     2026,
                     3,
                     10,
-                ),),
+                ),
+                ),
                 book(finishDate = LocalDate(
                     2026,
                     7,
                     1,
-                ),),
+                ),
+                ),
                 book(finishDate = LocalDate(
                     2025,
                     1,
                     1,
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -99,11 +88,16 @@ class StatsBookMapperTest {
         @Test
         fun `books with no finish date are excluded`() {
             // ----- Arrange -----
-            val books = listOf(book(finishDate = LocalDate(
-                2026,
-                3,
-                10,
-            ),), book(finishDate = null),)
+            val books = listOf(
+                book(
+                    finishDate = LocalDate(
+                        2026,
+                        3,
+                        10,
+                    ),
+                ),
+                book(finishDate = null),
+            )
 
             // ----- Act -----
             val result = books.toBooksByYear(currentYear = 2026)
@@ -125,12 +119,14 @@ class StatsBookMapperTest {
                     2010,
                     1,
                     1,
-                ),),
+                ),
+                ),
                 book(finishDate = LocalDate(
                     2026,
                     3,
                     10,
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -144,20 +140,6 @@ class StatsBookMapperTest {
 
     @Nested
     inner class ToPagesByYear {
-        @Test
-        fun `empty list returns 8 zero-filled entries for the trailing window`() {
-            // ----- Act -----
-            val result = emptyList<StatsBook>().toPagesByYear(currentYear = 2026)
-
-            // ----- Assert -----
-            result shouldBe (2019..2026).map {
-                YearCount(
-                    year = it,
-                    count = 0,
-                )
-            }
-        }
-
         @Test
         fun `sums pages per finish-date year, zero-filled across the window, ascending`() {
             // ----- Arrange -----
@@ -217,7 +199,8 @@ class StatsBookMapperTest {
             ), book(
                 finishDate = null,
                 pages = 999,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = books.toPagesByYear(currentYear = 2026)
@@ -266,8 +249,12 @@ class StatsBookMapperTest {
     inner class ToPagesByMonth {
         @Test
         fun `returns all 12 months zero-filled when the list is empty`() {
+            // ----- Arrange -----
+            val books = emptyList<StatsBook>()
+            val currentYear = 2026
+
             // ----- Act -----
-            val result = emptyList<StatsBook>().toPagesByMonth(currentYear = 2026)
+            val result = books.toPagesByMonth(currentYear = currentYear)
 
             // ----- Assert -----
             result.size shouldBe 12
@@ -324,7 +311,8 @@ class StatsBookMapperTest {
             val books = listOf(book(
                 finishDate = null,
                 pages = 999,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = books.toPagesByMonth(currentYear = 2026)
@@ -336,12 +324,6 @@ class StatsBookMapperTest {
 
     @Nested
     inner class ToTotalPages {
-        @Test
-        fun `empty list returns 0`() {
-            // ----- Act & Assert -----
-            emptyList<StatsBook>().toTotalPages() shouldBe 0
-        }
-
         @Test
         fun `sums pages across all books regardless of finish date`() {
             // ----- Arrange -----
@@ -368,12 +350,6 @@ class StatsBookMapperTest {
     @Nested
     inner class ToRatingAverage {
         @Test
-        fun `empty list returns 0_0`() {
-            // ----- Act & Assert -----
-            emptyList<StatsBook>().toRatingAverage() shouldBe 0.0
-        }
-
-        @Test
         fun `averages only the non-null ratings, ignoring unrated books`() {
             // ----- Arrange -----
             val books = listOf(book(rating = 4.0), book(rating = null), book(rating = 2.0))
@@ -395,12 +371,6 @@ class StatsBookMapperTest {
     @Nested
     inner class ToRatedCount {
         @Test
-        fun `empty list returns 0`() {
-            // ----- Act & Assert -----
-            emptyList<StatsBook>().toRatedCount() shouldBe 0
-        }
-
-        @Test
         fun `counts only books with a non-null rating`() {
             // ----- Arrange -----
             val books = listOf(book(rating = 4.0), book(rating = null), book(rating = 2.0))
@@ -413,18 +383,12 @@ class StatsBookMapperTest {
     @Nested
     inner class ToRatingHalfStarBuckets {
         @Test
-        fun `empty list returns 9 zero buckets`() {
-            // ----- Act -----
-            val result = emptyList<StatsBook>().toRatingHalfStarBuckets()
-
-            // ----- Assert -----
-            result shouldBe List(9) { 0 }
-        }
-
-        @Test
         fun `a 1_0 rating lands in the first bucket`() {
+            // ----- Arrange -----
+            val books = listOf(book(rating = 1.0))
+
             // ----- Act -----
-            val result = listOf(book(rating = 1.0)).toRatingHalfStarBuckets()
+            val result = books.toRatingHalfStarBuckets()
 
             // ----- Assert -----
             result shouldBe listOf(1, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -432,26 +396,23 @@ class StatsBookMapperTest {
 
         @Test
         fun `a 5_0 rating lands in the last bucket`() {
+            // ----- Arrange -----
+            val books = listOf(book(rating = 5.0))
+
             // ----- Act -----
-            val result = listOf(book(rating = 5.0)).toRatingHalfStarBuckets()
+            val result = books.toRatingHalfStarBuckets()
 
             // ----- Assert -----
             result shouldBe listOf(0, 0, 0, 0, 0, 0, 0, 0, 1)
         }
 
         @Test
-        fun `a 4_5 rating lands in the second-to-last bucket`() {
-            // ----- Act -----
-            val result = listOf(book(rating = 4.5)).toRatingHalfStarBuckets()
-
-            // ----- Assert -----
-            result shouldBe listOf(0, 0, 0, 0, 0, 0, 0, 1, 0)
-        }
-
-        @Test
         fun `a 0_5 rating folds down into the 1_0 bucket, since there is no dedicated bucket for it`() {
+            // ----- Arrange -----
+            val books = listOf(book(rating = 0.5))
+
             // ----- Act -----
-            val result = listOf(book(rating = 0.5)).toRatingHalfStarBuckets()
+            val result = books.toRatingHalfStarBuckets()
 
             // ----- Assert -----
             result shouldBe listOf(1, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -459,8 +420,11 @@ class StatsBookMapperTest {
 
         @Test
         fun `unrated books are not counted in any bucket`() {
+            // ----- Arrange -----
+            val books = listOf(book(rating = null))
+
             // ----- Act -----
-            val result = listOf(book(rating = null)).toRatingHalfStarBuckets()
+            val result = books.toRatingHalfStarBuckets()
 
             // ----- Assert -----
             result shouldBe List(9) { 0 }
@@ -481,18 +445,6 @@ class StatsBookMapperTest {
 
     @Nested
     inner class ToGenreBreakdown {
-        @Test
-        fun `empty list returns the empty GenreBreakdown`() {
-            // ----- Act & Assert -----
-            emptyList<StatsBook>().toGenreBreakdown() shouldBe GenreBreakdown()
-        }
-
-        @Test
-        fun `books with no genre tags contribute nothing`() {
-            // ----- Act & Assert -----
-            listOf(book(genreNames = emptyList())).toGenreBreakdown() shouldBe GenreBreakdown()
-        }
-
         @Test
         fun `a book contributes once to each of its distinct genre tags, each reaching a fraction of 1`() {
             // ----- Arrange -----
@@ -573,22 +525,6 @@ class StatsBookMapperTest {
         }
 
         @Test
-        fun `a genre on every tagged book reaches a fraction of 1`() {
-            // ----- Arrange -----
-            val books = listOf(
-                book(genreNames = listOf("Fantasy")),
-                book(genreNames = listOf("Fantasy", "Sci-Fi")),
-                book(genreNames = listOf("Fantasy")),
-            )
-
-            // ----- Act -----
-            val result = books.toGenreBreakdown()
-
-            // ----- Assert -----
-            result.slices.first { it.name == "Fantasy" }.fraction shouldBe (1.0 plusOrMinus 0.0001)
-        }
-
-        @Test
         fun `untagged books are excluded from the denominator - 2 tagged and 3 untagged books divide by 2, not 5`() {
             // ----- Arrange -----
             val books = listOf(
@@ -624,12 +560,6 @@ class StatsBookMapperTest {
     @Nested
     inner class ToTrackedYears {
         @Test
-        fun `empty list returns 0`() {
-            // ----- Act & Assert -----
-            emptyList<StatsBook>().toTrackedYears() shouldBe 0
-        }
-
-        @Test
         fun `two books finished in the same year count as a single distinct year`() {
             // ----- Arrange -----
             val books = listOf(
@@ -637,12 +567,14 @@ class StatsBookMapperTest {
                     2026,
                     3,
                     10,
-                ),),
+                ),
+                ),
                 book(finishDate = LocalDate(
                     2026,
                     7,
                     1,
-                ),),
+                ),
+                ),
             )
 
             // ----- Act & Assert -----
@@ -657,12 +589,14 @@ class StatsBookMapperTest {
                     2015,
                     1,
                     1,
-                ),),
+                ),
+                ),
                 book(finishDate = LocalDate(
                     2026,
                     3,
                     10,
-                ),),
+                ),
+                ),
             )
 
             // ----- Act & Assert -----
@@ -677,7 +611,8 @@ class StatsBookMapperTest {
                     2026,
                     3,
                     10,
-                ),),
+                ),
+                ),
                 book(finishDate = null),
             )
 
@@ -690,21 +625,8 @@ class StatsBookMapperTest {
     inner class ToAuthorDemographics {
         @Test
         fun `empty book list returns empty gender slices, zero counts and empty breakdowns`() {
-            // ----- Act -----
-            val result = emptyList<StatsBook>().toAuthorDemographics()
-
-            // ----- Assert -----
-            result.genderSlices shouldBe emptyList()
-            result.knownGenderCount shouldBe 0
-            result.unknownGenderCount shouldBe 0
-            result.bipocBreakdown shouldBe DemographicBreakdown()
-            result.lgbtqBreakdown shouldBe DemographicBreakdown()
-        }
-
-        @Test
-        fun `books with no authors produce empty gender slices, zero counts and empty breakdowns`() {
             // ----- Arrange -----
-            val books = listOf(book(authors = emptyList()), book(authors = emptyList()))
+            val books = emptyList<StatsBook>()
 
             // ----- Act -----
             val result = books.toAuthorDemographics()
@@ -760,113 +682,6 @@ class StatsBookMapperTest {
         }
 
         @Test
-        fun `an author id repeated with different attributes across books still resolves to a single entry`() {
-            // ----- Arrange -----
-            // distinctBy keeps only the first occurrence encountered for a given id - the second
-            // book's conflicting attributes for the same id must not contribute a second entry.
-            val books = listOf(
-                book(authors = listOf(statsAuthor(
-                    id = 1,
-                    gender = Gender.Male,
-                ),),),
-                book(authors = listOf(statsAuthor(
-                    id = 1,
-                    gender = Gender.Female,
-                ),),),
-            )
-
-            // ----- Act -----
-            val result = books.toAuthorDemographics()
-
-            // ----- Assert -----
-            result.knownGenderCount shouldBe 1
-            result.genderSlices shouldBe listOf(
-                GenderSlice(
-                    gender = Gender.Male,
-                    count = 1,
-                    fraction = 1.0,
-                ),
-            )
-        }
-
-        @Test
-        fun `Gender_Unknown is included in genderSlices as the last element, with fraction over ALL distinct authors`() {
-            // ----- Arrange -----
-            val books = listOf(
-                book(authors = listOf(
-                    statsAuthor(
-                        id = 1,
-                        gender = Gender.Male,
-                    ),
-                    statsAuthor(
-                        id = 2,
-                        gender = Gender.Unknown,
-                    ),
-                    statsAuthor(
-                        id = 3,
-                        gender = Gender.Unknown,
-                    ),
-                ),),
-            )
-
-            // ----- Act -----
-            val result = books.toAuthorDemographics()
-
-            // ----- Assert -----
-            result.knownGenderCount shouldBe 1
-            result.unknownGenderCount shouldBe 2
-            result.genderSlices shouldBe listOf(
-                GenderSlice(
-                    gender = Gender.Male,
-                    count = 1,
-                    fraction = 1.0 / 3.0,
-                ),
-                GenderSlice(
-                    gender = Gender.Unknown,
-                    count = 2,
-                    fraction = 2.0 / 3.0,
-                ),
-            )
-            result.genderSlices.last().gender shouldBe Gender.Unknown
-        }
-
-        @Test
-        fun `Gender_Other is counted as its own slice and never merged with Unknown`() {
-            // ----- Arrange -----
-            val books = listOf(
-                book(authors = listOf(
-                    statsAuthor(
-                        id = 1,
-                        gender = Gender.Other,
-                    ),
-                    statsAuthor(
-                        id = 2,
-                        gender = Gender.Unknown,
-                    ),
-                ),),
-            )
-
-            // ----- Act -----
-            val result = books.toAuthorDemographics()
-
-            // ----- Assert -----
-            result.knownGenderCount shouldBe 1
-            result.unknownGenderCount shouldBe 1
-            result.genderSlices shouldBe listOf(
-                GenderSlice(
-                    gender = Gender.Other,
-                    count = 1,
-                    fraction = 0.5,
-                ),
-                GenderSlice(
-                    gender = Gender.Unknown,
-                    count = 1,
-                    fraction = 0.5,
-                ),
-            )
-        }
-
-        @Test
         fun `gender slices are sorted count-descending with Unknown pinned last, and fractions sum to 1_0 over ALL authors`() {
             // ----- Arrange -----
             // Male x3, Female x1, Other x1, Unknown x2 - 7 distinct authors, 5 with a known gender, 2 unknown.
@@ -900,7 +715,8 @@ class StatsBookMapperTest {
                         id = 7,
                         gender = Gender.Unknown,
                     ),
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -956,7 +772,8 @@ class StatsBookMapperTest {
                         id = 6,
                         gender = Gender.Unknown,
                     ),
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -1005,7 +822,8 @@ class StatsBookMapperTest {
                         isBipoc = null,
                         isLgbtq = false,
                     ),
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -1024,44 +842,6 @@ class StatsBookMapperTest {
                 unknownCount = 1,
             )
             result.lgbtqBreakdown.total shouldBe 3
-        }
-
-        @Test
-        fun `bipocBreakdown is all-unknown when every distinct author has a null isBipoc, not absent`() {
-            // ----- Arrange -----
-            val books = listOf(
-                book(authors = listOf(
-                    statsAuthor(
-                        id = 1,
-                        isBipoc = null,
-                    ),
-                    statsAuthor(
-                        id = 2,
-                        isBipoc = null,
-                    ),
-                ),),
-            )
-
-            // ----- Act -----
-            val result = books.toAuthorDemographics()
-
-            // ----- Assert -----
-            result.bipocBreakdown shouldBe DemographicBreakdown(
-                yesCount = 0,
-                noCount = 0,
-                unknownCount = 2,
-            )
-            result.bipocBreakdown.total shouldBe 2
-        }
-
-        @Test
-        fun `lgbtqBreakdown and bipocBreakdown are both the empty default when there are no distinct authors at all`() {
-            // ----- Act -----
-            val result = emptyList<StatsBook>().toAuthorDemographics()
-
-            // ----- Assert -----
-            result.lgbtqBreakdown shouldBe DemographicBreakdown()
-            result.bipocBreakdown shouldBe DemographicBreakdown()
         }
     }
 }

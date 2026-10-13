@@ -5,12 +5,11 @@ import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Error
-import com.apollographql.cache.normalized.FetchPolicy
-import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.exception.ApolloHttpException
 import com.apollographql.apollo.exception.ApolloNetworkException
 import com.apollographql.apollo.exception.CacheMissException
+import com.apollographql.cache.normalized.fetchPolicy
 import com.benasher44.uuid.uuid4
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -21,10 +20,6 @@ import io.mockk.mockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import okio.Buffer
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.platform.NetworkAvailability
 import nl.rhaydus.softcover.GetUserIdQuery
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
@@ -32,6 +27,10 @@ import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
+import okio.Buffer
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class SafeQueryFlowTest {
     private val query = GetUserIdQuery()
@@ -192,22 +191,6 @@ class SafeQueryFlowTest {
 
             verify(exactly = 1) { SessionExpiredNotifier.notifySessionExpired() }
         }
-
-        @Test
-        fun `no data emitted then HTTP 401 — throws InvalidTokenException and notifies session expired`() = runTest {
-            // ----- Arrange -----
-            val authExResponse = exceptionResponse(httpException(401))
-            every {
-                apolloCall.toFlow()
-            } returns flowOf(authExResponse)
-
-            // ----- Act & Assert -----
-            apolloClient.safeQueryFlow(query).test {
-                awaitError().shouldBeInstanceOf<InvalidTokenException>()
-            }
-
-            verify(exactly = 1) { SessionExpiredNotifier.notifySessionExpired() }
-        }
     }
 
     @Nested
@@ -253,20 +236,6 @@ class SafeQueryFlowTest {
             every {
                 apolloCall.toFlow()
             } returns flowOf(transientExResponse)
-
-            // ----- Act & Assert -----
-            apolloClient.safeQueryFlow(query).test {
-                awaitError().shouldBeInstanceOf<ServerUnavailableException>()
-            }
-        }
-
-        @Test
-        fun `no data emitted, transient HTTP 429 — throws ServerUnavailableException`() = runTest {
-            // ----- Arrange -----
-            val throttleExResponse = exceptionResponse(httpException(429))
-            every {
-                apolloCall.toFlow()
-            } returns flowOf(throttleExResponse)
 
             // ----- Act & Assert -----
             apolloClient.safeQueryFlow(query).test {

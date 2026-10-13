@@ -123,7 +123,8 @@ class OfflineUserBookSyncImplTest {
             syncImpl.enqueueProgressUpdate(
                 book = book,
                 newPage = 150,
-                newSeconds = null,
+                newSeconds = 120,
+                actionAt = "2026-07-21T21:00:00Z",
             )
 
             // ----- Assert -----
@@ -134,102 +135,8 @@ class OfflineUserBookSyncImplTest {
                             write.userBookId == 10 &&
                             write.userBookReadId == 20 &&
                             write.progressPages == 150 &&
-                            write.progressSeconds == null
-                    },
-                )
-            }
-        }
-
-        @Test
-        fun `non-null newSeconds — progressSeconds maps through to the queued write`() = runTest {
-            // ----- Arrange -----
-            val userBook = stubUserBook(id = 10)
-            val userBookRead = stubUserBookRead(
-                id = 20,
-                currentPage = 100,
-            )
-            val book = stubBook(
-                userBook = userBook,
-                userBookRead = userBookRead,
-            )
-
-            // ----- Act -----
-            syncImpl.enqueueProgressUpdate(
-                book = book,
-                newPage = 100,
-                newSeconds = 120,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
-                        write.kind == PendingUserBookWriteKind.UPDATE_PROGRESS &&
-                            write.progressSeconds == 120
-                    },
-                )
-            }
-        }
-
-        @Test
-        fun `non-null actionAt — actionAt maps through to the queued write`() = runTest {
-            // ----- Arrange -----
-            val userBook = stubUserBook(id = 10)
-            val userBookRead = stubUserBookRead(
-                id = 20,
-                currentPage = 100,
-            )
-            val book = stubBook(
-                userBook = userBook,
-                userBookRead = userBookRead,
-            )
-            val actionAt = "2026-07-21T21:00:00Z"
-
-            // ----- Act -----
-            syncImpl.enqueueProgressUpdate(
-                book = book,
-                newPage = 150,
-                newSeconds = null,
-                actionAt = actionAt,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
-                        write.kind == PendingUserBookWriteKind.UPDATE_PROGRESS &&
-                            write.actionAt == actionAt
-                    },
-                )
-            }
-        }
-
-        @Test
-        fun `null actionAt — actionAt is null on the queued write`() = runTest {
-            // ----- Arrange -----
-            val userBook = stubUserBook(id = 10)
-            val userBookRead = stubUserBookRead(
-                id = 20,
-                currentPage = 100,
-            )
-            val book = stubBook(
-                userBook = userBook,
-                userBookRead = userBookRead,
-            )
-
-            // ----- Act -----
-            syncImpl.enqueueProgressUpdate(
-                book = book,
-                newPage = 150,
-                newSeconds = null,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
-                        write.kind == PendingUserBookWriteKind.UPDATE_PROGRESS &&
-                            write.actionAt == null
+                            write.progressSeconds == 120 &&
+                            write.actionAt == "2026-07-21T21:00:00Z"
                     },
                 )
             }
@@ -304,7 +211,10 @@ class OfflineUserBookSyncImplTest {
             )
 
             // ----- Act -----
-            syncImpl.enqueueMarkAsRead(book = book)
+            syncImpl.enqueueMarkAsRead(
+                book = book,
+                actionAt = "2026-07-21T21:00:00Z",
+            )
 
             // ----- Assert -----
             coVerify {
@@ -314,65 +224,8 @@ class OfflineUserBookSyncImplTest {
                             write.userBookId == 10 &&
                             write.userBookReadId == 20 &&
                             write.progressPages == 300 &&
-                            write.progressSeconds == userBookRead.currentSeconds
-                    },
-                )
-            }
-        }
-
-        @Test
-        fun `non-null actionAt — actionAt maps through to the queued write`() = runTest {
-            // ----- Arrange -----
-            val userBook = stubUserBook(id = 10)
-            val userBookRead = stubUserBookRead(
-                id = 20,
-                currentPage = 300,
-            )
-            val book = stubBook(
-                userBook = userBook,
-                userBookRead = userBookRead,
-            )
-            val actionAt = "2026-07-21T21:00:00Z"
-
-            // ----- Act -----
-            syncImpl.enqueueMarkAsRead(
-                book = book,
-                actionAt = actionAt,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
-                        write.kind == PendingUserBookWriteKind.MARK_AS_READ &&
-                            write.actionAt == actionAt
-                    },
-                )
-            }
-        }
-
-        @Test
-        fun `null actionAt — actionAt is null on the queued write`() = runTest {
-            // ----- Arrange -----
-            val userBook = stubUserBook(id = 10)
-            val userBookRead = stubUserBookRead(
-                id = 20,
-                currentPage = 300,
-            )
-            val book = stubBook(
-                userBook = userBook,
-                userBookRead = userBookRead,
-            )
-
-            // ----- Act -----
-            syncImpl.enqueueMarkAsRead(book = book)
-
-            // ----- Assert -----
-            coVerify {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
-                        write.kind == PendingUserBookWriteKind.MARK_AS_READ &&
-                            write.actionAt == null
+                            write.progressSeconds == userBookRead.currentSeconds &&
+                            write.actionAt == "2026-07-21T21:00:00Z"
                     },
                 )
             }

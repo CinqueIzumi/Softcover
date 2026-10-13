@@ -1,20 +1,18 @@
 package nl.rhaydus.softcover.feature.book_detail.di
 
-import org.koin.dsl.bind
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
-import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
-import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.domain.di.currentDateModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
 import nl.rhaydus.softcover.core.personal.di.personalModule
-import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
+import nl.rhaydus.softcover.core.presentation.di.presentationModule
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSourceImpl
@@ -36,16 +34,40 @@ import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCa
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDeadlineCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDetailCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CalloutsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ChooseListsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CoverModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CurrentUserCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyleCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionCardsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSelectionCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ExternalLinksCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.InProgressCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LensToggleCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.OfflineStateCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPaceForecastCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReviewsSummaryCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShareCardsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShelveControlHeaderCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShelveReadingStatusCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagChipModelsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorChipModelsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagNamingFieldCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagSuggestionsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagVocabularySyncCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UnreleasedBadgeCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserBooksFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserListsFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserTagsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.VerdictReviewCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.VerdictSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
 val bookDetailModule = module {
     includes(
@@ -58,20 +80,43 @@ val bookDetailModule = module {
         databaseModule,
         apolloModule,
         personalModule,
-        designSystemModule,
+        presentationModule,
+        currentDateModule,
         dispatcherModule,
     )
 
     factory { UserBooksFlowCollector() } bind BookDetailCollector::class
+    factory { CoverModelsCollector() } bind BookDetailCollector::class
     factory { DateStyleCollector() } bind BookDetailCollector::class
+    factory { OfflineStateCollector() } bind BookDetailCollector::class
     factory { BookDeadlineCollector() } bind BookDetailCollector::class
+    factory { ReviewsSummaryCollector() } bind BookDetailCollector::class
+    factory { UnreleasedBadgeCollector() } bind BookDetailCollector::class
+    factory { ExternalLinksCollector() } bind BookDetailCollector::class
+    factory { CalloutsCollector() } bind BookDetailCollector::class
+    factory { EditionSelectionCollector() } bind BookDetailCollector::class
+    factory { EditionCardsCollector() } bind BookDetailCollector::class
     factory { UserListsFlowCollector() } bind BookDetailCollector::class
     factory { CurrentUserCollector() } bind BookDetailCollector::class
     factory { UserTagsCollector() } bind BookDetailCollector::class
     factory { LastUsedProgressUnitCollector() } bind BookDetailCollector::class
     factory { ReadingPaceForecastCollector() } bind BookDetailCollector::class
     factory { TagSuggestionsCollector() } bind BookDetailCollector::class
+    factory { TagChipModelsCollector() } bind BookDetailCollector::class
+    factory { TagEditorChipModelsCollector() } bind BookDetailCollector::class
+    factory { TagNamingFieldCollector() } bind BookDetailCollector::class
     factory { TagVocabularySyncCollector() } bind BookDetailCollector::class
+    factory { VerdictReviewCollector() } bind BookDetailCollector::class
+    factory { VerdictSheetCollector() } bind BookDetailCollector::class
+    factory { InProgressCollector() } bind BookDetailCollector::class
+    factory { ShelveReadingStatusCollector() } bind BookDetailCollector::class
+    factory { ShareCardsCollector() } bind BookDetailCollector::class
+    factory { TagEditorSheetCollector() } bind BookDetailCollector::class
+    factory { EditionSheetCollector() } bind BookDetailCollector::class
+    factory { ProgressSheetCollector() } bind BookDetailCollector::class
+    factory { ChooseListsCollector() } bind BookDetailCollector::class
+    factory { ShelveControlHeaderCollector() } bind BookDetailCollector::class
+    factory { LensToggleCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())
@@ -142,19 +187,22 @@ val bookDetailModule = module {
         BookDetailScreenScreenModel(
             bookId = params.get(),
             initialCover = params.getOrNull<BookInitialCover>(),
+            transitionSurface = params.getOrNull<String>(),
             fetchBookByIdUseCase = get(),
             getEditionsByBookIdUseCase = get(),
             updateBookEditionUseCase = get(),
             recordBookProgressUseCase = get(),
-            getAllUserBooksUseCase = get(),
+            observeUserBookUseCase = get(),
             markBookAsWantToReadUseCase = get(),
             markBookAsReadingUseCase = get(),
-            removeBookFromLibraryUseCase = get(),
+            undoableBookRemover = get(),
             markBookAsReadUseCase = get(),
             saveBookVerdictUseCase = get(),
             flows = getAll(),
+            offlineCopy = get(),
             appDispatchers = get(),
             getDateStyleAsFlowUseCase = get(),
+            observeCurrentDateUseCase = get(),
             setEditionAsOwnedUseCase = get(),
             getAllUserListsUseCase = get(),
             addBookToListUseCase = get(),

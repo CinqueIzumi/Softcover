@@ -12,7 +12,9 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":core:domain"))
             implementation(project(":core:identity"))
+            api(project(":core:component"))
             implementation(project(":core:designsystem"))
+            implementation(project(":core:presentation"))
 
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)

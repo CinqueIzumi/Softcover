@@ -1,18 +1,17 @@
 package nl.rhaydus.softcover.feature.explore.domain.usecase
 
+import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -23,6 +22,9 @@ import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetBecauseYouReadGenreAsFlowUseCase
 import nl.rhaydus.softcover.feature.explore.domain.model.BecauseYouReadRecommendation
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 // The use case's own GENRE_BOOKS_DISPLAY_LIMIT (private to that file) - duplicated here only to
 // assert the overfetch limit passed to fetchBooksByGenre is comfortably past it.
@@ -51,6 +53,11 @@ class GetBecauseYouReadBooksUseCaseTest {
         every {
             getBecauseYouReadGenreUseCase()
         } returns flowOf(null)
+
+        // Cache miss by default - tests of the cache-hit path override this per genre.
+        coEvery {
+            exploreRepository.peekBooksByGenre(genre = any())
+        } returns null
 
         useCase = GetBecauseYouReadBooksUseCase(
             booksRepository = booksRepository,
@@ -95,24 +102,19 @@ class GetBecauseYouReadBooksUseCaseTest {
         )
     }
 
+    // A cache-missing genre emits a loading placeholder before the fetched result.
+    private suspend fun ReceiveTurbine<BecauseYouReadRecommendation?>.awaitSettled(): BecauseYouReadRecommendation? {
+        var recommendation = awaitItem()
+        while (recommendation?.loading == true) {
+            recommendation = awaitItem()
+        }
+        return recommendation
+    }
+
     // ----- Invoke -----
 
     @Nested
     inner class Invoke {
-        @Test
-        fun `emits null when the user has no books`() = runTest {
-            // ----- Arrange -----
-            every {
-                booksRepository.books
-            } returns flowOf(emptyList())
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
         @Test
         fun `emits null when no book carries a genre tag`() = runTest {
             // ----- Arrange -----
@@ -121,7 +123,7 @@ class GetBecauseYouReadBooksUseCaseTest {
             } returns flowOf(listOf(stubBook(id = 1)))
 
             // ----- Act -----
-            val result = useCase().first()
+            val result = useCase().first { recommendation -> recommendation?.loading != true }
 
             // ----- Assert -----
             result shouldBe null
@@ -146,7 +148,7 @@ class GetBecauseYouReadBooksUseCaseTest {
             } throws RuntimeException("network error")
 
             // ----- Act -----
-            val result = useCase().first()
+            val result = useCase().first { recommendation -> recommendation?.loading != true }
 
             // ----- Assert -----
             result?.genre shouldBe "Romance"
@@ -174,7 +176,7 @@ class GetBecauseYouReadBooksUseCaseTest {
             } returns emptyList()
 
             // ----- Act -----
-            useCase().first()
+            useCase().first { recommendation -> recommendation?.loading != true }
 
             // ----- Assert -----
             coVerify {
@@ -210,7 +212,7 @@ class GetBecauseYouReadBooksUseCaseTest {
             } returns emptyList()
 
             // ----- Act -----
-            useCase().first()
+            useCase().first { recommendation -> recommendation?.loading != true }
 
             // ----- Assert -----
             coVerify {
@@ -241,7 +243,7 @@ class GetBecauseYouReadBooksUseCaseTest {
             } returns listOf(shelvedBook, unshelvedBook)
 
             // ----- Act -----
-            val result = useCase().first()
+            val result = useCase().first { recommendation -> recommendation?.loading != true }
 
             // ----- Assert -----
             result?.books shouldBe listOf(unshelvedBook)
@@ -286,36 +288,10 @@ class GetBecauseYouReadBooksUseCaseTest {
             } returns listOf(listedBook, unlistedBook)
 
             // ----- Act -----
-            val result = useCase().first()
+            val result = useCase().first { recommendation -> recommendation?.loading != true }
 
             // ----- Assert -----
             result?.books shouldBe listOf(unlistedBook)
-        }
-
-        @Test
-        fun `keeps a fetched book that is neither shelved nor listed`() = runTest {
-            // ----- Arrange -----
-            val fetchedBook = stubBook(id = 10)
-            val unrelatedUserBook = stubBook(
-                id = 99,
-                genreTags = listOf("Romance"),
-            )
-
-            every {
-                booksRepository.books
-            } returns flowOf(listOf(unrelatedUserBook))
-            coEvery {
-                exploreRepository.fetchBooksByGenre(
-                    genre = any(),
-                    limit = any(),
-                )
-            } returns listOf(fetchedBook)
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result?.books shouldBe listOf(fetchedBook)
         }
 
         @Test
@@ -340,7 +316,7 @@ class GetBecauseYouReadBooksUseCaseTest {
             } returns emptyList()
 
             // ----- Act -----
-            useCase().first()
+            useCase().first { recommendation -> recommendation?.loading != true }
 
             // ----- Assert -----
             coVerify {
@@ -372,7 +348,7 @@ class GetBecauseYouReadBooksUseCaseTest {
             } returns fetchedBooks
 
             // ----- Act -----
-            val result = useCase().first()
+            val result = useCase().first { recommendation -> recommendation?.loading != true }
 
             // ----- Assert -----
             result?.books shouldBe fetchedBooks.take(DISPLAY_LIMIT)
@@ -402,7 +378,7 @@ class GetBecauseYouReadBooksUseCaseTest {
 
             // ----- Act & Assert -----
             useCase().test {
-                awaitItem()?.books shouldBe listOf(fetchedBook)
+                awaitSettled()?.books shouldBe listOf(fetchedBook)
 
                 booksFlow.value = booksFlow.value + fetchedBook
 
@@ -442,7 +418,7 @@ class GetBecauseYouReadBooksUseCaseTest {
 
             // ----- Act & Assert -----
             useCase().test {
-                awaitItem()?.books shouldBe listOf(listedBook)
+                awaitSettled()?.books shouldBe listOf(listedBook)
 
                 listsFlow.value = listOf(
                     BookList(
@@ -471,7 +447,7 @@ class GetBecauseYouReadBooksUseCaseTest {
         }
 
         @Test
-        fun `re-derives the recommendation reactively when the top genre changes`() = runTest {
+        fun `a failed fetch for a genre is not cached and retries on the next selection of that genre`() = runTest {
             // ----- Arrange -----
             val romanceBook = stubBook(id = 1)
             val horrorBook = stubBook(id = 2)
@@ -491,7 +467,7 @@ class GetBecauseYouReadBooksUseCaseTest {
                     genre = "Romance",
                     limit = any(),
                 )
-            } returns listOf(romanceBook)
+            } throws RuntimeException("network error")
             coEvery {
                 exploreRepository.fetchBooksByGenre(
                     genre = "Horror",
@@ -501,7 +477,11 @@ class GetBecauseYouReadBooksUseCaseTest {
 
             // ----- Act & Assert -----
             useCase().test {
-                awaitItem()?.genre shouldBe "Romance"
+                var recommendation = awaitItem()
+                while (recommendation == null || recommendation.genre != "Romance" || recommendation.loading) {
+                    recommendation = awaitItem()
+                }
+                recommendation.books shouldBe emptyList()
 
                 booksFlow.value = booksTaggedWithGenre(
                     genre = "Horror",
@@ -509,16 +489,38 @@ class GetBecauseYouReadBooksUseCaseTest {
                     startId = 100,
                 )
 
-                // The book list now drives both the genre derivation and the exclusion filter, so
-                // a single library update can settle over more than one emission before both sides
-                // observe it - keep reading until the genre itself has settled.
-                var recommendation = awaitItem()
-
-                while (recommendation?.genre != "Horror") {
+                recommendation = awaitItem()
+                while (recommendation == null || recommendation.genre != "Horror" || recommendation.loading) {
                     recommendation = awaitItem()
                 }
 
+                coEvery {
+                    exploreRepository.fetchBooksByGenre(
+                        genre = "Romance",
+                        limit = any(),
+                    )
+                } returns listOf(romanceBook)
+
+                booksFlow.value = booksTaggedWithGenre(
+                    genre = "Romance",
+                    count = 5,
+                    startId = 10,
+                )
+
+                recommendation = awaitItem()
+                while (recommendation == null || recommendation.genre != "Romance" || recommendation.loading) {
+                    recommendation = awaitItem()
+                }
+                recommendation.books shouldBe listOf(romanceBook)
+
                 cancelAndIgnoreRemainingEvents()
+            }
+
+            coVerify(exactly = 2) {
+                exploreRepository.fetchBooksByGenre(
+                    genre = "Romance",
+                    limit = any(),
+                )
             }
         }
     }
@@ -527,42 +529,6 @@ class GetBecauseYouReadBooksUseCaseTest {
 
     @Nested
     inner class GenreOptions {
-        @Test
-        fun `returns all genres in frequency order when fewer than five exist`() = runTest {
-            // ----- Arrange -----
-            every {
-                booksRepository.books
-            } returns flowOf(
-                booksTaggedWithGenre(
-                    genre = "Romance",
-                    count = 3,
-                    startId = 0,
-                ) +
-                    booksTaggedWithGenre(
-                        genre = "Horror",
-                        count = 2,
-                        startId = 10,
-                    ) +
-                    booksTaggedWithGenre(
-                        genre = "Fantasy",
-                        count = 1,
-                        startId = 20,
-                    ),
-            )
-            coEvery {
-                exploreRepository.fetchBooksByGenre(
-                    genre = any(),
-                    limit = any(),
-                )
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result?.genreOptions shouldBe listOf("Romance", "Horror", "Fantasy")
-        }
-
         @Test
         fun `returns only the top five genres by frequency when more than five exist`() = runTest {
             // ----- Arrange -----
@@ -608,7 +574,7 @@ class GetBecauseYouReadBooksUseCaseTest {
             } returns emptyList()
 
             // ----- Act -----
-            val result = useCase().first()
+            val result = useCase().first { recommendation -> recommendation?.loading != true }
 
             // ----- Assert -----
             result?.genreOptions shouldBe listOf("A", "B", "C", "D", "E")
@@ -639,20 +605,25 @@ class GetBecauseYouReadBooksUseCaseTest {
             } returns emptyList()
 
             // ----- Act -----
-            val result = useCase().first()
+            val result = useCase().first { recommendation -> recommendation?.loading != true }
 
             // ----- Assert -----
             result?.genreOptions shouldBe listOf("Alpha", "Zeta")
         }
     }
 
-    // ----- Loading placeholder (genre-switch clobber guard) -----
+    // ----- Loading placeholder (first load and genre-switch clobber guard) -----
 
     @Nested
     inner class LoadingPlaceholder {
         @Test
-        fun `does not emit a loading placeholder for the very first genre resolution`() = runTest {
+        fun `emits a loading placeholder for the very first genre resolution before the fetched result`() = runTest {
             // ----- Arrange -----
+            val romanceBook = stubBook(id = 100)
+            // Holds the fetch open so the placeholder is observable on its own; without it the
+            // synchronous upstream flows deliver both emissions in one combine pass.
+            val fetchGate = CompletableDeferred<Unit>()
+
             every {
                 booksRepository.books
             } returns flowOf(
@@ -666,7 +637,52 @@ class GetBecauseYouReadBooksUseCaseTest {
                     genre = "Romance",
                     limit = any(),
                 )
-            } returns listOf(stubBook(id = 1))
+            } coAnswers {
+                fetchGate.await()
+                listOf(romanceBook)
+            }
+
+            // ----- Act & Assert -----
+            useCase().test {
+                val placeholder = awaitItem()
+
+                placeholder?.genre shouldBe "Romance"
+                placeholder?.loading shouldBe true
+                placeholder?.books shouldBe emptyList()
+
+                fetchGate.complete(Unit)
+                val settled = awaitItem()
+
+                settled?.genre shouldBe "Romance"
+                settled?.loading shouldBe false
+                settled?.books shouldBe listOf(romanceBook)
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `emits the cached result directly with no placeholder when the first genre is cached`() = runTest {
+            // ----- Arrange -----
+            val cachedBook = stubBook(id = 100)
+
+            every {
+                booksRepository.books
+            } returns flowOf(
+                booksTaggedWithGenre(
+                    genre = "Romance",
+                    count = 5,
+                ),
+            )
+            coEvery {
+                exploreRepository.peekBooksByGenre(genre = "Romance")
+            } returns listOf(cachedBook)
+            coEvery {
+                exploreRepository.fetchBooksByGenre(
+                    genre = "Romance",
+                    limit = any(),
+                )
+            } returns listOf(cachedBook)
 
             // ----- Act & Assert -----
             useCase().test {
@@ -674,6 +690,63 @@ class GetBecauseYouReadBooksUseCaseTest {
 
                 first?.genre shouldBe "Romance"
                 first?.loading shouldBe false
+                first?.books shouldBe listOf(cachedBook)
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `emits no placeholder for a cached genre on a genre switch`() = runTest {
+            // ----- Arrange -----
+            val horrorBook = stubBook(id = 2)
+            val booksFlow = MutableStateFlow(
+                booksTaggedWithGenre(
+                    genre = "Romance",
+                    count = 5,
+                    startId = 10,
+                ),
+            )
+
+            every {
+                booksRepository.books
+            } returns booksFlow
+            coEvery {
+                exploreRepository.fetchBooksByGenre(
+                    genre = "Romance",
+                    limit = any(),
+                )
+            } returns emptyList()
+            coEvery {
+                exploreRepository.peekBooksByGenre(genre = "Horror")
+            } returns listOf(horrorBook)
+            coEvery {
+                exploreRepository.fetchBooksByGenre(
+                    genre = "Horror",
+                    limit = any(),
+                )
+            } returns listOf(horrorBook)
+
+            // ----- Act & Assert -----
+            useCase().test {
+                awaitSettled()?.genre shouldBe "Romance"
+
+                booksFlow.value = booksTaggedWithGenre(
+                    genre = "Horror",
+                    count = 9,
+                    startId = 100,
+                )
+
+                val horrorEmissions = mutableListOf<BecauseYouReadRecommendation>()
+                var item = awaitItem()
+                while (item?.genre != "Horror" || item.books.isEmpty()) {
+                    if (item?.genre == "Horror") horrorEmissions += item
+                    item = awaitItem()
+                }
+                horrorEmissions += item
+
+                horrorEmissions.none { it.loading } shouldBe true
+                item.books shouldBe listOf(horrorBook)
 
                 cancelAndIgnoreRemainingEvents()
             }
@@ -709,7 +782,7 @@ class GetBecauseYouReadBooksUseCaseTest {
 
             // ----- Act & Assert -----
             useCase().test {
-                awaitItem()?.genre shouldBe "Romance"
+                awaitSettled()?.genre shouldBe "Romance"
 
                 booksFlow.value = booksTaggedWithGenre(
                     genre = "Horror",

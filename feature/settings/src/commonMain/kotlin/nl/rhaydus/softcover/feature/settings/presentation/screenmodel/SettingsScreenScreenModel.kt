@@ -1,12 +1,9 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
-import kotlin.time.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
-import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.appupdate.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
@@ -41,6 +38,7 @@ internal class SettingsScreenScreenModel(
     private val setShelfSwipeEnabledUseCase: SetShelfSwipeEnabledUseCase,
     private val getUiScaleAsFlowUseCase: GetUiScaleAsFlowUseCase,
     private val setUiScaleUseCase: SetUiScaleUseCase,
+    private val observeAppUpdateStateUseCase: ObserveAppUpdateStateUseCase,
     appVersionProvider: AppVersionProvider,
     appDispatchers: AppDispatchers,
     flows: List<SettingsCollector>,
@@ -48,9 +46,6 @@ internal class SettingsScreenScreenModel(
     initialState = SettingsScreenUiState(
         appVersionName = appVersionProvider.versionInfo.name,
         appVersionCode = appVersionProvider.versionInfo.code,
-        dateStyleExamples = DateStyle.entries.associateWith {
-            it.format(Clock.System.todayIn(TimeZone.currentSystemDefault()))
-        },
     ),
     initialLocalVariables = SettingsLocalVariables(),
     initializers = flows,
@@ -69,6 +64,7 @@ internal class SettingsScreenScreenModel(
         setShelfSwipeEnabledUseCase = setShelfSwipeEnabledUseCase,
         getUiScaleAsFlowUseCase = getUiScaleAsFlowUseCase,
         setUiScaleUseCase = setUiScaleUseCase,
+        observeAppUpdateStateUseCase = observeAppUpdateStateUseCase,
         coroutineScope = screenModelScope,
         mainDispatcher = appDispatchers.main,
     )

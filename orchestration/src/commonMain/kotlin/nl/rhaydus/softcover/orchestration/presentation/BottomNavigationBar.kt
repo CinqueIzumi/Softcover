@@ -11,22 +11,22 @@ import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import nl.rhaydus.designsystem.component.RhaydusIconToggleButton
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.model.IconToggleButtonStyle
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun DockedBottomNavigationBar() {
     val navItems = rememberNavItems()
-    val tabNavigator = LocalTabNavigator.current
+    val onNavItemClick = rememberNavItemClick()
 
     NavigationBar {
         navItems.forEach { item ->
@@ -34,14 +34,14 @@ internal fun DockedBottomNavigationBar() {
 
             NavigationBarItem(
                 selected = item.selected,
-                onClick = { tabNavigator.current = item.tab },
+                onClick = { onNavItemClick(item) },
                 icon = {
                     NavItemIcon(
                         item = item,
                         painter = iconPainter,
                     )
                 },
-                label = { Text(text = item.tab.options.title) },
+                label = { SoftcoverText(text = item.tab.options.title) },
             )
         }
     }
@@ -51,7 +51,7 @@ internal fun DockedBottomNavigationBar() {
 @Composable
 internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
     val navItems = rememberNavItems()
-    val tabNavigator = LocalTabNavigator.current
+    val onNavItemClick = rememberNavItemClick()
 
     HorizontalFloatingToolbar(
         expanded = true,
@@ -63,14 +63,14 @@ internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
             Box {
                 RhaydusIconToggleButton(
                     checked = item.selected,
-                    onCheckedChange = { tabNavigator.current = item.tab },
+                    onCheckedChange = { onNavItemClick(item) },
                     icon = RhaydusIconResource.Custom(
                         painter = iconPainter,
                         contentDescription = item.tab.options.title,
                     ),
                     style = IconToggleButtonStyle.FILLED,
                     modifier = Modifier
-                        .padding(horizontal = 4.dp)
+                        .padding(horizontal = Spacing.xxs)
                         .graphicsLayer {
                             scaleX = item.iconScale
                             scaleY = item.iconScale
@@ -82,7 +82,7 @@ internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
                         containerColor = MaterialTheme.colorScheme.inversePrimary,
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .offset(x = (-6).dp, y = 2.dp)
+                            .offset(x = -Spacing.xs, y = Spacing.xxxs)
                             .size(10.dp),
                     )
                 }

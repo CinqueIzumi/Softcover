@@ -22,8 +22,9 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
                       #   impls, cross-feature orchestration use cases, the softcoverModules aggregate
 :feature:*            # Leaf features: lists, profile, onboarding, explore, library, book_detail,
                       #   reading, session, scan, settings, app_update
-:core:*               # domain, database, network, designsystem, notification, preferences, identity,
-                      #   book, lists, deadlines, personal, profile, connectivity
+:core:*               # domain, database, network, designsystem, presentation, component, uibinding,
+                      #   notification, preferences, identity, book, lists, deadlines, personal,
+                      #   profile, connectivity
 ```
 
 ## TOAD — Softcover-specific notes
@@ -34,7 +35,7 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
 - **TOAD is per-Voyager-screen only.** `MainActivityViewModel` is a plain `ViewModel`, not a TOAD
   `ScreenModel`. It is the one app-level view model and lives in `:orchestration`
   (`presentation/viewmodel/`); features that only need to flip the authenticated flag depend on the
-  `SessionAuthenticator` contract in `:core:designsystem`, which the view model implements (mirroring
+  `SessionAuthenticator` contract in `:core:presentation`, which the view model implements (mirroring
   the `AppNavigator` / `ActiveSessionController` seams).
 - The Koin aggregate is named `softcoverModules`; `:app`'s `SoftCoverApp` starts Koin with
   `modules(softcoverModules + appModule)`. Each module self-declares its DI dependencies via
@@ -45,6 +46,27 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   vendored in the app. Softcover's per-feature flow-collector interfaces are named `XxxCollector`
   (e.g. `BookDetailCollector`, in each feature's `presentation/collector/`) and implement the foundation
   `nl.rhaydus.toad.Collector` role.
+- **UI models are mapped off the composition.** A `UiState` exposes presentation-ready values; the
+  domain -> UI mapping that produced them runs in the ScreenModel, an `Action`, a `Collector`, or a
+  dependency injected into one of those — never in a `@Composable`. A render forwards
+  `state.verdictBlock`; it does not call `state.book?.userBook?.reviewDocument?.toRichTextUiModel()`.
+  The reverse direction follows the same rule: an editor's output travels out through the `Action`,
+  which maps it back to the domain type before the use case sees it, so the mapping lives in one place
+  rather than at every call site. Shared mappings live in `:core:uibinding` (promoted on their second
+  consumer); a feature's own live in its `presentation/mapper/`. This is **R9** in
+  [`design-system/component-contract.md`](design-system/component-contract.md), where the reasoning and
+  the one carve-out (reading a *platform* signal in composition — `isSystemInDarkTheme()`, a window
+  size class, a `CompositionLocal` — is not mapping) are written out. **R10** there goes one step
+  further — a composable does not *construct* a UI model either, even from literals; it arrives on the
+  `UiState`. That rule is normative for new work and has a scheduled retrofit for the call sites that
+  predate it.
+- **Collectors deriving a model off `scope.state` dedupe with a `*Snapshot`.** Map the state into a
+  private `*Snapshot` data class first, then `distinctUntilChanged()` on that snapshot before mapping to
+  the UI model — the snapshot's structural equality decides whether the derived work re-runs, not the
+  raw state. A `coerceIn`/`clamp` inside that mapping is a decision about which states the domain can
+  represent, not defensive hygiene: clamping a count to a minimum of one to avoid a "zero" case can
+  erase the exact state a component needs to render its own empty variant. Narrow a range only when the
+  render genuinely cannot tell the narrowed states apart.
 - **Error-slot convention.** A screen that can fail a load/submit follows the foundation TOAD error-slot
   convention ([`../rhaydus/0.3.1/toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md) §Conventions):
   a nullable `String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,
@@ -55,6 +77,17 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   presentation via `Throwable.toUserMessage()` plus a screen-specific fallback, and the renderer is the
   foundation `nl.rhaydus.designsystem.component.InlineErrorState` (call sites pass the editorial `bodySmall`
   as `textStyle`).
+- **`init` calls only `startInitializers()`.** One-shot startup work runs in a `Collector.onLaunch` or a
+  dispatched Action, never a raw `dependencies.launch {}`.
+- **A load-more / pagination Action shares the fresh-query cancellation Job.** It launches its fetch
+  through `dependencies.launch` and stores the Job in the same `LocalVariables` field the fresh-query
+  Actions cancel.
+- **A loading flag driven by a `distinctUntilChanged` flow needs a same-value guard.** An Action that
+  sets the flag and relies on that flow to clear it returns early when the chosen value equals the
+  current one — an unchanged value never re-emits, so the flag would stick.
+- **A once-per-session gate holds a `Mutex` across its check-then-act.** A shared singleton gate (e.g.
+  `ProfileRefreshGate`) runs its check, the guarded work and the mark inside `mutex.withLock`; a bare
+  boolean lets two screens that mount together both pass the check.
 
 ## Network Layer
 
@@ -78,11 +111,58 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   `httpModule`, separate from the `ApolloClient`'s own. There is no 401/403 re-auth path: the seam
   sends no credentials.
 - Network interceptors handle authentication headers.
+- **Session caching is the repository's job, not a use case's.** Editorial reads that turn over at most
+  daily (trending, featured upcoming release, mood tags, books-by-genre) are served from a
+  process-lifetime `SessionValueCache` held as a **private field of the `*RepositoryImpl`** — the
+  repository is what decides which source answers a read and how fresh that answer must be, exactly as
+  it already does with `inflightRefreshes` and `hydrateReferencedBooks`' existence check. Do not inject
+  a cache into a use case: a use case is a `factory` and a cache is session state, so that combination
+  needs a Koin qualifier to smuggle shared mutable state into an object whose convention is that it has
+  none. Freshness overrides ride on the repository method as a parameter (`fetchTrendingBooks(forceRefresh)`,
+  `hydrateReferencedBooks(forceNetwork)`), and only an explicit user action (pull-to-refresh) may pass one —
+  a fetch on screen mount is not user intent. `SessionValueCache` caches on success only, so a transient
+  failure never sticks and blanks a shelf for the rest of the session.
 - Apollo errors are thrown as typed, sealed `ApiException` subtypes (`RetryableSyncException` ⊃
   `OfflineException` / `ServerUnavailableException`, `InvalidTokenException`, `UnexpectedApiException`)
   in `:core:domain/exception`. The seam does **not** author user-facing copy; presentation maps the
   kind via `Throwable.toUserMessage()` + the `Result.onApiFailure()` fold helper in `:core:designsystem`
   (see [code-style.md](code-style.md)).
+
+### Rate limits — what a request costs
+
+The API bills **per top-level query field, not per HTTP request**: `me { username }` plus
+`m2: me { name }` in one document is 2 requests; `me { name username }` is 1. Exceeding the burst
+bucket returns **429 immediately with no server-side queue** — over-budget requests fail rather than
+arriving late — and a document carrying more than 5 top-level queries (or 5 mutations, or more than
+1 `search`) is a flat 403. Free plan: 10 burst / 5,000 daily, refilling at 1/sec; Supporter: 15 /
+50,000. An outdated JWT caps the burst at **5** regardless of plan, which is where every install
+currently sits.
+
+Request count is therefore a **correctness** concern here, not a performance one. Four rules follow,
+and a change that breaks one is a defect even if it compiles:
+
+- **Batching is worthless.** Five operations in one HTTP request cost the same five requests, buy one
+  round trip, and couple five independent failures together. Do **not** add `HttpBatchingInterceptor`
+  or hand-rolled multi-operation documents.
+- **Folding under a shared root is the only real lever.** Aliased siblings *nested under one*
+  top-level field count once — `me { a: user_books(…) b: user_books(…) }` is 1 request. The shape of
+  a query, not its size, is what to optimise.
+- **Fewer, fatter queries.** A top-level field costs the same regardless of payload, so adding a field
+  to an existing query is free and **splitting one query into two doubles its cost**. This inverts the
+  usual instinct toward small focused queries; flag any change that splits one.
+- **Page-size and fan-out constants are budget, not tuning.** `fetchAllPages`' `pageSize`/`maxPages`
+  (below) and `ProfileRemoteDataSource.MAX_PAGES` are request multipliers — one runaway loop is 100
+  requests, twenty full buckets. Every uncapped `async`/`awaitAll` fan-out is the same hazard with no
+  ceiling at all.
+
+`search` accepts exactly one per request and cannot be merged with anything, so `GetIdsForQuery` is
+already optimal and must stay standalone.
+
+`RateLimitInterceptor` (`:core:network`, registered at `InsertionPoint.BeforeNetwork`) paces requests
+against this budget closed-loop, adopting the server's own `X-Ratelimit-*` headers rather than
+simulating its accounting, and `safeQuery` retries 429/408/5xx with backoff. **Read that class's KDoc
+before changing it** — it records why an open-loop token bucket built from the documented numbers
+above still drew 429s.
 
 ### Paginating list queries — the server row cap
 
@@ -162,3 +242,5 @@ Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core
   migrations, and **all** persisted entities + DAOs live in `:core:database` (not in the feature whose
   data source uses them — see the vertical-slice rule in module-structure.md).
 - **DataStore**: simple key-value preferences (app settings, search history).
+- Replacing all rows for a key (clear then insert) is one `@Transaction` DAO method, never two
+  data-source calls.

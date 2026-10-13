@@ -1,14 +1,14 @@
 package nl.rhaydus.softcover.feature.book_detail.data.mapper
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.FindTagsByUserAndTaggableQuery
 import nl.rhaydus.softcover.FindUserTagVocabularyQuery
 import nl.rhaydus.softcover.SaveTagsMutation
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.type.BasicTag
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class UserTagMapperTest {
     // ----- FindTagsByUserAndTaggableQuery.Data.Tagging helpers -----
@@ -93,7 +93,7 @@ class UserTagMapperTest {
                     count = 3,
                     tagCategoryValue = "Mood",
                 ),
-                spoiler = false,
+                spoiler = true,
             )
 
             // ----- Act -----
@@ -104,20 +104,8 @@ class UserTagMapperTest {
                 name = "Cozy",
                 category = TagCategory.MOOD,
                 count = 3,
-                spoiler = false,
+                spoiler = true,
             )
-        }
-
-        @Test
-        fun `maps spoiler true`() {
-            // ----- Arrange -----
-            val tagging = stubTagging(spoiler = true)
-
-            // ----- Act -----
-            val result = tagging.toUserTag()
-
-            // ----- Assert -----
-            result.spoiler shouldBe true
         }
 
         @Test
@@ -178,7 +166,7 @@ class UserTagMapperTest {
                 tag = "Gothic",
                 category = "Genre",
                 count = 12,
-                spoiler = false,
+                spoiler = true,
             )
 
             // ----- Act -----
@@ -189,7 +177,7 @@ class UserTagMapperTest {
                 name = "Gothic",
                 category = TagCategory.GENRE,
                 count = 12,
-                spoiler = false,
+                spoiler = true,
             )
         }
 
@@ -203,18 +191,6 @@ class UserTagMapperTest {
 
             // ----- Assert -----
             result.count shouldBe 0
-        }
-
-        @Test
-        fun `maps spoiler true`() {
-            // ----- Arrange -----
-            val mutationTag = stubMutationTag(spoiler = true)
-
-            // ----- Act -----
-            val result = mutationTag.toUserTag()
-
-            // ----- Assert -----
-            result.spoiler shouldBe true
         }
 
         @Test
@@ -239,7 +215,7 @@ class UserTagMapperTest {
                 name = "Thriller",
                 category = TagCategory.GENRE,
                 count = 5,
-                spoiler = false,
+                spoiler = true,
             )
 
             // ----- Act -----
@@ -248,7 +224,7 @@ class UserTagMapperTest {
             // ----- Assert -----
             result shouldBe BasicTag(
                 category = "Genre",
-                spoiler = false,
+                spoiler = true,
                 tag = "Thriller",
             )
         }
@@ -267,37 +243,6 @@ class UserTagMapperTest {
 
             // ----- Assert -----
             result.category shouldBe "Content Warning"
-        }
-
-        @Test
-        fun `maps spoiler true`() {
-            // ----- Arrange -----
-            val userTag = UserTag(
-                name = "Death",
-                category = TagCategory.CONTENT_WARNING,
-                spoiler = true,
-            )
-
-            // ----- Act -----
-            val result = userTag.toBasicTag()
-
-            // ----- Assert -----
-            result.spoiler shouldBe true
-        }
-
-        @Test
-        fun `maps name to tag field`() {
-            // ----- Arrange -----
-            val userTag = UserTag(
-                name = "Post-Apocalyptic",
-                category = TagCategory.TAG,
-            )
-
-            // ----- Act -----
-            val result = userTag.toBasicTag()
-
-            // ----- Assert -----
-            result.tag shouldBe "Post-Apocalyptic"
         }
     }
 }

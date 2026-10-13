@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -32,7 +33,7 @@ internal class TrendingBooksCollector : ExploreCollector {
 
             scope.setState {
                 it.copy(
-                    trendingBooks = overlaid,
+                    trendingBooks = overlaid.toImmutableList(),
                     loadingTrendingBooks = false,
                 )
             }

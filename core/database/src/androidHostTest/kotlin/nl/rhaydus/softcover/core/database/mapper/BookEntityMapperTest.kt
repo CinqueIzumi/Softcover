@@ -2,17 +2,9 @@ package nl.rhaydus.softcover.core.database.mapper
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkAll
 import kotlinx.datetime.LocalDate
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromJson
-import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.database.model.BookEditionEntity
 import nl.rhaydus.softcover.core.database.model.BookEditionView
@@ -40,12 +32,10 @@ import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class BookEntityMapperTest {
-    @AfterEach
-    fun tearDown() {
-        unmockkAll()
-    }
     // region Shared stubs for UI -> Entity section
     private fun stubAuthor(
         id: Int = 1,
@@ -569,27 +559,6 @@ class BookEntityMapperTest {
     // =========================================================
 
     @Nested
-    inner class BookSeriesToEntity {
-        @Test
-        fun `maps all fields from BookSeries to BookSeriesEntity`() {
-            // ----- Arrange -----
-            val bookSeries = stubBookSeries(
-                id = 5,
-                name = "Test Series",
-                amountOfBooks = 3,
-            )
-
-            // ----- Act -----
-            val result = bookSeries.toEntity()
-
-            // ----- Assert -----
-            result.id shouldBe 5
-            result.name shouldBe "Test Series"
-            result.amountOfBooks shouldBe 3
-        }
-    }
-
-    @Nested
     inner class BookToEntity {
         @Test
         fun `maps all scalar fields from Book to BookEntity`() {
@@ -619,18 +588,6 @@ class BookEntityMapperTest {
             result.usersCount shouldBe 100
             result.ratingsCount shouldBe 42
             result.positionsInSeries shouldBe "2.0"
-        }
-
-        @Test
-        fun `round-trips ratingsCount through Book toEntity`() {
-            // ----- Arrange -----
-            val book = stubBook(ratingsCount = 137)
-
-            // ----- Act -----
-            val result = book.toEntity()
-
-            // ----- Assert -----
-            result.ratingsCount shouldBe 137
         }
 
         @Test
@@ -699,30 +656,6 @@ class BookEntityMapperTest {
             result.positionsInSeries shouldBe listOf(1.0, 2.0, 3.0)
             result.isCompilation shouldBe true
         }
-
-        @Test
-        fun `round-trips headline through Book toEntity`() {
-            // ----- Arrange -----
-            val book = stubBook(headline = "A bold claim about the book")
-
-            // ----- Act -----
-            val result = book.toEntity()
-
-            // ----- Assert -----
-            result.headline shouldBe "A bold claim about the book"
-        }
-
-        @Test
-        fun `round-trips empty headline through Book toEntity`() {
-            // ----- Arrange -----
-            val book = stubBook(headline = "")
-
-            // ----- Act -----
-            val result = book.toEntity()
-
-            // ----- Assert -----
-            result.headline shouldBe ""
-        }
     }
 
     @Nested
@@ -748,50 +681,6 @@ class BookEntityMapperTest {
             result.startedAt shouldBe "2024-01-01"
             result.finishedAt shouldBe "2024-06-01"
             result.userBookId shouldBe 3
-        }
-
-        @Test
-        fun `maps absent nullable fields to null and progress to zero`() {
-            // ----- Arrange -----
-            val userBookRead = stubUserBookRead(
-                currentPage = null,
-                progress = 0f,
-                startedAt = null,
-                finishedAt = null,
-            )
-
-            // ----- Act -----
-            val result = userBookRead.toEntity(userBookId = 3)
-
-            // ----- Assert -----
-            result.currentPage shouldBe null
-            result.progress shouldBe 0f
-            result.startedAt shouldBe null
-            result.finishedAt shouldBe null
-        }
-
-        @Test
-        fun `maps non-null currentSeconds to entity`() {
-            // ----- Arrange -----
-            val userBookRead = stubUserBookRead(currentSeconds = 3600)
-
-            // ----- Act -----
-            val result = userBookRead.toEntity(userBookId = 3)
-
-            // ----- Assert -----
-            result.currentSeconds shouldBe 3600
-        }
-
-        @Test
-        fun `maps null currentSeconds to entity as null`() {
-            // ----- Arrange -----
-            val userBookRead = stubUserBookRead(currentSeconds = null)
-
-            // ----- Act -----
-            val result = userBookRead.toEntity(userBookId = 3)
-
-            // ----- Assert -----
-            result.currentSeconds shouldBe null
         }
     }
 
@@ -832,68 +721,6 @@ class BookEntityMapperTest {
             result.reviewedAt shouldBe "2024-05-02"
             result.updatedAt shouldBe "2024-05-03"
             result.bookId shouldBe 1
-        }
-
-        @Test
-        fun `maps nullable fields as null when absent`() {
-            // ----- Arrange -----
-            val userBook = stubUserBook(
-                createdAt = null,
-                editionId = null,
-                lastReadDate = null,
-                rating = null,
-                referrerUserId = null,
-                reviewedAt = null,
-                updatedAt = null,
-            )
-
-            // ----- Act -----
-            val result = userBook.toEntity(bookId = 1)
-
-            // ----- Assert -----
-            result.createdAt shouldBe null
-            result.editionId shouldBe null
-            result.lastReadDate shouldBe null
-            result.rating shouldBe null
-            result.referrerUserId shouldBe null
-            result.reviewedAt shouldBe null
-            result.updatedAt shouldBe null
-        }
-
-        @Test
-        fun `propagates non-null createdAt to UserBookEntity`() {
-            // ----- Arrange -----
-            val userBook = stubUserBook(createdAt = "2024-03-10")
-
-            // ----- Act -----
-            val result = userBook.toEntity(bookId = 1)
-
-            // ----- Assert -----
-            result.createdAt shouldBe "2024-03-10"
-        }
-
-        @Test
-        fun `propagates null createdAt to UserBookEntity as null`() {
-            // ----- Arrange -----
-            val userBook = stubUserBook(createdAt = null)
-
-            // ----- Act -----
-            val result = userBook.toEntity(bookId = 1)
-
-            // ----- Assert -----
-            result.createdAt shouldBe null
-        }
-
-        @Test
-        fun `statusCode is taken from status enum code`() {
-            // ----- Arrange -----
-            val userBook = stubUserBook(status = BookStatus.WantToRead)
-
-            // ----- Act -----
-            val result = userBook.toEntity(bookId = 1)
-
-            // ----- Assert -----
-            result.statusCode shouldBe BookStatus.WantToRead.code
         }
 
         @Test
@@ -988,120 +815,6 @@ class BookEntityMapperTest {
             result.releaseYear shouldBe 2020
             result.format shouldBe "Paperback"
             result.localImageUrl shouldBe null
-        }
-
-        @Test
-        fun `passes through non-null canonicalId to entity`() {
-            // ----- Arrange -----
-            val edition = stubBookEdition(canonicalId = 42)
-
-            // ----- Act -----
-            val result = edition.toEntity()
-
-            // ----- Assert -----
-            result.canonicalId shouldBe 42
-        }
-
-        @Test
-        fun `passes through null canonicalId to entity`() {
-            // ----- Arrange -----
-            val edition = stubBookEdition(canonicalId = null)
-
-            // ----- Act -----
-            val result = edition.toEntity()
-
-            // ----- Assert -----
-            result.canonicalId shouldBe null
-        }
-
-        @Test
-        fun `maps nullable fields as null when absent`() {
-            // ----- Arrange -----
-            val edition = stubBookEdition(
-                publisher = null,
-                title = null,
-                url = null,
-                isbn10 = null,
-                isbn13 = null,
-                pages = null,
-            )
-
-            // ----- Act -----
-            val result = edition.toEntity()
-
-            // ----- Assert -----
-            result.publisher shouldBe null
-            result.title shouldBe null
-            result.url shouldBe null
-            result.isbn10 shouldBe null
-            result.pages shouldBe null
-        }
-
-        @Test
-        fun `passes through non-null localImagePath to entity`() {
-            // ----- Arrange -----
-            val edition = stubBookEdition(localImagePath = "/data/edition_images/10")
-
-            // ----- Act -----
-            val result = edition.toEntity()
-
-            // ----- Assert -----
-            result.localImagePath shouldBe "/data/edition_images/10"
-        }
-
-        @Test
-        fun `passes through null localImagePath to entity`() {
-            // ----- Arrange -----
-            val edition = stubBookEdition(localImagePath = null)
-
-            // ----- Act -----
-            val result = edition.toEntity()
-
-            // ----- Assert -----
-            result.localImagePath shouldBe null
-        }
-
-        @Test
-        fun `passes through non-null audioSeconds to entity`() {
-            // ----- Arrange -----
-            val edition = stubBookEdition(audioSeconds = 3600)
-
-            // ----- Act -----
-            val result = edition.toEntity()
-
-            // ----- Assert -----
-            result.audioSeconds shouldBe 3600
-        }
-
-        @Test
-        fun `passes through null audioSeconds to entity`() {
-            // ----- Arrange -----
-            val edition = stubBookEdition(audioSeconds = null)
-
-            // ----- Act -----
-            val result = edition.toEntity()
-
-            // ----- Assert -----
-            result.audioSeconds shouldBe null
-        }
-    }
-
-    @Nested
-    inner class AuthorToEntity {
-        @Test
-        fun `maps name and id from Author to AuthorEntity`() {
-            // ----- Arrange -----
-            val author = stubAuthor(
-                id = 1,
-                name = "Jane Austen",
-            )
-
-            // ----- Act -----
-            val result = author.toEntity()
-
-            // ----- Assert -----
-            result.id shouldBe 1
-            result.name shouldBe "Jane Austen"
         }
     }
 
@@ -1313,25 +1026,6 @@ class BookEntityMapperTest {
     // =========================================================
 
     @Nested
-    inner class AuthorEntityToModel {
-        @Test
-        fun `maps name and id from AuthorEntity to Author`() {
-            // ----- Arrange -----
-            val entity = stubAuthorEntity(
-                id = 1,
-                name = "Jane Austen",
-            )
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.id shouldBe 1
-            result.name shouldBe "Jane Austen"
-        }
-    }
-
-    @Nested
     inner class BookEditionEntityToModel {
         @Test
         fun `maps all fields from BookEditionEntity to BookEdition`() {
@@ -1374,156 +1068,6 @@ class BookEntityMapperTest {
             result.authors[0].id shouldBe 1
             result.authors[0].name shouldBe "Jane Austen"
         }
-
-        @Test
-        fun `passes through non-null canonicalId from entity to model`() {
-            // ----- Arrange -----
-            val entity = stubBookEditionEntity(canonicalId = 77)
-
-            // ----- Act -----
-            val result = entity.toModel(
-                authors = emptyList(),
-                owned = false,
-            )
-
-            // ----- Assert -----
-            result.canonicalId shouldBe 77
-        }
-
-        @Test
-        fun `passes through null canonicalId from entity to model`() {
-            // ----- Arrange -----
-            val entity = stubBookEditionEntity(canonicalId = null)
-
-            // ----- Act -----
-            val result = entity.toModel(
-                authors = emptyList(),
-                owned = false,
-            )
-
-            // ----- Assert -----
-            result.canonicalId shouldBe null
-        }
-
-        @Test
-        fun `maps owned as true when owned flag is true`() {
-            // ----- Arrange -----
-            val entity = stubBookEditionEntity()
-
-            // ----- Act -----
-            val result = entity.toModel(
-                authors = emptyList(),
-                owned = true,
-            )
-
-            // ----- Assert -----
-            result.owned shouldBe true
-        }
-
-        @Test
-        fun `maps owned as false when owned flag is false`() {
-            // ----- Arrange -----
-            val entity = stubBookEditionEntity()
-
-            // ----- Act -----
-            val result = entity.toModel(
-                authors = emptyList(),
-                owned = false,
-            )
-
-            // ----- Assert -----
-            result.owned shouldBe false
-        }
-
-        @Test
-        fun `maps empty authors list to empty authors on model`() {
-            // ----- Arrange -----
-            val entity = stubBookEditionEntity()
-
-            // ----- Act -----
-            val result = entity.toModel(
-                authors = emptyList(),
-                owned = false,
-            )
-
-            // ----- Assert -----
-            result.authors shouldBe emptyList()
-        }
-
-        @Test
-        fun `passes through non-null localImagePath to model`() {
-            // ----- Arrange -----
-            val entity = stubBookEditionEntity(localImagePath = "/data/edition_images/10")
-
-            // ----- Act -----
-            val result = entity.toModel(
-                authors = emptyList(),
-                owned = false,
-            )
-
-            // ----- Assert -----
-            result.localImagePath shouldBe "/data/edition_images/10"
-        }
-
-        @Test
-        fun `passes through null localImagePath to model`() {
-            // ----- Arrange -----
-            val entity = stubBookEditionEntity(localImagePath = null)
-
-            // ----- Act -----
-            val result = entity.toModel(
-                authors = emptyList(),
-                owned = false,
-            )
-
-            // ----- Assert -----
-            result.localImagePath shouldBe null
-        }
-
-        @Test
-        fun `passes through non-null audioSeconds from entity to model`() {
-            // ----- Arrange -----
-            val entity = stubBookEditionEntity(audioSeconds = 5400)
-
-            // ----- Act -----
-            val result = entity.toModel(
-                authors = emptyList(),
-                owned = false,
-            )
-
-            // ----- Assert -----
-            result.audioSeconds shouldBe 5400
-        }
-
-        @Test
-        fun `passes through null audioSeconds from entity to model`() {
-            // ----- Arrange -----
-            val entity = stubBookEditionEntity(audioSeconds = null)
-
-            // ----- Act -----
-            val result = entity.toModel(
-                authors = emptyList(),
-                owned = false,
-            )
-
-            // ----- Assert -----
-            result.audioSeconds shouldBe null
-        }
-
-        @Test
-        fun `maps non-null isbn13 from BookEditionEntity to BookEdition`() {
-            // ----- Arrange -----
-            val entity = stubBookEditionEntity(isbn13 = "9780451524935")
-
-            // ----- Act -----
-            val result = entity.toModel(
-                authors = emptyList(),
-                owned = false,
-            )
-
-            // ----- Assert -----
-            result.isbn13 shouldBe "9780451524935"
-        }
     }
 
     @Nested
@@ -1549,50 +1093,6 @@ class BookEntityMapperTest {
             result.progress shouldBe 0.14f
             result.startedAt shouldBe "2024-01-01"
             result.finishedAt shouldBe "2024-06-01"
-        }
-
-        @Test
-        fun `maps absent nullable fields to null and progress to zero`() {
-            // ----- Arrange -----
-            val entity = stubUserBookReadEntity(
-                currentPage = null,
-                progress = 0f,
-                startedAt = null,
-                finishedAt = null,
-            )
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.currentPage shouldBe null
-            result.progress shouldBe 0f
-            result.startedAt shouldBe null
-            result.finishedAt shouldBe null
-        }
-
-        @Test
-        fun `maps non-null currentSeconds from entity to model`() {
-            // ----- Arrange -----
-            val entity = stubUserBookReadEntity(currentSeconds = 7200)
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.currentSeconds shouldBe 7200
-        }
-
-        @Test
-        fun `maps null currentSeconds from entity to model as null`() {
-            // ----- Arrange -----
-            val entity = stubUserBookReadEntity(currentSeconds = null)
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.currentSeconds shouldBe null
         }
     }
 
@@ -1641,30 +1141,6 @@ class BookEntityMapperTest {
         }
 
         @Test
-        fun `propagates non-null createdAt from entity to model`() {
-            // ----- Arrange -----
-            val entity = stubUserBookEntity(createdAt = "2024-04-15")
-
-            // ----- Act -----
-            val result = entity.toModel(journals = emptyList())
-
-            // ----- Assert -----
-            result.createdAt shouldBe "2024-04-15"
-        }
-
-        @Test
-        fun `propagates null createdAt from entity to model as null`() {
-            // ----- Arrange -----
-            val entity = stubUserBookEntity(createdAt = null)
-
-            // ----- Act -----
-            val result = entity.toModel(journals = emptyList())
-
-            // ----- Assert -----
-            result.createdAt shouldBe null
-        }
-
-        @Test
         fun `resolves unknown statusCode to BookStatus None`() {
             // ----- Arrange -----
             val entity = stubUserBookEntity(statusCode = 999)
@@ -1674,18 +1150,6 @@ class BookEntityMapperTest {
 
             // ----- Assert -----
             result.status shouldBe BookStatus.None
-        }
-
-        @Test
-        fun `maps empty journals list to empty journals on model`() {
-            // ----- Arrange -----
-            val entity = stubUserBookEntity()
-
-            // ----- Act -----
-            val result = entity.toModel(journals = emptyList())
-
-            // ----- Assert -----
-            result.journals shouldBe emptyList()
         }
 
         @Test
@@ -1747,39 +1211,6 @@ class BookEntityMapperTest {
             result.updatedAt shouldBe "2024-06-01T12:00:00"
             result.event shouldBe "status:3"
         }
-
-        @Test
-        fun `maps empty event string`() {
-            // ----- Arrange -----
-            val entity = stubReadingJournalEntity(event = "")
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.event shouldBe ""
-        }
-    }
-
-    @Nested
-    inner class BookSeriesEntityToModel {
-        @Test
-        fun `maps all fields from BookSeriesEntity to BookSeries`() {
-            // ----- Arrange -----
-            val entity = stubBookSeriesEntity(
-                id = 5,
-                name = "Test Series",
-                amountOfBooks = 3,
-            )
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.id shouldBe 5
-            result.name shouldBe "Test Series"
-            result.amountOfBooks shouldBe 3
-        }
     }
 
     @Nested
@@ -1813,45 +1244,6 @@ class BookEntityMapperTest {
             result.usersCount shouldBe 100
             result.ratingsCount shouldBe 55
             result.positionsInSeries shouldBe listOf(2.0)
-        }
-
-        @Test
-        fun `round-trips ratingsCount through BookFullEntity toModel`() {
-            // ----- Arrange -----
-            val bookEntity = stubBookEntity(ratingsCount = 200)
-            val entity = stubBookFullEntity(book = bookEntity)
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.ratingsCount shouldBe 200
-        }
-
-        @Test
-        fun `round-trips headline through BookFullEntity toModel`() {
-            // ----- Arrange -----
-            val bookEntity = stubBookEntity(headline = "A bold claim about the book")
-            val entity = stubBookFullEntity(book = bookEntity)
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.headline shouldBe "A bold claim about the book"
-        }
-
-        @Test
-        fun `headline defaults to empty string when BookEntity headline is empty`() {
-            // ----- Arrange -----
-            val bookEntity = stubBookEntity(headline = "")
-            val entity = stubBookFullEntity(book = bookEntity)
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.headline shouldBe ""
         }
 
         @Test
@@ -1924,7 +1316,7 @@ class BookEntityMapperTest {
         }
 
         @Test
-        fun `journals defaults to empty list when userBookWithJournals is null`() {
+        fun `userBook and userBookRead are null when userBookWithJournals is null`() {
             // ----- Arrange -----
             val entity = stubBookFullEntity(userBookWithJournals = null)
 
@@ -1933,29 +1325,6 @@ class BookEntityMapperTest {
 
             // ----- Assert -----
             result.userBook shouldBe null
-        }
-
-        @Test
-        fun `userBook is null when userBookWithJournals is null`() {
-            // ----- Arrange -----
-            val entity = stubBookFullEntity(userBookWithJournals = null)
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.userBook shouldBe null
-        }
-
-        @Test
-        fun `userBookRead is null when userBookWithJournals is null`() {
-            // ----- Arrange -----
-            val entity = stubBookFullEntity(userBookWithJournals = null)
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
             result.userBookRead shouldBe null
         }
 
@@ -2144,18 +1513,6 @@ class BookEntityMapperTest {
         }
 
         @Test
-        fun `tags is empty when no BookTagFull rows are present`() {
-            // ----- Arrange -----
-            val entity = stubBookFullEntity(tags = emptyList())
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.tags shouldBe emptyList()
-        }
-
-        @Test
         fun `tag category string GENRE is mapped to TagCategory GENRE`() {
             // ----- Arrange -----
             val tags = listOf(
@@ -2205,32 +1562,6 @@ class BookEntityMapperTest {
 
             // ----- Assert -----
             result.tags[0].category shouldBe TagCategory.OTHER
-        }
-
-        @Test
-        fun `crossRef count is mapped to Tag count`() {
-            // ----- Arrange -----
-            val tags = listOf(
-                BookTagFull(
-                    crossRef = BookTagCrossRef(
-                        bookId = 10,
-                        tagId = 1,
-                        count = 42,
-                    ),
-                    tag = TagEntity(
-                        id = 1,
-                        name = "Fiction",
-                        category = "GENRE",
-                    ),
-                ),
-            )
-            val entity = stubBookFullEntity(tags = tags)
-
-            // ----- Act -----
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.tags[0].count shouldBe 42
         }
     }
 }

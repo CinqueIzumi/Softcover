@@ -1,0 +1,114 @@
+package nl.rhaydus.softcover.feature.profile.presentation.screen.section
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.conditional
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
+import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+
+/**
+ * The row that opens the reading-life share sheet — a primary glyph tile (reusing the share glyph as
+ * the "send this out" mark; the icon catalog has no dedicated upload glyph), a two-line editorial
+ * prompt, and a trailing chevron. The top bar's share action opens the same sheet.
+ */
+@Composable
+internal fun ShareEntryRow(
+    isLoading: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .alpha(if (enabled || isLoading) 1f else 0.4f)
+            .clip(Corners.md)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .skeletonMask(
+                visible = isLoading,
+                shape = Corners.md,
+            )
+            .conditional(
+                condition = enabled,
+                ifTrue = {
+                    Modifier
+                        .tactileClickable(onClick = onClick)
+                },
+            )
+            .padding(
+                horizontal = Spacing.md,
+                vertical = Spacing.md,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(42.dp)
+                .clip(Corners.md)
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center,
+        ) {
+            val icon = drawableIconResource(
+                icon = SoftcoverIcon.Share,
+                contentDescription = "",
+            )
+
+            Icon(
+                painter = icon.getIconPainter(),
+                contentDescription = icon.contentDescription,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            SoftcoverText(
+                text = "Share your profile",
+                style = MaterialTheme.editorialTypography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.xxxs))
+
+            SoftcoverText(
+                text = "A card built from everything you've read.",
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        val chevron = drawableIconResource(
+            icon = SoftcoverIcon.KeyboardArrowRight,
+            contentDescription = "",
+        )
+
+        Icon(
+            painter = chevron.getIconPainter(),
+            contentDescription = chevron.contentDescription,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}

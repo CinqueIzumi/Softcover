@@ -1,23 +1,57 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
-import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
+import nl.rhaydus.softcover.core.component.header.SectionHeaderTone
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
+import nl.rhaydus.softcover.feature.settings.presentation.model.buildLibraryTabEntries
 import nl.rhaydus.toad.UiState
 
+private const val LIBRARY_TABS_TITLE = "Library tabs"
+
 internal data class LibraryVisibilitySettingsUiState(
-    val persistedEnabledStatusCodes: Set<Int> = emptySet(),
-    val persistedEnabledListIds: Set<Int> = emptySet(),
-    val persistedTabOrder: List<String> = emptyList(),
-    val draftEnabledStatusCodes: Set<Int> = emptySet(),
-    val draftEnabledListIds: Set<Int> = emptySet(),
-    val draftTabOrder: List<String> = emptyList(),
+    val libraryTabsPageHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Library tabs",
+        headline = "Arrange your shelves.",
+        description = "Choose which shelves show as tabs in your library, and in what order.",
+    ),
+    val libraryTabsHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(
+        eyebrow = "Your tabs",
+        tone = SectionHeaderTone.Accent,
+    ),
+    val persistedEnabledStatusCodes: ImmutableSet<Int> = persistentSetOf(),
+    val persistedEnabledListIds: ImmutableSet<Int> = persistentSetOf(),
+    val persistedTabOrder: ImmutableList<String> = persistentListOf(),
+    val draftEnabledStatusCodes: ImmutableSet<Int> = persistentSetOf(),
+    val draftEnabledListIds: ImmutableSet<Int> = persistentSetOf(),
+    val draftTabOrder: ImmutableList<String> = persistentListOf(),
     val initialized: Boolean = false,
     val isSaving: Boolean = false,
-    val availableLists: List<BookList> = emptyList(),
-    val statusCounts: Map<Int, Int> = emptyMap(),
+    val discardSheet: SheetSession<SheetScaffoldUiModel, LeaveScreen> = SheetSession.Closed,
+    val availableLists: ImmutableList<BookList> = persistentListOf(),
+    val statusCounts: ImmutableMap<Int, Int> = persistentMapOf(),
     val totalCount: Int = 0,
+    val topBar: TopBarUiModel = TopBarUiModel(
+        title = LIBRARY_TABS_TITLE,
+    ),
+    /** Derived from the count, list and draft fields, but only refreshed by [withOrderedEntries]. */
+    val orderedEntries: ImmutableList<LibraryTabEntry> = buildLibraryTabEntries(
+        statusCounts = emptyMap(),
+        totalCount = 0,
+        availableLists = emptyList(),
+        draftEnabledStatusCodes = emptySet(),
+        draftEnabledListIds = emptySet(),
+        draftTabOrder = emptyList(),
+    ),
 ) : UiState {
     val isDirty: Boolean
         get() = initialized && (
@@ -25,52 +59,15 @@ internal data class LibraryVisibilitySettingsUiState(
                 draftEnabledListIds != persistedEnabledListIds ||
                 draftTabOrder != persistedTabOrder
             )
-
-    val orderedEntries: List<LibraryTabEntry>
-        get() {
-            val statusEntries: List<LibraryTabEntry> = defaultStatusOrder
-                .map { status ->
-                    LibraryTabEntry.Status(
-                        status = status,
-                        statusLabel = LibraryTab.Status.labelFor(status = status),
-                        statusCount = statusCounts[status.code] ?: 0,
-                    )
-                }
-
-            val listEntries: List<LibraryTabEntry> = availableLists
-                .sortedBy { it.name.lowercase() }
-                .map { list ->
-                    LibraryTabEntry.CustomList(
-                        listId = list.id,
-                        listName = list.name,
-                        listCount = list.books.size,
-                    )
-                }
-
-            val reorderableUniverse: List<LibraryTabEntry> = statusEntries + listEntries
-
-            val reorderableOrdered = if (draftTabOrder.isEmpty()) {
-                reorderableUniverse
-            } else {
-                val byId = reorderableUniverse.associateBy { it.id }
-                val ordered = draftTabOrder.mapNotNull { byId[it] }
-                val orderedIds = ordered.map { it.id }.toSet()
-                val appended = reorderableUniverse.filter { it.id !in orderedIds }
-
-                ordered + appended
-            }
-
-            val allEntry: LibraryTabEntry = LibraryTabEntry.All(totalCount = totalCount)
-
-            return listOf(allEntry) + reorderableOrdered
-        }
-
-    private companion object {
-        val defaultStatusOrder: List<UserBookStatus> = listOf(
-            UserBookStatus.CURRENTLY_READING,
-            UserBookStatus.WANT_TO_READ,
-            UserBookStatus.READ,
-            UserBookStatus.DID_NOT_FINISH,
-        )
-    }
 }
+
+internal fun LibraryVisibilitySettingsUiState.withOrderedEntries(): LibraryVisibilitySettingsUiState = copy(
+    orderedEntries = buildLibraryTabEntries(
+        statusCounts = statusCounts,
+        totalCount = totalCount,
+        availableLists = availableLists,
+        draftEnabledStatusCodes = draftEnabledStatusCodes,
+        draftEnabledListIds = draftEnabledListIds,
+        draftTabOrder = draftTabOrder,
+    ),
+)

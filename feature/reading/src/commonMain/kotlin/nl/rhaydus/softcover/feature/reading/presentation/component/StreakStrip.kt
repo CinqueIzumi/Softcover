@@ -10,94 +10,99 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.format.DayOfWeekNames
-import kotlinx.datetime.format.MonthNames
-import kotlinx.datetime.format.Padding
-import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import nl.rhaydus.common.currentLocalDate
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
-import nl.rhaydus.designsystem.haptics.rememberHaptics
-import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.softcover.core.component.statistic.StatNumber
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakSheetFor
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakStripFor
+import nl.rhaydus.softcover.feature.reading.presentation.state.StreakDayRowUiModel
+import nl.rhaydus.softcover.feature.reading.presentation.state.StreakSheetUiModel
+import nl.rhaydus.softcover.feature.reading.presentation.state.StreakStripUiModel
 
-private val DOT_ROW_HEIGHT = 18.dp
-private val DOT = 9.dp
-private val TODAY_DOT = 12.dp
-private val DOT_GAP = 10.dp
-private val sheetDateFormatter = LocalDate.Format {
-    dayOfWeek(DayOfWeekNames.ENGLISH_ABBREVIATED)
-    char(' ')
-    day(Padding.NONE)
-    char(' ')
-    monthName(MonthNames.ENGLISH_ABBREVIATED)
-}
+private const val PLACEHOLDER_DAY_COUNT = 21
 
 @Composable
 internal fun StreakStrip(
-    activity: List<ReadingDayActivity>,
-    onClick: () -> Unit,
+    model: StreakStripUiModel,
+    onEvent: (StreakStripEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val haptics = rememberHaptics()
+    val haptics = LocalHaptics.current
 
     val litColor = MaterialTheme.colorScheme.primary
     val trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f)
-    val todayDate = activity.lastOrNull()?.date
 
-    // Most-recent-first: today sits at the left edge, older days run off to the right.
-    val displayDays = activity.asReversed()
-
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier,
+    ) {
         // A scrolling row keeps every dot comfortably sized on narrow screens instead of
         // squeezing 21 of them into the viewport width. The tap target lives on this row so
         // the press-scale never fires on a horizontal scroll — the inner scroll wins the drag.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .pressScaleClickable {
-                    haptics.select()
+                .tactileClickable(
+                    onClick = {
+                        haptics.select()
 
-                    onClick()
-                }
+                        onEvent(StreakStripEvent.Clicked)
+                    },
+                )
                 .horizontalScroll(rememberScrollState())
-                .height(DOT_ROW_HEIGHT),
-            horizontalArrangement = Arrangement.spacedBy(DOT_GAP),
+                .height(18.dp)
+                .skeletonMask(visible = model.isLoading),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            displayDays.forEach { day ->
-                val isToday = day.date == todayDate
+            if (model.isLoading && model.days.isEmpty()) {
+                repeat(PLACEHOLDER_DAY_COUNT) {
+                    Box(
+                        modifier = Modifier
+                            .size(9.dp)
+                            .background(
+                                color = trackColor,
+                                shape = CircleShape,
+                            ),
+                    )
+                }
+            }
 
+            // Most-recent-first: today sits at the left edge, older days run off to the right.
+            model.days.forEach { day ->
                 Box(
                     modifier = Modifier
-                        .size(if (isToday) TODAY_DOT else DOT)
+                        .size(if (day.isToday) 12.dp else 9.dp)
                         .background(
                             color = if (day.didRead) litColor else trackColor,
                             shape = CircleShape,
                         )
                         .then(
-                            if (isToday && day.didRead.not()) {
+                            if (day.isToday && day.didRead.not()) {
                                 Modifier.border(
                                     width = 1.5.dp,
                                     color = litColor,
@@ -111,7 +116,7 @@ internal fun StreakStrip(
             }
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -120,90 +125,47 @@ internal fun StreakStrip(
         ) {
             // A static, direction-only caption: it never pins to a specific dot, so it stays
             // accurate however far the user scrolls into the past.
-            Text(
+            SoftcoverText(
                 text = "Most recent first".uppercase(),
+                modifier = Modifier.skeletonMask(visible = model.isLoading),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            val streakLength = remember(activity) { currentStreakLength(activity) }
-
-            if (streakLength > 0) {
-                Text(
-                    text = "$streakLength ${if (streakLength == 1) "day" else "days"} running",
-                    style = MaterialTheme.editorialTypography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+            model.running?.let { running ->
+                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
+                    StatNumber(model = running)
+                }
             }
         }
     }
 }
 
-/**
- * The number of consecutive read days running backward from today (the last, most-recent entry in
- * [activity]) - a pure UI-layer computation from the same activity list the dots already render, no
- * new domain concept. Stops at the first missed day; `0` when today itself was missed or the list is
- * empty.
- */
-internal fun currentStreakLength(activity: List<ReadingDayActivity>): Int {
-    var streak = 0
-
-    for (day in activity.asReversed()) {
-        if (day.didRead.not()) break
-
-        streak++
-    }
-
-    return streak
-}
-
 @Composable
 internal fun StreakStripSheet(
-    activity: List<ReadingDayActivity>,
+    model: StreakSheetUiModel,
     onDismiss: () -> Unit,
 ) {
-    AdaptiveModalSheet(onDismissRequest = onDismiss) {
-        StreakStripSheetContent(activity = activity)
-    }
-}
+    SheetScaffold(
+        model = model.scaffold,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.Dismissed -> onDismiss()
 
-@Composable
-private fun StreakStripSheetContent(activity: List<ReadingDayActivity>) {
-    val readDays = activity.count { it.didRead }
-    val today = activity.lastOrNull()?.date
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp)
-            .padding(top = 8.dp, bottom = 24.dp)
-            .navigationBarsPadding(),
+                SheetScaffoldEvent.PrimaryClicked,
+                SheetScaffoldEvent.SecondaryClicked,
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
+            }
+        },
     ) {
-        EditorialSectionHeader(
-            eyebrow = "Last ${activity.size} days",
-            headline = readDaysSummary(
-                readDays = readDays,
-                totalDays = activity.size,
-            ),
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        activity.asReversed().forEach { day ->
-            StreakStripSheetRow(
-                day = day,
-                today = today,
-            )
+        model.rows.forEach { row ->
+            StreakStripSheetRow(row = row)
         }
     }
 }
 
 @Composable
-private fun StreakStripSheetRow(
-    day: ReadingDayActivity,
-    today: LocalDate?,
-) {
+private fun StreakStripSheetRow(row: StreakDayRowUiModel) {
     val litColor = MaterialTheme.colorScheme.primary
     val trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f)
 
@@ -215,22 +177,19 @@ private fun StreakStripSheetRow(
     ) {
         Box(
             modifier = Modifier
-                .size(DOT)
+                .size(9.dp)
                 .background(
-                    color = if (day.didRead) litColor else trackColor,
+                    color = if (row.didRead) litColor else trackColor,
                     shape = CircleShape,
                 ),
         )
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(Spacing.md))
 
-        Text(
-            text = sheetDayLabel(
-                date = day.date,
-                today = today,
-            ),
+        SoftcoverText(
+            text = row.label,
             style = MaterialTheme.editorialTypography.body,
-            color = if (day.didRead) {
+            color = if (row.didRead) {
                 MaterialTheme.colorScheme.onSurface
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
@@ -238,35 +197,14 @@ private fun StreakStripSheetRow(
             modifier = Modifier.weight(1f),
         )
 
-        if (day.didRead) {
-            Text(
+        if (row.didRead) {
+            SoftcoverText(
                 text = "Read".uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.primary,
             )
         }
     }
-}
-
-private fun readDaysSummary(
-    readDays: Int,
-    totalDays: Int,
-): String = when (readDays) {
-    0 -> "No reading logged yet"
-    1 -> "You read on 1 of the last $totalDays days"
-    else -> "You read on $readDays of the last $totalDays days"
-}
-
-private fun sheetDayLabel(
-    date: LocalDate,
-    today: LocalDate?,
-): String = when (date) {
-    today -> "Today"
-    today?.minus(
-        1,
-        DateTimeUnit.DAY,
-    ) -> "Yesterday"
-    else -> sheetDateFormatter.format(date)
 }
 
 private fun previewActivity(litOffsets: Set<Int>): List<ReadingDayActivity> {
@@ -291,12 +229,14 @@ private fun previewActivity(litOffsets: Set<Int>): List<ReadingDayActivity> {
 @Composable
 private fun StreakStripPreview() {
     SoftcoverTheme {
-        Column(modifier = Modifier.padding(24.dp)) {
+        Column(modifier = Modifier.padding(Spacing.xl)) {
             StreakStrip(
-                activity = previewActivity(
-                    litOffsets = setOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20),
+                model = streakStripFor(
+                    activity = previewActivity(
+                        litOffsets = setOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20),
+                    ),
                 ),
-                onClick = {},
+                onEvent = {},
             )
         }
     }
@@ -306,10 +246,13 @@ private fun StreakStripPreview() {
 @Composable
 private fun StreakStripSheetPreview() {
     SoftcoverTheme {
-        StreakStripSheetContent(
-            activity = previewActivity(
-                litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20),
-            ),
+        val activity = previewActivity(
+            litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20),
+        )
+
+        StreakStripSheet(
+            model = streakSheetFor(activity = activity),
+            onDismiss = {},
         )
     }
 }

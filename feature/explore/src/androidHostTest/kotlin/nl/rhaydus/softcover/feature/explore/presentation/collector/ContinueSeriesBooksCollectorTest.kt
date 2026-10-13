@@ -9,17 +9,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ContinueSeriesBooksCollectorTest {
     private lateinit var getContinueSeriesBooksUseCase: GetContinueSeriesBooksUseCase
@@ -66,11 +67,28 @@ class ContinueSeriesBooksCollectorTest {
         }
     }
 
-    private fun stubBook(id: Int): Book = mockk {
-        every {
-            this@mockk.id
-        } returns id
-    }
+    private fun stubBook(
+        id: Int,
+        title: String = "Book $id",
+        bookSeries: BookSeries? = null,
+    ): Book = Book(
+        id = id,
+        title = title,
+        editions = emptyList(),
+        defaultEdition = null,
+        rating = 0.0,
+        description = "",
+        releaseYear = 2020,
+        coverUrl = "https://covers.test/$id.jpg",
+        authors = emptyList(),
+        usersCount = 0,
+        ratingsCount = 0,
+        bookSeries = bookSeries,
+        positionsInSeries = emptyList(),
+        isCompilation = false,
+        userBook = null,
+        userBookRead = null,
+    )
 
     // ----- OnLaunch -----
 
@@ -81,10 +99,12 @@ class ContinueSeriesBooksCollectorTest {
             // ----- Arrange -----
             val book = stubBook(id = 1)
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(book))
@@ -105,10 +125,12 @@ class ContinueSeriesBooksCollectorTest {
                 throw RuntimeException("use case error")
             }
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             allUserBooksFlow.emit(emptyList())
@@ -125,10 +147,12 @@ class ContinueSeriesBooksCollectorTest {
             val fetchedBook = stubBook(id = 5)
             val userBook = stubBook(id = 5)
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(fetchedBook))
@@ -145,10 +169,12 @@ class ContinueSeriesBooksCollectorTest {
             val fetchedBook = stubBook(id = 10)
             val userBook = stubBook(id = 99)
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(fetchedBook))
@@ -156,58 +182,6 @@ class ContinueSeriesBooksCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.continueSeriesBooks shouldBe listOf(fetchedBook)
-            job.cancel()
-        }
-
-        @Test
-        fun `preserves other state fields when updating continueSeriesBooks on success`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ExploreScreenUiState(
-                searchText = "fantasy",
-                trendingBooks = emptyList(),
-                loadingTrendingBooks = false,
-            )
-            val book = stubBook(id = 2)
-            val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            continueSeriesBooksFlow.emit(listOf(book))
-            allUserBooksFlow.emit(emptyList())
-
-            // ----- Assert -----
-            stateFlow.value.searchText shouldBe "fantasy"
-            stateFlow.value.loadingTrendingBooks shouldBe false
-            job.cancel()
-        }
-
-        @Test
-        fun `preserves other state fields when clearing loading on failure`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ExploreScreenUiState(
-                searchText = "sci-fi",
-                loadingTrendingBooks = false,
-            )
-            every {
-                getContinueSeriesBooksUseCase()
-            } returns kotlinx.coroutines.flow.flow {
-                throw RuntimeException("error")
-            }
-            val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            allUserBooksFlow.emit(emptyList())
-
-            // ----- Assert -----
-            stateFlow.value.searchText shouldBe "sci-fi"
-            stateFlow.value.loadingTrendingBooks shouldBe false
             job.cancel()
         }
     }

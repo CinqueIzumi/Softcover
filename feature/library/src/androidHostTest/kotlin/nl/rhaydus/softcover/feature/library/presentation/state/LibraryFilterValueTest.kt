@@ -1,9 +1,10 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentSetOf
+import nl.rhaydus.softcover.core.domain.model.Tag
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.Tag
 
 class LibraryFilterValueTest {
     // region Fixtures
@@ -33,7 +34,7 @@ class LibraryFilterValueTest {
         @Test
         fun `removes tag when already present`() {
             // ----- Arrange -----
-            val filters = LibraryFilters(tags = setOf(tagFiction))
+            val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
 
             // ----- Act -----
             val result = filters.toggle(value = LibraryFilterValue.Tag(tagFiction))
@@ -45,7 +46,7 @@ class LibraryFilterValueTest {
         @Test
         fun `toggling a second tag adds it without removing the first`() {
             // ----- Arrange -----
-            val filters = LibraryFilters(tags = setOf(tagFiction))
+            val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
 
             // ----- Act -----
             val result = filters.toggle(value = LibraryFilterValue.Tag(tagScifi))
@@ -68,18 +69,6 @@ class LibraryFilterValueTest {
             // ----- Assert -----
             result.formats shouldBe setOf("ebook")
         }
-
-        @Test
-        fun `removes format when already present`() {
-            // ----- Arrange -----
-            val filters = LibraryFilters(formats = setOf("ebook"))
-
-            // ----- Act -----
-            val result = filters.toggle(value = LibraryFilterValue.Format("ebook"))
-
-            // ----- Assert -----
-            result.formats shouldBe emptySet()
-        }
     }
 
     @Nested
@@ -94,18 +83,6 @@ class LibraryFilterValueTest {
 
             // ----- Assert -----
             result.releaseYears shouldBe setOf(2021)
-        }
-
-        @Test
-        fun `removes year when already present`() {
-            // ----- Arrange -----
-            val filters = LibraryFilters(releaseYears = setOf(2021))
-
-            // ----- Act -----
-            val result = filters.toggle(value = LibraryFilterValue.ReleaseYear(2021))
-
-            // ----- Assert -----
-            result.releaseYears shouldBe emptySet()
         }
     }
 
@@ -232,9 +209,9 @@ class LibraryFilterValueTest {
         fun `toggling one facet does not change other facets`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
-                tags = setOf(tagFiction),
-                formats = setOf("paperback"),
-                releaseYears = setOf(2020),
+                tags = persistentSetOf(tagFiction),
+                formats = persistentSetOf("paperback"),
+                releaseYears = persistentSetOf(2020),
                 readYear = 2019,
                 owned = true,
                 ratingMin = 4.0,

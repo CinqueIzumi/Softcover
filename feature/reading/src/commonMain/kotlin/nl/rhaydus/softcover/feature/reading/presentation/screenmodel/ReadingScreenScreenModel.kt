@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
+import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
@@ -19,7 +20,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingCollector
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -35,13 +36,14 @@ internal class ReadingScreenScreenModel(
     private val refreshLibraryUseCase: RefreshLibraryUseCase,
     private val recordBookProgressUseCase: RecordBookProgressUseCase,
     private val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
+    private val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val observePlanTodayDismissalsUseCase: ObservePlanTodayDismissalsUseCase,
     private val dismissPlanTodayUseCase: DismissPlanTodayUseCase,
     private val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
     private val getTrendingBooksUseCase: GetTrendingBooksUseCase,
     private val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
-    private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
+    private val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
     private val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     private val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
     private val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
@@ -63,13 +65,14 @@ internal class ReadingScreenScreenModel(
         refreshLibraryUseCase = refreshLibraryUseCase,
         recordBookProgressUseCase = recordBookProgressUseCase,
         observeAllBookDeadlinesUseCase = observeAllBookDeadlinesUseCase,
+        observeCurrentDateUseCase = observeCurrentDateUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         observePlanTodayDismissalsUseCase = observePlanTodayDismissalsUseCase,
         dismissPlanTodayUseCase = dismissPlanTodayUseCase,
         getWantToReadUserBooksUseCase = getWantToReadUserBooksUseCase,
         getTrendingBooksUseCase = getTrendingBooksUseCase,
         observeRecentReadingActivityUseCase = observeRecentReadingActivityUseCase,
-        refreshUserProfileDataUseCase = refreshUserProfileDataUseCase,
+        refreshReadingActivityUseCase = refreshReadingActivityUseCase,
         getReadingStreakEnabledAsFlowUseCase = getReadingStreakEnabledAsFlowUseCase,
         getLastUsedProgressUnitAsFlowUseCase = getLastUsedProgressUnitAsFlowUseCase,
         setLastUsedProgressUnitUseCase = setLastUsedProgressUnitUseCase,

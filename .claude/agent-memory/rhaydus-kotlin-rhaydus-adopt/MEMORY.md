@@ -1,3 +1,1 @@
-- [Softcover on published foundation 0.3.1](project_softcover_foundation_0.3.1_published.md) — foundation.local=false (Maven Central), docs vendored at docs/rhaydus/0.3.1/; supersedes the 0.3.0-local entry below
-- [Softcover on local foundation 0.3.0 (superseded)](project_softcover_foundation_0.3.0_local.md) — historical: foundation.local=true, core-ui split into core-common/core-platform
 - [Wiring passes must not adopt F-item batches](feedback_rhaydus_adopt_scope.md) — even when the target module is being wired in the same pass, leave app-local forks/F-item migrations for a separate step

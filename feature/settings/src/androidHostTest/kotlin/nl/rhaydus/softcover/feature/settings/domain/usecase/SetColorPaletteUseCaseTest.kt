@@ -5,11 +5,11 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.ColorPalette
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.ColorPalette
-import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class SetColorPaletteUseCaseTest {
     private lateinit var settingsRepository: SettingsRepository
@@ -24,47 +24,23 @@ class SetColorPaletteUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `returns success when repository calls succeed`() = runTest {
+        fun `writes the palette and switches dynamic colour off`() = runTest {
             // ----- Arrange -----
             // (repository is relaxed)
 
             // ----- Act -----
-            val result = useCase(palette = ColorPalette.SEA)
+            val result = useCase(palette = ColorPalette.INK)
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-        }
-
-        @Test
-        fun `delegates to the repository with the given palette`() = runTest {
-            // ----- Arrange -----
-            // (repository is relaxed)
-
-            // ----- Act -----
-            useCase(palette = ColorPalette.INK)
-
-            // ----- Assert -----
             coVerify {
                 settingsRepository.setColorPalette(palette = ColorPalette.INK)
-            }
-        }
-
-        @Test
-        fun `also switches dynamic colour off`() = runTest {
-            // ----- Arrange -----
-            // (repository is relaxed)
-
-            // ----- Act -----
-            useCase(palette = ColorPalette.VELLUM)
-
-            // ----- Assert -----
-            coVerify {
                 settingsRepository.setDynamicColorEnabled(enabled = false)
             }
         }
 
         @Test
-        fun `returns failure when repository throws`() = runTest {
+        fun `returns failure and leaves dynamic colour untouched when writing the palette throws`() = runTest {
             // ----- Arrange -----
             val expectedError = RuntimeException("storage error")
 
@@ -76,8 +52,10 @@ class SetColorPaletteUseCaseTest {
             val result = useCase(palette = ColorPalette.FOXED)
 
             // ----- Assert -----
-            result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
+            coVerify(exactly = 0) {
+                settingsRepository.setDynamicColorEnabled(enabled = any())
+            }
         }
     }
 }

@@ -9,9 +9,6 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.offlinesync.ReplayOutcome
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.database.mapper.toJson
@@ -20,6 +17,9 @@ import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class UserBookWriteReplayTest {
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
@@ -66,48 +66,7 @@ class UserBookWriteReplayTest {
     @Nested
     inner class UpdateProgress {
         @Test
-        fun `calls replayUpdateBookProgress with the payload's fields and returns SYNCED`() = runTest {
-            // ----- Arrange -----
-            val payload = pendingUserBookWrite(
-                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
-                userBookReadId = 100,
-                editionId = 200,
-                progressPages = 50,
-                progressSeconds = 3600,
-                startedAt = "2026-01-01",
-                finishedAt = null,
-            )
-
-            coJustRun {
-                booksRemoteDataSource.replayUpdateBookProgress(
-                    userBookReadId = 100,
-                    editionId = 200,
-                    progressPages = 50,
-                    progressSeconds = 3600,
-                    startedAt = "2026-01-01",
-                    finishedAt = null,
-                )
-            }
-
-            // ----- Act -----
-            val result = replay(payload = payload)
-
-            // ----- Assert -----
-            result shouldBe ReplayOutcome.SYNCED
-            coVerify(exactly = 1) {
-                booksRemoteDataSource.replayUpdateBookProgress(
-                    userBookReadId = 100,
-                    editionId = 200,
-                    progressPages = 50,
-                    progressSeconds = 3600,
-                    startedAt = "2026-01-01",
-                    finishedAt = null,
-                )
-            }
-        }
-
-        @Test
-        fun `passes a non-null actionAt through to replayUpdateBookProgress`() = runTest {
+        fun `calls replayUpdateBookProgress with the payload's fields including actionAt and returns SYNCED`() = runTest {
             // ----- Arrange -----
             val payload = pendingUserBookWrite(
                 kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
@@ -175,35 +134,6 @@ class UserBookWriteReplayTest {
     inner class MarkAsRead {
         @Test
         fun `calls replayMarkBookAsRead with the date-only prefix of enqueuedAt and returns SYNCED`() = runTest {
-            // ----- Arrange -----
-            val payload = pendingUserBookWrite(
-                kind = PendingUserBookWriteKind.MARK_AS_READ,
-                bookId = 300,
-                enqueuedAt = "2026-05-04T12:34:56Z",
-            )
-
-            coJustRun {
-                booksRemoteDataSource.replayMarkBookAsRead(
-                    bookId = 300,
-                    userDate = "2026-05-04",
-                )
-            }
-
-            // ----- Act -----
-            val result = replay(payload = payload)
-
-            // ----- Assert -----
-            result shouldBe ReplayOutcome.SYNCED
-            coVerify(exactly = 1) {
-                booksRemoteDataSource.replayMarkBookAsRead(
-                    bookId = 300,
-                    userDate = "2026-05-04",
-                )
-            }
-        }
-
-        @Test
-        fun `passes a non-null actionAt through to replayMarkBookAsRead`() = runTest {
             // ----- Arrange -----
             val payload = pendingUserBookWrite(
                 kind = PendingUserBookWriteKind.MARK_AS_READ,

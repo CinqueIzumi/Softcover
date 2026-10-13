@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.personal.domain.model
 
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
+import kotlin.time.Instant
 
 data class ReadingLogEntry(
     val id: Long,

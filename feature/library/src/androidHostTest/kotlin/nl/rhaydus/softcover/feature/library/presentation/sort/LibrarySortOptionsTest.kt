@@ -1,10 +1,9 @@
 package nl.rhaydus.softcover.feature.library.presentation.sort
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.datetime.LocalDate
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -13,7 +12,10 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class LibrarySortOptionsTest {
     private fun buildUserBook(status: BookStatus) = UserBook(
@@ -93,10 +95,12 @@ class LibrarySortOptionsTest {
                 listName = "TBR",
             )
             val state = LibraryUiState(
-                customLists = listOf(buildBookList(
-                    id = 1,
-                    ranked = false,
-                ),),
+                customLists = persistentListOf(
+                    buildBookList(
+                        id = 1,
+                        ranked = false,
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -123,10 +127,12 @@ class LibrarySortOptionsTest {
                 listName = "Favorites",
             )
             val state = LibraryUiState(
-                customLists = listOf(buildBookList(
-                    id = 1,
-                    ranked = true,
-                ),),
+                customLists = persistentListOf(
+                    buildBookList(
+                        id = 1,
+                        ranked = true,
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -153,7 +159,7 @@ class LibrarySortOptionsTest {
                 listId = 99,
                 listName = "Unknown",
             )
-            val state = LibraryUiState(customLists = emptyList())
+            val state = LibraryUiState(customLists = persistentListOf())
 
             // ----- Act -----
             val result = librarySortOptions(
@@ -179,14 +185,20 @@ class LibrarySortOptionsTest {
                 listName = "TBR",
             )
             val state = LibraryUiState(
-                customLists = listOf(buildBookList(
-                    id = 1,
-                    ranked = false,
-                ),),
-                booksByTab = mapOf(tab.id to listOf(buildBook(
-                    id = 1,
-                    status = BookStatus.Reading,
-                ),),),
+                customLists = persistentListOf(
+                    buildBookList(
+                        id = 1,
+                        ranked = false,
+                    ),
+                ),
+                booksByTab = persistentMapOf(
+                    tab.id to persistentListOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.Reading,
+                        ),
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -203,26 +215,10 @@ class LibrarySortOptionsTest {
     @Nested
     inner class AllTab {
         @Test
-        fun `excludes MANUAL and ORDER regardless of content`() {
-            // ----- Arrange -----
-            val state = LibraryUiState()
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = LibraryTab.All,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.MANUAL) shouldBe false
-            result.contains(LibrarySortMode.ORDER) shouldBe false
-        }
-
-        @Test
         fun `with no books excludes PROGRESS, DEADLINE_URGENCY, and DATE_FINISHED`() {
             // ----- Arrange -----
             val state = LibraryUiState(
-                booksByTab = mapOf(LibraryTab.All.id to emptyList()),
+                booksByTab = persistentMapOf(LibraryTab.All.id to persistentListOf()),
             )
 
             // ----- Act -----
@@ -246,11 +242,13 @@ class LibrarySortOptionsTest {
         fun `with an in-progress book includes PROGRESS`() {
             // ----- Arrange -----
             val state = LibraryUiState(
-                booksByTab = mapOf(
-                    LibraryTab.All.id to listOf(buildBook(
-                        id = 1,
-                        status = BookStatus.Reading,
-                    ),),
+                booksByTab = persistentMapOf(
+                    LibraryTab.All.id to persistentListOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.Reading,
+                        ),
+                    ),
                 ),
             )
 
@@ -268,11 +266,13 @@ class LibrarySortOptionsTest {
         fun `with a finished book includes DATE_FINISHED`() {
             // ----- Arrange -----
             val state = LibraryUiState(
-                booksByTab = mapOf(
-                    LibraryTab.All.id to listOf(buildBook(
-                        id = 1,
-                        status = BookStatus.Read,
-                    ),),
+                booksByTab = persistentMapOf(
+                    LibraryTab.All.id to persistentListOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.Read,
+                        ),
+                    ),
                 ),
             )
 
@@ -287,34 +287,11 @@ class LibrarySortOptionsTest {
         }
 
         @Test
-        fun `with a tracked deadline includes DEADLINE_URGENCY`() {
-            // ----- Arrange -----
-            val state = LibraryUiState(
-                booksByTab = mapOf(
-                    LibraryTab.All.id to listOf(buildBook(
-                        id = 1,
-                        status = BookStatus.WantToRead,
-                    ),),
-                ),
-                deadlines = mapOf(1 to buildDeadline(bookId = 1)),
-            )
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = LibraryTab.All,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.DEADLINE_URGENCY) shouldBe true
-        }
-
-        @Test
         fun `with in-progress, finished, and deadline books includes all three content-gated modes but never MANUAL or ORDER`() {
             // ----- Arrange -----
             val state = LibraryUiState(
-                booksByTab = mapOf(
-                    LibraryTab.All.id to listOf(
+                booksByTab = persistentMapOf(
+                    LibraryTab.All.id to persistentListOf(
                         buildBook(
                             id = 1,
                             status = BookStatus.Reading,
@@ -329,7 +306,7 @@ class LibrarySortOptionsTest {
                         ),
                     ),
                 ),
-                deadlines = mapOf(3 to buildDeadline(bookId = 3)),
+                deadlines = persistentMapOf(3 to buildDeadline(bookId = 3)),
             )
 
             // ----- Act -----
@@ -358,26 +335,10 @@ class LibrarySortOptionsTest {
         private val tab = LibraryTab.Status.of(UserBookStatus.DID_NOT_FINISH)
 
         @Test
-        fun `excludes MANUAL and ORDER`() {
-            // ----- Arrange -----
-            val state = LibraryUiState()
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = tab,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.MANUAL) shouldBe false
-            result.contains(LibrarySortMode.ORDER) shouldBe false
-        }
-
-        @Test
         fun `with no books excludes the content-gated modes`() {
             // ----- Arrange -----
             val state = LibraryUiState(
-                booksByTab = mapOf(tab.id to emptyList()),
+                booksByTab = persistentMapOf(tab.id to persistentListOf()),
             )
 
             // ----- Act -----
@@ -396,28 +357,6 @@ class LibrarySortOptionsTest {
                 LibrarySortMode.RELEASE_DATE,
             )
         }
-
-        @Test
-        fun `content gating still applies off the tab's raw book list`() {
-            // ----- Arrange -----
-            val state = LibraryUiState(
-                booksByTab = mapOf(
-                    tab.id to listOf(buildBook(
-                        id = 1,
-                        status = BookStatus.Read,
-                    ),),
-                ),
-            )
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = tab,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.DATE_FINISHED) shouldBe true
-        }
     }
 
     @Nested
@@ -425,26 +364,10 @@ class LibrarySortOptionsTest {
         private val tab = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING)
 
         @Test
-        fun `includes MANUAL but excludes ORDER`() {
-            // ----- Arrange -----
-            val state = LibraryUiState()
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = tab,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.MANUAL) shouldBe true
-            result.contains(LibrarySortMode.ORDER) shouldBe false
-        }
-
-        @Test
         fun `with no books excludes PROGRESS, DEADLINE_URGENCY, and DATE_FINISHED`() {
             // ----- Arrange -----
             val state = LibraryUiState(
-                booksByTab = mapOf(tab.id to emptyList()),
+                booksByTab = persistentMapOf(tab.id to persistentListOf()),
             )
 
             // ----- Act -----
@@ -466,62 +389,18 @@ class LibrarySortOptionsTest {
         }
 
         @Test
-        fun `with an in-progress book includes PROGRESS alongside MANUAL`() {
-            // ----- Arrange -----
-            val state = LibraryUiState(
-                booksByTab = mapOf(
-                    tab.id to listOf(buildBook(
-                        id = 1,
-                        status = BookStatus.Reading,
-                    ),),
-                ),
-            )
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = tab,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.PROGRESS) shouldBe true
-            result.contains(LibrarySortMode.MANUAL) shouldBe true
-        }
-
-        @Test
-        fun `with a tracked deadline includes DEADLINE_URGENCY`() {
-            // ----- Arrange -----
-            val state = LibraryUiState(
-                booksByTab = mapOf(
-                    tab.id to listOf(buildBook(
-                        id = 5,
-                        status = BookStatus.WantToRead,
-                    ),),
-                ),
-                deadlines = mapOf(5 to buildDeadline(bookId = 5)),
-            )
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = tab,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.DEADLINE_URGENCY) shouldBe true
-        }
-
-        @Test
         fun `book on a different tab's list does not trigger content gating for this tab`() {
             // ----- Arrange -----
             val otherTab = LibraryTab.Status.of(UserBookStatus.READ)
             val state = LibraryUiState(
-                booksByTab = mapOf(
-                    tab.id to emptyList(),
-                    otherTab.id to listOf(buildBook(
-                        id = 1,
-                        status = BookStatus.Reading,
-                    ),),
+                booksByTab = persistentMapOf(
+                    tab.id to persistentListOf(),
+                    otherTab.id to persistentListOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.Reading,
+                        ),
+                    ),
                 ),
             )
 

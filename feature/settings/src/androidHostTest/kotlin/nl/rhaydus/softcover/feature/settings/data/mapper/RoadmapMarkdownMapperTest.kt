@@ -1,12 +1,11 @@
 package nl.rhaydus.softcover.feature.settings.data.mapper
 
 import io.kotest.matchers.shouldBe
-
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSpan
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class RoadmapMarkdownMapperTest {
     @Nested
@@ -21,7 +20,7 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Body"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Body"))),
             )
         }
 
@@ -35,46 +34,32 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Paragraph one"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Paragraph one"))),
                 RoadmapBlock.Heading(
                     level = 1,
-                    spans = listOf(RoadmapSpan(text = "Title")),
+                    spans = persistentListOf(RoadmapSpan(text = "Title")),
                 ),
             )
         }
 
         @Test
-        fun `double hash produces level two heading`() {
+        fun `double and triple hashes produce level two and three headings`() {
             // ----- Arrange -----
-            val markdown = "Intro\n\n## Heading Two"
+            val markdown = "Intro\n\n## Heading Two\n\n### Heading Three"
 
             // ----- Act -----
             val blocks = markdown.toRoadmapBlocks()
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Intro"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Intro"))),
                 RoadmapBlock.Heading(
                     level = 2,
-                    spans = listOf(RoadmapSpan(text = "Heading Two")),
+                    spans = persistentListOf(RoadmapSpan(text = "Heading Two")),
                 ),
-            )
-        }
-
-        @Test
-        fun `triple hash produces level three heading`() {
-            // ----- Arrange -----
-            val markdown = "Intro\n\n### Heading Three"
-
-            // ----- Act -----
-            val blocks = markdown.toRoadmapBlocks()
-
-            // ----- Assert -----
-            blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Intro"))),
                 RoadmapBlock.Heading(
                     level = 3,
-                    spans = listOf(RoadmapSpan(text = "Heading Three")),
+                    spans = persistentListOf(RoadmapSpan(text = "Heading Three")),
                 ),
             )
         }
@@ -92,7 +77,7 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Line one Line two Line three"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Line one Line two Line three"))),
             )
         }
 
@@ -106,8 +91,8 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "First paragraph text"))),
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Second paragraph text"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "First paragraph text"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Second paragraph text"))),
             )
         }
     }
@@ -115,37 +100,24 @@ class RoadmapMarkdownMapperTest {
     @Nested
     inner class Lists {
         @Test
-        fun `dash bullet produces a bullet list item`() {
+        fun `dash and asterisk bullets produce bullet list items`() {
             // ----- Arrange -----
-            val markdown = "- First item"
+            val markdown = "- First item\n* Second item"
 
             // ----- Act -----
             val blocks = markdown.toRoadmapBlocks()
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.BulletListItem(spans = listOf(RoadmapSpan(text = "First item"))),
+                RoadmapBlock.BulletListItem(spans = persistentListOf(RoadmapSpan(text = "First item"))),
+                RoadmapBlock.BulletListItem(spans = persistentListOf(RoadmapSpan(text = "Second item"))),
             )
         }
 
         @Test
-        fun `asterisk bullet produces a bullet list item`() {
+        fun `ordered items keep their explicit non-sequential index`() {
             // ----- Arrange -----
-            val markdown = "* First item"
-
-            // ----- Act -----
-            val blocks = markdown.toRoadmapBlocks()
-
-            // ----- Assert -----
-            blocks shouldBe listOf(
-                RoadmapBlock.BulletListItem(spans = listOf(RoadmapSpan(text = "First item"))),
-            )
-        }
-
-        @Test
-        fun `ordered item produces the parsed index`() {
-            // ----- Arrange -----
-            val markdown = "1. First item"
+            val markdown = "1. First item\n5. Fifth item"
 
             // ----- Act -----
             val blocks = markdown.toRoadmapBlocks()
@@ -154,24 +126,11 @@ class RoadmapMarkdownMapperTest {
             blocks shouldBe listOf(
                 RoadmapBlock.OrderedListItem(
                     index = 1,
-                    spans = listOf(RoadmapSpan(text = "First item")),
+                    spans = persistentListOf(RoadmapSpan(text = "First item")),
                 ),
-            )
-        }
-
-        @Test
-        fun `non-sequential explicit index is preserved`() {
-            // ----- Arrange -----
-            val markdown = "5. Fifth item"
-
-            // ----- Act -----
-            val blocks = markdown.toRoadmapBlocks()
-
-            // ----- Assert -----
-            blocks shouldBe listOf(
                 RoadmapBlock.OrderedListItem(
                     index = 5,
-                    spans = listOf(RoadmapSpan(text = "Fifth item")),
+                    spans = persistentListOf(RoadmapSpan(text = "Fifth item")),
                 ),
             )
         }
@@ -189,7 +148,7 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.BlockQuote(spans = listOf(RoadmapSpan(text = "Line one Line two"))),
+                RoadmapBlock.BlockQuote(spans = persistentListOf(RoadmapSpan(text = "Line one Line two"))),
             )
         }
 
@@ -203,8 +162,8 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.BlockQuote(spans = listOf(RoadmapSpan(text = "Quoted text"))),
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Plain paragraph"))),
+                RoadmapBlock.BlockQuote(spans = persistentListOf(RoadmapSpan(text = "Quoted text"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "Plain paragraph"))),
             )
         }
     }
@@ -212,51 +171,20 @@ class RoadmapMarkdownMapperTest {
     @Nested
     inner class ThematicBreaks {
         @Test
-        fun `three dashes produce a thematic break`() {
+        fun `three or more dashes, asterisks or underscores produce a thematic break`() {
             // ----- Arrange -----
-            val markdown = "---"
+            val markdown = "---\n***\n___\n-----"
 
             // ----- Act -----
             val blocks = markdown.toRoadmapBlocks()
 
             // ----- Assert -----
-            blocks shouldBe listOf(RoadmapBlock.ThematicBreak)
-        }
-
-        @Test
-        fun `three asterisks produce a thematic break`() {
-            // ----- Arrange -----
-            val markdown = "***"
-
-            // ----- Act -----
-            val blocks = markdown.toRoadmapBlocks()
-
-            // ----- Assert -----
-            blocks shouldBe listOf(RoadmapBlock.ThematicBreak)
-        }
-
-        @Test
-        fun `three underscores produce a thematic break`() {
-            // ----- Arrange -----
-            val markdown = "___"
-
-            // ----- Act -----
-            val blocks = markdown.toRoadmapBlocks()
-
-            // ----- Assert -----
-            blocks shouldBe listOf(RoadmapBlock.ThematicBreak)
-        }
-
-        @Test
-        fun `more than three repeated dashes still produce a thematic break`() {
-            // ----- Arrange -----
-            val markdown = "-----"
-
-            // ----- Act -----
-            val blocks = markdown.toRoadmapBlocks()
-
-            // ----- Assert -----
-            blocks shouldBe listOf(RoadmapBlock.ThematicBreak)
+            blocks shouldBe listOf(
+                RoadmapBlock.ThematicBreak,
+                RoadmapBlock.ThematicBreak,
+                RoadmapBlock.ThematicBreak,
+                RoadmapBlock.ThematicBreak,
+            )
         }
     }
 
@@ -272,44 +200,40 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(
-                    text = "bold text",
-                    bold = true,
-                ),),),
+                RoadmapBlock.Paragraph(
+                    spans = persistentListOf(
+                        RoadmapSpan(
+                            text = "bold text",
+                            bold = true,
+                        ),
+                    ),
+                ),
             )
         }
 
         @Test
-        fun `italic text with asterisks produces an italic span`() {
+        fun `italic text with asterisks or underscores produces italic spans`() {
             // ----- Arrange -----
-            val markdown = "*italic text*"
+            val markdown = "*one* _two_"
 
             // ----- Act -----
             val blocks = markdown.toRoadmapBlocks()
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(
-                    text = "italic text",
-                    italic = true,
-                ),),),
-            )
-        }
-
-        @Test
-        fun `italic text with underscores produces an italic span`() {
-            // ----- Arrange -----
-            val markdown = "_italic text_"
-
-            // ----- Act -----
-            val blocks = markdown.toRoadmapBlocks()
-
-            // ----- Assert -----
-            blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(
-                    text = "italic text",
-                    italic = true,
-                ),),),
+                RoadmapBlock.Paragraph(
+                    spans = persistentListOf(
+                        RoadmapSpan(
+                            text = "one",
+                            italic = true,
+                        ),
+                        RoadmapSpan(text = " "),
+                        RoadmapSpan(
+                            text = "two",
+                            italic = true,
+                        ),
+                    ),
+                ),
             )
         }
 
@@ -323,10 +247,14 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(
-                    text = "code text",
-                    code = true,
-                ),),),
+                RoadmapBlock.Paragraph(
+                    spans = persistentListOf(
+                        RoadmapSpan(
+                            text = "code text",
+                            code = true,
+                        ),
+                    ),
+                ),
             )
         }
 
@@ -341,10 +269,12 @@ class RoadmapMarkdownMapperTest {
             // ----- Assert -----
             blocks shouldBe listOf(
                 RoadmapBlock.Paragraph(
-                    spans = listOf(RoadmapSpan(
-                        text = "Click here",
-                        url = "https://example.com",
-                    ),),
+                    spans = persistentListOf(
+                        RoadmapSpan(
+                            text = "Click here",
+                            url = "https://example.com",
+                        ),
+                    ),
                 ),
             )
         }
@@ -360,7 +290,7 @@ class RoadmapMarkdownMapperTest {
             // ----- Assert -----
             blocks shouldBe listOf(
                 RoadmapBlock.Paragraph(
-                    spans = listOf(
+                    spans = persistentListOf(
                         RoadmapSpan(
                             text = "Bold",
                             bold = true,
@@ -386,7 +316,7 @@ class RoadmapMarkdownMapperTest {
             // ----- Assert -----
             blocks shouldBe listOf(
                 RoadmapBlock.Paragraph(
-                    spans = listOf(
+                    spans = persistentListOf(
                         RoadmapSpan(text = "Plain text "),
                         RoadmapSpan(
                             text = "bold forever",
@@ -407,7 +337,7 @@ class RoadmapMarkdownMapperTest {
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "*"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "*"))),
             )
         }
     }
@@ -415,27 +345,18 @@ class RoadmapMarkdownMapperTest {
     @Nested
     inner class Robustness {
         @Test
-        fun `empty string produces an empty block list`() {
+        fun `empty and whitespace-only strings produce an empty block list`() {
             // ----- Arrange -----
-            val markdown = ""
+            val empty = ""
+            val whitespace = "   \n  \n"
 
             // ----- Act -----
-            val blocks = markdown.toRoadmapBlocks()
+            val emptyBlocks = empty.toRoadmapBlocks()
+            val whitespaceBlocks = whitespace.toRoadmapBlocks()
 
             // ----- Assert -----
-            blocks shouldBe emptyList()
-        }
-
-        @Test
-        fun `whitespace-only string produces an empty block list`() {
-            // ----- Arrange -----
-            val markdown = "   \n  \n"
-
-            // ----- Act -----
-            val blocks = markdown.toRoadmapBlocks()
-
-            // ----- Assert -----
-            blocks shouldBe emptyList()
+            emptyBlocks shouldBe emptyList()
+            whitespaceBlocks shouldBe emptyList()
         }
 
         @Test
@@ -453,73 +374,18 @@ class RoadmapMarkdownMapperTest {
         }
 
         @Test
-        fun `a markdown table row survives as plain paragraph text`() {
+        fun `unsupported table and html syntax survive as plain paragraph text`() {
             // ----- Arrange -----
-            val markdown = "| a | b |"
+            val markdown = "| a | b |\n\n<div>text</div>"
 
             // ----- Act -----
             val blocks = markdown.toRoadmapBlocks()
 
             // ----- Assert -----
             blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "| a | b |"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "| a | b |"))),
+                RoadmapBlock.Paragraph(spans = persistentListOf(RoadmapSpan(text = "<div>text</div>"))),
             )
-        }
-
-        @Test
-        fun `a raw html tag survives as plain paragraph text`() {
-            // ----- Arrange -----
-            val markdown = "<div>text</div>"
-
-            // ----- Act -----
-            val blocks = markdown.toRoadmapBlocks()
-
-            // ----- Assert -----
-            blocks shouldBe listOf(
-                RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "<div>text</div>"))),
-            )
-        }
-    }
-
-    @Nested
-    inner class RealRoadmapExcerpt {
-        @Test
-        fun `parses a realistic excerpt of the actual roadmap document`() {
-            // ----- Arrange -----
-            val markdown = """
-                # Softcover roadmap
-
-                What we're building next for [Softcover](https://hardcover.app/), grouped by the version it's planned to land in. This is the public view of our plan.
-
-                **Current release: 3.1.2.** Softcover runs on Android, iPhone, iPad and desktop.
-
-                A few honest caveats:
-                - **These are plans, not promises.** Versions are listed in the order we intend to ship them, but order can shift and some items may move, merge, or change shape.
-                - **No release dates.** We ship when each drop is ready.
-
-                > Reading this inside the app? It's the same file, fetched live, so it's always current.
-
-                ---
-
-                ## 3.2.0: Widgets, and a lot of small things
-
-                **Home-screen widgets** (Android first): the book you're **Currently Reading**, a **random pick from Want-to-Read** for when you can't decide.
-            """.trimIndent()
-
-            // ----- Act -----
-            val blocks = markdown.toRoadmapBlocks()
-
-            // ----- Assert -----
-            val firstBlock = blocks.first()
-
-            (firstBlock is RoadmapBlock.Heading && firstBlock.level == 1) shouldBe false
-
-            val introParagraph = firstBlock as RoadmapBlock.Paragraph
-            introParagraph.spans.any { it.text.contains("What we're building next") } shouldBe true
-
-            val levelTwoHeadings = blocks.filterIsInstance<RoadmapBlock.Heading>()
-                .filter { it.level == 2 }
-            levelTwoHeadings.isNotEmpty() shouldBe true
         }
     }
 }

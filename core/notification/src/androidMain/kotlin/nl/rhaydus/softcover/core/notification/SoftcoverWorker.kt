@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.core.notification
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import kotlin.coroutines.cancellation.CancellationException
 import nl.rhaydus.common.AppLog
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Base class for scheduled work that produces notifications.

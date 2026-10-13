@@ -11,25 +11,30 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import org.koin.compose.koinInject
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.designsystem.util.SnackBarManager
-import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.component.field.TextFieldEvent
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnConfirmedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnDismissedAction
+import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnChangedAction
+import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnShakeEndedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnSubmittedAction
 import nl.rhaydus.softcover.feature.scan.presentation.component.UnknownIsbnSheet
-import nl.rhaydus.softcover.feature.scan.presentation.event.AddBookFailedEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.InvalidIsbnEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.ResolutionFailedEvent
+import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.permission.isCameraAvailable
 import nl.rhaydus.softcover.feature.scan.presentation.permission.isCameraPermissionGranted
 import nl.rhaydus.softcover.feature.scan.presentation.permission.rememberCameraPermissionRequester
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanScreenModel
+import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
+import org.koin.compose.koinInject
 
 class BarcodeScannerScreen : Screen {
     @Composable
@@ -60,9 +65,13 @@ class BarcodeScannerScreen : Screen {
             if (hasCamera && cameraGranted.not()) permissionRequester.request()
         }
 
+        val haptics = LocalHaptics.current
+
         ObserveAsEvents(flow = screenModel.events) { event ->
+            if (event is FeedbackEvent) haptics.play(event.feedback)
+
             when (event) {
-                is BookResolvedEvent -> {
+                is ScanEvent.BookResolvedEvent -> {
                     val scannedEdition = event.book.editions.firstOrNull { it.id == event.editionId }
 
                     navigator.pop()
@@ -82,9 +91,17 @@ class BarcodeScannerScreen : Screen {
                     )
                 }
 
-                is InvalidIsbnEvent -> SnackBarManager.showSnackbar(title = "That doesn't look like a valid ISBN.")
-                is ResolutionFailedEvent -> SnackBarManager.showSnackbar(title = "Couldn't look that up — try again.")
-                is AddBookFailedEvent -> SnackBarManager.showSnackbar(title = "Couldn't add it — try again.")
+                is ScanEvent.InvalidIsbnEvent -> {
+                    SnackBarManager.showSnackbar(title = "That doesn't look like a valid ISBN.")
+                }
+
+                is ScanEvent.ResolutionFailedEvent -> {
+                    SnackBarManager.showSnackbar(title = "Couldn't look up that ISBN. Try again.")
+                }
+
+                is ScanEvent.AddBookFailedEvent -> {
+                    SnackBarManager.showSnackbar(title = "Couldn't add the book. Try again.")
+                }
             }
         }
 
@@ -92,15 +109,31 @@ class BarcodeScannerScreen : Screen {
             state = state,
             manualMode = manualMode,
             cameraGranted = cameraGranted,
-            onIsbnSubmit = { isbn -> screenModel.runAction(OnIsbnSubmittedAction(isbn = isbn)) },
+            onIsbnSubmit = { isbn, origin ->
+                screenModel.runAction(
+                    OnIsbnSubmittedAction(
+                        isbn = isbn,
+                        origin = origin,
+                    ),
+                )
+            },
+            onIsbnFieldEvent = { event ->
+                when (event) {
+                    is TextFieldEvent.ValueChanged -> screenModel.runAction(OnIsbnChangedAction(text = event.text))
+
+                    is TextFieldEvent.Submitted,
+                    is TextFieldEvent.TrailingClicked -> Unit
+
+                    is TextFieldEvent.ShakeEnded -> screenModel.runAction(OnIsbnShakeEndedAction)
+                }
+            },
             onEnterManually = { manualMode = true },
             onNavigateBack = navigator::pop,
         )
 
-        state.unknownIsbn?.let { unknownIsbn ->
+        state.unknownIsbnSheet.modelOrNull?.let { unknownIsbnSheet ->
             UnknownIsbnSheet(
-                isbn = unknownIsbn,
-                isAdding = state.isAddingBook,
+                model = unknownIsbnSheet,
                 onConfirm = { screenModel.runAction(OnAddUnknownIsbnConfirmedAction()) },
                 onDismiss = { screenModel.runAction(OnAddUnknownIsbnDismissedAction()) },
             )
@@ -118,7 +151,8 @@ internal expect fun BarcodeScannerScreenLayout(
     state: ScanUiState,
     manualMode: Boolean,
     cameraGranted: Boolean,
-    onIsbnSubmit: (String) -> Unit,
+    onIsbnSubmit: (String, IsbnOrigin) -> Unit,
+    onIsbnFieldEvent: (TextFieldEvent) -> Unit,
     onEnterManually: () -> Unit,
     onNavigateBack: () -> Unit,
 )

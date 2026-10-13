@@ -24,10 +24,6 @@ fun ReviewDocument.isBlank(): Boolean = paragraphs.all { paragraph ->
     paragraph.runs.all { it.text.isBlank() }
 }
 
-fun ReviewDocument.plainText(): String = paragraphs.joinToString(separator = "\n") { paragraph ->
-    paragraph.runs.joinToString(separator = "") { it.text }
-}
-
 /**
  * Collapse a document to a canonical shape: drop empty runs and merge adjacent runs that carry the
  * same marks. Two documents with identical visible content and formatting are then structurally equal,

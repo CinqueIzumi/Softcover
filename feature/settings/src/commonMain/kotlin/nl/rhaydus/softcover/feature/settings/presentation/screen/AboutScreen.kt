@@ -8,6 +8,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 
 class AboutScreen : Screen {
@@ -22,11 +24,15 @@ class AboutScreen : Screen {
         val uriHandler = LocalUriHandler.current
 
         AboutScreenLayout(
-            versionName = state.appVersionName,
-            versionCode = state.appVersionCode,
+            topBar = state.aboutTopBar,
+            versionLabel = state.versionLabel,
+            creditsHeader = state.aboutCreditsHeader,
+            sourceHeader = state.aboutSourceHeader,
+            contactHeader = state.aboutContactHeader,
             openUrl = uriHandler::openUri,
             onNavigateBack = navigator::pop,
             onRoadmapClick = { navigator.push(RoadmapScreen()) },
+            onComponentGalleryUnlocked = { navigator.push(ComponentGalleryScreen()) },
         )
     }
 }
@@ -39,13 +45,21 @@ class AboutScreen : Screen {
  * the single call site above. [onRoadmapClick] pushes [RoadmapScreen] onto this screen's own navigator —
  * About always reaches Roadmap by pushing, even on desktop, since the master–detail pane's own `About`
  * category swaps to `Roadmap` through a separate, locally-wired callback instead (see
- * `SettingsScreenLayout`'s `AboutPane`).
+ * `SettingsScreenLayout`'s `AboutPane`). [onComponentGalleryUnlocked] fires from the version footer's
+ * seven-tap easter egg (`component-contract.md` § 7.5) and, on this standalone page, pushes
+ * [ComponentGalleryScreen] onto this screen's own navigator — the master–detail pane's `About`
+ * category wires the same gesture to its own local navigator instead (see `section/AboutPane.kt`'s
+ * `AboutPane`).
  */
 @Composable
 internal expect fun AboutScreenLayout(
-    versionName: String,
-    versionCode: Int,
+    topBar: TopBarUiModel,
+    versionLabel: String,
+    creditsHeader: SectionHeaderUiModel,
+    sourceHeader: SectionHeaderUiModel,
+    contactHeader: SectionHeaderUiModel,
     openUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
     onRoadmapClick: () -> Unit,
+    onComponentGalleryUnlocked: () -> Unit,
 )

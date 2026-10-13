@@ -1,8 +1,9 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.cancelAndJoin
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.softcover.core.designsystem.presentation.error.toUserMessage
+import nl.rhaydus.softcover.core.presentation.error.toUserMessage
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -83,7 +84,7 @@ internal suspend fun resetSearch(
     scope.setState {
         it.copy(
             searchText = "",
-            queriedBooks = emptyList(),
+            queriedBooks = persistentListOf(),
             activeMoodFilter = null,
             queriedBooksHasMore = true,
             isLoading = false,

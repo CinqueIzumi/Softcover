@@ -7,13 +7,13 @@ import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.memory.MemoryCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
-import org.koin.android.ext.koin.androidContext
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.notification.NotificationChannelInitializer
 import nl.rhaydus.softcover.di.appModule
 import nl.rhaydus.softcover.di.debugRoutesModule
 import nl.rhaydus.softcover.orchestration.di.initKoin
 import nl.rhaydus.softcover.orchestration.di.startAppServices
+import org.koin.android.ext.koin.androidContext
 
 internal class SoftCoverApp : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {

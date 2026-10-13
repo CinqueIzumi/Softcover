@@ -1,14 +1,16 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.withBook
 import nl.rhaydus.toad.ActionScope
 
 internal class UserBooksFlowCollector : BookDetailCollector {
@@ -16,20 +18,21 @@ internal class UserBooksFlowCollector : BookDetailCollector {
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
         dependencies: BookDetailDependencies,
     ) {
-        combine(
-            dependencies.getAllUserBooksUseCase(),
-            scope.state.map { it.book?.id }.distinctUntilChanged(),
-        ) { books, bookId ->
-            bookId?.let { id -> books.find { it.id == id } }
-        }.collectLatest { localBook ->
-            localBook ?: return@collectLatest
+        scope.state
+            .map { it.book?.id }
+            .distinctUntilChanged()
+            .flatMapLatest { bookId ->
+                bookId?.let { id -> dependencies.observeUserBookUseCase(id = id) } ?: emptyFlow()
+            }.collectLatest { localBook ->
+                localBook ?: return@collectLatest
 
-            scope.setState { state ->
-                val currentBook = state.book ?: return@setState state
+                scope.setState { state ->
+                    val currentBook = state.book ?: return@setState state
+                    val overlaid = currentBook.overlay(localBook)
 
-                state.copy(book = currentBook.overlay(localBook))
+                    if (overlaid == currentBook) state else state.withBook(book = overlaid)
+                }
             }
-        }
     }
 
     private fun Book.overlay(localBook: Book): Book {

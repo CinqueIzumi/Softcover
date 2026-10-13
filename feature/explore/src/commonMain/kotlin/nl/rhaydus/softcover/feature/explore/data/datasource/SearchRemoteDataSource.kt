@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
+import nl.rhaydus.softcover.feature.explore.domain.model.SeriesContinuationSeed
 
 interface SearchRemoteDataSource {
     val queriedBooks: Flow<List<Book>>
@@ -31,6 +32,16 @@ interface SearchRemoteDataSource {
         seriesId: Int,
         afterPosition: Double,
     ): Book?
+
+    /**
+     * Batched sibling of [fetchNextInSeries]: resolves the next-unread-book cursor for every
+     * [seeds] entry in a single request instead of one request per seed, at the cost of failing
+     * (or succeeding) as a whole rather than per series - see the call site in
+     * `GetContinueSeriesBooksUseCase.fetchNextBooks` for why that trade is worth it. Returns at
+     * most one [Book] per seed, in the same order as [seeds]; a seed whose series has no book past
+     * its cursor is simply absent from the result.
+     */
+    suspend fun fetchNextBooksInSeries(seeds: List<SeriesContinuationSeed>): List<Book>
 
     suspend fun fetchFeaturedUpcomingRelease(): Book?
 

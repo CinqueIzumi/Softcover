@@ -13,6 +13,6 @@ internal class OnNameChangedAction(
         dependencies: CreateListDependencies,
         scope: ActionScope<CreateListUiState, CreateListEvent, LocalCreateListVariables>,
     ) {
-        scope.setState { it.copy(name = newName) }
+        scope.setState { it.withName(newName = newName) }
     }
 }

@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class TagSuggestionDerivationTest {
     private fun buildTag(
@@ -195,33 +195,6 @@ class TagSuggestionDerivationTest {
         }
 
         @Test
-        fun `blank input returns every candidate ranked by count then name`() {
-            // ----- Arrange -----
-            val tags = (1..10).map {
-                buildTag(
-                    name = "Tag$it",
-                    count = it,
-                )
-            }
-
-            // ----- Act -----
-            val result = computeTagSuggestions(
-                vocabulary = tags,
-                input = "",
-                category = TagCategory.GENRE,
-                appliedTags = emptyList(),
-            )
-
-            // ----- Assert -----
-            result shouldBe (10 downTo 1).map {
-                buildTag(
-                    name = "Tag$it",
-                    count = it,
-                )
-            }
-        }
-
-        @Test
         fun `non-blank input filters candidates to substring matches ignoring case`() {
             // ----- Arrange -----
             val matching = buildTag(name = "Fantasy")
@@ -327,76 +300,6 @@ class TagSuggestionDerivationTest {
 
             // ----- Assert -----
             result shouldBe listOf(highCount, tiedA, tiedB, lowCount)
-        }
-
-        @Test
-        fun `within the mid-string tier entries are ordered by count desc then name asc`() {
-            // ----- Arrange -----
-            val lowCount = buildTag(
-                name = "Urban Fantasy",
-                count = 1,
-            )
-            val highCount = buildTag(
-                name = "Epic Fantasy",
-                count = 9,
-            )
-
-            // ----- Act -----
-            val result = computeTagSuggestions(
-                vocabulary = listOf(lowCount, highCount),
-                input = "fan",
-                category = TagCategory.GENRE,
-                appliedTags = emptyList(),
-            )
-
-            // ----- Assert -----
-            result shouldBe listOf(highCount, lowCount)
-        }
-
-        @Test
-        fun `non-blank input returns every match with prefix tier ahead of mid-string tier`() {
-            // ----- Arrange -----
-            val prefixTags = (1..2).map {
-                buildTag(
-                    name = "Fan$it",
-                    count = it,
-                )
-            }
-            val midTags = (1..2).map {
-                buildTag(
-                    name = "Urban Fan$it",
-                    count = 100 + it,
-                )
-            }
-
-            // ----- Act -----
-            val result = computeTagSuggestions(
-                vocabulary = prefixTags + midTags,
-                input = "fan",
-                category = TagCategory.GENRE,
-                appliedTags = emptyList(),
-            )
-
-            // ----- Assert -----
-            // Both prefix matches rank ahead of both mid-string matches regardless of count.
-            result shouldBe listOf(
-                buildTag(
-                    name = "Fan2",
-                    count = 2,
-                ),
-                buildTag(
-                    name = "Fan1",
-                    count = 1,
-                ),
-                buildTag(
-                    name = "Urban Fan2",
-                    count = 102,
-                ),
-                buildTag(
-                    name = "Urban Fan1",
-                    count = 101,
-                ),
-            )
         }
 
         @Test

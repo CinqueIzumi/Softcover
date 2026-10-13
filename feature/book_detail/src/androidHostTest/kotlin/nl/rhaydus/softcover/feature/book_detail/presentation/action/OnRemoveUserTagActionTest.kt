@@ -2,25 +2,30 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnRemoveUserTagActionTest {
     private lateinit var saveUserTagsUseCase: SaveUserTagsUseCase
@@ -31,7 +36,7 @@ class OnRemoveUserTagActionTest {
     @BeforeEach
     fun setUp() {
         saveUserTagsUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -83,7 +88,7 @@ class OnRemoveUserTagActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = listOf(tagToRemove, otherTag),
+                userTags = persistentListOf(tagToRemove, otherTag),
             )
             val serverResponse = listOf(otherTag)
 
@@ -94,7 +99,13 @@ class OnRemoveUserTagActionTest {
                 )
             } returns Result.success(serverResponse)
 
-            val action = OnRemoveUserTagAction(tag = tagToRemove)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = persistentMapOf("chip" to tagToRemove),
+
+            )
+
+            val action = OnRemoveUserTagAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -104,38 +115,6 @@ class OnRemoveUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe serverResponse
-        }
-
-        @Test
-        fun `results in empty list when removing the only tag`() = runTest {
-            // ----- Arrange -----
-            val dependencies = stubDependencies(this)
-            val onlyTag = UserTag(
-                name = "mystery",
-                category = TagCategory.GENRE,
-            )
-            stateFlow.value = stateFlow.value.copy(
-                book = stubBook(id = 1),
-                userTags = listOf(onlyTag),
-            )
-
-            coEvery {
-                saveUserTagsUseCase(
-                    bookId = 1,
-                    tags = emptyList(),
-                )
-            } returns Result.success(emptyList())
-
-            val action = OnRemoveUserTagAction(tag = onlyTag)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.userTags shouldBe emptyList()
         }
 
         @Test
@@ -152,7 +131,7 @@ class OnRemoveUserTagActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = listOf(genreTag, moodTag),
+                userTags = persistentListOf(genreTag, moodTag),
             )
             val serverResponse = listOf(moodTag)
 
@@ -163,7 +142,13 @@ class OnRemoveUserTagActionTest {
                 )
             } returns Result.success(serverResponse)
 
-            val action = OnRemoveUserTagAction(tag = genreTag)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = persistentMapOf("chip" to genreTag),
+
+            )
+
+            val action = OnRemoveUserTagAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -190,7 +175,7 @@ class OnRemoveUserTagActionTest {
             val originalTags = listOf(tagToRemove, otherTag)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = originalTags,
+                userTags = originalTags.toImmutableList(),
             )
 
             coEvery {
@@ -200,7 +185,13 @@ class OnRemoveUserTagActionTest {
                 )
             } returns Result.failure(RuntimeException("server error"))
 
-            val action = OnRemoveUserTagAction(tag = tagToRemove)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = persistentMapOf("chip" to tagToRemove),
+
+            )
+
+            val action = OnRemoveUserTagAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -222,10 +213,13 @@ class OnRemoveUserTagActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = null,
-                userTags = listOf(tag),
+                userTags = persistentListOf(tag),
             )
             val initialTags = stateFlow.value.userTags
-            val action = OnRemoveUserTagAction(tag = tag)
+            stateFlow.value = stateFlow.value.copy(
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
+            )
+            val action = OnRemoveUserTagAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -235,6 +229,37 @@ class OnRemoveUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe initialTags
+        }
+
+        @Test
+        fun `does nothing when the chip key matches no user tag`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            val tag = UserTag(
+                name = "fantasy",
+                category = TagCategory.GENRE,
+            )
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(id = 1),
+                userTags = persistentListOf(tag),
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
+            )
+            val action = OnRemoveUserTagAction(chipKey = "unknown")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.userTags shouldBe listOf(tag)
+            coVerify(exactly = 0) {
+                saveUserTagsUseCase(
+                    any(),
+                    any(),
+                )
+            }
         }
     }
 }

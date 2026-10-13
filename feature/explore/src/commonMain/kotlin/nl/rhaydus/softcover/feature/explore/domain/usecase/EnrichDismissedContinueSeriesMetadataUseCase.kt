@@ -12,6 +12,17 @@ import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 
 /**
+ * Rate-limit budget, not a UI preference: every un-enriched row below fires its own network
+ * request (`GetBookById` or `GetNextBookInSeries`), unpaced, on the same Explore mount that also
+ * fires the continue-series fan-out. A long-standing account can carry dozens of pre-v44/v45
+ * dismissed rows, which would blow a Free-plan burst bucket outright. Slicing here rather than
+ * pacing is squarely in the grain of this use case's documented design: each row is already
+ * resolved independently and retried on the next open, so a row that misses this slice is not
+ * lost - it is simply picked up next time, the same as a row that failed outright would be.
+ */
+private const val MAX_ENRICHMENT_ROWS_PER_OPEN = 8
+
+/**
  * Backfills the metadata a hidden "up next in your series" row is missing when it predates the
  * schema that introduced it: display fields (title, cover, author, series name) before v44, and the
  * series cursor (series id + position) before v45. The cursor matters beyond presentation - a row
@@ -45,19 +56,23 @@ class EnrichDismissedContinueSeriesMetadataUseCase(
             emptyList()
         }
 
+        val enrichments: List<suspend () -> Unit> = booksNeedingEnrichment
+            .map { book -> suspend { enrichBook(book = book) } }
+            .plus(
+                seriesNeedingEnrichment.map { series ->
+                    suspend {
+                        enrichSeries(
+                            series = series,
+                            localBooks = localBooks,
+                        )
+                    }
+                },
+            )
+
         coroutineScope {
-            booksNeedingEnrichment
-                .map { book -> async { enrichBook(book = book) } }
-                .plus(
-                    seriesNeedingEnrichment.map { series ->
-                        async {
-                            enrichSeries(
-                                series = series,
-                                localBooks = localBooks,
-                            )
-                        }
-                    },
-                )
+            enrichments
+                .take(MAX_ENRICHMENT_ROWS_PER_OPEN)
+                .map { enrich -> async { enrich() } }
                 .awaitAll()
         }
     }

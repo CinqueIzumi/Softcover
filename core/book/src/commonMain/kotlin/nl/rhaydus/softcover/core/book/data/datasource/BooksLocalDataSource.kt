@@ -3,11 +3,15 @@ package nl.rhaydus.softcover.core.book.data.datasource
 import androidx.room.RoomRawQuery
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.data.sort.toOrderByFragment
 import nl.rhaydus.softcover.core.book.data.storage.EditionImageStorage
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.mapper.toModel
+import nl.rhaydus.softcover.core.database.model.BookFullEntity
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
@@ -16,6 +20,8 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 
 interface BooksLocalDataSource {
     val allUserBooks: Flow<List<Book>>
+
+    fun observeUserBook(id: Int): Flow<Book?>
 
     /**
      * Rewrite the **prefix** of the manual ordering for [status] with [prefixBookIds]
@@ -93,12 +99,20 @@ interface BooksLocalDataSource {
 internal class BooksLocalDataSourceImpl(
     private val dao: BookDao,
     private val editionImageStorage: EditionImageStorage,
+    private val appDispatchers: AppDispatchers,
 ) : BooksLocalDataSource {
     override val allUserBooks: Flow<List<Book>>
         get() = dao
             .observeBooks()
             .distinctUntilChanged()
-            .map { list -> list.map { it.toModel() } }
+            .toModelsReusingUnchanged()
+
+    override fun observeUserBook(id: Int): Flow<Book?> = dao
+        .observeBookById(id = id)
+        .distinctUntilChanged()
+        .map { entity -> entity?.toModel() }
+        .distinctUntilChanged()
+        .flowOn(appDispatchers.default)
 
     override suspend fun getAllUserBookIds(): List<Int> {
         return dao.getAllUserBookIds()
@@ -172,7 +186,7 @@ internal class BooksLocalDataSourceImpl(
             )
         }
             .distinctUntilChanged()
-            .map { list -> list.map { it.toModel() } }
+            .toModelsReusingUnchanged()
     }
 
     override fun getSortedAllUserBooks(
@@ -201,7 +215,7 @@ internal class BooksLocalDataSourceImpl(
 
         return dao.observeBooksRaw(query = RoomRawQuery(sql = sql))
             .distinctUntilChanged()
-            .map { list -> list.map { it.toModel() } }
+            .toModelsReusingUnchanged()
     }
 
     override fun getSortedBooksByStatus(
@@ -265,7 +279,7 @@ internal class BooksLocalDataSourceImpl(
             },
         )
             .distinctUntilChanged()
-            .map { list -> list.map { it.toModel() } }
+            .toModelsReusingUnchanged()
     }
 
     override suspend fun applyShelfManualOrderPrefix(
@@ -329,5 +343,37 @@ internal class BooksLocalDataSourceImpl(
             oldId = oldId,
             newId = newId,
         )
+    }
+
+    /**
+     * Maps each emission to models, reusing the previous [Book] instance for every row whose
+     * entity is unchanged. Downstream `distinctUntilChanged` comparisons then short-circuit on
+     * identity instead of walking every field of every book. The previous-emission state is
+     * created per collection, so subscribers never share it.
+     */
+    private fun Flow<List<BookFullEntity>>.toModelsReusingUnchanged(): Flow<List<Book>> {
+        val upstream = this
+
+        return flow {
+            var previous: Map<Int, Pair<BookFullEntity, Book>> = emptyMap()
+
+            upstream.collect { entities ->
+                val next = HashMap<Int, Pair<BookFullEntity, Book>>(entities.size)
+                val models = entities.map { entity ->
+                    val id = entity.book.id
+                    val prior = previous[id]
+                    val model = if (prior != null && prior.first == entity) {
+                        prior.second
+                    } else {
+                        entity.toModel()
+                    }
+                    next[id] = entity to model
+                    model
+                }
+
+                previous = next
+                emit(models)
+            }
+        }.flowOn(appDispatchers.default)
     }
 }

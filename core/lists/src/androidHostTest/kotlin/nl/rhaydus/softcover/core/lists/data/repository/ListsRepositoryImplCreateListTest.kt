@@ -9,19 +9,18 @@ import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
-import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
-import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
+import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ListsRepositoryImplCreateListTest {
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
@@ -64,7 +63,7 @@ class ListsRepositoryImplCreateListTest {
     @Nested
     inner class CreateList {
         @Test
-        fun `returns the BookList produced by the remote data source`() = runTest {
+        fun `returns the created BookList and caches it as a single-element list`() = runTest {
             // ----- Arrange -----
             val name = "My List"
             val created = stubBookList(
@@ -81,46 +80,33 @@ class ListsRepositoryImplCreateListTest {
 
             // ----- Assert -----
             result shouldBe created
-        }
 
-        @Test
-        fun `caches the created list as a single-element list`() = runTest {
-            // ----- Arrange -----
-            val name = "Favourites"
-            val created = stubBookList(
-                id = 3,
-                name = name,
-            )
-
-            coEvery {
-                listsRemoteDataSource.createList(name = name)
-            } returns created
-
-            // ----- Act -----
-            repository.createList(name = name)
-
-            // ----- Assert -----
             coVerify(exactly = 1) {
                 listsLocalDataSource.cacheUserBookLists(lists = listOf(created))
             }
         }
 
         @Test
-        fun `propagates remote exception and does not cache`() = runTest {
+        fun `on a retryable failure rethrows without enqueuing or caching`() = runTest {
             // ----- Arrange -----
-            val name = "Bad List"
-            val error = RuntimeException("API failure")
+            val name = "Retry Me"
+            val error = OfflineException()
 
             coEvery {
                 listsRemoteDataSource.createList(name = name)
             } throws error
 
-            // ----- Act & Assert -----
-            val thrown = shouldThrow<RuntimeException> {
+            // ----- Act -----
+            val thrown = shouldThrow<OfflineException> {
                 repository.createList(name = name)
             }
 
+            // ----- Assert -----
             thrown shouldBe error
+
+            coVerify(exactly = 0) {
+                listWriteQueue.enqueue(payload = any())
+            }
 
             coVerify(exactly = 0) {
                 listsLocalDataSource.cacheUserBookLists(lists = any())
@@ -128,20 +114,14 @@ class ListsRepositoryImplCreateListTest {
         }
 
         @Test
-        fun `on generic remote failure enqueues CREATE_LIST with listName and rethrows`() = runTest {
+        fun `on a rejected failure rethrows without enqueuing or caching`() = runTest {
             // ----- Arrange -----
-            val name = "Retry Me"
-            val error = RuntimeException("network error")
+            val name = "Rejected"
+            val error = RuntimeException("rejected")
 
             coEvery {
                 listsRemoteDataSource.createList(name = name)
             } throws error
-
-            val slot = mutableListOf<PendingListWrite>()
-
-            coJustRun {
-                listWriteQueue.enqueue(capture(slot))
-            }
 
             // ----- Act -----
             val thrown = shouldThrow<RuntimeException> {
@@ -151,14 +131,9 @@ class ListsRepositoryImplCreateListTest {
             // ----- Assert -----
             thrown shouldBe error
 
-            coVerify(exactly = 1) {
+            coVerify(exactly = 0) {
                 listWriteQueue.enqueue(payload = any())
             }
-
-            val enqueued = slot.first()
-
-            enqueued.kind shouldBe PendingListWriteKind.CREATE_LIST
-            enqueued.listName shouldBe name
 
             coVerify(exactly = 0) {
                 listsLocalDataSource.cacheUserBookLists(lists = any())

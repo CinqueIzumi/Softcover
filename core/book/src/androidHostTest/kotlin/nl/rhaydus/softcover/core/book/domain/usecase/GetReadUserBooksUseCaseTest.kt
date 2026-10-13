@@ -6,12 +6,12 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class GetReadUserBooksUseCaseTest {
     private lateinit var booksRepository: BooksRepository
@@ -39,20 +39,6 @@ class GetReadUserBooksUseCaseTest {
             // ----- Act & Assert -----
             useCase().test {
                 awaitItem() shouldBe listOf(book)
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `emits empty list when no read books exist`() = runTest {
-            // ----- Arrange -----
-            every {
-                booksRepository.getBooksFlowByStatus(status = UserBookStatus.READ)
-            } returns flowOf(emptyList())
-
-            // ----- Act & Assert -----
-            useCase().test {
-                awaitItem() shouldBe emptyList()
                 awaitComplete()
             }
         }

@@ -1,7 +1,10 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
-import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
+import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.BOOK_REVIEW_STAND_INS
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toBookReviewUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -15,24 +18,16 @@ internal class FetchBookReviewsAction(
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         dependencies.launch {
-            scope.setState {
-                it.copy(
-                    loadingReviews = true,
-                    revealedSpoilerReviewIds = emptySet(),
-                )
-            }
+            scope.setState { it.copy(reviews = BOOK_REVIEW_STAND_INS) }
 
             val reviews = dependencies
                 .getTopBookReviewsUseCase(bookId = bookId)
                 .onApiFailure()
                 .getOrDefault(emptyList())
+                .map { it.toBookReviewUiModel() }
+                .toImmutableList()
 
-            scope.setState {
-                it.copy(
-                    reviews = reviews,
-                    loadingReviews = false,
-                )
-            }
+            scope.setState { it.copy(reviews = reviews) }
         }
     }
 }

@@ -1,10 +1,12 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
-import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
 
 /**
@@ -76,9 +78,11 @@ internal data class DisplayInputs(
         }
 
         return DisplayResult(
-            displayBooksByTab = newBooksByTab,
-            displayEditionsByTab = newEditionsByTab,
-            tabStatsByTab = tabStats,
+            displayBooksByTab = newBooksByTab.mapValues { (_, books) -> books.toImmutableList() }.toImmutableMap(),
+            displayEditionsByTab = newEditionsByTab
+                .mapValues { (_, editions) -> editions.toImmutableList() }
+                .toImmutableMap(),
+            tabStatsByTab = tabStats.toImmutableMap(),
         )
     }
 }

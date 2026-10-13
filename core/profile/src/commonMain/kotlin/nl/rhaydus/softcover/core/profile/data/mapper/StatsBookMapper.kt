@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.profile.data.mapper
 
-import kotlin.math.roundToInt
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.data.model.StatsAuthor
 import nl.rhaydus.softcover.core.profile.data.model.StatsBook
@@ -11,6 +10,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
+import kotlin.math.roundToInt
 
 private const val TOP_GENRE_COUNT = 5
 private const val YEAR_CHART_SPAN = 8

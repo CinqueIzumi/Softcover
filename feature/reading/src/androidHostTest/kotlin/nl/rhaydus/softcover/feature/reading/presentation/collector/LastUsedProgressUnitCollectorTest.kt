@@ -9,16 +9,16 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class LastUsedProgressUnitCollectorTest {
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
@@ -48,10 +48,14 @@ class LastUsedProgressUnitCollectorTest {
             // ----- Arrange -----
             val dependencies = buildDependencies(ProgressUnit.PERCENTAGE)
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
             stateFlow.value.progressSheetTab shouldBe ProgressSheetTab.PERCENTAGE
@@ -63,10 +67,14 @@ class LastUsedProgressUnitCollectorTest {
             // ----- Arrange -----
             val dependencies = buildDependencies(ProgressUnit.PAGE)
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
             stateFlow.value.progressSheetTab shouldBe ProgressSheetTab.PAGE
@@ -78,10 +86,14 @@ class LastUsedProgressUnitCollectorTest {
             // ----- Arrange -----
             val dependencies = buildDependencies(ProgressUnit.TIME)
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
             stateFlow.value.progressSheetTab shouldBe ProgressSheetTab.TIME

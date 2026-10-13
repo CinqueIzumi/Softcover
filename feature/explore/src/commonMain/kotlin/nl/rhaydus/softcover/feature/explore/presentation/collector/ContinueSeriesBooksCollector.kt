@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
@@ -39,7 +40,7 @@ internal class ContinueSeriesBooksCollector : ExploreCollector {
         }.collectLatest { books ->
             scope.setState {
                 it.copy(
-                    continueSeriesBooks = books,
+                    continueSeriesBooks = books.toImmutableList(),
                     loadingContinueSeriesBooks = false,
                 )
             }

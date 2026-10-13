@@ -1,0 +1,64 @@
+package nl.rhaydus.softcover.core.component.chip
+
+import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class ChipSetTest {
+    @Nested
+    inner class ToChipSet {
+        @Test
+        fun `chips keep the source order and each key maps to its payload`() {
+            // ----- Arrange -----
+            val first = ChipUiModel(
+                key = "first",
+                label = "First",
+            )
+            val second = ChipUiModel(
+                key = "second",
+                label = "Second",
+            )
+            val pairs = listOf(first to "a", second to "b")
+
+            // ----- Act -----
+            val chipSet = pairs.toChipSet()
+
+            // ----- Assert -----
+            chipSet.chips shouldBe listOf(first, second)
+            chipSet["first"] shouldBe "a"
+            chipSet["second"] shouldBe "b"
+        }
+
+        @Test
+        fun `an empty source produces an empty chip set`() {
+            // ----- Arrange -----
+            val pairs = emptyList<Pair<ChipUiModel, String>>()
+
+            // ----- Act -----
+            val chipSet = pairs.toChipSet()
+
+            // ----- Assert -----
+            chipSet.chips shouldBe emptyList()
+            chipSet.payloadByKey shouldBe emptyMap()
+        }
+    }
+
+    @Nested
+    inner class Get {
+        @Test
+        fun `an unknown key returns null`() {
+            // ----- Arrange -----
+            val chip = ChipUiModel(
+                key = "known",
+                label = "Known",
+            )
+            val chipSet = listOf(chip to "payload").toChipSet()
+
+            // ----- Act -----
+            val result = chipSet["unknown"]
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+    }
+}

@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * The house palette — the warm clay, old gold, and warm-white paper Softcover has always worn, and
- * the default [nl.rhaydus.softcover.core.domain.model.ColorPalette]. Its five accent tones per family
+ * the default look ([SpinePalette.DEFAULT]). Its five accent tones per family
  * are the exact hexes the flat `primaryLight` / `primaryDark` / … pairs used to spell out one role at
  * a time, and its neutral ramp is the exact paper the app shipped with, so nothing about the default
  * look changed when palettes arrived.
@@ -31,6 +31,13 @@ internal val softcoverPalette = PaletteColors(
         tone40 = Color(0xFF6C5D2F),
         tone80 = Color(0xFFD8C58D),
         tone90 = Color(0xFFF5E1A7),
+    ),
+    error = ErrorFamily(
+        tone20 = Color(0xFF66002D),
+        tone30 = Color(0xFF8F0142),
+        tone40 = Color(0xFFBA0258),
+        tone70 = Color(0xFFFE85A6),
+        tone86 = Color(0xFFFFC9D5),
     ),
     neutral = NeutralFamily(
         tone4 = Color(0xFF140C0A),
@@ -85,6 +92,13 @@ internal val vellumPalette = PaletteColors(
         tone80 = Color(0xFFB4D0A3),
         tone90 = Color(0xFFCFECBD),
     ),
+    error = ErrorFamily(
+        tone20 = Color(0xFF680106),
+        tone30 = Color(0xFF93000C),
+        tone40 = Color(0xFFC00214),
+        tone70 = Color(0xFFFF8A7E),
+        tone86 = Color(0xFFFFCBC4),
+    ),
     neutral = NeutralFamily(
         tone4 = Color(0xFF140D01),
         tone6 = Color(0xFF1A1202),
@@ -137,6 +151,13 @@ internal val inkPalette = PaletteColors(
         tone40 = Color(0xFF7D4048),
         tone80 = Color(0xFFF0B3BB),
         tone90 = Color(0xFFFFD9DD),
+    ),
+    error = ErrorFamily(
+        tone20 = Color(0xFF640C01),
+        tone30 = Color(0xFF8D1601),
+        tone40 = Color(0xFFB82002),
+        tone70 = Color(0xFFFF8A74),
+        tone86 = Color(0xFFFECCC1),
     ),
     neutral = NeutralFamily(
         tone4 = Color(0xFF090E19),
@@ -192,6 +213,13 @@ internal val foxedPalette = PaletteColors(
         tone80 = Color(0xFFB3C8E3),
         tone90 = Color(0xFFD0E4FF),
     ),
+    error = ErrorFamily(
+        tone20 = Color(0xFF68000E),
+        tone30 = Color(0xFF920118),
+        tone40 = Color(0xFFBF0423),
+        tone70 = Color(0xFFFF8983),
+        tone86 = Color(0xFFFECBC7),
+    ),
     neutral = NeutralFamily(
         tone4 = Color(0xFF180B02),
         tone6 = Color(0xFF1E1003),
@@ -245,6 +273,13 @@ internal val seaPalette = PaletteColors(
         tone80 = Color(0xFFE9C08D),
         tone90 = Color(0xFFFFDDB3),
     ),
+    error = ErrorFamily(
+        tone20 = Color(0xFF68000B),
+        tone30 = Color(0xFF920215),
+        tone40 = Color(0xFFC0001E),
+        tone70 = Color(0xFFFF8981),
+        tone86 = Color(0xFFFECBC6),
+    ),
     neutral = NeutralFamily(
         tone4 = Color(0xFF031115),
         tone6 = Color(0xFF05161B),
@@ -272,18 +307,8 @@ internal val seaPalette = PaletteColors(
     ),
 )
 
-// The colours no palette owns: the error family reads as a warning in every look, and the scrim is
-// simply black. Every other scheme slot comes from the chosen palette's tables above.
-internal val errorLight = Color(0xFFBA1A1A)
-internal val onErrorLight = Color(0xFFFFFFFF)
-internal val errorContainerLight = Color(0xFFFFDAD6)
-internal val onErrorContainerLight = Color(0xFF93000A)
+// The scrim is simply black in every look; the error family lives on each palette above.
 internal val scrimLight = Color(0xFF000000)
-
-internal val errorDark = Color(0xFFFFB4AB)
-internal val onErrorDark = Color(0xFF690005)
-internal val errorContainerDark = Color(0xFF93000A)
-internal val onErrorContainerDark = Color(0xFFFFDAD6)
 internal val scrimDark = Color(0xFF000000)
 
 /**
@@ -302,7 +327,7 @@ val RatingGold = Color(0xFFFBBF23)
 val ColorScheme.spoilerEditorHighlight: Color
     get() = onSurfaceVariant.copy(alpha = 0.20f)
 
-internal val ColorScheme.spoilerCover: Color
+val ColorScheme.spoilerCover: Color
     get() = onSurfaceVariant.copy(alpha = 0.90f)
 
 /**
@@ -329,13 +354,3 @@ val MoodInkHeartWrenchForeground = Color(0xFFFFD9DE)
  */
 val MonogramCoverInk = Color(0xFF1A110F)
 val MonogramCoverForeground = Color(0xFFFFEDE8)
-
-/**
- * The fixed warm-white foreground for text painted directly on the Reading screen's featured-hero
- * backdrop (series eyebrow, hero title, byline, the "Your pace" row) - the backdrop itself is a
- * blurred, dimmed book cover (a theme-role black scrim + a fade into the card's own surface colour,
- * not a fixed-ink field), but the overlaid text still needs a colour that reads reliably against an
- * arbitrary cover image regardless of theme, so it stays fixed rather than switching to `onSurface` /
- * `onSurfaceVariant` - see `docs/reference/design-system.md`.
- */
-val ReadingHeroBackdropForeground = Color(0xFFFFEDE8)

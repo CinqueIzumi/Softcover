@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 
@@ -8,7 +10,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
  * [DisplayListsCollector] writes into [LibraryUiState].
  */
 internal data class DisplayResult(
-    val displayBooksByTab: Map<String, List<Book>>,
-    val displayEditionsByTab: Map<String, List<BookEdition>>,
-    val tabStatsByTab: Map<String, LibraryTabStats>,
+    val displayBooksByTab: ImmutableMap<String, ImmutableList<Book>>,
+    val displayEditionsByTab: ImmutableMap<String, ImmutableList<BookEdition>>,
+    val tabStatsByTab: ImmutableMap<String, LibraryTabStats>,
 )

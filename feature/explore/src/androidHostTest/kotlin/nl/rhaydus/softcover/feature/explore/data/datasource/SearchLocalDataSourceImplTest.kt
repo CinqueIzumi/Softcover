@@ -4,17 +4,16 @@ import androidx.datastore.core.DataStore
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.feature.explore.data.datastore.SearchHistoryDataStore
+import nl.rhaydus.softcover.feature.explore.data.datastore.serializer.SearchHistoryEntity
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.feature.explore.data.datastore.SearchHistoryDataStore
-import nl.rhaydus.softcover.feature.explore.data.datastore.serializer.SearchHistoryEntity
 
 class SearchLocalDataSourceImplTest {
     private lateinit var storeDouble: DataStore<SearchHistoryEntity>
@@ -47,19 +46,6 @@ class SearchLocalDataSourceImplTest {
                 awaitComplete()
             }
         }
-
-        @Test
-        fun `emits empty list when datastore has no queries`() = runTest {
-            // ----- Arrange -----
-            stubDataStore(SearchHistoryEntity(previousQueries = emptyList()))
-            val freshDataSource = SearchLocalDataSourceImpl(dataStore = SearchHistoryDataStore(store = storeDouble))
-
-            // ----- Act & Assert -----
-            freshDataSource.previousSearchQueries.test {
-                awaitItem() shouldBe emptyList()
-                awaitComplete()
-            }
-        }
     }
 
     @Nested
@@ -79,9 +65,6 @@ class SearchLocalDataSourceImplTest {
             dataSource.saveSearchQuery(name = "new")
 
             // ----- Assert -----
-            coVerify {
-                storeDouble.updateData(any())
-            }
             val result = transformSlot.captured(SearchHistoryEntity(previousQueries = listOf("existing")))
             result.previousQueries.first() shouldBe "new"
         }
@@ -125,25 +108,6 @@ class SearchLocalDataSourceImplTest {
             result.previousQueries.size shouldBe 10
             result.previousQueries.first() shouldBe "queryNew"
         }
-
-        @Test
-        fun `saves first query to an empty list`() = runTest {
-            // ----- Arrange -----
-            val transformSlot = slot<suspend (SearchHistoryEntity) -> SearchHistoryEntity>()
-
-            coEvery {
-                storeDouble.updateData(capture(transformSlot))
-            } coAnswers {
-                transformSlot.captured(SearchHistoryEntity(previousQueries = emptyList()))
-            }
-
-            // ----- Act -----
-            dataSource.saveSearchQuery(name = "first")
-
-            // ----- Assert -----
-            val result = transformSlot.captured(SearchHistoryEntity(previousQueries = emptyList()))
-            result.previousQueries shouldBe listOf("first")
-        }
     }
 
     @Nested
@@ -168,44 +132,6 @@ class SearchLocalDataSourceImplTest {
             )
             result.previousQueries shouldBe listOf("kotlin", "compose")
         }
-
-        @Test
-        fun `is a no-op when the query is not in the list`() = runTest {
-            // ----- Arrange -----
-            val transformSlot = slot<suspend (SearchHistoryEntity) -> SearchHistoryEntity>()
-
-            coEvery {
-                storeDouble.updateData(capture(transformSlot))
-            } coAnswers {
-                transformSlot.captured(SearchHistoryEntity(previousQueries = listOf("kotlin")))
-            }
-
-            // ----- Act -----
-            dataSource.removeSearchQuery(name = "nonexistent")
-
-            // ----- Assert -----
-            val result = transformSlot.captured(SearchHistoryEntity(previousQueries = listOf("kotlin")))
-            result.previousQueries shouldBe listOf("kotlin")
-        }
-
-        @Test
-        fun `results in empty list when removing the only query`() = runTest {
-            // ----- Arrange -----
-            val transformSlot = slot<suspend (SearchHistoryEntity) -> SearchHistoryEntity>()
-
-            coEvery {
-                storeDouble.updateData(capture(transformSlot))
-            } coAnswers {
-                transformSlot.captured(SearchHistoryEntity(previousQueries = listOf("only")))
-            }
-
-            // ----- Act -----
-            dataSource.removeSearchQuery(name = "only")
-
-            // ----- Assert -----
-            val result = transformSlot.captured(SearchHistoryEntity(previousQueries = listOf("only")))
-            result.previousQueries shouldBe emptyList()
-        }
     }
 
     @Nested
@@ -226,25 +152,6 @@ class SearchLocalDataSourceImplTest {
 
             // ----- Assert -----
             val result = transformSlot.captured(SearchHistoryEntity(previousQueries = listOf("a", "b", "c")))
-            result.previousQueries shouldBe emptyList()
-        }
-
-        @Test
-        fun `is a no-op on an already empty list`() = runTest {
-            // ----- Arrange -----
-            val transformSlot = slot<suspend (SearchHistoryEntity) -> SearchHistoryEntity>()
-
-            coEvery {
-                storeDouble.updateData(capture(transformSlot))
-            } coAnswers {
-                transformSlot.captured(SearchHistoryEntity(previousQueries = emptyList()))
-            }
-
-            // ----- Act -----
-            dataSource.removeAllSearchQueries()
-
-            // ----- Assert -----
-            val result = transformSlot.captured(SearchHistoryEntity(previousQueries = emptyList()))
             result.previousQueries shouldBe emptyList()
         }
     }

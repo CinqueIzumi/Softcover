@@ -13,10 +13,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,24 +22,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverLoadingSheet
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
+import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
+import nl.rhaydus.softcover.feature.onboarding.presentation.screen.section.ApiKeyEntrySection
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 
-// Keeps the onboarding panel at a readable editorial measure rather than stretching the intro copy and
-// the key field across a maximized window.
-private val PANEL_MAX_WIDTH = 520.dp
-
 /**
- * Desktop onboarding. The mobile three-page swipe flow collapses into one centered, scrolling
- * editorial panel: the same type-led "Welcome" hero used on mobile page 1 (sized down for the narrower,
- * centered panel — `editorialTypography.display`'s baked-in 45sp/44sp rather than mobile's oversized
- * 76sp override, since a full-bleed hero size reads as oversized once it is centered in a 520dp column
- * instead of bleeding to a phone's edges) above the shared [ApiKeyEntrySection] — no pager, no folio, no
- * top-bar chrome (those are mobile-pager-only concerns) and no separate Back/Skip footer: desktop keeps
- * a single "Save API key" button flow via the shared section. The whole surface paints an opaque
- * [Surface] background, and the [SoftcoverLoadingSheet] overlay still covers the setup progress.
+ * Desktop onboarding: the mobile three-page swipe flow collapses into one centered, scrolling panel,
+ * the first page's hero above the shared [ApiKeyEntrySection], with no pager, folio or Back/Skip footer.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -50,7 +42,6 @@ internal actual fun OnboardingScreenLayout(
     runAction: (action: OnboardingAction) -> Unit,
     openUrl: (String) -> Unit,
     getCopiedText: () -> String,
-    onInitializingComplete: () -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -64,27 +55,27 @@ internal actual fun OnboardingScreenLayout(
                     .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding(
-                        horizontal = 24.dp,
-                        vertical = 48.dp,
+                        horizontal = Spacing.gutter,
+                        vertical = Spacing.x5l,
                     ),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 Column(
-                    modifier = Modifier.widthIn(max = PANEL_MAX_WIDTH),
+                    modifier = Modifier.widthIn(max = 520.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(
-                        text = "Welcome".uppercase(),
+                    SoftcoverText(
+                        text = state.pageHeaders.getValue(IntroScreen.FIRST).eyebrow.uppercase(),
                         style = MaterialTheme.editorialTypography.eyebrow,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
-                    Text(
+                    SoftcoverText(
                         text = "Book smart.",
                         style = MaterialTheme.editorialTypography.display,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -92,11 +83,10 @@ internal actual fun OnboardingScreenLayout(
                         textAlign = TextAlign.Center,
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
-                    Text(
-                        text = "Track every book you read, share the ones worth sharing — or " +
-                            "don't — and find your next life-changing read.",
+                    SoftcoverText(
+                        text = "Keep a record of every book you read, and find the next one worth reading.",
                         style = MaterialTheme.editorialTypography.bodyLarge.copy(
                             fontSize = 18.sp,
                             lineHeight = 28.sp,
@@ -106,11 +96,11 @@ internal actual fun OnboardingScreenLayout(
                         textAlign = TextAlign.Center,
                     )
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xxxl))
 
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    Divider()
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xxxl))
 
                     ApiKeyEntrySection(
                         state = state,
@@ -127,17 +117,8 @@ internal actual fun OnboardingScreenLayout(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .fillMaxHeight()
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = Spacing.xxs),
             )
         }
-
-        SoftcoverLoadingSheet(
-            isLoading = state.isLoading,
-            progress = state.progress,
-            onLoaderFinished = onInitializingComplete,
-            eyebrow = "Setting up",
-            headline = "Pulling your library together.",
-            description = "Depending on its size, this might take a moment.",
-        )
     }
 }

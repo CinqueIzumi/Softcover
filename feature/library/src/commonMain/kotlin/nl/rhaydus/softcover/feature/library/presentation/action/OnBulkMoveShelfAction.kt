@@ -1,12 +1,15 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.withSelectedBookIds
 import nl.rhaydus.toad.ActionScope
 
 internal class OnBulkMoveShelfAction(
@@ -58,18 +61,23 @@ internal class OnBulkMoveShelfAction(
         if (failureCount > 0) {
             val noun = if (failureCount == 1) "book" else "books"
 
-            SnackBarManager.showSnackbar(title = "Couldn't move $failureCount $noun — try again.")
+            SnackBarManager.showSnackbar(title = "Couldn't move $failureCount $noun. Try again.")
+
+            scope.sendEvent(LibraryEvent.BulkMoveFailedEvent())
+        } else {
+            val feedback = if (status == UserBookStatus.READ) Feedback.Milestone else Feedback.Routine
+
+            scope.sendEvent(LibraryEvent.BulkMoveAppliedEvent(feedback = feedback))
         }
 
         scope.setState {
-            it.copy(
+            it.withSelectedBookIds(persistentSetOf()).copy(
                 selectionMode = false,
-                selectedBookIds = emptySet(),
                 bulkActionInProgress = false,
                 isBulkMoveMenuExpanded = false,
-                isBulkRemoveDialogShown = false,
-                isBulkAddToListSheetShown = false,
-                listsBeingMutated = emptySet(),
+                isBulkRemoveSheetRequested = false,
+                isChooseListsSheetRequested = false,
+                listsBeingMutated = persistentSetOf(),
             )
         }
     }

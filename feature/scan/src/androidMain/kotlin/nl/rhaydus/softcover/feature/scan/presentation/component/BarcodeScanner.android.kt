@@ -19,9 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -36,15 +34,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.google.mlkit.vision.barcode.BarcodeScanner as MlKitBarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
-import nl.rhaydus.common.AppLog
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import com.google.mlkit.vision.barcode.BarcodeScanner as MlKitBarcodeScanner
 
 /**
  * Android implementation: a CameraX barcode-scanning surface backed by the bundled ML Kit model
@@ -158,18 +159,18 @@ actual fun BarcodeScanner(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 32.dp),
+                .padding(horizontal = Spacing.xl, vertical = Spacing.xxxl),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
+            SoftcoverText(
                 text = "SCANNING",
                 style = MaterialTheme.editorialTypography.eyebrow,
                 color = Color.White.copy(alpha = 0.8f),
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
-            Text(
+            SoftcoverText(
                 text = "Center a book's barcode",
                 style = MaterialTheme.editorialTypography.headlineMedium,
                 color = Color.White,
@@ -182,11 +183,11 @@ actual fun BarcodeScanner(
                 .align(Alignment.Center)
                 .fillMaxWidth(0.72f)
                 .aspectRatio(1.9f)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(Corners.lg)
                 .border(
                     width = 2.dp,
                     color = Color.White.copy(alpha = 0.85f),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = Corners.lg,
                 ),
         )
     }
@@ -214,12 +215,13 @@ private fun scanFrame(
 
     scanner.process(inputImage)
         .addOnSuccessListener { barcodes ->
-            val isbn = barcodes.firstNotNullOfOrNull { it.rawValue }
-
-            if (isbn != null && hasEmitted.compareAndSet(
+            val isbn = barcodes.firstNotNullOfOrNull { it.rawValue } ?: return@addOnSuccessListener
+            val isFirstDetection = hasEmitted.compareAndSet(
                 false,
                 true,
-            )) {
+            )
+
+            if (isFirstDetection) {
                 onIsbnDetected(isbn)
             }
         }

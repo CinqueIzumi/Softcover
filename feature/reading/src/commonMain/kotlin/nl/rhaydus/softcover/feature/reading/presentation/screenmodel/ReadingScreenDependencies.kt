@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
+import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
@@ -19,7 +20,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.toad.ActionDependencies
 
 internal data class ReadingScreenDependencies(
@@ -30,13 +31,14 @@ internal data class ReadingScreenDependencies(
     val refreshLibraryUseCase: RefreshLibraryUseCase,
     val recordBookProgressUseCase: RecordBookProgressUseCase,
     val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
+    val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val observePlanTodayDismissalsUseCase: ObservePlanTodayDismissalsUseCase,
     val dismissPlanTodayUseCase: DismissPlanTodayUseCase,
     val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
     val getTrendingBooksUseCase: GetTrendingBooksUseCase,
     val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
-    val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
+    val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
     val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
     val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,

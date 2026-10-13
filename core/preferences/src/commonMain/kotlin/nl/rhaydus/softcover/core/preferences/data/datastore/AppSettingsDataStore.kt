@@ -3,11 +3,11 @@ package nl.rhaydus.softcover.core.preferences.data.datastore
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
+import nl.rhaydus.softcover.core.preferences.data.datastore.serializer.AppSettingsSerializer
+import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
 import okio.FileSystem
 import okio.Path
 import kotlin.jvm.JvmInline
-import nl.rhaydus.softcover.core.preferences.data.datastore.serializer.AppSettingsSerializer
-import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
 
 @JvmInline
 internal value class AppSettingsDataStore(val store: DataStore<AppSettingsEntity>)

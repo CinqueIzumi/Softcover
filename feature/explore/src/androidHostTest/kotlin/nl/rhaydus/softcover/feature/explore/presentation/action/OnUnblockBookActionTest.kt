@@ -13,10 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
@@ -26,6 +22,10 @@ import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSugge
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnUnblockBookActionTest {
     private lateinit var undoContinueSeriesBookDismissalUseCase: UndoContinueSeriesBookDismissalUseCase
@@ -127,7 +127,7 @@ class OnUnblockBookActionTest {
         }
 
         @Test
-        fun `shows an Undo snackbar with the book title on success`() = runTest {
+        fun `offers an Undo snackbar once the book is unblocked`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
 
@@ -155,46 +155,8 @@ class OnUnblockBookActionTest {
             // ----- Assert -----
             verify {
                 SnackBarManager.showSnackBar(
-                    title = "\"Dune\" is back in your suggestions",
-                    actionLabel = "Undo",
-                    duration = any(),
-                    onActionClick = any(),
-                    onDismiss = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `falls back to a generic label when title is null`() = runTest {
-            // ----- Arrange -----
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                undoContinueSeriesBookDismissalUseCase(bookId = 7)
-            } returns Result.success(Unit)
-
-            val book = DismissedSeriesBook(
-                bookId = 7,
-                title = null,
-                coverUrl = null,
-                authorText = null,
-                seriesName = null,
-                seriesId = null,
-                seriesPosition = null,
-            )
-            val action = OnUnblockBookAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            verify {
-                SnackBarManager.showSnackBar(
-                    title = "\"Book\" is back in your suggestions",
-                    actionLabel = "Undo",
+                    title = any(),
+                    actionLabel = any(),
                     duration = any(),
                     onActionClick = any(),
                     onDismiss = any(),

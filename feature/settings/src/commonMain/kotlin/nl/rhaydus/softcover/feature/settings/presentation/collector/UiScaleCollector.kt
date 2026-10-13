@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.uiScaleRowsFor
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -13,7 +14,11 @@ internal class UiScaleCollector : SettingsCollector {
         dependencies: SettingsScreenDependencies,
     ) {
         dependencies.getUiScaleAsFlowUseCase().collectLatest { scale ->
-            scope.setState { it.copy(uiScale = scale) }
+            scope.setState {
+                it.copy(
+                    uiScaleRows = uiScaleRowsFor(selected = scale),
+                )
+            }
         }
     }
 }

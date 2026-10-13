@@ -6,12 +6,22 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
-import org.koin.compose.koinInject
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.designsystem.util.rememberClipboardReader
-import nl.rhaydus.softcover.core.designsystem.presentation.session.SessionAuthenticator
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
+import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
+import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
+import nl.rhaydus.softcover.core.component.sheet.modelOrNull
+import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
+import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoaderFinishedAction
+import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoadingSheetDismissedAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
+import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenScreenModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
+import org.koin.compose.koinInject
 
 object OnboardingScreen : Screen {
     @Composable
@@ -25,27 +35,47 @@ object OnboardingScreen : Screen {
 
         val clipboardReader = rememberClipboardReader()
 
+        val haptics = LocalHaptics.current
+
+        ObserveAsEvents(flow = screenModel.events) {
+            if (it is FeedbackEvent) haptics.play(it.feedback)
+
+            when (it) {
+                is OnboardingEvent.SignInCompletedEvent -> {
+                    sessionAuthenticator.setUserAuthenticated(authenticated = true)
+                }
+
+                is OnboardingEvent.SignedInEvent,
+                is OnboardingEvent.SignInFailedEvent -> Unit
+            }
+        }
+
         OnboardingScreenLayout(
             state = state,
             runAction = screenModel::runAction,
             openUrl = uriHandler::openUri,
-            onInitializingComplete = {
-                sessionAuthenticator.setUserAuthenticated(authenticated = true)
-            },
             getCopiedText = clipboardReader::read,
         )
+
+        state.loadingSheet.modelOrNull?.let { loadingSheet ->
+            LoadingSheet(
+                model = loadingSheet,
+                onEvent = { event ->
+                    when (event) {
+                        LoadingSheetEvent.LoaderFinished -> screenModel.runAction(OnLoaderFinishedAction)
+
+                        LoadingSheetEvent.Dismissed -> screenModel.runAction(OnLoadingSheetDismissedAction)
+                    }
+                },
+            )
+        }
     }
 }
 
-// The mobile actual keeps today's swipeable three-page HorizontalPager; the desktop actual collapses
-// it into a single centered editorial panel (intro + the shared API-key entry form). Wiring above
-// stays platform-agnostic. No default arguments — they are not allowed on an expect declaration, so
-// every argument is supplied explicitly at the single call site above.
 @Composable
 internal expect fun OnboardingScreenLayout(
     state: OnboardingUiState,
     runAction: (action: OnboardingAction) -> Unit,
     openUrl: (String) -> Unit,
     getCopiedText: () -> String,
-    onInitializingComplete: () -> Unit,
 )

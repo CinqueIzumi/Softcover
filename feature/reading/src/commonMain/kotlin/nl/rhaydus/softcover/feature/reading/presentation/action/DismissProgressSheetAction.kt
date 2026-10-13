@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -14,7 +15,8 @@ internal data object DismissProgressSheetAction : ReadingAction {
         scope.setState {
             it.copy(
                 bookToUpdate = null,
-                showProgressSheet = false,
+                progressSheet = SheetSession.Closed,
+                progressTimeDraft = null,
             )
         }
     }

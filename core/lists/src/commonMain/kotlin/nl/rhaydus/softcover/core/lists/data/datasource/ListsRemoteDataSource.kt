@@ -271,10 +271,12 @@ internal class ListsRemoteDataSourceImpl(
         )
 
         val response = apolloClient
-            .safeMutation(mutation = UpdateListMutation(
-                id = listId,
-                list = input,
-            ),)
+            .safeMutation(
+                mutation = UpdateListMutation(
+                    id = listId,
+                    list = input,
+                ),
+            )
             .listResponse
             ?: throw Exception("Did not receive an update-list response")
 
@@ -293,12 +295,4 @@ internal class ListsRemoteDataSourceImpl(
     }
 }
 
-// The list-mutation responses expose `errors` as a list of messages (the API changed it from a
-// single string). Collapse it to one non-blank message for the callers, which only need "was there
-// an error, and what did it say".
-private fun List<String?>?.toErrorTextOrNull(): String? =
-    this
-        ?.filterNotNull()
-        ?.filter { it.isNotBlank() }
-        ?.joinToString(separator = "; ")
-        ?.takeIf { it.isNotBlank() }
+private fun String?.toErrorTextOrNull(): String? = this?.takeIf { it.isNotBlank() }

@@ -3,19 +3,20 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
+import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
+import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
@@ -24,6 +25,7 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistor
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
+import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
@@ -38,13 +40,14 @@ internal class BookDetailDependencies(
     val updateBookEditionUseCase: UpdateBookEditionUseCase,
     val fetchBookByIdUseCase: FetchBookByIdUseCase,
     val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,
-    val getAllUserBooksUseCase: GetAllUserBooksUseCase,
+    val observeUserBookUseCase: ObserveUserBookUseCase,
     val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     val markBookAsReadUseCase: MarkBookAsReadUseCase,
     val saveBookVerdictUseCase: SaveBookVerdictUseCase,
-    val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
+    val undoableBookRemover: UndoableBookRemover,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
+    val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
     val getAllUserListsUseCase: GetAllUserListsUseCase,
     val addBookToListUseCase: AddBookToListUseCase,
@@ -63,6 +66,7 @@ internal class BookDetailDependencies(
     val observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase,
     val syncUserTagVocabularyUseCase: SyncUserTagVocabularyUseCase,
     val recordAppliedTagsUseCase: RecordAppliedTagsUseCase,
+    val offlineCopy: OfflineCopy,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

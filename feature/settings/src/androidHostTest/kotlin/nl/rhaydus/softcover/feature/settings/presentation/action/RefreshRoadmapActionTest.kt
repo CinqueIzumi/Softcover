@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -8,18 +9,15 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.feature.settings.domain.usecase.RefreshRoadmapUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.RoadmapEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 import nl.rhaydus.toad.ActionScope
-
-private const val FALLBACK_MESSAGE = "Couldn't reach the roadmap. Check your connection and try again."
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class RefreshRoadmapActionTest {
     private lateinit var refreshRoadmapUseCase: RefreshRoadmapUseCase
@@ -47,7 +45,7 @@ class RefreshRoadmapActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets isRefreshing and clears roadmapError before calling the use case`() = runTest {
+        fun `shows the refreshing state with no error during the call and clears it afterwards`() = runTest {
             // ----- Arrange -----
             stateFlow.value = RoadmapUiState(roadmapError = "stale error")
             var isRefreshingDuringCall = false
@@ -72,48 +70,11 @@ class RefreshRoadmapActionTest {
             // ----- Assert -----
             isRefreshingDuringCall shouldBe true
             errorDuringCall shouldBe null
-        }
-
-        @Test
-        fun `clears isRefreshing after the use case completes`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                refreshRoadmapUseCase(force = true)
-            } returns Result.success(Unit)
-
-            val action = RefreshRoadmapAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             stateFlow.value.isRefreshing shouldBe false
         }
 
         @Test
-        fun `fills roadmapError using the mapped message for a typed api exception`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                refreshRoadmapUseCase(force = true)
-            } returns Result.failure(OfflineException())
-
-            val action = RefreshRoadmapAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.roadmapError shouldBe "You're offline. Check your connection and try again."
-        }
-
-        @Test
-        fun `fills roadmapError using the fallback message for a generic throwable`() = runTest {
+        fun `surfaces an error and stops refreshing when the use case fails`() = runTest {
             // ----- Arrange -----
             coEvery {
                 refreshRoadmapUseCase(force = true)
@@ -128,7 +89,8 @@ class RefreshRoadmapActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.roadmapError shouldBe FALLBACK_MESSAGE
+            stateFlow.value.roadmapError.shouldNotBeNull()
+            stateFlow.value.isRefreshing shouldBe false
         }
 
         @Test

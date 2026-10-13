@@ -1,0 +1,120 @@
+package nl.rhaydus.softcover.feature.settings.presentation.screen.section
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTile
+import nl.rhaydus.softcover.core.component.control.PreviewTileEvent
+import nl.rhaydus.softcover.core.component.control.ToggleEvent
+import nl.rhaydus.softcover.core.component.control.ToggleRow
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.feature.settings.presentation.action.OnColorPaletteSelectedAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.displayToggleActionFor
+import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
+import nl.rhaydus.softcover.feature.settings.presentation.util.supportsDynamicColor
+
+/** The spine-colour picker wraps after three tiles, so its five sit as a 3 + 2 grid. */
+private const val PALETTE_TILES_PER_ROW = 3
+
+/**
+ * The spine-colour picker — the featured personalisation of the Appearance body: one
+ * [ColorPalettePreviewTile] per [ColorPalette][nl.rhaydus.softcover.core.domain.model.ColorPalette], each
+ * painting the same page miniature in that palette's own paper and ink, so five curated looks are compared
+ * by looking at them side by side. The gloss line beneath names what the *selected* palette is made of
+ * rather than repeating a fixed sentence — it is the only place the picker says anything in words.
+ *
+ * Dynamic colour is this section's tail rather than a Display switch, because it is the alternative
+ * *scheme source*: while it is on it takes the whole scheme from the wallpaper and the palette steps
+ * aside, so the gloss says so and picking any tile takes the page back
+ * ([OnColorPaletteSelectedAction]). It stays gated on [supportsDynamicColor], so on iOS and desktop
+ * the section is the tiles alone.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun SpineColourSection(
+    state: SettingsScreenUiState,
+    runAction: (SettingsAction) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SectionHeader(model = state.spineColourSectionHeader)
+
+        Spacer(modifier = Modifier.height(Spacing.md))
+
+        // Every tile is measured to the same width — a third of the row, capped — rather than
+        // weighted: with weights the wrapped second row's two tiles would each claim half the width
+        // and end up visibly larger than the three above them.
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val tileWidth = minOf(
+                128.dp,
+                (maxWidth - Spacing.md * (PALETTE_TILES_PER_ROW - 1)) / PALETTE_TILES_PER_ROW,
+            )
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+                maxItemsInEachRow = PALETTE_TILES_PER_ROW,
+            ) {
+                state.paletteChoices.forEach { tile ->
+                    ColorPalettePreviewTile(
+                        model = tile,
+                        onEvent = { event ->
+                            when (event) {
+                                is PreviewTileEvent.Clicked ->
+                                    runAction(OnColorPaletteSelectedAction(palette = event.key))
+                            }
+                        },
+                        modifier = Modifier.width(tileWidth),
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(Spacing.md))
+
+        SoftcoverText(
+            text = if (state.dynamicColorToggleRow.checked) {
+                "Dynamic colour is on. Pick a spine colour to switch back."
+            } else {
+                state.paletteGloss
+            },
+            style = MaterialTheme.editorialTypography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        if (supportsDynamicColor()) {
+            Spacer(modifier = Modifier.height(Spacing.lg))
+
+            Divider()
+
+            ToggleRow(
+                model = state.dynamicColorToggleRow,
+                onEvent = { event ->
+                    when (event) {
+                        is ToggleEvent.Toggled -> runAction(
+                            displayToggleActionFor(
+                                key = state.dynamicColorToggleRow.key,
+                                newValue = event.checked,
+                            ),
+                        )
+                    }
+                },
+            )
+        }
+    }
+}

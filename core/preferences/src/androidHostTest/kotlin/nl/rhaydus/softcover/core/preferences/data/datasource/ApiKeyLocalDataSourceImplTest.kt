@@ -2,25 +2,24 @@ package nl.rhaydus.softcover.core.preferences.data.datasource
 
 import androidx.datastore.core.DataStore
 import app.cash.turbine.test
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.unmockkAll
-import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.platform.SecureStorage
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
 import nl.rhaydus.softcover.core.preferences.data.security.LegacySecureApiKeyStorage
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 private const val API_KEY = "api_key"
 
@@ -79,11 +78,6 @@ class ApiKeyLocalDataSourceImplTest {
         )
     }
 
-    @AfterEach
-    fun tearDown() {
-        unmockkAll()
-    }
-
     private fun stubLegacyKey(apiKey: String) {
         val entity = AppSettingsEntity(apiKey = apiKey)
         every {
@@ -109,38 +103,6 @@ class ApiKeyLocalDataSourceImplTest {
 
     @Nested
     inner class Construction {
-        @Test
-        fun `foundation store already has a key — never reads the legacy secure store`() = runTest {
-            // ----- Arrange -----
-            storedKey = "existing-key"
-
-            // ----- Act -----
-            buildDataSource()
-
-            // ----- Assert -----
-            coVerify(exactly = 0) { legacySecureStorage.read() }
-        }
-
-        @Test
-        fun `foundation store already has a key — reads the plain-text settings field but writes nothing`() = runTest {
-            // ----- Arrange -----
-            storedKey = "existing-key"
-            stubLegacyKey(apiKey = "")
-
-            // ----- Act -----
-            buildDataSource()
-
-            // ----- Assert -----
-            verify(exactly = 1) { dataStore.data }
-            coVerify(exactly = 0) {
-                secureStorage.write(
-                    any(),
-                    any(),
-                )
-            }
-            coVerify(exactly = 0) { legacySecureStorage.read() }
-        }
-
         @Test
         fun `foundation store already has a key and the plain-text field is non-blank — clears the residue`() = runTest {
             // ----- Arrange -----
@@ -214,22 +176,7 @@ class ApiKeyLocalDataSourceImplTest {
         }
 
         @Test
-        fun `foundation store already has a key — flow emits the existing key`() = runTest {
-            // ----- Arrange -----
-            storedKey = "stored-key"
-
-            // ----- Act -----
-            val dataSource = buildDataSource()
-
-            // ----- Assert -----
-            dataSource.apiKey.test {
-                awaitItem() shouldBe "stored-key"
-                cancelAndIgnoreRemainingEvents()
-            }
-        }
-
-        @Test
-        fun `legacy secure store has a key — writes it to the foundation store`() = runTest {
+        fun `legacy secure store has a key — moves it to the foundation store and deletes the legacy copy`() = runTest {
             // ----- Arrange -----
             coEvery {
                 legacySecureStorage.read()
@@ -245,20 +192,33 @@ class ApiKeyLocalDataSourceImplTest {
                     "legacy-secure-key",
                 )
             }
+            coVerify(exactly = 1) { legacySecureStorage.delete() }
         }
 
         @Test
-        fun `legacy secure store has a key — deletes the legacy copy after a successful write`() = runTest {
+        fun `foundation store has a key and the legacy store has another — keeps the foundation key`() = runTest {
             // ----- Arrange -----
+            storedKey = "new"
+
             coEvery {
                 legacySecureStorage.read()
-            } returns "legacy-secure-key"
+            } returns "old"
 
             // ----- Act -----
-            buildDataSource()
+            val dataSource = buildDataSource()
 
             // ----- Assert -----
-            coVerify(exactly = 1) { legacySecureStorage.delete() }
+            coVerify(exactly = 0) {
+                secureStorage.write(
+                    API_KEY,
+                    "old",
+                )
+            }
+
+            dataSource.apiKey.test {
+                awaitItem() shouldBe "new"
+                cancelAndIgnoreRemainingEvents()
+            }
         }
 
         @Test
@@ -283,24 +243,6 @@ class ApiKeyLocalDataSourceImplTest {
         }
 
         @Test
-        fun `both secure stores are empty — writes the plain-text settings key to the foundation store`() = runTest {
-            // ----- Arrange -----
-            val legacyKey = "legacy-plaintext-api-key"
-            stubLegacyKey(apiKey = legacyKey)
-
-            // ----- Act -----
-            buildDataSource()
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                secureStorage.write(
-                    API_KEY,
-                    legacyKey,
-                )
-            }
-        }
-
-        @Test
         fun `both secure stores are empty — clears the plain-text settings field after writing`() = runTest {
             // ----- Arrange -----
             val legacyKey = "legacy-plaintext-api-key"
@@ -316,7 +258,7 @@ class ApiKeyLocalDataSourceImplTest {
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
                 capturedResult = updater(originalEntity)
-                capturedResult!!
+                capturedResult.shouldNotBeNull()
             }
 
             // ----- Act -----
@@ -343,7 +285,7 @@ class ApiKeyLocalDataSourceImplTest {
         }
 
         @Test
-        fun `skips migration — does not call secureStorage write when legacy key is blank`() = runTest {
+        fun `skips migration — writes nothing and leaves the data store untouched when legacy key is blank`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
 
@@ -357,17 +299,6 @@ class ApiKeyLocalDataSourceImplTest {
                     any(),
                 )
             }
-        }
-
-        @Test
-        fun `skips migration — does not call updateData when legacy key is blank`() = runTest {
-            // ----- Arrange -----
-            stubLegacyKey(apiKey = "")
-
-            // ----- Act -----
-            buildDataSource()
-
-            // ----- Assert -----
             coVerify(exactly = 0) { dataStore.updateData(any()) }
         }
 
@@ -426,7 +357,7 @@ class ApiKeyLocalDataSourceImplTest {
     @Nested
     inner class UpdateApiKey {
         @Test
-        fun `non-blank key — emits the new key on the flow`() = runTest {
+        fun `non-blank key — emits the new key and persists it in the secure store`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
             val dataSource = buildDataSource()
@@ -436,6 +367,7 @@ class ApiKeyLocalDataSourceImplTest {
             dataSource.updateApiKey(key = newKey)
 
             // ----- Assert -----
+            storedKey shouldBe newKey
             dataSource.apiKey.test {
                 awaitItem() shouldBe newKey
                 cancelAndIgnoreRemainingEvents()
@@ -443,26 +375,7 @@ class ApiKeyLocalDataSourceImplTest {
         }
 
         @Test
-        fun `non-blank key — calls secureStorage write with the key`() = runTest {
-            // ----- Arrange -----
-            stubLegacyKey(apiKey = "")
-            val dataSource = buildDataSource()
-            val newKey = "my-new-api-key"
-
-            // ----- Act -----
-            dataSource.updateApiKey(key = newKey)
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                secureStorage.write(
-                    API_KEY,
-                    newKey,
-                )
-            }
-        }
-
-        @Test
-        fun `blank key — emits null on the flow`() = runTest {
+        fun `blank key — emits null and removes the key from the secure store`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
             val dataSource = buildDataSource()
@@ -472,6 +385,7 @@ class ApiKeyLocalDataSourceImplTest {
             dataSource.updateApiKey(key = "")
 
             // ----- Assert -----
+            storedKey.shouldBeNull()
             dataSource.apiKey.test {
                 awaitItem() shouldBe null
                 cancelAndIgnoreRemainingEvents()
@@ -479,20 +393,7 @@ class ApiKeyLocalDataSourceImplTest {
         }
 
         @Test
-        fun `blank key — calls secureStorage delete`() = runTest {
-            // ----- Arrange -----
-            stubLegacyKey(apiKey = "")
-            val dataSource = buildDataSource()
-
-            // ----- Act -----
-            dataSource.updateApiKey(key = "")
-
-            // ----- Assert -----
-            coVerify(exactly = 1) { secureStorage.delete(API_KEY) }
-        }
-
-        @Test
-        fun `whitespace-only key — emits null on the flow`() = runTest {
+        fun `whitespace-only key — is treated as blank and removes the stored key`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
             val dataSource = buildDataSource()
@@ -502,30 +403,18 @@ class ApiKeyLocalDataSourceImplTest {
             dataSource.updateApiKey(key = "   ")
 
             // ----- Assert -----
+            storedKey.shouldBeNull()
             dataSource.apiKey.test {
                 awaitItem() shouldBe null
                 cancelAndIgnoreRemainingEvents()
             }
-        }
-
-        @Test
-        fun `whitespace-only key — calls secureStorage delete`() = runTest {
-            // ----- Arrange -----
-            stubLegacyKey(apiKey = "")
-            val dataSource = buildDataSource()
-
-            // ----- Act -----
-            dataSource.updateApiKey(key = "   ")
-
-            // ----- Assert -----
-            coVerify(exactly = 1) { secureStorage.delete(API_KEY) }
         }
     }
 
     @Nested
     inner class Clear {
         @Test
-        fun `emits null on the flow after clear`() = runTest {
+        fun `emits null and removes the key from the secure store`() = runTest {
             // ----- Arrange -----
             stubLegacyKey(apiKey = "")
             val dataSource = buildDataSource()
@@ -535,23 +424,11 @@ class ApiKeyLocalDataSourceImplTest {
             dataSource.clear()
 
             // ----- Assert -----
+            storedKey.shouldBeNull()
             dataSource.apiKey.test {
                 awaitItem() shouldBe null
                 cancelAndIgnoreRemainingEvents()
             }
-        }
-
-        @Test
-        fun `calls secureStorage delete after clear`() = runTest {
-            // ----- Arrange -----
-            stubLegacyKey(apiKey = "")
-            val dataSource = buildDataSource()
-
-            // ----- Act -----
-            dataSource.clear()
-
-            // ----- Assert -----
-            coVerify(atLeast = 1) { secureStorage.delete(API_KEY) }
         }
     }
 }

@@ -1,0 +1,89 @@
+package nl.rhaydus.softcover.feature.explore.presentation.collector
+
+import io.kotest.matchers.shouldBe
+import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
+import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
+import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
+import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
+import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
+import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class MoodChipsCollectorTest {
+    private lateinit var dependencies: ExploreDependencies
+    private lateinit var stateFlow: MutableStateFlow<ExploreScreenUiState>
+    private lateinit var scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>
+
+    private val cozy = MoodTag(
+        id = 1,
+        label = "cosy",
+        slug = "cosy",
+        bookCount = 10,
+    )
+
+    @BeforeEach
+    fun setUp() {
+        stateFlow = MutableStateFlow(ExploreScreenUiState())
+        scope = ActionScope(
+            stateFlow = stateFlow,
+            localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
+            eventChannel = Channel(Channel.BUFFERED),
+        )
+        dependencies = mockk<ExploreDependencies>(relaxed = true)
+    }
+
+    @Nested
+    inner class OnLaunch {
+        @Test
+        fun `sets moodChips with chips and payloads from moodTags`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = MoodChipsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = ExploreScreenUiState(moodTags = persistentListOf(cozy))
+
+            // ----- Assert -----
+            stateFlow.value.moodChips.chips.map { it.key } shouldBe listOf("mood:1")
+            stateFlow.value.moodChips.chips.map { it.label } shouldBe listOf("Cosy")
+            stateFlow.value.moodChips.payloadByKey shouldBe mapOf("mood:1" to cozy)
+            job.cancel()
+        }
+
+        @Test
+        fun `unrelated state change that leaves moodTags equal does not retrigger recompute`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                stateFlow.value = ExploreScreenUiState(moodTags = persistentListOf(cozy))
+                val collector = MoodChipsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+                val chipSetAfterFirstEmit = stateFlow.value.moodChips
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(isLoading = true)
+
+                // ----- Assert -----
+                (stateFlow.value.moodChips === chipSetAfterFirstEmit) shouldBe true
+                job.cancel()
+            }
+    }
+}

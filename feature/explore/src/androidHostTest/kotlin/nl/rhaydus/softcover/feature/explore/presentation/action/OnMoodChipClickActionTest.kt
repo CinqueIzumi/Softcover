@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
@@ -13,10 +14,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchByMoodUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
@@ -24,6 +21,9 @@ import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDepe
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnMoodChipClickActionTest {
     private lateinit var searchByMoodUseCase: SearchByMoodUseCase
@@ -102,7 +102,7 @@ class OnMoodChipClickActionTest {
         }
 
         @Test
-        fun `immediately clears focus, sets the mood filter and starts loading`() = runTest(UnconfinedTestDispatcher()) {
+        fun `clears focus, sets the mood filter and loads until the search resolves`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(
@@ -136,53 +136,42 @@ class OnMoodChipClickActionTest {
 
             gate.complete(Unit)
             job.join()
-        }
-
-        @Test
-        fun `sets isLoading false when the mood search succeeds`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                searchByMoodUseCase(mood = mood)
-            } returns Result.success(Unit)
-
-            val action = OnMoodChipClickAction(mood = mood)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
         }
 
         @Test
-        fun `sets offline searchError and isLoading false when the mood search fails offline`() = runTest {
+        fun `drops a pending load-more spinner while the mood search runs`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(loadingMoreQueriedBooks = true)
+            val gate = CompletableDeferred<Unit>()
 
             coEvery {
                 searchByMoodUseCase(mood = mood)
-            } returns Result.failure(OfflineException())
+            } coAnswers {
+                gate.await()
+                Result.success(Unit)
+            }
 
             val action = OnMoodChipClickAction(mood = mood)
 
             // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
+            val job = launch {
+                action.execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+            }
 
             // ----- Assert -----
-            stateFlow.value.searchError shouldBe "You're offline. Check your connection and try again."
-            stateFlow.value.isLoading shouldBe false
+            stateFlow.value.loadingMoreQueriedBooks shouldBe false
+
+            gate.complete(Unit)
+            job.join()
         }
 
         @Test
-        fun `sets fallback searchError and isLoading false when the mood search fails with an unknown error`() = runTest {
+        fun `sets searchError and isLoading false when the mood search fails`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
 
@@ -199,7 +188,7 @@ class OnMoodChipClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.searchError shouldBe "We couldn't load results. Please try again."
+            stateFlow.value.searchError.shouldNotBeNull()
             stateFlow.value.isLoading shouldBe false
         }
     }

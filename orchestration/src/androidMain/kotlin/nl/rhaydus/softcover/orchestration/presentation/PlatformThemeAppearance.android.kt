@@ -5,8 +5,8 @@ import androidx.activity.compose.LocalActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.isDark
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
+import nl.rhaydus.softcover.core.presentation.theme.isDark
 
 @Composable
 internal actual fun ApplyPlatformThemeAppearance(themeMode: ThemeMode) {

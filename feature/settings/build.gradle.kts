@@ -35,17 +35,29 @@ compose.resources {
 kotlin {
     androidLibrary {
         namespace = "nl.rhaydus.softcover.feature.settings"
+
+        // Required for the bundled `ROADMAP.md` below to reach the APK at all. The KMP Android library
+        // plugin keeps Android resources off by default and Compose Multiplatform resources ship as
+        // Android *assets*, so without this the `compose.resources` block still generates its `Res`
+        // accessor and still compiles — the failure is entirely at runtime, as a
+        // `MissingResourceException` from `RoadmapBundledDataSource`. That made it invisible: the
+        // bundled copy is only read before the first live fetch lands, so a machine with a warm cache
+        // never touches it.
+        androidResources.enable = true
     }
 
     sourceSets {
         commonMain.dependencies {
             api(project(":core:domain"))
             implementation(project(":core:book"))
+            implementation(project(":core:component"))
             implementation(project(":core:database"))
             implementation(project(":core:lists"))
             implementation(project(":core:network"))
             api(project(":core:preferences"))
             implementation(project(":core:designsystem"))
+            implementation(project(":core:presentation"))
+            implementation(project(":core:uibinding"))
 
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)

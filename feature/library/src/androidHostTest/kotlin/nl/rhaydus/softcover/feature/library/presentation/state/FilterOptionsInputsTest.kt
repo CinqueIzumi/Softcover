@@ -1,14 +1,14 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class FilterOptionsInputsTest {
     // region Fixtures
@@ -43,19 +43,23 @@ class FilterOptionsInputsTest {
     ) = Book(
         id = id,
         title = "Book $id",
-        editions = listOf(buildEdition(
-            id = id,
-            bookId = id,
-        ),),
+        editions = listOf(
+            buildEdition(
+                id = id,
+                bookId = id,
+            ),
+        ),
         defaultEdition = null,
         rating = 0.0,
         description = "",
         releaseYear = 2020,
         coverUrl = "",
-        authors = listOf(Author(
-            id = id,
-            name = "Author $id",
-        ),),
+        authors = listOf(
+            Author(
+                id = id,
+                name = "Author $id",
+            ),
+        ),
         usersCount = 0,
         ratingsCount = 0,
         bookSeries = null,

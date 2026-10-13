@@ -14,7 +14,8 @@ internal class OnDismissEditEditionSheetClickAction : BookDetailAction {
         scope.setState {
             it.copy(
                 showEditEditionSheet = false,
-                editionSearchQuery = "",
+                editionSheet = it.editionSheet?.copy(searchQuery = ""),
+                selectedEditionId = null,
             )
         }
     }

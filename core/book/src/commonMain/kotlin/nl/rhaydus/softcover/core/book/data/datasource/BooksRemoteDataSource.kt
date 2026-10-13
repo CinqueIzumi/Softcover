@@ -303,7 +303,7 @@ internal class BooksRemoteDataSourceImpl(
             .mapNotNull { it.booksByIdsBookDetailFragment()?.toBook() }
             // Restore the trending rank lost by the by-ids batch fetch; a book whose id isn't in the
             // trending set (e.g. an Apollo canonical-merge redirect) sorts last on its null rank.
-            .sortedBy { book -> idOrdered[book.id] }
+            .sortedWith(compareBy(nullsLast()) { book -> idOrdered[book.id] })
     }
 
     override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.profile.domain.model
 
 data class LovedBook(
+    val bookId: Int,
     val coverUrl: String,
     val title: String,
     val author: String,

@@ -1,19 +1,29 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
-import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
-import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.component.haptics.Feedback
+import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.selectedEditionFor
 import nl.rhaydus.toad.ActionScope
 
-internal data class OnNewEditionSaveClickAction(val edition: BookEdition) : BookDetailAction {
+internal class OnNewEditionSaveClickAction : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        val userBook = scope.currentState.book?.userBook
+        val state = scope.currentState
+        val currentEdition = state.displayedEdition ?: return
+
+        val edition = selectedEditionFor(
+            editions = state.filteredEditions,
+            selectedEditionId = state.selectedEditionId,
+            currentEdition = currentEdition,
+        )
+
+        val userBook = state.book?.userBook
 
         // No user book yet: switching editions is a local-only preview. Show the chosen edition's
         // details without creating or mutating a user book and without caching anything.
@@ -22,7 +32,7 @@ internal data class OnNewEditionSaveClickAction(val edition: BookEdition) : Book
                 it.copy(
                     previewEdition = edition,
                     scannedEditionId = null,
-                    showEditEditionSheet = false,
+                    selectedEditionId = null,
                 )
             }
 
@@ -37,7 +47,14 @@ internal data class OnNewEditionSaveClickAction(val edition: BookEdition) : Book
             dependencies.updateBookEditionUseCase(
                 userBook = userBook,
                 newEditionId = edition.id,
-            ).onApiFailure()
+            )
+                .onSuccess {
+                    scope.sendEvent(BookDetailEvent.MutationSucceededEvent(feedback = Feedback.Routine))
+                }
+                .onApiFailure()
+                .onFailure {
+                    scope.sendEvent(BookDetailEvent.MutationFailedEvent())
+                }
 
             scope.setState {
                 it.copy(loadingBookDetails = false)
@@ -47,7 +64,7 @@ internal data class OnNewEditionSaveClickAction(val edition: BookEdition) : Book
         scope.setState {
             it.copy(
                 scannedEditionId = null,
-                showEditEditionSheet = false,
+                selectedEditionId = null,
             )
         }
     }

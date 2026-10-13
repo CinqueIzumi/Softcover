@@ -1,0 +1,72 @@
+package nl.rhaydus.softcover.feature.settings.presentation.screen.section
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.control.PreviewTileEvent
+import nl.rhaydus.softcover.core.component.control.ThemePreviewTile
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.feature.settings.presentation.action.OnThemeModeSelectedAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
+import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
+
+/**
+ * The theme picker: one [ThemePreviewTile] per
+ * [ThemeMode][nl.rhaydus.softcover.core.domain.model.ThemeMode], each painting the app's own page in the
+ * scheme it would give — in the reader's chosen spine colour, so the two pickers agree — so the choice is
+ * made by looking rather than by reading three words. It leads the Appearance body — including on desktop,
+ * ahead of "Display scale" — because it is the one control that changes every surface in the app.
+ */
+@Composable
+internal fun ThemeSection(
+    state: SettingsScreenUiState,
+    runAction: (SettingsAction) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SectionHeader(model = state.themeSectionHeader)
+
+        Spacer(modifier = Modifier.height(Spacing.md))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            state.themeChoices.forEach { tile ->
+                ThemePreviewTile(
+                    model = tile,
+                    onEvent = { event ->
+                        when (event) {
+                            is PreviewTileEvent.Clicked ->
+                                runAction(OnThemeModeSelectedAction(mode = event.key))
+                        }
+                    },
+                    modifier = Modifier
+                        .weight(
+                            weight = 1f,
+                            fill = false,
+                        )
+                        .widthIn(max = 128.dp),
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(Spacing.md))
+
+        SoftcoverText(
+            text = "System follows your device's own light and dark setting.",
+            style = MaterialTheme.editorialTypography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}

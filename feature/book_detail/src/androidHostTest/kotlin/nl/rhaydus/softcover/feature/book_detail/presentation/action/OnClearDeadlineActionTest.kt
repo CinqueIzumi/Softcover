@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
-import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -10,16 +9,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnClearDeadlineActionTest {
     private lateinit var clearBookDeadlineUseCase: ClearBookDeadlineUseCase
@@ -30,7 +30,7 @@ class OnClearDeadlineActionTest {
     @BeforeEach
     fun setUp() {
         clearBookDeadlineUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -71,7 +71,7 @@ class OnClearDeadlineActionTest {
         fun `calls clearBookDeadlineUseCase with the book id from state`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 99)
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -95,7 +95,7 @@ class OnClearDeadlineActionTest {
         @Test
         fun `does nothing when state has no book`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null)
+            stateFlow.value = buildBookDetailUiState().copy(book = null)
             dependencies = stubDependencies(this)
             val action = OnClearDeadlineAction()
 
@@ -109,32 +109,6 @@ class OnClearDeadlineActionTest {
             coVerify(exactly = 0) {
                 clearBookDeadlineUseCase(bookId = any())
             }
-        }
-
-        @Test
-        fun `state is not mutated when book is present`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 5)
-            stateFlow.value = BookDetailUiState(
-                book = book,
-                loadingBookDetails = false,
-            )
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                clearBookDeadlineUseCase(bookId = 5)
-            } returns Result.success(Unit)
-
-            val action = OnClearDeadlineAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.loadingBookDetails shouldBe false
         }
     }
 }

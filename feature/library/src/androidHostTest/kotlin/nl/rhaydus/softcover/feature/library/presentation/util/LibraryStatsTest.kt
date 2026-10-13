@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.util
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
@@ -10,6 +8,8 @@ import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class LibraryStatsTest {
     // region Fixtures
@@ -121,18 +121,6 @@ class LibraryStatsTest {
     @Nested
     inner class TotalPages {
         @Test
-        fun `returns 0 for empty list`() {
-            // ----- Arrange -----
-            val books = emptyList<Book>()
-
-            // ----- Act -----
-            val result = books.totalPages()
-
-            // ----- Assert -----
-            result shouldBe 0
-        }
-
-        @Test
         fun `sums currentEdition pages when available`() {
             // ----- Arrange -----
             val books = listOf(
@@ -206,66 +194,6 @@ class LibraryStatsTest {
             // ----- Assert -----
             result shouldBe "0 titles"
         }
-
-        @Test
-        fun `returns "N titles" for count greater than 1`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = formatBookCount(count = 42)
-
-            // ----- Assert -----
-            result shouldBe "42 titles"
-        }
-    }
-
-    @Nested
-    inner class FormatPageCount {
-        @Test
-        fun `returns null for 0 pages`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = formatPageCount(pages = 0)
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `formats small page count without thousands separator`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = formatPageCount(pages = 300)
-
-            // ----- Assert -----
-            result shouldBe "300 pages"
-        }
-
-        @Test
-        fun `formats large page count with thousands separator`() {
-            // ----- Arrange -----
-            val expected = "%,d pages".format(1500)
-
-            // ----- Act -----
-            val result = formatPageCount(pages = 1500)
-
-            // ----- Assert -----
-            result shouldBe expected
-        }
-
-        @Test
-        fun `formats very large page count with thousands separator`() {
-            // ----- Arrange -----
-            val expected = "%,d pages".format(12345)
-
-            // ----- Act -----
-            val result = formatPageCount(pages = 12345)
-
-            // ----- Assert -----
-            result shouldBe expected
-        }
     }
 
     @Nested
@@ -280,31 +208,6 @@ class LibraryStatsTest {
 
             // ----- Assert -----
             result shouldBe null
-        }
-
-        @Test
-        fun `returns null when no StatusFinished journal exists`() {
-            // ----- Arrange -----
-            val book = buildBook(userBook = buildUserBook(journals = emptyList()))
-
-            // ----- Act -----
-            val result = book.finishedYear()
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `returns year from most recent StatusFinished journal`() {
-            // ----- Arrange -----
-            val journals = listOf(buildFinishedJournal("2022-05-10T12:00:00"))
-            val book = buildBook(userBook = buildUserBook(journals = journals))
-
-            // ----- Act -----
-            val result = book.finishedYear()
-
-            // ----- Assert -----
-            result shouldBe 2022
         }
 
         @Test

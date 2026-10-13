@@ -1,12 +1,10 @@
 package nl.rhaydus.softcover.feature.settings.data.mapper
 
 import io.kotest.matchers.shouldBe
-
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-
 import nl.rhaydus.softcover.core.database.model.RoadmapDocumentEntity
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSource
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class RoadmapDocumentMapperTest {
     @Nested

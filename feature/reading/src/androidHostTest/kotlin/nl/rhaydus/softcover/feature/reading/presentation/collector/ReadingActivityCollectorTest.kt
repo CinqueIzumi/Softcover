@@ -13,23 +13,26 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakSheetFor
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakStripFor
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+import nl.rhaydus.softcover.feature.reading.presentation.state.streakSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ReadingActivityCollectorTest {
     private lateinit var getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase
     private lateinit var observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase
-    private lateinit var refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase
+    private lateinit var refreshReadingActivityUseCase: RefreshReadingActivityUseCase
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>
     private lateinit var streakEnabledFlow: MutableSharedFlow<Boolean>
@@ -41,7 +44,7 @@ class ReadingActivityCollectorTest {
         activityFlow = MutableSharedFlow()
         getReadingStreakEnabledAsFlowUseCase = mockk()
         observeRecentReadingActivityUseCase = mockk()
-        refreshUserProfileDataUseCase = mockk()
+        refreshReadingActivityUseCase = mockk()
         stateFlow = MutableStateFlow(ReadingScreenUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -67,8 +70,8 @@ class ReadingActivityCollectorTest {
                 mock.observeRecentReadingActivityUseCase
             } returns observeRecentReadingActivityUseCase
             every {
-                mock.refreshUserProfileDataUseCase
-            } returns refreshUserProfileDataUseCase
+                mock.refreshReadingActivityUseCase
+            } returns refreshReadingActivityUseCase
 
             every {
                 mock.coroutineScope
@@ -83,158 +86,110 @@ class ReadingActivityCollectorTest {
         }
     }
 
-    private fun stubActivity(): ReadingDayActivity = ReadingDayActivity(
+    private fun stubActivity(didRead: Boolean = true): ReadingDayActivity = ReadingDayActivity(
         date = LocalDate(
             2026,
             5,
             31,
         ),
-        didRead = true,
+        didRead = didRead,
     )
 
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets streakEnabled to true when enabled flow emits true`() = runTest(UnconfinedTestDispatcher()) {
+        fun `sets streakEnabled to true and keeps other state when enabled flow emits true`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery {
-                refreshUserProfileDataUseCase()
+                refreshReadingActivityUseCase()
             } returns Result.success(Unit)
+            stateFlow.value = ReadingScreenUiState(isLoading = true)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             streakEnabledFlow.emit(true)
 
             // ----- Assert -----
             stateFlow.value.streakEnabled shouldBe true
+            stateFlow.value.isLoading shouldBe true
             job.cancel()
         }
 
         @Test
-        fun `sets streakEnabled to false when enabled flow emits false`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val dependencies = buildDependencies(this)
-            val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            streakEnabledFlow.emit(false)
-
-            // ----- Assert -----
-            stateFlow.value.streakEnabled shouldBe false
-            job.cancel()
-        }
-
-        @Test
-        fun `clears recentReadingActivity when enabled flow emits false`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(recentReadingActivity = listOf(stubActivity()))
-            val dependencies = buildDependencies(this)
-            val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            streakEnabledFlow.emit(false)
-
-            // ----- Assert -----
-            stateFlow.value.recentReadingActivity shouldBe emptyList()
-            job.cancel()
-        }
-
-        @Test
-        fun `populates recentReadingActivity from observe flow when enabled`() = runTest(UnconfinedTestDispatcher()) {
+        fun `populates streak models from observe flow when enabled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery {
-                refreshUserProfileDataUseCase()
+                refreshReadingActivityUseCase()
             } returns Result.success(Unit)
             val activity = listOf(stubActivity(), stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             streakEnabledFlow.emit(true)
             activityFlow.emit(activity)
 
             // ----- Assert -----
-            stateFlow.value.recentReadingActivity shouldBe activity
+            stateFlow.value.streakStrip shouldBe streakStripFor(
+                activity = activity,
+                isLoading = true,
+            )
+            stateFlow.value.streakSheet shouldBe streakSheetFor(activity = activity)
+            stateFlow.value.hasLoadedReadingActivity shouldBe true
             job.cancel()
         }
 
         @Test
-        fun `invokes refreshUserProfileDataUseCase when enabled`() = runTest(UnconfinedTestDispatcher()) {
+        fun `invokes refreshReadingActivityUseCase when enabled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery {
-                refreshUserProfileDataUseCase()
+                refreshReadingActivityUseCase()
             } returns Result.success(Unit)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             streakEnabledFlow.emit(true)
 
             // ----- Assert -----
-            coVerify(exactly = 1) { refreshUserProfileDataUseCase() }
+            coVerify(exactly = 1) { refreshReadingActivityUseCase() }
             job.cancel()
         }
 
         @Test
-        fun `updates recentReadingActivity to latest emission when enabled flow emits multiple activity lists`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                coEvery {
-                    refreshUserProfileDataUseCase()
-                } returns Result.success(Unit)
-                val firstList = listOf(stubActivity())
-                val secondList = listOf(stubActivity(), stubActivity(), stubActivity())
-                val dependencies = buildDependencies(this)
-                val collector = ReadingActivityCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
-
-                // ----- Act -----
-                streakEnabledFlow.emit(true)
-                activityFlow.emit(firstList)
-                activityFlow.emit(secondList)
-
-                // ----- Assert -----
-                stateFlow.value.recentReadingActivity shouldBe secondList
-                job.cancel()
-            }
-
-        @Test
-        fun `clears recentReadingActivity when toggled from true to false`() = runTest(UnconfinedTestDispatcher()) {
+        fun `clears the streak models when toggled from true to false`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery {
-                refreshUserProfileDataUseCase()
+                refreshReadingActivityUseCase()
             } returns Result.success(Unit)
             val activity = listOf(stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             streakEnabledFlow.emit(true)
             activityFlow.emit(activity)
 
@@ -243,7 +198,12 @@ class ReadingActivityCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.streakEnabled shouldBe false
-            stateFlow.value.recentReadingActivity shouldBe emptyList()
+            stateFlow.value.streakStrip shouldBe streakStripFor(
+                activity = emptyList(),
+                isLoading = true,
+            )
+            stateFlow.value.streakSheet shouldBe streakSheetFor(activity = emptyList())
+            stateFlow.value.hasLoadedReadingActivity shouldBe true
             job.cancel()
         }
 
@@ -251,68 +211,166 @@ class ReadingActivityCollectorTest {
         fun `swallows refresh failure and still collects from observe when enabled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery {
-                refreshUserProfileDataUseCase()
+                refreshReadingActivityUseCase()
             } returns Result.failure(RuntimeException("network error"))
             val activity = listOf(stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             streakEnabledFlow.emit(true)
             activityFlow.emit(activity)
 
             // ----- Assert -----
-            stateFlow.value.recentReadingActivity shouldBe activity
+            stateFlow.value.streakStrip shouldBe streakStripFor(
+                activity = activity,
+                isLoading = true,
+            )
+            stateFlow.value.streakSheet shouldBe streakSheetFor(activity = activity)
             job.cancel()
         }
 
         @Test
-        fun `preserves other state fields when updating streakEnabled`() = runTest(UnconfinedTestDispatcher()) {
+        fun `sets streakSheet to the scaffold built for the emitted activity`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery {
-                refreshUserProfileDataUseCase()
+                refreshReadingActivityUseCase()
             } returns Result.success(Unit)
+            val activity = listOf(
+                stubActivity(didRead = true),
+                stubActivity(didRead = false),
+                stubActivity(didRead = true),
+            )
+            val dependencies = buildDependencies(this)
+            val collector = ReadingActivityCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            streakEnabledFlow.emit(true)
+            activityFlow.emit(activity)
+
+            // ----- Assert -----
+            stateFlow.value.streakSheet.scaffold shouldBe streakSheetScaffoldFor(activity = activity)
+            job.cancel()
+        }
+
+        @Test
+        fun `resets streakSheet to the empty-activity scaffold when toggled from true to false`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                coEvery {
+                    refreshReadingActivityUseCase()
+                } returns Result.success(Unit)
+                val activity = listOf(stubActivity(didRead = true), stubActivity(didRead = false))
+                val dependencies = buildDependencies(this)
+                val collector = ReadingActivityCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+                streakEnabledFlow.emit(true)
+                activityFlow.emit(activity)
+
+                // ----- Act -----
+                streakEnabledFlow.emit(false)
+
+                // ----- Assert -----
+                stateFlow.value.streakSheet.scaffold shouldBe streakSheetScaffoldFor(activity = emptyList())
+                job.cancel()
+            }
+
+        @Test
+        fun `carries the state's isLoading into the strip and rows into the sheet`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            coEvery {
+                refreshReadingActivityUseCase()
+            } returns Result.success(Unit)
+            stateFlow.value = ReadingScreenUiState(isLoading = true)
+            val activity = listOf(stubActivity(didRead = true))
+            val dependencies = buildDependencies(this)
+            val collector = ReadingActivityCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            streakEnabledFlow.emit(true)
+            activityFlow.emit(activity)
+
+            // ----- Assert -----
+            stateFlow.value.streakStrip shouldBe streakStripFor(
+                activity = activity,
+                isLoading = true,
+            )
+            stateFlow.value.streakSheet.rows shouldBe streakSheetFor(activity = activity).rows
+            stateFlow.value.streakSheet.rows.single().label shouldBe "Today"
+            job.cancel()
+        }
+
+        @Test
+        fun `carries a settled isLoading into the strip`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            coEvery {
+                refreshReadingActivityUseCase()
+            } returns Result.success(Unit)
+            stateFlow.value = ReadingScreenUiState(isLoading = false)
+            val dependencies = buildDependencies(this)
+            val collector = ReadingActivityCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            streakEnabledFlow.emit(true)
+            activityFlow.emit(listOf(stubActivity()))
+
+            // ----- Assert -----
+            stateFlow.value.streakStrip.isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `empties the sheet rows and carries isLoading when disabled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(isLoading = true)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
-            streakEnabledFlow.emit(true)
+            streakEnabledFlow.emit(false)
 
             // ----- Assert -----
-            stateFlow.value.isLoading shouldBe true
-            stateFlow.value.streakEnabled shouldBe true
+            stateFlow.value.streakStrip shouldBe streakStripFor(
+                activity = emptyList(),
+                isLoading = true,
+            )
+            stateFlow.value.streakSheet.rows.size shouldBe 0
             job.cancel()
-        }
-
-        @Test
-        fun `retains last state after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            coEvery {
-                refreshUserProfileDataUseCase()
-            } returns Result.success(Unit)
-            val activity = listOf(stubActivity(), stubActivity())
-            val dependencies = buildDependencies(this)
-            val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-            streakEnabledFlow.emit(true)
-            activityFlow.emit(activity)
-            job.cancel()
-
-            // ----- Act & Assert -----
-            stateFlow.value.streakEnabled shouldBe true
-            stateFlow.value.recentReadingActivity shouldBe activity
         }
     }
 }

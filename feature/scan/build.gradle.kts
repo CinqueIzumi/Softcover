@@ -12,11 +12,12 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":core:domain"))
             implementation(project(":core:book"))
+            implementation(project(":core:component"))
             implementation(project(":core:designsystem"))
+            implementation(project(":core:presentation"))
 
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)
-            implementation(libs.rhaydus.designsystemEditorial)
             implementation(libs.rhaydus.toad)
 
             implementation(libs.koin.compose.multiplatform)

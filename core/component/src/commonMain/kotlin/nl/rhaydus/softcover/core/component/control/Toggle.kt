@@ -1,0 +1,105 @@
+package nl.rhaydus.softcover.core.component.control
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
+import nl.rhaydus.softcover.core.component.modifier.tactileToggleable
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
+
+/** A two-state glyph control reporting through one [ToggleEvent] lambda; the caller's [modifier] places it. */
+@Composable
+fun Toggle(
+    model: ToggleUiModel,
+    onEvent: (ToggleEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val filled = model.variant == ToggleVariant.Filled
+    val size = if (filled) 44.dp else 38.dp
+    val iconSize = if (filled) 24.dp else 20.dp
+    val shape = if (filled) Corners.md else Corners.pill
+    val targetContainer = when {
+        filled.not() -> Color.Transparent
+        model.checked -> scheme.primary
+        else -> scheme.surfaceContainerHigh
+    }
+    val targetTint = when {
+        filled && model.checked -> scheme.onPrimary
+        filled -> scheme.primary
+        model.checked -> scheme.primary
+        else -> scheme.outline
+    }
+    val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
+    val container by animateColorAsState(
+        targetValue = targetContainer,
+        animationSpec = colorSpec,
+        label = "IconToggleContainer",
+    )
+    val tint by animateColorAsState(
+        targetValue = targetTint,
+        animationSpec = colorSpec,
+        label = "IconToggleTint",
+    )
+    val motionScheme = MaterialTheme.motionScheme
+
+    DesktopTooltip(text = model.description) {
+        Box(
+            modifier = modifier
+                .minimumInteractiveComponentSize()
+                .alpha(if (model.enabled) 1f else DISABLED_ALPHA)
+                .size(size)
+                .tactileToggleable(
+                    value = model.checked,
+                    onValueChange = { checked ->
+                        onEvent(ToggleEvent.Toggled(checked = checked))
+                    },
+                    role = Role.Switch,
+                    enabled = model.enabled,
+                    hoverShape = shape,
+                )
+                .clip(shape)
+                .background(container),
+            contentAlignment = Alignment.Center,
+        ) {
+            AnimatedContent(
+                targetState = model.checked,
+                transitionSpec = {
+                    glyphSwapTransition(
+                        popsIn = targetState,
+                        motionScheme = motionScheme,
+                    )
+                },
+                label = "ToggleGlyph",
+            ) { checked ->
+                val icon = drawableIconResource(
+                    icon = if (checked) model.on else model.off,
+                    contentDescription = model.description,
+                )
+
+                Icon(
+                    painter = icon.getIconPainter(),
+                    contentDescription = icon.contentDescription,
+                    tint = tint,
+                    modifier = Modifier.size(iconSize),
+                )
+            }
+        }
+    }
+}

@@ -7,12 +7,12 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class UpdateBookRatingUseCaseTest {
     private lateinit var booksRepository: BooksRepository
@@ -43,10 +43,12 @@ class UpdateBookRatingUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            coVerify(exactly = 0) { booksRepository.updateBookRating(
-                book = any(),
-                rating = any(),
-            ) }
+            coVerify(exactly = 0) {
+                booksRepository.updateBookRating(
+                    book = any(),
+                    rating = any(),
+                )
+            }
             coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
@@ -72,10 +74,12 @@ class UpdateBookRatingUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            coVerify(exactly = 0) { booksRepository.updateBookRating(
-                book = any(),
-                rating = any(),
-            ) }
+            coVerify(exactly = 0) {
+                booksRepository.updateBookRating(
+                    book = any(),
+                    rating = any(),
+                )
+            }
             coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
@@ -113,10 +117,12 @@ class UpdateBookRatingUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            coVerify(exactly = 1) { booksRepository.updateBookRating(
-                book = inputBook,
-                rating = newRating,
-            ) }
+            coVerify(exactly = 1) {
+                booksRepository.updateBookRating(
+                    book = inputBook,
+                    rating = newRating,
+                )
+            }
             coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
         }
 

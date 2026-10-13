@@ -11,6 +11,7 @@ import org.gradle.kotlin.dsl.dependencies
 class AndroidComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
+        applyComposeStabilityGate()
 
         extensions.configure<LibraryExtension> {
             buildFeatures {

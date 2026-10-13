@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -40,7 +41,7 @@ internal class TagSuggestionsCollector : BookDetailCollector {
                 appliedTags = query.applied,
             )
         }.collectLatest { suggestions ->
-            scope.setState { it.copy(tagSuggestions = suggestions) }
+            scope.setState { it.copy(tagSuggestions = suggestions.toImmutableList()) }
         }
     }
 }

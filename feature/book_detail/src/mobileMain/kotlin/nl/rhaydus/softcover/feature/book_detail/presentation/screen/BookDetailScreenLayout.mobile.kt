@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -13,9 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
@@ -25,24 +20,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
+import nl.rhaydus.softcover.core.component.topbar.TopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
-import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.bookDetailItems
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.topBarFor
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -51,47 +43,13 @@ internal actual fun BookDetailScreenLayout(
     runAction: (BookDetailAction) -> Unit,
     onNavigateBack: () -> Unit,
     onCoverClick: () -> Unit,
-    onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
-    bookId: Int,
-    transitionSurface: String?,
-    celebrationKey: Int,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val lazyListState = rememberLazyListState()
 
     val shouldBeExpanded by remember {
         derivedStateOf { lazyListState.firstVisibleItemIndex >= 1 }
-    }
-
-    val title = remember(shouldBeExpanded) {
-        if (shouldBeExpanded.not()) {
-            ""
-        } else {
-            state.book?.title.orEmpty()
-        }
-    }
-
-    val containerColor by animateColorAsState(
-        if (shouldBeExpanded.not()) {
-            Color.Transparent
-        } else {
-            Color.Unspecified
-        },
-    )
-
-    val defaultIconButtonColors = IconButtonDefaults.iconButtonColors()
-    val iconButtonColorsWithScrim = IconButtonDefaults.iconButtonColors(
-        containerColor = Color.Black.copy(alpha = 0.35f),
-        contentColor = Color.White,
-    )
-
-    val backButtonColors = remember(shouldBeExpanded) {
-        if (shouldBeExpanded) {
-            defaultIconButtonColors
-        } else {
-            iconButtonColorsWithScrim
-        }
     }
 
     val showOfflinePlaceholder =
@@ -101,29 +59,20 @@ internal actual fun BookDetailScreenLayout(
         contentWindowInsets = WindowInsets(),
     ) { innerPadding ->
         if (showOfflinePlaceholder) {
-            OfflineScreenContent(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .padding(bottom = bottomChromePadding()),
-            )
+            state.offlineEmptyState?.let { offlineEmptyState ->
+                OfflineEmptyStatePlaceholder(
+                    model = offlineEmptyState,
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .padding(bottom = bottomChromePadding()),
+                )
+            }
 
-            SoftcoverTopBar(
-                title = "",
-                onNavigateBack = onNavigateBack,
-                navigateBackButton = {
-                    IconButton(
-                        onClick = onNavigateBack,
-                        colors = backButtonColors,
-                    ) {
-                        val backIcon = drawableIconResource(
-                            icon = SoftcoverIcon.ArrowBack,
-                            contentDescription = "Navigate back icon",
-                        )
-
-                        Icon(
-                            painter = backIcon.getIconPainter(),
-                            contentDescription = backIcon.contentDescription,
-                        )
+            TopBar(
+                model = state.topBar,
+                onEvent = { event ->
+                    when (event) {
+                        TopBarEvent.BackClicked -> onNavigateBack()
                     }
                 },
                 scrollBehavior = topAppBarScrollBehavior,
@@ -132,7 +81,6 @@ internal actual fun BookDetailScreenLayout(
             return@Scaffold
         }
 
-        val yoursEnabled = state.book?.userBook != null
 
         LazyColumn(
             modifier = Modifier
@@ -140,125 +88,35 @@ internal actual fun BookDetailScreenLayout(
                 .padding(innerPadding),
             state = lazyListState,
         ) {
-            item {
-                val currentEditionId = state.book?.currentEdition?.id
-
-                val editionMutationFailed =
-                    currentEditionId != null && currentEditionId in state.failedMutationEditionIds
-
-                Box(
-                    modifier = Modifier.shakeOnError(
-                        trigger = editionMutationFailed,
-                        onShakeEnd = {
-                            if (currentEditionId != null) {
-                                runAction(
-                                    OnClearMutationFailureAction(editionId = currentEditionId),
-                                )
-                            }
-                        },
-                    ),
-                ) {
-                    GeneralBookInfoSection(
-                        edition = state.displayedEdition,
-                        isLoading = state.loadingBookDetails && state.book == null,
-                        fallBackEdition = state.book?.defaultEdition ?: state.initialCover?.defaultEdition,
-                        fallbackCoverUrl = state.book?.coverUrl ?: state.initialCover?.fallbackCoverUrl,
-                        isExpired = state.deadlineProgress?.isExpired == true,
-                        rating = state.book?.rating,
-                        title = state.book?.title,
-                        seriesText = state.book?.seriesText,
-                        releaseYear = state.displayedEdition?.releaseYear.takeIf { it != -1 }
-                            ?: state.book?.releaseYear,
-                        unreleasedDate = state.book?.takeIf { it.isUnreleased }?.effectiveReleaseDate,
-                        isOwned = state.isEditionOwned(edition = state.displayedEdition),
-                        bookId = bookId,
-                        transitionSurface = transitionSurface,
-                        onCoverClick = onCoverClick,
-                    )
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(20.dp)) }
-
-            item {
-                ShelveControlCard(
-                    state = state,
-                    runAction = runAction,
-                    dateStyle = state.dateStyle,
-                    celebrationKey = celebrationKey,
-                )
-            }
-
-            if (state.showScanEditionUpdateBanner) {
-                item { Spacer(modifier = Modifier.height(20.dp)) }
-
-                item {
-                    ScanEditionUpdateBanner(
-                        isUpdating = state.isUpdatingScannedEdition,
-                        runAction = runAction,
-                    )
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(20.dp)) }
-
-            stickyHeader {
-                LensToggle(
-                    selectedLens = state.selectedLens,
-                    onLensSelected = { lens -> runAction(OnLensSelectedAction(lens = lens)) },
-                    yoursEnabled = yoursEnabled,
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            item {
-                LensContent(
-                    state = state,
-                    runAction = runAction,
-                )
-            }
+            bookDetailItems(
+                state = state,
+                runAction = runAction,
+                onCoverClick = onCoverClick,
+            )
 
             item { Spacer(modifier = Modifier.height(bottomChromePadding())) }
         }
 
-        SoftcoverTopBar(
-            title = title,
-            onNavigateBack = onNavigateBack,
-            navigateBackButton = {
-                IconButton(
-                    onClick = onNavigateBack,
-                    colors = backButtonColors,
-                ) {
-                    val backIcon = drawableIconResource(
-                        icon = SoftcoverIcon.ArrowBack,
-                        contentDescription = "Navigate back icon",
-                    )
-
-                    Icon(
-                        painter = backIcon.getIconPainter(),
-                        contentDescription = backIcon.contentDescription,
-                    )
+        TopBar(
+            model = if (shouldBeExpanded) state.topBar else state.overMediaTopBar,
+            onEvent = { event ->
+                when (event) {
+                    TopBarEvent.BackClicked -> onNavigateBack()
                 }
             },
-            additionalActions = {
-                BookOverflowMenu(
-                    state = state,
-                    runAction = runAction,
-                    isOnline = isOnline,
-                    iconColors = backButtonColors,
-                )
-            },
             scrollBehavior = topAppBarScrollBehavior,
-            colors = TopAppBarDefaults.topAppBarColors().copy(
-                containerColor = containerColor,
-            ),
-        )
+        ) { controlColors ->
+            BookOverflowMenu(
+                state = state,
+                runAction = runAction,
+                isOnline = isOnline,
+                iconColors = controlColors,
+            )
+        }
 
         BookDetailOverlays(
             state = state,
             runAction = runAction,
-            onCreateNewListClick = onCreateNewListClick,
         )
     }
 }
@@ -286,17 +144,15 @@ private fun BookDetailScreenReadingPreview() {
 
             BookDetailScreenLayout(
                 state = BookDetailUiState(
+                    bookId = book.id,
                     book = book,
+                    topBar = topBarFor(book = book),
                     loadingBookDetails = true,
                 ),
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
-                onCreateNewListClick = {},
                 isOnline = true,
-                bookId = 1,
-                transitionSurface = null,
-                celebrationKey = 0,
             )
         }
     }
@@ -317,17 +173,15 @@ private fun BookDetailScreenNonePreview() {
 
             BookDetailScreenLayout(
                 state = BookDetailUiState(
+                    bookId = book.id,
                     book = book,
+                    topBar = topBarFor(book = book),
                     loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
-                onCreateNewListClick = {},
                 isOnline = true,
-                bookId = 1,
-                transitionSurface = null,
-                celebrationKey = 0,
             )
         }
     }
@@ -348,17 +202,15 @@ private fun BookDetailScreenDnfPreview() {
 
             BookDetailScreenLayout(
                 state = BookDetailUiState(
+                    bookId = book.id,
                     book = book,
+                    topBar = topBarFor(book = book),
                     loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
-                onCreateNewListClick = {},
                 isOnline = true,
-                bookId = 1,
-                transitionSurface = null,
-                celebrationKey = 0,
             )
         }
     }
@@ -379,17 +231,15 @@ private fun BookDetailScreenWantToReadPreview() {
 
             BookDetailScreenLayout(
                 state = BookDetailUiState(
+                    bookId = book.id,
                     book = book,
+                    topBar = topBarFor(book = book),
                     loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
-                onCreateNewListClick = {},
                 isOnline = true,
-                bookId = 1,
-                transitionSurface = null,
-                celebrationKey = 0,
             )
         }
     }
@@ -410,17 +260,15 @@ private fun BookDetailScreenReadPreview() {
 
             BookDetailScreenLayout(
                 state = BookDetailUiState(
+                    bookId = book.id,
                     book = book,
+                    topBar = topBarFor(book = book),
                     loadingBookDetails = false,
                 ),
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
-                onCreateNewListClick = {},
                 isOnline = true,
-                bookId = 1,
-                transitionSurface = null,
-                celebrationKey = 0,
             )
         }
     }

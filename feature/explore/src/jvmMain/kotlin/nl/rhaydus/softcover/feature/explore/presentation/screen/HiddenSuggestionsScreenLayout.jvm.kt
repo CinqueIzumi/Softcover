@@ -1,120 +1,76 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.DesktopTooltip
-import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.component.layout.DesktopScrollPage
+import nl.rhaydus.softcover.core.component.state.EmptyState
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.explore.presentation.action.HiddenSuggestionsAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
 
 /**
- * Standalone desktop Hidden-suggestions page — a direct push from Settings (there is no master–
- * detail pane for it). A static back bar carrying the back control + the "Hidden suggestions" title,
- * mirroring the sibling `LibraryVisibilitySettingsScreenLayout` / `AppearanceSettingsScreenLayout`
- * desktop pages in `:feature:settings` (whose `DesktopSettingsBackBar` shows the page title the same
- * way), over the shared [HiddenSuggestionsContent], capped to the reading measure, with a persistent
- * desktop scrollbar. The foundation `DesktopBackStrip` has no slot for a title, so — like the Settings
- * feature's own `DesktopSettingsBackBar` — this stays a small feature-local back+title row built from
- * the same `DesktopTooltip` / `pointerHandCursor` primitives.
+ * Standalone desktop Hidden-suggestions page, pushed from Settings; it has no master–detail pane.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal actual fun HiddenSuggestionsScreenLayout(
     state: HiddenSuggestionsUiState,
     runAction: (HiddenSuggestionsAction) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
-    val scrollState = rememberScrollState()
+    val topBar: @Composable () -> Unit = {
+        EditorialTopBar(
+            model = state.topBar,
+            onEvent = { event ->
+                when (event) {
+                    TopBarEvent.BackClicked -> onNavigateBack()
+                }
+            },
+        )
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        HiddenSuggestionsDesktopBackBar(onNavigateBack = onNavigateBack)
+        topBar()
 
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-        ) {
-            HiddenSuggestionsContent(
-                state = state,
-                runAction = runAction,
+        key(state.isLoading) {
+            Crossfade(
+                targetState = state.isEmpty,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .cappedContentWidth()
-                    .padding(horizontal = 32.dp),
-            )
-
-            DesktopVerticalScrollbar(
-                scrollState = scrollState,
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .fillMaxHeight()
-                    .padding(vertical = 4.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun HiddenSuggestionsDesktopBackBar(onNavigateBack: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 8.dp,
-                end = 16.dp,
-                top = 12.dp,
-                bottom = 4.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        DesktopTooltip(text = "Back") {
-            IconButton(
-                onClick = onNavigateBack,
-                modifier = Modifier.pointerHandCursor(),
-            ) {
-                val backIcon = drawableIconResource(
-                    icon = SoftcoverIcon.ArrowBack,
-                    contentDescription = "Navigate back",
-                )
-
-                Icon(
-                    painter = backIcon.getIconPainter(),
-                    contentDescription = backIcon.contentDescription,
-                )
+                    .weight(1f)
+                    .fillMaxWidth(),
+                animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+            ) { isEmpty ->
+                if (isEmpty) {
+                    EmptyState(
+                        model = state.emptyState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .cappedContentWidth()
+                            .padding(horizontal = Spacing.gutter),
+                    )
+                } else {
+                    DesktopScrollPage {
+                        HiddenSuggestionsContent(
+                            state = state,
+                            runAction = runAction,
+                        )
+                    }
+                }
             }
         }
-
-        Spacer(modifier = Modifier.width(4.dp))
-
-        Text(
-            text = "Hidden suggestions",
-            style = MaterialTheme.editorialTypography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
     }
 }
 

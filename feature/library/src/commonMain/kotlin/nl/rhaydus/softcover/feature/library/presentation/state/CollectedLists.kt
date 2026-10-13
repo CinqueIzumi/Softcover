@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -10,8 +12,8 @@ import nl.rhaydus.softcover.core.domain.model.BookList
  * writes to state — the previous `Triple` ran out of slots once `addedAtByTab` joined the picture.
  */
 internal data class CollectedLists(
-    val editionsPerList: Map<String, List<BookEdition>>,
-    val addedAtPerList: Map<String, Map<Int, String?>>,
-    val booksById: Map<Int, Book>,
-    val allLists: List<BookList>,
+    val editionsPerList: ImmutableMap<String, ImmutableList<BookEdition>>,
+    val addedAtPerList: ImmutableMap<String, ImmutableMap<Int, String?>>,
+    val booksById: ImmutableMap<Int, Book>,
+    val allLists: ImmutableList<BookList>,
 )

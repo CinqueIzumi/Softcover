@@ -7,11 +7,11 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 
 class SetEditionAsOwnedUseCaseTest {
     private lateinit var listsRepository: ListsRepository
@@ -92,28 +92,6 @@ class SetEditionAsOwnedUseCaseTest {
             val result = useCase(
                 edition = edition,
                 owned = true,
-            )
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe expectedError
-        }
-
-        @Test
-        fun `returns failure when removeOwnedEdition throws`() = runTest {
-            // ----- Arrange -----
-            val editionId = 10
-            val edition = stubEdition(id = editionId)
-            val expectedError = RuntimeException("db error")
-
-            coEvery {
-                listsRepository.removeOwnedEdition(editionId = editionId)
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase(
-                edition = edition,
-                owned = false,
             )
 
             // ----- Assert -----

@@ -8,15 +8,15 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.feature.settings.domain.usecase.RefreshRoadmapUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.RoadmapEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class RoadmapRefreshCollectorTest {
     private lateinit var refreshRoadmapUseCase: RefreshRoadmapUseCase
@@ -65,7 +65,7 @@ class RoadmapRefreshCollectorTest {
         }
 
         @Test
-        fun `does not fill roadmapError when the use case fails`() = runTest {
+        fun `swallows a failed refresh without filling roadmapError`() = runTest {
             // ----- Arrange -----
             coEvery {
                 refreshRoadmapUseCase(force = false)
@@ -81,27 +81,6 @@ class RoadmapRefreshCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.roadmapError shouldBe null
-        }
-
-        @Test
-        fun `does not throw when the use case fails`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                refreshRoadmapUseCase(force = false)
-            } returns Result.failure(RuntimeException("network error"))
-
-            val collector = RoadmapRefreshCollector()
-
-            // ----- Act -----
-            val result = runCatching {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
         }
     }
 }

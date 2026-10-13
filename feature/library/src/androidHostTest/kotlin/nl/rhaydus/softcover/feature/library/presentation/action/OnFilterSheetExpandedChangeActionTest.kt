@@ -2,17 +2,23 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryTabStats
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.filterSheetScaffoldFor
+import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
-import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
-import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
-import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.toad.ActionScope
 
 class OnFilterSheetExpandedChangeActionTest {
     private lateinit var dependencies: LibraryDependencies
@@ -33,9 +39,47 @@ class OnFilterSheetExpandedChangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets isFilterSheetExpanded to true when expanded is true`() = runTest {
+        fun `opening seeds the draft and sheet from the selected tab and clears stale tag search text`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isFilterSheetExpanded = false)
+            val selectedTabId = "list-42"
+            val committedFilters = LibraryFilters(formats = persistentSetOf("ebook"))
+            val initial = LibraryUiState()
+            stateFlow.value = initial.copy(
+                selectedTabId = selectedTabId,
+                filtersByTab = persistentMapOf(selectedTabId to committedFilters),
+                tabStatsByTab = persistentMapOf(
+                    selectedTabId to LibraryTabStats(
+                        itemCount = 11,
+                        totalPages = 0,
+                    ),
+                ),
+                filterSheet = initial.filterSheet.copy(
+                    tagSearchField = initial.filterSheet.tagSearchField.copy(text = "stale"),
+                ),
+            )
+
+            // ----- Act -----
+            OnFilterSheetExpandedChangeAction(expanded = true).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isFilterSheetExpanded shouldBe true
+            stateFlow.value.filterDraft shouldBe LibraryFilterDraft(
+                tabId = selectedTabId,
+                filters = committedFilters,
+            )
+            stateFlow.value.filterSheet.scaffold shouldBe filterSheetScaffoldFor(
+                resultCount = 11,
+                filtersActive = true,
+            )
+            stateFlow.value.filterSheet.tagSearchField.text shouldBe ""
+        }
+
+        @Test
+        fun `opening with no committed filters seeds an inactive Clear all`() = runTest {
+            // ----- Arrange -----
             val action = OnFilterSheetExpandedChangeAction(expanded = true)
 
             // ----- Act -----
@@ -45,43 +89,44 @@ class OnFilterSheetExpandedChangeActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isFilterSheetExpanded shouldBe true
+            stateFlow.value.filterSheet.scaffold shouldBe filterSheetScaffoldFor(
+                resultCount = 0,
+                filtersActive = false,
+            )
         }
 
         @Test
-        fun `sets isFilterSheetExpanded to false when expanded is false`() = runTest {
+        fun `closing discards the draft and tag search text and keeps the existing filterSheet`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isFilterSheetExpanded = true)
-            val action = OnFilterSheetExpandedChangeAction(expanded = false)
+            val existingSheet = filterSheetScaffoldFor(
+                resultCount = 7,
+                filtersActive = true,
+            )
+            val initial = LibraryUiState()
+            stateFlow.value = initial.copy(
+                isFilterSheetExpanded = true,
+                filterSheet = initial.filterSheet.copy(
+                    scaffold = existingSheet,
+                    tagSearchField = initial.filterSheet.tagSearchField.copy(text = "kotlin"),
+                ),
+                filterDraft = LibraryFilterDraft(
+                    tabId = "list-42",
+                    filters = LibraryFilters(formats = persistentSetOf("ebook")),
+                    tagSearch = "kotlin",
+                ),
+            )
 
             // ----- Act -----
-            action.execute(
+            OnFilterSheetExpandedChangeAction(expanded = false).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
             stateFlow.value.isFilterSheetExpanded shouldBe false
-        }
-
-        @Test
-        fun `preserves other state fields when updating isFilterSheetExpanded`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isLoading = false,
-                isFilterSheetExpanded = false,
-            )
-            val action = OnFilterSheetExpandedChangeAction(expanded = true)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isFilterSheetExpanded shouldBe true
+            stateFlow.value.filterDraft shouldBe null
+            stateFlow.value.filterSheet.tagSearchField.text shouldBe ""
+            stateFlow.value.filterSheet.scaffold shouldBe existingSheet
         }
     }
 }

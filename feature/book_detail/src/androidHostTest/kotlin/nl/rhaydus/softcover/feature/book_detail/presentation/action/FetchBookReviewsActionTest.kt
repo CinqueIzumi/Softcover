@@ -1,29 +1,34 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReviewer
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toBookReviewUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class FetchBookReviewsActionTest {
     private lateinit var getTopBookReviewsUseCase: GetTopBookReviewsUseCase
@@ -35,7 +40,7 @@ class FetchBookReviewsActionTest {
     @BeforeEach
     fun setUp() {
         getTopBookReviewsUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -68,7 +73,11 @@ class FetchBookReviewsActionTest {
     private fun stubReview(id: Int = 1): BookReview = BookReview(
         id = id,
         reviewDocument = ReviewDocument(
-            paragraphs = listOf(ReviewParagraph(runs = listOf(ReviewRun(text = "A great read")))),
+            paragraphs = listOf(
+                ReviewParagraph(
+                    runs = listOf(ReviewRun(text = "A great read")),
+                ),
+            ),
         ),
         hasSpoilers = false,
         rating = 4.0,
@@ -85,21 +94,16 @@ class FetchBookReviewsActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets loadingReviews to true and clears revealedSpoilerReviewIds before the use case is called`() = runTest {
+        fun `shows the stand-ins while the use case is still running`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
-                loadingReviews = false,
-                revealedSpoilerReviewIds = setOf(1, 2),
-            )
+            stateFlow.value = buildBookDetailUiState().copy(reviews = persistentListOf())
             dependencies = stubDependencies(this)
 
-            var loadingAtInvocation: Boolean? = null
-            var revealedAtInvocation: Set<Int>? = null
+            var reviewsAtInvocation: List<BookReviewUiModel>? = null
             coEvery {
                 getTopBookReviewsUseCase(bookId = 42)
             } coAnswers {
-                loadingAtInvocation = stateFlow.value.loadingReviews
-                revealedAtInvocation = stateFlow.value.revealedSpoilerReviewIds
+                reviewsAtInvocation = stateFlow.value.reviews
                 Result.success(emptyList())
             }
 
@@ -112,12 +116,12 @@ class FetchBookReviewsActionTest {
             )
 
             // ----- Assert -----
-            loadingAtInvocation shouldBe true
-            revealedAtInvocation shouldBe emptySet()
+            reviewsAtInvocation.shouldNotBeNull().shouldNotBeEmpty()
+            reviewsAtInvocation.shouldNotBeNull().all { it.isLoading } shouldBe true
         }
 
         @Test
-        fun `populates reviews and sets loadingReviews to false on success`() = runTest {
+        fun `replaces the stand-ins with the mapped reviews on success`() = runTest {
             // ----- Arrange -----
             val bookId = 42
             val expectedReviews = listOf(stubReview(id = 1), stubReview(id = 2))
@@ -136,12 +140,12 @@ class FetchBookReviewsActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.reviews shouldBe expectedReviews
-            stateFlow.value.loadingReviews shouldBe false
+            stateFlow.value.reviews shouldBe expectedReviews.map { it.toBookReviewUiModel() }
+            stateFlow.value.reviews.none { it.isLoading } shouldBe true
         }
 
         @Test
-        fun `sets reviews to empty list and sets loadingReviews to false on failure`() = runTest {
+        fun `ends with no reviews when the use case fails`() = runTest {
             // ----- Arrange -----
             val bookId = 7
             dependencies = stubDependencies(this)
@@ -160,81 +164,6 @@ class FetchBookReviewsActionTest {
 
             // ----- Assert -----
             stateFlow.value.reviews shouldBe emptyList()
-            stateFlow.value.loadingReviews shouldBe false
-        }
-
-        @Test
-        fun `invokes use case with the bookId provided to the action constructor`() = runTest {
-            // ----- Arrange -----
-            val bookId = 99
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                getTopBookReviewsUseCase(bookId = bookId)
-            } returns Result.success(emptyList())
-
-            val action = FetchBookReviewsAction(bookId = bookId)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                getTopBookReviewsUseCase(bookId = bookId)
-            }
-        }
-
-        @Test
-        fun `loadingReviews remains true while the use case is executing`() = runTest {
-            // ----- Arrange -----
-            val bookId = 5
-            dependencies = stubDependencies(this)
-
-            var loadingAtInvocation: Boolean? = null
-            coEvery {
-                getTopBookReviewsUseCase(bookId = bookId)
-            } coAnswers {
-                loadingAtInvocation = stateFlow.value.loadingReviews
-                Result.success(emptyList())
-            }
-
-            val action = FetchBookReviewsAction(bookId = bookId)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            loadingAtInvocation shouldBe true
-            stateFlow.value.loadingReviews shouldBe false
-        }
-
-        @Test
-        fun `clears revealedSpoilerReviewIds even when they were previously populated`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(revealedSpoilerReviewIds = setOf(10, 20, 30))
-            val bookId = 42
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                getTopBookReviewsUseCase(bookId = bookId)
-            } returns Result.success(emptyList())
-
-            val action = FetchBookReviewsAction(bookId = bookId)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.revealedSpoilerReviewIds shouldBe emptySet()
         }
     }
 }

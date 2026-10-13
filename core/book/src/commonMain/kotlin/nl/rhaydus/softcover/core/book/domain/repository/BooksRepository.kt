@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core.book.domain.repository
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -14,6 +15,9 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 
 interface BooksRepository {
     val books: Flow<List<Book>>
+
+    /** Emits the cached book with [id], or null while it is not cached. Re-emits only when that book changes. */
+    fun observeUserBook(id: Int): Flow<Book?>
 
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
 
@@ -91,8 +95,17 @@ interface BooksRepository {
      * Fetches the books trending on Hardcover this week - the app's single trending cadence, no
      * monthly/other fallback. A book-discovery query (consumed by the reading and explore
      * surfaces), so it lives with the other book queries.
+     *
+     * Served from a process-lifetime session cache: trending is editorial content that turns over at
+     * most daily, so its 2 requests (GetTrendingBookIds + GetBooksByIds) are spent once per session
+     * rather than once per mount. Both the Reading and Explore surfaces read through here, so they
+     * share the one cached result. Caching is success-only, so a failed fetch retries on the next call.
+     *
+     * [forceRefresh] bypasses that cache. Pass it only for explicit user intent (pull-to-refresh):
+     * answering one from the cache spins the indicator, changes nothing, and reports no error, which
+     * reads as a broken button. A fetch on screen mount is not user intent and must leave it `false`.
      */
-    suspend fun fetchTrendingBooks(): List<Book>
+    suspend fun fetchTrendingBooks(forceRefresh: Boolean = false): List<Book>
 
     suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
 
@@ -142,7 +155,15 @@ interface BooksRepository {
         hasSpoilers: Boolean,
     ): Book
 
-    suspend fun removeBookFromLibrary(book: Book)
+    /**
+     * Removes [books] from the local cache only. Until the removal is undone or committed, fetched
+     * copies of these books are dropped instead of cached, so a sync cannot bring them back.
+     */
+    suspend fun stageBookRemoval(books: List<Book>): StagedBookRemoval
+
+    suspend fun undoBookRemoval(staged: StagedBookRemoval)
+
+    suspend fun commitBookRemoval(staged: StagedBookRemoval): List<Book>
 
     suspend fun updateBookProgress(
         book: Book,

@@ -16,6 +16,11 @@ internal data object OnSearchDismissedAction : ExploreAction {
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        scope.setState { it.copy(searchFocused = false) }
+        scope.setState {
+            it.copy(
+                searchFocused = false,
+                isSortMenuExpanded = false,
+            )
+        }
     }
 }

@@ -5,8 +5,9 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
+import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.feature.explore.domain.usecase.ClearSearchResultsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
@@ -41,7 +42,7 @@ internal class ExploreScreenScreenModel(
     private val removeSearchQueryUseCase: RemoveSearchQueryUseCase,
     private val removeAllSearchQueriesUseCase: RemoveAllSearchQueriesUseCase,
     private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
-    private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
+    private val undoableBookRemover: UndoableBookRemover,
     private val getTrendingBooksUseCase: GetTrendingBooksUseCase,
     private val getContinueSeriesBooksUseCase: GetContinueSeriesBooksUseCase,
     private val dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
@@ -54,6 +55,7 @@ internal class ExploreScreenScreenModel(
     private val getMoodTagsUseCase: GetMoodTagsUseCase,
     private val searchByMoodUseCase: SearchByMoodUseCase,
     private val setBecauseYouReadGenreUseCase: SetBecauseYouReadGenreUseCase,
+    offlineCopy: OfflineCopy,
     flows: List<ExploreCollector>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<ExploreScreenUiState, ExploreEvent, ExploreDependencies, ExploreCollector, ExploreLocalVariables>(
@@ -73,7 +75,7 @@ internal class ExploreScreenScreenModel(
         getAllUserBooksUseCase = getAllUserBooksUseCase,
         removeAllSearchQueriesUseCase = removeAllSearchQueriesUseCase,
         markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
-        removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
+        undoableBookRemover = undoableBookRemover,
         getTrendingBooksUseCase = getTrendingBooksUseCase,
         getContinueSeriesBooksUseCase = getContinueSeriesBooksUseCase,
         dismissContinueSeriesBookUseCase = dismissContinueSeriesBookUseCase,
@@ -86,6 +88,7 @@ internal class ExploreScreenScreenModel(
         getMoodTagsUseCase = getMoodTagsUseCase,
         searchByMoodUseCase = searchByMoodUseCase,
         setBecauseYouReadGenreUseCase = setBecauseYouReadGenreUseCase,
+        offlineCopy = offlineCopy,
     )
 
     init {

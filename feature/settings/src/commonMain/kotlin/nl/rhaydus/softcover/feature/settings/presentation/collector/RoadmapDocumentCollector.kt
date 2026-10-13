@@ -2,12 +2,17 @@ package nl.rhaydus.softcover.feature.settings.presentation.collector
 
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.uibinding.date.formatLongDate
 import nl.rhaydus.softcover.feature.settings.presentation.event.RoadmapEvent
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.toRoadmapRenderUnits
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 import nl.rhaydus.toad.ActionScope
+import kotlin.time.Instant
 
 private const val LOAD_FAILURE_MESSAGE = "Couldn't load the roadmap. Pull to refresh to try again."
 
@@ -43,10 +48,19 @@ internal class RoadmapDocumentCollector : RoadmapCollector {
                 }
             }
             .collectLatest { document ->
+                val lastUpdatedText = document.fetchedAtEpochMillis?.let { epochMillis ->
+                    Instant.fromEpochMilliseconds(epochMillis)
+                        .toLocalDateTime(TimeZone.currentSystemDefault())
+                        .date
+                        .formatLongDate()
+                }
+
                 scope.setState {
                     it.copy(
                         document = document,
+                        renderUnits = document.blocks.toRoadmapRenderUnits(),
                         isLoading = false,
+                        lastUpdatedText = lastUpdatedText,
                     )
                 }
             }

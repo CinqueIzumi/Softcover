@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
-import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
+import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -14,7 +15,7 @@ internal class TrendingBooksLoader : ReadingCollector {
     ) {
         dependencies.getTrendingBooksUseCase()
             .onSuccess { books ->
-                scope.setState { it.copy(trendingBooks = books) }
+                scope.setState { it.copy(trendingBooks = books.toImmutableList()) }
             }
             .onApiFailure()
     }

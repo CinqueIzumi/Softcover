@@ -1,9 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.domain.usecase
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -16,27 +13,45 @@ import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.model.SeriesContinuationSeed
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 
+// Seeds are deliberately uncapped: every seed resolves in one batched request, so a failure empties
+// the whole shelf rather than one card.
+
 class GetContinueSeriesBooksUseCase(
     private val booksRepository: BooksRepository,
     private val exploreRepository: ExploreRepository,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    operator fun invoke(): Flow<List<Book>> = combine(
-        booksRepository.books,
-        exploreRepository.dismissedContinueSeriesBooks,
-        exploreRepository.dismissedContinueSeriesIds,
-    ) { books, dismissedBooks, dismissedSeriesIds ->
-        deriveSeeds(
-            books = books,
-            dismissedBooks = dismissedBooks,
-            dismissedSeriesIds = dismissedSeriesIds.toSet(),
-        ) to dismissedBooks.map { it.bookId }.toSet()
-    }
-        .distinctUntilChanged()
-        .mapLatest { (seeds, dismissedBookIds) ->
-            fetchNextBooks(seeds = seeds)
-                .filter { it.id !in dismissedBookIds }
+    operator fun invoke(): Flow<List<Book>> {
+        val dismissedBooks = exploreRepository.dismissedContinueSeriesBooks
+        val dismissedSeriesIds = exploreRepository.dismissedContinueSeriesIds
+
+        val nextBooks = combine(
+            booksRepository.books,
+            dismissedBooks,
+            dismissedSeriesIds,
+        ) { books, dismissed, dismissedSeries ->
+            deriveSeeds(
+                books = books,
+                dismissedBooks = dismissed,
+                dismissedSeriesIds = dismissedSeries.toSet(),
+            )
         }
+            .distinctUntilChanged()
+            .mapLatest { seeds -> fetchNextBooks(seeds = seeds) }
+
+        return combine(
+            nextBooks,
+            dismissedBooks,
+            dismissedSeriesIds,
+        ) { books, dismissed, dismissedSeries ->
+            val dismissedBookIds = dismissed.map { it.bookId }.toSet()
+            val dismissedSeriesIdSet = dismissedSeries.toSet()
+
+            books.filter { book ->
+                book.id !in dismissedBookIds && book.bookSeries?.id !in dismissedSeriesIdSet
+            }
+        }
+    }
 
     private fun deriveSeeds(
         books: List<Book>,
@@ -53,17 +68,18 @@ class GetContinueSeriesBooksUseCase(
 
         return books
             .asSequence()
-            .filter { it.bookSeries != null && it.positionsInSeries.isNotEmpty() }
+            .filter { it.positionsInSeries.isNotEmpty() }
             .filter {
                 it.userBook?.status == BookStatus.Reading ||
                     it.userBook?.status == BookStatus.Read
             }
-            .filter { it.bookSeries!!.id !in seriesIdsWithDnf }
-            .filter { it.bookSeries!!.id !in dismissedSeriesIds }
-            .groupBy { it.bookSeries!!.id }
+            .mapNotNull { book -> book.bookSeries?.let { series -> book to series } }
+            .filter { (_, series) -> series.id !in seriesIdsWithDnf }
+            .filter { (_, series) -> series.id !in dismissedSeriesIds }
+            .groupBy { (_, series) -> series.id }
             .mapNotNull { (seriesId, group) ->
-                val maxRead = group.maxOf { it.positionsInSeries.last() }
-                val series = group.first().bookSeries!!
+                val maxRead = group.maxOf { (book, _) -> book.positionsInSeries.last() }
+                val (_, series) = group.first()
 
                 // The cursor is the furthest point in the series the user has settled: read through,
                 // or explicitly hidden. Hiding a suggestion has to move it, otherwise the next-in-
@@ -76,11 +92,20 @@ class GetContinueSeriesBooksUseCase(
 
                 if (cursor >= series.amountOfBooks) return@mapNotNull null
 
-                SeriesContinuationSeed(
+                // A series with no read book yet (Reading-only, never finished) sorts last via the
+                // empty fallback.
+                val mostRecentReadDate = group
+                    .mapNotNull { (book, _) -> book.userBook?.lastReadDate }
+                    .maxOrNull()
+                    .orEmpty()
+
+                mostRecentReadDate to SeriesContinuationSeed(
                     seriesId = seriesId,
                     afterPosition = cursor,
                 )
             }
+            .sortedByDescending { (mostRecentReadDate, _) -> mostRecentReadDate }
+            .map { (_, seed) -> seed }
     }
 
     /**
@@ -101,19 +126,8 @@ class GetContinueSeriesBooksUseCase(
         )
         .mapValues { (_, positions) -> positions.max() }
 
-    private suspend fun fetchNextBooks(seeds: List<SeriesContinuationSeed>): List<Book> = coroutineScope {
-        seeds
-            .map { seed ->
-                async {
-                    runCatchingLogged {
-                        exploreRepository.fetchNextInSeries(
-                            seriesId = seed.seriesId,
-                            afterPosition = seed.afterPosition,
-                        )
-                    }.getOrNull()
-                }
-            }
-            .awaitAll()
-            .filterNotNull()
-    }
+    private suspend fun fetchNextBooks(seeds: List<SeriesContinuationSeed>): List<Book> =
+        runCatchingLogged {
+            exploreRepository.fetchNextBooksInSeries(seeds = seeds)
+        }.getOrNull().orEmpty()
 }

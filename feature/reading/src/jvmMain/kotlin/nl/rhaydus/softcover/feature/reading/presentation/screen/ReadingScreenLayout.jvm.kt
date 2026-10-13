@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.reading.presentation.screen
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,34 +10,35 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
-import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
-import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.rememberBookDetailPrefetcher
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.bookCardStaggeredEntry
+import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
+import nl.rhaydus.softcover.core.component.header.PageMasthead
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
+import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowStreakSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripEvent
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.ALSO_READING_STAND_IN_CARDS
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.AlsoReadingHeader
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingFeaturedSection
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.rememberReadingCardEventHandler
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
 private val readingScrollState = ScrollState(initial = 0)
@@ -46,12 +46,9 @@ private val readingScrollState = ScrollState(initial = 0)
 /**
  * Desktop Reading: a static editorial header (greeting, subtitle, streak strip, explicit Refresh
  * control with hover/cursor affordances) above the scrolling currently-reading column, which carries
- * a persistent desktop scrollbar. No status-bar insets, no pager, and no pull-to-refresh — the
- * featured card, "also reading" list, progress sheet, and mark-as-read celebration all reuse the
- * shared shelf pieces ([FeaturedBookCard], [CompactBookEntry], [ReadingOverlays],
- * [rememberMarkAsReadController]).
+ * a persistent desktop scrollbar. No status-bar insets, no pager, and no pull-to-refresh.
  *
- * The body is a non-lazy [verticalScroll] column rather than the shared lazy [ReadingBooksColumn]:
+ * The body is a non-lazy [verticalScroll] column rather than the lazy list the mobile layout uses:
  * the list is short and its items vary wildly in height (the tall featured card above short rows), so
  * a fully-measured [ScrollState] gives the scrollbar an exact extent and a stable thumb where a lazy
  * adapter's estimate would make it jump as the featured card scrolls out of view.
@@ -63,12 +60,15 @@ internal actual fun ReadingScreenLayout(
     onBookClick: (Book) -> Unit,
     onNavigateToSearch: () -> Unit,
 ) {
+    TabReselectScrollToTopEffect(
+        tab = ReadingTab,
+        state = readingScrollState,
+    )
+
     val controller = rememberMarkAsReadController(
         books = state.books,
         runAction = runAction,
     )
-
-    var showStreakSheet by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -78,16 +78,12 @@ internal actual fun ReadingScreenLayout(
                     .fillMaxWidth(),
             ) {
                 when {
-                    state.books.isNotEmpty() -> {
+                    state.books.isNotEmpty() || state.isLoading -> {
                         Column(modifier = Modifier.fillMaxSize()) {
                             DesktopReadingHeader(
-                                bookCount = state.books.size,
-                                averageProgress = state.books.averageProgress(),
-                                recentReadingActivity = state.recentReadingActivity,
-                                streakEnabled = state.streakEnabled,
-                                isRefreshing = state.isLoading,
-                                onExpandStreak = { showStreakSheet = true },
-                                onRefreshClick = { runAction(RefreshAction) },
+                                state = state,
+                                runAction = runAction,
+                                onExpandStreak = { runAction(OnShowStreakSheetClickAction) },
                             )
 
                             DesktopReadingContent(
@@ -102,13 +98,16 @@ internal actual fun ReadingScreenLayout(
                         }
                     }
 
-                    state.isLoading -> Unit
                     else -> EmptyCurrentlyReadingScreen(
-                        wantToReadBooks = state.wantToReadBooks,
                         trendingBooks = state.trendingBooks,
+                        pickUpNext = state.pickUpNext,
+                        trendingTile = state.trendingTile,
+                        pickUpNextHeader = state.pickUpNextHeader,
+                        trendingHeader = state.trendingHeader,
+                        emptyState = state.emptyCurrentlyReading,
                         streakEnabled = state.streakEnabled,
-                        recentReadingActivity = state.recentReadingActivity,
-                        onExpandStreak = { showStreakSheet = true },
+                        streakStrip = state.streakStrip,
+                        onExpandStreak = { runAction(OnShowStreakSheetClickAction) },
                         onBookClick = onBookClick,
                         onNavigateToSearch = onNavigateToSearch,
                     )
@@ -119,26 +118,16 @@ internal actual fun ReadingScreenLayout(
                 state = state,
                 runAction = runAction,
                 controller = controller,
-                showStreakSheet = showStreakSheet,
-                onDismissStreakSheet = { showStreakSheet = false },
             )
         }
 
         MarkAsReadBurst(
-            triggerKey = controller.celebrationKey,
+            model = controller.burst,
             modifier = Modifier.fillMaxSize(),
-            particleCount = 28,
-            durationMillis = 1000,
         )
     }
 }
 
-/**
- * The desktop currently-reading column: the featured card (which fuses its own optional plan-today
- * nudge to its top edge) and the "also reading" rows, in a non-lazy [verticalScroll] so the
- * [DesktopVerticalScrollbar] thumb tracks the true content height. Mirrors the item order of the
- * shared [ReadingBooksColumn] (which the mobile layout uses lazily), reusing the same shared cards.
- */
 @Composable
 private fun DesktopReadingContent(
     state: ReadingScreenUiState,
@@ -147,60 +136,55 @@ private fun DesktopReadingContent(
     controller: MarkAsReadController,
     modifier: Modifier = Modifier,
 ) {
-    val featured = state.books.first()
-    val rest = state.books.drop(1)
+    val onCardEvent = rememberReadingCardEventHandler(
+        alsoReading = state.visibleAlsoReading,
+        runAction = runAction,
+        onBookClick = onBookClick,
+    )
 
-    val today = remember { currentLocalDate().toString() }
+    val isShowingStandIns = state.visibleAlsoReading.cards.any(BookCardUiModel::isLoading)
 
-    val isInspection = LocalInspectionMode.current
-    val prefetcher = if (isInspection) null else rememberBookDetailPrefetcher()
-
-    val featuredDeadlineProgress = featured.deadlineProgressFrom(state)
-    val planTodayMessage = planTodayNudgeFor(progress = featuredDeadlineProgress)
-    val isPlanTodayDismissed = state.dismissedPlanTodayByBook[featured.id] == today
+    val entry = rememberBookCardEntryCoordinator(
+        cards = state.visibleAlsoReading.cards,
+        key = "reading:rest",
+    )
 
     Box(modifier = modifier) {
-        CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(readingScrollState)
-                    .padding(top = 8.dp, bottom = 24.dp + rememberBottomBarPadding()),
-            ) {
-                FeaturedBookCard(
-                    book = featured,
-                    deadlineProgress = featuredDeadlineProgress,
-                    dateStyle = state.dateStyle,
-                    mutationFailed = featured.id in state.failedMutationBookIds,
-                    paceForecast = state.featuredBookPace,
-                    planTodayMessage = planTodayMessage.takeIf { isPlanTodayDismissed.not() },
-                    onDismissPlanToday = {
-                        runAction(OnDismissPlanTodayAction(bookId = featured.id))
-                    },
-                    runAction = runAction,
-                    onBookClick = onBookClick,
-                    modifier = controller.slideModifier(featured.id),
-                )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(readingScrollState)
+                .padding(top = Spacing.xs, bottom = Spacing.xl + rememberBottomBarPadding()),
+        ) {
+            ReadingFeaturedSection(
+                state = state,
+                runAction = runAction,
+                onBookClick = onBookClick,
+                controller = controller,
+            )
 
-                if (rest.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(32.dp))
+            if (state.visibleAlsoReading.isEmpty.not()) {
+                AlsoReadingHeader(model = state.visibleAlsoReadingHeader)
 
-                    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                        AlsoReadingSectionHeader(count = rest.size)
-                    }
+                SkeletonCrossfade(isLoading = isShowingStandIns) { showStandIns ->
+                    Column {
+                        val cards = if (showStandIns) ALSO_READING_STAND_IN_CARDS else state.visibleAlsoReading.cards
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        cards.forEachIndexed { index, card ->
+                            val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@forEachIndexed
 
-                    rest.forEach { book ->
-                        CompactBookEntry(
-                            modifier = controller.slideModifier(book.id),
-                            book = book,
-                            deadlineProgress = book.deadlineProgressFrom(state),
-                            dateStyle = state.dateStyle,
-                            mutationFailed = book.id in state.failedMutationBookIds,
-                            runAction = runAction,
-                            onBookClick = onBookClick,
-                        )
+                            BookCard(
+                                model = card,
+                                onEvent = onCardEvent,
+                                modifier = Modifier
+                                    .bookCardStaggeredEntry(
+                                        card = card,
+                                        coordinator = entry,
+                                        index = index,
+                                    )
+                                    .then(controller.slideModifier(bookId)),
+                            )
+                        }
                     }
                 }
             }
@@ -211,81 +195,46 @@ private fun DesktopReadingContent(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(vertical = 4.dp),
+                .padding(vertical = Spacing.xxs),
         )
     }
 }
 
 @Composable
 private fun DesktopReadingHeader(
-    bookCount: Int,
-    averageProgress: Float?,
-    recentReadingActivity: List<ReadingDayActivity>,
-    streakEnabled: Boolean,
-    isRefreshing: Boolean,
+    state: ReadingScreenUiState,
+    runAction: (ReadingAction) -> Unit,
     onExpandStreak: () -> Unit,
-    onRefreshClick: () -> Unit,
 ) {
-    val greeting = remember { greetingForNow() }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 24.dp, end = 12.dp, top = 16.dp),
+            .padding(start = Spacing.gutter, end = Spacing.sm, top = Spacing.md),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = if (isRefreshing) "Catching up on your reading…" else "Now reading",
-                    style = MaterialTheme.editorialTypography.eyebrow,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = greeting,
-                    style = MaterialTheme.editorialTypography.pageTitle,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(end = 16.dp),
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = buildSubtitle(
-                        bookCount = bookCount,
-                        averageProgress = averageProgress,
-                    ),
-                    style = MaterialTheme.editorialTypography.body,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(end = 16.dp),
-                )
-            }
-
-            TextButton(
-                onClick = onRefreshClick,
-                enabled = isRefreshing.not(),
-                modifier = Modifier.pointerHandCursor(),
-            ) {
-                Text(text = if (isRefreshing) "Refreshing…" else "Refresh")
-            }
-        }
-
-        if (streakEnabled && recentReadingActivity.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(14.dp))
-
-            StreakStrip(
-                activity = recentReadingActivity,
-                onClick = onExpandStreak,
+        PageMasthead(model = state.visibleMasthead) {
+            MastheadRefreshAction(
+                model = state.mastheadRefresh,
+                onEvent = {
+                    when (it) {
+                        MastheadRefreshEvent.Refresh -> runAction(RefreshAction)
+                    }
+                },
             )
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        if (state.streakEnabled && (state.isLoading || state.streakStrip.days.isNotEmpty())) {
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            StreakStrip(
+                model = state.streakStrip,
+                onEvent = { event ->
+                    when (event) {
+                        StreakStripEvent.Clicked -> onExpandStreak()
+                    }
+                },
+            )
+        }
+
+        Spacer(modifier = Modifier.height(Spacing.xxs))
     }
 }

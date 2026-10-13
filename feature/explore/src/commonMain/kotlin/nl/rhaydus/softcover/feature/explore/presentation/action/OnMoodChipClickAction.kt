@@ -42,6 +42,7 @@ internal data class OnMoodChipClickAction(val mood: MoodTag) : ExploreAction {
                 activeMoodFilter = mood,
                 searchText = mood.label,
                 isLoading = true,
+                loadingMoreQueriedBooks = false,
                 searchError = null,
                 queriedBooksHasMore = true,
             )

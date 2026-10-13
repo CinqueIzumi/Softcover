@@ -11,12 +11,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.component.field.TextFieldEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.scan.presentation.component.BarcodeScanner
+import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -25,15 +28,20 @@ internal actual fun BarcodeScannerScreenLayout(
     state: ScanUiState,
     manualMode: Boolean,
     cameraGranted: Boolean,
-    onIsbnSubmit: (String) -> Unit,
+    onIsbnSubmit: (String, IsbnOrigin) -> Unit,
+    onIsbnFieldEvent: (TextFieldEvent) -> Unit,
     onEnterManually: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     Scaffold(
         topBar = {
-            SoftcoverTopBar(
-                title = "Scan a barcode",
-                onNavigateBack = onNavigateBack,
+            TopBar(
+                model = state.topBar,
+                onEvent = { event ->
+                    when (event) {
+                        TopBarEvent.BackClicked -> onNavigateBack()
+                    }
+                },
             )
         },
     ) { padding ->
@@ -44,18 +52,20 @@ internal actual fun BarcodeScannerScreenLayout(
         ) {
             when {
                 manualMode -> ManualEntryContent(
+                    field = state.isbnField,
                     isResolving = state.isResolving,
                     isAddingBook = state.isAddingBook,
+                    header = state.manualEntryHeader,
+                    onFieldEvent = onIsbnFieldEvent,
                     onIsbnSubmit = onIsbnSubmit,
-                    autoFocus = false,
                     modifier = Modifier
                         .fillMaxSize()
                         .imePadding()
-                        .padding(horizontal = 24.dp),
+                        .padding(horizontal = Spacing.gutter),
                 )
 
                 cameraGranted -> ScannerContent(
-                    cameraPaused = state.isResolving || state.unknownIsbn != null,
+                    cameraPaused = state.isResolving || state.unknownIsbnSheet != null,
                     onIsbnSubmit = onIsbnSubmit,
                     onEnterManually = onEnterManually,
                 )
@@ -75,7 +85,7 @@ internal actual fun BarcodeScannerScreenLayout(
 @Composable
 private fun ScannerContent(
     cameraPaused: Boolean,
-    onIsbnSubmit: (String) -> Unit,
+    onIsbnSubmit: (String, IsbnOrigin) -> Unit,
     onEnterManually: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -88,7 +98,12 @@ private fun ScannerContent(
             }
         } else {
             BarcodeScanner(
-                onIsbnDetected = onIsbnSubmit,
+                onIsbnDetected = { isbn ->
+                    onIsbnSubmit(
+                        isbn,
+                        IsbnOrigin.Camera,
+                    )
+                },
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -100,7 +115,7 @@ private fun ScannerContent(
             onClick = onEnterManually,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp),
+                .padding(bottom = Spacing.xl),
         )
     }
 }

@@ -3,10 +3,13 @@ package nl.rhaydus.softcover.core.profile.domain
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-// Process-lifetime, in-memory: guards the profile network fetch to at most once per app session.
-// A new session starts fresh (Koin recreates the singleton on process death), and logout/reset
-// calls reset() explicitly so the next login re-fetches instead of reusing a stale session flag.
-// Public only because it appears in the public RefreshUserProfileDataUseCase's constructor.
+// Process-lifetime, in-memory: guards a profile network fetch to at most once per app session.
+// Two independent instances are wired (one per Koin qualifier) so the activity half
+// (RefreshReadingActivityUseCase) and the stats half (RefreshUserProfileStatsUseCase) can be
+// deferred from one another without either blocking or re-triggering the other. A new session
+// starts fresh (Koin recreates the singletons on process death), and logout/reset calls reset()
+// on both explicitly so the next login re-fetches instead of reusing a stale session flag.
+// Public only because it appears in those use cases' public constructors.
 class ProfileRefreshGate {
     private val mutex = Mutex()
     private var wasRefreshedThisSession = false

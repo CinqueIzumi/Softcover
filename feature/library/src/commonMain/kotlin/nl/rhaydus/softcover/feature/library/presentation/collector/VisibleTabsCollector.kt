@@ -1,11 +1,12 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import androidx.compose.foundation.lazy.grid.LazyGridState
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -39,10 +40,12 @@ internal class VisibleTabsCollector : LibraryCollector {
             val listTabs = lists
                 .filter { it.id in enabledListIds }
                 .sortedBy { it.name.lowercase() }
-                .map { LibraryTab.CustomList(
-                    listId = it.id,
-                    listName = it.name,
-                ) }
+                .map {
+                    LibraryTab.CustomList(
+                        listId = it.id,
+                        listName = it.name,
+                    )
+                }
 
             val defaultOrdered = buildList<LibraryTab> {
                 add(LibraryTab.All)
@@ -62,7 +65,7 @@ internal class VisibleTabsCollector : LibraryCollector {
                 val fallback = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id
 
                 state.copy(
-                    visibleTabs = tabs,
+                    visibleTabs = tabs.toImmutableList(),
                     tabsLoaded = true,
                     selectedTabId = if (stillVisible) state.selectedTabId else fallback,
                 )

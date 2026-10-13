@@ -6,11 +6,11 @@ import androidx.sqlite.execSQL
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 
 class Migration42To43Test {
     private lateinit var connection: SQLiteConnection
@@ -61,14 +61,20 @@ class Migration42To43Test {
     inner class BookAuthorCrossRefIndex {
         @Test
         fun `index_book_author_cross_ref_authorId does not exist before migration`() {
-            // ----- Assert -----
-            indexExists("index_book_author_cross_ref_authorId").shouldBeFalse()
+            // ----- Arrange -----
+            val indexName = "index_book_author_cross_ref_authorId"
+
+            // ----- Act & Assert -----
+            indexExists(indexName).shouldBeFalse()
         }
 
         @Test
         fun `index_book_author_cross_ref_authorId exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             indexExists("index_book_author_cross_ref_authorId").shouldBeTrue()
@@ -79,8 +85,11 @@ class Migration42To43Test {
     inner class EditionAuthorCrossRefIndex {
         @Test
         fun `index_edition_author_cross_ref_authorId exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             indexExists("index_edition_author_cross_ref_authorId").shouldBeTrue()

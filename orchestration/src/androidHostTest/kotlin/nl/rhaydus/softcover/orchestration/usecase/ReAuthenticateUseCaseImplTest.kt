@@ -7,13 +7,13 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ReAuthenticateUseCaseImplTest {
     private lateinit var settingsRepository: SettingsRepository
@@ -49,7 +49,7 @@ class ReAuthenticateUseCaseImplTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `returns success when same account logs in again`() = runTest {
+        fun `same account logging in again keeps local data, stores the key and the id, and refreshes the library`() = runTest {
             // ----- Arrange -----
             every {
                 settingsRepository.getUserId()
@@ -63,78 +63,14 @@ class ReAuthenticateUseCaseImplTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-        }
-
-        @Test
-        fun `does not call resetUserDataUseCase when account is the same`() = runTest {
-            // ----- Arrange -----
-            every {
-                settingsRepository.getUserId()
-            } returns flowOf(42)
-            coEvery {
-                settingsRepository.getUserIdFromBackend()
-            } returns 42
-
-            // ----- Act -----
-            useCase(apiKey = "valid-token")
-
-            // ----- Assert -----
             coVerify(exactly = 0) { resetUserDataUseCase() }
-        }
-
-        @Test
-        fun `calls updateApiKey once when account is the same`() = runTest {
-            // ----- Arrange -----
-            every {
-                settingsRepository.getUserId()
-            } returns flowOf(42)
-            coEvery {
-                settingsRepository.getUserIdFromBackend()
-            } returns 42
-
-            // ----- Act -----
-            useCase(apiKey = "valid-token")
-
-            // ----- Assert -----
             coVerify(exactly = 1) { settingsRepository.updateApiKey(key = "valid-token") }
-        }
-
-        @Test
-        fun `calls updateUserId with backend id when account is the same`() = runTest {
-            // ----- Arrange -----
-            every {
-                settingsRepository.getUserId()
-            } returns flowOf(42)
-            coEvery {
-                settingsRepository.getUserIdFromBackend()
-            } returns 42
-
-            // ----- Act -----
-            useCase(apiKey = "valid-token")
-
-            // ----- Assert -----
             coVerify { settingsRepository.updateUserId(id = 42) }
-        }
-
-        @Test
-        fun `calls refreshLibraryUseCase when account is the same`() = runTest {
-            // ----- Arrange -----
-            every {
-                settingsRepository.getUserId()
-            } returns flowOf(42)
-            coEvery {
-                settingsRepository.getUserIdFromBackend()
-            } returns 42
-
-            // ----- Act -----
-            useCase(apiKey = "valid-token")
-
-            // ----- Assert -----
             coVerify { refreshLibraryUseCase() }
         }
 
         @Test
-        fun `calls resetUserDataUseCase when a different account authenticates`() = runTest {
+        fun `a different account wipes the previous data, restores the key and stores the new id`() = runTest {
             // ----- Arrange -----
             every {
                 settingsRepository.getUserId()
@@ -144,48 +80,17 @@ class ReAuthenticateUseCaseImplTest {
             } returns 99
 
             // ----- Act -----
-            useCase(apiKey = "new-token")
+            val result = useCase(apiKey = "new-token")
 
             // ----- Assert -----
+            result.isSuccess shouldBe true
             coVerify { resetUserDataUseCase() }
-        }
-
-        @Test
-        fun `calls updateApiKey twice when a different account authenticates`() = runTest {
-            // ----- Arrange -----
-            every {
-                settingsRepository.getUserId()
-            } returns flowOf(42)
-            coEvery {
-                settingsRepository.getUserIdFromBackend()
-            } returns 99
-
-            // ----- Act -----
-            useCase(apiKey = "new-token")
-
-            // ----- Assert -----
             coVerify(exactly = 2) { settingsRepository.updateApiKey(key = "new-token") }
-        }
-
-        @Test
-        fun `calls updateUserId with new backend id when a different account authenticates`() = runTest {
-            // ----- Arrange -----
-            every {
-                settingsRepository.getUserId()
-            } returns flowOf(42)
-            coEvery {
-                settingsRepository.getUserIdFromBackend()
-            } returns 99
-
-            // ----- Act -----
-            useCase(apiKey = "new-token")
-
-            // ----- Assert -----
             coVerify { settingsRepository.updateUserId(id = 99) }
         }
 
         @Test
-        fun `does not call resetUserDataUseCase on first login`() = runTest {
+        fun `first login does not wipe data and stores the backend id`() = runTest {
             // ----- Arrange -----
             every {
                 settingsRepository.getUserId()
@@ -199,27 +104,11 @@ class ReAuthenticateUseCaseImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) { resetUserDataUseCase() }
-        }
-
-        @Test
-        fun `calls updateUserId with backend id on first login`() = runTest {
-            // ----- Arrange -----
-            every {
-                settingsRepository.getUserId()
-            } returns flowOf(-1)
-            coEvery {
-                settingsRepository.getUserIdFromBackend()
-            } returns 99
-
-            // ----- Act -----
-            useCase(apiKey = "first-token")
-
-            // ----- Assert -----
             coVerify { settingsRepository.updateUserId(id = 99) }
         }
 
         @Test
-        fun `returns failure when getUserIdFromBackend throws`() = runTest {
+        fun `an invalid token fails without wiping data or storing a user id`() = runTest {
             // ----- Arrange -----
             every {
                 settingsRepository.getUserId()
@@ -233,39 +122,28 @@ class ReAuthenticateUseCaseImplTest {
 
             // ----- Assert -----
             result.isFailure shouldBe true
-        }
-
-        @Test
-        fun `does not call resetUserDataUseCase when token is invalid`() = runTest {
-            // ----- Arrange -----
-            every {
-                settingsRepository.getUserId()
-            } returns flowOf(42)
-            coEvery {
-                settingsRepository.getUserIdFromBackend()
-            } throws RuntimeException("invalid token")
-
-            // ----- Act -----
-            useCase(apiKey = "bad-token")
-
-            // ----- Assert -----
             coVerify(exactly = 0) { resetUserDataUseCase() }
+            coVerify(exactly = 0) { settingsRepository.updateUserId(id = any()) }
         }
 
         @Test
-        fun `does not call updateUserId when token is invalid`() = runTest {
+        fun `a failed wipe for a different account fails without storing the new user id`() = runTest {
             // ----- Arrange -----
             every {
                 settingsRepository.getUserId()
             } returns flowOf(42)
             coEvery {
                 settingsRepository.getUserIdFromBackend()
-            } throws RuntimeException("invalid token")
+            } returns 99
+            coEvery {
+                resetUserDataUseCase()
+            } returns Result.failure(RuntimeException("wipe failed"))
 
             // ----- Act -----
-            useCase(apiKey = "bad-token")
+            val result = useCase(apiKey = "new-token")
 
             // ----- Assert -----
+            result.isFailure shouldBe true
             coVerify(exactly = 0) { settingsRepository.updateUserId(id = any()) }
         }
 

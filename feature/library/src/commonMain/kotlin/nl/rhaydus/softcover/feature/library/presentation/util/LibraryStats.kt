@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.library.presentation.util
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
-import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.JournalEventType
 
@@ -13,12 +12,6 @@ internal fun List<Book>.totalPages(): Int = sumOf { it.pagesForStats() }
 internal fun formatBookCount(count: Int): String = when (count) {
     1 -> "1 title"
     else -> "$count titles"
-}
-
-internal fun formatPageCount(pages: Int): String? = if (pages > 0) {
-    "${formatGroupedNumber(pages)} pages"
-} else {
-    null
 }
 
 internal fun Book.finishedYear(): Int? {

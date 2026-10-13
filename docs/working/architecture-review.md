@@ -2,7 +2,7 @@
 
 > **Status:** Advisory read-out — **open items only**. Everything that has been implemented and
 > verified in the code has been **deleted from this file** (2026-07-14 sweep); what remains below is
-> what still needs doing. Item IDs are **never reused or renumbered**, so a gap (M1–M8, B1, B3, B4, D1,
+> what still needs doing. Item IDs are **never reused or renumbered**, so a gap (M1–M8, B1, B3, B4, B5, D1,
 > D2, D4, P2, T1, T2, T4, C1, DC1) means "that one shipped".
 >
 > **Date:** 2026-06-17 (review) · 2026-06-24/26 (Tier 1 + Tier 2 implementation) · 2026-07-14 (resolved

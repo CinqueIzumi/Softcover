@@ -1,0 +1,92 @@
+package nl.rhaydus.softcover.core.component.badge
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+
+/**
+ * A small pill of chrome reporting a status in one word or a short phrase — a reading deadline's
+ * pace, an edition's release date, or an "Owned"/"TRACKING NOW" mark.
+ */
+@Composable
+fun Badge(
+    model: BadgeUiModel,
+    modifier: Modifier = Modifier,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val (container, content) = when (model.tone) {
+        BadgeTone.Primary -> scheme.primary to scheme.onPrimary
+        BadgeTone.PrimaryContainer -> scheme.primaryContainer to scheme.onPrimaryContainer
+        BadgeTone.ErrorContainer -> scheme.errorContainer to scheme.onErrorContainer
+        BadgeTone.TertiaryContainer -> scheme.tertiaryContainer to scheme.onTertiaryContainer
+        BadgeTone.Neutral -> scheme.surfaceContainerHigh to scheme.onSurfaceVariant
+        BadgeTone.Scrim -> Color.Black.copy(alpha = 0.55f) to Color.White
+    }
+    val padding = when (model.size) {
+        BadgeSize.Compact -> PaddingValues(
+            horizontal = Spacing.xxs,
+            vertical = Spacing.xxxs,
+        )
+
+        BadgeSize.Regular -> PaddingValues(
+            horizontal = Spacing.xs,
+            vertical = Spacing.xxs,
+        )
+    }
+    val style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold)
+
+    Surface(
+        modifier = modifier.semantics(mergeDescendants = true) {
+            model.contentDescription?.let { contentDescription = it }
+        },
+        color = container,
+        contentColor = content,
+        shape = Corners.sm,
+    ) {
+        Row(
+            modifier = Modifier.padding(padding),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (model.icon != null) {
+                val icon = drawableIconResource(
+                    icon = model.icon,
+                    contentDescription = "",
+                )
+
+                Icon(
+                    painter = icon.getIconPainter(),
+                    contentDescription = null,
+                    modifier = Modifier.size(12.dp),
+                )
+
+                Spacer(modifier = Modifier.width(Spacing.xxs))
+            }
+
+            SoftcoverText(
+                text = model.label,
+                style = style,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}

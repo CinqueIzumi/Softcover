@@ -14,12 +14,13 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.settings.presentation.action.RefreshRoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
@@ -36,9 +37,13 @@ internal actual fun RoadmapScreenLayout(
 
     Scaffold(
         topBar = {
-            SoftcoverTopBar(
-                title = "Roadmap",
-                onNavigateBack = onNavigateBack,
+            TopBar(
+                model = state.topBar,
+                onEvent = { event ->
+                    when (event) {
+                        TopBarEvent.BackClicked -> onNavigateBack()
+                    }
+                },
             )
         },
     ) { innerPadding ->
@@ -56,18 +61,18 @@ internal actual fun RoadmapScreenLayout(
                     .verticalScroll(rememberScrollState())
                     .cappedContentWidth()
                     .padding(
-                        horizontal = 24.dp,
-                        vertical = 16.dp,
+                        horizontal = Spacing.gutter,
+                        vertical = Spacing.md,
                     ),
             ) {
                 PullToRefreshEyebrow(
                     pullToRefreshState = pullToRefreshState,
                     isRefreshing = state.isRefreshing,
-                    baseText = "The plan",
+                    baseText = "Roadmap",
                     refreshingText = "Checking for updates…",
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 RoadmapContent(
                     state = state,

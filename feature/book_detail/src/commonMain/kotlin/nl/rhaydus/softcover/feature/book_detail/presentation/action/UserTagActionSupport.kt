@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.cancelAndJoin
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.domain.model.UserTag
@@ -25,7 +26,7 @@ internal suspend fun TagScope.commitUserTags(
 
     val previous = currentState.userTags
 
-    setState { it.copy(userTags = newSet) }
+    setState { it.copy(userTags = newSet.toImmutableList()) }
 
     currentLocalVariables.tagSaveJob?.cancelAndJoin()
 
@@ -35,7 +36,7 @@ internal suspend fun TagScope.commitUserTags(
             tags = newSet,
         )
             .onSuccess { saved ->
-                setState { it.copy(userTags = saved) }
+                setState { it.copy(userTags = saved.toImmutableList()) }
 
                 dependencies.recordAppliedTagsUseCase(saved)
             }
@@ -43,6 +44,8 @@ internal suspend fun TagScope.commitUserTags(
                 AppLog.e("$error")
 
                 setState { it.copy(userTags = previous) }
+
+                sendEvent(BookDetailEvent.MutationFailedEvent())
             }
     }
 

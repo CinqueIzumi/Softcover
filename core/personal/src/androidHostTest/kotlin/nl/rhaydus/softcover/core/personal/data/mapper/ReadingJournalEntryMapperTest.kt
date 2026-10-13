@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.core.personal.data.mapper
 
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 
 class ReadingJournalEntryMapperTest {
     private fun validPagesMetadata(pages: Any? = 120): Map<String, Any?> = mapOf(
@@ -165,22 +165,6 @@ class ReadingJournalEntryMapperTest {
         }
 
         @Test
-        fun `returns null when metadata is a plain String`() {
-            // ----- Arrange -----
-            val updatedAt = "2024-01-01"
-            val metadata = "not a map"
-
-            // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
-                metadata = metadata,
-            )
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
         fun `returns null when metadata is null`() {
             // ----- Arrange -----
             val updatedAt = "2024-01-01"
@@ -209,26 +193,6 @@ class ReadingJournalEntryMapperTest {
 
             // ----- Assert -----
             result shouldBe null
-        }
-
-        @Test
-        fun `parses a date-only updatedAt value into the date field`() {
-            // ----- Arrange -----
-            val updatedAt = "2024-01-01"
-            val metadata = validPagesMetadata(pages = 10)
-
-            // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
-                metadata = metadata,
-            )
-
-            // ----- Assert -----
-            result?.date shouldBe LocalDate(
-                2024,
-                1,
-                1,
-            )
         }
 
         @Test

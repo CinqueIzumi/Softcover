@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -32,11 +33,11 @@ internal class OnBulkAddToNewListAction(
 
         // Reopened first so the chooser is already back by the time the writes land — the rows show
         // their own in-flight state, which is the feedback this path wants.
-        scope.setState { it.copy(isBulkAddToListSheetShown = true) }
+        scope.setState { it.copy(isChooseListsSheetRequested = true) }
 
         if (books.isEmpty()) return
 
-        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated + listId) }
+        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated.toPersistentSet().add(listId)) }
 
         var failureCount = 0
 
@@ -65,14 +66,16 @@ internal class OnBulkAddToNewListAction(
             }
         }
 
-        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated - listId) }
+        scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated.toPersistentSet().remove(listId)) }
 
         if (failureCount > 0) {
             val noun = if (failureCount == 1) "book" else "books"
 
             SnackBarManager.showSnackbar(
-                title = "Couldn't add $failureCount $noun to “$listName” — try again.",
+                title = "Couldn't add $failureCount $noun to “$listName”. Try again.",
             )
+
+            scope.sendEvent(LibraryEvent.NewListBooksAddFailedEvent())
         }
     }
 }

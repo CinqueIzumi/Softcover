@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.toPaceLine
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
@@ -75,7 +76,7 @@ internal class ReadingPaceForecastCollector : ReadingCollector {
                 snapshot = snapshot,
             )
         }.collectLatest { forecast ->
-            scope.setState { it.copy(featuredBookPace = forecast) }
+            scope.setState { it.copy(featuredBookPace = forecast?.toPaceLine()) }
         }
     }
 

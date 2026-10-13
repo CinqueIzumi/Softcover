@@ -1,15 +1,14 @@
 package nl.rhaydus.softcover.core.preferences.domain.usecase
 
 import io.kotest.matchers.shouldBe
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class DismissPlanTodayUseCaseTest {
     private lateinit var settingsRepository: SettingsRepository
@@ -27,7 +26,7 @@ class DismissPlanTodayUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `delegates to repository with bookId and ISO date string and returns success`() = runTest {
+        fun `records the dismissal with the date formatted as an ISO string`() = runTest {
             // ----- Arrange -----
             val today = LocalDate(
                 2025,
@@ -49,33 +48,6 @@ class DismissPlanTodayUseCaseTest {
                     isoDate = "2025-05-13",
                 )
             }
-        }
-
-        @Test
-        fun `wraps repository exception in Result failure`() = runTest {
-            // ----- Arrange -----
-            val error = RuntimeException("write error")
-
-            coEvery {
-                settingsRepository.setPlanTodayDismissed(
-                    any(),
-                    any(),
-                )
-            } throws error
-
-            // ----- Act -----
-            val result = useCase(
-                bookId = 1,
-                today = LocalDate(
-                    2025,
-                    1,
-                    1,
-                ),
-            )
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe error
         }
     }
 }

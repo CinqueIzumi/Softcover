@@ -1,19 +1,32 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import org.koin.compose.koinInject
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
-import nl.rhaydus.softcover.core.designsystem.presentation.session.SessionAuthenticator
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
+import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
+import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
+import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
-import nl.rhaydus.softcover.feature.profile.presentation.event.LogOutUserEvent
+import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileScreenScreenModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import org.koin.compose.koinInject
 
 class ProfileScreen : Screen {
     @Composable
@@ -25,17 +38,33 @@ class ProfileScreen : Screen {
 
         val navigator = LocalNavigator.currentOrThrow
 
+        val haptics = LocalHaptics.current
+
         ObserveAsEvents(flow = screenModel.events) {
+            if (it is FeedbackEvent) haptics.play(it.feedback)
+
             when (it) {
-                is LogOutUserEvent -> sessionAuthenticator.setUserAuthenticated(authenticated = false)
+                is ProfileEvent.LogOutUserEvent -> {
+                    sessionAuthenticator.setUserAuthenticated(authenticated = false)
+                }
+
+                is ProfileEvent.LogOutFailedEvent -> Unit
             }
         }
 
-        ProfileScreenLayout(
-            state = state,
-            runAction = screenModel::runAction,
-            onNavigateUp = navigator::pop,
-        )
+        val prefetcher = rememberBookDetailPrefetcher()
+
+        CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
+            ProfileScreenLayout(
+                state = state,
+                runAction = screenModel::runAction,
+                onNavigateUp = navigator::pop,
+                onBookCardEvent = rememberRecentlyLovedEventHandler(
+                    state = state,
+                    navigator = navigator,
+                ),
+            )
+        }
     }
 }
 
@@ -50,4 +79,36 @@ internal expect fun ProfileScreenLayout(
     state: ProfileUiState,
     runAction: (ProfileAction) -> Unit,
     onNavigateUp: () -> Unit,
+    onBookCardEvent: (BookCardEvent) -> Unit,
 )
+
+/**
+ * Opens book detail for a tapped "Recently loved" card and warms the detail on finger-down. A loved
+ * book has no full `Book`, so the destination is seeded from the card's id and cover URL alone.
+ */
+@Composable
+private fun rememberRecentlyLovedEventHandler(
+    state: ProfileUiState,
+    navigator: Navigator,
+): (BookCardEvent) -> Unit {
+    val appNavigator = koinInject<AppNavigator>()
+    val currentNavigator by rememberUpdatedState(navigator)
+
+    return rememberPrefetchingBookCardEventHandler(
+        set = state.recentlyLoved,
+    ) { event, loved ->
+        if (event is BookCardEvent.Clicked) {
+            val destination = ScreenDestination.BookDetail(
+                id = loved.bookId,
+                initialCover = BookInitialCover(
+                    currentEdition = null,
+                    defaultEdition = null,
+                    fallbackCoverUrl = loved.coverUrl.takeIf { it.isNotBlank() },
+                    title = loved.title,
+                ),
+            )
+
+            currentNavigator.push(item = appNavigator.screen(destination))
+        }
+    }
+}

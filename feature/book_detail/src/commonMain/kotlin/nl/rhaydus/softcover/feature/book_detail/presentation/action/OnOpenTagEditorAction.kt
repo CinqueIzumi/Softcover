@@ -4,6 +4,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.withTagDraft
 import nl.rhaydus.toad.ActionScope
 
 internal class OnOpenTagEditorAction : BookDetailAction {
@@ -12,9 +13,9 @@ internal class OnOpenTagEditorAction : BookDetailAction {
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         scope.setState {
-            it.copy(
+            it.withTagDraft(input = "").copy(
                 showTagEditorSheet = true,
-                tagEditorInput = "",
+                newlyAddedTagKey = null,
             )
         }
     }

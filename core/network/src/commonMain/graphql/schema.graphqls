@@ -307,6 +307,10 @@ input ContributionInputType {
   author_id: Int!
 
   contribution: String
+
+  contributor_role_id: Int
+
+  contributor_specialization_id: Int
 }
 
 input CreateBookFromPlatformInput {
@@ -367,6 +371,18 @@ input DtoTag {
   tag: String!
 
   tagSlug: String!
+}
+
+input DynamicSignalInput {
+  category: String!
+
+  count: Int
+
+  max_rating: numeric
+
+  min_rating: numeric
+
+  weight: Int
 }
 
 type EditionIdType {
@@ -686,6 +702,36 @@ input ListInput {
   url: String
 }
 
+type ListMemberDeleteType {
+  list_id: Int
+
+  removed: Boolean
+
+  user_id: Int
+}
+
+type ListMemberIdType {
+  id: Int
+
+  list_id: Int
+
+  user_id: Int
+}
+
+input ListMemberInput {
+  list_id: Int!
+
+  user_id: Int!
+}
+
+type ListMemberStatusType {
+  list_id: Int
+
+  status: String
+
+  user_id: Int
+}
+
 type NewBookIdType {
   book: books
 
@@ -771,6 +817,8 @@ input ReadingJournalCreateType {
 
   book_id: Int!
 
+  custom: jsonb
+
   edition_id: Int
 
   entry: String
@@ -794,6 +842,8 @@ type ReadingJournalOutput {
 
 input ReadingJournalUpdateType {
   action_at: date
+
+  custom: jsonb
 
   edition_id: Int
 
@@ -1110,6 +1160,8 @@ type UserBookReadIdType {
 input UserBookUpdateInput {
   action_at: timestamptz
 
+  buddy_read_privacy_setting_id: Int
+
   date_added: date
 
   edition_id: Int
@@ -1171,26 +1223,60 @@ type UserIdType {
   user: users
 }
 
-input UserJoinInput {
-  email: String!
-
-  password: String!
-
-  referrer_id: Int
-
-  referrer_url: String
-}
-
-input UserLoginInput {
-  email: String!
-
-  password: String!
-}
-
 type ValidateReceiptType {
   result: jsonb!
 
   supporter: Boolean
+}
+
+type VibeDeleteType {
+  success: Boolean!
+}
+
+input VibeExclusionInput {
+  _destroy: Boolean
+
+  excluded_id: Int!
+
+  excluded_type: String!
+
+  id: Int
+}
+
+type VibeIdType {
+  errors: [String]
+
+  id: Int
+
+  vibe: vibes
+}
+
+input VibeInput {
+  description: String
+
+  dynamic_signals: [DynamicSignalInput!]
+
+  privacy_setting_id: Int
+
+  title: String
+
+  vibe_exclusions_attributes: [VibeExclusionInput!]
+
+  vibe_signals_attributes: [VibeSignalInput!]
+}
+
+input VibeSignalInput {
+  _destroy: Boolean
+
+  id: Int
+
+  position: Int
+
+  signal_type: String!
+
+  value: String
+
+  weight: Int!
 }
 
 type __Directive {
@@ -1324,8 +1410,6 @@ type activities {
 
   object_type: String!
 
-  original_book_id: Int
-
   """
   An object relationship
   """
@@ -1380,8 +1464,6 @@ input activities_avg_order_by {
 
   likes_count: order_by
 
-  original_book_id: order_by
-
   privacy_setting_id: order_by
 
   user_id: order_by
@@ -1417,8 +1499,6 @@ input activities_bool_exp {
 
   object_type: String_comparison_exp
 
-  original_book_id: Int_comparison_exp
-
   privacy_setting: privacy_settings_bool_exp
 
   privacy_setting_id: Int_comparison_exp
@@ -1446,8 +1526,6 @@ input activities_max_order_by {
 
   object_type: order_by
 
-  original_book_id: order_by
-
   privacy_setting_id: order_by
 
   uid: order_by
@@ -1470,8 +1548,6 @@ input activities_min_order_by {
   likes_count: order_by
 
   object_type: order_by
-
-  original_book_id: order_by
 
   privacy_setting_id: order_by
 
@@ -1518,8 +1594,6 @@ input activities_order_by {
   likes_count: order_by
 
   object_type: order_by
-
-  original_book_id: order_by
 
   privacy_setting: privacy_settings_order_by
 
@@ -1574,11 +1648,6 @@ enum activities_select_column {
   """
   column name
   """
-  original_book_id
-
-  """
-  column name
-  """
   privacy_setting_id
 
   """
@@ -1602,8 +1671,6 @@ input activities_stddev_order_by {
 
   likes_count: order_by
 
-  original_book_id: order_by
-
   privacy_setting_id: order_by
 
   user_id: order_by
@@ -1619,8 +1686,6 @@ input activities_stddev_pop_order_by {
 
   likes_count: order_by
 
-  original_book_id: order_by
-
   privacy_setting_id: order_by
 
   user_id: order_by
@@ -1635,8 +1700,6 @@ input activities_stddev_samp_order_by {
   id: order_by
 
   likes_count: order_by
-
-  original_book_id: order_by
 
   privacy_setting_id: order_by
 
@@ -1676,8 +1739,6 @@ input activities_stream_cursor_value_input {
 
   object_type: String
 
-  original_book_id: Int
-
   privacy_setting_id: Int
 
   uid: String
@@ -1695,8 +1756,6 @@ input activities_sum_order_by {
 
   likes_count: order_by
 
-  original_book_id: order_by
-
   privacy_setting_id: order_by
 
   user_id: order_by
@@ -1711,8 +1770,6 @@ input activities_var_pop_order_by {
   id: order_by
 
   likes_count: order_by
-
-  original_book_id: order_by
 
   privacy_setting_id: order_by
 
@@ -1729,8 +1786,6 @@ input activities_var_samp_order_by {
 
   likes_count: order_by
 
-  original_book_id: order_by
-
   privacy_setting_id: order_by
 
   user_id: order_by
@@ -1745,8 +1800,6 @@ input activities_variance_order_by {
   id: order_by
 
   likes_count: order_by
-
-  original_book_id: order_by
 
   privacy_setting_id: order_by
 
@@ -1836,6 +1889,8 @@ type authors {
   state: String!
 
   title: String
+
+  updated_at: timestamp!
 
   user_id: Int
 
@@ -1966,6 +2021,8 @@ input authors_bool_exp {
 
   title: String_comparison_exp
 
+  updated_at: timestamp_comparison_exp
+
   user_id: Int_comparison_exp
 
   users_count: Int_comparison_exp
@@ -2011,6 +2068,8 @@ input authors_max_order_by {
 
   title: order_by
 
+  updated_at: order_by
+
   user_id: order_by
 
   users_count: order_by
@@ -2055,6 +2114,8 @@ input authors_min_order_by {
   state: order_by
 
   title: order_by
+
+  updated_at: order_by
 
   user_id: order_by
 
@@ -2124,6 +2185,8 @@ input authors_order_by {
   state: order_by
 
   title: order_by
+
+  updated_at: order_by
 
   user_id: order_by
 
@@ -2258,6 +2321,11 @@ enum authors_select_column {
   column name
   """
   title
+
+  """
+  column name
+  """
+  updated_at
 
   """
   column name
@@ -2413,6 +2481,8 @@ input authors_stream_cursor_value_input {
   state: String
 
   title: String
+
+  updated_at: timestamp
 
   user_id: Int
 
@@ -4559,11 +4629,15 @@ type books {
 
   cached_contributors("JSON select path" path: String): json!
 
-  cached_featured_series("JSON select path" path: String): jsonb
+  cached_featured_series("JSON select path" path: String): jsonb!
 
   cached_header_image("JSON select path" path: String): jsonb!
 
   cached_image("JSON select path" path: String): jsonb!
+
+  cached_similar_book_ids("JSON select path" path: String): jsonb!
+
+  cached_similar_books_updated_at: timestamp
 
   cached_tags("JSON select path" path: String): jsonb!
 
@@ -4723,7 +4797,7 @@ type books {
 
   slug: String
 
-  state: String
+  state: String!
 
   subtitle: String
 
@@ -5026,6 +5100,10 @@ input books_bool_exp {
 
   cached_image: jsonb_comparison_exp
 
+  cached_similar_book_ids: jsonb_comparison_exp
+
+  cached_similar_books_updated_at: timestamp_comparison_exp
+
   cached_tags: jsonb_comparison_exp
 
   canonical: books_bool_exp
@@ -5165,6 +5243,8 @@ type books_max_fields {
 
   book_status_id: smallint
 
+  cached_similar_books_updated_at: timestamp
+
   canonical_id: Int
 
   created_at: timestamp
@@ -5245,6 +5325,8 @@ input books_max_order_by {
   book_category_id: order_by
 
   book_status_id: order_by
+
+  cached_similar_books_updated_at: order_by
 
   canonical_id: order_by
 
@@ -5327,6 +5409,8 @@ type books_min_fields {
 
   book_status_id: smallint
 
+  cached_similar_books_updated_at: timestamp
+
   canonical_id: Int
 
   created_at: timestamp
@@ -5407,6 +5491,8 @@ input books_min_order_by {
   book_category_id: order_by
 
   book_status_id: order_by
+
+  cached_similar_books_updated_at: order_by
 
   canonical_id: order_by
 
@@ -5506,6 +5592,10 @@ input books_order_by {
   cached_header_image: order_by
 
   cached_image: order_by
+
+  cached_similar_book_ids: order_by
+
+  cached_similar_books_updated_at: order_by
 
   cached_tags: order_by
 
@@ -5672,6 +5762,16 @@ enum books_select_column {
   column name
   """
   cached_image
+
+  """
+  column name
+  """
+  cached_similar_book_ids
+
+  """
+  column name
+  """
+  cached_similar_books_updated_at
 
   """
   column name
@@ -6329,6 +6429,10 @@ input books_stream_cursor_value_input {
 
   cached_image: jsonb
 
+  cached_similar_book_ids: jsonb
+
+  cached_similar_books_updated_at: timestamp
+
   cached_tags: jsonb
 
   canonical_id: Int
@@ -6962,7 +7066,7 @@ type characters {
 
   is_poc: Boolean
 
-  locked: Boolean
+  locked: Boolean!
 
   name: String!
 
@@ -8390,6 +8494,25 @@ type contributions {
 
   contribution: String
 
+  """
+  An object relationship
+  """
+  contributor_role: contributor_roles
+
+  contributor_role_id: Int
+
+  """
+  An object relationship
+  """
+  contributor_role_specialization: contributor_role_specializations
+
+  """
+  An object relationship
+  """
+  contributor_specialization: contributor_specializations
+
+  contributor_specialization_id: Int
+
   created_at: timestamp!
 
   id: bigint!
@@ -8482,6 +8605,10 @@ type contributions_avg_fields {
 
   contributable_id: Float
 
+  contributor_role_id: Float
+
+  contributor_specialization_id: Float
+
   id: Float
 }
 
@@ -8492,6 +8619,10 @@ input contributions_avg_order_by {
   author_id: order_by
 
   contributable_id: order_by
+
+  contributor_role_id: order_by
+
+  contributor_specialization_id: order_by
 
   id: order_by
 }
@@ -8518,6 +8649,16 @@ input contributions_bool_exp {
 
   contribution: String_comparison_exp
 
+  contributor_role: contributor_roles_bool_exp
+
+  contributor_role_id: Int_comparison_exp
+
+  contributor_role_specialization: contributor_role_specializations_bool_exp
+
+  contributor_specialization: contributor_specializations_bool_exp
+
+  contributor_specialization_id: Int_comparison_exp
+
   created_at: timestamp_comparison_exp
 
   id: bigint_comparison_exp
@@ -8536,6 +8677,10 @@ type contributions_max_fields {
   contributable_type: String
 
   contribution: String
+
+  contributor_role_id: Int
+
+  contributor_specialization_id: Int
 
   created_at: timestamp
 
@@ -8556,6 +8701,10 @@ input contributions_max_order_by {
 
   contribution: order_by
 
+  contributor_role_id: order_by
+
+  contributor_specialization_id: order_by
+
   created_at: order_by
 
   id: order_by
@@ -8575,6 +8724,10 @@ type contributions_min_fields {
 
   contribution: String
 
+  contributor_role_id: Int
+
+  contributor_specialization_id: Int
+
   created_at: timestamp
 
   id: bigint
@@ -8593,6 +8746,10 @@ input contributions_min_order_by {
   contributable_type: order_by
 
   contribution: order_by
+
+  contributor_role_id: order_by
+
+  contributor_specialization_id: order_by
 
   created_at: order_by
 
@@ -8616,6 +8773,16 @@ input contributions_order_by {
   contributable_type: order_by
 
   contribution: order_by
+
+  contributor_role: contributor_roles_order_by
+
+  contributor_role_id: order_by
+
+  contributor_role_specialization: contributor_role_specializations_order_by
+
+  contributor_specialization: contributor_specializations_order_by
+
+  contributor_specialization_id: order_by
 
   created_at: order_by
 
@@ -8651,6 +8818,16 @@ enum contributions_select_column {
   """
   column name
   """
+  contributor_role_id
+
+  """
+  column name
+  """
+  contributor_specialization_id
+
+  """
+  column name
+  """
   created_at
 
   """
@@ -8672,6 +8849,10 @@ type contributions_stddev_fields {
 
   contributable_id: Float
 
+  contributor_role_id: Float
+
+  contributor_specialization_id: Float
+
   id: Float
 }
 
@@ -8682,6 +8863,10 @@ input contributions_stddev_order_by {
   author_id: order_by
 
   contributable_id: order_by
+
+  contributor_role_id: order_by
+
+  contributor_specialization_id: order_by
 
   id: order_by
 }
@@ -8694,6 +8879,10 @@ type contributions_stddev_pop_fields {
 
   contributable_id: Float
 
+  contributor_role_id: Float
+
+  contributor_specialization_id: Float
+
   id: Float
 }
 
@@ -8704,6 +8893,10 @@ input contributions_stddev_pop_order_by {
   author_id: order_by
 
   contributable_id: order_by
+
+  contributor_role_id: order_by
+
+  contributor_specialization_id: order_by
 
   id: order_by
 }
@@ -8716,6 +8909,10 @@ type contributions_stddev_samp_fields {
 
   contributable_id: Float
 
+  contributor_role_id: Float
+
+  contributor_specialization_id: Float
+
   id: Float
 }
 
@@ -8726,6 +8923,10 @@ input contributions_stddev_samp_order_by {
   author_id: order_by
 
   contributable_id: order_by
+
+  contributor_role_id: order_by
+
+  contributor_specialization_id: order_by
 
   id: order_by
 }
@@ -8757,6 +8958,10 @@ input contributions_stream_cursor_value_input {
 
   contribution: String
 
+  contributor_role_id: Int
+
+  contributor_specialization_id: Int
+
   created_at: timestamp
 
   id: bigint
@@ -8772,6 +8977,10 @@ type contributions_sum_fields {
 
   contributable_id: Int
 
+  contributor_role_id: Int
+
+  contributor_specialization_id: Int
+
   id: bigint
 }
 
@@ -8782,6 +8991,10 @@ input contributions_sum_order_by {
   author_id: order_by
 
   contributable_id: order_by
+
+  contributor_role_id: order_by
+
+  contributor_specialization_id: order_by
 
   id: order_by
 }
@@ -8794,6 +9007,10 @@ type contributions_var_pop_fields {
 
   contributable_id: Float
 
+  contributor_role_id: Float
+
+  contributor_specialization_id: Float
+
   id: Float
 }
 
@@ -8804,6 +9021,10 @@ input contributions_var_pop_order_by {
   author_id: order_by
 
   contributable_id: order_by
+
+  contributor_role_id: order_by
+
+  contributor_specialization_id: order_by
 
   id: order_by
 }
@@ -8816,6 +9037,10 @@ type contributions_var_samp_fields {
 
   contributable_id: Float
 
+  contributor_role_id: Float
+
+  contributor_specialization_id: Float
+
   id: Float
 }
 
@@ -8826,6 +9051,10 @@ input contributions_var_samp_order_by {
   author_id: order_by
 
   contributable_id: order_by
+
+  contributor_role_id: order_by
+
+  contributor_specialization_id: order_by
 
   id: order_by
 }
@@ -8838,6 +9067,10 @@ type contributions_variance_fields {
 
   contributable_id: Float
 
+  contributor_role_id: Float
+
+  contributor_specialization_id: Float
+
   id: Float
 }
 
@@ -8849,7 +9082,468 @@ input contributions_variance_order_by {
 
   contributable_id: order_by
 
+  contributor_role_id: order_by
+
+  contributor_specialization_id: order_by
+
   id: order_by
+}
+
+"""
+columns and relationships of "contributor_role_categories"
+"""
+type contributor_role_categories {
+  group: Int!
+
+  id: Int!
+
+  name: String!
+}
+
+"""
+Boolean expression to filter rows from the table "contributor_role_categories". All fields are combined with a logical 'AND'.
+"""
+input contributor_role_categories_bool_exp {
+  _and: [contributor_role_categories_bool_exp!]
+
+  _not: contributor_role_categories_bool_exp
+
+  _or: [contributor_role_categories_bool_exp!]
+
+  group: Int_comparison_exp
+
+  id: Int_comparison_exp
+
+  name: String_comparison_exp
+}
+
+"""
+Ordering options when selecting data from "contributor_role_categories".
+"""
+input contributor_role_categories_order_by {
+  group: order_by
+
+  id: order_by
+
+  name: order_by
+}
+
+"""
+select columns of table "contributor_role_categories"
+"""
+enum contributor_role_categories_select_column {
+  """
+  column name
+  """
+  group
+
+  """
+  column name
+  """
+  id
+
+  """
+  column name
+  """
+  name
+}
+
+"""
+Streaming cursor of the table "contributor_role_categories"
+"""
+input contributor_role_categories_stream_cursor_input {
+  """
+  Stream column input with initial value
+  """
+  initial_value: contributor_role_categories_stream_cursor_value_input!
+
+  """
+  cursor ordering
+  """
+  ordering: cursor_ordering
+}
+
+"""
+Initial value of the column from where the streaming should start
+"""
+input contributor_role_categories_stream_cursor_value_input {
+  group: Int
+
+  id: Int
+
+  name: String
+}
+
+"""
+columns and relationships of "contributor_role_specializations"
+"""
+type contributor_role_specializations {
+  blurb: String
+
+  contributor_role_id: Int!
+
+  contributor_specialization_id: Int!
+
+  description: String
+
+  id: Int!
+
+  primary: Boolean
+}
+
+"""
+Boolean expression to filter rows from the table "contributor_role_specializations". All fields are combined with a logical 'AND'.
+"""
+input contributor_role_specializations_bool_exp {
+  _and: [contributor_role_specializations_bool_exp!]
+
+  _not: contributor_role_specializations_bool_exp
+
+  _or: [contributor_role_specializations_bool_exp!]
+
+  blurb: String_comparison_exp
+
+  contributor_role_id: Int_comparison_exp
+
+  contributor_specialization_id: Int_comparison_exp
+
+  description: String_comparison_exp
+
+  id: Int_comparison_exp
+
+  primary: Boolean_comparison_exp
+}
+
+"""
+Ordering options when selecting data from "contributor_role_specializations".
+"""
+input contributor_role_specializations_order_by {
+  blurb: order_by
+
+  contributor_role_id: order_by
+
+  contributor_specialization_id: order_by
+
+  description: order_by
+
+  id: order_by
+
+  primary: order_by
+}
+
+"""
+select columns of table "contributor_role_specializations"
+"""
+enum contributor_role_specializations_select_column {
+  """
+  column name
+  """
+  blurb
+
+  """
+  column name
+  """
+  contributor_role_id
+
+  """
+  column name
+  """
+  contributor_specialization_id
+
+  """
+  column name
+  """
+  description
+
+  """
+  column name
+  """
+  id
+
+  """
+  column name
+  """
+  primary
+}
+
+"""
+Streaming cursor of the table "contributor_role_specializations"
+"""
+input contributor_role_specializations_stream_cursor_input {
+  """
+  Stream column input with initial value
+  """
+  initial_value: contributor_role_specializations_stream_cursor_value_input!
+
+  """
+  cursor ordering
+  """
+  ordering: cursor_ordering
+}
+
+"""
+Initial value of the column from where the streaming should start
+"""
+input contributor_role_specializations_stream_cursor_value_input {
+  blurb: String
+
+  contributor_role_id: Int
+
+  contributor_specialization_id: Int
+
+  description: String
+
+  id: Int
+
+  primary: Boolean
+}
+
+"""
+columns and relationships of "contributor_roles"
+"""
+type contributor_roles {
+  blurb: String
+
+  contributor_role_category_id: Int!
+
+  description: String
+
+  id: Int!
+
+  important: Int!
+
+  name: String!
+
+  primary: Boolean!
+
+  slug: String
+}
+
+"""
+Boolean expression to filter rows from the table "contributor_roles". All fields are combined with a logical 'AND'.
+"""
+input contributor_roles_bool_exp {
+  _and: [contributor_roles_bool_exp!]
+
+  _not: contributor_roles_bool_exp
+
+  _or: [contributor_roles_bool_exp!]
+
+  blurb: String_comparison_exp
+
+  contributor_role_category_id: Int_comparison_exp
+
+  description: String_comparison_exp
+
+  id: Int_comparison_exp
+
+  important: Int_comparison_exp
+
+  name: String_comparison_exp
+
+  primary: Boolean_comparison_exp
+
+  slug: String_comparison_exp
+}
+
+"""
+Ordering options when selecting data from "contributor_roles".
+"""
+input contributor_roles_order_by {
+  blurb: order_by
+
+  contributor_role_category_id: order_by
+
+  description: order_by
+
+  id: order_by
+
+  important: order_by
+
+  name: order_by
+
+  primary: order_by
+
+  slug: order_by
+}
+
+"""
+select columns of table "contributor_roles"
+"""
+enum contributor_roles_select_column {
+  """
+  column name
+  """
+  blurb
+
+  """
+  column name
+  """
+  contributor_role_category_id
+
+  """
+  column name
+  """
+  description
+
+  """
+  column name
+  """
+  id
+
+  """
+  column name
+  """
+  important
+
+  """
+  column name
+  """
+  name
+
+  """
+  column name
+  """
+  primary
+
+  """
+  column name
+  """
+  slug
+}
+
+"""
+Streaming cursor of the table "contributor_roles"
+"""
+input contributor_roles_stream_cursor_input {
+  """
+  Stream column input with initial value
+  """
+  initial_value: contributor_roles_stream_cursor_value_input!
+
+  """
+  cursor ordering
+  """
+  ordering: cursor_ordering
+}
+
+"""
+Initial value of the column from where the streaming should start
+"""
+input contributor_roles_stream_cursor_value_input {
+  blurb: String
+
+  contributor_role_category_id: Int
+
+  description: String
+
+  id: Int
+
+  important: Int
+
+  name: String
+
+  primary: Boolean
+
+  slug: String
+}
+
+"""
+columns and relationships of "contributor_specializations"
+"""
+type contributor_specializations {
+  blurb: String
+
+  description: String
+
+  id: Int!
+
+  name: String!
+}
+
+"""
+Boolean expression to filter rows from the table "contributor_specializations". All fields are combined with a logical 'AND'.
+"""
+input contributor_specializations_bool_exp {
+  _and: [contributor_specializations_bool_exp!]
+
+  _not: contributor_specializations_bool_exp
+
+  _or: [contributor_specializations_bool_exp!]
+
+  blurb: String_comparison_exp
+
+  description: String_comparison_exp
+
+  id: Int_comparison_exp
+
+  name: String_comparison_exp
+}
+
+"""
+Ordering options when selecting data from "contributor_specializations".
+"""
+input contributor_specializations_order_by {
+  blurb: order_by
+
+  description: order_by
+
+  id: order_by
+
+  name: order_by
+}
+
+"""
+select columns of table "contributor_specializations"
+"""
+enum contributor_specializations_select_column {
+  """
+  column name
+  """
+  blurb
+
+  """
+  column name
+  """
+  description
+
+  """
+  column name
+  """
+  id
+
+  """
+  column name
+  """
+  name
+}
+
+"""
+Streaming cursor of the table "contributor_specializations"
+"""
+input contributor_specializations_stream_cursor_input {
+  """
+  Stream column input with initial value
+  """
+  initial_value: contributor_specializations_stream_cursor_value_input!
+
+  """
+  cursor ordering
+  """
+  ordering: cursor_ordering
+}
+
+"""
+Initial value of the column from where the streaming should start
+"""
+input contributor_specializations_stream_cursor_value_input {
+  blurb: String
+
+  description: String
+
+  id: Int
+
+  name: String
 }
 
 """
@@ -12388,44 +13082,6 @@ input followed_prompts_bool_exp {
 }
 
 """
-unique or primary key constraints on table "followed_prompts"
-"""
-enum followed_prompts_constraint {
-  """
-  unique or primary key constraint on columns "id"
-  """
-  followed_prompts_pkey
-
-  """
-  unique or primary key constraint on columns "id"
-  """
-  question_features_id_key
-
-  """
-  unique or primary key constraint on columns "user_id", "prompt_id"
-  """
-  question_features_userId_questionId_key
-}
-
-"""
-input type for incrementing numeric columns in table "followed_prompts"
-"""
-input followed_prompts_inc_input {
-  order: Int
-}
-
-"""
-input type for inserting data into table "followed_prompts"
-"""
-input followed_prompts_insert_input {
-  order: Int
-
-  prompt_id: Int
-
-  user_id: Int
-}
-
-"""
 order by max() on columns of table "followed_prompts"
 """
 input followed_prompts_max_order_by {
@@ -12456,32 +13112,6 @@ input followed_prompts_min_order_by {
 }
 
 """
-response of any mutation on the table "followed_prompts"
-"""
-type followed_prompts_mutation_response {
-  """
-  number of rows affected by the mutation
-  """
-  affected_rows: Int!
-
-  """
-  data from the rows affected by the mutation
-  """
-  returning: [followed_prompts!]!
-}
-
-"""
-on_conflict condition type for table "followed_prompts"
-"""
-input followed_prompts_on_conflict {
-  constraint: followed_prompts_constraint!
-
-  update_columns: [followed_prompts_update_column!]! = []
-
-  where: followed_prompts_bool_exp
-}
-
-"""
 Ordering options when selecting data from "followed_prompts".
 """
 input followed_prompts_order_by {
@@ -12498,13 +13128,6 @@ input followed_prompts_order_by {
   user: users_order_by
 
   user_id: order_by
-}
-
-"""
-primary key columns input for table: followed_prompts
-"""
-input followed_prompts_pk_columns_input {
-  id: Int!
 }
 
 """
@@ -12535,13 +13158,6 @@ enum followed_prompts_select_column {
   column name
   """
   user_id
-}
-
-"""
-input type for updating data in table "followed_prompts"
-"""
-input followed_prompts_set_input {
-  order: Int
 }
 
 """
@@ -12624,33 +13240,6 @@ input followed_prompts_sum_order_by {
   prompt_id: order_by
 
   user_id: order_by
-}
-
-"""
-update columns of table "followed_prompts"
-"""
-enum followed_prompts_update_column {
-  """
-  column name
-  """
-  order
-}
-
-input followed_prompts_updates {
-  """
-  increments the numeric columns with given value of the filtered values
-  """
-  _inc: followed_prompts_inc_input
-
-  """
-  sets the columns of the filtered rows to the given values
-  """
-  _set: followed_prompts_set_input
-
-  """
-  filter the rows which have to be updated
-  """
-  where: followed_prompts_bool_exp!
 }
 
 """
@@ -14939,6 +15528,16 @@ input jsonb_comparison_exp {
 
   _is_null: Boolean
 
+  """
+  does the jsonpath return any item for the specified JSON value
+  """
+  _jsonb_path_exists: String
+
+  """
+  does the jsonpath predicate check return true for the specified JSON value
+  """
+  _jsonb_path_match: String
+
   _lt: jsonb
 
   _lte: jsonb
@@ -15084,6 +15683,11 @@ type likes {
   user_book: user_books
 
   user_id: Int!
+
+  """
+  An object relationship
+  """
+  vibe: vibes
 }
 
 """
@@ -15153,6 +15757,8 @@ input likes_bool_exp {
   user_book: user_books_bool_exp
 
   user_id: Int_comparison_exp
+
+  vibe: vibes_bool_exp
 }
 
 """
@@ -15208,6 +15814,8 @@ input likes_order_by {
   user_book: user_books_order_by
 
   user_id: order_by
+
+  vibe: vibes_order_by
 }
 
 """
@@ -15530,7 +16138,7 @@ type list_books {
 
   id: Int!
 
-  imported: Boolean
+  imported: Boolean!
 
   """
   An object relationship
@@ -15560,6 +16168,8 @@ type list_books {
   An aggregate relationship
   """
   user_books_aggregate("distinct select on columns" distinct_on: [user_books_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [user_books_order_by!], "filter the rows returned" where: user_books_bool_exp): user_books_aggregate!
+
+  user_id: Int
 }
 
 """
@@ -15680,6 +16290,8 @@ type list_books_avg_fields {
   original_edition_id: Float
 
   position: Float
+
+  user_id: Float
 }
 
 """
@@ -15699,6 +16311,8 @@ input list_books_avg_order_by {
   original_edition_id: order_by
 
   position: order_by
+
+  user_id: order_by
 }
 
 """
@@ -15746,6 +16360,8 @@ input list_books_bool_exp {
   user_books: user_books_bool_exp
 
   user_books_aggregate: user_books_aggregate_bool_exp
+
+  user_id: Int_comparison_exp
 }
 
 """
@@ -15782,6 +16398,8 @@ type list_books_max_fields {
   reason: String
 
   updated_at: timestamptz
+
+  user_id: Int
 }
 
 """
@@ -15811,6 +16429,8 @@ input list_books_max_order_by {
   reason: order_by
 
   updated_at: order_by
+
+  user_id: order_by
 }
 
 """
@@ -15840,6 +16460,8 @@ type list_books_min_fields {
   reason: String
 
   updated_at: timestamptz
+
+  user_id: Int
 }
 
 """
@@ -15869,6 +16491,8 @@ input list_books_min_order_by {
   reason: order_by
 
   updated_at: order_by
+
+  user_id: order_by
 }
 
 """
@@ -15923,6 +16547,8 @@ input list_books_order_by {
   updated_at: order_by
 
   user_books_aggregate: user_books_aggregate_order_by
+
+  user_id: order_by
 }
 
 """
@@ -16000,6 +16626,11 @@ enum list_books_select_column {
   column name
   """
   updated_at
+
+  """
+  column name
+  """
+  user_id
 }
 
 """
@@ -16048,6 +16679,8 @@ type list_books_stddev_fields {
   original_edition_id: Float
 
   position: Float
+
+  user_id: Float
 }
 
 """
@@ -16067,6 +16700,8 @@ input list_books_stddev_order_by {
   original_edition_id: order_by
 
   position: order_by
+
+  user_id: order_by
 }
 
 """
@@ -16086,6 +16721,8 @@ type list_books_stddev_pop_fields {
   original_edition_id: Float
 
   position: Float
+
+  user_id: Float
 }
 
 """
@@ -16105,6 +16742,8 @@ input list_books_stddev_pop_order_by {
   original_edition_id: order_by
 
   position: order_by
+
+  user_id: order_by
 }
 
 """
@@ -16124,6 +16763,8 @@ type list_books_stddev_samp_fields {
   original_edition_id: Float
 
   position: Float
+
+  user_id: Float
 }
 
 """
@@ -16143,6 +16784,8 @@ input list_books_stddev_samp_order_by {
   original_edition_id: order_by
 
   position: order_by
+
+  user_id: order_by
 }
 
 """
@@ -16189,6 +16832,8 @@ input list_books_stream_cursor_value_input {
   reason: String
 
   updated_at: timestamptz
+
+  user_id: Int
 }
 
 """
@@ -16208,6 +16853,8 @@ type list_books_sum_fields {
   original_edition_id: Int
 
   position: Int
+
+  user_id: Int
 }
 
 """
@@ -16227,6 +16874,8 @@ input list_books_sum_order_by {
   original_edition_id: order_by
 
   position: order_by
+
+  user_id: order_by
 }
 
 input list_books_updates {
@@ -16263,6 +16912,8 @@ type list_books_var_pop_fields {
   original_edition_id: Float
 
   position: Float
+
+  user_id: Float
 }
 
 """
@@ -16282,6 +16933,8 @@ input list_books_var_pop_order_by {
   original_edition_id: order_by
 
   position: order_by
+
+  user_id: order_by
 }
 
 """
@@ -16301,6 +16954,8 @@ type list_books_var_samp_fields {
   original_edition_id: Float
 
   position: Float
+
+  user_id: Float
 }
 
 """
@@ -16320,6 +16975,8 @@ input list_books_var_samp_order_by {
   original_edition_id: order_by
 
   position: order_by
+
+  user_id: order_by
 }
 
 """
@@ -16339,6 +16996,8 @@ type list_books_variance_fields {
   original_edition_id: Float
 
   position: Float
+
+  user_id: Float
 }
 
 """
@@ -16358,6 +17017,298 @@ input list_books_variance_order_by {
   original_edition_id: order_by
 
   position: order_by
+
+  user_id: order_by
+}
+
+"""
+columns and relationships of "list_members"
+"""
+type list_members {
+  created_at: timestamp!
+
+  id: Int!
+
+  """
+  An object relationship
+  """
+  list: lists
+
+  list_id: Int!
+
+  status: Int!
+
+  """
+  An object relationship
+  """
+  user: users
+
+  user_id: Int!
+}
+
+"""
+order by aggregate values of table "list_members"
+"""
+input list_members_aggregate_order_by {
+  avg: list_members_avg_order_by
+
+  count: order_by
+
+  max: list_members_max_order_by
+
+  min: list_members_min_order_by
+
+  stddev: list_members_stddev_order_by
+
+  stddev_pop: list_members_stddev_pop_order_by
+
+  stddev_samp: list_members_stddev_samp_order_by
+
+  sum: list_members_sum_order_by
+
+  var_pop: list_members_var_pop_order_by
+
+  var_samp: list_members_var_samp_order_by
+
+  variance: list_members_variance_order_by
+}
+
+"""
+order by avg() on columns of table "list_members"
+"""
+input list_members_avg_order_by {
+  id: order_by
+
+  list_id: order_by
+
+  status: order_by
+
+  user_id: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "list_members". All fields are combined with a logical 'AND'.
+"""
+input list_members_bool_exp {
+  _and: [list_members_bool_exp!]
+
+  _not: list_members_bool_exp
+
+  _or: [list_members_bool_exp!]
+
+  created_at: timestamp_comparison_exp
+
+  id: Int_comparison_exp
+
+  list: lists_bool_exp
+
+  list_id: Int_comparison_exp
+
+  status: Int_comparison_exp
+
+  user: users_bool_exp
+
+  user_id: Int_comparison_exp
+}
+
+"""
+order by max() on columns of table "list_members"
+"""
+input list_members_max_order_by {
+  created_at: order_by
+
+  id: order_by
+
+  list_id: order_by
+
+  status: order_by
+
+  user_id: order_by
+}
+
+"""
+order by min() on columns of table "list_members"
+"""
+input list_members_min_order_by {
+  created_at: order_by
+
+  id: order_by
+
+  list_id: order_by
+
+  status: order_by
+
+  user_id: order_by
+}
+
+"""
+Ordering options when selecting data from "list_members".
+"""
+input list_members_order_by {
+  created_at: order_by
+
+  id: order_by
+
+  list: lists_order_by
+
+  list_id: order_by
+
+  status: order_by
+
+  user: users_order_by
+
+  user_id: order_by
+}
+
+"""
+select columns of table "list_members"
+"""
+enum list_members_select_column {
+  """
+  column name
+  """
+  created_at
+
+  """
+  column name
+  """
+  id
+
+  """
+  column name
+  """
+  list_id
+
+  """
+  column name
+  """
+  status
+
+  """
+  column name
+  """
+  user_id
+}
+
+"""
+order by stddev() on columns of table "list_members"
+"""
+input list_members_stddev_order_by {
+  id: order_by
+
+  list_id: order_by
+
+  status: order_by
+
+  user_id: order_by
+}
+
+"""
+order by stddev_pop() on columns of table "list_members"
+"""
+input list_members_stddev_pop_order_by {
+  id: order_by
+
+  list_id: order_by
+
+  status: order_by
+
+  user_id: order_by
+}
+
+"""
+order by stddev_samp() on columns of table "list_members"
+"""
+input list_members_stddev_samp_order_by {
+  id: order_by
+
+  list_id: order_by
+
+  status: order_by
+
+  user_id: order_by
+}
+
+"""
+Streaming cursor of the table "list_members"
+"""
+input list_members_stream_cursor_input {
+  """
+  Stream column input with initial value
+  """
+  initial_value: list_members_stream_cursor_value_input!
+
+  """
+  cursor ordering
+  """
+  ordering: cursor_ordering
+}
+
+"""
+Initial value of the column from where the streaming should start
+"""
+input list_members_stream_cursor_value_input {
+  created_at: timestamp
+
+  id: Int
+
+  list_id: Int
+
+  status: Int
+
+  user_id: Int
+}
+
+"""
+order by sum() on columns of table "list_members"
+"""
+input list_members_sum_order_by {
+  id: order_by
+
+  list_id: order_by
+
+  status: order_by
+
+  user_id: order_by
+}
+
+"""
+order by var_pop() on columns of table "list_members"
+"""
+input list_members_var_pop_order_by {
+  id: order_by
+
+  list_id: order_by
+
+  status: order_by
+
+  user_id: order_by
+}
+
+"""
+order by var_samp() on columns of table "list_members"
+"""
+input list_members_var_samp_order_by {
+  id: order_by
+
+  list_id: order_by
+
+  status: order_by
+
+  user_id: order_by
+}
+
+"""
+order by variance() on columns of table "list_members"
+"""
+input list_members_variance_order_by {
+  id: order_by
+
+  list_id: order_by
+
+  status: order_by
+
+  user_id: order_by
 }
 
 """
@@ -16408,6 +17359,11 @@ type lists {
   An aggregate relationship
   """
   list_books_aggregate("distinct select on columns" distinct_on: [list_books_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [list_books_order_by!], "filter the rows returned" where: list_books_bool_exp): list_books_aggregate!
+
+  """
+  An array relationship
+  """
+  list_members("distinct select on columns" distinct_on: [list_members_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [list_members_order_by!], "filter the rows returned" where: list_members_bool_exp): [list_members!]!
 
   name: String!
 
@@ -16613,6 +17569,8 @@ input lists_bool_exp {
 
   list_books_aggregate: list_books_aggregate_bool_exp
 
+  list_members: list_members_bool_exp
+
   name: String_comparison_exp
 
   object_type: String_comparison_exp
@@ -16799,6 +17757,8 @@ input lists_order_by {
   likes_count: order_by
 
   list_books_aggregate: list_books_aggregate_order_by
+
+  list_members_aggregate: list_members_aggregate_order_by
 
   name: order_by
 
@@ -17289,6 +18249,11 @@ type mutation_root {
   add_to_default_filter_list(entity_id: Int!, entity_type: String!, visibility: Int!): FilterDefaultEntryType
 
   """
+  apply_buddy_read_default_to_want_to_read
+  """
+  apply_buddy_read_default_to_want_to_read: UserIdType
+
+  """
   book_mapping_normalize
   """
   book_mapping_normalize(deep: Boolean!, id: Int!): BookMappingIdType
@@ -17351,16 +18316,6 @@ type mutation_root {
   delete_followed_prompt(prompt_id: Int!): DeleteFollowedPromptType
 
   """
-  delete data from the table: "followed_prompts"
-  """
-  delete_followed_prompts("filter the rows which have to be deleted" where: followed_prompts_bool_exp!): followed_prompts_mutation_response
-
-  """
-  delete single row from the table: "followed_prompts"
-  """
-  delete_followed_prompts_by_pk(id: Int!): followed_prompts
-
-  """
   delete_followed_user
   """
   delete_followed_user(remove_follower: Boolean, user_id: Int!): FollowedUserType
@@ -17394,6 +18349,11 @@ type mutation_root {
   delete_list_book
   """
   delete_list_book(id: Int!): ListBookDeleteType
+
+  """
+  delete_list_member
+  """
+  delete_list_member(list_id: Int!, user_id: Int!): ListMemberDeleteType
 
   """
   delete_prompt_answer
@@ -17438,6 +18398,11 @@ type mutation_root {
   delete_user_book_read(id: Int!): UserBookReadIdType
 
   """
+  delete_vibe
+  """
+  delete_vibe(id: Int!): VibeDeleteType
+
+  """
   edition_normalize
   """
   edition_normalize(deep: Boolean!, id: Int!): EditionIdType
@@ -17460,7 +18425,7 @@ type mutation_root {
   """
   insert_block
   """
-  insert_block(blocked_user_id: Int!): InsertBlockOutput
+  insert_block(blocked_user_id: Int!, type: String): InsertBlockOutput
 
   """
   insert_book
@@ -17503,16 +18468,6 @@ type mutation_root {
   insert_follow(followable_id: Int!, followable_type: String!): FollowType
 
   """
-  insert data into the table: "followed_prompts"
-  """
-  insert_followed_prompts("the rows to be inserted" objects: [followed_prompts_insert_input!]!, "upsert condition" on_conflict: followed_prompts_on_conflict): followed_prompts_mutation_response
-
-  """
-  insert a single row into the table: "followed_prompts"
-  """
-  insert_followed_prompts_one("the row to be inserted" object: followed_prompts_insert_input!, "upsert condition" on_conflict: followed_prompts_on_conflict): followed_prompts
-
-  """
   insert_followed_user
   """
   insert_followed_user(user_id: Int!): FollowedUserType
@@ -17536,6 +18491,11 @@ type mutation_root {
   insert_list_book
   """
   insert_list_book(object: ListBookInput!): ListBookIdType
+
+  """
+  insert_list_member
+  """
+  insert_list_member(object: ListMemberInput!): ListMemberIdType
 
   """
   insert data into the table: "notification_settings"
@@ -17578,11 +18538,6 @@ type mutation_root {
   insert_serie(object: SeriesInput!): SeriesIdType
 
   """
-  insert_user
-  """
-  insert_user(user: UserJoinInput!): UserIdType
-
-  """
   insert data into the table: "user_blocks"
   """
   insert_user_blocks("the rows to be inserted" objects: [user_blocks_insert_input!]!, "upsert condition" on_conflict: user_blocks_on_conflict): user_blocks_mutation_response
@@ -17608,6 +18563,11 @@ type mutation_root {
   insert a single row into the table: "user_flags"
   """
   insert_user_flags_one("the row to be inserted" object: user_flags_insert_input!, "upsert condition" on_conflict: user_flags_on_conflict): user_flags
+
+  """
+  insert_vibe
+  """
+  insert_vibe(object: VibeInput!): VibeIdType
 
   """
   validate_receipt
@@ -17655,21 +18615,6 @@ type mutation_root {
   update_filter_list(id: Int!, object: FilterListInput!): FilterListIdType
 
   """
-  update data of the table: "followed_prompts"
-  """
-  update_followed_prompts("increments the numeric columns with given value of the filtered values" _inc: followed_prompts_inc_input, "sets the columns of the filtered rows to the given values" _set: followed_prompts_set_input, "filter the rows which have to be updated" where: followed_prompts_bool_exp!): followed_prompts_mutation_response
-
-  """
-  update single row of the table: "followed_prompts"
-  """
-  update_followed_prompts_by_pk("increments the numeric columns with given value of the filtered values" _inc: followed_prompts_inc_input, "sets the columns of the filtered rows to the given values" _set: followed_prompts_set_input, pk_columns: followed_prompts_pk_columns_input!): followed_prompts
-
-  """
-  update multiples rows of table: "followed_prompts"
-  """
-  update_followed_prompts_many("updates to execute, in order" updates: [followed_prompts_updates!]!): [followed_prompts_mutation_response]
-
-  """
   update_goal
   """
   update_goal(id: Int!, object: GoalInput!): GoalIdType
@@ -17698,6 +18643,11 @@ type mutation_root {
   update multiples rows of table: "list_books"
   """
   update_list_books_many("updates to execute, in order" updates: [list_books_updates!]!): [list_books_mutation_response]
+
+  """
+  update_list_member
+  """
+  update_list_member(list_id: Int!, status: String!): ListMemberStatusType
 
   """
   update_newsletter
@@ -17790,6 +18740,11 @@ type mutation_root {
   update_user_privacy_setting(privacy_setting_id: Int!): UserIdType
 
   """
+  update_vibe
+  """
+  update_vibe(id: Int!, object: VibeInput!): VibeIdType
+
+  """
   upsert_book
   """
   upsert_book(book: CreateBookFromPlatformInput!): NewBookIdType
@@ -17823,11 +18778,6 @@ type mutation_root {
   upsert_user_book_read
   """
   upsert_user_book_reads(datesRead: [DatesReadInput]!, user_book_id: Int!): UserBooksReadUpsertType
-
-  """
-  user_login
-  """
-  user_login(user: UserLoginInput!): UserIdType
 }
 
 """
@@ -19010,6 +19960,11 @@ type notifications {
   """
   notifierUser: users
 
+  """
+  An object relationship
+  """
+  notifier_user: users
+
   notifier_user_id: Int!
 
   priority: Int
@@ -19047,6 +20002,8 @@ input notifications_bool_exp {
 
   notifierUser: users_bool_exp
 
+  notifier_user: users_bool_exp
+
   notifier_user_id: Int_comparison_exp
 
   priority: Int_comparison_exp
@@ -19075,6 +20032,8 @@ input notifications_order_by {
   notification_type_id: order_by
 
   notifierUser: users_order_by
+
+  notifier_user: users_order_by
 
   notifier_user_id: order_by
 
@@ -19491,10 +20450,6 @@ type prompt_answers {
 
   id: Int!
 
-  merged_at: timestamp
-
-  original_book_id: Int
-
   """
   An object relationship
   """
@@ -19600,8 +20555,6 @@ type prompt_answers_avg_fields {
 
   id: Float
 
-  original_book_id: Float
-
   prompt_id: Float
 
   user_id: Float
@@ -19614,8 +20567,6 @@ input prompt_answers_avg_order_by {
   book_id: order_by
 
   id: order_by
-
-  original_book_id: order_by
 
   prompt_id: order_by
 
@@ -19642,10 +20593,6 @@ input prompt_answers_bool_exp {
 
   id: Int_comparison_exp
 
-  merged_at: timestamp_comparison_exp
-
-  original_book_id: Int_comparison_exp
-
   prompt: prompts_bool_exp
 
   prompt_book: prompt_books_summary_bool_exp
@@ -19669,10 +20616,6 @@ type prompt_answers_max_fields {
 
   id: Int
 
-  merged_at: timestamp
-
-  original_book_id: Int
-
   prompt_id: Int
 
   user_id: Int
@@ -19689,10 +20632,6 @@ input prompt_answers_max_order_by {
   description: order_by
 
   id: order_by
-
-  merged_at: order_by
-
-  original_book_id: order_by
 
   prompt_id: order_by
 
@@ -19711,10 +20650,6 @@ type prompt_answers_min_fields {
 
   id: Int
 
-  merged_at: timestamp
-
-  original_book_id: Int
-
   prompt_id: Int
 
   user_id: Int
@@ -19731,10 +20666,6 @@ input prompt_answers_min_order_by {
   description: order_by
 
   id: order_by
-
-  merged_at: order_by
-
-  original_book_id: order_by
 
   prompt_id: order_by
 
@@ -19769,10 +20700,6 @@ input prompt_answers_order_by {
   description: order_by
 
   id: order_by
-
-  merged_at: order_by
-
-  original_book_id: order_by
 
   prompt: prompts_order_by
 
@@ -19819,16 +20746,6 @@ enum prompt_answers_select_column {
   """
   column name
   """
-  merged_at
-
-  """
-  column name
-  """
-  original_book_id
-
-  """
-  column name
-  """
   prompt_id
 
   """
@@ -19852,8 +20769,6 @@ type prompt_answers_stddev_fields {
 
   id: Float
 
-  original_book_id: Float
-
   prompt_id: Float
 
   user_id: Float
@@ -19866,8 +20781,6 @@ input prompt_answers_stddev_order_by {
   book_id: order_by
 
   id: order_by
-
-  original_book_id: order_by
 
   prompt_id: order_by
 
@@ -19882,8 +20795,6 @@ type prompt_answers_stddev_pop_fields {
 
   id: Float
 
-  original_book_id: Float
-
   prompt_id: Float
 
   user_id: Float
@@ -19896,8 +20807,6 @@ input prompt_answers_stddev_pop_order_by {
   book_id: order_by
 
   id: order_by
-
-  original_book_id: order_by
 
   prompt_id: order_by
 
@@ -19912,8 +20821,6 @@ type prompt_answers_stddev_samp_fields {
 
   id: Float
 
-  original_book_id: Float
-
   prompt_id: Float
 
   user_id: Float
@@ -19926,8 +20833,6 @@ input prompt_answers_stddev_samp_order_by {
   book_id: order_by
 
   id: order_by
-
-  original_book_id: order_by
 
   prompt_id: order_by
 
@@ -19961,10 +20866,6 @@ input prompt_answers_stream_cursor_value_input {
 
   id: Int
 
-  merged_at: timestamp
-
-  original_book_id: Int
-
   prompt_id: Int
 
   user_id: Int
@@ -19978,8 +20879,6 @@ type prompt_answers_sum_fields {
 
   id: Int
 
-  original_book_id: Int
-
   prompt_id: Int
 
   user_id: Int
@@ -19992,8 +20891,6 @@ input prompt_answers_sum_order_by {
   book_id: order_by
 
   id: order_by
-
-  original_book_id: order_by
 
   prompt_id: order_by
 
@@ -20020,8 +20917,6 @@ type prompt_answers_var_pop_fields {
 
   id: Float
 
-  original_book_id: Float
-
   prompt_id: Float
 
   user_id: Float
@@ -20034,8 +20929,6 @@ input prompt_answers_var_pop_order_by {
   book_id: order_by
 
   id: order_by
-
-  original_book_id: order_by
 
   prompt_id: order_by
 
@@ -20050,8 +20943,6 @@ type prompt_answers_var_samp_fields {
 
   id: Float
 
-  original_book_id: Float
-
   prompt_id: Float
 
   user_id: Float
@@ -20064,8 +20955,6 @@ input prompt_answers_var_samp_order_by {
   book_id: order_by
 
   id: order_by
-
-  original_book_id: order_by
 
   prompt_id: order_by
 
@@ -20080,8 +20969,6 @@ type prompt_answers_variance_fields {
 
   id: Float
 
-  original_book_id: Float
-
   prompt_id: Float
 
   user_id: Float
@@ -20094,8 +20981,6 @@ input prompt_answers_variance_order_by {
   book_id: order_by
 
   id: order_by
-
-  original_book_id: order_by
 
   prompt_id: order_by
 
@@ -21207,6 +22092,46 @@ type query_root {
   contributions_by_pk(id: bigint!): contributions
 
   """
+  fetch data from the table: "contributor_role_categories"
+  """
+  contributor_role_categories("distinct select on columns" distinct_on: [contributor_role_categories_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [contributor_role_categories_order_by!], "filter the rows returned" where: contributor_role_categories_bool_exp): [contributor_role_categories!]!
+
+  """
+  fetch data from the table: "contributor_role_categories" using primary key columns
+  """
+  contributor_role_categories_by_pk(id: Int!): contributor_role_categories
+
+  """
+  fetch data from the table: "contributor_role_specializations"
+  """
+  contributor_role_specializations("distinct select on columns" distinct_on: [contributor_role_specializations_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [contributor_role_specializations_order_by!], "filter the rows returned" where: contributor_role_specializations_bool_exp): [contributor_role_specializations!]!
+
+  """
+  fetch data from the table: "contributor_role_specializations" using primary key columns
+  """
+  contributor_role_specializations_by_pk(id: Int!): contributor_role_specializations
+
+  """
+  fetch data from the table: "contributor_roles"
+  """
+  contributor_roles("distinct select on columns" distinct_on: [contributor_roles_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [contributor_roles_order_by!], "filter the rows returned" where: contributor_roles_bool_exp): [contributor_roles!]!
+
+  """
+  fetch data from the table: "contributor_roles" using primary key columns
+  """
+  contributor_roles_by_pk(id: Int!): contributor_roles
+
+  """
+  fetch data from the table: "contributor_specializations"
+  """
+  contributor_specializations("distinct select on columns" distinct_on: [contributor_specializations_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [contributor_specializations_order_by!], "filter the rows returned" where: contributor_specializations_bool_exp): [contributor_specializations!]!
+
+  """
+  fetch data from the table: "contributor_specializations" using primary key columns
+  """
+  contributor_specializations_by_pk(id: Int!): contributor_specializations
+
+  """
   fetch data from the table: "countries"
   """
   countries("distinct select on columns" distinct_on: [countries_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [countries_order_by!], "filter the rows returned" where: countries_bool_exp): [countries!]!
@@ -21410,6 +22335,16 @@ type query_root {
   fetch data from the table: "list_books" using primary key columns
   """
   list_books_by_pk(id: Int!): list_books
+
+  """
+  An array relationship
+  """
+  list_members("distinct select on columns" distinct_on: [list_members_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [list_members_order_by!], "filter the rows returned" where: list_members_bool_exp): [list_members!]!
+
+  """
+  fetch data from the table: "list_members" using primary key columns
+  """
+  list_members_by_pk(id: Int!): list_members
 
   """
   An array relationship
@@ -21747,6 +22682,16 @@ type query_root {
   fetch data from the table: "users" using primary key columns
   """
   users_by_pk(id: Int!): users
+
+  """
+  fetch data from the table: "vibes"
+  """
+  vibes("distinct select on columns" distinct_on: [vibes_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [vibes_order_by!], "filter the rows returned" where: vibes_bool_exp): [vibes!]!
+
+  """
+  fetch data from the table: "vibes" using primary key columns
+  """
+  vibes_by_pk(id: Int!): vibes
 }
 
 """
@@ -21836,6 +22781,8 @@ type reading_journals {
 
   created_at: timestamp!
 
+  custom("JSON select path" path: String): jsonb
+
   """
   An object relationship
   """
@@ -21853,6 +22800,8 @@ type reading_journals {
   followers("distinct select on columns" distinct_on: [followed_users_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [followed_users_order_by!], "filter the rows returned" where: followed_users_bool_exp): [followed_users!]!
 
   id: bigint!
+
+  journal_date: date
 
   """
   An array relationship
@@ -21949,6 +22898,8 @@ input reading_journals_bool_exp {
 
   created_at: timestamp_comparison_exp
 
+  custom: jsonb_comparison_exp
+
   edition: editions_bool_exp
 
   edition_id: Int_comparison_exp
@@ -21960,6 +22911,8 @@ input reading_journals_bool_exp {
   followers: followed_users_bool_exp
 
   id: bigint_comparison_exp
+
+  journal_date: date_comparison_exp
 
   likes: likes_bool_exp
 
@@ -22000,6 +22953,8 @@ input reading_journals_max_order_by {
 
   id: order_by
 
+  journal_date: order_by
+
   likes_count: order_by
 
   object_type: order_by
@@ -22029,6 +22984,8 @@ input reading_journals_min_order_by {
 
   id: order_by
 
+  journal_date: order_by
+
   likes_count: order_by
 
   object_type: order_by
@@ -22052,6 +23009,8 @@ input reading_journals_order_by {
 
   created_at: order_by
 
+  custom: order_by
+
   edition: editions_order_by
 
   edition_id: order_by
@@ -22063,6 +23022,8 @@ input reading_journals_order_by {
   followers_aggregate: followed_users_aggregate_order_by
 
   id: order_by
+
+  journal_date: order_by
 
   likes_aggregate: likes_aggregate_order_by
 
@@ -22105,6 +23066,11 @@ enum reading_journals_select_column {
   """
   column name
   """
+  custom
+
+  """
+  column name
+  """
   edition_id
 
   """
@@ -22121,6 +23087,11 @@ enum reading_journals_select_column {
   column name
   """
   id
+
+  """
+  column name
+  """
+  journal_date
 
   """
   column name
@@ -22229,6 +23200,8 @@ input reading_journals_stream_cursor_value_input {
 
   created_at: timestamp
 
+  custom: jsonb
+
   edition_id: Int
 
   entry: String
@@ -22236,6 +23209,8 @@ input reading_journals_stream_cursor_value_input {
   event: String
 
   id: bigint
+
+  journal_date: date
 
   likes_count: Int
 
@@ -22975,6 +23950,66 @@ type subscription_root {
   contributions_stream("maximum number of rows returned in a single batch" batch_size: Int!, "cursor to stream the results returned by the query" cursor: [contributions_stream_cursor_input]!, "filter the rows returned" where: contributions_bool_exp): [contributions!]!
 
   """
+  fetch data from the table: "contributor_role_categories"
+  """
+  contributor_role_categories("distinct select on columns" distinct_on: [contributor_role_categories_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [contributor_role_categories_order_by!], "filter the rows returned" where: contributor_role_categories_bool_exp): [contributor_role_categories!]!
+
+  """
+  fetch data from the table: "contributor_role_categories" using primary key columns
+  """
+  contributor_role_categories_by_pk(id: Int!): contributor_role_categories
+
+  """
+  fetch data from the table in a streaming manner: "contributor_role_categories"
+  """
+  contributor_role_categories_stream("maximum number of rows returned in a single batch" batch_size: Int!, "cursor to stream the results returned by the query" cursor: [contributor_role_categories_stream_cursor_input]!, "filter the rows returned" where: contributor_role_categories_bool_exp): [contributor_role_categories!]!
+
+  """
+  fetch data from the table: "contributor_role_specializations"
+  """
+  contributor_role_specializations("distinct select on columns" distinct_on: [contributor_role_specializations_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [contributor_role_specializations_order_by!], "filter the rows returned" where: contributor_role_specializations_bool_exp): [contributor_role_specializations!]!
+
+  """
+  fetch data from the table: "contributor_role_specializations" using primary key columns
+  """
+  contributor_role_specializations_by_pk(id: Int!): contributor_role_specializations
+
+  """
+  fetch data from the table in a streaming manner: "contributor_role_specializations"
+  """
+  contributor_role_specializations_stream("maximum number of rows returned in a single batch" batch_size: Int!, "cursor to stream the results returned by the query" cursor: [contributor_role_specializations_stream_cursor_input]!, "filter the rows returned" where: contributor_role_specializations_bool_exp): [contributor_role_specializations!]!
+
+  """
+  fetch data from the table: "contributor_roles"
+  """
+  contributor_roles("distinct select on columns" distinct_on: [contributor_roles_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [contributor_roles_order_by!], "filter the rows returned" where: contributor_roles_bool_exp): [contributor_roles!]!
+
+  """
+  fetch data from the table: "contributor_roles" using primary key columns
+  """
+  contributor_roles_by_pk(id: Int!): contributor_roles
+
+  """
+  fetch data from the table in a streaming manner: "contributor_roles"
+  """
+  contributor_roles_stream("maximum number of rows returned in a single batch" batch_size: Int!, "cursor to stream the results returned by the query" cursor: [contributor_roles_stream_cursor_input]!, "filter the rows returned" where: contributor_roles_bool_exp): [contributor_roles!]!
+
+  """
+  fetch data from the table: "contributor_specializations"
+  """
+  contributor_specializations("distinct select on columns" distinct_on: [contributor_specializations_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [contributor_specializations_order_by!], "filter the rows returned" where: contributor_specializations_bool_exp): [contributor_specializations!]!
+
+  """
+  fetch data from the table: "contributor_specializations" using primary key columns
+  """
+  contributor_specializations_by_pk(id: Int!): contributor_specializations
+
+  """
+  fetch data from the table in a streaming manner: "contributor_specializations"
+  """
+  contributor_specializations_stream("maximum number of rows returned in a single batch" batch_size: Int!, "cursor to stream the results returned by the query" cursor: [contributor_specializations_stream_cursor_input]!, "filter the rows returned" where: contributor_specializations_bool_exp): [contributor_specializations!]!
+
+  """
   fetch data from the table: "countries"
   """
   countries("distinct select on columns" distinct_on: [countries_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [countries_order_by!], "filter the rows returned" where: countries_bool_exp): [countries!]!
@@ -23268,6 +24303,21 @@ type subscription_root {
   fetch data from the table in a streaming manner: "list_books"
   """
   list_books_stream("maximum number of rows returned in a single batch" batch_size: Int!, "cursor to stream the results returned by the query" cursor: [list_books_stream_cursor_input]!, "filter the rows returned" where: list_books_bool_exp): [list_books!]!
+
+  """
+  An array relationship
+  """
+  list_members("distinct select on columns" distinct_on: [list_members_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [list_members_order_by!], "filter the rows returned" where: list_members_bool_exp): [list_members!]!
+
+  """
+  fetch data from the table: "list_members" using primary key columns
+  """
+  list_members_by_pk(id: Int!): list_members
+
+  """
+  fetch data from the table in a streaming manner: "list_members"
+  """
+  list_members_stream("maximum number of rows returned in a single batch" batch_size: Int!, "cursor to stream the results returned by the query" cursor: [list_members_stream_cursor_input]!, "filter the rows returned" where: list_members_bool_exp): [list_members!]!
 
   """
   An array relationship
@@ -23733,6 +24783,21 @@ type subscription_root {
   fetch data from the table in a streaming manner: "users"
   """
   users_stream("maximum number of rows returned in a single batch" batch_size: Int!, "cursor to stream the results returned by the query" cursor: [users_stream_cursor_input]!, "filter the rows returned" where: users_bool_exp): [users!]!
+
+  """
+  fetch data from the table: "vibes"
+  """
+  vibes("distinct select on columns" distinct_on: [vibes_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [vibes_order_by!], "filter the rows returned" where: vibes_bool_exp): [vibes!]!
+
+  """
+  fetch data from the table: "vibes" using primary key columns
+  """
+  vibes_by_pk(id: Int!): vibes
+
+  """
+  fetch data from the table in a streaming manner: "vibes"
+  """
+  vibes_stream("maximum number of rows returned in a single batch" batch_size: Int!, "cursor to stream the results returned by the query" cursor: [vibes_stream_cursor_input]!, "filter the rows returned" where: vibes_bool_exp): [vibes!]!
 }
 
 """
@@ -25280,6 +26345,18 @@ input timestamptz_comparison_exp {
 }
 
 input update_user_input {
+  account_book_club_invites: Boolean
+
+  account_book_club_invites_privacy_setting_id: Int
+
+  account_buddy_read_invites: Boolean
+
+  account_buddy_read_invites_privacy_setting_id: Int
+
+  account_list_invites: Boolean
+
+  account_list_invites_privacy_setting_id: Int
+
   account_privacy_setting_id: Int
 
   activity_privacy_settings_id: Int
@@ -25287,6 +26364,8 @@ input update_user_input {
   bio: String
 
   birthdate: date
+
+  buddy_read_default_privacy_setting_id: Int
 
   cover: String
 
@@ -25335,6 +26414,8 @@ type user_blocks {
   created_at: timestamp!
 
   id: bigint!
+
+  type: String!
 
   """
   An object relationship
@@ -25400,6 +26481,8 @@ input user_blocks_bool_exp {
 
   id: bigint_comparison_exp
 
+  type: String_comparison_exp
+
   user: users_bool_exp
 
   user_id: Int_comparison_exp
@@ -25410,9 +26493,9 @@ unique or primary key constraints on table "user_blocks"
 """
 enum user_blocks_constraint {
   """
-  unique or primary key constraint on columns "user_id", "blocked_user_id"
+  unique or primary key constraint on columns "user_id", "type", "blocked_user_id"
   """
-  index_user_blocks_on_user_id_and_blocked_user_id
+  index_user_blocks_on_user_id_and_blocked_user_id_and_type
 
   """
   unique or primary key constraint on columns "id"
@@ -25439,6 +26522,8 @@ input user_blocks_max_order_by {
 
   id: order_by
 
+  type: order_by
+
   user_id: order_by
 }
 
@@ -25451,6 +26536,8 @@ input user_blocks_min_order_by {
   created_at: order_by
 
   id: order_by
+
+  type: order_by
 
   user_id: order_by
 }
@@ -25493,6 +26580,8 @@ input user_blocks_order_by {
 
   id: order_by
 
+  type: order_by
+
   user: users_order_by
 
   user_id: order_by
@@ -25516,6 +26605,11 @@ enum user_blocks_select_column {
   column name
   """
   id
+
+  """
+  column name
+  """
+  type
 
   """
   column name
@@ -25580,6 +26674,8 @@ input user_blocks_stream_cursor_value_input {
   created_at: timestamp
 
   id: bigint
+
+  type: String
 
   user_id: Int
 }
@@ -26768,7 +27864,7 @@ type user_books {
 
   id: Int!
 
-  imported: Boolean
+  imported: Boolean!
 
   last_read_date: date
 
@@ -26793,7 +27889,7 @@ type user_books {
 
   owned: Boolean!
 
-  owned_copies: Int
+  owned_copies: Int!
 
   """
   An object relationship
@@ -26837,7 +27933,7 @@ type user_books {
 
   review_markdown: String
 
-  review_migrated: Boolean
+  review_migrated: Boolean!
 
   review_raw: String
 
@@ -26886,6 +27982,11 @@ type user_books {
   user_books_aggregate("distinct select on columns" distinct_on: [user_books_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [user_books_order_by!], "filter the rows returned" where: user_books_bool_exp): user_books_aggregate!
 
   user_id: Int!
+
+  """
+  Per-book buddy-read setting, only on the viewer's own row
+  """
+  viewer_buddy_read_privacy_setting_id: Int
 }
 
 """
@@ -27022,6 +28123,11 @@ type user_books_avg_fields {
   status_id: Float
 
   user_id: Float
+
+  """
+  Per-book buddy-read setting, only on the viewer's own row
+  """
+  viewer_buddy_read_privacy_setting_id: Int
 }
 
 """
@@ -27176,6 +28282,8 @@ input user_books_bool_exp {
   user_books_aggregate: user_books_aggregate_bool_exp
 
   user_id: Int_comparison_exp
+
+  viewer_buddy_read_privacy_setting_id: Int_comparison_exp
 }
 
 """
@@ -27245,6 +28353,11 @@ type user_books_max_fields {
   url: String
 
   user_id: Int
+
+  """
+  Per-book buddy-read setting, only on the viewer's own row
+  """
+  viewer_buddy_read_privacy_setting_id: Int
 }
 
 """
@@ -27383,6 +28496,11 @@ type user_books_min_fields {
   url: String
 
   user_id: Int
+
+  """
+  Per-book buddy-read setting, only on the viewer's own row
+  """
+  viewer_buddy_read_privacy_setting_id: Int
 }
 
 """
@@ -27561,6 +28679,8 @@ input user_books_order_by {
   user_books_aggregate: user_books_aggregate_order_by
 
   user_id: order_by
+
+  viewer_buddy_read_privacy_setting_id: order_by
 }
 
 """
@@ -27881,6 +29001,11 @@ type user_books_stddev_fields {
   status_id: Float
 
   user_id: Float
+
+  """
+  Per-book buddy-read setting, only on the viewer's own row
+  """
+  viewer_buddy_read_privacy_setting_id: Int
 }
 
 """
@@ -27951,6 +29076,11 @@ type user_books_stddev_pop_fields {
   status_id: Float
 
   user_id: Float
+
+  """
+  Per-book buddy-read setting, only on the viewer's own row
+  """
+  viewer_buddy_read_privacy_setting_id: Int
 }
 
 """
@@ -28021,6 +29151,11 @@ type user_books_stddev_samp_fields {
   status_id: Float
 
   user_id: Float
+
+  """
+  Per-book buddy-read setting, only on the viewer's own row
+  """
+  viewer_buddy_read_privacy_setting_id: Int
 }
 
 """
@@ -28191,6 +29326,11 @@ type user_books_sum_fields {
   status_id: Int
 
   user_id: Int
+
+  """
+  Per-book buddy-read setting, only on the viewer's own row
+  """
+  viewer_buddy_read_privacy_setting_id: Int
 }
 
 """
@@ -28261,6 +29401,11 @@ type user_books_var_pop_fields {
   status_id: Float
 
   user_id: Float
+
+  """
+  Per-book buddy-read setting, only on the viewer's own row
+  """
+  viewer_buddy_read_privacy_setting_id: Int
 }
 
 """
@@ -28331,6 +29476,11 @@ type user_books_var_samp_fields {
   status_id: Float
 
   user_id: Float
+
+  """
+  Per-book buddy-read setting, only on the viewer's own row
+  """
+  viewer_buddy_read_privacy_setting_id: Int
 }
 
 """
@@ -28401,6 +29551,11 @@ type user_books_variance_fields {
   status_id: Float
 
   user_id: Float
+
+  """
+  Per-book buddy-read setting, only on the viewer's own row
+  """
+  viewer_buddy_read_privacy_setting_id: Int
 }
 
 """
@@ -30513,6 +31668,296 @@ input users_variance_order_by {
   sign_in_count: order_by
 
   status_id: order_by
+}
+
+"""
+columns and relationships of "vibes"
+"""
+type vibes {
+  books_generated_at: timestamp
+
+  cached_book_ids("JSON select path" path: String): jsonb!
+
+  created_at: timestamp!
+
+  description: String
+
+  featured: Boolean!
+
+  featured_at: timestamp
+
+  """
+  An array relationship
+  """
+  followers("distinct select on columns" distinct_on: [followed_users_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [followed_users_order_by!], "filter the rows returned" where: followed_users_bool_exp): [followed_users!]!
+
+  id: Int!
+
+  """
+  An array relationship
+  """
+  likes("distinct select on columns" distinct_on: [likes_select_column!], "limit the number of rows returned" limit: Int, "skip the first n rows. Use only with order_by" offset: Int, "sort the rows by one or more columns" order_by: [likes_order_by!], "filter the rows returned" where: likes_bool_exp): [likes!]!
+
+  likes_count: Int!
+
+  object_type: String!
+
+  """
+  An object relationship
+  """
+  privacy_setting: privacy_settings
+
+  privacy_setting_id: Int!
+
+  result_type: Int!
+
+  slug: String!
+
+  title: String!
+
+  updated_at: timestamp!
+
+  """
+  An object relationship
+  """
+  user: users
+
+  user_id: Int!
+
+  vibe_type: Int!
+}
+
+"""
+Boolean expression to filter rows from the table "vibes". All fields are combined with a logical 'AND'.
+"""
+input vibes_bool_exp {
+  _and: [vibes_bool_exp!]
+
+  _not: vibes_bool_exp
+
+  _or: [vibes_bool_exp!]
+
+  books_generated_at: timestamp_comparison_exp
+
+  cached_book_ids: jsonb_comparison_exp
+
+  created_at: timestamp_comparison_exp
+
+  description: String_comparison_exp
+
+  featured: Boolean_comparison_exp
+
+  featured_at: timestamp_comparison_exp
+
+  followers: followed_users_bool_exp
+
+  id: Int_comparison_exp
+
+  likes: likes_bool_exp
+
+  likes_count: Int_comparison_exp
+
+  object_type: String_comparison_exp
+
+  privacy_setting: privacy_settings_bool_exp
+
+  privacy_setting_id: Int_comparison_exp
+
+  result_type: Int_comparison_exp
+
+  slug: String_comparison_exp
+
+  title: String_comparison_exp
+
+  updated_at: timestamp_comparison_exp
+
+  user: users_bool_exp
+
+  user_id: Int_comparison_exp
+
+  vibe_type: Int_comparison_exp
+}
+
+"""
+Ordering options when selecting data from "vibes".
+"""
+input vibes_order_by {
+  books_generated_at: order_by
+
+  cached_book_ids: order_by
+
+  created_at: order_by
+
+  description: order_by
+
+  featured: order_by
+
+  featured_at: order_by
+
+  followers_aggregate: followed_users_aggregate_order_by
+
+  id: order_by
+
+  likes_aggregate: likes_aggregate_order_by
+
+  likes_count: order_by
+
+  object_type: order_by
+
+  privacy_setting: privacy_settings_order_by
+
+  privacy_setting_id: order_by
+
+  result_type: order_by
+
+  slug: order_by
+
+  title: order_by
+
+  updated_at: order_by
+
+  user: users_order_by
+
+  user_id: order_by
+
+  vibe_type: order_by
+}
+
+"""
+select columns of table "vibes"
+"""
+enum vibes_select_column {
+  """
+  column name
+  """
+  books_generated_at
+
+  """
+  column name
+  """
+  cached_book_ids
+
+  """
+  column name
+  """
+  created_at
+
+  """
+  column name
+  """
+  description
+
+  """
+  column name
+  """
+  featured
+
+  """
+  column name
+  """
+  featured_at
+
+  """
+  column name
+  """
+  id
+
+  """
+  column name
+  """
+  likes_count
+
+  """
+  column name
+  """
+  object_type
+
+  """
+  column name
+  """
+  privacy_setting_id
+
+  """
+  column name
+  """
+  result_type
+
+  """
+  column name
+  """
+  slug
+
+  """
+  column name
+  """
+  title
+
+  """
+  column name
+  """
+  updated_at
+
+  """
+  column name
+  """
+  user_id
+
+  """
+  column name
+  """
+  vibe_type
+}
+
+"""
+Streaming cursor of the table "vibes"
+"""
+input vibes_stream_cursor_input {
+  """
+  Stream column input with initial value
+  """
+  initial_value: vibes_stream_cursor_value_input!
+
+  """
+  cursor ordering
+  """
+  ordering: cursor_ordering
+}
+
+"""
+Initial value of the column from where the streaming should start
+"""
+input vibes_stream_cursor_value_input {
+  books_generated_at: timestamp
+
+  cached_book_ids: jsonb
+
+  created_at: timestamp
+
+  description: String
+
+  featured: Boolean
+
+  featured_at: timestamp
+
+  id: Int
+
+  likes_count: Int
+
+  object_type: String
+
+  privacy_setting_id: Int
+
+  result_type: Int
+
+  slug: String
+
+  title: String
+
+  updated_at: timestamp
+
+  user_id: Int
+
+  vibe_type: Int
 }
 
 """

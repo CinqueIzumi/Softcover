@@ -5,13 +5,11 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.domain.usecase.ClearSearchResultsUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
@@ -19,6 +17,9 @@ import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDepe
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnClearSearchActionTest {
     private lateinit var clearSearchResultsUseCase: ClearSearchResultsUseCase
@@ -52,43 +53,14 @@ class OnClearSearchActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets searchFocused to false when it was previously true`() = runTest {
+        fun `leaves search entirely, dropping chrome, query, mood filter and in-flight fetch`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(searchFocused = true)
-
-            // ----- Act -----
-            OnClearSearchAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.searchFocused shouldBe false
-        }
-
-        @Test
-        fun `clears the query text and queried results`() = runTest {
-            // ----- Arrange -----
+            val queryJob = Job()
             stateFlow.value = stateFlow.value.copy(
+                searchFocused = true,
+                isSortMenuExpanded = true,
                 searchText = "dune",
-                queriedBooks = listOf(mockk()),
-            )
-
-            // ----- Act -----
-            OnClearSearchAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.searchText shouldBe ""
-            stateFlow.value.queriedBooks shouldBe emptyList()
-        }
-
-        @Test
-        fun `clears an active mood filter`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(
+                queriedBooks = persistentListOf(mockk()),
                 activeMoodFilter = MoodTag(
                     id = 1,
                     label = "Cozy",
@@ -96,21 +68,6 @@ class OnClearSearchActionTest {
                     bookCount = 10,
                 ),
             )
-
-            // ----- Act -----
-            OnClearSearchAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.activeMoodFilter shouldBe null
-        }
-
-        @Test
-        fun `cancels an active queryJob and resets searchResultsPage to 1`() = runTest {
-            // ----- Arrange -----
-            val queryJob = Job()
             localVariablesFlow.value = ExploreLocalVariables(
                 queryJob = queryJob,
                 searchResultsPage = 3,
@@ -123,13 +80,19 @@ class OnClearSearchActionTest {
             )
 
             // ----- Assert -----
+            val state = stateFlow.value
+            state.searchFocused shouldBe false
+            state.isSortMenuExpanded shouldBe false
+            state.searchText shouldBe ""
+            state.queriedBooks shouldBe emptyList()
+            state.activeMoodFilter shouldBe null
             queryJob.isCancelled shouldBe true
             localVariablesFlow.value.queryJob shouldBe null
             localVariablesFlow.value.searchResultsPage shouldBe 1
         }
 
         @Test
-        fun `calls clearSearchResultsUseCase exactly once`() = runTest {
+        fun `clears the persisted search results exactly once`() = runTest {
             // ----- Arrange -----
             stateFlow.value = stateFlow.value.copy(searchText = "dune")
 

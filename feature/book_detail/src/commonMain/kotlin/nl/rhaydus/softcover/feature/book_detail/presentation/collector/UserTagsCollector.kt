@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -28,7 +29,7 @@ internal class UserTagsCollector : BookDetailCollector {
                 shelvedBookId ?: return@collectLatest
 
                 dependencies.getUserTagsUseCase(bookId = shelvedBookId)
-                    .onSuccess { tags -> scope.setState { it.copy(userTags = tags) } }
+                    .onSuccess { tags -> scope.setState { it.copy(userTags = tags.toImmutableList()) } }
                     .onFailure { error -> AppLog.e("$error") }
             }
     }

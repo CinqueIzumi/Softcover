@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import nl.rhaydus.common.AppLog
@@ -19,7 +20,9 @@ internal data object OnRefreshAction : ExploreAction {
 
         dependencies.continueSeriesRefreshTrigger.update { it + 1 }
 
-        dependencies.getTrendingBooksUseCase()
+        // forceRefresh: this is a pull-to-refresh, so it must bypass the session cache that the
+        // on-mount collector reads from - otherwise the gesture spins and changes nothing.
+        dependencies.getTrendingBooksUseCase(forceRefresh = true)
             .onSuccess { trending ->
                 // Nothing catches a throw between here and the screen model's scope, and a terminal read
                 // re-throws an upstream failure even as `firstOrNull()`. No overlay is the safe default.
@@ -31,7 +34,7 @@ internal data object OnRefreshAction : ExploreAction {
                     allUserBooks.find { it.id == book.id } ?: book
                 }
 
-                scope.setState { it.copy(trendingBooks = overlaid) }
+                scope.setState { it.copy(trendingBooks = overlaid.toImmutableList()) }
             }
             .onFailure { error ->
                 AppLog.e(

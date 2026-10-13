@@ -30,8 +30,7 @@ import androidx.compose.ui.graphics.Color
  *
  * Every palette's ramp is the house ramp **re-tinted at identical lightness** (each step keeps its
  * OkLab L and takes the palette's neutral hue at a scaled chroma), which is what lets a palette
- * repaint the whole page without re-checking a single contrast pair — see the ramp's provenance note
- * in `docs/reference/design-system/foundations.md` §2.1.
+ * repaint the whole page without re-checking a single contrast pair.
  */
 internal data class NeutralFamily(
     val tone4: Color,

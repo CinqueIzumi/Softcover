@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.withIndex
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
@@ -23,49 +22,28 @@ import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 // without overwhelming a menu with every genre the user has ever read.
 private const val GENRE_OPTIONS_LIMIT = 5
 
-// The rail's final, displayed size.
 private const val GENRE_BOOKS_DISPLAY_LIMIT = 12
 
-// Requested from the query - overfetches past [GENRE_BOOKS_DISPLAY_LIMIT] because the exclusion
-// of the user's own shelved/listed books now happens client-side (see the class doc below), so
-// some of what comes back won't make the final cut. 3x is a safety margin, not a measured figure.
+// Overfetches past [GENRE_BOOKS_DISPLAY_LIMIT] because owned books are excluded client-side after the
+// fetch. 3x is a safety margin, not a measured figure.
 private const val GENRE_BOOKS_FETCH_LIMIT = GENRE_BOOKS_DISPLAY_LIMIT * 3
 
 /**
- * "Because you read {genre}" - approved deviation 2 of the explore-3a brief, later made
- * user-selectable (explore-3a feedback item 10). The effective genre is [getBecauseYouReadGenreUseCase]'s
- * persisted user choice when one exists, otherwise the user's single most-read genre derived from
- * [booksRepository]'s local library taggings (the same [buildGenreOptions] ranking that backs the
- * picker's option list, so the default is always consistent with the choices offered).
- * Deriving from the already-loaded local library - rather than the profile-stats observable, which
- * only carries data once its own background network refresh completes - means the rail no longer
- * waits on that unrelated, slower fetch to appear.
+ * "Because you read {genre}". The genre is [getBecauseYouReadGenreUseCase]'s persisted choice when one
+ * exists, otherwise the user's most-read genre from [booksRepository]'s local library taggings, ranked by
+ * the same [buildGenreOptions] that backs the picker, so the default is always one of the offered options.
+ * Deriving it locally rather than from profile stats keeps the rail off that slower network refresh.
  *
- * Books carrying that genre are fetched ranked by genre-specific strength, overfetching
- * [GENRE_BOOKS_FETCH_LIMIT] candidates (see `GetBooksByGenreTag.graphql`), then excluding - HERE,
- * client-side, rather than server-side - any book already on one of the user's shelves
- * ([booksRepository]) or lists ([listsRepository]). That exclusion used to be a `_not`/`_or`
- * correlated anti-join over the user's entire library and every list, run on every request; it was
- * the rail's reported slowness, so it no longer runs on the server at all. Reacting to
- * [booksRepository] and [listsRepository] here - rather than only at fetch time - also means a book
- * the user shelves or adds to a list disappears from an already-fetched rail without needing a
- * re-fetch. Emits null when no genre can be derived and none was chosen (never surfaces as an
- * error - the section degrades to hidden).
+ * Owned books, shelved ([booksRepository]) or listed ([listsRepository]), are excluded client-side: the
+ * server-side anti-join over the whole library was the rail's slowness. Reacting to both repositories also
+ * drops a book from an already-fetched rail as soon as the user shelves or lists it. Emits null when no
+ * genre can be derived and none was chosen; the section hides rather than erroring.
  *
- * Clobber guard: the final `combine` below caches the latest value from each of its three sources
- * and re-emits whenever ANY of them ticks - including [booksRepository]'s own book flow, which this
- * use case also reacts to for the owned-book exclusion. Without help, a genre switch would leave a
- * window - the whole duration of [fetchRecommendation]'s network call - where the cached
- * recommendation is still the PREVIOUS genre's; an unrelated book/list tick in that window would
- * re-emit the stale genre and flip the rail's loading flag off before the new genre's books ever
- * arrived (the "flashes back to the old genre mid-fetch" bug). [fetchRecommendation] closes that
- * window by emitting a `loading = true` placeholder carrying the NEW genre the instant a genre
- * *switch* is detected (via [withIndex] - `index > 0` means this is not the very first resolution),
- * before doing the network fetch at all; that placeholder overwrites the stale cached value in the
- * final `combine` right away, so any later tick during the fetch re-emits the new genre's
- * placeholder instead of the old genre's settled result. The very first resolution (`index == 0`,
- * i.e. initial screen load) skips the placeholder - there is no previous settled recommendation for
- * it to clobber, and `loadingBecauseYouReadBooks` already defaults to true for that case.
+ * The final `combine` re-emits whenever any source ticks, owned-book flows included. On a cache miss,
+ * [fetchRecommendation] first emits a `loading = true` placeholder carrying the new genre, so a tick during
+ * the network fetch re-emits that placeholder instead of the previous genre's settled result, and the
+ * first load shows the masked stand-in rail instead of popping in. A cached genre settles directly, with
+ * no loading frame.
  */
 class GetBecauseYouReadBooksUseCase(
     private val booksRepository: BooksRepository,
@@ -84,13 +62,7 @@ class GetBecauseYouReadBooksUseCase(
             .distinctUntilChanged()
 
         val recommendationFlow = genreFlow
-            .withIndex()
-            .flatMapLatest { (index, genre) ->
-                fetchRecommendation(
-                    genre = genre,
-                    isGenreSwitch = index > 0,
-                )
-            }
+            .flatMapLatest { genre -> fetchRecommendation(genre = genre) }
 
         return combine(
             recommendationFlow,
@@ -108,14 +80,11 @@ class GetBecauseYouReadBooksUseCase(
         }
     }
 
-    private fun fetchRecommendation(
-        genre: String?,
-        isGenreSwitch: Boolean,
-    ): Flow<BecauseYouReadRecommendation?> {
+    private fun fetchRecommendation(genre: String?): Flow<BecauseYouReadRecommendation?> {
         if (genre == null) return flowOf(null)
 
         return flow {
-            if (isGenreSwitch) {
+            if (exploreRepository.peekBooksByGenre(genre = genre) == null) {
                 emit(
                     BecauseYouReadRecommendation(
                         genre = genre,

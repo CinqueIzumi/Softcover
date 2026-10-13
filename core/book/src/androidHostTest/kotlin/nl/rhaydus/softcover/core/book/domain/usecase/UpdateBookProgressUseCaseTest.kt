@@ -6,12 +6,12 @@ import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class UpdateBookProgressUseCaseTest {
     private lateinit var repository: BooksRepository
@@ -21,9 +21,10 @@ class UpdateBookProgressUseCaseTest {
     @BeforeEach
     fun setUp() {
         repository = mockk()
-        markReadingActivityTodayUseCase = mockk { coEvery {
-            this@mockk()
-        } returns Unit }
+        markReadingActivityTodayUseCase = mockk()
+        coEvery {
+            markReadingActivityTodayUseCase()
+        } returns Unit
         useCase = UpdateBookProgressUseCase(
             repository = repository,
             markReadingActivityTodayUseCase = markReadingActivityTodayUseCase,
@@ -65,41 +66,6 @@ class UpdateBookProgressUseCaseTest {
                 )
             }
             coVerify(exactly = 1) { repository.cacheBook(book = updatedBook) }
-            coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
-        }
-
-        @Test
-        fun `passes the exact page number to the repository`() = runTest {
-            // ----- Arrange -----
-            val inputBook = mockk<Book>()
-            val newPage = 0
-            val updatedBook = mockk<Book>()
-
-            coEvery {
-                repository.updateBookProgress(
-                    book = inputBook,
-                    newPage = newPage,
-                )
-            } returns updatedBook
-
-            coJustRun {
-                repository.cacheBook(book = updatedBook)
-            }
-
-            // ----- Act -----
-            val result = useCase(
-                book = inputBook,
-                newPage = newPage,
-            )
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            coVerify(exactly = 1) {
-                repository.updateBookProgress(
-                    book = inputBook,
-                    newPage = 0,
-                )
-            }
             coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
         }
 

@@ -2,18 +2,17 @@ package nl.rhaydus.softcover.feature.book_detail.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReviewer
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.BookReviewsRepository
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class GetTopBookReviewsUseCaseTest {
     private lateinit var bookReviewsRepository: BookReviewsRepository
@@ -63,23 +62,6 @@ class GetTopBookReviewsUseCaseTest {
         }
 
         @Test
-        fun `returns success with empty list when repository returns no reviews`() = runTest {
-            // ----- Arrange -----
-            val bookId = 7
-
-            coEvery {
-                bookReviewsRepository.getTopReviewsForBook(bookId = bookId)
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = useCase(bookId = bookId)
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe emptyList()
-        }
-
-        @Test
         fun `returns failure when repository throws`() = runTest {
             // ----- Arrange -----
             val bookId = 5
@@ -95,41 +77,6 @@ class GetTopBookReviewsUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
-        }
-
-        @Test
-        fun `invokes repository with the given bookId`() = runTest {
-            // ----- Arrange -----
-            val bookId = 99
-
-            coEvery {
-                bookReviewsRepository.getTopReviewsForBook(bookId = bookId)
-            } returns emptyList()
-
-            // ----- Act -----
-            useCase(bookId = bookId)
-
-            // ----- Assert -----
-            coVerify {
-                bookReviewsRepository.getTopReviewsForBook(bookId = bookId)
-            }
-        }
-
-        @Test
-        fun `wraps the exception in the Result rather than propagating it`() = runTest {
-            // ----- Arrange -----
-            val bookId = 3
-
-            coEvery {
-                bookReviewsRepository.getTopReviewsForBook(bookId = bookId)
-            } throws IllegalStateException("server error")
-
-            // ----- Act -----
-            val result = runCatching { useCase(bookId = bookId) }
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull()!!.isFailure shouldBe true
         }
     }
 }

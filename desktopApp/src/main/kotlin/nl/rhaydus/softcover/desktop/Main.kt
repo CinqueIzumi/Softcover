@@ -4,13 +4,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import java.awt.Dimension
-import kotlin.system.exitProcess
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.orchestration.presentation.DesktopApp
 import nl.rhaydus.softcover.orchestration.presentation.bootstrapDesktop
 import nl.rhaydus.softcover.orchestration.presentation.rememberPersistedWindowState
 import nl.rhaydus.softcover.orchestration.presentation.shutdownDesktop
+import java.awt.Dimension
+import kotlin.system.exitProcess
 
 // Kept below the 600dp COMPACT breakpoint so dragging the window narrow still falls back gracefully
 // to the phone-shaped shell rather than clamping at the wide layout's minimum.

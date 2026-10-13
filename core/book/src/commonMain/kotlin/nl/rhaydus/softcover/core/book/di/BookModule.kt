@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.book.di
 
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
@@ -10,6 +9,7 @@ import nl.rhaydus.softcover.core.book.data.sync.OfflineUserBookSyncImpl
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.CommitBookRemovalUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
@@ -23,12 +23,14 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCa
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.StageBookRemovalUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.UndoBookRemovalUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
@@ -36,9 +38,9 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.di.databaseModule
-import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
+import org.koin.dsl.module
 
 val bookModule = module {
     includes(
@@ -78,6 +80,7 @@ val bookModule = module {
         BooksLocalDataSourceImpl(
             dao = get(),
             editionImageStorage = get(),
+            appDispatchers = get(),
         )
     }
 
@@ -87,6 +90,10 @@ val bookModule = module {
 
     factory {
         GetAllUserBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        ObserveUserBookUseCase(booksRepository = get())
     }
 
     factory {
@@ -165,7 +172,15 @@ val bookModule = module {
     }
 
     factory {
-        RemoveBookFromLibraryUseCase(booksRepository = get())
+        StageBookRemovalUseCase(booksRepository = get())
+    }
+
+    factory {
+        UndoBookRemovalUseCase(booksRepository = get())
+    }
+
+    factory {
+        CommitBookRemovalUseCase(booksRepository = get())
     }
 
     factory {

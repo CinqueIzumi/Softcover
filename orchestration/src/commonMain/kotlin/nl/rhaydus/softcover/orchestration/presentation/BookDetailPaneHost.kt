@@ -1,24 +1,17 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import cafe.adriel.voyager.navigator.Navigator
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailOverlayNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPaneCloseHandler
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
+import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailOverlayNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPaneCloseHandler
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 
 /**
@@ -39,6 +32,15 @@ internal fun BookDetailPaneHost(
     onClose: () -> Unit,
     overlayNavigator: Navigator,
 ) {
+    val backState = rememberNavigationEventState(NavigationEventInfo.None)
+
+    NavigationBackHandler(
+        state = backState,
+        isBackEnabled = true,
+        onBackCancelled = {},
+        onBackCompleted = onClose,
+    )
+
     key(destination.id) {
         CompositionLocalProvider(
             LocalSharedTransitionScope provides null,
@@ -52,28 +54,8 @@ internal fun BookDetailPaneHost(
                     initialCover = destination.initialCover,
                     transitionSurface = destination.transitionSurface,
                 ),
+                onBackPressed = null,
             )
         }
-    }
-}
-
-/**
- * The trailing pane's resting state before a book is chosen — a quiet editorial prompt rather than a
- * blank surface.
- */
-@Composable
-internal fun EmptyDetailPane(modifier: Modifier = Modifier) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .fillMaxSize()
-            .padding(24.dp),
-    ) {
-        Text(
-            text = "Select a book to see its details.",
-            style = MaterialTheme.editorialTypography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
     }
 }

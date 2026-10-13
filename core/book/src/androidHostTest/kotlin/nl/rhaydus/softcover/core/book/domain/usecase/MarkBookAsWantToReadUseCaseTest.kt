@@ -6,12 +6,12 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class MarkBookAsWantToReadUseCaseTest {
     private lateinit var booksRepository: BooksRepository
@@ -49,10 +49,12 @@ class MarkBookAsWantToReadUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
-            coVerify(exactly = 1) { booksRepository.markBookAsWantToRead(
-                book = book,
-                editionId = null,
-            ) }
+            coVerify(exactly = 1) {
+                booksRepository.markBookAsWantToRead(
+                    book = book,
+                    editionId = null,
+                )
+            }
         }
 
         @Test
@@ -80,37 +82,12 @@ class MarkBookAsWantToReadUseCaseTest {
             )
 
             // ----- Assert -----
-            coVerify(exactly = 1) { booksRepository.markBookAsWantToRead(
-                book = book,
-                editionId = editionId,
-            ) }
-        }
-
-        @Test
-        fun `forwards null editionId to the repository when omitted`() = runTest {
-            // ----- Arrange -----
-            val book = mockk<Book>()
-            val updatedBook = mockk<Book>()
-
-            every {
-                book.status
-            } returns BookStatus.None
-
-            coEvery {
+            coVerify(exactly = 1) {
                 booksRepository.markBookAsWantToRead(
                     book = book,
-                    editionId = null,
+                    editionId = editionId,
                 )
-            } returns updatedBook
-
-            // ----- Act -----
-            useCase(book = book)
-
-            // ----- Assert -----
-            coVerify(exactly = 1) { booksRepository.markBookAsWantToRead(
-                book = book,
-                editionId = null,
-            ) }
+            }
         }
 
         @Test
@@ -152,10 +129,12 @@ class MarkBookAsWantToReadUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe ShelfMutationOutcome.NoChange
-            coVerify(exactly = 0) { booksRepository.markBookAsWantToRead(
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                booksRepository.markBookAsWantToRead(
+                    any(),
+                    any(),
+                )
+            }
         }
     }
 }

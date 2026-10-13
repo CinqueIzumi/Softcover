@@ -1,0 +1,133 @@
+package nl.rhaydus.softcover.feature.book_detail.presentation.collector
+
+import io.kotest.matchers.shouldBe
+import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.core.domain.model.UserTag
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.EDITABLE_CATEGORIES
+import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class TagEditorChipModelsCollectorTest {
+    private lateinit var dependencies: BookDetailDependencies
+    private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
+    private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
+
+    @BeforeEach
+    fun setUp() {
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
+        scope = ActionScope(
+            stateFlow = stateFlow,
+            localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
+            eventChannel = Channel(Channel.BUFFERED),
+        )
+
+        dependencies = mockk<BookDetailDependencies>(relaxed = true)
+    }
+
+    @Nested
+    inner class OnLaunch {
+        @Test
+        fun `produces one category chip per editable category with only the current one selected`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val collector = TagEditorChipModelsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.MOOD)
+
+                // ----- Assert -----
+                val chips = stateFlow.value.tagEditorCategoryChips
+                chips.map { it.key } shouldBe EDITABLE_CATEGORIES.map { it.name }
+                chips.map { it.label } shouldBe EDITABLE_CATEGORIES.map { it.label }
+                chips.count { it.selected } shouldBe 1
+                chips.single { it.selected }.key shouldBe TagCategory.MOOD.name
+                job.cancel()
+            }
+
+        @Test
+        fun `tagSuggestionChips mirror the suggestions`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val suggestions = listOf(
+                UserTag(
+                    name = "Fantasy",
+                    category = TagCategory.GENRE,
+                ),
+                UserTag(
+                    name = "Cozy",
+                    category = TagCategory.MOOD,
+                ),
+            )
+            val collector = TagEditorChipModelsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(tagSuggestions = suggestions.toImmutableList())
+
+            // ----- Assert -----
+            val chips = stateFlow.value.tagSuggestionChips.chips
+            chips.map { it.label } shouldBe listOf("Fantasy", "Cozy")
+            chips.map { it.key } shouldBe listOf("GENRE:Fantasy", "MOOD:Cozy")
+            job.cancel()
+        }
+
+        @Test
+        fun `same-named suggestions in different categories get distinct keys that both resolve correctly`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val genreFantasy = UserTag(
+                    name = "Fantasy",
+                    category = TagCategory.GENRE,
+                )
+                val moodFantasy = UserTag(
+                    name = "Fantasy",
+                    category = TagCategory.MOOD,
+                )
+                val collector = TagEditorChipModelsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(tagSuggestions = persistentListOf(genreFantasy, moodFantasy))
+
+                // ----- Assert -----
+                val chips = stateFlow.value.tagSuggestionChips.chips
+                val keys = chips.map { it.key }
+                keys.toSet().size shouldBe 2
+
+                val byKey = stateFlow.value.tagSuggestionChips.payloadByKey
+                byKey["GENRE:Fantasy"] shouldBe genreFantasy
+                byKey["MOOD:Fantasy"] shouldBe moodFantasy
+                job.cancel()
+            }
+    }
+}

@@ -1,14 +1,28 @@
 package nl.rhaydus.softcover.feature.session.presentation.screen
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel
+import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
+import nl.rhaydus.softcover.feature.session.presentation.event.FocusModeEvent
+import nl.rhaydus.softcover.feature.session.presentation.screen.section.FocusReadingPanel
+import nl.rhaydus.softcover.feature.session.presentation.screenmodel.FocusModeScreenModel
+import nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 
 /**
  * Distraction-free full-screen reading surface for the active session. An editorial hero on the page
@@ -26,26 +40,42 @@ object FocusModeScreen : Screen {
         val controller = koinInject<ActiveSessionController>()
         val navigator = LocalNavigator.currentOrThrow
         val active by controller.activeSession.collectAsStateWithLifecycle()
+        val screenModel = koinScreenModel<FocusModeScreenModel>()
+        val state by screenModel.state.collectAsStateWithLifecycle()
+        val haptics = LocalHaptics.current
 
-        val current = active
+        ObserveAsEvents(flow = screenModel.events) { event ->
+            if (event is FeedbackEvent) haptics.play(event.feedback)
 
-        if (current == null) {
-            navigator.pop()
-
-            return
+            when (event) {
+                is FocusModeEvent.PageCommittedEvent -> Unit
+            }
         }
+
+        var lastActive by remember { mutableStateOf<ActiveSessionUiModel?>(null) }
+
+        active?.let { lastActive = it.ui }
+
+        val isSessionEnded = active == null
+
+        LaunchedEffect(isSessionEnded) {
+            if (isSessionEnded && navigator.lastItem == this@FocusModeScreen) navigator.pop()
+        }
+
+        val current = lastActive ?: return
 
         FocusModeScreenLayout(
             active = current,
             onPauseResume = {
-                if (current.session.isPaused) controller.resume() else controller.pause()
+                if (current.isPaused) controller.resume() else controller.pause()
             },
             onStop = {
                 controller.stop()
 
                 navigator.pop()
             },
-            onUpdatePage = { controller.updatePage(newPage = it) },
+            state = state,
+            runAction = screenModel::runAction,
             onClose = { navigator.pop() },
         )
     }
@@ -57,9 +87,10 @@ object FocusModeScreen : Screen {
 // declaration, so every argument is supplied explicitly at the single call site above.
 @Composable
 internal expect fun FocusModeScreenLayout(
-    active: ActiveSession,
+    active: ActiveSessionUiModel,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
-    onUpdatePage: (Int) -> Unit,
+    state: FocusModeUiState,
+    runAction: (FocusModeAction) -> Unit,
     onClose: () -> Unit,
 )

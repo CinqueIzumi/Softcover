@@ -5,21 +5,22 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnBecauseYouReadGenreSelectedActionTest {
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -48,11 +49,11 @@ class OnBecauseYouReadGenreSelectedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `optimistically sets the selected genre and clears the books before the persist call resolves`() = runTest(testDispatcher) {
+        fun `optimistically selects the genre, clears books and shows loading while persisting`() = runTest(testDispatcher) {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Romance",
-                becauseYouReadBooks = listOf(mockk()),
+                becauseYouReadBooks = persistentListOf(mockk()),
             )
             val gate = CompletableDeferred<Unit>()
 
@@ -76,6 +77,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
             // ----- Assert -----
             stateFlow.value.becauseYouReadGenre shouldBe "Fantasy"
             stateFlow.value.becauseYouReadBooks shouldBe emptyList()
+            stateFlow.value.loadingBecauseYouReadBooks shouldBe true
 
             gate.complete(Unit)
             job.join()
@@ -86,7 +88,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Romance",
-                becauseYouReadGenreOptions = listOf("Horror", "Fantasy"),
+                becauseYouReadGenreOptions = persistentListOf("Horror", "Fantasy"),
             )
             coEvery {
                 setBecauseYouReadGenreUseCase(genre = null)
@@ -109,7 +111,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Romance",
-                becauseYouReadGenreOptions = emptyList(),
+                becauseYouReadGenreOptions = persistentListOf(),
             )
             coEvery {
                 setBecauseYouReadGenreUseCase(genre = null)
@@ -128,87 +130,12 @@ class OnBecauseYouReadGenreSelectedActionTest {
         }
 
         @Test
-        fun `sets loadingBecauseYouReadBooks true before calling the use case`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val gate = CompletableDeferred<Unit>()
-
-            coEvery {
-                setBecauseYouReadGenreUseCase(genre = "Fantasy")
-            } coAnswers {
-                gate.await()
-                Result.success(Unit)
-            }
-
-            val action = OnBecauseYouReadGenreSelectedAction(genre = "Fantasy")
-
-            // ----- Act -----
-            val job = launch {
-                action.execute(
-                    dependencies = dependencies,
-                    scope = scope,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.loadingBecauseYouReadBooks shouldBe true
-
-            gate.complete(Unit)
-            job.join()
-        }
-
-        @Test
-        fun `calls setBecauseYouReadGenreUseCase with the constructor genre`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                setBecauseYouReadGenreUseCase(genre = "Fantasy")
-            } returns Result.success(Unit)
-
-            val action = OnBecauseYouReadGenreSelectedAction(genre = "Fantasy")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                setBecauseYouReadGenreUseCase(genre = "Fantasy")
-            }
-        }
-
-        @Test
-        fun `calls setBecauseYouReadGenreUseCase with null to clear the override`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ExploreScreenUiState(
-                becauseYouReadGenre = "Romance",
-                becauseYouReadGenreOptions = emptyList(),
-            )
-            coEvery {
-                setBecauseYouReadGenreUseCase(genre = null)
-            } returns Result.success(Unit)
-
-            val action = OnBecauseYouReadGenreSelectedAction(genre = null)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                setBecauseYouReadGenreUseCase(genre = null)
-            }
-        }
-
-        @Test
         fun `is a no-op when re-selecting the already-active genre row`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Fantasy",
-                becauseYouReadGenreOptions = listOf("Horror", "Fantasy"),
-                becauseYouReadBooks = listOf(mockk()),
+                becauseYouReadGenreOptions = persistentListOf("Horror", "Fantasy"),
+                becauseYouReadBooks = persistentListOf(mockk()),
                 loadingBecauseYouReadBooks = false,
             )
 
@@ -233,8 +160,8 @@ class OnBecauseYouReadGenreSelectedActionTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Horror",
-                becauseYouReadGenreOptions = listOf("Horror", "Fantasy"),
-                becauseYouReadBooks = listOf(mockk()),
+                becauseYouReadGenreOptions = persistentListOf("Horror", "Fantasy"),
+                becauseYouReadBooks = persistentListOf(mockk()),
                 loadingBecauseYouReadBooks = false,
             )
 

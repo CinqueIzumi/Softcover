@@ -15,8 +15,9 @@ set -u
 input=$(cat)
 cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // ""')
 
-# Only act on Gradle invocations (gradlew, or a bare `gradle ` token — not paths like ~/.gradle/).
-if ! printf '%s' "$cmd" | grep -Eq 'gradlew|(^|[[:space:]])gradle[[:space:]]'; then
+# Only act on Gradle invocations (gradlew, the gradle-quiet.sh wrapper, or a bare `gradle ` token — not
+# paths like ~/.gradle/).
+if ! printf '%s' "$cmd" | grep -Eq 'gradlew|gradle-quiet\.sh|(^|[[:space:]])gradle[[:space:]]'; then
   exit 0
 fi
 
@@ -32,7 +33,7 @@ fi
 gradle_segments=$(
   printf '%s' "$cmd" |
     sed -E 's/(\|\||&&|;|\|)/\n/g' |
-    grep -E 'gradlew|(^|[[:space:]])gradle[[:space:]]'
+    grep -E 'gradlew|gradle-quiet\.sh|(^|[[:space:]])gradle[[:space:]]'
 )
 
 block=0

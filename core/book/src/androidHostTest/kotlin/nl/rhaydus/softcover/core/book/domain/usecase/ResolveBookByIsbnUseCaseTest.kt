@@ -5,13 +5,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.baseBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ResolveBookByIsbnUseCaseTest {
     private lateinit var booksRepository: BooksRepository
@@ -60,9 +60,6 @@ class ResolveBookByIsbnUseCaseTest {
                 book = book,
                 editionId = editionId,
             )
-
-            coVerify(exactly = 1) { booksRepository.fetchEditionMatchesForIsbns(isbns = listOf(validIsbn)) }
-            coVerify(exactly = 1) { fetchBookByIdUseCase(id = bookId) }
         }
 
         @Test

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.Tag
@@ -49,12 +50,12 @@ internal fun buildBookFilterOptions(
     val ratingBuckets = RATING_BUCKETS.filter { it <= maxRating }
 
     return LibraryFilterOptions(
-        tags = tags,
-        formats = formats,
-        releaseYears = years,
-        readYears = readYears,
+        tags = tags.toImmutableList(),
+        formats = formats.toImmutableList(),
+        releaseYears = years.toImmutableList(),
+        readYears = readYears.toImmutableList(),
         supportsOwnedFilter = supportsOwned,
-        ratingBuckets = ratingBuckets,
+        ratingBuckets = ratingBuckets.toImmutableList(),
     )
 }
 
@@ -90,10 +91,10 @@ internal fun buildEditionFilterOptions(
     val ratingBuckets = RATING_BUCKETS.filter { it <= maxRating }
 
     return LibraryFilterOptions(
-        tags = tags,
-        formats = formats,
-        releaseYears = years,
+        tags = tags.toImmutableList(),
+        formats = formats.toImmutableList(),
+        releaseYears = years.toImmutableList(),
         supportsOwnedFilter = supportsOwned,
-        ratingBuckets = ratingBuckets,
+        ratingBuckets = ratingBuckets.toImmutableList(),
     )
 }

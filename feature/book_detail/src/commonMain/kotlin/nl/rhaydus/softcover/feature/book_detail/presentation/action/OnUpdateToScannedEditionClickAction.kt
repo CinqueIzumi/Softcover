@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -11,8 +12,8 @@ import nl.rhaydus.toad.ActionScope
 /**
  * Updates the edition of the book already on the user's shelf to the scanned edition (the offer
  * surfaced by the scan-edition banner). The display is already showing the scanned edition; once the
- * cached user book reflects the new edition, [BookDetailUiState.showScanEditionUpdateBanner] turns
- * false on its own, so the scanned edition stays visible throughout without flicker.
+ * cached user book reflects the new edition, [BookDetailUiState.scanEditionCallout] turns null
+ * on its own, so the scanned edition stays visible throughout without flicker.
  */
 internal class OnUpdateToScannedEditionClickAction : BookDetailAction {
     override suspend fun execute(
@@ -31,11 +32,17 @@ internal class OnUpdateToScannedEditionClickAction : BookDetailAction {
             dependencies.updateBookEditionUseCase(
                 userBook = userBook,
                 newEditionId = scannedEditionId,
-            ).onFailure {
-                AppLog.e("Failed to update shelved edition to scanned edition $it")
+            )
+                .onSuccess {
+                    scope.sendEvent(BookDetailEvent.MutationSucceededEvent(feedback = Feedback.Routine))
+                }
+                .onFailure {
+                    AppLog.e("Failed to update shelved edition to scanned edition $it")
 
-                SnackBarManager.showSnackbar(title = "Couldn't update the edition — try again.")
-            }
+                    SnackBarManager.showSnackbar(title = "Couldn't update the edition. Try again.")
+
+                    scope.sendEvent(BookDetailEvent.MutationFailedEvent())
+                }
 
             scope.setState { it.copy(isUpdatingScannedEdition = false) }
         }

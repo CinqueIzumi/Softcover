@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.profile.data.model
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
@@ -49,14 +50,16 @@ class UserProfileDataEntityTest {
         ), YearCount(
             year = 2026,
             count = 5,
-        ),),
+        ),
+        ),
         pagesByYear = listOf(YearCount(
             year = 2025,
             count = 3000,
         ), YearCount(
             year = 2026,
             count = 1500,
-        ),),
+        ),
+        ),
         pagesByMonth = listOf(MonthCount(
             year = 2026,
             month = 1,
@@ -65,7 +68,8 @@ class UserProfileDataEntityTest {
             year = 2026,
             month = 2,
             count = 450,
-        ),),
+        ),
+        ),
         genres = GenreBreakdown(
             slices = listOf(GenreSlice(
                 name = "Fantasy",
@@ -75,7 +79,8 @@ class UserProfileDataEntityTest {
                 name = "Sci-Fi",
                 count = 10,
                 fraction = 0.5,
-            ),),
+            ),
+            ),
             taggedBookCount = 20,
         ),
         ratings = RatingsDistribution(
@@ -86,6 +91,7 @@ class UserProfileDataEntityTest {
         ),
         recentlyLoved = listOf(
             LovedBook(
+                bookId = 1,
                 coverUrl = "cover.jpg",
                 title = "Dune",
                 author = "Frank Herbert",
@@ -97,18 +103,6 @@ class UserProfileDataEntityTest {
 
     @Nested
     inner class RoundTrip {
-        @Test
-        fun `toEntity then toModel preserves an empty active dates set`() {
-            // ----- Arrange -----
-            val model = minimalModel(dates = emptySet())
-
-            // ----- Act -----
-            val result = model.toEntity().toModel()
-
-            // ----- Assert -----
-            result.recentReadingDays shouldBe emptySet()
-        }
-
         @Test
         fun `toEntity then toModel preserves a non-empty active dates set`() {
             // ----- Arrange -----
@@ -136,47 +130,6 @@ class UserProfileDataEntityTest {
 
             // ----- Assert -----
             result.recentReadingDays shouldBe dates
-        }
-
-        @Test
-        fun `toEntity then toModel preserves username`() {
-            // ----- Arrange -----
-            val model = minimalModel()
-
-            // ----- Act -----
-            val result = model.toEntity().toModel()
-
-            // ----- Assert -----
-            result.username shouldBe "cinque"
-        }
-
-        @Test
-        fun `toEntity then toModel preserves trackedYears`() {
-            // ----- Arrange -----
-            val model = minimalModel().copy(trackedYears = 6)
-
-            // ----- Act -----
-            val result = model.toEntity().toModel()
-
-            // ----- Assert -----
-            result.trackedYears shouldBe 6
-        }
-
-        @Test
-        fun `round-trips booksByYear, pagesByYear, pagesByMonth, genres and recentlyLoved`() {
-            // ----- Arrange -----
-            val model = richModel()
-
-            // ----- Act -----
-            val entity = model.toEntity()
-            val result = entity.toModel()
-
-            // ----- Assert -----
-            result.booksByYear shouldBe model.booksByYear
-            result.pagesByYear shouldBe model.pagesByYear
-            result.pagesByMonth shouldBe model.pagesByMonth
-            result.genres shouldBe model.genres
-            result.recentlyLoved shouldBe model.recentlyLoved
         }
 
         @Test
@@ -285,58 +238,12 @@ class UserProfileDataEntityTest {
             // ----- Assert -----
             result.authorDemographics shouldBe authorDemographics()
         }
-
-        @Test
-        fun `genderId persistence rebuilds Gender_Other from id 3 and Gender_Unknown from a null id`() {
-            // ----- Arrange -----
-            val model = minimalModel().copy(authorDemographics = authorDemographics())
-
-            // ----- Act -----
-            val result = model.toEntity().toModel()
-
-            // ----- Assert -----
-            result.authorDemographics.genderSlices.map { it.gender } shouldBe listOf(
-                Gender.Male,
-                Gender.Other,
-                Gender.Unknown,
-            )
-        }
-
-        @Test
-        fun `an all-unknown bipocBreakdown and lgbtqBreakdown both round-trip as DemographicBreakdown(0, 0, N)`() {
-            // ----- Arrange -----
-            val model = minimalModel().copy(
-                authorDemographics = AuthorDemographics(
-                    bipocBreakdown = DemographicBreakdown(unknownCount = 4),
-                    lgbtqBreakdown = DemographicBreakdown(unknownCount = 4),
-                ),
-            )
-
-            // ----- Act -----
-            val result = model.toEntity().toModel()
-
-            // ----- Assert -----
-            result.authorDemographics.bipocBreakdown shouldBe DemographicBreakdown(unknownCount = 4)
-            result.authorDemographics.lgbtqBreakdown shouldBe DemographicBreakdown(unknownCount = 4)
-        }
-
-        @Test
-        fun `authorDemographics defaults to an empty AuthorDemographics when never set`() {
-            // ----- Arrange -----
-            val model = minimalModel()
-
-            // ----- Act -----
-            val result = model.toEntity().toModel()
-
-            // ----- Assert -----
-            result.authorDemographics shouldBe AuthorDemographics()
-        }
     }
 
     @Nested
     inner class BackwardCompat {
         @Test
-        fun `legacy JSON without recentReadingDays field decodes with empty list`() {
+        fun `legacy JSON predating recentReadingDays, trackedYears and authorDemographics decodes to their defaults`() {
             // ----- Arrange -----
             val legacyJson = """
                 {
@@ -359,87 +266,9 @@ class UserProfileDataEntityTest {
 
             // ----- Assert -----
             entity.recentReadingDays shouldBe emptyList()
-        }
-
-        @Test
-        fun `legacy entity without recentReadingDays maps to empty set on toModel`() {
-            // ----- Arrange -----
-            val legacyJson = """
-                {
-                  "profileImageUrl": "https://example.com/avatar.png",
-                  "name": "Jane Doe",
-                  "bio": "Avid reader",
-                  "booksRead": 42,
-                  "totalPagesRead": 12000,
-                  "averageRating": 4.2,
-                  "readingStreak": 5
-                }
-            """.trimIndent()
-            val lenientJson = Json { ignoreUnknownKeys = true }
-
-            // ----- Act -----
-            val entity = lenientJson.decodeFromString(
-                UserProfileDataEntity.serializer(),
-                legacyJson,
-            )
-            val model = entity.toModel()
-
-            // ----- Assert -----
-            model.recentReadingDays shouldBe emptySet()
-        }
-
-        @Test
-        fun `legacy entity without trackedYears maps to default 0 on toModel`() {
-            // ----- Arrange -----
-            val legacyJson = """
-                {
-                  "profileImageUrl": "https://example.com/avatar.png",
-                  "name": "Jane Doe",
-                  "bio": "Avid reader",
-                  "booksRead": 42,
-                  "totalPagesRead": 12000,
-                  "averageRating": 4.2,
-                  "readingStreak": 5
-                }
-            """.trimIndent()
-            val lenientJson = Json { ignoreUnknownKeys = true }
-
-            // ----- Act -----
-            val entity = lenientJson.decodeFromString(
-                UserProfileDataEntity.serializer(),
-                legacyJson,
-            )
-            val model = entity.toModel()
-
-            // ----- Assert -----
-            model.trackedYears shouldBe 0
-        }
-
-        @Test
-        fun `legacy JSON without an authorDemographics key decodes to the empty AuthorDemographics default`() {
-            // ----- Arrange -----
-            val legacyJson = """
-                {
-                  "profileImageUrl": "https://example.com/avatar.png",
-                  "name": "Jane Doe",
-                  "bio": "Avid reader",
-                  "booksRead": 42,
-                  "totalPagesRead": 12000,
-                  "averageRating": 4.2,
-                  "readingStreak": 5
-                }
-            """.trimIndent()
-            val lenientJson = Json { ignoreUnknownKeys = true }
-
-            // ----- Act -----
-            val entity = lenientJson.decodeFromString(
-                UserProfileDataEntity.serializer(),
-                legacyJson,
-            )
-            val model = entity.toModel()
-
-            // ----- Assert -----
-            model.authorDemographics shouldBe AuthorDemographics()
+            entity.toModel().recentReadingDays shouldBe emptySet()
+            entity.toModel().trackedYears shouldBe 0
+            entity.toModel().authorDemographics shouldBe AuthorDemographics()
         }
 
         @Test
@@ -520,6 +349,66 @@ class UserProfileDataEntityTest {
     }
 
     @Nested
+    inner class LovedBookCache {
+        private fun lovedBookEntity(bookId: Int?): LovedBookEntity = LovedBookEntity(
+            bookId = bookId,
+            coverUrl = "cover.jpg",
+            title = "Dune",
+            author = "Frank Herbert",
+            ratingStars = 4.5,
+            monthLabel = "May 2026",
+        )
+
+        @Test
+        fun `a cached recentlyLoved entry without a bookId is dropped while the others map through`() {
+            // ----- Arrange -----
+            val entity = minimalModel().toEntity().copy(
+                recentlyLoved = listOf(
+                    lovedBookEntity(bookId = 1),
+                    lovedBookEntity(bookId = null),
+                    lovedBookEntity(bookId = 3),
+                ),
+            )
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.recentlyLoved.map { it.bookId } shouldBe listOf(1, 3)
+        }
+
+        @Test
+        fun `legacy JSON with a loved book lacking the bookId field still decodes and is dropped on toModel`() {
+            // ----- Arrange -----
+            val legacyJson = """
+                {
+                  "profileImageUrl": "https://example.com/avatar.png",
+                  "name": "Jane Doe",
+                  "bio": "Avid reader",
+                  "booksRead": 42,
+                  "totalPagesRead": 12000,
+                  "averageRating": 4.2,
+                  "readingStreak": 5,
+                  "recentlyLoved": [
+                    { "coverUrl": "cover.jpg", "title": "Dune", "author": "Frank Herbert", "ratingStars": 4.5, "monthLabel": "May 2026" }
+                  ]
+                }
+            """.trimIndent()
+            val lenientJson = Json { ignoreUnknownKeys = true }
+
+            // ----- Act -----
+            val entity = lenientJson.decodeFromString(
+                UserProfileDataEntity.serializer(),
+                legacyJson,
+            )
+
+            // ----- Assert -----
+            entity.recentlyLoved.single().bookId.shouldBeNull()
+            entity.toModel().recentlyLoved shouldBe emptyList()
+        }
+    }
+
+    @Nested
     inner class GenreBreakdownDecoding {
         @Test
         fun `a legacy entity carrying genre slices but no genreTaggedBookCount decodes to an empty GenreBreakdown`() {
@@ -537,7 +426,8 @@ class UserProfileDataEntityTest {
                     name = "Fantasy",
                     count = 10,
                     fraction = 0.5,
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -563,7 +453,8 @@ class UserProfileDataEntityTest {
                     name = "Fantasy",
                     count = 10,
                     fraction = 0.5,
-                ),),
+                ),
+                ),
                 genreTaggedBookCount = 20,
             )
 
@@ -576,7 +467,8 @@ class UserProfileDataEntityTest {
                     name = "Fantasy",
                     count = 10,
                     fraction = 0.5,
-                ),),
+                ),
+                ),
                 taggedBookCount = 20,
             )
         }

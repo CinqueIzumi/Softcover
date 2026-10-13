@@ -6,34 +6,11 @@ import org.junit.jupiter.api.Test
 
 class PaginationTest {
     @Test
-    fun `returns all rows and stops after a single short page`() = runTest {
-        // ----- Arrange -----
-        val calls = mutableListOf<Pair<Int, Int>>()
-        val shortPage = listOf("a", "b")
-
-        // ----- Act -----
-        val result = fetchAllPages(pageSize = 3) { limit, offset ->
-            calls += limit to offset
-            shortPage
-        }
-
-        // ----- Assert -----
-        calls shouldBe listOf(3 to 0)
-        result shouldBe shortPage
-    }
-
-    @Test
     fun `confirms end of pages with a trailing empty call when total is an exact multiple of pageSize`() = runTest {
         // ----- Arrange -----
         val calls = mutableListOf<Pair<Int, Int>>()
         val rows = (1..6).map { "row$it" }
-        val pages = listOf(rows.subList(
-            0,
-            3,
-        ), rows.subList(
-            3,
-            6,
-        ), emptyList(),)
+        val pages = rows.chunked(3) + listOf(emptyList())
         var callIndex = 0
 
         // ----- Act -----
@@ -52,16 +29,7 @@ class PaginationTest {
         // ----- Arrange -----
         val calls = mutableListOf<Pair<Int, Int>>()
         val rows = (1..7).map { "row$it" }
-        val pages = listOf(rows.subList(
-            0,
-            3,
-        ), rows.subList(
-            3,
-            6,
-        ), rows.subList(
-            6,
-            7,
-        ),)
+        val pages = rows.chunked(3)
         var callIndex = 0
 
         // ----- Act -----

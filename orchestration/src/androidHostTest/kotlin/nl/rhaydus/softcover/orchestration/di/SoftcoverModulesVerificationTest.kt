@@ -4,20 +4,23 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
+import nl.rhaydus.softcover.core.notification.NotificationAppearance
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import org.junit.jupiter.api.Test
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.module
 import org.koin.test.verify.verify
-import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
-import nl.rhaydus.softcover.core.notification.NotificationAppearance
 
 @OptIn(KoinExperimentalAPI::class)
 class SoftcoverModulesVerificationTest {
     @Test
     fun `softcover module graph resolves`() {
-        module { includes(softcoverModules) }
-            .verify(
+        // ----- Arrange -----
+        val graph = module { includes(softcoverModules) }
+
+        // ----- Act & Assert -----
+        graph.verify(
                 extraTypes = listOf(
                     Context::class,                // runtime androidContext()
                     AppVersionProvider::class,                     // supplied by :app appModule

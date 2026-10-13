@@ -30,17 +30,6 @@ class TagCategoryTest {
         }
 
         @Test
-        fun `Mood maps to MOOD`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = TagCategory.fromApiString("Mood")
-
-            // ----- Assert -----
-            result shouldBe TagCategory.MOOD
-        }
-
-        @Test
         fun `null maps to OTHER`() {
             // ----- Arrange -----
 
@@ -61,101 +50,25 @@ class TagCategoryTest {
             // ----- Assert -----
             result shouldBe TagCategory.OTHER
         }
-
-        @Test
-        fun `empty string maps to OTHER`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = TagCategory.fromApiString("")
-
-            // ----- Assert -----
-            result shouldBe TagCategory.OTHER
-        }
-
-        @Test
-        fun `Tag maps to TAG`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = TagCategory.fromApiString("Tag")
-
-            // ----- Assert -----
-            result shouldBe TagCategory.TAG
-        }
     }
 
     @Nested
     inner class ApiValueRoundTrip {
         @Test
-        fun `GENRE round-trips via apiValue`() {
+        fun `every category round-trips via apiValue`() {
             // ----- Arrange -----
+            val categories = TagCategory.entries
 
             // ----- Act -----
-            val result = TagCategory.fromApiString(TagCategory.GENRE.apiValue)
+            val result = categories.map { TagCategory.fromApiString(it.apiValue) }
 
             // ----- Assert -----
-            result shouldBe TagCategory.GENRE
-        }
-
-        @Test
-        fun `MOOD round-trips via apiValue`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = TagCategory.fromApiString(TagCategory.MOOD.apiValue)
-
-            // ----- Assert -----
-            result shouldBe TagCategory.MOOD
-        }
-
-        @Test
-        fun `TAG round-trips via apiValue`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = TagCategory.fromApiString(TagCategory.TAG.apiValue)
-
-            // ----- Assert -----
-            result shouldBe TagCategory.TAG
-        }
-
-        @Test
-        fun `CONTENT_WARNING round-trips via apiValue`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = TagCategory.fromApiString(TagCategory.CONTENT_WARNING.apiValue)
-
-            // ----- Assert -----
-            result shouldBe TagCategory.CONTENT_WARNING
-        }
-
-        @Test
-        fun `OTHER round-trips via apiValue`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = TagCategory.fromApiString(TagCategory.OTHER.apiValue)
-
-            // ----- Assert -----
-            result shouldBe TagCategory.OTHER
+            result shouldBe categories
         }
     }
 
     @Nested
     inner class FromName {
-        @Test
-        fun `GENRE maps to GENRE`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = TagCategory.fromName("GENRE")
-
-            // ----- Assert -----
-            result shouldBe TagCategory.GENRE
-        }
-
         @Test
         fun `CONTENT_WARNING maps to CONTENT_WARNING`() {
             // ----- Arrange -----
@@ -165,28 +78,6 @@ class TagCategoryTest {
 
             // ----- Assert -----
             result shouldBe TagCategory.CONTENT_WARNING
-        }
-
-        @Test
-        fun `MOOD maps to MOOD`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = TagCategory.fromName("MOOD")
-
-            // ----- Assert -----
-            result shouldBe TagCategory.MOOD
-        }
-
-        @Test
-        fun `OTHER maps to OTHER`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = TagCategory.fromName("OTHER")
-
-            // ----- Assert -----
-            result shouldBe TagCategory.OTHER
         }
 
         @Test

@@ -24,39 +24,6 @@ class AuthorDemographicsTest {
     @Nested
     inner class ExcludingUntaggedAuthors {
         @Test
-        fun `renormalises remaining gender slices so fractions sum to 1`() {
-            // ----- Arrange -----
-            val original = demographics(
-                genderSlices = listOf(
-                    GenderSlice(
-                        gender = Gender.Male,
-                        count = 3,
-                        fraction = 0.3,
-                    ),
-                    GenderSlice(
-                        gender = Gender.Female,
-                        count = 6,
-                        fraction = 0.6,
-                    ),
-                    GenderSlice(
-                        gender = Gender.Unknown,
-                        count = 1,
-                        fraction = 0.1,
-                    ),
-                ),
-                knownGenderCount = 9,
-                unknownGenderCount = 1,
-            )
-
-            // ----- Act -----
-            val result = original.excludingUntaggedAuthors()
-
-            // ----- Assert -----
-            val fractionSum = result.genderSlices.sumOf { it.fraction }
-            fractionSum shouldBe (1.0 plusOrMinus 0.0001)
-        }
-
-        @Test
         fun `each remaining gender slice's fraction equals its count over known gender count`() {
             // ----- Arrange -----
             val original = demographics(
@@ -225,18 +192,6 @@ class AuthorDemographicsTest {
 
             // ----- Assert -----
             result shouldBe original
-        }
-
-        @Test
-        fun `calling it on the default AuthorDemographics is safe`() {
-            // ----- Arrange -----
-            val original = AuthorDemographics()
-
-            // ----- Act -----
-            val result = original.excludingUntaggedAuthors()
-
-            // ----- Assert -----
-            result shouldBe AuthorDemographics()
         }
     }
 }

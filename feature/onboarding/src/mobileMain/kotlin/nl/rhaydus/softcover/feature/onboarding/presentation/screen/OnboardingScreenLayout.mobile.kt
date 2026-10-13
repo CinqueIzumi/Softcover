@@ -1,41 +1,34 @@
 package nl.rhaydus.softcover.feature.onboarding.presentation.screen
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -46,25 +39,26 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverLoadingSheet
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
+import nl.rhaydus.softcover.feature.onboarding.presentation.screen.section.ApiKeyEntryContent
+import nl.rhaydus.softcover.feature.onboarding.presentation.screen.section.ApiKeyEntryFooter
+import nl.rhaydus.softcover.feature.onboarding.presentation.screen.section.PrimaryActionFooterRow
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 
 private val PAGE_NUMBERS = listOf(1, 2, 3)
-
-/** The persistent top bar's per-page eyebrow label, keyed on the pager's settled current page. */
-private val IntroScreen.eyebrow: String
-    get() = when (this) {
-        IntroScreen.FIRST -> "Welcome"
-        IntroScreen.SECOND -> "Connect"
-        IntroScreen.THIRD -> "API key"
-    }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -73,7 +67,6 @@ internal actual fun OnboardingScreenLayout(
     runAction: (action: OnboardingAction) -> Unit,
     openUrl: (String) -> Unit,
     getCopiedText: () -> String,
-    onInitializingComplete: () -> Unit,
 ) {
     val pages = IntroScreen.entries
     val pagerState = rememberPagerState { pages.size }
@@ -84,21 +77,31 @@ internal actual fun OnboardingScreenLayout(
         scope.launch { pagerState.animateScrollToPage(page = index) }
     }
 
+    val previousPageBackState = rememberNavigationEventState(NavigationEventInfo.None)
+
+    NavigationBackHandler(
+        state = previousPageBackState,
+        isBackEnabled = pagerState.currentPage > 0,
+        onBackCancelled = {},
+        onBackCompleted = { navigateToPage(index = pagerState.currentPage - 1) },
+    )
+
     Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
                 .imePadding(),
         ) {
             // Persistent chrome, rendered once above the pager (not per-page) so it never shifts as
-            // pages swipe — only the eyebrow label and the folio's active digit track the pager below.
+            // pages swipe — only the header and the folio's active digit track the pager below.
             OnboardingTopBar(
-                eyebrow = pages[pagerState.currentPage].eyebrow,
+                header = state.pageHeaders.getValue(pages[pagerState.currentPage]),
                 activePage = pagerState.currentPage + 1,
                 modifier = Modifier
-                    .padding(horizontal = 30.dp)
-                    .padding(top = 24.dp),
+                    .padding(horizontal = Spacing.gutter)
+                    .padding(top = Spacing.xl),
             )
 
             HorizontalPager(
@@ -134,29 +137,19 @@ internal actual fun OnboardingScreenLayout(
                 }
             }
         }
-
-        SoftcoverLoadingSheet(
-            isLoading = state.isLoading,
-            progress = state.progress,
-            onLoaderFinished = onInitializingComplete,
-            eyebrow = "Setting up",
-            headline = "Pulling your library together.",
-            description = "Depending on its size, this might take a moment.",
-        )
     }
 }
 
 /**
- * The persistent chrome above the pager: an accent-bar eyebrow on the left (the established
- * hand-composed pattern — `EditorialSectionHeader` has no trailing slot for the folio, see
- * `TagEditorHeader`/`AppUpdateSection` for the same convention elsewhere) and the "01 — 02 — 03" folio
+ * The persistent chrome above the pager: a [SectionHeader] on the left and the "01 — 02 — 03" folio
  * indicator on the right. Rendered once above the pager rather than per-page, so its position never
- * shifts as pages swipe — only the [eyebrow] label cross-fades and the folio's active digit updates as
- * the pager settles on a new page. Back/Skip live only in [PrimaryActionFooterRow], never here.
+ * shifts as pages swipe — only the [header] cross-fades, accent bar included, and the folio's active
+ * digit updates as the pager settles on a new page. Back/Skip live only in [PrimaryActionFooterRow],
+ * never here.
  */
 @Composable
 private fun OnboardingTopBar(
-    eyebrow: String,
+    header: SectionHeaderUiModel.Section,
     activePage: Int,
     modifier: Modifier = Modifier,
 ) {
@@ -165,35 +158,17 @@ private fun OnboardingTopBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(
-                        width = 32.dp,
-                        height = 4.dp,
-                    )
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(MaterialTheme.colorScheme.primary),
-            )
+        val fadeSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            val playMotion = playDecorativeMotion()
-            val fadeSpec = if (playMotion) tween<Float>(durationMillis = 220) else snap()
-
-            AnimatedContent(
-                targetState = eyebrow,
-                transitionSpec = {
-                    fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
-                },
-                label = "OnboardingTopBarEyebrow",
-            ) { label ->
-                Text(
-                    text = label.uppercase(),
-                    style = MaterialTheme.editorialTypography.eyebrow,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
+        AnimatedContent(
+            targetState = header,
+            modifier = Modifier.weight(1f),
+            transitionSpec = {
+                fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
+            },
+            label = "OnboardingTopBarHeader",
+        ) { pageHeader ->
+            SectionHeader(model = pageHeader)
         }
 
         FolioIndicator(activePage = activePage)
@@ -220,12 +195,11 @@ private fun FolioIndicator(activePage: Int) {
         }
     }
 
-    Text(
+    SoftcoverText(
         text = folioText,
         style = MaterialTheme.editorialTypography.eyebrow.copy(
             letterSpacing = 2.sp,
-            fontFeatureSettings = "tnum",
-        ),
+        ).tabularFigures(),
     )
 }
 
@@ -238,19 +212,19 @@ private fun FirstIntroScreen(
         // The single decorative flourish for this page: a low-alpha primary quote glyph bleeding off
         // the top-left edge. Static (not `quoteGlyphSway()` — that sway is scoped to empty-state
         // glyphs), so it is marked decorative and dropped from the semantics tree.
-        Text(
+        SoftcoverText(
             text = "“",
             style = MaterialTheme.editorialTypography.quoteGlyph.copy(fontSize = 340.sp),
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
             modifier = Modifier
-                .offset(x = (-18).dp, y = 96.dp)
+                .offset(x = -Spacing.lg, y = 96.dp)
                 .clearAndSetSemantics {},
         )
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 30.dp),
+                .padding(horizontal = Spacing.gutter),
         ) {
             Column(
                 modifier = Modifier
@@ -258,7 +232,7 @@ private fun FirstIntroScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text(
+                SoftcoverText(
                     text = "Book\nsmart.",
                     style = MaterialTheme.editorialTypography.display.copy(
                         fontSize = 76.sp,
@@ -268,11 +242,10 @@ private fun FirstIntroScreen(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                Spacer(modifier = Modifier.height(26.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
-                Text(
-                    text = "Track every book you read, share the ones worth sharing — or " +
-                        "don't — and find your next life-changing read.",
+                SoftcoverText(
+                    text = "Keep a record of every book you read, and find the next one worth reading.",
                     style = MaterialTheme.editorialTypography.bodyLarge.copy(
                         fontSize = 18.sp,
                         lineHeight = 28.sp,
@@ -288,7 +261,7 @@ private fun FirstIntroScreen(
                 showTrailingArrow = true,
                 trailingLabel = "Skip",
                 onTrailingClick = onSkipClick,
-                modifier = Modifier.padding(bottom = 16.dp),
+                modifier = Modifier.padding(bottom = Spacing.md),
             )
         }
     }
@@ -302,7 +275,7 @@ private fun SecondIntroScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 30.dp),
+            .padding(horizontal = Spacing.gutter),
     ) {
         Column(
             modifier = Modifier
@@ -310,7 +283,7 @@ private fun SecondIntroScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(
+            SoftcoverText(
                 text = "Powered by Hardcover.",
                 style = MaterialTheme.editorialTypography.display.copy(
                     fontSize = 54.sp,
@@ -320,15 +293,14 @@ private fun SecondIntroScreen(
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Spacer(modifier = Modifier.height(34.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             WavyConnector()
 
-            Spacer(modifier = Modifier.height(34.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
-            Text(
-                text = "To sync your reading, Softcover connects to your Hardcover account — " +
-                    "the open book database your library actually lives in.",
+            SoftcoverText(
+                text = "Softcover syncs with Hardcover, the open book database that holds your library.",
                 style = MaterialTheme.editorialTypography.bodyLarge.copy(
                     fontSize = 18.sp,
                     lineHeight = 28.sp,
@@ -344,7 +316,7 @@ private fun SecondIntroScreen(
             showTrailingArrow = true,
             trailingLabel = "Back",
             onTrailingClick = onBackClick,
-            modifier = Modifier.padding(bottom = 16.dp),
+            modifier = Modifier.padding(bottom = Spacing.md),
         )
     }
 }
@@ -353,13 +325,13 @@ private fun SecondIntroScreen(
  * The mandated sine motif that literally links the two wordmarks: a static `outlineVariant` track with
  * a `primary` wave drawn over it. No reusable static wavy-line primitive exists in the foundation or
  * this app — the only wavy component is Material3's `LinearWavyProgressIndicator`, which is tied to
- * animated progress state (used unchanged in `SoftcoverLoadingSheet`) and not a fit for a static
+ * animated progress state (used unchanged in `LoadingSheet`) and not a fit for a static
  * decorative connector — so this is a small bespoke `Canvas`, scoped to this single screen.
  */
 @Composable
 private fun WavyConnector() {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
+        SoftcoverText(
             text = "SOFTCOVER",
             style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                 letterSpacing = 1.8.sp,
@@ -371,11 +343,11 @@ private fun WavyConnector() {
         WavySineLine(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 10.dp)
+                .padding(horizontal = Spacing.xs)
                 .height(14.dp),
         )
 
-        Text(
+        SoftcoverText(
             text = "HARDCOVER",
             style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                 letterSpacing = 1.8.sp,
@@ -453,7 +425,7 @@ private fun ThirdIntroScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 30.dp),
+            .padding(horizontal = Spacing.gutter),
     ) {
         // Scrollable content only — the commit footer is a pinned sibling below, outside this scroll
         // region, so "Save API key" is always visible rather than scrolling off-screen with the
@@ -463,9 +435,9 @@ private fun ThirdIntroScreen(
                 .weight(1f)
                 .verticalScroll(rememberScrollState()),
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
-            Text(
+            SoftcoverText(
                 text = "Add your\nkey.",
                 style = MaterialTheme.editorialTypography.display.copy(
                     fontSize = 46.sp,
@@ -475,16 +447,16 @@ private fun ThirdIntroScreen(
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
-            Text(
-                text = "One key, once. It only syncs your reading progress — never your password.",
+            SoftcoverText(
+                text = "You only need to add it once. It syncs your reading progress and never touches your password.",
                 style = MaterialTheme.editorialTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.widthIn(max = 300.dp),
             )
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             ApiKeyEntryContent(
                 state = state,
@@ -494,7 +466,7 @@ private fun ThirdIntroScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
         }
 
         ApiKeyEntryFooter(
@@ -502,7 +474,7 @@ private fun ThirdIntroScreen(
             runAction = runAction,
             footerTrailingLabel = "Back",
             onFooterTrailingLabelClick = onBackClick,
-            modifier = Modifier.padding(bottom = 16.dp),
+            modifier = Modifier.padding(bottom = Spacing.md),
         )
     }
 }
@@ -516,24 +488,6 @@ private fun FirstIntroScreenPreview() {
             runAction = {},
             getCopiedText = { "" },
             openUrl = {},
-            onInitializingComplete = {},
-        )
-    }
-}
-
-@StandardPreview
-@Composable
-private fun LoadingDialogIntroScreenPreview() {
-    SoftcoverTheme {
-        OnboardingScreenLayout(
-            state = OnboardingUiState(
-                isLoading = true,
-                progress = 0.2f,
-            ),
-            runAction = {},
-            getCopiedText = { "" },
-            openUrl = {},
-            onInitializingComplete = {},
         )
     }
 }

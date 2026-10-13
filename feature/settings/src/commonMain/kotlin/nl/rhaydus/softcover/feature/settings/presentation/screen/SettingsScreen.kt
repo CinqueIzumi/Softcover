@@ -9,26 +9,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.debug.DebugRoutesContent
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalCreateListPresenter
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
-import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalStartAppUpdate
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
-import nl.rhaydus.softcover.core.domain.model.AppUpdateState
+import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesContent
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
@@ -38,6 +36,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsSc
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
+import org.koin.compose.koinInject
 
 object SettingsScreen : Screen {
     @Composable
@@ -50,7 +49,6 @@ object SettingsScreen : Screen {
         val appNavigator = koinInject<AppNavigator>()
         val debugRoutesContent = koinInject<DebugRoutesContent>()
         val appUpdateSimulator = koinInject<AppUpdateSimulator>()
-        val appUpdateState = LocalAppUpdateState.current
         val onStartAppUpdate = LocalStartAppUpdate.current
         val createListPresenter = LocalCreateListPresenter.current
         val uriHandler = LocalUriHandler.current
@@ -108,6 +106,9 @@ object SettingsScreen : Screen {
             navigateToRoadmap = {
                 navigator.parent?.push(RoadmapScreen())
             },
+            navigateToComponentGallery = {
+                navigator.parent?.push(ComponentGalleryScreen())
+            },
             libraryVisibilityState = libraryVisibilityState,
             libraryVisibilityRunAction = { action -> libraryVisibilityModel?.runAction(action) },
             roadmapState = roadmapState,
@@ -115,13 +116,15 @@ object SettingsScreen : Screen {
             onCreateListClick = {
                 createListPresenter?.open(onListCreated = null)
             },
-            appUpdateState = appUpdateState,
             onStartAppUpdate = onStartAppUpdate,
             openUrl = uriHandler::openUri,
             debugSection = {
-                debugRoutesContent.Render()
+                debugRoutesContent.Render(host = this)
 
-                AppUpdateSimulatorSection(simulator = appUpdateSimulator)
+                AppUpdateSimulatorSection(
+                    simulator = appUpdateSimulator,
+                    header = state.appUpdateSimulatorHeader,
+                )
             },
         )
     }
@@ -142,7 +145,10 @@ internal expect val settingsUsesMasterDetail: Boolean
  * values, so every parameter is supplied explicitly at the single call site above. [roadmapState] /
  * [roadmapRunAction] back the desktop master–detail pane's `Roadmap` category; [navigateToRoadmap]
  * mirrors [navigateToAbout]'s shape (mobile pushes [RoadmapScreen] from its own menu row, desktop
- * leaves it unused in favour of its sidebar's local category selection).
+ * leaves it unused in favour of its sidebar's local category selection). [navigateToComponentGallery]
+ * is the inverse: desktop wires it to the master–detail `About` category's own version-footer easter
+ * egg (`component-contract.md` § 7.5), while mobile leaves it unused — [AboutScreen], which mobile
+ * pushes instead, wires that same gesture to its own navigator directly.
  */
 @Composable
 internal expect fun SettingsScreenLayout(
@@ -154,12 +160,12 @@ internal expect fun SettingsScreenLayout(
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
     navigateToRoadmap: () -> Unit,
+    navigateToComponentGallery: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
     roadmapState: RoadmapUiState,
     roadmapRunAction: (RoadmapAction) -> Unit,
     onCreateListClick: () -> Unit,
-    appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,
     openUrl: (String) -> Unit,
     debugSection: @Composable () -> Unit,
@@ -170,17 +176,19 @@ internal expect fun SettingsScreenLayout(
  * raised by [SettingsScreen.Content] as the `debugSection` slot, which both platform layouts render.
  */
 @Composable
-internal fun AppUpdateSimulatorSection(simulator: AppUpdateSimulator) {
+internal fun AppUpdateSimulatorSection(
+    simulator: AppUpdateSimulator,
+    header: SectionHeaderUiModel,
+) {
     if (simulator.isEnabled.not()) return
 
     val scope = rememberCoroutineScope()
 
-    EditorialSectionHeader(
-        eyebrow = "Debug",
-        headline = "App update simulator",
-    )
+    Spacer(modifier = Modifier.height(Spacing.section))
 
-    Spacer(modifier = Modifier.height(16.dp))
+    SectionHeader(model = header)
+
+    Spacer(modifier = Modifier.height(Spacing.md))
 
     Column(modifier = Modifier.fillMaxWidth()) {
         RhaydusButton(
@@ -191,7 +199,7 @@ internal fun AppUpdateSimulatorSection(simulator: AppUpdateSimulator) {
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         RhaydusButton(
             label = "Simulate downloading",
@@ -201,7 +209,7 @@ internal fun AppUpdateSimulatorSection(simulator: AppUpdateSimulator) {
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         RhaydusButton(
             label = "Simulate downloaded",
@@ -211,7 +219,7 @@ internal fun AppUpdateSimulatorSection(simulator: AppUpdateSimulator) {
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         RhaydusButton(
             label = "Simulate failure",
@@ -221,7 +229,7 @@ internal fun AppUpdateSimulatorSection(simulator: AppUpdateSimulator) {
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         RhaydusButton(
             label = "Reset",
@@ -231,6 +239,4 @@ internal fun AppUpdateSimulatorSection(simulator: AppUpdateSimulator) {
             modifier = Modifier.fillMaxWidth(),
         )
     }
-
-    Spacer(modifier = Modifier.height(40.dp))
 }

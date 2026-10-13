@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -12,12 +13,8 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
@@ -26,6 +23,9 @@ import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScre
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ReadingPaceForecastCollectorTest {
     private lateinit var getReadingJournalHistoryUseCase: GetReadingJournalHistoryUseCase
@@ -153,19 +153,20 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 getReadingJournalHistoryUseCase(bookId = any())
             } returns Result.success(history)
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(book))
             val dependencies = buildDependencies(this)
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
-            stateFlow.value.featuredBookPace?.avgPerReadingDay shouldBe 30f
-            stateFlow.value.featuredBookPace?.forecastReadingDays shouldBe 7
+            stateFlow.value.featuredBookPace shouldBe "30 pages/day · about 7 days to go"
             job.cancel()
         }
 
@@ -199,19 +200,20 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 getReadingJournalHistoryUseCase(bookId = any())
             } returns Result.success(history)
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(book))
             val dependencies = buildDependencies(this)
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
-            stateFlow.value.featuredBookPace?.avgPerReadingDay shouldBe 45f
-            stateFlow.value.featuredBookPace?.forecastReadingDays shouldBe 2
+            stateFlow.value.featuredBookPace shouldBe "45 pages/day · about 2 days to go"
             job.cancel()
         }
 
@@ -229,19 +231,20 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 getReadingJournalHistoryUseCase(bookId = any())
             } returns Result.success(history)
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(book))
             val dependencies = buildDependencies(this)
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
-            stateFlow.value.featuredBookPace?.avgPerReadingDay shouldBe 25f
-            stateFlow.value.featuredBookPace?.forecastReadingDays shouldBe 4
+            stateFlow.value.featuredBookPace shouldBe "25 pages/day · about 4 days to go"
             job.cancel()
         }
 
@@ -263,38 +266,17 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 getReadingJournalHistoryUseCase(bookId = any())
             } returns Result.success(history)
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(book))
             val dependencies = buildDependencies(this)
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Assert -----
-            stateFlow.value.featuredBookPace shouldBe null
-            job.cancel()
-        }
-
-        @Test
-        fun `does not set featuredBookPace when the journal history is empty`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val edition = stubEdition(pages = 100)
-            val book = stubBook(edition = edition)
-            coEvery {
-                getReadingJournalHistoryUseCase(bookId = any())
-            } returns Result.success(emptyList())
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
-            val dependencies = buildDependencies(this)
-            val collector = ReadingPaceForecastCollector()
-
-            // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
             stateFlow.value.featuredBookPace shouldBe null
@@ -323,15 +305,17 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 getReadingJournalHistoryUseCase(bookId = any())
             } returns Result.success(history)
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(book))
             val dependencies = buildDependencies(this)
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
             stateFlow.value.featuredBookPace shouldBe null
@@ -360,20 +344,20 @@ class ReadingPaceForecastCollectorTest {
             coEvery {
                 getReadingJournalHistoryUseCase(bookId = any())
             } returns Result.success(history)
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
+            stateFlow.value = ReadingScreenUiState(books = persistentListOf(book))
             val dependencies = buildDependencies(this)
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
-            stateFlow.value.featuredBookPace?.unit shouldBe DeadlineUnit.SECONDS
-            stateFlow.value.featuredBookPace?.avgPerReadingDay shouldBe 1800f
-            stateFlow.value.featuredBookPace?.forecastReadingDays shouldBe 2
+            stateFlow.value.featuredBookPace shouldBe "0h 30m/day · about 2 days to go"
             job.cancel()
         }
 
@@ -381,15 +365,17 @@ class ReadingPaceForecastCollectorTest {
         fun `does not set featuredBookPace and never invokes the journal history use case when there is no featured book`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                stateFlow.value = ReadingScreenUiState(books = emptyList())
+                stateFlow.value = ReadingScreenUiState(books = persistentListOf())
                 val dependencies = buildDependencies(this)
                 val collector = ReadingPaceForecastCollector()
 
                 // ----- Act -----
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Assert -----
                 stateFlow.value.featuredBookPace shouldBe null

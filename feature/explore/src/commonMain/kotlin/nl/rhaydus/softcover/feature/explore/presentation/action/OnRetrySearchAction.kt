@@ -25,6 +25,7 @@ internal data object OnRetrySearchAction : ExploreAction {
         scope.setState {
             it.copy(
                 isLoading = true,
+                loadingMoreQueriedBooks = false,
                 searchError = null,
                 queriedBooksHasMore = true,
             )

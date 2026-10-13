@@ -1,14 +1,16 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.feature.library.presentation.util.finishedYear
 
 internal data class LibraryFilters(
-    val tags: Set<Tag> = emptySet(),
-    val formats: Set<String> = emptySet(),
-    val releaseYears: Set<Int> = emptySet(),
+    val tags: ImmutableSet<Tag> = persistentSetOf(),
+    val formats: ImmutableSet<String> = persistentSetOf(),
+    val releaseYears: ImmutableSet<Int> = persistentSetOf(),
     /** Single-select year-finished facet, offered on the Read tab only. */
     val readYear: Int? = null,
     val owned: Boolean? = null,

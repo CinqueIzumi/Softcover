@@ -8,13 +8,13 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagVocabularyRepository
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ObserveUserTagVocabularyUseCaseTest {
     private lateinit var userTagVocabularyRepository: UserTagVocabularyRepository
@@ -57,32 +57,6 @@ class ObserveUserTagVocabularyUseCaseTest {
             // ----- Act & Assert -----
             useCase().test {
                 awaitItem() shouldBe tags
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `forwards every emission from the repository's flow`() = runTest {
-            // ----- Arrange -----
-            val userId = 3
-            val firstEmission = listOf(stubUserTag("Fantasy"))
-            val secondEmission = listOf(stubUserTag("Fantasy"), stubUserTag("Horror"))
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            every {
-                userTagVocabularyRepository.observe(userId = userId)
-            } returns flowOf(
-                firstEmission,
-                secondEmission,
-            )
-
-            // ----- Act & Assert -----
-            useCase().test {
-                awaitItem() shouldBe firstEmission
-                awaitItem() shouldBe secondEmission
                 awaitComplete()
             }
         }

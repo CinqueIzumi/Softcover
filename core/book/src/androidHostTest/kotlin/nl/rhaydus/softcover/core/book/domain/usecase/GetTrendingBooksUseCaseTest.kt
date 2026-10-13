@@ -2,13 +2,14 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.model.Book
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.domain.model.Book
 
 class GetTrendingBooksUseCaseTest {
     private lateinit var booksRepository: BooksRepository
@@ -28,7 +29,7 @@ class GetTrendingBooksUseCaseTest {
             val trendingBooks = listOf(mockk<Book>(relaxed = true), mockk<Book>(relaxed = true))
 
             coEvery {
-                booksRepository.fetchTrendingBooks()
+                booksRepository.fetchTrendingBooks(forceRefresh = any())
             } returns trendingBooks
 
             // ----- Act -----
@@ -45,7 +46,7 @@ class GetTrendingBooksUseCaseTest {
             val error = RuntimeException("network error")
 
             coEvery {
-                booksRepository.fetchTrendingBooks()
+                booksRepository.fetchTrendingBooks(forceRefresh = any())
             } throws error
 
             // ----- Act -----
@@ -57,18 +58,19 @@ class GetTrendingBooksUseCaseTest {
         }
 
         @Test
-        fun `returns Result success wrapping an empty list when the repository returns no books`() = runTest {
+        fun `forceRefresh true is forwarded verbatim to the repository`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksRepository.fetchTrendingBooks()
+                booksRepository.fetchTrendingBooks(forceRefresh = any())
             } returns emptyList()
 
             // ----- Act -----
-            val result = useCase()
+            useCase(forceRefresh = true)
 
             // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe emptyList()
+            coVerify {
+                booksRepository.fetchTrendingBooks(forceRefresh = true)
+            }
         }
     }
 }

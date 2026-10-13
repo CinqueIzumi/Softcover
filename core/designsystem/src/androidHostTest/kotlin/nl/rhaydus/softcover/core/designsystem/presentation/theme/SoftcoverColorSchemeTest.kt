@@ -1,12 +1,9 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.theme
 
-import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.doubles.shouldBeGreaterThanOrEqual
-import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Nested
@@ -15,66 +12,22 @@ import org.junit.jupiter.api.TestFactory
 
 class SoftcoverColorSchemeTest {
     @Nested
-    inner class HouseLookIsUnchanged {
-        @Test
-        fun `SOFTCOVER light scheme keeps its shipped hexes`() {
-            // ----- Arrange -----
-            val palette = ColorPalette.SOFTCOVER
-
-            // ----- Act -----
-            val scheme = softcoverColorScheme(
-                darkTheme = false,
-                colorPalette = palette,
-            )
-
-            // ----- Assert -----
-            scheme.primary shouldBe Color(0xFF8F4C38)
-            scheme.primaryContainer shouldBe Color(0xFFFFDBD1)
-            scheme.tertiary shouldBe Color(0xFF6C5D2F)
-            scheme.background shouldBe Color(0xFFFFF8F6)
-            scheme.onSurface shouldBe Color(0xFF231917)
-            scheme.surfaceContainerHigh shouldBe Color(0xFFF7E4E0)
-            scheme.outlineVariant shouldBe Color(0xFFD8C2BC)
-            scheme.inversePrimary shouldBe Color(0xFFFFB5A0)
-        }
-
-        @Test
-        fun `SOFTCOVER dark scheme keeps its shipped hexes`() {
-            // ----- Arrange -----
-            val palette = ColorPalette.SOFTCOVER
-
-            // ----- Act -----
-            val scheme = softcoverColorScheme(
-                darkTheme = true,
-                colorPalette = palette,
-            )
-
-            // ----- Assert -----
-            scheme.primary shouldBe Color(0xFFFFB5A0)
-            scheme.onPrimary shouldBe Color(0xFF561F0F)
-            scheme.background shouldBe Color(0xFF1A110F)
-            scheme.onSurface shouldBe Color(0xFFF1DFDA)
-            scheme.surfaceContainerHigh shouldBe Color(0xFF322825)
-            scheme.outline shouldBe Color(0xFFA08C87)
-        }
-    }
-
-    @Nested
     inner class ContrastFloor {
         @TestFactory
         fun `every palette clears its contrast floor in both brightnesses`(): List<DynamicTest> =
-            ColorPalette.entries.flatMap { palette ->
+            SpinePalette.entries.flatMap { palette ->
                 listOf(false, true).map { darkTheme ->
                     dynamicTest(
                         "${palette.name} ${if (darkTheme) "dark" else "light"} clears its contrast floor",
                     ) {
+                        // ----- Arrange -----
                         val scheme = softcoverColorScheme(
                             darkTheme = darkTheme,
-                            colorPalette = palette,
+                            palette = palette,
                         )
 
+                        // ----- Act & Assert -----
                         assertPairPasses(
-                            scheme = scheme,
                             palette = palette,
                             darkTheme = darkTheme,
                             foreground = scheme.onSurface,
@@ -84,7 +37,6 @@ class SoftcoverColorSchemeTest {
                             minimumRatio = 4.5,
                         )
                         assertPairPasses(
-                            scheme = scheme,
                             palette = palette,
                             darkTheme = darkTheme,
                             foreground = scheme.onSurfaceVariant,
@@ -94,7 +46,6 @@ class SoftcoverColorSchemeTest {
                             minimumRatio = 4.5,
                         )
                         assertPairPasses(
-                            scheme = scheme,
                             palette = palette,
                             darkTheme = darkTheme,
                             foreground = scheme.primary,
@@ -104,7 +55,6 @@ class SoftcoverColorSchemeTest {
                             minimumRatio = 4.5,
                         )
                         assertPairPasses(
-                            scheme = scheme,
                             palette = palette,
                             darkTheme = darkTheme,
                             foreground = scheme.tertiary,
@@ -114,7 +64,6 @@ class SoftcoverColorSchemeTest {
                             minimumRatio = 4.5,
                         )
                         assertPairPasses(
-                            scheme = scheme,
                             palette = palette,
                             darkTheme = darkTheme,
                             foreground = scheme.onPrimary,
@@ -124,7 +73,6 @@ class SoftcoverColorSchemeTest {
                             minimumRatio = 4.5,
                         )
                         assertPairPasses(
-                            scheme = scheme,
                             palette = palette,
                             darkTheme = darkTheme,
                             foreground = scheme.onPrimaryContainer,
@@ -134,7 +82,6 @@ class SoftcoverColorSchemeTest {
                             minimumRatio = 4.5,
                         )
                         assertPairPasses(
-                            scheme = scheme,
                             palette = palette,
                             darkTheme = darkTheme,
                             foreground = scheme.onTertiaryContainer,
@@ -144,7 +91,6 @@ class SoftcoverColorSchemeTest {
                             minimumRatio = 4.5,
                         )
                         assertPairPasses(
-                            scheme = scheme,
                             palette = palette,
                             darkTheme = darkTheme,
                             foreground = scheme.onSurface,
@@ -154,7 +100,6 @@ class SoftcoverColorSchemeTest {
                             minimumRatio = 4.5,
                         )
                         assertPairPasses(
-                            scheme = scheme,
                             palette = palette,
                             darkTheme = darkTheme,
                             foreground = scheme.outline,
@@ -168,8 +113,7 @@ class SoftcoverColorSchemeTest {
             }
 
         private fun assertPairPasses(
-            scheme: ColorScheme,
-            palette: ColorPalette,
+            palette: SpinePalette,
             darkTheme: Boolean,
             foreground: Color,
             foregroundName: String,
@@ -197,10 +141,10 @@ class SoftcoverColorSchemeTest {
         @Test
         fun `light mode primary and background differ across all five palettes`() {
             // ----- Arrange -----
-            val schemes = ColorPalette.entries.map {
+            val schemes = SpinePalette.entries.map {
                 softcoverColorScheme(
                     darkTheme = false,
-                    colorPalette = it,
+                    palette = it,
                 )
             }
 
@@ -216,10 +160,10 @@ class SoftcoverColorSchemeTest {
         @Test
         fun `dark mode primary and background differ across all five palettes`() {
             // ----- Arrange -----
-            val schemes = ColorPalette.entries.map {
+            val schemes = SpinePalette.entries.map {
                 softcoverColorScheme(
                     darkTheme = true,
-                    colorPalette = it,
+                    palette = it,
                 )
             }
 

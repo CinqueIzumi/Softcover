@@ -3,54 +3,52 @@ package nl.rhaydus.softcover.feature.reading.presentation.screen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import nl.rhaydus.common.currentLocalDate
-import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
-import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
+import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowStreakSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
-import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakStripFor
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.toPickUpNextCard
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.toTrendingTileUiModel
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingBooksColumn
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingMasthead
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
 private val booksListState = LazyListState()
@@ -63,14 +61,17 @@ internal actual fun ReadingScreenLayout(
     onBookClick: (Book) -> Unit,
     onNavigateToSearch: () -> Unit,
 ) {
+    TabReselectScrollToTopEffect(
+        tab = ReadingTab,
+        state = booksListState,
+    )
+
     val pullToRefreshState = rememberPullToRefreshState()
 
     val controller = rememberMarkAsReadController(
         books = state.books,
         runAction = runAction,
     )
-
-    var showStreakSheet by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -83,24 +84,22 @@ internal actual fun ReadingScreenLayout(
                     .imePadding(),
             ) {
                 PullToRefreshBox(
-                    isRefreshing = state.isLoading,
+                    isRefreshing = state.isRefreshing,
                     onRefresh = { runAction(RefreshAction) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
                     state = pullToRefreshState,
                     indicator = {
-                        IndicatorBox(
-                            modifier = Modifier.align(Alignment.TopCenter),
+                        PullToRefreshDefaults.LoadingIndicator(
                             state = pullToRefreshState,
-                            isRefreshing = state.isLoading,
-                        ) {
-                            ContainedLoadingIndicator(modifier = Modifier.align(Alignment.TopCenter))
-                        }
+                            isRefreshing = state.isRefreshing,
+                            modifier = Modifier.align(Alignment.TopCenter),
+                        )
                     },
                 ) {
                     when {
-                        state.books.isNotEmpty() -> {
+                        state.books.isNotEmpty() || state.isLoading -> {
                             ReadingBooksColumn(
                                 state = state,
                                 runAction = runAction,
@@ -109,25 +108,24 @@ internal actual fun ReadingScreenLayout(
                                 listState = booksListState,
                                 contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
                             ) {
-                                EditorialHeader(
-                                    bookCount = state.books.size,
-                                    averageProgress = state.books.averageProgress(),
-                                    recentReadingActivity = state.recentReadingActivity,
-                                    streakEnabled = state.streakEnabled,
-                                    onExpandStreak = { showStreakSheet = true },
+                                ReadingMasthead(
+                                    state = state,
+                                    onExpandStreak = { runAction(OnShowStreakSheetClickAction) },
                                     pullToRefreshState = pullToRefreshState,
-                                    isRefreshing = state.isLoading,
                                 )
                             }
                         }
 
-                        state.isLoading -> Unit
                         else -> EmptyCurrentlyReadingScreen(
-                            wantToReadBooks = state.wantToReadBooks,
                             trendingBooks = state.trendingBooks,
+                            pickUpNext = state.pickUpNext,
+                            trendingTile = state.trendingTile,
+                            pickUpNextHeader = state.pickUpNextHeader,
+                            trendingHeader = state.trendingHeader,
+                            emptyState = state.emptyCurrentlyReading,
                             streakEnabled = state.streakEnabled,
-                            recentReadingActivity = state.recentReadingActivity,
-                            onExpandStreak = { showStreakSheet = true },
+                            streakStrip = state.streakStrip,
+                            onExpandStreak = { runAction(OnShowStreakSheetClickAction) },
                             onBookClick = onBookClick,
                             onNavigateToSearch = onNavigateToSearch,
                         )
@@ -138,81 +136,14 @@ internal actual fun ReadingScreenLayout(
                     state = state,
                     runAction = runAction,
                     controller = controller,
-                    showStreakSheet = showStreakSheet,
-                    onDismissStreakSheet = { showStreakSheet = false },
                 )
             }
         }
 
         MarkAsReadBurst(
-            triggerKey = controller.celebrationKey,
+            model = controller.burst,
             modifier = Modifier.fillMaxSize(),
-            particleCount = 28,
-            durationMillis = 1000,
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun EditorialHeader(
-    bookCount: Int,
-    averageProgress: Float?,
-    recentReadingActivity: List<ReadingDayActivity>,
-    streakEnabled: Boolean,
-    onExpandStreak: () -> Unit,
-    pullToRefreshState: PullToRefreshState,
-    isRefreshing: Boolean,
-) {
-    val greeting = remember { greetingForNow() }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 24.dp, end = 24.dp, top = 24.dp),
-    ) {
-        PullToRefreshEyebrow(
-            pullToRefreshState = pullToRefreshState,
-            isRefreshing = isRefreshing,
-            baseText = "Now reading",
-            refreshingText = "Catching up on your reading…",
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = greeting,
-            style = MaterialTheme.editorialTypography.headlineMedium.copy(
-                lineHeight = 32.sp,
-            ),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-
-        val subtitle = buildSubtitle(
-            bookCount = bookCount,
-            averageProgress = averageProgress,
-        )
-
-        Text(
-            text = subtitle,
-            style = MaterialTheme.editorialTypography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-
-        if (streakEnabled && recentReadingActivity.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(14.dp))
-
-            StreakStrip(
-                activity = recentReadingActivity,
-                onClick = onExpandStreak,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
     }
 }
 
@@ -320,15 +251,32 @@ private fun ReadingScreenEmptyPreview() {
     }
 }
 
+/**
+ * The two empty-screen preview states, built as top-level `val`s so the cover mapping a
+ * `CoverModelsCollector` performs at runtime happens off the composition here too. Without the
+ * covers the tiles would render blank placeholders.
+ *
+ * Declared **after** [previewBooks]: top-level properties initialise in file order, so reading it
+ * from above would see an uninitialised list.
+ */
+private val previewEmptyWithPickUpNextState = ReadingScreenUiState(
+    isLoading = false,
+    wantToReadBooks = previewBooks.take(3).toImmutableList(),
+    pickUpNext = previewBooks.take(3).map { it.toPickUpNextCard() to it }.toBookCardSet(),
+)
+
+private val previewEmptyWithTrendingState = ReadingScreenUiState(
+    isLoading = false,
+    trendingBooks = persistentListOf(previewBooks.first()),
+    trendingTile = previewBooks.first().toTrendingTileUiModel(),
+)
+
 @StandardPreview
 @Composable
 private fun ReadingScreenEmptyWithPickUpNextPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
-            state = ReadingScreenUiState(
-                isLoading = false,
-                wantToReadBooks = previewBooks.take(3),
-            ),
+            state = previewEmptyWithPickUpNextState,
             runAction = {},
             onBookClick = {},
             onNavigateToSearch = {},
@@ -341,10 +289,7 @@ private fun ReadingScreenEmptyWithPickUpNextPreview() {
 private fun ReadingScreenEmptyWithTrendingPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
-            state = ReadingScreenUiState(
-                isLoading = false,
-                trendingBooks = listOf(previewBooks.first()),
-            ),
+            state = previewEmptyWithTrendingState,
             runAction = {},
             onBookClick = {},
             onNavigateToSearch = {},
@@ -371,7 +316,7 @@ private fun ReadingScreenSingleBookPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = previewBooks.take(1),
+                books = previewBooks.take(1).toImmutableList(),
                 isLoading = false,
             ),
             runAction = {},
@@ -387,7 +332,7 @@ private fun ReadingScreenPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = previewBooks,
+                books = previewBooks.toImmutableList(),
                 isLoading = false,
             ),
             runAction = {},
@@ -422,9 +367,9 @@ private fun ReadingScreenWithStreakStripPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = previewBooks,
+                books = previewBooks.toImmutableList(),
                 isLoading = false,
-                recentReadingActivity = previewReadingActivity(),
+                streakStrip = streakStripFor(activity = previewReadingActivity()),
             ),
             runAction = {},
             onBookClick = {},
@@ -472,9 +417,9 @@ private fun ReadingScreenWithDeadlineAndNudgePreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = previewBooks,
+                books = previewBooks.toImmutableList(),
                 isLoading = false,
-                deadlines = deadlines,
+                deadlines = deadlines.toImmutableMap(),
             ),
             runAction = {},
             onBookClick = {},
@@ -508,9 +453,9 @@ private fun ReadingScreenExpiredDeadlinePreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = previewBooks.take(3),
+                books = previewBooks.take(3).toImmutableList(),
                 isLoading = false,
-                deadlines = deadlines,
+                deadlines = deadlines.toImmutableMap(),
             ),
             runAction = {},
             onBookClick = {},
@@ -525,9 +470,9 @@ private fun ReadingScreenMutationFailedPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = previewBooks,
+                books = previewBooks.toImmutableList(),
                 isLoading = false,
-                failedMutationBookIds = setOf(previewBooks[0].id, previewBooks[2].id),
+                failedMutationBookIds = persistentSetOf(previewBooks[0].id, previewBooks[2].id),
             ),
             runAction = {},
             onBookClick = {},
@@ -559,23 +504,12 @@ private fun ReadingScreenAudiobookPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
-                books = listOf(audioBook) + previewBooks.take(2),
+                books = (listOf(audioBook) + previewBooks.take(2)).toImmutableList(),
                 isLoading = false,
             ),
             runAction = {},
             onBookClick = {},
             onNavigateToSearch = {},
-        )
-    }
-}
-
-@StandardPreview
-@Composable
-private fun PaceNudgeRibbonPreview() {
-    SoftcoverTheme {
-        PaceNudgeRibbon(
-            text = "Read 24 pages today to stay on pace.",
-            onDismiss = {},
         )
     }
 }

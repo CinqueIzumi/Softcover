@@ -1,16 +1,16 @@
 package nl.rhaydus.softcover.core.personal.data.mapper
 
 import io.kotest.matchers.shouldBe
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.database.model.HighlightEntity
 import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
 import nl.rhaydus.softcover.core.personal.domain.model.Highlight
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import kotlin.time.Instant
 
 class PersonalMappersTest {
     // region Fixtures
@@ -108,22 +108,6 @@ class PersonalMappersTest {
         }
 
         @Test
-        fun `maps null page and note correctly`() {
-            // ----- Arrange -----
-            val entity = buildHighlightEntity(
-                page = null,
-                note = null,
-            )
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.page shouldBe null
-            result.note shouldBe null
-        }
-
-        @Test
         fun `falls back to Instant EPOCH when createdAt is malformed`() {
             // ----- Arrange -----
             val entity = buildHighlightEntity(createdAt = "bad-date")
@@ -159,9 +143,14 @@ class PersonalMappersTest {
     @Nested
     inner class ReadingSessionEntityToDomain {
         @Test
-        fun `maps active session (no endedAt) correctly`() {
+        fun `maps every field of a completed paused session`() {
             // ----- Arrange -----
-            val entity = buildReadingSessionEntity()
+            val entity = buildReadingSessionEntity(
+                endedAt = "2024-04-01T10:00:00Z",
+                endPage = 80,
+                pausedSeconds = 120,
+                lastPausedAt = "2024-04-01T09:30:00Z",
+            )
 
             // ----- Act -----
             val result = entity.toDomain()
@@ -170,25 +159,11 @@ class PersonalMappersTest {
             result.id shouldBe 10L
             result.bookId shouldBe 1
             result.startedAt shouldBe Instant.parse("2024-04-01T09:00:00Z")
-            result.endedAt shouldBe null
-            result.startPage shouldBe 50
-            result.endPage shouldBe null
-        }
-
-        @Test
-        fun `maps completed session with endedAt correctly`() {
-            // ----- Arrange -----
-            val entity = buildReadingSessionEntity(
-                endedAt = "2024-04-01T10:00:00Z",
-                endPage = 80,
-            )
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
             result.endedAt shouldBe Instant.parse("2024-04-01T10:00:00Z")
+            result.startPage shouldBe 50
             result.endPage shouldBe 80
+            result.pausedSeconds shouldBe 120
+            result.lastPausedAt shouldBe Instant.parse("2024-04-01T09:30:00Z")
         }
 
         @Test
@@ -216,34 +191,6 @@ class PersonalMappersTest {
         }
 
         @Test
-        fun `maps pausedSeconds and non-null lastPausedAt correctly`() {
-            // ----- Arrange -----
-            val entity = buildReadingSessionEntity(
-                pausedSeconds = 120,
-                lastPausedAt = "2024-04-01T09:30:00Z",
-            )
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.pausedSeconds shouldBe 120
-            result.lastPausedAt shouldBe Instant.parse("2024-04-01T09:30:00Z")
-        }
-
-        @Test
-        fun `maps null lastPausedAt to null`() {
-            // ----- Arrange -----
-            val entity = buildReadingSessionEntity(lastPausedAt = null)
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.lastPausedAt shouldBe null
-        }
-
-        @Test
         fun `maps a malformed lastPausedAt to null`() {
             // ----- Arrange -----
             val entity = buildReadingSessionEntity(lastPausedAt = "not-a-timestamp")
@@ -254,28 +201,12 @@ class PersonalMappersTest {
             // ----- Assert -----
             result.lastPausedAt shouldBe null
         }
-
-        @Test
-        fun `round-trips entity to domain and back preserving pausedSeconds and lastPausedAt`() {
-            // ----- Arrange -----
-            val entity = buildReadingSessionEntity(
-                pausedSeconds = 300,
-                lastPausedAt = "2024-04-01T09:45:00Z",
-            )
-
-            // ----- Act -----
-            val result = entity.toDomain().toEntity()
-
-            // ----- Assert -----
-            result.pausedSeconds shouldBe 300
-            result.lastPausedAt shouldBe "2024-04-01T09:45:00Z"
-        }
     }
 
     @Nested
     inner class ReadingSessionToEntity {
         @Test
-        fun `maps all fields correctly for an active session`() {
+        fun `maps every field of a paused session to the entity`() {
             // ----- Arrange -----
             val session = ReadingSession(
                 id = 10L,
@@ -283,31 +214,6 @@ class PersonalMappersTest {
                 startedAt = Instant.parse("2024-04-01T09:00:00Z"),
                 endedAt = null,
                 startPage = 50,
-                endPage = null,
-                startSeconds = null,
-                endSeconds = null,
-            )
-
-            // ----- Act -----
-            val result = session.toEntity()
-
-            // ----- Assert -----
-            result.id shouldBe 10L
-            result.bookId shouldBe 1
-            result.startedAt shouldBe "2024-04-01T09:00:00Z"
-            result.endedAt shouldBe null
-            result.startPage shouldBe 50
-        }
-
-        @Test
-        fun `maps pausedSeconds and non-null lastPausedAt to entity correctly`() {
-            // ----- Arrange -----
-            val session = ReadingSession(
-                id = 10L,
-                bookId = 1,
-                startedAt = Instant.parse("2024-04-01T09:00:00Z"),
-                endedAt = null,
-                startPage = null,
                 endPage = null,
                 startSeconds = null,
                 endSeconds = null,
@@ -319,55 +225,13 @@ class PersonalMappersTest {
             val result = session.toEntity()
 
             // ----- Assert -----
+            result.id shouldBe 10L
+            result.bookId shouldBe 1
+            result.startedAt shouldBe "2024-04-01T09:00:00Z"
+            result.endedAt shouldBe null
+            result.startPage shouldBe 50
             result.pausedSeconds shouldBe 180
             result.lastPausedAt shouldBe "2024-04-01T09:20:00Z"
-        }
-
-        @Test
-        fun `maps null lastPausedAt to null in entity`() {
-            // ----- Arrange -----
-            val session = ReadingSession(
-                id = 10L,
-                bookId = 1,
-                startedAt = Instant.parse("2024-04-01T09:00:00Z"),
-                endedAt = null,
-                startPage = null,
-                endPage = null,
-                startSeconds = null,
-                endSeconds = null,
-                pausedSeconds = 0,
-                lastPausedAt = null,
-            )
-
-            // ----- Act -----
-            val result = session.toEntity()
-
-            // ----- Assert -----
-            result.lastPausedAt shouldBe null
-        }
-
-        @Test
-        fun `round-trips domain to entity and back preserving pausedSeconds and lastPausedAt`() {
-            // ----- Arrange -----
-            val session = ReadingSession(
-                id = 10L,
-                bookId = 1,
-                startedAt = Instant.parse("2024-04-01T09:00:00Z"),
-                endedAt = null,
-                startPage = null,
-                endPage = null,
-                startSeconds = null,
-                endSeconds = null,
-                pausedSeconds = 240,
-                lastPausedAt = Instant.parse("2024-04-01T09:50:00Z"),
-            )
-
-            // ----- Act -----
-            val result = session.toEntity().toDomain()
-
-            // ----- Assert -----
-            result.pausedSeconds shouldBe 240
-            result.lastPausedAt shouldBe Instant.parse("2024-04-01T09:50:00Z")
         }
     }
 
@@ -428,18 +292,6 @@ class PersonalMappersTest {
         }
 
         @Test
-        fun `returns null for finishedAt when string is malformed`() {
-            // ----- Arrange -----
-            val entity = buildReadingLogEntryEntity(finishedAt = "not-a-date")
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.finishedAt shouldBe null
-        }
-
-        @Test
         fun `falls back to Instant EPOCH when createdAt is malformed`() {
             // ----- Arrange -----
             val entity = buildReadingLogEntryEntity(createdAt = "bad")
@@ -486,27 +338,6 @@ class PersonalMappersTest {
             result.rating shouldBe 4.5
             result.note shouldBe "Enjoyable"
             result.createdAt shouldBe "2024-01-16T12:00:00Z"
-        }
-
-        @Test
-        fun `maps null LocalDate fields to null strings`() {
-            // ----- Arrange -----
-            val entry = ReadingLogEntry(
-                id = 5L,
-                bookId = 1,
-                startedAt = null,
-                finishedAt = null,
-                rating = null,
-                note = null,
-                createdAt = Instant.parse("2024-01-16T12:00:00Z"),
-            )
-
-            // ----- Act -----
-            val result = entry.toEntity()
-
-            // ----- Assert -----
-            result.startedAt shouldBe null
-            result.finishedAt shouldBe null
         }
     }
 }

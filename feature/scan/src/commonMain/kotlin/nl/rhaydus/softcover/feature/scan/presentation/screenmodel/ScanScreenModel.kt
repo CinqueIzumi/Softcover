@@ -15,8 +15,9 @@ internal class ScanScreenModel(
     private val resolveBookByIsbnUseCase: ResolveBookByIsbnUseCase,
     private val addBookByIsbnUseCase: AddBookByIsbnUseCase,
     dispatchers: AppDispatchers,
+    flows: List<ScanCollector>,
 ) : ToadScreenModel<ScanUiState, ScanEvent, ScanDependencies, ScanCollector, LocalScanVariables>(
-    initializers = emptyList(),
+    initializers = flows,
     initialState = ScanUiState(),
     initialLocalVariables = LocalScanVariables(),
 ) {
@@ -26,6 +27,10 @@ internal class ScanScreenModel(
         coroutineScope = screenModelScope,
         mainDispatcher = dispatchers.main,
     )
+
+    init {
+        startInitializers()
+    }
 
     fun runAction(action: ScanAction) = dispatch(action)
 }

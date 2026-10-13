@@ -9,9 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetDidNotFinishUserBooksUseCase
@@ -24,6 +21,9 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVis
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class LibraryTabCountsCollectorTest {
     private lateinit var getAllUserBooksUseCase: GetAllUserBooksUseCase
@@ -111,7 +111,7 @@ class LibraryTabCountsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets totalCount and statusCounts from the five flows once all have emitted`() = runTest(UnconfinedTestDispatcher()) {
+        fun `sets the counts and the ordered entries from the five flows once all have emitted`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LibraryTabCountsCollector()
             val job = launch {
@@ -135,6 +135,13 @@ class LibraryTabCountsCollectorTest {
                 UserBookStatus.WANT_TO_READ.code to 5,
                 UserBookStatus.READ.code to 9,
                 UserBookStatus.DID_NOT_FINISH.code to 2,
+            )
+            stateFlow.value.orderedEntries.map { it.count } shouldBe listOf(
+                20,
+                3,
+                5,
+                9,
+                2,
             )
             job.cancel()
         }
@@ -167,29 +174,6 @@ class LibraryTabCountsCollectorTest {
                 UserBookStatus.READ.code to 9,
                 UserBookStatus.DID_NOT_FINISH.code to 2,
             )
-            job.cancel()
-        }
-
-        @Test
-        fun `does not change state before all five flows have emitted`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = LibraryTabCountsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            allFlow.emit(books(20))
-            currentlyReadingFlow.emit(books(3))
-            wantToReadFlow.emit(books(5))
-            readFlow.emit(books(9))
-
-            // ----- Assert -----
-            stateFlow.value.totalCount shouldBe 0
-            stateFlow.value.statusCounts shouldBe emptyMap()
             job.cancel()
         }
     }

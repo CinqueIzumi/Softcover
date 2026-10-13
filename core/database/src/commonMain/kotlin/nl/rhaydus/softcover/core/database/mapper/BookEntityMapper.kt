@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.database.mapper
 
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromJson
-import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.database.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.core.database.model.BookEditionEntity

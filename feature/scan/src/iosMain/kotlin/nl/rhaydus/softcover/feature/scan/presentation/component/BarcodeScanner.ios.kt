@@ -8,12 +8,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 // TODO(iOS): real AVCaptureSession + Vision (VNDetectBarcodesRequest) scanner.
@@ -25,19 +25,19 @@ actual fun BarcodeScanner(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = Spacing.xl),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
+        SoftcoverText(
             text = "SCANNING",
             style = MaterialTheme.editorialTypography.eyebrow,
             color = MaterialTheme.colorScheme.primary,
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
-        Text(
+        SoftcoverText(
             text = "Barcode scanning isn't available on iOS yet",
             style = MaterialTheme.editorialTypography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,

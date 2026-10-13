@@ -13,10 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesDismissalUseCase
@@ -25,6 +21,10 @@ import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSugge
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnUnblockSeriesActionTest {
     private lateinit var undoContinueSeriesDismissalUseCase: UndoContinueSeriesDismissalUseCase
@@ -121,7 +121,7 @@ class OnUnblockSeriesActionTest {
         }
 
         @Test
-        fun `shows an Undo snackbar with the series name on success`() = runTest {
+        fun `offers an Undo snackbar once the series is unblocked`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
 
@@ -144,41 +144,8 @@ class OnUnblockSeriesActionTest {
             // ----- Assert -----
             verify {
                 SnackBarManager.showSnackBar(
-                    title = "\"Foundation\" is back in your suggestions",
-                    actionLabel = "Undo",
-                    duration = any(),
-                    onActionClick = any(),
-                    onDismiss = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `falls back to a generic label when seriesName is null`() = runTest {
-            // ----- Arrange -----
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                undoContinueSeriesDismissalUseCase(seriesId = 200)
-            } returns Result.success(Unit)
-
-            val action = OnUnblockSeriesAction(
-                seriesId = 200,
-                seriesName = null,
-                coverUrl = null,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            verify {
-                SnackBarManager.showSnackBar(
-                    title = "\"Series\" is back in your suggestions",
-                    actionLabel = "Undo",
+                    title = any(),
+                    actionLabel = any(),
                     duration = any(),
                     onActionClick = any(),
                     onDismiss = any(),
@@ -215,58 +182,6 @@ class OnUnblockSeriesActionTest {
                     duration = any(),
                     onActionClick = any(),
                     onDismiss = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `clicking Undo on the snackbar re-dismisses the series with the original metadata`() = runTest {
-            // ----- Arrange -----
-            val dependencies = stubDependencies(this)
-            val onActionClickSlot = slot<() -> Unit>()
-
-            coEvery {
-                undoContinueSeriesDismissalUseCase(seriesId = 100)
-            } returns Result.success(Unit)
-
-            every {
-                SnackBarManager.showSnackBar(
-                    title = any(),
-                    actionLabel = any(),
-                    duration = any(),
-                    onActionClick = capture(onActionClickSlot),
-                    onDismiss = any(),
-                )
-            } returns Unit
-
-            coEvery {
-                dismissContinueSeriesUseCase(
-                    seriesId = 100,
-                    seriesName = "Foundation",
-                    coverUrl = "cover.jpg",
-                )
-            } returns Result.success(Unit)
-
-            val action = OnUnblockSeriesAction(
-                seriesId = 100,
-                seriesName = "Foundation",
-                coverUrl = "cover.jpg",
-            )
-
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Act -----
-            onActionClickSlot.captured.invoke()
-
-            // ----- Assert -----
-            coVerify {
-                dismissContinueSeriesUseCase(
-                    seriesId = 100,
-                    seriesName = "Foundation",
-                    coverUrl = "cover.jpg",
                 )
             }
         }

@@ -1,19 +1,13 @@
 package nl.rhaydus.softcover.feature.settings.di
 
-import org.koin.dsl.bind
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
-import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.network.di.httpModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
+import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapBundledDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapBundledDataSourceImpl
 import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapLocalDataSource
@@ -32,29 +26,34 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUse
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetThemeModeUseCase
+import nl.rhaydus.softcover.feature.settings.presentation.collector.AppUpdateCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.ComponentGalleryCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DateStyleCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.DisplayToggleRowsCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.GalleryThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryTabCountsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.PersistedLibraryVisibilityCollector
-import nl.rhaydus.softcover.feature.settings.presentation.collector.ReadingStreakCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.RoadmapCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.RoadmapDocumentCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.RoadmapRefreshCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsCollector
-import nl.rhaydus.softcover.feature.settings.presentation.collector.ShelfSwipeCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UiScaleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UserListsCollector
+import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.ComponentGalleryScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
 val settingsModule = module {
     includes(
         dispatcherModule,
         listsModule,
         preferencesModule,
-        designSystemModule,
+        presentationModule,
         bookModule,
         databaseModule,
         httpModule,
@@ -77,6 +76,7 @@ val settingsModule = module {
             setShelfSwipeEnabledUseCase = get(),
             getUiScaleAsFlowUseCase = get(),
             setUiScaleUseCase = get(),
+            observeAppUpdateStateUseCase = get(),
             appVersionProvider = get(),
         )
     }
@@ -85,11 +85,11 @@ val settingsModule = module {
 
     factory { DateStyleCollector() } bind SettingsCollector::class
 
-    factory { ReadingStreakCollector() } bind SettingsCollector::class
-
-    factory { ShelfSwipeCollector() } bind SettingsCollector::class
+    factory { DisplayToggleRowsCollector() } bind SettingsCollector::class
 
     factory { UiScaleCollector() } bind SettingsCollector::class
+
+    factory { AppUpdateCollector() } bind SettingsCollector::class
 
     factory { SetBottomBarStyleUseCase(settingsRepository = get()) }
 
@@ -171,6 +171,17 @@ val settingsModule = module {
         RoadmapScreenModel(
             observeRoadmapUseCase = get(),
             refreshRoadmapUseCase = get(),
+            appDispatchers = get(),
+            flows = getAll(),
+        )
+    }
+    // endregion
+    // region Component gallery
+    factory { GalleryThemeConfigurationCollector() } bind ComponentGalleryCollector::class
+
+    factory {
+        ComponentGalleryScreenModel(
+            getThemeConfigurationUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
         )

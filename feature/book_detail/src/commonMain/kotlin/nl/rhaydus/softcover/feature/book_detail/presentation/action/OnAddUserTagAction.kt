@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.withTagDraft
 import nl.rhaydus.toad.ActionScope
 
 /**
@@ -39,7 +40,11 @@ internal class OnAddUserTagAction(
             category = category,
         )
 
-        scope.setState { it.copy(tagEditorInput = "") }
+        scope.setState {
+            it.withTagDraft(input = "").copy(
+                newlyAddedTagKey = "${category.name}:$trimmed",
+            )
+        }
 
         scope.commitUserTags(
             newSet = newSet,

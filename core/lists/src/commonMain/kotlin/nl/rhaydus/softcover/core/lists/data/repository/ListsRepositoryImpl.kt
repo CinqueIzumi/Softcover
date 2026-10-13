@@ -1,17 +1,19 @@
 package nl.rhaydus.softcover.core.lists.data.repository
 
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.time.Clock
+import kotlinx.coroutines.withContext
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
+import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -19,10 +21,11 @@ import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
-import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.core.lists.domain.model.ListSignature
 import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
 
 internal class ListsRepositoryImpl(
     private val listsRemoteDataSource: ListsRemoteDataSource,
@@ -41,23 +44,10 @@ internal class ListsRepositoryImpl(
         name: String,
         privacy: PrivacySetting,
     ): BookList {
-        val created: BookList = runCatching {
-            listsRemoteDataSource.createList(
-                name = name,
-                privacy = privacy,
-            )
-        }.getOrElse { error ->
-            if (error is CancellationException) throw error
-
-            if (error is ListNameTakenException) throw error
-
-            enqueueCreateList(
-                name = name,
-                privacy = privacy,
-            )
-
-            throw error
-        }
+        val created: BookList = listsRemoteDataSource.createList(
+            name = name,
+            privacy = privacy,
+        )
 
         listsLocalDataSource.cacheUserBookLists(lists = listOf(created))
 
@@ -193,15 +183,25 @@ internal class ListsRepositoryImpl(
                 editionId = edition.id,
             )
         }.getOrElse { error ->
-            if (error is CancellationException) throw error
-
-            enqueueAddListBook(
-                listId = listId,
-                bookId = bookId,
-                editionId = edition.id,
+            settleFailedWrite(
+                error = error,
+                description = "Add to list",
+                rollback = {
+                    listsLocalDataSource.removeOptimisticListBook(
+                        listId = listId,
+                        bookId = bookId,
+                    )
+                },
+                enqueue = {
+                    enqueueAddListBook(
+                        listId = listId,
+                        bookId = bookId,
+                        editionId = edition.id,
+                    )
+                },
             )
 
-            throw error
+            return
         }
 
         listsLocalDataSource.removeOptimisticListBook(
@@ -222,17 +222,7 @@ internal class ListsRepositoryImpl(
 
         listsLocalDataSource.removeListBookById(listBookId = snapshot.listBookId)
 
-        val updatedList: BookList = runCatching {
-            listsRemoteDataSource.removeListBook(book = snapshot)
-        }.getOrElse { error ->
-            if (error is CancellationException) throw error
-
-            enqueueRemoveListBook(snapshot = snapshot)
-
-            throw error
-        }
-
-        listsLocalDataSource.cacheUserBookLists(lists = listOf(updatedList))
+        pushListBookRemoval(snapshot = snapshot)
     }
 
     override suspend fun removeOwnedEdition(editionId: Int) {
@@ -242,17 +232,22 @@ internal class ListsRepositoryImpl(
 
         listsLocalDataSource.removeOwnedListBookByEditionId(editionId = editionId)
 
-        val updatedList: BookList = runCatching {
+        pushListBookRemoval(snapshot = snapshot)
+    }
+
+    private suspend fun pushListBookRemoval(snapshot: ListBook) {
+        runCatching {
             listsRemoteDataSource.removeListBook(book = snapshot)
-        }.getOrElse { error ->
-            if (error is CancellationException) throw error
-
-            enqueueRemoveListBook(snapshot = snapshot)
-
-            throw error
+        }.onSuccess { updatedList ->
+            listsLocalDataSource.cacheUserBookLists(lists = listOf(updatedList))
+        }.onFailure { error ->
+            settleFailedWrite(
+                error = error,
+                description = "Remove from list",
+                rollback = { listsLocalDataSource.cacheListBook(book = snapshot) },
+                enqueue = { enqueueRemoveListBook(snapshot = snapshot) },
+            )
         }
-
-        listsLocalDataSource.cacheUserBookLists(lists = listOf(updatedList))
     }
 
     private suspend fun restoreOwnedListBook(
@@ -295,6 +290,12 @@ internal class ListsRepositoryImpl(
     ) {
         if (orderedListBookIds.isEmpty()) return
 
+        val previousPositions: Map<Int, Int?> = listsLocalDataSource.getAffectedListBookPositions(
+            listId = listId,
+            startPosition = startPosition,
+            orderedListBookIds = orderedListBookIds,
+        )
+
         listsLocalDataSource.applyListBookPositions(
             listId = listId,
             startPosition = startPosition,
@@ -308,15 +309,18 @@ internal class ListsRepositoryImpl(
                 orderedListBookIds = orderedListBookIds,
             )
         }.onFailure { error ->
-            if (error is CancellationException) throw error
-
-            enqueueReorderListBooks(
-                listId = listId,
-                startPosition = startPosition,
-                orderedListBookIds = orderedListBookIds,
+            settleFailedWrite(
+                error = error,
+                description = "Reorder",
+                rollback = { listsLocalDataSource.restoreListBookPositions(positions = previousPositions) },
+                enqueue = {
+                    enqueueReorderListBooks(
+                        listId = listId,
+                        startPosition = startPosition,
+                        orderedListBookIds = orderedListBookIds,
+                    )
+                },
             )
-
-            throw error
         }
     }
 
@@ -348,26 +352,42 @@ internal class ListsRepositoryImpl(
         listsLocalDataSource.cacheUserBookLists(lists = listOf(refreshed))
     }
 
-    private suspend fun enqueueCreateList(
-        name: String,
-        privacy: PrivacySetting,
+    /**
+     * Applies the offline rule to a failed remote write: a [RetryableSyncException] keeps the local
+     * change and queues the write, then returns; anything else (the server rejected it, so a replay
+     * would fail identically) runs [rollback] and rethrows. A failed queue write also rolls back and
+     * rethrows, so returning always means saved or queued.
+     */
+    private suspend fun settleFailedWrite(
+        error: Throwable,
+        description: String,
+        rollback: suspend () -> Unit,
+        enqueue: suspend () -> Unit,
     ) {
-        runCatching {
-            listWriteQueue.enqueue(
-                PendingListWrite(
-                    kind = PendingListWriteKind.CREATE_LIST,
-                    listId = null,
-                    listName = name,
-                    bookId = null,
-                    editionId = null,
-                    listBookId = null,
-                    startPosition = null,
-                    orderedListBookIds = null,
-                    enqueuedAt = Clock.System.now().toString(),
-                    privacy = privacy,
-                ),
+        if (error is CancellationException) throw error
+
+        if (error is RetryableSyncException) {
+            AppLog.w(
+                error,
+                "$description hit a transient error; queued for retry",
             )
+
+            runCatching { enqueue() }.onFailure { queueError ->
+                rollbackUninterrupted(rollback)
+
+                throw queueError
+            }
+
+            return
         }
+
+        rollbackUninterrupted(rollback)
+
+        throw error
+    }
+
+    private suspend fun rollbackUninterrupted(rollback: suspend () -> Unit) {
+        withContext(NonCancellable) { rollback() }
     }
 
     private suspend fun enqueueAddListBook(
@@ -375,39 +395,35 @@ internal class ListsRepositoryImpl(
         bookId: Int,
         editionId: Int,
     ) {
-        runCatching {
-            listWriteQueue.enqueue(
-                PendingListWrite(
-                    kind = PendingListWriteKind.ADD_LIST_BOOK,
-                    listId = listId,
-                    listName = null,
-                    bookId = bookId,
-                    editionId = editionId,
-                    listBookId = null,
-                    startPosition = null,
-                    orderedListBookIds = null,
-                    enqueuedAt = Clock.System.now().toString(),
-                ),
-            )
-        }
+        listWriteQueue.enqueue(
+            PendingListWrite(
+                kind = PendingListWriteKind.ADD_LIST_BOOK,
+                listId = listId,
+                listName = null,
+                bookId = bookId,
+                editionId = editionId,
+                listBookId = null,
+                startPosition = null,
+                orderedListBookIds = null,
+                enqueuedAt = Clock.System.now().toString(),
+            ),
+        )
     }
 
     private suspend fun enqueueRemoveListBook(snapshot: ListBook) {
-        runCatching {
-            listWriteQueue.enqueue(
-                PendingListWrite(
-                    kind = PendingListWriteKind.REMOVE_LIST_BOOK,
-                    listId = snapshot.listId,
-                    listName = null,
-                    bookId = snapshot.bookId,
-                    editionId = snapshot.editionId,
-                    listBookId = snapshot.listBookId,
-                    startPosition = null,
-                    orderedListBookIds = null,
-                    enqueuedAt = Clock.System.now().toString(),
-                ),
-            )
-        }
+        listWriteQueue.enqueue(
+            PendingListWrite(
+                kind = PendingListWriteKind.REMOVE_LIST_BOOK,
+                listId = snapshot.listId,
+                listName = null,
+                bookId = snapshot.bookId,
+                editionId = snapshot.editionId,
+                listBookId = snapshot.listBookId,
+                startPosition = null,
+                orderedListBookIds = null,
+                enqueuedAt = Clock.System.now().toString(),
+            ),
+        )
     }
 
     private suspend fun enqueueReorderListBooks(
@@ -415,21 +431,19 @@ internal class ListsRepositoryImpl(
         startPosition: Int,
         orderedListBookIds: List<Int>,
     ) {
-        runCatching {
-            listWriteQueue.enqueue(
-                PendingListWrite(
-                    kind = PendingListWriteKind.REORDER_LIST_BOOKS,
-                    listId = listId,
-                    listName = null,
-                    bookId = null,
-                    editionId = null,
-                    listBookId = null,
-                    startPosition = startPosition,
-                    orderedListBookIds = orderedListBookIds,
-                    enqueuedAt = Clock.System.now().toString(),
-                ),
-            )
-        }
+        listWriteQueue.enqueue(
+            PendingListWrite(
+                kind = PendingListWriteKind.REORDER_LIST_BOOKS,
+                listId = listId,
+                listName = null,
+                bookId = null,
+                editionId = null,
+                listBookId = null,
+                startPosition = startPosition,
+                orderedListBookIds = orderedListBookIds,
+                enqueuedAt = Clock.System.now().toString(),
+            ),
+        )
     }
 
     private companion object {

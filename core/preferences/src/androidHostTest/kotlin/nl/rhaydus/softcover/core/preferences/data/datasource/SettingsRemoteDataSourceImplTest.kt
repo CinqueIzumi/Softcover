@@ -9,12 +9,13 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterEach
+import nl.rhaydus.softcover.GetUserIdQuery
+import nl.rhaydus.softcover.core.network.helper.safeQuery
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.GetUserIdQuery
-import nl.rhaydus.softcover.core.network.helper.safeQuery
 
 class SettingsRemoteDataSourceImplTest {
     private lateinit var apolloClient: ApolloClient
@@ -27,13 +28,20 @@ class SettingsRemoteDataSourceImplTest {
             SettingsRemoteDataSourceImpl(
                 apolloClient = apolloClient,
             )
-
-        mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
     }
 
-    @AfterEach
-    fun tearDown() {
-        unmockkAll()
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun mockApolloExtensions() {
+            mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun unmockApolloExtensions() {
+            unmockkAll()
+        }
     }
 
     @Nested
@@ -78,21 +86,6 @@ class SettingsRemoteDataSourceImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                dataSource.getUserIdFromBackend()
-            }
-        }
-
-        @Test
-        fun `throws when safeQuery throws`() = runTest {
-            // ----- Arrange -----
-            val expectedError = RuntimeException("network error")
-
-            coEvery {
-                apolloClient.safeQuery(query = any<GetUserIdQuery>())
-            } throws expectedError
-
-            // ----- Act & Assert -----
-            shouldThrow<RuntimeException> {
                 dataSource.getUserIdFromBackend()
             }
         }

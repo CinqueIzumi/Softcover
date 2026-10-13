@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -20,7 +21,7 @@ internal class MoodTagsCollector : ExploreCollector {
                 )
             }
             .onSuccess { tags ->
-                scope.setState { it.copy(moodTags = tags) }
+                scope.setState { it.copy(moodTags = tags.toImmutableList()) }
             }
 
         scope.setState { it.copy(loadingMoodTags = false) }

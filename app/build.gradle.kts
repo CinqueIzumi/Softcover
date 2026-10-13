@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.Test
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -16,8 +17,8 @@ android {
         applicationId = "nl.rhaydus.softcover"
         minSdk = 26
         targetSdk = 37
-        versionCode = 36
-        versionName = "3.1.2"
+        versionCode = 37
+        versionName = "3.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -80,6 +81,10 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:notification"))
 
+    // The DebugRoutesContent seam, bound per build type below. Needed in every variant: the release
+    // binding implements the same interface with a no-op body.
+    implementation(project(":core:presentation"))
+
     // The logging facade the Application entry point installs (AppLog.install) now lives in the
     // foundation core-common module.
     implementation(libs.rhaydus.coreCommon)
@@ -93,6 +98,46 @@ dependencies {
 
     // Image loading — the Application registers a network fetcher on the singleton loader (the default
     // loader ships none) via SingletonImageLoader.Factory. coil-core comes transitively from the
-    // network artifact; coil-compose is not used here (no Compose UI in :app).
+    // network artifact; coil-compose is not used here (the only Compose UI in :app is debug-only).
     implementation(libs.coil3.network.okhttp)
+
+    // Debug-only tooling: the motion / share-card / routes debug screens (`src/debug/`). They live in
+    // the application shell rather than in a library module because `:app` is the only module with
+    // build types — the KMP Android library plugin produces a single variant, so an implementation in
+    // `:core:designsystem` shipped in release builds even though its *binding* was stripped. On
+    // `debugImplementation`, none of this reaches the release binary. `:app` cannot depend on
+    // `:feature:settings` (the tier rule allows app -> orchestration/core only), which is why the
+    // screens are here and not beside the Settings surface that reveals them.
+    //
+    // `compose-material3-expressive` rather than the AndroidX material3 from the Compose BOM: these
+    // screens render `:core:designsystem` composables (SoftcoverTopBar, AnimatedStatNumber) that are
+    // compiled against the same CMP artifact, and the M3-expressive APIs one of them uses
+    // (LinearWavyProgressIndicator) are exactly what CMP's stable material3 strips. One material3 on
+    // the classpath, at one version.
+    //
+    // Only these are declared. `designsystem-core` and `core-common` are already on :app's
+    // compile classpath in every variant, through `:core:designsystem`'s `api` edges; `designsystem-
+    // editorial` is not, because that module holds it on `implementation`. `voyager-navigator` is
+    // declared rather than taken from `:core:presentation`'s `api` edge, so the debug screens do not
+    // silently depend on another module's choice to re-export it.
+    debugImplementation(project(":core:component"))
+    debugImplementation(libs.compose.material3.expressive)
+    debugImplementation(libs.voyager.navigator)
+    debugImplementation(libs.voyager.koin)
+    debugImplementation(libs.rhaydus.toad)
+
+    // Unit tests for the debug-only TOAD ScreenModel above (app/src/testDebug). Mirrors the JUnit5 +
+    // MockK + Kotest + coroutines-test stack the KMP feature modules get from their convention plugin,
+    // which :app does not apply.
+    testDebugImplementation(libs.junit.api)
+    testDebugImplementation(libs.junit.params)
+    testDebugRuntimeOnly(libs.junit.engine)
+    testDebugRuntimeOnly(libs.junit.platform.launcher)
+    testDebugImplementation(libs.mockk)
+    testDebugImplementation(libs.kotest)
+    testDebugImplementation(libs.coroutines.test)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

@@ -2,15 +2,15 @@ package nl.rhaydus.softcover.core.preferences.di
 
 import eu.anifantakis.lib.ksafe.KSafe
 import eu.anifantakis.lib.ksafe.KSafeConfig
-import okio.FileSystem
-import okio.Path.Companion.toPath
-import org.koin.core.module.Module
-import org.koin.dsl.module
 import nl.rhaydus.platform.JvmSecureStorage
 import nl.rhaydus.platform.SecureStorage
 import nl.rhaydus.softcover.core.domain.platform.desktopAppDataDirectory
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.datastore.createAppSettingsDataStore
+import okio.FileSystem
+import okio.Path.Companion.toPath
+import org.koin.core.module.Module
+import org.koin.dsl.module
 
 actual val platformPreferencesModule: Module = module {
     single<AppSettingsDataStore> {

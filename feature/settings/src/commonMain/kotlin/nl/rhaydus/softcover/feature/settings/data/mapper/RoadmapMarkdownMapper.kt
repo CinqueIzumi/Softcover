@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.data.mapper
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSpan
 
@@ -15,14 +17,14 @@ import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSpan
  * own chrome (a top bar / page header) already supplies that title, so keeping it would duplicate it
  * in the body.
  */
-internal fun String.toRoadmapBlocks(): List<RoadmapBlock> {
+internal fun String.toRoadmapBlocks(): ImmutableList<RoadmapBlock> {
     val blocks = RoadmapMarkdownParser().parse(markdown = this)
     val firstBlock = blocks.firstOrNull()
 
     return if (firstBlock is RoadmapBlock.Heading && firstBlock.level == 1) {
-        blocks.drop(1)
+        blocks.drop(1).toImmutableList()
     } else {
-        blocks
+        blocks.toImmutableList()
     }
 }
 
@@ -152,7 +154,7 @@ private class RoadmapMarkdownParser {
  * marker characters with no text), the original raw text is returned verbatim as a single plain span
  * so content is never silently dropped.
  */
-private fun String.toRoadmapSpans(): List<RoadmapSpan> {
+private fun String.toRoadmapSpans(): ImmutableList<RoadmapSpan> {
     val spans = mutableListOf<RoadmapSpan>()
     val buffer = StringBuilder()
     var bold = false
@@ -226,7 +228,7 @@ private fun String.toRoadmapSpans(): List<RoadmapSpan> {
 
     flush()
 
-    return spans.ifEmpty { listOf(RoadmapSpan(text = this)) }
+    return spans.ifEmpty { listOf(RoadmapSpan(text = this)) }.toImmutableList()
 }
 
 private val LINK_REGEX = Regex("""\[([^\]]*)]\(([^)]*)\)""")
