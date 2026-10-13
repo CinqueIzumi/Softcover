@@ -366,10 +366,11 @@ internal fun BookList(
                         model = card,
                         onEvent = onCardEvent,
                         modifier = entryModifier,
-                        content = if (isRearranging) {
-                            { DragHandle(modifier = handleModifier) }
-                        } else {
-                            null
+                        content = {
+                            DragHandle(
+                                visible = isRearranging,
+                                modifier = handleModifier,
+                            )
                         },
                     )
                 }

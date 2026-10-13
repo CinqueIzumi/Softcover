@@ -94,6 +94,7 @@ internal val sheetEntries: ImmutableList<GalleryEntry> = persistentListOf(
 internal fun GallerySheetFrame(
     scaffold: SheetScaffoldUiModel,
     modifier: Modifier = Modifier,
+    lazyBody: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     SheetScaffoldContent(
@@ -104,6 +105,7 @@ internal fun GallerySheetFrame(
         } else {
             modifier.heightIn(max = 420.dp)
         },
+        lazyBody = lazyBody,
         content = content,
     )
 }

@@ -118,7 +118,7 @@ private fun chooseListsScaffold(
             dismissesSheet = true,
         ),
     ),
-    layout = SheetLayout.PinnedLazy,
+    layout = SheetLayout.Pinned,
 )
 
 private fun List<BookList>.rowsFor(

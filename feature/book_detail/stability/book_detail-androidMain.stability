@@ -5,14 +5,6 @@
 //   ./gradlew :book_detail:stabilityDump
 
 @Composable
-private fun nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetContent(model: nl.rhaydus.softcover.feature.book_detail.presentation.state.EditionSheetUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.state.EditionSheetEvent, kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - model: STABLE (class with no mutable properties)
-    - onEvent: STABLE (function type)
-
-@Composable
 private fun nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetContentPreview(): kotlin.Unit
   skippable: true
   restartable: true
@@ -26,6 +18,14 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.component.Edi
     - model: STABLE (class with no mutable properties)
     - onEvent: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionSearchHeader(model: nl.rhaydus.softcover.feature.book_detail.presentation.state.EditionSheetUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.state.EditionSheetEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - onEvent: STABLE (function type)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.book_detail.presentation.component.EditorTagChip(chip: nl.rhaydus.softcover.core.component.chip.ChipUiModel, isNewlyAdded: kotlin.Boolean, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>): kotlin.Unit

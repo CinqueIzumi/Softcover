@@ -1,5 +1,13 @@
 package nl.rhaydus.softcover.feature.library.presentation.component
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,8 +17,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.chip.Chip
@@ -48,6 +59,11 @@ internal fun LibraryControlLine(
 ) {
     val currentTab = tab ?: return
 
+    val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntSize>()
+    val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val enter = expandHorizontally(animationSpec = spatialSpec) + fadeIn(animationSpec = effectsSpec)
+    val exit = shrinkHorizontally(animationSpec = spatialSpec) + fadeOut(animationSpec = effectsSpec)
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -60,23 +76,32 @@ internal fun LibraryControlLine(
             runAction = runAction,
         )
 
-        state.rearrangeChipFor(tabId = currentTab.id)?.let { chip ->
-            Spacer(modifier = Modifier.width(Spacing.sm))
+        AnimatedContent(
+            targetState = state.rearrangeChipFor(tabId = currentTab.id),
+            transitionSpec = { enter togetherWith exit },
+            contentKey = { chip -> chip != null },
+            label = "rearrangeChip",
+        ) { chip ->
+            if (chip != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Spacer(modifier = Modifier.width(Spacing.sm))
 
-            Chip(
-                model = chip,
-                onEvent = { event ->
-                    if (event is ChipEvent.Clicked) {
-                        val action = if (state.isRearranging) {
-                            OnExitRearrangeModeAction()
-                        } else {
-                            OnEnterRearrangeModeAction()
-                        }
+                    Chip(
+                        model = chip,
+                        onEvent = { event ->
+                            if (event is ChipEvent.Clicked) {
+                                val action = if (state.isRearranging) {
+                                    OnExitRearrangeModeAction()
+                                } else {
+                                    OnEnterRearrangeModeAction()
+                                }
 
-                        runAction(action)
-                    }
-                },
-            )
+                                runAction(action)
+                            }
+                        },
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -91,13 +116,19 @@ internal fun LibraryControlLine(
             tab = currentTab,
         )
 
-        if (canSelectTab) {
-            Spacer(modifier = Modifier.width(Spacing.xs))
+        AnimatedVisibility(
+            visible = canSelectTab,
+            enter = enter,
+            exit = exit,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Spacer(modifier = Modifier.width(Spacing.xs))
 
-            PillButton(
-                model = state.selectPill,
-                onEvent = { runAction(OnEnterSelectionModeAction()) },
-            )
+                PillButton(
+                    model = state.selectPill,
+                    onEvent = { runAction(OnEnterSelectionModeAction()) },
+                )
+            }
         }
     }
 }
@@ -130,19 +161,23 @@ private fun SortLabelControl(
             Spacer(modifier = Modifier.width(Spacing.xxs))
 
             val arrowIcon = drawableIconResource(
-                icon = if (direction == SortDirection.ASCENDING) {
-                    SoftcoverIcon.ArrowDropUp
-                } else {
-                    SoftcoverIcon.ArrowDropDown
-                },
+                icon = SoftcoverIcon.ArrowDropDown,
                 contentDescription = "Sorted ${direction.label}. Tap to change.",
+            )
+
+            val arrowRotation by animateFloatAsState(
+                targetValue = if (direction == SortDirection.ASCENDING) 180f else 0f,
+                animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                label = "sortArrowRotation",
             )
 
             Icon(
                 painter = arrowIcon.getIconPainter(),
                 contentDescription = arrowIcon.contentDescription,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier
+                    .size(16.dp)
+                    .graphicsLayer { rotationZ = arrowRotation },
             )
         }
     }

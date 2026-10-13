@@ -54,16 +54,16 @@ Regressions found so far:
 Walkthrough findings, 2026-10-13. Rows tagged `PF Sn` / `PF On` come from the premium-feel findings and are
 approved by this walkthrough.
 
-- [ ] **Library, bulk move offers the current shelf.** On Want to Read, the selection actions include
+- [x] **Library, bulk move offers the current shelf.** On Want to Read, the selection actions include
   "Move to Want to Read". Leave the shelf being viewed out of the bulk move options.
-- [ ] **Library, selection count lags the cards.** The card border and checkmark update immediately; the
-  "N selected" count updates noticeably later. Find what delays the header and make it land in the same frame.
-- [ ] **Library, control-line affordances snap.** (PF S6, O33) The sort-direction arrow swaps glyphs; rotate
+- [x] **Library, selection count lags the cards.** The card border and checkmark update immediately; the
+  "N selected" count springs (`StatNumber`); now `StatNumberMotion.Roll`.
+- [x] **Library, control-line affordances snap.** (PF S6, O33) The sort-direction arrow swaps glyphs; rotate
   it instead, and rotate the shelves chevron while the sheet is open. The chip, pill and drag handles appear
   via `if` (`LibraryControlLine.kt`, `BookList.kt`); expand or fade them in.
-- [ ] **Library, shelf title lags the pager.** (PF S4) The title changes at the swipe's midpoint. Drive it
+- [x] **Library, shelf title lags the pager.** (PF S4) The title changes at the swipe's midpoint. Drive it
   from the pager offset.
-- [ ] **Shelf sheet, padding under the "Create new list" divider.** Padding between the divider and the
+- [x] **Shelf sheet, padding under the "Create new list" divider.** Padding between the divider and the
   content leaves a dark band, so content looks clipped by a padded block instead of scrolling up behind the
   divider. Move the padding inside the scrolling content.
 - [ ] **Explore, "Because you read" has no skeleton and rows jump.** The genre-based feed loads with no

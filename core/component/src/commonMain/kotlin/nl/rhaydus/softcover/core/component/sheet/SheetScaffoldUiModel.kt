@@ -91,7 +91,7 @@ data class SheetScaffoldUiModel(
                     ),
                 ),
                 footer = SheetFooterUiModel.previews.getValue("Inline"),
-                layout = SheetLayout.PinnedLazy,
+                layout = SheetLayout.Pinned,
             ),
             "Pinned, inline footer with a disabled button" to SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(

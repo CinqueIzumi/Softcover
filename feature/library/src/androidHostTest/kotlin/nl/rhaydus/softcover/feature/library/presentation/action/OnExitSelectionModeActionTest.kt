@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.CreateList
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.selectionCountOf
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -117,6 +118,27 @@ class OnExitSelectionModeActionTest {
             // ----- Assert -----
             stateFlow.value.bulkRemoveSheet shouldBe SheetSession.Closed
             stateFlow.value.chooseListsSheet shouldBe SheetSession.Closed
+        }
+
+
+        @Test
+        fun `exiting resets the selection count to zero`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = persistentSetOf(1, 2, 3),
+                selectionCount = selectionCountOf(count = 3),
+            )
+
+            // ----- Act -----
+            OnExitSelectionModeAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectedBookIds shouldBe emptySet()
+            stateFlow.value.selectionCount shouldBe selectionCountOf(count = 0)
         }
     }
 }

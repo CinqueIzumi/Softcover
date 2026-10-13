@@ -29,7 +29,6 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollec
 import nl.rhaydus.softcover.feature.library.presentation.collector.MastheadCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.PillButtonsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.RearrangeChipCollector
-import nl.rhaydus.softcover.feature.library.presentation.collector.SelectionCountCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSidebarCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSwipeCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelvesSheetCollector
@@ -80,7 +79,6 @@ val libraryModule = module {
     factory { ArrangeSheetCollector() } bind LibraryCollector::class
     factory { ShelvesSheetCollector() } bind LibraryCollector::class
     factory { BulkRemoveSheetCollector() } bind LibraryCollector::class
-    factory { SelectionCountCollector() } bind LibraryCollector::class
 
     factory { DisplayListsCollector() } bind LibraryCollector::class
 

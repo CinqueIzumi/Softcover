@@ -43,6 +43,8 @@ Vertical lists use the same anatomy laid horizontally: cover at the leading edge
 
 A body reads `LocalModalSheetForm` (`SHEET` / `PANEL`) to adapt to the form, never the window width: the library filter's facet chips scroll horizontally on the sheet and wrap behind an `ExpandableFlowRow` on the panel. An in-content dismiss calls `LocalModalSheetDismiss`.
 
+A `SheetLayout.Pinned` sheet whose body is a list is built with `LazySheetScaffold`, which owns the `LazyColumn` (the body is `LazyListScope` content, with an optional fixed `pinned` slot above it; `fillHeight` gives the list all the height the sheet leaves) and gives it a `Spacing.md` bottom content padding when a footer is present, so rows scroll right up to the footer divider instead of stopping at a padded band.
+
 ### 3.6 Adaptive content width
 
 The two-pane split and width caps are [fd §5.8](../../rhaydus/0.3.1/design-system-foundations.md#58-adaptive-content-width-and-the-two-pane-split). On a wide window (§2.7):

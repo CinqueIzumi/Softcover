@@ -76,7 +76,7 @@ internal fun SelectionHeader(
                     expanded = isMoveMenuExpanded,
                     onDismissRequest = { onMoveMenuExpandedChange(false) },
                 ) {
-                    SelectionShelfTargets.forEach { (status, label) ->
+                    pills.moveTargets.forEach { (status, label) ->
                         DropdownMenuItem(
                             text = {
                                 SoftcoverText(
@@ -103,9 +103,3 @@ internal fun SelectionHeader(
         }
     }
 }
-
-private val SelectionShelfTargets: List<Pair<UserBookStatus, String>> = listOf(
-    UserBookStatus.WANT_TO_READ to "Move to Want to Read",
-    UserBookStatus.CURRENTLY_READING to "Move to Currently Reading",
-    UserBookStatus.READ to "Mark as Read",
-)

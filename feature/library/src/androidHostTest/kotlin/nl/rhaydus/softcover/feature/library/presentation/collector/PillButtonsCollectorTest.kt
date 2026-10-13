@@ -85,7 +85,109 @@ class PillButtonsCollectorTest {
             stateFlow.value = stateFlow.value.copy(bulkActionInProgress = true)
 
             // ----- Assert -----
-            stateFlow.value.selectionPills shouldBe LibrarySelectionPills.of(bulkActionInProgress = true)
+            stateFlow.value.selectionPills shouldBe LibrarySelectionPills.of(
+                bulkActionInProgress = true,
+                currentShelf = UserBookStatus.CURRENTLY_READING,
+            )
+            job.cancel()
+        }
+
+
+        @Test
+        fun `a status tab leaves its own shelf out of the move targets`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = PillButtonsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab, readTab),
+                selectedTabId = readTab.id,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectionPills shouldBe LibrarySelectionPills.of(
+                bulkActionInProgress = false,
+                currentShelf = UserBookStatus.READ,
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `switching to another status tab moves the omitted shelf`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = PillButtonsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab, readTab),
+                selectedTabId = readTab.id,
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(selectedTabId = readingTab.id)
+
+            // ----- Assert -----
+            stateFlow.value.selectionPills.moveTargets.map { it.status } shouldBe listOf(
+                UserBookStatus.WANT_TO_READ,
+                UserBookStatus.READ,
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `a non-status tab offers every shelf`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = PillButtonsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab, LibraryTab.All),
+                selectedTabId = LibraryTab.All.id,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectionPills shouldBe LibrarySelectionPills.of(
+                bulkActionInProgress = false,
+                currentShelf = null,
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `a selected tab id missing from the visible tabs offers every shelf`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = PillButtonsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab),
+                selectedTabId = readTab.id,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectionPills.moveTargets.size shouldBe 3
             job.cancel()
         }
     }

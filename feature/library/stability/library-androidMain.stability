@@ -174,10 +174,11 @@ internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.Bo
     - columnsOverride: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.DragHandle(modifier: androidx.compose.ui.Modifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.DragHandle(visible: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:
+    - visible: STABLE (primitive type)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -249,11 +250,14 @@ internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.Li
     - runAction: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.MastheadHeader(masthead: nl.rhaydus.softcover.core.component.header.PageMastheadUiModel, pullToRefreshState: androidx.compose.material3.pulltorefresh.PullToRefreshState, isRefreshing: kotlin.Boolean, topAppBarState: androidx.compose.material3.TopAppBarState, onTitleClick: kotlin.Function0<kotlin.Unit>, onCollapsibleSized: kotlin.Function1<kotlin.Int, kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.MastheadHeader(masthead: nl.rhaydus.softcover.core.component.header.PageMastheadUiModel, titleAt: kotlin.Function1<kotlin.Int, kotlin.String>, pagePosition: kotlin.Function0<kotlin.Float>, isShelvesSheetOpen: kotlin.Boolean, pullToRefreshState: androidx.compose.material3.pulltorefresh.PullToRefreshState, isRefreshing: kotlin.Boolean, topAppBarState: androidx.compose.material3.TopAppBarState, onTitleClick: kotlin.Function0<kotlin.Unit>, onCollapsibleSized: kotlin.Function1<kotlin.Int, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - masthead: STABLE (marked @Stable or @Immutable)
+    - titleAt: STABLE (function type)
+    - pagePosition: STABLE (function type)
+    - isShelvesSheetOpen: STABLE (primitive type)
     - pullToRefreshState: STABLE (marked @Stable or @Immutable)
     - isRefreshing: STABLE (primitive type)
     - topAppBarState: STABLE (marked @Stable or @Immutable)
@@ -285,4 +289,24 @@ internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.Se
     - onMoveShelf: STABLE (function type)
     - onAddToListClick: STABLE (function type)
     - onRemoveClick: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.library.presentation.screen.section.ShelfTitle(text: kotlin.String, alpha: kotlin.Function0<kotlin.Float>, offsetFraction: kotlin.Function0<kotlin.Float>, isAnnounced: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - text: STABLE (String is immutable)
+    - alpha: STABLE (function type)
+    - offsetFraction: STABLE (function type)
+    - isAnnounced: STABLE (primitive type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.library.presentation.screen.section.ShelfTitleCrossfade(titleAt: kotlin.Function1<kotlin.Int, kotlin.String>, pagePosition: kotlin.Function0<kotlin.Float>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - titleAt: STABLE (function type)
+    - pagePosition: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
 

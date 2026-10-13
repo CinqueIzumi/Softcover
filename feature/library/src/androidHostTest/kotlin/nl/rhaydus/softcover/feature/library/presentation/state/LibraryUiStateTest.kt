@@ -317,5 +317,51 @@ class LibraryUiStateTest {
             // ----- Assert -----
             result shouldBe state.inactiveFilterPill
         }
+
+
+    @Nested
+    inner class WithSelectedBookIds {
+        @Test
+        fun `sets the ids and a count matching their size together`() {
+            // ----- Arrange -----
+            val state = LibraryUiState()
+
+            // ----- Act -----
+            val result = state.withSelectedBookIds(ids = setOf(3, 5, 8))
+
+            // ----- Assert -----
+            result.selectedBookIds shouldBe setOf(3, 5, 8)
+            result.selectionCount shouldBe selectionCountOf(count = 3)
+        }
+
+        @Test
+        fun `an empty set resets the count to zero`() {
+            // ----- Arrange -----
+            val state = LibraryUiState().withSelectedBookIds(ids = setOf(1, 2))
+
+            // ----- Act -----
+            val result = state.withSelectedBookIds(ids = emptySet())
+
+            // ----- Assert -----
+            result.selectedBookIds shouldBe emptySet()
+            result.selectionCount shouldBe selectionCountOf(count = 0)
+        }
+
+        @Test
+        fun `leaves every other field untouched`() {
+            // ----- Arrange -----
+            val state = LibraryUiState(
+                selectionMode = true,
+                bulkActionInProgress = true,
+            )
+
+            // ----- Act -----
+            val result = state.withSelectedBookIds(ids = setOf(1))
+
+            // ----- Assert -----
+            result.selectionMode shouldBe true
+            result.bulkActionInProgress shouldBe true
+        }
+    }
     }
 }

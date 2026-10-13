@@ -66,7 +66,7 @@ internal fun editionSheetScaffoldFor(
             ),
             secondary = null,
         ),
-        layout = SheetLayout.PinnedLazy,
+        layout = SheetLayout.Pinned,
     )
 
 internal fun shareSheetFor(

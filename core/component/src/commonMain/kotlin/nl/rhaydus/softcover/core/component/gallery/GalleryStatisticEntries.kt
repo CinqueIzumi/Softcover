@@ -102,8 +102,8 @@ internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "StatNumber",
         family = GalleryFamily.STATISTIC,
-        blurb = "A number bound to live state: it tweens between values, holds tabular figures " +
-            "so digits don't jitter, and ticks a hairline on each integer crossing.",
+        blurb = "A number bound to live state: it springs or rolls between values, and holds tabular figures " +
+            "so digits don't jitter.",
         previews = StatNumberUiModel,
         content = { model, modifier ->
             StatNumber(

@@ -31,7 +31,7 @@
 
 ### Change edition sheet
 
-- `EditionBottomSheetSelector`: `SheetScaffold`, `SheetLayout.PinnedLazy`, primary "Track this edition"
+- `EditionBottomSheetSelector`: `LazySheetScaffold` (`SheetLayout.Pinned`, `fillHeight`), primary "Track this edition"
   (enabled once a different edition is picked). `EditorialSearchField` ("Search by ISBN or publisher"), an
   "{n} EDITIONS" count, then one `BookCard` row per edition: the format as title with a format icon, a meta
   line (publisher · year · pages or duration), "ISBN …"; single choice. Owned editions carry "Owned", the

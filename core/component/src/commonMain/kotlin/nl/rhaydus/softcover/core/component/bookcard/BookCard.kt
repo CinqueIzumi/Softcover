@@ -31,7 +31,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 
 /**
  * [content] is positioned but not sized by the card: at the cover's top-end corner on cover-only and
- * column cards, at the row's end on rows.
+ * column cards, at the row's end on rows. The card adds no inset and reserves no space for it, so a slot
+ * that is empty (for example a handle that is currently hidden) leaves the card's layout untouched; the
+ * slot owns its own padding.
  */
 @Composable
 fun BookCard(
@@ -112,9 +114,7 @@ private fun BookCardCoverScaffold(
                     }
 
                     if (content != null) {
-                        Box(modifier = Modifier.padding(Spacing.xxs)) {
-                            content()
-                        }
+                        content()
                     }
                 }
             }

@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.selectionCountOf
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -71,6 +72,26 @@ class OnSelectBookRangeActionTest {
             stateFlow.value.selectionMode shouldBe true
             stateFlow.value.selectedBookIds shouldBe setOf(10, 20, 30)
             stateFlow.value.isRearranging shouldBe false
+        }
+
+
+        @Test
+        fun `range select counts only the distinct books in the merged selection`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = persistentSetOf(10),
+            )
+
+            // ----- Act -----
+            OnSelectBookRangeAction(bookIds = listOf(10, 20, 30)).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectedBookIds shouldBe setOf(10, 20, 30)
+            stateFlow.value.selectionCount shouldBe selectionCountOf(count = 3)
         }
     }
 }

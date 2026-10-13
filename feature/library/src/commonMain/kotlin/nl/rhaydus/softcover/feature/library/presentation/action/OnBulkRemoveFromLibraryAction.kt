@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.withSelectedBookIds
 import nl.rhaydus.toad.ActionScope
 
 internal class OnBulkRemoveFromLibraryAction(
@@ -30,9 +31,8 @@ internal class OnBulkRemoveFromLibraryAction(
         dependencies.undoableBookRemover.remove(books = books)
 
         scope.setState {
-            it.copy(
+            it.withSelectedBookIds(persistentSetOf()).copy(
                 selectionMode = false,
-                selectedBookIds = persistentSetOf(),
                 bulkActionInProgress = false,
                 isBulkMoveMenuExpanded = false,
                 isBulkRemoveSheetRequested = false,

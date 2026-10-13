@@ -1,6 +1,13 @@
 package nl.rhaydus.softcover.core.component.statistic
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.LocalContentColor
@@ -25,12 +32,15 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 
 /**
  * The canonical way to render a numeric stat that can change in place. Raw `Text` for a number that
- * can change should be treated as a bug. Springs between values when [StatNumberUiModel.value] changes,
- * and counts up from 0 when loading ends; a loading model's value is never shown.
+ * can change should be treated as a bug. When [StatNumberUiModel.value] changes it either springs through
+ * the values in between ([StatNumberMotion.Spring]) or shows the new value at once and slides it in from
+ * the direction of the change ([StatNumberMotion.Roll]); it moves from 0 when loading ends, and a loading
+ * model's value is never shown.
  *
- * The text is locked to tabular figures so digits don't shift width while it springs, and it reserves
- * the width of the final value so the number does not grow while it counts up. When the user has
- * disabled system animations the number snaps.
+ * The text is locked to tabular figures so digits don't shift width while it moves. A spring reserves
+ * the width of the final value so the number does not grow while it counts up; a roll reserves nothing
+ * and animates its width when the digit count changes, clipping the sliding digits to the number's bounds.
+ * When the user has disabled system animations the number snaps.
  */
 @Composable
 fun StatNumber(
@@ -77,6 +87,32 @@ internal fun StatNumber(
     autoSize: TextAutoSize?,
     modifier: Modifier = Modifier,
 ) {
+    val numberStyle = style.tabularFigures()
+
+    when (model.motion) {
+        StatNumberMotion.Spring -> SpringStatNumber(
+            model = model,
+            style = numberStyle,
+            autoSize = autoSize,
+            modifier = modifier,
+        )
+
+        StatNumberMotion.Roll -> RollStatNumber(
+            model = model,
+            style = numberStyle,
+            autoSize = autoSize,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun SpringStatNumber(
+    model: StatNumberUiModel,
+    style: TextStyle,
+    autoSize: TextAutoSize?,
+    modifier: Modifier,
+) {
     val animated by animateFloatAsState(
         targetValue = if (model.isLoading) 0f else model.value.toFloat(),
         animationSpec = MaterialTheme.motion.valueChange,
@@ -84,17 +120,16 @@ internal fun StatNumber(
     )
 
     val displayValue = animated.toDouble()
-    val numberStyle = style.tabularFigures()
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
 
-    val reservedWidth = remember(model, numberStyle, density) {
+    val reservedWidth = remember(model, style, density) {
         if (model.isLoading) {
             0.dp
         } else {
             val finalWidthPx = textMeasurer.measure(
                 text = model.textAt(model.value.toDouble()),
-                style = numberStyle,
+                style = style,
                 maxLines = 1,
             ).size.width
 
@@ -105,13 +140,50 @@ internal fun StatNumber(
     SoftcoverText(
         text = remember(displayValue, model) { model.textAt(displayValue) },
         color = LocalContentColor.current,
-        style = numberStyle,
+        style = style,
         autoSize = autoSize,
         maxLines = 1,
         isLoading = model.isLoading,
         standIn = model.standIn(),
         modifier = modifier.widthIn(min = reservedWidth),
     )
+}
+
+@Composable
+private fun RollStatNumber(
+    model: StatNumberUiModel,
+    style: TextStyle,
+    autoSize: TextAutoSize?,
+    modifier: Modifier,
+) {
+    val motionScheme = MaterialTheme.motionScheme
+
+    AnimatedContent(
+        targetState = if (model.isLoading) 0.0 else model.value,
+        transitionSpec = {
+            val direction = if (targetState >= initialState) 1 else -1
+            val enter = slideInVertically(animationSpec = motionScheme.defaultSpatialSpec()) { it * direction } +
+                fadeIn(animationSpec = motionScheme.defaultEffectsSpec())
+            val exit = slideOutVertically(animationSpec = motionScheme.defaultSpatialSpec()) { -it * direction } +
+                fadeOut(animationSpec = motionScheme.defaultEffectsSpec())
+
+            enter
+                .togetherWith(exit)
+                .using(SizeTransform())
+        },
+        modifier = modifier,
+        label = "StatNumberRoll",
+    ) { shown ->
+        SoftcoverText(
+            text = model.textAt(shown),
+            color = LocalContentColor.current,
+            style = style,
+            autoSize = autoSize,
+            maxLines = 1,
+            isLoading = model.isLoading,
+            standIn = model.standIn(),
+        )
+    }
 }
 
 internal fun StatNumberUiModel.textAt(displayValue: Double): String =

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.component.gallery
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
@@ -11,8 +12,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import nl.rhaydus.softcover.core.component.dialog.toPickerMillis
-import nl.rhaydus.softcover.core.component.lists.ChooseListsBody
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
+import nl.rhaydus.softcover.core.component.lists.chooseListsItems
 import nl.rhaydus.softcover.core.component.progress.ProgressBottomSheetContent
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.share.ScaledShareCardPreview
@@ -22,6 +23,7 @@ import nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.rememberShareCardCapture
 import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
+import nl.rhaydus.softcover.core.component.sheet.LazySheetBody
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetBody
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetBody
@@ -39,10 +41,19 @@ internal val modalEntries: ImmutableList<GalleryEntry> = persistentListOf(
             GallerySheetFrame(
                 scaffold = model.scaffold,
                 modifier = modifier,
+                lazyBody = true,
             ) {
-                ChooseListsBody(
-                    model = model,
-                    onEvent = {},
+                LazySheetBody(
+                    model = model.scaffold,
+                    state = rememberLazyListState(),
+                    fillHeight = false,
+                    pinned = {},
+                    body = {
+                        chooseListsItems(
+                            model = model,
+                            onEvent = {},
+                        )
+                    },
                 )
             }
         },

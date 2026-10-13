@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S12-3 done. S12-4 walkthrough findings are logged as 12 unchecked fix items in `steps/s12-close-out.md` § S12-4 (premium-feel rows S4, S6, S21, S29, S30, S31 and O33 moved there, approved); all are designed, none built. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
-- **Next:** build the Library and shelf-sheet items in `steps/s12-close-out.md` § S12-4 (bulk move offers the current shelf, selection count lag, control-line affordances, shelf title lag, sheet divider padding) through `softcover-implementer`, then the reviewer round and a device check on Medium_Phone; Explore, Search and Book detail groups follow, one per round.
+- **State:** S12-3 done. The five Library / shelf-sheet items in `steps/s12-close-out.md` § S12-4 are built, reviewed, device-confirmed, ticked and committed. Shape changes: `SheetLayout` is `Scrolling | Pinned`; list sheets render through the new `LazySheetScaffold` (scaffold-owned `LazyColumn`, `fillHeight`); `LibraryUiState.withSelectedBookIds` is the single selection writer. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
+- **Next:** build the Explore group the same way; Search and Book detail follow, one per round.
 - **Open questions:** release builds ship with R8 off (`isMinifyEnabled = false`, 45.8 MB APK); enabling it is out of this plan's scope, track separately.
-- **Verification:** docs-only session; `checkDocBudgets` passed. No Kotlin changed since the last `styleCheck` pass.
-- **Uncommitted:** tracker docs: this `## Now` block and the S12-4 findings in `component-library-migration/`, and the rows moved out of `premium-feel-polish/` (README group table, `findings.md`).
+- **Verification:** compiles of `:core:component`, `:core:uibinding`, `:feature:book_detail`, `:feature:library`, their `testAndroidHostTest`, `stabilityCheck`, `styleCheck`, `checkDocBudgets` all green.
+- **Uncommitted:** nothing.
 
 ## Local verification
 

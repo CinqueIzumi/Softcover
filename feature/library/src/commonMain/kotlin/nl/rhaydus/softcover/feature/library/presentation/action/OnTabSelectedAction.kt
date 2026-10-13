@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.withSelectedBookIds
 import nl.rhaydus.toad.ActionScope
 
 internal class OnTabSelectedAction(
@@ -24,10 +25,9 @@ internal class OnTabSelectedAction(
 // long-pressed on, and silently carrying it across tabs (each of which has its own visible
 // set) makes the count subtitle lie.
 internal fun LibraryUiState.withTabSelected(tabId: String): LibraryUiState =
-    copy(
+    withSelectedBookIds(persistentSetOf()).copy(
         selectedTabId = tabId,
         selectionMode = false,
-        selectedBookIds = persistentSetOf(),
         isBulkMoveMenuExpanded = false,
         isBulkRemoveSheetRequested = false,
         isChooseListsSheetRequested = false,

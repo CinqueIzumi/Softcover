@@ -10,7 +10,9 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  *
  * One `Double`, because the spring runs on a float anyway; [format] decides whether the reader ever
  * sees a fraction. [prefix] and [suffix] sit around the number in the same text, so a phrase such as
- * "Page 331" reads as one line where only the digits move; they carry their own spaces.
+ * "Page 331" reads as one line where only the digits move; they carry their own spaces. [motion] picks
+ * between easing through the values in between and showing the new value at once; either way a loading
+ * model's value is never shown.
  */
 @Immutable
 data class StatNumberUiModel(
@@ -20,6 +22,7 @@ data class StatNumberUiModel(
     val variant: StatNumberVariant = StatNumberVariant.Standard,
     val prefix: String = "",
     val suffix: StatNumberSuffix? = null,
+    val motion: StatNumberMotion = StatNumberMotion.Spring,
 ) {
     companion object : UiModelPreviews<StatNumberUiModel> {
         override val previews: ImmutableMap<String, StatNumberUiModel> = persistentMapOf(
@@ -60,6 +63,13 @@ data class StatNumberUiModel(
                 value = 5_400.0,
                 format = StatNumberFormat.Duration,
                 variant = StatNumberVariant.Hero,
+            ),
+            "Roll" to StatNumberUiModel(
+                value = 3.0,
+                format = StatNumberFormat.Plain,
+                variant = StatNumberVariant.Headline,
+                suffix = StatNumberSuffix.Fixed(" selected"),
+                motion = StatNumberMotion.Roll,
             ),
             "Loading with affixes" to StatNumberUiModel(
                 value = 0.0,

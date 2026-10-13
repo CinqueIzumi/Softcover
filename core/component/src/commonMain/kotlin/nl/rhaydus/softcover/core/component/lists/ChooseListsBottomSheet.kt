@@ -11,7 +11,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -42,7 +41,7 @@ import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.control.glyphSwapTransition
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.modifier.tactileClickable
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.LazySheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -72,7 +71,7 @@ fun ChooseListsBottomSheet(
     onEvent: (ChooseListsEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    SheetScaffold(
+    LazySheetScaffold(
         model = model.scaffold,
         onEvent = { event ->
             when (event) {
@@ -86,48 +85,40 @@ fun ChooseListsBottomSheet(
         },
         modifier = modifier,
     ) {
-        ChooseListsBody(
+        chooseListsItems(
             model = model,
             onEvent = onEvent,
         )
     }
 }
 
-/** The sheet's list without the modal container, so the gallery can host it inline. */
-@Composable
-internal fun ColumnScope.ChooseListsBody(
+/** The sheet's list items, so the gallery can host them inline in a lazy list of its own. */
+internal fun LazyListScope.chooseListsItems(
     model: ChooseListsUiModel,
     onEvent: (ChooseListsEvent) -> Unit,
 ) {
     if (model.rows.isEmpty()) {
-        EmptyState(
-            model = model.emptyState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = Spacing.x4l),
-        )
+        item {
+            EmptyState(
+                model = model.emptyState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.x4l),
+            )
+        }
     } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(
-                    weight = 1f,
-                    fill = false,
-                ),
-        ) {
-            items(items = model.rows, key = { it.listId }) { row ->
-                ChooseListsRow(
-                    row = row,
-                    onClick = {
-                        onEvent(
-                            ChooseListsEvent.MembershipToggled(
-                                listId = row.listId,
-                                membership = row.membership,
-                            ),
-                        )
-                    },
-                )
-            }
+        items(items = model.rows, key = { it.listId }) { row ->
+            ChooseListsRow(
+                row = row,
+                onClick = {
+                    onEvent(
+                        ChooseListsEvent.MembershipToggled(
+                            listId = row.listId,
+                            membership = row.membership,
+                        ),
+                    )
+                },
+            )
         }
     }
 }

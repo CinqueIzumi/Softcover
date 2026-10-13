@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.component.share
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import nl.rhaydus.designsystem.share.ShareCardCapture as FoundationShareCardCapture
 import nl.rhaydus.designsystem.share.ShareCardCaptureConfig
@@ -11,6 +12,7 @@ import nl.rhaydus.designsystem.share.ShareCardCaptureConfig
  * desktop clipboard write as [ShareOutcome.CopiedToClipboard]. Obtain an instance with
  * [rememberShareCardCapture].
  */
+@Stable
 interface ShareCardCapture {
     val graphicsLayer: GraphicsLayer
 

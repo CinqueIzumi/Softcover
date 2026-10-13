@@ -52,11 +52,30 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
+/** A list body belongs in [LazySheetScaffold]; a `LazyColumn` inside this scaffold's scrolling body crashes. */
 @Composable
 fun SheetScaffold(
     model: SheetScaffoldUiModel,
     onEvent: (SheetScaffoldEvent) -> Unit,
     modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    SheetScaffoldModal(
+        model = model,
+        onEvent = onEvent,
+        modifier = modifier,
+        lazyBody = false,
+        content = content,
+    )
+}
+
+/** The modal sheet behind [SheetScaffold] and [LazySheetScaffold]; [lazyBody] leaves scrolling to the body. */
+@Composable
+internal fun SheetScaffoldModal(
+    model: SheetScaffoldUiModel,
+    onEvent: (SheetScaffoldEvent) -> Unit,
+    modifier: Modifier,
+    lazyBody: Boolean,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val dismissStarted = remember { mutableStateOf(false) }
@@ -72,6 +91,7 @@ fun SheetScaffold(
             model = model,
             onEvent = onEvent,
             dismissStarted = dismissStarted,
+            lazyBody = lazyBody,
             content = content,
         )
     }
@@ -84,6 +104,7 @@ internal fun SheetScaffoldContent(
     onEvent: (SheetScaffoldEvent) -> Unit,
     modifier: Modifier = Modifier,
     dismissStarted: MutableState<Boolean> = remember { mutableStateOf(false) },
+    lazyBody: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val chrome = rememberSheetChrome(
@@ -98,6 +119,7 @@ internal fun SheetScaffoldContent(
     }
 
     val scrollState = rememberScrollState()
+    val scrollsBody = model.layout == SheetLayout.Pinned && lazyBody.not()
     val paneTitle = model.header?.let { header -> header.section.headlineText ?: header.section.eyebrow }
 
     Column(
@@ -136,16 +158,19 @@ internal fun SheetScaffoldContent(
                             Modifier
                         },
                     )
-                    .then(if (model.layout == SheetLayout.Pinned) Modifier.verticalScroll(state = scrollState) else Modifier)
+                    .then(if (scrollsBody) Modifier.verticalScroll(state = scrollState) else Modifier)
                     .blockInput(enabled = chrome.unlocked.not()),
-                content = content,
-            )
+            ) {
+                content()
+
+                if (scrollsBody && model.footer != null) {
+                    Spacer(modifier = Modifier.height(Spacing.md))
+                }
+            }
         }
 
         if (model.footer != null) {
             if (model.layout != SheetLayout.Scrolling) {
-                Spacer(modifier = Modifier.height(Spacing.md))
-
                 Divider()
 
                 Spacer(modifier = Modifier.height(Spacing.sm))

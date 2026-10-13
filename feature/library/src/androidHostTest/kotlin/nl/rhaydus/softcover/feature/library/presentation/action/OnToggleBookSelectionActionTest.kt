@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.selectionCountOf
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -134,6 +135,44 @@ class OnToggleBookSelectionActionTest {
             // ----- Assert -----
             stateFlow.value.isBulkRemoveSheetRequested shouldBe true
             stateFlow.value.isChooseListsSheetRequested shouldBe true
+        }
+
+
+        @Test
+        fun `selecting a book updates the selection count with the set`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = persistentSetOf(1),
+            )
+
+            // ----- Act -----
+            OnToggleBookSelectionAction(bookId = 2).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectionCount shouldBe selectionCountOf(count = 2)
+        }
+
+        @Test
+        fun `deselecting the last book resets the selection count to zero`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = persistentSetOf(1),
+                selectionCount = selectionCountOf(count = 1),
+            )
+
+            // ----- Act -----
+            OnToggleBookSelectionAction(bookId = 1).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectionCount shouldBe selectionCountOf(count = 0)
         }
     }
 }

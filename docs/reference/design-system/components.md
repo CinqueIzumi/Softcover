@@ -68,7 +68,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Statistics
 
-- **StatNumber** — `statistic` — springs a number into place, with an optional prefix or suffix.
+- **StatNumber** — `statistic` — springs or rolls a number into place, with an optional prefix or suffix.
 - **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile.
 - **ColumnChart** — `chart` — vertical columns on one baseline with a per-column readout.
 - **RankedBars** — `chart` — a bar per category, each on its own 100% track.

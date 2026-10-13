@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableSet
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
@@ -343,3 +344,10 @@ internal data class LibraryUiState(
         return bookIds.mapNotNull { byId[it] }
     }
 }
+
+/** The only writer of [LibraryUiState.selectedBookIds]; keeps [LibraryUiState.selectionCount] in the same transition. */
+internal fun LibraryUiState.withSelectedBookIds(ids: Set<Int>): LibraryUiState =
+    copy(
+        selectedBookIds = ids.toImmutableSet(),
+        selectionCount = selectionCountOf(count = ids.size),
+    )

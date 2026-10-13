@@ -187,6 +187,9 @@ internal actual fun LibraryScreenLayout(
 
                 MastheadHeader(
                     masthead = masthead,
+                    titleAt = { index -> state.mastheadFor(tabs.getOrNull(index)?.id).title.orEmpty() },
+                    pagePosition = { pagerState.currentPage + pagerState.currentPageOffsetFraction },
+                    isShelvesSheetOpen = state.isShelvesSheetRequested,
                     pullToRefreshState = pullToRefreshState,
                     isRefreshing = state.isLoading,
                     topAppBarState = topAppBarState,

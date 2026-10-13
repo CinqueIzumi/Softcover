@@ -1,6 +1,10 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen.section
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -33,28 +37,40 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 /**
  * Small grab affordance shown only while a shelf is in MANUAL sort. The icon itself is the
  * drag handle — the caller attaches `Modifier.draggableHandle(...)` from the reorder library's
- * item scope.
+ * item scope. It fades in and out as [visible] flips and occupies no space while hidden; a handle
+ * composed already visible (a recycled grid item) does not replay the fade.
  */
 @Composable
-internal fun DragHandle(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f),
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        shape = CircleShape,
+internal fun DragHandle(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
+        exit = fadeOut(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
     ) {
-        val dragHandleIcon = drawableIconResource(
-            icon = SoftcoverIcon.DragHandle,
-            contentDescription = "Drag to reorder",
-        )
+        Box(modifier = Modifier.padding(Spacing.xxs)) {
+            Surface(
+                modifier = modifier,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f),
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                shape = CircleShape,
+            ) {
+                val dragHandleIcon = drawableIconResource(
+                    icon = SoftcoverIcon.DragHandle,
+                    contentDescription = "Drag to reorder",
+                )
 
-        Icon(
-            painter = dragHandleIcon.getIconPainter(),
-            contentDescription = dragHandleIcon.contentDescription,
-            modifier = Modifier
-                .size(28.dp)
-                .padding(Spacing.xxs),
-        )
+                Icon(
+                    painter = dragHandleIcon.getIconPainter(),
+                    contentDescription = dragHandleIcon.contentDescription,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .padding(Spacing.xxs),
+                )
+            }
+        }
     }
 }
 

@@ -56,7 +56,7 @@ data class ChooseListsUiModel(
                 primary = null,
                 secondary = SheetFooterButton(label = "New list"),
             ),
-            layout = SheetLayout.PinnedLazy,
+            layout = SheetLayout.Pinned,
         )
 
         private val onTheList = ChipUiModel(
