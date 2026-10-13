@@ -66,15 +66,17 @@ approved by this walkthrough.
 - [x] **Shelf sheet, padding under the "Create new list" divider.** Padding between the divider and the
   content leaves a dark band, so content looks clipped by a padded block instead of scrolling up behind the
   divider. Move the padding inside the scrolling content.
-- [ ] **Explore, "Because you read" has no skeleton and rows jump.** The genre-based feed loads with no
+- [x] **Explore, "Because you read" has no skeleton and rows jump.** The genre-based feed loads with no
   skeleton, and late rows push others down. Add a skeleton, and animate placement so rows move to their new
   spot when the order or content changes.
-- [ ] **Explore, Up-next rail jumps on hide and undo.** (PF S29) Hiding a series or book snaps the rest of
-  the rail into place, and undo snaps it back. Animate both.
-- [ ] **Explore, featured card's "Added to library" button.** (PF S30) Once the book is in the library, the
+- [x] **Explore, Up-next rail jumps on hide and undo.** (PF S29) Hiding a series or book snaps the rest of
+  the rail into place, and undo snaps it back. Animate both. Animation built; device check found hiding a
+  whole series slow to take effect, and its undo not always restoring the series. Hiding a single book was
+  not reported. Fixed: immediate dismissal filter, start anchor on the mobile rail; device-confirmed.
+- [x] **Explore, featured card's "Added to library" button.** (PF S30) Once the book is in the library, the
   primary button reads "Added to library", a status rather than an action. Morph it into a button that
   removes the book from the library.
-- [ ] **Explore, rail covers are blank while loading.** Fast-scrolling a rail (e.g. "What everyone's
+- [x] **Explore, rail covers are blank while loading.** Fast-scrolling a rail (e.g. "What everyone's
   reading") shows empty cover slots. Show a shimmer until the image loads; if this goes in the shared cover
   image, make it opt-in unless every screen should get it.
 - [ ] **Search, removed rows snap away.** (PF S31) Removing a recent search, or a hidden suggestion

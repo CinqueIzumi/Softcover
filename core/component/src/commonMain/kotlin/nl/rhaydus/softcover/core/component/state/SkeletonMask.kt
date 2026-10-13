@@ -50,6 +50,7 @@ internal fun skeletonRevealPhase(
     elapsedMillis: Long,
     loadingEndedAtMillis: Long?,
     skipsGrace: Boolean = false,
+    holdsMinimumVisible: Boolean = true,
 ): SkeletonRevealPhase {
     val graceMillis = if (skipsGrace) 0L else SKELETON_GRACE_MILLIS
 
@@ -63,10 +64,14 @@ internal fun skeletonRevealPhase(
 
     if (loadingEndedAtMillis < graceMillis) return SkeletonRevealPhase.Content
 
-    val shimmerEndsAtMillis = maxOf(
-        loadingEndedAtMillis,
-        graceMillis + SKELETON_MINIMUM_VISIBLE_MILLIS,
-    )
+    val shimmerEndsAtMillis = if (holdsMinimumVisible) {
+        maxOf(
+            loadingEndedAtMillis,
+            graceMillis + SKELETON_MINIMUM_VISIBLE_MILLIS,
+        )
+    } else {
+        loadingEndedAtMillis
+    }
 
     return if (elapsedMillis < shimmerEndsAtMillis) {
         SkeletonRevealPhase.Shimmer
@@ -80,6 +85,8 @@ internal fun skeletonRevealPhase(
  * [SKELETON_GRACE_MILLIS] of a first load, then a shimmer that stays at least [SKELETON_MINIMUM_VISIBLE_MILLIS], then
  * a crossfade to the content on the scheme's fast effects spec (a plain fade-in when loading ends within the grace).
  * The grace is skipped when the skeleton replaces content this mask, or its [SkeletonRevealGroup], already showed.
+ * With [revealsImmediately] the shimmer shows from the first frame of loading and the content crossfades in as soon
+ * as loading ends, with neither the grace nor the minimum hold; use it where loads are short and repeated, like covers.
  * The content still measures and lays out, so a stand-in value sizes the slot the real one will fill.
  *
  * Timed on the frame clock, so leaves composed in the same frame share one start. The minimum hold only
@@ -89,22 +96,23 @@ internal fun skeletonRevealPhase(
 fun Modifier.skeletonMask(
     visible: Boolean,
     shape: Shape = Corners.xs,
+    revealsImmediately: Boolean = false,
 ): Modifier {
     var phase by remember { mutableStateOf(SkeletonRevealPhase.Content) }
     var startMillis by remember { mutableLongStateOf(NOT_STARTED) }
     var hasRevealed by remember { mutableStateOf(false) }
     var graceSkipped by remember { mutableStateOf(false) }
     val group = LocalSkeletonRevealGroup.current
-    val skipsGrace = hasRevealed || group?.hasShownContent == true
+    val startsWithoutGrace = revealsImmediately || hasRevealed || group?.hasShownContent == true
 
     LaunchedEffect(visible) {
         if (visible) {
             if (phase == SkeletonRevealPhase.Shimmer) return@LaunchedEffect
 
             startMillis = withFrameMillis { it }
-            graceSkipped = skipsGrace
+            graceSkipped = startsWithoutGrace
 
-            if (skipsGrace) {
+            if (startsWithoutGrace) {
                 phase = SkeletonRevealPhase.Shimmer
 
                 return@LaunchedEffect
@@ -138,6 +146,7 @@ fun Modifier.skeletonMask(
                 elapsedMillis = withFrameMillis { it } - startMillis,
                 loadingEndedAtMillis = endedAtMillis,
                 skipsGrace = graceSkipped,
+                holdsMinimumVisible = revealsImmediately.not(),
             )
 
             if (phase == SkeletonRevealPhase.Content) break
@@ -148,7 +157,7 @@ fun Modifier.skeletonMask(
     }
 
     val effectivePhase = when {
-        visible && phase == SkeletonRevealPhase.Content && skipsGrace -> SkeletonRevealPhase.Shimmer
+        visible && phase == SkeletonRevealPhase.Content && startsWithoutGrace -> SkeletonRevealPhase.Shimmer
         visible && phase == SkeletonRevealPhase.Content -> SkeletonRevealPhase.Hidden
         visible.not() && phase == SkeletonRevealPhase.Hidden -> SkeletonRevealPhase.Content
         else -> phase

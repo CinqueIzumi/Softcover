@@ -193,6 +193,15 @@ public fun nl.rhaydus.softcover.core.component.bookcard.bookCardHandOver(scope: 
     - index: STABLE (primitive type)
 
 @Composable
+public fun nl.rhaydus.softcover.core.component.bookcard.bookCardHandOver(card: nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel, coordinator: nl.rhaydus.designsystem.component.StaggeredEntryCoordinator, index: kotlin.Int): androidx.compose.ui.Modifier
+  skippable: true
+  restartable: true
+  params:
+    - card: STABLE (marked @Stable or @Immutable)
+    - coordinator: STABLE (marked @Stable or @Immutable)
+    - index: STABLE (primitive type)
+
+@Composable
 internal fun nl.rhaydus.softcover.core.component.bookcard.bookCardInteraction(model: nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>, interactionSource: androidx.compose.foundation.interaction.MutableInteractionSource, hoverWash: kotlin.Boolean): androidx.compose.ui.Modifier
   skippable: true
   restartable: true
@@ -244,6 +253,18 @@ internal fun nl.rhaydus.softcover.core.component.bookcard.rememberHeldMark(markS
   restartable: true
   params:
     - markSelected: STABLE (class with no mutable properties)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.button.MorphingButton(label: kotlin.String, tone: nl.rhaydus.softcover.core.component.button.MorphingButtonTone, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, enabled: kotlin.Boolean, icon: nl.rhaydus.designsystem.icon.RhaydusIconResource?): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - label: STABLE (String is immutable)
+    - tone: STABLE (class with no mutable properties)
+    - onClick: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - enabled: STABLE (primitive type)
+    - icon: STABLE (class with no mutable properties)
 
 @Composable
 public fun nl.rhaydus.softcover.core.component.button.PillButton(model: nl.rhaydus.softcover.core.component.button.PillButtonUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.button.PillButtonEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
@@ -1039,7 +1060,7 @@ private fun nl.rhaydus.softcover.core.component.modifier.tactileFeedback(interac
     - hoverShape: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.modifier.tactilePressScale(interactionSource: androidx.compose.foundation.interaction.MutableInteractionSource): androidx.compose.ui.Modifier
+internal fun nl.rhaydus.softcover.core.component.modifier.tactilePressScale(interactionSource: androidx.compose.foundation.interaction.MutableInteractionSource): androidx.compose.ui.Modifier
   skippable: true
   restartable: true
   params:
@@ -1758,12 +1779,13 @@ private fun nl.rhaydus.softcover.core.component.state.rememberShimmerSweep(): an
   params:
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.state.skeletonMask(visible: kotlin.Boolean, shape: androidx.compose.ui.graphics.Shape): androidx.compose.ui.Modifier
+public fun nl.rhaydus.softcover.core.component.state.skeletonMask(visible: kotlin.Boolean, shape: androidx.compose.ui.graphics.Shape, revealsImmediately: kotlin.Boolean): androidx.compose.ui.Modifier
   skippable: true
   restartable: true
   params:
     - visible: STABLE (primitive type)
     - shape: STABLE (marked @Stable or @Immutable)
+    - revealsImmediately: STABLE (primitive type)
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.statistic.CompactTile(model: nl.rhaydus.softcover.core.component.statistic.StatTileUiModel, variant: nl.rhaydus.softcover.core.component.statistic.StatTileVariant.Compact, modifier: androidx.compose.ui.Modifier): kotlin.Unit
@@ -1949,6 +1971,16 @@ public fun nl.rhaydus.softcover.core.component.topbar.TopBar(model: nl.rhaydus.s
     - modifier: STABLE (marked @Stable or @Immutable)
     - scrollBehavior: STABLE (marked @Stable or @Immutable)
     - actions: STABLE (composable function type)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.transition.ExitFadeItems(items: kotlinx.collections.immutable.ImmutableList<T of nl.rhaydus.softcover.core.component.transition.ExitFadeItems>, keyOf: kotlin.Function1<T of nl.rhaydus.softcover.core.component.transition.ExitFadeItems, kotlin.Any>, itemModifier: androidx.compose.ui.Modifier, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction2<@[ParameterName(name = \): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - items: STABLE (known stable type)
+    - keyOf: STABLE (function type)
+    - itemModifier: STABLE (marked @Stable or @Immutable)
+    - content: STABLE (composable function type)
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.verdict.EmptyVerdict(): kotlin.Unit

@@ -190,6 +190,7 @@ private fun CoverImage(
                 .skeletonMask(
                     visible = hasNothingToShow && previous == null && inMemory.not(),
                     shape = RectangleShape,
+                    revealsImmediately = true,
                 ),
         ) {
             Image(

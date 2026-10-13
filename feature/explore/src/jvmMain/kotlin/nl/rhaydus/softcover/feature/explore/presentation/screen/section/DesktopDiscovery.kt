@@ -45,6 +45,7 @@ internal fun DesktopDiscovery(
                 state = state,
                 runAction = runAction,
                 onBookClick = onBookClick,
+                sectionGap = Spacing.x4l,
             ) { rail, set, onCardEvent ->
                 ExploreCardRail(
                     rail = rail,

@@ -260,4 +260,91 @@ class SkeletonRevealPhaseTest {
             phase shouldBe SkeletonRevealPhase.Content
         }
     }
+
+    @Nested
+    inner class SkippingGraceWithoutMinimumHold {
+        @Test
+        fun `is Shimmer at once while loading`() {
+            // ----- Arrange -----
+            val elapsed = 0L
+
+            // ----- Act -----
+            val phase = skeletonRevealPhase(
+                elapsedMillis = elapsed,
+                loadingEndedAtMillis = null,
+                skipsGrace = true,
+                holdsMinimumVisible = false,
+            )
+
+            // ----- Assert -----
+            phase shouldBe SkeletonRevealPhase.Shimmer
+        }
+
+        @Test
+        fun `is Shimmer one millisecond before loading ended`() {
+            // ----- Arrange -----
+            val elapsed = 39L
+
+            // ----- Act -----
+            val phase = skeletonRevealPhase(
+                elapsedMillis = elapsed,
+                loadingEndedAtMillis = 40L,
+                skipsGrace = true,
+                holdsMinimumVisible = false,
+            )
+
+            // ----- Assert -----
+            phase shouldBe SkeletonRevealPhase.Shimmer
+        }
+
+        @Test
+        fun `is Content when loading ended`() {
+            // ----- Arrange -----
+            val elapsed = 40L
+
+            // ----- Act -----
+            val phase = skeletonRevealPhase(
+                elapsedMillis = elapsed,
+                loadingEndedAtMillis = 40L,
+                skipsGrace = true,
+                holdsMinimumVisible = false,
+            )
+
+            // ----- Assert -----
+            phase shouldBe SkeletonRevealPhase.Content
+        }
+
+        @Test
+        fun `is Content at once when loading ended at zero`() {
+            // ----- Arrange -----
+            val elapsed = 0L
+
+            // ----- Act -----
+            val phase = skeletonRevealPhase(
+                elapsedMillis = elapsed,
+                loadingEndedAtMillis = 0L,
+                skipsGrace = true,
+                holdsMinimumVisible = false,
+            )
+
+            // ----- Assert -----
+            phase shouldBe SkeletonRevealPhase.Content
+        }
+
+        @Test
+        fun `still holds the Shimmer to the minimum when the hold is kept`() {
+            // ----- Arrange -----
+            val elapsed = 40L
+
+            // ----- Act -----
+            val phase = skeletonRevealPhase(
+                elapsedMillis = elapsed,
+                loadingEndedAtMillis = 40L,
+                skipsGrace = true,
+            )
+
+            // ----- Assert -----
+            phase shouldBe SkeletonRevealPhase.Shimmer
+        }
+    }
 }

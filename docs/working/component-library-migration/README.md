@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S12-3 done. The five Library / shelf-sheet items in `steps/s12-close-out.md` § S12-4 are built, reviewed, device-confirmed, ticked and committed. Shape changes: `SheetLayout` is `Scrolling | Pinned`; list sheets render through the new `LazySheetScaffold` (scaffold-owned `LazyColumn`, `fillHeight`); `LibraryUiState.withSelectedBookIds` is the single selection writer. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
-- **Next:** build the Explore group the same way; Search and Book detail follow, one per round.
+- **State:** the four Explore items in `steps/s12-close-out.md` § S12-4 are built, tested and twice reviewed; all four are device-confirmed and ticked. New: `MorphingButton` + `MorphingButtonTone` (`button/`, featured card), `ExitFadeItems` + `retainExiting` (`transition/`, desktop rail), `skeletonMask(revealsImmediately)` (`Cover`), `SessionValueCache.peek` / `ExploreRepository.peekBooksByGenre` (placeholder on cache miss only). [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
+- **Next:** build the Search item in `steps/s12-close-out.md` § S12-4 (removed rows fade and collapse, then crossfade to the empty state) the same way; Book detail follows.
 - **Open questions:** release builds ship with R8 off (`isMinifyEnabled = false`, 45.8 MB APK); enabling it is out of this plan's scope, track separately.
-- **Verification:** compiles of `:core:component`, `:core:uibinding`, `:feature:book_detail`, `:feature:library`, their `testAndroidHostTest`, `stabilityCheck`, `styleCheck`, `checkDocBudgets` all green.
+- **Verification:** after the last Kotlin edit: `styleCheck`, `stabilityCheck` (dump refreshed), `checkDocBudgets`, `checkModuleGraph`, and `testAndroidHostTest` for `:core:component`, `:feature:explore`, `:core:domain` all green; glommed-closer / `!!` grep and AAA markers clean.
 - **Uncommitted:** nothing.
 
 ## Local verification

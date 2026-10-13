@@ -71,6 +71,20 @@ fun Modifier.bookCardHandOver(
     },
 )
 
+/** The hand-over for a non-lazy container; a stand-in has no item scope to fade out in, so it renders plain. */
+@Composable
+fun Modifier.bookCardHandOver(
+    card: BookCardUiModel,
+    coordinator: StaggeredEntryCoordinator,
+    index: Int,
+): Modifier = handOver(
+    card = card,
+    coordinator = coordinator,
+    index = index,
+    realCard = { this },
+    standIn = { Modifier },
+)
+
 @Composable
 private fun Modifier.handOver(
     card: BookCardUiModel,

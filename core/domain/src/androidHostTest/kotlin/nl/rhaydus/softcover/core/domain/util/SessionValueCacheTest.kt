@@ -16,6 +16,73 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class SessionValueCacheTest {
     @Nested
+    inner class Peek {
+        @Test
+        fun `returns null for a key that was never loaded`() = runTest {
+            // ----- Arrange -----
+            val cache = SessionValueCache<String, String>()
+
+            // ----- Act -----
+            val result = cache.peek(key = "key")
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `returns the value cached for the key`() = runTest {
+            // ----- Arrange -----
+            val cache = SessionValueCache<String, String>()
+            cache.getOrPut(
+                key = "key",
+                load = { "value" },
+            )
+
+            // ----- Act -----
+            val result = cache.peek(key = "key")
+
+            // ----- Assert -----
+            result shouldBe "value"
+        }
+
+        @Test
+        fun `returns null for a different key than the one cached`() = runTest {
+            // ----- Arrange -----
+            val cache = SessionValueCache<String, String>()
+            cache.getOrPut(
+                key = "key",
+                load = { "value" },
+            )
+
+            // ----- Act -----
+            val result = cache.peek(key = "other")
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `does not trigger a load`() = runTest {
+            // ----- Arrange -----
+            val cache = SessionValueCache<String, String>()
+            val loadCount = AtomicInteger(0)
+
+            // ----- Act -----
+            cache.peek(key = "key")
+            cache.getOrPut(
+                key = "key",
+                load = {
+                    loadCount.incrementAndGet()
+                    "value"
+                },
+            )
+
+            // ----- Assert -----
+            loadCount.get() shouldBe 1
+        }
+    }
+
+    @Nested
     inner class GetOrPutKeyed {
         @Test
         fun `second call for the same key does not invoke load again`() = runTest {

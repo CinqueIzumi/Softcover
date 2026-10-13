@@ -158,7 +158,7 @@ private fun Modifier.tactileFeedback(
  * `playDecorativeMotion` gate: the reduced-motion scheme already snaps.
  */
 @Composable
-private fun Modifier.tactilePressScale(interactionSource: MutableInteractionSource): Modifier {
+internal fun Modifier.tactilePressScale(interactionSource: MutableInteractionSource): Modifier {
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (isPressed) PRESS_SCALE_TARGET else 1f,

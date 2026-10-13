@@ -18,6 +18,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 ## Buttons & controls
 
 - **PillButton** — `button` — action pill or icon-only circle in five tones.
+- **MorphingButton** — `button` — text button that animates between the filled and tonal styles.
 - **Toggle** — `control` — filled or bare icon toggle, or a display-only switch inside a row that owns the tap.
 - **ToggleRow** — `control` — a title over an optional gloss with a trailing switch; the row is the tap target.
 - **TextField** — `field` — pill, outlined, hero or numeral input, with an optional error state.
@@ -93,6 +94,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **`shakeOnError`** — `modifier` — shakes a node and plays *reject* on a failure trigger.
 - **`navSharedBounds`** — `modifier` — the one way to make a node a navigation shared element.
 - **`rememberPulseScale`** — `modifier` — a one-shot scale pulse each time a trigger changes.
+- **`ExitFadeItems`** — `transition` — keeps removed items of a non-lazy container composed, inert, while they fade out.
 - **`rememberReorderHaptics`** — `haptics` — lift, per-target tick and drop haptics for drag-to-reorder.
 - **`Haptics.play(Feedback)`** — `haptics` — plays the outcome haptic a `FeedbackEvent` carries.
 

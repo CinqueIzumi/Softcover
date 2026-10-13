@@ -17,9 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.badge.Badge
+import nl.rhaydus.softcover.core.component.button.MorphingButton
+import nl.rhaydus.softcover.core.component.button.MorphingButtonTone
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -134,9 +134,9 @@ internal fun FeaturedCard(
 
         Spacer(modifier = Modifier.height(Spacing.md))
 
-        RhaydusButton(
-            label = if (model.inLibrary) "Added to library" else "Want to read",
-            style = ButtonStyle.FILLED,
+        MorphingButton(
+            label = if (model.inLibrary) "Remove from library" else "Want to read",
+            tone = if (model.inLibrary) MorphingButtonTone.Tonal else MorphingButtonTone.Filled,
             onClick = {
                 onEvent(
                     if (model.inLibrary) {

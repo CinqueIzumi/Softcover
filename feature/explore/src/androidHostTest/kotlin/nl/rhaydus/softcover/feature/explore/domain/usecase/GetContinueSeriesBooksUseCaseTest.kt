@@ -7,6 +7,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -558,7 +559,18 @@ class GetContinueSeriesBooksUseCaseTest {
                 positionsInSeries = listOf(1.0),
                 status = BookStatus.Read,
             )
-            val nextBook: Book = mockk(relaxed = true)
+            val nextBook: Book = mockk {
+                every {
+                    id
+                } returns 1801
+                every {
+                    bookSeries
+                } returns BookSeries(
+                    id = 1800,
+                    name = "Test Series",
+                    amountOfBooks = 5,
+                )
+            }
 
             val dismissedSeriesIds = MutableStateFlow(emptyList<Int>())
 
@@ -592,6 +604,7 @@ class GetContinueSeriesBooksUseCaseTest {
 
                 // Second emission: series dismissed, result should be empty
                 awaitItem() shouldBe emptyList()
+                cancelAndIgnoreRemainingEvents()
             }
         }
     }
@@ -614,6 +627,9 @@ class GetContinueSeriesBooksUseCaseTest {
                 every {
                     id
                 } returns 2004
+                every {
+                    bookSeries
+                } returns null
             }
 
             every {
@@ -773,6 +789,188 @@ class GetContinueSeriesBooksUseCaseTest {
             result shouldBe emptyList()
             coVerify(exactly = 1) {
                 exploreRepository.fetchNextBooksInSeries(seeds = emptyList())
+            }
+        }
+    }
+
+    // ----- ImmediateDismissal -----
+
+    @Nested
+    inner class ImmediateDismissal {
+        private fun fetchedBook(
+            id: Int,
+            seriesId: Int,
+        ): Book = PreviewData.baseBook.copy(
+            id = id,
+            bookSeries = BookSeries(
+                id = seriesId,
+                name = "Test Series",
+                amountOfBooks = 10,
+            ),
+        )
+
+        @Test
+        fun `dismissing a series drops its book while the refetch is still suspended`() = runTest {
+            // ----- Arrange -----
+            val readBook = bookInSeries(
+                id = 1,
+                seriesId = 3000,
+                positionsInSeries = listOf(1.0),
+                status = BookStatus.Read,
+            )
+            val nextBook = fetchedBook(
+                id = 3002,
+                seriesId = 3000,
+            )
+            val dismissedSeriesIds = MutableStateFlow(emptyList<Int>())
+            val pendingRefetch = CompletableDeferred<List<Book>>()
+
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(readBook))
+            every {
+                exploreRepository.dismissedContinueSeriesIds
+            } returns dismissedSeriesIds
+            coEvery {
+                exploreRepository.fetchNextBooksInSeries(
+                    seeds = listOf(
+                        SeriesContinuationSeed(
+                            seriesId = 3000,
+                            afterPosition = 1.0,
+                        ),
+                    ),
+                )
+            } returns listOf(nextBook)
+            coEvery {
+                exploreRepository.fetchNextBooksInSeries(seeds = emptyList())
+            } coAnswers { pendingRefetch.await() }
+
+            useCase().test {
+                awaitItem() shouldBe listOf(nextBook)
+
+                // ----- Act -----
+                dismissedSeriesIds.value = listOf(3000)
+
+                // ----- Assert -----
+                awaitItem() shouldBe emptyList()
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `dismissing a single book drops it while the refetch is still suspended`() = runTest {
+            // ----- Arrange -----
+            val readBook = bookInSeries(
+                id = 1,
+                seriesId = 3100,
+                positionsInSeries = listOf(1.0),
+                status = BookStatus.Read,
+            )
+            val nextBook = fetchedBook(
+                id = 3102,
+                seriesId = 3100,
+            )
+            val dismissedBooks = MutableStateFlow(emptyList<DismissedSeriesBook>())
+            val pendingRefetch = CompletableDeferred<List<Book>>()
+
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(readBook))
+            every {
+                exploreRepository.dismissedContinueSeriesBooks
+            } returns dismissedBooks
+            coEvery {
+                exploreRepository.fetchNextBooksInSeries(
+                    seeds = listOf(
+                        SeriesContinuationSeed(
+                            seriesId = 3100,
+                            afterPosition = 1.0,
+                        ),
+                    ),
+                )
+            } returns listOf(nextBook)
+            coEvery {
+                exploreRepository.fetchNextBooksInSeries(
+                    seeds = listOf(
+                        SeriesContinuationSeed(
+                            seriesId = 3100,
+                            afterPosition = 2.0,
+                        ),
+                    ),
+                )
+            } coAnswers { pendingRefetch.await() }
+
+            useCase().test {
+                awaitItem() shouldBe listOf(nextBook)
+
+                // ----- Act -----
+                dismissedBooks.value = listOf(
+                    dismissedBook(
+                        bookId = 3102,
+                        seriesId = 3100,
+                        seriesPosition = 2.0,
+                    ),
+                )
+
+                // ----- Assert -----
+                awaitItem() shouldBe emptyList()
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `undoing a series dismissal brings its book back once the refetch returns`() = runTest {
+            // ----- Arrange -----
+            val readBook = bookInSeries(
+                id = 1,
+                seriesId = 3200,
+                positionsInSeries = listOf(1.0),
+                status = BookStatus.Read,
+            )
+            val nextBook = fetchedBook(
+                id = 3202,
+                seriesId = 3200,
+            )
+            val dismissedSeriesIds = MutableStateFlow(emptyList<Int>())
+
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(readBook))
+            every {
+                exploreRepository.dismissedContinueSeriesIds
+            } returns dismissedSeriesIds
+            coEvery {
+                exploreRepository.fetchNextBooksInSeries(
+                    seeds = listOf(
+                        SeriesContinuationSeed(
+                            seriesId = 3200,
+                            afterPosition = 1.0,
+                        ),
+                    ),
+                )
+            } returns listOf(nextBook)
+            coEvery {
+                exploreRepository.fetchNextBooksInSeries(seeds = emptyList())
+            } returns emptyList()
+
+            useCase().test {
+                awaitItem() shouldBe listOf(nextBook)
+                dismissedSeriesIds.value = listOf(3200)
+                var latest = awaitItem()
+                while (latest.isNotEmpty()) {
+                    latest = awaitItem()
+                }
+
+                // ----- Act -----
+                dismissedSeriesIds.value = emptyList()
+
+                // ----- Assert -----
+                var restored = awaitItem()
+                while (restored.isEmpty()) {
+                    restored = awaitItem()
+                }
+                restored shouldBe listOf(nextBook)
+                cancelAndIgnoreRemainingEvents()
             }
         }
     }

@@ -61,6 +61,7 @@ internal fun EditorialContent(
                 state = state,
                 runAction = runAction,
                 onBookClick = onBookClick,
+                sectionGap = Spacing.section,
             ) { rail, set, onCardEvent ->
                 ExploreCardRail(
                     rail = rail,

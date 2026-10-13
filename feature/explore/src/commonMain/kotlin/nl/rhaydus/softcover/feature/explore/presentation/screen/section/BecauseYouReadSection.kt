@@ -1,10 +1,18 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -17,6 +25,10 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnBecauseYouRead
 import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreControlUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_YOU_READ
 
+/**
+ * [trailingGap] is the space to the next section. It lives inside the animated content so it grows
+ * and shrinks with the section instead of snapping in from the parent's `spacedBy`.
+ */
 @Composable
 internal fun BecauseYouReadSection(
     header: SectionHeaderUiModel,
@@ -24,10 +36,9 @@ internal fun BecauseYouReadSection(
     set: BookCardSet<Book>,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
+    trailingGap: Dp,
     rail: @Composable ((BookCardEvent) -> Unit) -> Unit,
 ) {
-    if (genreControl.visible.not()) return
-
     val onCardEvent = rememberPrefetchingBookCardEventHandler(
         set = set,
     ) { event, book ->
@@ -39,20 +50,32 @@ internal fun BecauseYouReadSection(
         }
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-        SectionHeader(
-            model = header,
-            modifier = Modifier.padding(horizontal = Spacing.xl),
-        )
+    val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntSize>()
+    val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
 
-        BecauseYouReadGenreControl(
-            model = genreControl,
-            onOpen = {
-                runAction(OnBecauseYouReadGenreSheetVisibleChangeAction(visible = true))
-            },
-            modifier = Modifier.padding(horizontal = Spacing.xl),
-        )
+    AnimatedVisibility(
+        visible = genreControl.visible,
+        enter = expandVertically(animationSpec = spatialSpec) + fadeIn(animationSpec = effectsSpec),
+        exit = shrinkVertically(animationSpec = spatialSpec) + fadeOut(animationSpec = effectsSpec),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            modifier = Modifier.padding(bottom = trailingGap),
+        ) {
+            SectionHeader(
+                model = header,
+                modifier = Modifier.padding(horizontal = Spacing.xl),
+            )
 
-        rail(onCardEvent)
+            BecauseYouReadGenreControl(
+                model = genreControl,
+                onOpen = {
+                    runAction(OnBecauseYouReadGenreSheetVisibleChangeAction(visible = true))
+                },
+                modifier = Modifier.padding(horizontal = Spacing.xl),
+            )
+
+            rail(onCardEvent)
+        }
     }
 }

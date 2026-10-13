@@ -179,6 +179,65 @@ class ExploreRepositoryImplTest {
     }
 
     @Nested
+    inner class PeekBooksByGenre {
+        @Test
+        fun `returns null before any fetch for the genre`() = runTest {
+            // ----- Arrange -----
+            // Nothing fetched yet.
+
+            // ----- Act -----
+            val result = repository.peekBooksByGenre(genre = "Fantasy")
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `returns the fetched books after a fetch for that genre`() = runTest {
+            // ----- Arrange -----
+            val expectedBooks = listOf(stubBook())
+
+            coEvery {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = "Fantasy",
+                    limit = 50,
+                )
+            } returns expectedBooks
+            repository.fetchBooksByGenre(
+                genre = "Fantasy",
+                limit = 50,
+            )
+
+            // ----- Act -----
+            val result = repository.peekBooksByGenre(genre = "Fantasy")
+
+            // ----- Assert -----
+            result shouldBe expectedBooks
+        }
+
+        @Test
+        fun `returns null for a genre other than the one fetched`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = "Fantasy",
+                    limit = 50,
+                )
+            } returns listOf(stubBook())
+            repository.fetchBooksByGenre(
+                genre = "Fantasy",
+                limit = 50,
+            )
+
+            // ----- Act -----
+            val result = repository.peekBooksByGenre(genre = "Horror")
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+    }
+
+    @Nested
     inner class FetchFeaturedUpcomingRelease {
         @Test
         fun `two calls hit remote exactly once and both return the same value`() = runTest {
