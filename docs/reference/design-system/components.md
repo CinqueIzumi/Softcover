@@ -94,7 +94,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **`shakeOnError`** — `modifier` — shakes a node and plays *reject* on a failure trigger.
 - **`navSharedBounds`** — `modifier` — the one way to make a node a navigation shared element.
 - **`rememberPulseScale`** — `modifier` — a one-shot scale pulse each time a trigger changes.
-- **`ExitFadeItems`** — `transition` — keeps removed items of a non-lazy container composed, inert, while they fade out.
+- **`ExitingItems`** — `transition` — keeps removed items of a non-lazy container composed, inert, while a caller-supplied exit (default fade) plays.
 - **`rememberReorderHaptics`** — `haptics` — lift, per-target tick and drop haptics for drag-to-reorder.
 - **`Haptics.play(Feedback)`** — `haptics` — plays the outcome haptic a `FeedbackEvent` carries.
 

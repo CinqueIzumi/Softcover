@@ -42,8 +42,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.BookCardModel
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ContinueSeriesBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ContinueSeriesMenuCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.CoverModelsCollector
-import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedBooksCollector
-import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedSeriesCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedSuggestionsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichDismissedMetadataCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichMetadataCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ExploreCollector
@@ -167,9 +166,7 @@ val exploreModule = module {
         )
     }
 
-    factory { DismissedBooksCollector() } bind HiddenSuggestionsCollector::class
-
-    factory { DismissedSeriesCollector() } bind HiddenSuggestionsCollector::class
+    factory { DismissedSuggestionsCollector() } bind HiddenSuggestionsCollector::class
 
     factory { EnrichMetadataCollector() } bind HiddenSuggestionsCollector::class
 

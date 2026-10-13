@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** the four Explore items in `steps/s12-close-out.md` § S12-4 are built, tested and twice reviewed; all four are device-confirmed and ticked. New: `MorphingButton` + `MorphingButtonTone` (`button/`, featured card), `ExitFadeItems` + `retainExiting` (`transition/`, desktop rail), `skeletonMask(revealsImmediately)` (`Cover`), `SessionValueCache.peek` / `ExploreRepository.peekBooksByGenre` (placeholder on cache miss only). [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
-- **Next:** build the Search item in `steps/s12-close-out.md` § S12-4 (removed rows fade and collapse, then crossfade to the empty state) the same way; Book detail follows.
+- **State:** the Explore and Search items in `steps/s12-close-out.md` § S12-4 are built, reviewed, tested, device-confirmed and ticked. `ExitingItems` (renamed from `ExitFadeItems`) takes `exit` and `animatesExit`; Hidden suggestions loads books and series in one `setState` (`DismissedSuggestionsCollector`) and never animates leaving loading. [`domain-out-of-uistate`](../domain-out-of-uistate/README.md) starts after this plan closes.
+- **Next:** build the Book detail items in `steps/s12-close-out.md` § S12-4: animate the review "Show more" height change, then profile and fix the choppy shelving fill. Hand the user a Medium_Phone build for the device check, then ask to commit.
 - **Open questions:** release builds ship with R8 off (`isMinifyEnabled = false`, 45.8 MB APK); enabling it is out of this plan's scope, track separately.
-- **Verification:** after the last Kotlin edit: `styleCheck`, `stabilityCheck` (dump refreshed), `checkDocBudgets`, `checkModuleGraph`, and `testAndroidHostTest` for `:core:component`, `:feature:explore`, `:core:domain` all green; glommed-closer / `!!` grep and AAA markers clean.
+- **Verification:** after the last Kotlin edit: `styleCheck`, `stabilityCheck` (`:core:component` dump refreshed), `checkModuleGraph`, `:core:component` and `:feature:explore` `testAndroidHostTest`, `:feature:explore:compileKotlinJvm` and `assembleDebug` green; glommed-closer / `!!` grep and AAA markers clean.
 - **Uncommitted:** nothing.
 
 ## Local verification

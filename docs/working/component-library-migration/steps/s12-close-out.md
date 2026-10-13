@@ -79,9 +79,10 @@ approved by this walkthrough.
 - [x] **Explore, rail covers are blank while loading.** Fast-scrolling a rail (e.g. "What everyone's
   reading") shows empty cover slots. Show a shimmer until the image loads; if this goes in the shared cover
   image, make it opt-in unless every screen should get it.
-- [ ] **Search, removed rows snap away.** (PF S31) Removing a recent search, or a hidden suggestion
+- [x] **Search, removed rows snap away.** (PF S31) Removing a recent search, or a hidden suggestion
   (`HiddenSuggestionsContent.kt` `HiddenGroupSection`), makes the remaining rows jump into place. Fade and
-  collapse the removed row, then crossfade to the empty state.
+  collapse the removed row, then crossfade to the empty state. Built, plus the Hidden suggestions
+  load-flash fix (atomic load, masked loading text, no animation leaving loading); device-confirmed.
 - [ ] **Book detail, review "Show more" snaps open.** (PF S21) Expanding a review jumps to full height.
   Animate the height change.
 - [ ] **Book detail, shelving fill is choppy.** Adding to or switching shelves doesn't play one smooth fill

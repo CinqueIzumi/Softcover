@@ -1,10 +1,14 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
@@ -20,6 +24,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestions
 /**
  * Standalone desktop Hidden-suggestions page, pushed from Settings; it has no master–detail pane.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal actual fun HiddenSuggestionsScreenLayout(
     state: HiddenSuggestionsUiState,
@@ -37,25 +42,34 @@ internal actual fun HiddenSuggestionsScreenLayout(
         )
     }
 
-    if (state.isEmpty) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            topBar()
+    Column(modifier = Modifier.fillMaxSize()) {
+        topBar()
 
-            EmptyState(
-                model = state.emptyState,
+        key(state.isLoading) {
+            Crossfade(
+                targetState = state.isEmpty,
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
-                    .cappedContentWidth()
-                    .padding(horizontal = Spacing.gutter),
-            )
-        }
-    } else {
-        DesktopScrollPage(topBar = topBar) {
-            HiddenSuggestionsContent(
-                state = state,
-                runAction = runAction,
-            )
+                    .fillMaxWidth(),
+                animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+            ) { isEmpty ->
+                if (isEmpty) {
+                    EmptyState(
+                        model = state.emptyState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .cappedContentWidth()
+                            .padding(horizontal = Spacing.gutter),
+                    )
+                } else {
+                    DesktopScrollPage {
+                        HiddenSuggestionsContent(
+                            state = state,
+                            runAction = runAction,
+                        )
+                    }
+                }
+            }
         }
     }
 }

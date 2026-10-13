@@ -1973,13 +1973,15 @@ public fun nl.rhaydus.softcover.core.component.topbar.TopBar(model: nl.rhaydus.s
     - actions: STABLE (composable function type)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.transition.ExitFadeItems(items: kotlinx.collections.immutable.ImmutableList<T of nl.rhaydus.softcover.core.component.transition.ExitFadeItems>, keyOf: kotlin.Function1<T of nl.rhaydus.softcover.core.component.transition.ExitFadeItems, kotlin.Any>, itemModifier: androidx.compose.ui.Modifier, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction2<@[ParameterName(name = \): kotlin.Unit
+public fun nl.rhaydus.softcover.core.component.transition.ExitingItems(items: kotlinx.collections.immutable.ImmutableList<T of nl.rhaydus.softcover.core.component.transition.ExitingItems>, keyOf: kotlin.Function1<T of nl.rhaydus.softcover.core.component.transition.ExitingItems, kotlin.Any>, itemModifier: androidx.compose.ui.Modifier, animatesExit: kotlin.Function1<T of nl.rhaydus.softcover.core.component.transition.ExitingItems, kotlin.Boolean>, exit: androidx.compose.animation.ExitTransition, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction2<@[ParameterName(name = \): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - items: STABLE (known stable type)
     - keyOf: STABLE (function type)
     - itemModifier: STABLE (marked @Stable or @Immutable)
+    - animatesExit: STABLE (function type)
+    - exit: STABLE (marked @Stable or @Immutable)
     - content: STABLE (composable function type)
 
 @Composable

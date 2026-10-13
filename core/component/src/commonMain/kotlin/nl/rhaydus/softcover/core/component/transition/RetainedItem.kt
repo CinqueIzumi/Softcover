@@ -8,12 +8,13 @@ internal data class RetainedItem<T>(
 
 /**
  * Folds [current] into [previous], keeping every previous item that has left [current] as an exiting entry
- * at the position it last held.
+ * at the position it last held. An item for which [animatesExit] is false is dropped at once.
  */
 internal fun <T> retainExiting(
     previous: List<RetainedItem<T>>,
     current: List<T>,
     keyOf: (T) -> Any,
+    animatesExit: (T) -> Boolean = { true },
 ): List<RetainedItem<T>> {
     val result = current
         .map {
@@ -29,7 +30,11 @@ internal fun <T> retainExiting(
     var anchorKey: Any? = null
 
     previous.forEach { entry ->
-        if (entry.key !in currentKeys) {
+        val isRemoved = entry.key !in currentKeys
+
+        if (isRemoved && animatesExit(entry.item).not()) return@forEach
+
+        if (isRemoved) {
             val anchorIndex = anchorKey?.let { anchor -> result.indexOfFirst { it.key == anchor } } ?: -1
             result.add(
                 anchorIndex + 1,

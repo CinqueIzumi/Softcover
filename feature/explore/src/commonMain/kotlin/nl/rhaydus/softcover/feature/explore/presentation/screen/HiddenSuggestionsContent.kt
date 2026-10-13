@@ -1,13 +1,19 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntSize
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
@@ -16,6 +22,7 @@ import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.component.transition.ExitingItems
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
@@ -32,15 +39,21 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestions
  * ([HiddenSuggestionsUiState.isEmpty]): the screen layouts show that outside the scroll, where it can
  * centre. The caller supplies the scroll / width [modifier].
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun HiddenSuggestionsContent(
     state: HiddenSuggestionsUiState,
     runAction: (HiddenSuggestionsAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val effectsSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+    val spatialSpec = MaterialTheme.motionScheme.fastSpatialSpec<IntSize>()
+
     Column(modifier = modifier) {
         SoftcoverText(
             text = state.intro,
+            isLoading = state.isLoading,
+            standIn = state.intro,
             style = MaterialTheme.editorialTypography.body,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -48,21 +61,32 @@ internal fun HiddenSuggestionsContent(
         Spacer(modifier = Modifier.height(Spacing.xxxl))
 
         val hasBooksGroup = state.isLoadingBooks || state.hiddenBooks.isEmpty.not()
+        val hasSeriesGroup = state.isLoadingSeries || state.hiddenSeries.isEmpty.not()
 
-        if (hasBooksGroup) {
-            HiddenGroupSection(
-                header = state.hiddenBooksGroupHeader,
-                set = state.hiddenBooks,
-                isLoading = state.isLoadingBooks,
-                runAction = runAction,
-            )
+        AnimatedVisibility(
+            visible = hasBooksGroup,
+            enter = fadeIn(animationSpec = effectsSpec) + expandVertically(animationSpec = spatialSpec),
+            exit = fadeOut(animationSpec = effectsSpec) + shrinkVertically(animationSpec = spatialSpec),
+        ) {
+            Column {
+                HiddenGroupSection(
+                    header = state.hiddenBooksGroupHeader,
+                    set = state.hiddenBooks,
+                    isLoading = state.isLoadingBooks,
+                    runAction = runAction,
+                )
+
+                if (hasSeriesGroup) {
+                    Spacer(modifier = Modifier.height(Spacing.section))
+                }
+            }
         }
 
-        if (state.isLoadingSeries || state.hiddenSeries.isEmpty.not()) {
-            if (hasBooksGroup) {
-                Spacer(modifier = Modifier.height(Spacing.section))
-            }
-
+        AnimatedVisibility(
+            visible = hasSeriesGroup,
+            enter = fadeIn(animationSpec = effectsSpec) + expandVertically(animationSpec = spatialSpec),
+            exit = fadeOut(animationSpec = effectsSpec) + shrinkVertically(animationSpec = spatialSpec),
+        ) {
             HiddenGroupSection(
                 header = state.hiddenSeriesGroupHeader,
                 set = state.hiddenSeries,
@@ -73,6 +97,7 @@ internal fun HiddenSuggestionsContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun HiddenGroupSection(
     header: HiddenGroupHeaderUiModel,
@@ -88,6 +113,9 @@ private fun HiddenGroupSection(
         }
     }
 
+    val effectsSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+    val spatialSpec = MaterialTheme.motionScheme.fastSpatialSpec<IntSize>()
+
     Column(modifier = Modifier.fillMaxWidth()) {
         HiddenSuggestionsGroupHeader(
             model = header,
@@ -96,13 +124,16 @@ private fun HiddenGroupSection(
 
         Spacer(modifier = Modifier.height(Spacing.xs))
 
-        set.cards.forEach { card ->
-            key(card.key.lazyKey) {
-                BookCard(
-                    model = card,
-                    onEvent = onEvent,
-                )
-            }
+        ExitingItems(
+            items = set.cards,
+            keyOf = { it.key.lazyKey },
+            animatesExit = { it.isLoading.not() },
+            exit = fadeOut(animationSpec = effectsSpec) + shrinkVertically(animationSpec = spatialSpec),
+        ) { card, _ ->
+            BookCard(
+                model = card,
+                onEvent = onEvent,
+            )
         }
     }
 }
@@ -134,6 +165,8 @@ private fun HiddenSuggestionsGroupHeader(
 
         SoftcoverText(
             text = model.subline,
+            isLoading = isLoading,
+            standIn = model.subline,
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

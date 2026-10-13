@@ -1,12 +1,16 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
@@ -24,7 +28,10 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestions
  * Library-tabs settings pages; the [HiddenSuggestionsContent] body opens with an intro line rather than
  * repeating the title.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+)
 @Composable
 internal actual fun HiddenSuggestionsScreenLayout(
     state: HiddenSuggestionsUiState,
@@ -43,28 +50,35 @@ internal actual fun HiddenSuggestionsScreenLayout(
             )
         },
     ) { innerPadding ->
-        if (state.isEmpty) {
-            EmptyState(
-                model = state.emptyState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .cappedContentWidth()
-                    .padding(horizontal = Spacing.gutter),
-            )
-        } else {
-            HiddenSuggestionsContent(
-                state = state,
-                runAction = runAction,
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
-                    .cappedContentWidth()
-                    .padding(
-                        horizontal = Spacing.gutter,
-                        vertical = Spacing.md,
-                    ),
-            )
+        key(state.isLoading) {
+            Crossfade(
+                targetState = state.isEmpty,
+                animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+            ) { isEmpty ->
+                if (isEmpty) {
+                    EmptyState(
+                        model = state.emptyState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .cappedContentWidth()
+                            .padding(horizontal = Spacing.gutter),
+                    )
+                } else {
+                    HiddenSuggestionsContent(
+                        state = state,
+                        runAction = runAction,
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .verticalScroll(rememberScrollState())
+                            .cappedContentWidth()
+                            .padding(
+                                horizontal = Spacing.gutter,
+                                vertical = Spacing.md,
+                            ),
+                    )
+                }
+            }
         }
     }
 }

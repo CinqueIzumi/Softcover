@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.component.transition
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.fadeOut
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -21,17 +22,20 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import kotlinx.collections.immutable.ImmutableList
 
 /**
- * Emits [items] in a non-lazy container and keeps each removed item composed while it fades out, then
- * drops it. An item that returns under the same key while fading out fades back in.
+ * Emits [items] in a non-lazy container and keeps each removed item composed while its [exit] plays, then
+ * drops it. An item that returns under the same key while exiting animates back in.
  *
  * [itemModifier] sits on each item's wrapper, so a placement modifier passed here sees the exit too.
+ * A removed item for which [animatesExit] is false is dropped without an exit, e.g. a loading stand-in.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun <T> ExitFadeItems(
+fun <T> ExitingItems(
     items: ImmutableList<T>,
     keyOf: (T) -> Any,
     itemModifier: Modifier = Modifier,
+    animatesExit: (T) -> Boolean = { true },
+    exit: ExitTransition = fadeOut(animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()),
     content: @Composable (item: T, index: Int) -> Unit,
 ) {
     var retained by remember {
@@ -40,6 +44,7 @@ fun <T> ExitFadeItems(
                 previous = emptyList(),
                 current = items,
                 keyOf = keyOf,
+                animatesExit = animatesExit,
             ),
         )
     }
@@ -48,6 +53,7 @@ fun <T> ExitFadeItems(
         previous = retained,
         current = items,
         keyOf = keyOf,
+        animatesExit = animatesExit,
     )
 
     SideEffect {
@@ -55,8 +61,6 @@ fun <T> ExitFadeItems(
             retained = merged
         }
     }
-
-    val fadeOutSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
 
     merged.forEachIndexed { index, entry ->
         key(entry.key) {
@@ -76,7 +80,7 @@ fun <T> ExitFadeItems(
                 visibleState = visibleState,
                 modifier = if (entry.exiting) itemModifier.inertWhileExiting() else itemModifier,
                 enter = EnterTransition.None,
-                exit = fadeOut(animationSpec = fadeOutSpec),
+                exit = exit,
             ) {
                 content(
                     entry.item,

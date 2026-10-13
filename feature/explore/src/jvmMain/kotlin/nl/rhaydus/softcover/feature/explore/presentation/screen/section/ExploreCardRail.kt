@@ -22,7 +22,7 @@ import nl.rhaydus.softcover.core.component.bookcard.bookCardHandOver
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
 import nl.rhaydus.softcover.core.component.state.SkeletonRevealGroup
-import nl.rhaydus.softcover.core.component.transition.ExitFadeItems
+import nl.rhaydus.softcover.core.component.transition.ExitingItems
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 
@@ -58,9 +58,10 @@ internal fun ExploreCardRail(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
                 verticalArrangement = Arrangement.spacedBy(Spacing.xl),
             ) {
-                ExitFadeItems(
+                ExitingItems(
                     items = set.cards,
                     keyOf = { it.key.lazyKey },
+                    animatesExit = { it.isLoading.not() },
                     itemModifier = Modifier.animateBounds(
                         lookaheadScope = this@LookaheadScope,
                         boundsTransform = { _, _ -> placementSpec },

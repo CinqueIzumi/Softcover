@@ -94,6 +94,50 @@ class HiddenSuggestionsUiStateTest {
         }
     }
 
+    // ----- isLoading -----
+
+    @Nested
+    inner class IsAnyListLoading {
+        @Test
+        fun `is true when only the books are still loading`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(hiddenSeries = BookCardSet.empty())
+
+            // ----- Act -----
+            val result = state.isLoading
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `is true when only the series are still loading`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(hiddenBooks = BookCardSet.empty())
+
+            // ----- Act -----
+            val result = state.isLoading
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `is false when both lists have loaded`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(
+                hiddenBooks = setOf(1),
+                hiddenSeries = BookCardSet.empty(),
+            )
+
+            // ----- Act -----
+            val result = state.isLoading
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+    }
+
     // ----- isEmpty -----
 
     @Nested

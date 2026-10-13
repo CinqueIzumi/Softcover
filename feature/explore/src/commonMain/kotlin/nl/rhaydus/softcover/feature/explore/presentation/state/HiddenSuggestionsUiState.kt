@@ -15,12 +15,18 @@ private const val HIDDEN_SUGGESTIONS_TITLE = "Hidden suggestions"
 
 internal data class HiddenSuggestionsUiState(
     val hiddenBooksGroupHeader: HiddenGroupHeaderUiModel = HiddenGroupHeaderUiModel(
-        header = SectionHeaderUiModel.Inline(eyebrow = "Hidden books"),
+        header = SectionHeaderUiModel.Inline(
+            eyebrow = "Hidden books",
+            isLoading = true,
+        ),
         count = "0",
         subline = "Hidden from Up next. Tap Restore to bring one back.",
     ),
     val hiddenSeriesGroupHeader: HiddenGroupHeaderUiModel = HiddenGroupHeaderUiModel(
-        header = SectionHeaderUiModel.Inline(eyebrow = "Hidden series"),
+        header = SectionHeaderUiModel.Inline(
+            eyebrow = "Hidden series",
+            isLoading = true,
+        ),
         count = "0",
         subline = "A hidden series hides every book in it.",
     ),
@@ -44,6 +50,9 @@ internal data class HiddenSuggestionsUiState(
     val isLoadingSeries: Boolean
         get() = hiddenSeries.cards.any(BookCardUiModel::isLoading)
 
+    val isLoading: Boolean
+        get() = isLoadingBooks || isLoadingSeries
+
     val isEmpty: Boolean
-        get() = isLoadingBooks.not() && isLoadingSeries.not() && hiddenBooks.isEmpty && hiddenSeries.isEmpty
+        get() = isLoading.not() && hiddenBooks.isEmpty && hiddenSeries.isEmpty
 }

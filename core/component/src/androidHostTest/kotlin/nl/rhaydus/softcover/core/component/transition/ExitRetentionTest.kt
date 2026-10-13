@@ -195,6 +195,64 @@ class ExitRetentionTest {
     }
 
     @Nested
+    inner class NonAnimatingExit {
+        @Test
+        fun `removed item that does not animate its exit is dropped`() {
+            // ----- Arrange -----
+            val previous = listOf(retained("A"), retained("B"), retained("C"))
+
+            // ----- Act -----
+            val result = retainExiting(
+                previous = previous,
+                current = listOf("A", "C"),
+                keyOf = { it },
+                animatesExit = { it != "B" },
+            )
+
+            // ----- Assert -----
+            result.items() shouldContainExactly listOf("A", "C")
+            result.exitingItems().shouldBeEmpty()
+        }
+
+        @Test
+        fun `dropped item is not the position anchor for a later exiting item`() {
+            // ----- Arrange -----
+            val previous = listOf(retained("A"), retained("S"), retained("B"))
+
+            // ----- Act -----
+            val result = retainExiting(
+                previous = previous,
+                current = listOf("A"),
+                keyOf = { it },
+                animatesExit = { it != "S" },
+            )
+
+            // ----- Assert -----
+            result.items() shouldContainExactly listOf("A", "B")
+            result.exitingItems() shouldContainExactly listOf("B")
+        }
+
+        @Test
+        fun `previous items that all skip the exit animation leave exactly current`() {
+            // ----- Arrange -----
+            val previous = listOf(retained("S1"), retained("S2"))
+            val current = listOf("X", "Y")
+
+            // ----- Act -----
+            val result = retainExiting(
+                previous = previous,
+                current = current,
+                keyOf = { it },
+                animatesExit = { false },
+            )
+
+            // ----- Assert -----
+            result.items() shouldContainExactly current
+            result.exitingItems().shouldBeEmpty()
+        }
+    }
+
+    @Nested
     inner class CurrentOrder {
         @Test
         fun `inserted item appears at its current position`() {

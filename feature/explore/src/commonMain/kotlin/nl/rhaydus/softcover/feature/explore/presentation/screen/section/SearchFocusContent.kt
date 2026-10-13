@@ -1,5 +1,10 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -18,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.ImmutableList
@@ -29,6 +36,7 @@ import nl.rhaydus.softcover.core.component.chip.ChipFlow
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.component.transition.ExitingItems
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -45,6 +53,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveSearchQu
  * full rows (clock leading icon, trailing per-row remove) followed by "Try a mood" chips. Replaces the
  * feed while the field is focused and empty — no editorial recommendations here, those live on the feed.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun SearchFocusContent(
     queries: ImmutableList<String>,
@@ -52,44 +61,57 @@ internal fun SearchFocusContent(
     runAction: (ExploreAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val effectsSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+    val spatialSpec = MaterialTheme.motionScheme.fastSpatialSpec<IntSize>()
+
     Column(modifier = modifier.padding(horizontal = Spacing.gutter)) {
-        if (queries.isNotEmpty()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                SoftcoverText(
-                    text = "RECENT",
-                    style = MaterialTheme.editorialTypography.eyebrowSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+        AnimatedVisibility(
+            visible = queries.isNotEmpty(),
+            enter = fadeIn(animationSpec = effectsSpec) + expandVertically(animationSpec = spatialSpec),
+            exit = fadeOut(animationSpec = effectsSpec) + shrinkVertically(animationSpec = spatialSpec),
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    SoftcoverText(
+                        text = "RECENT",
+                        style = MaterialTheme.editorialTypography.eyebrowSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
 
-                RhaydusButton(
-                    label = "Clear all",
-                    onClick = { runAction(OnRemoveAllSearchQueriesClickedAction()) },
-                    style = ButtonStyle.TEXT,
-                )
-            }
-
-            Column(modifier = Modifier.padding(top = Spacing.xs)) {
-                queries.forEach { query ->
-                    SearchFocusRecentRow(
-                        query = query,
-                        onClick = {
-                            runAction(
-                                OnQueryChangeAction(
-                                    newQuery = query,
-                                    searchDelay = 0.seconds,
-                                ),
-                            )
-                        },
-                        onRemoveClick = { runAction(OnRemoveSearchQueryClickedAction(query = query)) },
+                    RhaydusButton(
+                        label = "Clear all",
+                        onClick = { runAction(OnRemoveAllSearchQueriesClickedAction()) },
+                        style = ButtonStyle.TEXT,
                     )
                 }
-            }
 
-            Spacer(modifier = Modifier.height(Spacing.xxl))
+                Column(modifier = Modifier.padding(top = Spacing.xs)) {
+                    ExitingItems(
+                        items = queries,
+                        keyOf = { it },
+                        exit = fadeOut(animationSpec = effectsSpec) + shrinkVertically(animationSpec = spatialSpec),
+                    ) { query, _ ->
+                        SearchFocusRecentRow(
+                            query = query,
+                            onClick = {
+                                runAction(
+                                    OnQueryChangeAction(
+                                        newQuery = query,
+                                        searchDelay = 0.seconds,
+                                    ),
+                                )
+                            },
+                            onRemoveClick = { runAction(OnRemoveSearchQueryClickedAction(query = query)) },
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(Spacing.xxl))
+            }
         }
 
         if (moodChips.isEmpty.not()) {
