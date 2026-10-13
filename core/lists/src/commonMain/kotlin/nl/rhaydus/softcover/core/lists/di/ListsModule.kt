@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.lists.data.repository.ListsRepositoryImpl
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.DrainPendingListWritesUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.ReorderListBooksUseCase
@@ -70,5 +71,9 @@ val listsModule = module {
 
     factory {
         SetListRankedUseCase(listsRepository = get())
+    }
+
+    factory {
+        DrainPendingListWritesUseCase(listsRepository = get())
     }
 }

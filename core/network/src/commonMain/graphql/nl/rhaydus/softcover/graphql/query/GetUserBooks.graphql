@@ -1,7 +1,12 @@
-query GetUserBooks($statusIds: [Int!]) {
+query GetUserBooks($statusIds: [Int!], $userBookIds: [Int!]) {
     me {
         user_books(
-            where: { status_id: { _in: $statusIds } },
+            where: {
+                _or: [
+                    { status_id: { _in: $statusIds } },
+                    { id: { _in: $userBookIds } }
+                ]
+            },
             order_by: { updated_at: desc }
         ) {
             ...UserBookFragment
