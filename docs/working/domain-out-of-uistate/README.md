@@ -6,10 +6,11 @@ removes the UiState entries from those baselines.
 
 ## Now
 
-- **State:** written 2026-10-12 from the Book Detail audits; nothing built.
+- **State:** written 2026-10-12 from the Book Detail audits; nothing built. Now the active plan; the component-library migration it waited on is closed.
 - **Next:** phase 1, step 1a below: design the per-id book flow and the fetch-persists contract, stop for approval.
 - **Open questions:** see `## Risks`.
-- **Uncommitted:** this file.
+- **Verification:** `check` and a local CI dry run (every `ci.yml` job plus the release APK/AAB and dmg builds) passed on the branch; `styleCheck` and the affected `testAndroidHostTest` suites passed after the last Kotlin edit.
+- **Uncommitted:** this Now block only.
 
 ## Why
 
