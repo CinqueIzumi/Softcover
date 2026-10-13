@@ -37,10 +37,10 @@ Then one `softcover-implementer` brief per screen group, with tests through `sof
 
 | Group | Rows | Status |
 |---|---|---|
-| Library | S1–S7, O19, O33 | [ ] |
+| Library | S1–S3, S5, S7, O19 | [ ] |
 | Reading and Focus Mode | S8–S17, O16–O18, O34, O37 | [ ] |
-| Book detail | S18–S26, O21–O25 | [ ] |
-| Explore | S28–S33, O26–O28 | [ ] |
+| Book detail | S18–S20, S22–S26, O21–O25 | [ ] |
+| Explore | S28, S32, S33, O26–O28 | [ ] |
 | Profile | S34, S36 | [ ] |
 | Onboarding | S37, S42, S44, O39, O40 | [ ] |
 | Settings | S38–S41, S43, S45 | [ ] |

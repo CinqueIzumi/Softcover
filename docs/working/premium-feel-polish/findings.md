@@ -1,7 +1,8 @@
 # Premium-feel findings
 
 The approved surface rows of the premium-feel audit, the work list for [`README.md`](README.md). Rows that were
-fixed, cut or moved to the copy audit are gone.
+fixed, cut or moved to the copy audit are gone. S4, S6, S21, S29, S30, S31 and O33 moved to the S12-4
+walkthrough fixes in [`s12-close-out.md`](../component-library-migration/steps/s12-close-out.md).
 
 > [!WARNING]
 > **Stale and not approved for building.** Re-audit and walk every row with the user first; see the
@@ -29,9 +30,7 @@ auto-repeat, and the one root push/pop transition driven by predictive back.
 | S1 | Library | **Bulk Mark as Read gets no celebration.** (`SelectionHeader.kt:107-111`, `BookList.kt:300-311`) | The books fade out. There is no burst. | Play `MarkAsReadBurst` when the batch succeeds. | S |
 | S2 | Library | **The shelf cuts to the empty state.** (`BookList.kt:60-72`, `EditionList.kt`) | An early `return` skips the removal fade. | Let the last book fade out, then crossfade to the empty state. | S |
 | S3 | Library | **Entering selection makes the grid jump.** (`LibraryScreenLayout.mobile.kt:158-232`, `.jvm.kt:109-145`) | The whole header swaps at once. | Crossfade the headers and animate the height change. | S |
-| S4 | Library | **The shelf title lags the pager.** (`MastheadHeader.kt:104-114`) | It swaps at the swipe's midpoint. | Slide or fade the title with the pager. `select` when it settles. | S |
 | S5 | Library | **Switching shelves on desktop cuts.** (`LibraryScreenLayout.jvm.kt:159-176`) | `when (currentTab)` | A short crossfade. | S |
-| S6 | Library | **Control-line affordances pop in.** (`LibraryControlLine.kt:63-148`, `BookList.kt:355-359`) | The arrow swaps icon. The chip, pill and drag handles appear via `if`. | Rotate the arrow and expand or fade the rest in. | S |
 | S7 | Library | **Back out of selection shows no preview.** (`LibraryEditModeBackHandlers.kt:19-33`) | The exit is instant. | Scrub the exit with the back gesture's progress, on top of the predictive-back push/pop. | M |
 | S8 | Reading | **Finishing from Focus Mode gets no celebration.** (`ActiveSessionControllerImpl.kt:112-122`, `OnPageFocusLostAction.kt:34`) | The outcome is ignored and `commit` fires before the save. No burst, no verdict. A failed save is silent. | On finish, play the burst and open the verdict sheet. Haptic after success, `reject` on failure. | M |
 | S9 | Reading | **The next book cuts into the hero.** (`ReadingBooksColumn.kt:60`, `MarkAsReadController.kt:94-116`) | The key changes, so the new book appears in one frame. | It rises into the hero, and its cover travels up from its row. | M |
@@ -46,16 +45,12 @@ auto-repeat, and the one root push/pop transition driven by predictive back.
 | S18 | Book detail | **The burst plays under the verdict sheet.** (`BookDetailScreen.kt:91-97`) | Both are triggered in the same frame. | Play the burst first, then open the sheet. | S |
 | S19 | Book detail | **Shelving never pulses the Library tab.** (`ShelveControlCard.kt:111-152`) | Only Reading pulses it. | Pulse the tab when a shelve is applied. | S |
 | S20 | Book detail | **A status change rebuilds the lens in one frame.** (`YoursLensContent.kt:33-65`) | `when (status)`, and `VerdictBlock` pops in. | A size-aware crossfade and a vertical reveal. | S |
-| S21 | Book detail | **Reviews snap open.** (`ReviewsSection.kt:155-183`) | `maxLines` flips. | Animate the height and fade the spoiler in. | S |
 | S22 | Book detail | **The top-bar title pops in, and its scroll behaviour does nothing.** (`BookDetailScreenLayout.mobile.kt:50-104`) | Index threshold. The list has no `nestedScroll`. | Drive the title from scroll progress, and wire `nestedScroll`. | M |
 | S23 | Book detail | **The hero scrolls like any other row.** (`GeneralBookInfoSection.kt:76-103`) | It moves 1:1 with the list. | Parallax on the backdrop. Android below 12 can't blur, so it needs a heavier dim. | M |
 | S24 | Book detail | **The full-screen cover jumps to 2.5×.** (`CoverZoomState.kt` `CoverZoomState`, `.mobile.kt:23-35`) | No animation. No swipe to dismiss. | Animated zoom, swipe-down to dismiss, and soft edges. | M |
 | S25 | Book detail | **The wide pane cuts between books.** (`BookDetailPaneHost.kt:33-47`, `BottomBarScreen.kt:163-184`) | `key(destination.id)` | A fade-through. | S |
 | S26 | Book detail | **Shelve rows have no desktop affordances.** (`ShelveControlCard.kt:275-295`) | No hand cursor or hover. | Add both. | S |
 | S28 | Explore | **Feed, focus and results cut.** (`ExploreScreenLayout.mobile.kt:120-140`, `.jvm.kt:114-126`) | `when (searchPhase)` | A fade-through, with the results settling upward. | S |
-| S29 | Explore | **Dismissing an Up-next card makes the rail jump.** (`ExploreCardRail.kt:40`, desktop `:42`) | Undo jumps the same way. | `mutationAnimated` on the rail. | S |
-| S30 | Explore | **The featured "Want to read" flips flatly.** (`FeaturedCard.kt:135-148`) | No transition or haptic. | Morph the label and fire `select`. | S |
-| S31 | Explore | **Recent and hidden rows snap away.** (`SearchFocusContent.kt:74-87`, `HiddenSuggestionsContent.kt` `HiddenGroupSection`) | `forEach` removal. | Fade and collapse the rows, then crossfade to the empty state. | S |
 | S32 | Explore | **Search focus and dismiss rows ripple.** (`SearchFocusContent.kt:128,159`, `ContinueSeriesMenuSheet.kt:76`) | Plain `.clickable`. | A small press response. | S |
 | S33 | Explore | **The result bookmark doesn't fill.** (`BookCardControls.kt:42-45`) | It changes colour only. | The animated selection-state glyph pop, plus `select` when adding. | S |
 | S34 | Profile | **The page lands all at once.** (`ProfileReadingLife.kt:24-96`, `ReadingAtlasSection.kt:35-59`) | No stagger. | A one-time `StaggeredEntry` welcome. | S |
@@ -95,7 +90,6 @@ auto-repeat, and the one root push/pop transition driven by predictive back.
 | O28 | **Load-more rows pop in.** (`SearchResultsSection.kt:117-126`) | Fade in the new rows. | S |
 | O30 | **Desktop has no keyboard or mouse-back navigation.** (`desktopApp/.../Main.kt`) | Tab shortcuts, back shortcuts and a minimal MenuBar. | M |
 | O31 | **The scanner has no torch.** (`BarcodeScanner.android.kt:50-76`) | A torch toggle. | S–M |
-| O33 | **The shelves chevron stays still.** (`MastheadHeader.kt:118-130`) | Rotate it while the sheet is open. | S |
 | O34 | **A progress update gives no cue where it landed.** (`ReadingOverlays.kt:57-84`) | Briefly highlight the updated row. | S |
 | O37 | **A zero streak looks live.** (`ReadingAtlasMapper.kt:40-48`) | A muted "Start today" state. | S |
 | O39 | **First-login progress stalls at 20 %.** (`OnApiKeySaveClickAction.kt:47-63`) | Report real stages. | M |

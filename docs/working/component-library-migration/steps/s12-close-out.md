@@ -51,6 +51,41 @@ Regressions found so far:
   (`withCoverModels()`), and `AppDispatchers.main` is `Main.immediate` so collector-derived state lands in
   the same frame. Device confirmation pending, plus a smoke pass of every screen for the dispatcher change.
 
+Walkthrough findings, 2026-10-13. Rows tagged `PF Sn` / `PF On` come from the premium-feel findings and are
+approved by this walkthrough.
+
+- [ ] **Library, bulk move offers the current shelf.** On Want to Read, the selection actions include
+  "Move to Want to Read". Leave the shelf being viewed out of the bulk move options.
+- [ ] **Library, selection count lags the cards.** The card border and checkmark update immediately; the
+  "N selected" count updates noticeably later. Find what delays the header and make it land in the same frame.
+- [ ] **Library, control-line affordances snap.** (PF S6, O33) The sort-direction arrow swaps glyphs; rotate
+  it instead, and rotate the shelves chevron while the sheet is open. The chip, pill and drag handles appear
+  via `if` (`LibraryControlLine.kt`, `BookList.kt`); expand or fade them in.
+- [ ] **Library, shelf title lags the pager.** (PF S4) The title changes at the swipe's midpoint. Drive it
+  from the pager offset.
+- [ ] **Shelf sheet, padding under the "Create new list" divider.** Padding between the divider and the
+  content leaves a dark band, so content looks clipped by a padded block instead of scrolling up behind the
+  divider. Move the padding inside the scrolling content.
+- [ ] **Explore, "Because you read" has no skeleton and rows jump.** The genre-based feed loads with no
+  skeleton, and late rows push others down. Add a skeleton, and animate placement so rows move to their new
+  spot when the order or content changes.
+- [ ] **Explore, Up-next rail jumps on hide and undo.** (PF S29) Hiding a series or book snaps the rest of
+  the rail into place, and undo snaps it back. Animate both.
+- [ ] **Explore, featured card's "Added to library" button.** (PF S30) Once the book is in the library, the
+  primary button reads "Added to library", a status rather than an action. Morph it into a button that
+  removes the book from the library.
+- [ ] **Explore, rail covers are blank while loading.** Fast-scrolling a rail (e.g. "What everyone's
+  reading") shows empty cover slots. Show a shimmer until the image loads; if this goes in the shared cover
+  image, make it opt-in unless every screen should get it.
+- [ ] **Search, removed rows snap away.** (PF S31) Removing a recent search, or a hidden suggestion
+  (`HiddenSuggestionsContent.kt` `HiddenGroupSection`), makes the remaining rows jump into place. Fade and
+  collapse the removed row, then crossfade to the empty state.
+- [ ] **Book detail, review "Show more" snaps open.** (PF S21) Expanding a review jumps to full height.
+  Animate the height change.
+- [ ] **Book detail, shelving fill is choppy.** Adding to or switching shelves doesn't play one smooth fill
+  from start to end. Profile it first: dropped frames, recompositions or redraws mid-fill, or the animation
+  being cancelled and restarted (e.g. by an optimistic state followed by the synced state). Then fix the cause.
+
 ## S12-5 — final gate and directory deletion
 
 - `scripts/gradle-quiet.sh check` green, including `styleCheck` and `ktlintCheck` (G6).
