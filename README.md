@@ -4,6 +4,8 @@ A [Hardcover.app](https://hardcover.app/) client for **Android, iOS, and desktop
 
 A Kotlin Multiplatform app: domain, data, and UI are shared across all three platforms via Compose Multiplatform. Android targets 8.0+.
 
+<a href="https://play.google.com/store/apps/details?id=nl.rhaydus.softcover"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="80"></a>
+
 [![CI](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci.yml/badge.svg)](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/CinqueIzumi/Softcover/branch/main/graph/badge.svg)](https://codecov.io/gh/CinqueIzumi/Softcover)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
@@ -299,3 +301,5 @@ Softcover is being actively redesigned. **What's coming, by version, lives in [R
 ## Disclaimer
 
 This project is an independent, open-source application and is **not affiliated with, endorsed by, or sponsored by** [Hardcover.app](https://hardcover.app/).
+
+Google Play and the Google Play logo are trademarks of Google LLC.
