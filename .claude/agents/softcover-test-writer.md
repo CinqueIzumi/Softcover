@@ -37,17 +37,30 @@ Your prompt must contain `## Files` and `## Verify`. If either is missing, reply
   coroutine timing).
 - `CLAUDE.md` is already in your context; do not read it again.
 
+## Triage the brief first
+
+A brief names units and cases; it does not prove they earn a test. Before writing anything, put every unit
+and case it asks for through the checks in `.claude/rules/tests.md` (input decides output, behaviour not
+implementation, it would be missed, not a copy, no change-detector). Decline each one that fails, write
+nothing for it, and list it under **Declined** in the report with the check it fails. Typical declines: a use
+case that only wraps a repository call in `runCatching*`, a repository or source that only forwards to
+another seam, a "passes the key / force flag through" case, and initial-state or per-variant constants.
+
 ## Designing the cases
 
-Per unit: happy path, boundaries (empty, single, max), nulls and missing fields, error paths (`Result`
-failures, thrown exceptions), state transitions, and delegation to dependencies. Test behaviour, not
-implementation. Each test is deterministic and independent of order, and would fail if the code under test
-broke.
+Per unit that survives triage: happy path, boundaries (empty, single, max), nulls and missing fields, error
+paths (`Result` failures, thrown exceptions) and state transitions — only where the code branches on them.
+Assert observable output; use `verify` only when the call itself is the outcome (a network fetch skipped
+inside a TTL, a write that must land). Each test is deterministic and independent of order, and would fail
+if the code under test broke.
 
 Do not write change-detector tests: no assertion on a value copied straight out of production code, such as
 a style table's dp, alpha, colour role or typography, or a constructor default. For a UI model, test only the
-logic that turns input into output, and the fixture coverage (every variant appears in `previews`). If a brief
-asks for a change-detector test, skip it and say so in the report.
+logic that turns input into output, and the fixture coverage (every variant appears in `previews`).
+
+Structure follows the rules exactly even where a neighbouring test does not: every `@Test` inside a
+`@Nested inner class`, and all three AAA markers (or `// ----- Act & Assert -----` only when the assertion is
+the act, e.g. a Turbine `test { }` or `shouldThrow`). An existing test that breaks a rule is not a template.
 
 ## Running
 
@@ -70,6 +83,8 @@ asks for a change-detector test, skip it and say so in the report.
 ## Report
 
 Follow the brief's `## Report`; default to at most 150 words: files written, tests added, the Verify result.
+Always end with a **Declined** line: each requested unit or case you did not write and the `tests.md` check
+it fails, or "Declined: none".
 
 ## Memory
 
