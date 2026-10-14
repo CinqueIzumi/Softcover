@@ -66,6 +66,7 @@ class ChipUiModelTest {
             // ----- Arrange -----
             val expectedTrailingTypes = setOf(
                 ChipTrailing.Icon::class,
+                ChipTrailing.Disclosure::class,
                 ChipTrailing.Dismiss::class,
             )
 
@@ -77,6 +78,22 @@ class ChipUiModelTest {
 
             // ----- Assert -----
             coveredTrailingTypes shouldBe expectedTrailingTypes
+        }
+
+        @Test
+        fun `both Disclosure states appear across the fixtures`() {
+            // ----- Arrange -----
+            val expectedExpandedStates = setOf(true, false)
+
+            // ----- Act -----
+            val coveredExpandedStates = ChipUiModel.previews.values
+                .map { it.trailing }
+                .filterIsInstance<ChipTrailing.Disclosure>()
+                .map { it.expanded }
+                .toSet()
+
+            // ----- Assert -----
+            coveredExpandedStates shouldBe expectedExpandedStates
         }
 
         @Test

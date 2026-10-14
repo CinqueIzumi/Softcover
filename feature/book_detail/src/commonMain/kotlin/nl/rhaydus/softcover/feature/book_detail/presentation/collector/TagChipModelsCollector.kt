@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.EDITABLE_CATEGORIES
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.TagCategoryChipGroup
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagEditorChipGroup
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.tagsOrEmpty
 import nl.rhaydus.toad.ActionScope
 
 /**
@@ -48,7 +49,7 @@ internal class TagChipModelsCollector : BookDetailCollector {
         scope.state
             .map { state ->
                 TagChipModelsSnapshot(
-                    userTags = state.userTags,
+                    userTags = state.userTags.tagsOrEmpty,
                     communityTags = state.book?.tags.orEmpty(),
                     revealedTagKeys = state.revealedTagKeys,
                 )

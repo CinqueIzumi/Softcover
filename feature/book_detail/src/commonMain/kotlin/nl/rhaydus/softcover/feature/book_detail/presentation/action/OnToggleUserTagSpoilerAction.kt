@@ -4,6 +4,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagsLoad
 import nl.rhaydus.toad.ActionScope
 
 internal class OnToggleUserTagSpoilerAction(
@@ -15,7 +16,9 @@ internal class OnToggleUserTagSpoilerAction(
     ) {
         val tag = scope.currentState.userTagByEditorChipKey[chipKey] ?: return
 
-        val newSet = scope.currentState.userTags.map {
+        val current = (scope.currentState.userTags as? UserTagsLoad.Loaded)?.tags ?: return
+
+        val newSet = current.map {
             if (it.category == tag.category && it.name == tag.name) {
                 it.copy(spoiler = it.spoiler.not())
             } else {

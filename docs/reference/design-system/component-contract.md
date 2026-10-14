@@ -223,7 +223,7 @@ sealed interface ShareCardUiModel
 
 // Presentation-ready primitives only — no domain types
 data class BookShareCardUiModel(
-    val coverUrl: String?,
+    val cover: CoverUiModel,
     val title: String,
     val author: String,
     val statsLine: String?,

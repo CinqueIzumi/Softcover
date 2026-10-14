@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
@@ -26,7 +28,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 /**
  * Renders any user-facing share artefact — book, personal reading update, hero stat, pulled quote,
  * year recap, or whole-history reading-life recap — into a fixed-aspect editorial composition with a
- * trailing `SOFTCOVER` folio sign-off. [model]'s concrete [ShareCardUiModel] subtype selects the
+ * trailing `SOFTCOVER` sign-off. [model]'s concrete [ShareCardUiModel] subtype selects the
  * variant body and the card's size; a variant never overrides those dimensions at the call site.
  *
  * [ShareCard] only draws pixels — it takes no position on exporting them. Show it through
@@ -45,46 +47,100 @@ fun ShareCard(
     model: ShareCardUiModel,
     modifier: Modifier = Modifier,
 ) {
-    val (surfaceColor, contentColor) = when (model) {
-        is StatShareCardUiModel,
-        is ReadingLifeShareCardUiModel -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+    val colors = MaterialTheme.colorScheme
 
-        is BookShareCardUiModel,
-        is ReadingUpdateShareCardUiModel,
-        is QuoteShareCardUiModel,
-        is YearRecapShareCardUiModel -> MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
+    when (model) {
+        is BookShareCardUiModel -> BookShareCardFrame(
+            eyebrow = "FROM THE SHELF",
+            cover = model.cover,
+            title = model.title,
+            author = model.author,
+            username = null,
+            avatarUrl = null,
+            format = model.format,
+            modifier = modifier,
+        ) {
+            BookShareCardBody(model)
+        }
+
+        is ReadingUpdateShareCardUiModel -> BookShareCardFrame(
+            eyebrow = when (model) {
+                is ReadingUpdateShareCardUiModel.Finished -> "FROM MY SHELF"
+                is ReadingUpdateShareCardUiModel.Reading -> "CURRENTLY READING"
+            },
+            cover = model.cover,
+            title = model.title,
+            author = model.author,
+            username = model.username,
+            avatarUrl = model.avatarUrl,
+            format = model.format,
+            modifier = modifier,
+        ) {
+            ReadingUpdateShareCardBody(model)
+        }
+
+        is StatShareCardUiModel -> PaperShareCard(
+            surfaceColor = colors.primary,
+            contentColor = colors.onPrimary,
+            sizeModifier = Modifier.requiredSize(
+                width = 360.dp,
+                height = 540.dp,
+            ),
+            contentPadding = Spacing.xxl,
+            modifier = modifier,
+        ) {
+            StatShareCardBody(model)
+        }
+
+        is QuoteShareCardUiModel -> PaperShareCard(
+            surfaceColor = colors.surface,
+            contentColor = colors.onSurface,
+            sizeModifier = Modifier.requiredSize(
+                width = 360.dp,
+                height = 540.dp,
+            ),
+            contentPadding = Spacing.xxl,
+            modifier = modifier,
+        ) {
+            QuoteShareCardBody(model)
+        }
+
+        is YearRecapShareCardUiModel -> PaperShareCard(
+            surfaceColor = colors.surface,
+            contentColor = colors.onSurface,
+            sizeModifier = Modifier.requiredSize(
+                width = 360.dp,
+                height = 540.dp,
+            ),
+            contentPadding = Spacing.xxl,
+            modifier = modifier,
+        ) {
+            YearRecapShareCardBody(model)
+        }
+
+        is ReadingLifeShareCardUiModel -> PaperShareCard(
+            surfaceColor = colors.primary,
+            contentColor = colors.onPrimary,
+            sizeModifier = Modifier
+                .requiredWidth(300.dp)
+                .requiredHeightIn(min = 560.dp),
+            contentPadding = Spacing.xl,
+            modifier = modifier,
+        ) {
+            ReadingLifeShareCardBody(model)
+        }
     }
+}
 
-    val sizeModifier = when (model) {
-        is BookShareCardUiModel -> Modifier
-            .requiredWidth(420.dp)
-            .requiredHeightIn(min = 480.dp)
-
-        is ReadingUpdateShareCardUiModel -> Modifier
-            .requiredWidth(380.dp)
-            .requiredHeightIn(min = 460.dp)
-
-        is ReadingLifeShareCardUiModel -> Modifier
-            .requiredWidth(300.dp)
-            .requiredHeightIn(min = 560.dp)
-
-        is StatShareCardUiModel,
-        is QuoteShareCardUiModel,
-        is YearRecapShareCardUiModel -> Modifier.requiredSize(
-            width = 360.dp,
-            height = 540.dp,
-        )
-    }
-
-    val contentPadding = when (model) {
-        is BookShareCardUiModel,
-        is ReadingUpdateShareCardUiModel -> Spacing.xxxl
-        is ReadingLifeShareCardUiModel -> Spacing.xl
-        is StatShareCardUiModel,
-        is QuoteShareCardUiModel,
-        is YearRecapShareCardUiModel -> Spacing.xxl
-    }
-
+@Composable
+private fun PaperShareCard(
+    surfaceColor: Color,
+    contentColor: Color,
+    sizeModifier: Modifier,
+    contentPadding: Dp,
+    modifier: Modifier,
+    content: @Composable () -> Unit,
+) {
     Surface(
         modifier = modifier
             .then(other = sizeModifier)
@@ -97,14 +153,7 @@ fun ShareCard(
                 .fillMaxSize()
                 .padding(contentPadding),
         ) {
-            when (model) {
-                is BookShareCardUiModel -> BookShareCardBody(model)
-                is ReadingUpdateShareCardUiModel -> ReadingUpdateShareCardBody(model)
-                is StatShareCardUiModel -> StatShareCardBody(model)
-                is QuoteShareCardUiModel -> QuoteShareCardBody(model)
-                is YearRecapShareCardUiModel -> YearRecapShareCardBody(model)
-                is ReadingLifeShareCardUiModel -> ReadingLifeShareCardBody(model)
-            }
+            content()
 
             Spacer(modifier = Modifier.weight(1f))
 

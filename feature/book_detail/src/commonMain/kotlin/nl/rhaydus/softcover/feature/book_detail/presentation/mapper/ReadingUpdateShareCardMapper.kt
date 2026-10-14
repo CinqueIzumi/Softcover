@@ -2,15 +2,19 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.richtext.RichTextVariant
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.ShareCardFormat
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.domain.model.isBlank
+import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.progress.toPositionText
 import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import kotlin.math.roundToInt
@@ -27,6 +31,7 @@ internal fun Book.toReadingUpdateShareCardUiModel(
     username: String?,
     avatarUrl: String?,
     userTags: List<UserTag> = emptyList(),
+    format: ShareCardFormat = ShareCardFormat.Story,
 ): ReadingUpdateShareCardUiModel? {
     val resolvedUsername = username?.takeIf { it.isNotBlank() } ?: return null
 
@@ -34,9 +39,12 @@ internal fun Book.toReadingUpdateShareCardUiModel(
 
     val resolvedEdition = edition ?: defaultEdition
 
-    val resolvedCover = resolvedEdition?.localImagePath
-        ?: resolvedEdition?.url
-        ?: coverUrl
+    val resolvedCover = resolvedEdition.toCoverUiModel(
+        defaultEdition = defaultEdition,
+        coverlessTitle = title,
+        variant = CoverVariant.Floating,
+        fallbackCoverUrl = coverUrl.takeIf { it.isNotBlank() },
+    )
 
     val resolvedAvatarUrl = avatarUrl?.takeIf { it.isNotBlank() }
     val resolvedAuthor = authors.firstOrNull()?.name.orEmpty()
@@ -46,6 +54,7 @@ internal fun Book.toReadingUpdateShareCardUiModel(
             ChipUiModel(
                 key = tag.name,
                 label = tag.name,
+                tone = ChipTone.OverMedia,
                 interaction = ChipInteraction.Inert,
             )
         }
@@ -55,20 +64,26 @@ internal fun Book.toReadingUpdateShareCardUiModel(
         BookStatus.Read -> ReadingUpdateShareCardUiModel.Finished(
             username = resolvedUsername,
             avatarUrl = resolvedAvatarUrl,
-            coverUrl = resolvedCover,
+            cover = resolvedCover,
             title = title,
             author = resolvedAuthor,
             tags = resolvedTags,
+            format = format,
             ratingStars = currentUserBook.rating?.takeIf { it > 0.0 },
             review = currentUserBook.reviewDocument
                 ?.takeUnless { it.isBlank() }
-                ?.toRichTextUiModel(variant = RichTextVariant.ShareCard),
+                ?.toRichTextUiModel(
+                    variant = when (format) {
+                        ShareCardFormat.Story -> RichTextVariant.ShareCard
+                        ShareCardFormat.FullText -> RichTextVariant.ShareCardFullText
+                    },
+                ),
         )
 
         BookStatus.Reading -> ReadingUpdateShareCardUiModel.Reading(
             username = resolvedUsername,
             avatarUrl = resolvedAvatarUrl,
-            coverUrl = resolvedCover,
+            cover = resolvedCover,
             title = title,
             author = resolvedAuthor,
             tags = resolvedTags,
