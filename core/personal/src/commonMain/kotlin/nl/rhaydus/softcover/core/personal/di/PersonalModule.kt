@@ -7,6 +7,8 @@ import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
 import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSourceImpl
+import nl.rhaydus.softcover.core.personal.data.datasource.ReadingJournalHistoryLocalDataSource
+import nl.rhaydus.softcover.core.personal.data.datasource.ReadingJournalHistoryLocalDataSourceImpl
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingJournalHistoryRemoteDataSource
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingJournalHistoryRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSource
@@ -26,15 +28,16 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.AddReadingLogEntryUseCa
 import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteHighlightUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteReadingLogEntryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteReadingSessionUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveActiveSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveAllHighlightsUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveAllSessionsUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveHighlightsForBookUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingLogCountUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingLogForBookUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveSessionsForBookUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.PauseReadingSessionUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ResumeReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StartReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StopReadingSessionUseCase
@@ -90,9 +93,17 @@ val personalModule = module {
         )
     }
 
-    single<ReadingJournalHistoryRepository> {
-        ReadingJournalHistoryRepositoryImpl(readingJournalHistoryRemoteDataSource = get())
+    single<ReadingJournalHistoryLocalDataSource> {
+        ReadingJournalHistoryLocalDataSourceImpl(dao = get<SoftcoverDatabase>().progressHistoryDao())
     }
 
-    factory { GetReadingJournalHistoryUseCase(readingJournalHistoryRepository = get()) }
+    single<ReadingJournalHistoryRepository> {
+        ReadingJournalHistoryRepositoryImpl(
+            readingJournalHistoryRemoteDataSource = get(),
+            readingJournalHistoryLocalDataSource = get(),
+        )
+    }
+
+    factory { ObserveReadingJournalHistoryUseCase(repository = get()) }
+    factory { RefreshReadingJournalHistoryUseCase(repository = get()) }
 }

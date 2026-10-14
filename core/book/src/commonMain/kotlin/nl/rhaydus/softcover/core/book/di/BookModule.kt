@@ -4,6 +4,8 @@ import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSourceImpl
+import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.repository.BooksRepositoryImpl
 import nl.rhaydus.softcover.core.book.data.sync.OfflineUserBookSyncImpl
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
@@ -73,7 +75,12 @@ val bookModule = module {
             offlineSync = get(),
             applicationScope = get(),
             appDispatchers = get(),
+            progressHistoryLocalDataSource = get(),
         )
+    }
+
+    single<ProgressHistoryLocalDataSource> {
+        ProgressHistoryLocalDataSourceImpl(dao = get<SoftcoverDatabase>().progressHistoryDao())
     }
 
     single<BooksLocalDataSource> {

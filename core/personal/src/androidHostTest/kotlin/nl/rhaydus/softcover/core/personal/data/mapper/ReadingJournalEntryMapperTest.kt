@@ -1,91 +1,257 @@
 package nl.rhaydus.softcover.core.personal.data.mapper
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import nl.rhaydus.softcover.core.database.model.ProgressHistoryEntity
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Instant
 
 class ReadingJournalEntryMapperTest {
-    private fun validPagesMetadata(pages: Any? = 120): Map<String, Any?> = mapOf(
-        "progress_pages" to pages,
-    )
+    private val hasuraInstant = "2024-10-05T10:30:00.123456+00:00"
 
-    private fun validSecondsMetadata(seconds: Any? = 900): Map<String, Any?> = mapOf(
-        "progress_seconds" to seconds,
+    private fun millis(instant: String): Long = Instant.parse(instant).toEpochMilliseconds()
+
+    private fun entity(actionAt: String): ProgressHistoryEntity = ProgressHistoryEntity(
+        bookId = 1,
+        actionAtEpochMillis = millis(instant = actionAt),
+        pages = 10,
+        seconds = null,
+        pending = false,
     )
 
     @Nested
-    inner class ToReadingJournalEntry {
+    inner class ToProgressHistoryEntity {
         @Test
-        fun `maps valid progress_pages metadata into pages with seconds null`() {
+        fun `maps pages metadata into a synced entity for the book`() {
             // ----- Arrange -----
-            val updatedAt = "2024-01-01"
-            val metadata = validPagesMetadata(pages = 120)
+            val metadata = mapOf("progress_pages" to 120)
 
             // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
+            val result = toProgressHistoryEntity(
+                bookId = 9,
+                actionAt = hasuraInstant,
                 metadata = metadata,
             )
 
             // ----- Assert -----
-            result shouldBe ReadingJournalEntry(
-                date = LocalDate(
-                    2024,
-                    1,
-                    1,
-                ),
-                pages = 120,
-                seconds = null,
-            )
+            val entity = result.shouldNotBeNull()
+            entity.bookId shouldBe 9
+            entity.pages shouldBe 120
+            entity.seconds shouldBe null
+            entity.pending shouldBe false
         }
 
         @Test
-        fun `maps valid progress_seconds metadata into seconds with pages null`() {
+        fun `parses a Hasura timestamptz with offset and fractional seconds into epoch millis`() {
             // ----- Arrange -----
-            val updatedAt = "2024-01-01"
-            val metadata = validSecondsMetadata(seconds = 900)
+            val metadata = mapOf("progress_pages" to 1)
 
             // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
                 metadata = metadata,
             )
 
             // ----- Assert -----
-            result shouldBe ReadingJournalEntry(
-                date = LocalDate(
-                    2024,
-                    1,
-                    1,
-                ),
-                pages = null,
-                seconds = 900,
-            )
+            result.shouldNotBeNull().actionAtEpochMillis shouldBe millis(instant = "2024-10-05T10:30:00.123Z")
         }
 
         @Test
-        fun `maps both progress_pages and progress_seconds when both present`() {
+        fun `converts a non-UTC offset to the same epoch millis as its UTC equivalent`() {
             // ----- Arrange -----
-            val updatedAt = "2024-01-01"
+            val metadata = mapOf("progress_pages" to 1)
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = "2024-10-05T12:30:00+02:00",
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull().actionAtEpochMillis shouldBe millis(instant = "2024-10-05T10:30:00Z")
+        }
+
+        @Test
+        fun `maps seconds metadata with pages null`() {
+            // ----- Arrange -----
+            val metadata = mapOf("progress_seconds" to 900)
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            val entity = result.shouldNotBeNull()
+            entity.pages shouldBe null
+            entity.seconds shouldBe 900
+        }
+
+        @Test
+        fun `maps both pages and seconds when both present`() {
+            // ----- Arrange -----
             val metadata = mapOf(
                 "progress_pages" to 50,
                 "progress_seconds" to 600,
             )
 
             // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
                 metadata = metadata,
             )
+
+            // ----- Assert -----
+            val entity = result.shouldNotBeNull()
+            entity.pages shouldBe 50
+            entity.seconds shouldBe 600
+        }
+
+        @Test
+        fun `parses string-typed numbers`() {
+            // ----- Arrange -----
+            val metadata = mapOf("progress_pages" to "120")
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull().pages shouldBe 120
+        }
+
+        @Test
+        fun `drops the entry when the only value is a non-numeric string`() {
+            // ----- Arrange -----
+            val metadata = mapOf("progress_pages" to "abc")
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `drops the entry when the only value is a boolean`() {
+            // ----- Arrange -----
+            val metadata = mapOf("progress_pages" to true)
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `drops the entry when metadata is a list`() {
+            // ----- Arrange -----
+            val metadata = listOf("progress_pages" to 120)
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `drops the entry when metadata is null`() {
+            // ----- Arrange -----
+            val metadata: Any? = null
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `drops the entry when both expected keys are missing`() {
+            // ----- Arrange -----
+            val metadata = mapOf("some_other_key" to 42)
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `drops the entry when the instant is unparseable`() {
+            // ----- Arrange -----
+            val metadata = mapOf("progress_pages" to 10)
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = "not-a-date",
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class ToReadingJournalEntry {
+        @Test
+        fun `carries pages and seconds through with the local date`() {
+            // ----- Arrange -----
+            val source = ProgressHistoryEntity(
+                bookId = 1,
+                actionAtEpochMillis = millis(instant = "2024-10-05T10:30:00Z"),
+                pages = 50,
+                seconds = 600,
+                pending = true,
+            )
+
+            // ----- Act -----
+            val result = source.toReadingJournalEntry(timeZone = TimeZone.UTC)
 
             // ----- Assert -----
             result shouldBe ReadingJournalEntry(
                 date = LocalDate(
                     2024,
-                    1,
-                    1,
+                    10,
+                    5,
                 ),
                 pages = 50,
                 seconds = 600,
@@ -93,142 +259,71 @@ class ReadingJournalEntryMapperTest {
         }
 
         @Test
-        fun `parses a string-typed progress_pages value via toIntOrNull`() {
+        fun `keeps an instant of 22 30Z on the same day in UTC`() {
             // ----- Arrange -----
-            val updatedAt = "2024-01-01"
-            val metadata = validPagesMetadata(pages = "120")
+            val source = entity(actionAt = "2024-10-05T22:30:00Z")
 
             // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
-                metadata = metadata,
-            )
+            val result = source.toReadingJournalEntry(timeZone = TimeZone.UTC)
 
             // ----- Assert -----
-            result shouldBe ReadingJournalEntry(
-                date = LocalDate(
-                    2024,
-                    1,
-                    1,
-                ),
-                pages = 120,
-                seconds = null,
-            )
-        }
-
-        @Test
-        fun `returns null when progress_pages is a non-numeric string and progress_seconds is absent`() {
-            // ----- Arrange -----
-            val updatedAt = "2024-01-01"
-            val metadata = validPagesMetadata(pages = "abc")
-
-            // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
-                metadata = metadata,
-            )
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `returns null when progress_pages is a boolean and progress_seconds is absent`() {
-            // ----- Arrange -----
-            val updatedAt = "2024-01-01"
-            val metadata = validPagesMetadata(pages = true)
-
-            // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
-                metadata = metadata,
-            )
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `returns null when metadata is a List rather than a Map`() {
-            // ----- Arrange -----
-            val updatedAt = "2024-01-01"
-            val metadata = listOf("progress_pages" to 120)
-
-            // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
-                metadata = metadata,
-            )
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `returns null when metadata is null`() {
-            // ----- Arrange -----
-            val updatedAt = "2024-01-01"
-
-            // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
-                metadata = null,
-            )
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `returns null when metadata map is missing both expected keys`() {
-            // ----- Arrange -----
-            val updatedAt = "2024-01-01"
-            val metadata = mapOf("some_other_key" to 42)
-
-            // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
-                metadata = metadata,
-            )
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `parses a datetime updatedAt value taking only the date portion`() {
-            // ----- Arrange -----
-            val updatedAt = "2024-01-01T10:30:00"
-            val metadata = validPagesMetadata(pages = 10)
-
-            // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
-                metadata = metadata,
-            )
-
-            // ----- Assert -----
-            result?.date shouldBe LocalDate(
+            result.date shouldBe LocalDate(
                 2024,
-                1,
-                1,
+                10,
+                5,
             )
         }
 
         @Test
-        fun `returns null when updatedAt fails to parse as any date format`() {
+        fun `moves an instant of 22 30Z to the next day in Europe Amsterdam`() {
             // ----- Arrange -----
-            val updatedAt = "not-a-date"
-            val metadata = validPagesMetadata(pages = 10)
+            val source = entity(actionAt = "2024-10-05T22:30:00Z")
 
             // ----- Act -----
-            val result = toReadingJournalEntry(
-                updatedAt = updatedAt,
-                metadata = metadata,
-            )
+            val result = source.toReadingJournalEntry(timeZone = TimeZone.of("Europe/Amsterdam"))
 
             // ----- Assert -----
-            result shouldBe null
+            result.date shouldBe LocalDate(
+                2024,
+                10,
+                6,
+            )
+        }
+
+        @Test
+        fun `moves an instant of 03 00Z to the previous day in America New_York`() {
+            // ----- Arrange -----
+            val source = entity(actionAt = "2024-10-05T03:00:00Z")
+
+            // ----- Act -----
+            val result = source.toReadingJournalEntry(timeZone = TimeZone.of("America/New_York"))
+
+            // ----- Assert -----
+            result.date shouldBe LocalDate(
+                2024,
+                10,
+                4,
+            )
+        }
+
+        @Test
+        fun `dates a Hasura offset instant with fractional seconds by the local day`() {
+            // ----- Arrange -----
+            val source = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = "2024-10-05T22:30:00.5+00:00",
+                metadata = mapOf("progress_pages" to 1),
+            ).shouldNotBeNull()
+
+            // ----- Act -----
+            val result = source.toReadingJournalEntry(timeZone = TimeZone.of("Europe/Amsterdam"))
+
+            // ----- Assert -----
+            result.date shouldBe LocalDate(
+                2024,
+                10,
+                6,
+            )
         }
     }
 }

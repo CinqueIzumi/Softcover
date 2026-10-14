@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.database.dao.DismissedContinueSeriesDao
 import nl.rhaydus.softcover.core.database.dao.HighlightDao
 import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
+import nl.rhaydus.softcover.core.database.dao.ProgressHistoryDao
 import nl.rhaydus.softcover.core.database.dao.ReadingLogDao
 import nl.rhaydus.softcover.core.database.dao.ReadingSessionDao
 import nl.rhaydus.softcover.core.database.dao.RoadmapDocumentDao
@@ -33,6 +34,7 @@ import nl.rhaydus.softcover.core.database.model.HighlightEntity
 import nl.rhaydus.softcover.core.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
 import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
+import nl.rhaydus.softcover.core.database.model.ProgressHistoryEntity
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
@@ -70,11 +72,12 @@ import kotlin.coroutines.CoroutineContext
         ShelfManualOrderEntity::class,
         UserTagVocabularyEntity::class,
         RoadmapDocumentEntity::class,
+        ProgressHistoryEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 50,
+    version = 51,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -97,6 +100,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun userTagVocabularyDao(): UserTagVocabularyDao
 
     abstract fun roadmapDocumentDao(): RoadmapDocumentDao
+
+    abstract fun progressHistoryDao(): ProgressHistoryDao
 
     companion object {
         internal fun build(
@@ -1341,6 +1346,25 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_50_51 = object : Migration(50, 51) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS progress_history (
+                            localId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            bookId INTEGER NOT NULL,
+                            actionAtEpochMillis INTEGER NOT NULL,
+                            pages INTEGER,
+                            seconds INTEGER,
+                            pending INTEGER NOT NULL
+                        )
+                    """.trimIndent(),
+                )
+                connection.execSQL("CREATE INDEX IF NOT EXISTS index_progress_history_bookId ON progress_history (bookId)")
+                connection.execSQL("ALTER TABLE pending_user_book_writes ADD COLUMN progressHistoryId INTEGER DEFAULT NULL")
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1392,6 +1416,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_47_48,
             MIGRATION_48_49,
             MIGRATION_49_50,
+            MIGRATION_50_51,
         )
     }
 }

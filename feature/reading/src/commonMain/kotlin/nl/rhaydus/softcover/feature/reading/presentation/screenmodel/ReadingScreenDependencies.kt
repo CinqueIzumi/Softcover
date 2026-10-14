@@ -12,7 +12,8 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
@@ -42,7 +43,8 @@ internal data class ReadingScreenDependencies(
     val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
     val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
-    val getReadingJournalHistoryUseCase: GetReadingJournalHistoryUseCase,
+    val observeReadingJournalHistoryUseCase: ObserveReadingJournalHistoryUseCase,
+    val refreshReadingJournalHistoryUseCase: RefreshReadingJournalHistoryUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

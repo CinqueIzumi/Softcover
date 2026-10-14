@@ -550,6 +550,9 @@ interface BookDao {
     @Query("DELETE FROM reading_log_entries")
     suspend fun deleteAllReadingLogEntries()
 
+    @Query("DELETE FROM progress_history")
+    suspend fun deleteAllProgressHistory()
+
     @Query("DELETE FROM book_editions WHERE bookId = :bookId")
     suspend fun deleteEditions(bookId: Int)
 
@@ -716,6 +719,7 @@ interface BookDao {
         deleteAllHighlights()
         deleteAllReadingSessions()
         deleteAllReadingLogEntries()
+        deleteAllProgressHistory()
 
         deleteAllUserBooks()
         deleteAllBookEditions()

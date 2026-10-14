@@ -9,16 +9,16 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.GetReadingJournalHistoryQuery
+import nl.rhaydus.softcover.core.database.model.ProgressHistoryEntity
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.network.helper.safeQuery
-import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Instant
 
 class ReadingJournalHistoryRemoteDataSourceImplTest {
     private lateinit var apolloClient: ApolloClient
@@ -55,25 +55,26 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
     }
 
     /**
-     * Builds a row that the real [nl.rhaydus.softcover.core.personal.data.mapper.toReadingJournalEntry]
-     * maps into a distinct [ReadingJournalEntry], keyed by [pages], so accumulated pagination results
+     * Builds a row that the real [nl.rhaydus.softcover.core.personal.data.mapper.toProgressHistoryEntity]
+     * maps into a distinct [ProgressHistoryEntity], keyed by [pages], so accumulated pagination results
      * can be asserted by value and order without mocking the mapper itself.
      */
     private fun row(pages: Int): GetReadingJournalHistoryQuery.Data.Reading_journal =
         GetReadingJournalHistoryQuery.Data.Reading_journal(
             __typename = "reading_journals",
-            updated_at = "2024-01-01",
+            action_at = "2024-01-01T10:00:00+00:00",
             metadata = mapOf("progress_pages" to pages),
         )
 
-    private fun expectedEntry(pages: Int): ReadingJournalEntry = ReadingJournalEntry(
-        date = LocalDate(
-            2024,
-            1,
-            1,
-        ),
+    private fun expectedEntity(
+        bookId: Int,
+        pages: Int,
+    ): ProgressHistoryEntity = ProgressHistoryEntity(
+        bookId = bookId,
+        actionAtEpochMillis = Instant.parse("2024-01-01T10:00:00Z").toEpochMilliseconds(),
         pages = pages,
         seconds = null,
+        pending = false,
     )
 
     @Nested
@@ -96,7 +97,12 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
             val result = dataSource.getReadingJournalHistory(bookId = bookId)
 
             // ----- Assert -----
-            result shouldBe (0 until 3).map { expectedEntry(pages = it) }
+            result shouldBe (0 until 3).map {
+                expectedEntity(
+                    bookId = bookId,
+                    pages = it,
+                )
+            }
 
             coVerify(exactly = 1) {
                 apolloClient.safeQuery(query = any<GetReadingJournalHistoryQuery>())
@@ -139,7 +145,12 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
             val result = dataSource.getReadingJournalHistory(bookId = bookId)
 
             // ----- Assert -----
-            result shouldBe (0 until 125).map { expectedEntry(pages = it) }
+            result shouldBe (0 until 125).map {
+                expectedEntity(
+                    bookId = bookId,
+                    pages = it,
+                )
+            }
 
             coVerify(exactly = 2) {
                 apolloClient.safeQuery(query = any<GetReadingJournalHistoryQuery>())
