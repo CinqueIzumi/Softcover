@@ -29,6 +29,7 @@ class SoftcoverModulesVerificationTest {
                     CoroutineDispatcher::class, // platform dispatchers (Main/IO/Default) supplied at runtime
                     CoroutineScope::class,      // ApplicationScope wraps an inline-constructed CoroutineScope, not a Koin binding
                     BookInitialCover::class, // passed via parametersOf at BookDetailScreen call site
+                    Boolean::class,             // passed via parametersOf at BarcodeScannerScreen call site
                     List::class,                // getAll() calls return a List assembled at runtime, never a bound type
                 ),
             )

@@ -107,7 +107,14 @@ interface BooksRepository {
      */
     suspend fun fetchTrendingBooks(forceRefresh: Boolean = false): List<Book>
 
-    suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
+    /**
+     * [forceNetwork] bypasses the Apollo cache. Pass it only on explicit user action that can have just
+     * created an edition on Hardcover (the ISBN lookup returning), never on a screen mount.
+     */
+    suspend fun getEditionsByBookId(
+        bookId: Int,
+        forceNetwork: Boolean = false,
+    ): List<BookEdition>
 
     suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition>
 

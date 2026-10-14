@@ -106,7 +106,10 @@ interface BooksRemoteDataSource {
         userBookIds: Set<Int> = emptySet(),
     ): List<Book>
 
-    suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
+    suspend fun getEditionsByBookId(
+        bookId: Int,
+        forceNetwork: Boolean = false,
+    ): List<BookEdition>
 
     suspend fun fetchEditionsByIds(
         ids: List<Int>,
@@ -319,10 +322,15 @@ internal class BooksRemoteDataSourceImpl(
             .sortedWith(compareBy(nullsLast()) { book -> idOrdered[book.id] })
     }
 
-    override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
+    override suspend fun getEditionsByBookId(
+        bookId: Int,
+        forceNetwork: Boolean,
+    ): List<BookEdition> {
+        val policy = if (forceNetwork) FetchPolicy.NetworkFirst else FetchPolicy.CacheFirst
+
         val result = apolloClient.safeQuery(
             query = GetEditionsByBookIdQuery(bookId = bookId),
-            fetchPolicy = FetchPolicy.CacheFirst,
+            fetchPolicy = policy,
         )
 
         return result.editions.mapNotNull { it.editionDetailFragment()?.toBookEdition() }

@@ -82,9 +82,11 @@ internal data class BookDetailUiState(
     val topBar: TopBarUiModel = topBarFor(book = null),
     val initialCover: BookInitialCover? = null,
     val fabMenuExpanded: Boolean = false,
-    val showEditEditionSheet: Boolean = false,
+    val editionSheetRequested: Boolean = false,
+    val editionSearchQuery: String = "",
     val editions: ImmutableList<BookEdition> = persistentListOf(),
     val loadingEditions: Boolean = false,
+    val editionsError: String? = null,
 
     /**
      * The edition selector's in-progress pick, set to [displayedEdition]'s id when the sheet opens
@@ -236,8 +238,8 @@ internal data class BookDetailUiState(
     /** `null` until [book] exists. */
     val tagEditorSheet: TagEditorSheetUiModel? = null,
 
-    /** `null` until [book] and [displayedEdition] exist. */
-    val editionSheet: EditionSheetUiModel? = null,
+    /** Opens only once [book] and [displayedEdition] exist; [editionSheetRequested] drives it. */
+    val editionSheet: SheetSession<EditionSheetUiModel, IsbnLookup> = SheetSession.Closed,
 
     val showChooseListsSheet: Boolean = false,
 
@@ -294,12 +296,15 @@ internal data class BookDetailUiState(
      * The edition pinned by an external entry point (a barcode scan), if any. It wins over every
      * other edition — including the persisted on-shelf edition — so a scan always shows the exact
      * edition that was scanned. Resolved from [book]'s editions (so it carries the locally-overlaid
-     * `owned` flag — e.g. the owned cover badge shows for a scanned edition the user owns); falls
-     * back to [initialCover] for the pre-load frame before the book has loaded.
+     * `owned` flag — e.g. the owned cover badge shows for a scanned edition the user owns); then from
+     * [editions], which holds an edition just added on Hardcover before [book] has it; then from
+     * [initialCover] for the pre-load frame before the book has loaded.
      */
     val scannedEdition: BookEdition?
         get() = scannedEditionId?.let { id ->
-            book?.editions?.firstOrNull { it.id == id } ?: initialCover?.currentEdition?.takeIf { it.id == id }
+            book?.editions?.firstOrNull { it.id == id }
+                ?: editions.firstOrNull { it.id == id }
+                ?: initialCover?.currentEdition?.takeIf { it.id == id }
         }
 
     /**
@@ -355,5 +360,5 @@ internal data class BookDetailUiState(
     fun isEditionOwned(edition: BookEdition?): Boolean = edition != null && edition.id in ownedEditionIds
 
     val filteredEditions: List<BookEdition>
-        get() = editions.filterByEditionSearch(editionSheet?.searchQuery.orEmpty())
+        get() = editions.filterByEditionSearch(editionSearchQuery)
 }

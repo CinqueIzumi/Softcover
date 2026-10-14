@@ -330,12 +330,18 @@ internal class BooksRepositoryImpl(
         trendingBooksCache.getOrPut { booksRemoteDataSource.fetchTrendingBooks() }
     }
 
-    override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
+    override suspend fun getEditionsByBookId(
+        bookId: Int,
+        forceNetwork: Boolean,
+    ): List<BookEdition> {
         if (networkAvailability.isOnline.value.not()) {
             return booksLocalDataSource.getBookById(id = bookId)?.editions.orEmpty()
         }
 
-        return booksRemoteDataSource.getEditionsByBookId(bookId = bookId)
+        return booksRemoteDataSource.getEditionsByBookId(
+            bookId = bookId,
+            forceNetwork = forceNetwork,
+        )
     }
 
     override suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition> {

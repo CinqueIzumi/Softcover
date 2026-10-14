@@ -29,4 +29,6 @@ internal sealed interface BookDetailEvent : UiEvent {
     }
 
     class CreateListRequestedEvent : BookDetailEvent
+
+    data class OpenIsbnLookupEvent(val prefilledIsbn: String?) : BookDetailEvent
 }
