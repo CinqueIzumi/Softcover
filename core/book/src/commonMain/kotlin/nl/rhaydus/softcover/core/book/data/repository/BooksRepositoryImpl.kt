@@ -17,7 +17,7 @@ import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
-import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
+import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
@@ -314,7 +314,7 @@ internal class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = isbns)
     }
 
-    override suspend fun addBookByIsbn(isbn: String): CreatedBook {
+    override suspend fun addBookByIsbn(isbn: String): BookImport {
         if (networkAvailability.isOnline.value.not()) throw OfflineException()
 
         return booksRemoteDataSource.addBookByIsbn(isbn = isbn)

@@ -44,7 +44,7 @@ import nl.rhaydus.softcover.UpdateUserBookReviewMutation
 import nl.rhaydus.softcover.UpdateUserBookReviewMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookReviewUserBookFragment
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
-import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
+import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.database.mapper.reviewSlateFromDocument
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -67,7 +67,7 @@ interface BooksRemoteDataSource {
 
     suspend fun fetchEditionMatchesForIsbns(isbns: List<String>): Map<String, IsbnEditionMatch>
 
-    suspend fun addBookByIsbn(isbn: String): CreatedBook
+    suspend fun addBookByIsbn(isbn: String): BookImport
 
     suspend fun fetchBooksByIds(
         ids: List<Int>,
@@ -165,6 +165,9 @@ private const val BATCH_ID_LIMIT: Int = 200
 /** Hardcover's ISBN external-book provider platform — `upsert_book` uses the ISBN as the external id. */
 private const val HARDCOVER_ISBN_PLATFORM_ID: Int = 8
 
+/** `upsert_book` status while Hardcover imports the book asynchronously from its ISBN source. */
+private const val UPSERT_BOOK_STATUS_FETCHING: String = "fetching"
+
 internal class BooksRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
     private val appDispatchers: AppDispatchers,
@@ -238,7 +241,7 @@ internal class BooksRemoteDataSourceImpl(
         return matches
     }
 
-    override suspend fun addBookByIsbn(isbn: String): CreatedBook {
+    override suspend fun addBookByIsbn(isbn: String): BookImport {
         val response = apolloClient
             .safeMutation(
                 mutation = CreateBookMutation(
@@ -257,12 +260,21 @@ internal class BooksRemoteDataSourceImpl(
 
         if (errors.isNotEmpty()) throw Exception("CreateBook rejected by server: ${errors.joinToString()}")
 
-        val bookId = response.book?.id
-            ?: throw Exception("upsert_book returned no book")
+        // upsert_book's top-level id and edition_id are the book's and the edition's ids.
+        val bookId = response.book?.id ?: response.id
 
-        return CreatedBook(
+        if (bookId == null) {
+            if (response.status == UPSERT_BOOK_STATUS_FETCHING) return BookImport.Fetching
+
+            throw Exception(
+                "upsert_book returned no book (status=${response.status}, id=${response.id}, " +
+                    "edition_id=${response.edition_id})",
+            )
+        }
+
+        return BookImport.Created(
             bookId = bookId,
-            editionId = response.edition?.id,
+            editionId = response.edition?.id ?: response.edition_id,
         )
     }
 

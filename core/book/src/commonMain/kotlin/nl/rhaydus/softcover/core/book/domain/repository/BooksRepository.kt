@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.book.domain.repository
 
 import kotlinx.coroutines.flow.Flow
-import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
+import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
@@ -87,7 +87,7 @@ interface BooksRepository {
      * [OfflineException] when offline, mirroring
      * [fetchEditionMatchesForIsbns].
      */
-    suspend fun addBookByIsbn(isbn: String): CreatedBook
+    suspend fun addBookByIsbn(isbn: String): BookImport
 
     suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
 
