@@ -70,7 +70,6 @@ kotlin {
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.koin)
             implementation(libs.voyager.tabNavigator)
-            implementation(libs.voyager.transitions)
         }
 
         androidMain.dependencies {
