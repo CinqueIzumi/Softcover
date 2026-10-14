@@ -19,7 +19,7 @@ another feature's screen; `book_detail` is the canonical candidate for that slot
 
 | Tier | Features |
 |------|----------|
-| T1 (leaf) | `library`, `reading`, `explore`, `book_detail`, `lists`, `profile`, `scan`, `session`, `onboarding`, `settings`, `app_update` |
+| T1 (leaf) | `library`, `reading`, `explore`, `book_detail`, `lists`, `profile`, `scan`, `session`, `onboarding`, `settings`, `app_update`, `widget` |
 
 Notes on features that are leaves only for their *screens*:
 
@@ -35,6 +35,8 @@ Notes on features that are leaves only for their *screens*:
 - `app_update` stays a feature (its Play-`AppUpdateManager` domain is the sanctioned `androidMain`
   exception), but its pure `AppUpdateState` and the `AppUpdateSimulator` and `ObserveAppUpdateStateUseCase` contracts live in
   `core:domain`.
+- `widget` (the Glance home-screen widgets) is Android-only: all its code sits in `androidMain`, and it is
+  wired from `:orchestration`'s `androidMain`, the edge through which its manifest receivers reach `:app`.
 
 `deadlines`, `personal`, and `connectivity` were kernels in disguise and are now `core` modules —
 they are **not** features.
@@ -53,7 +55,7 @@ only on modules **below** its tier.
 |------|---------|
 | T3 app shell | `:app` |
 | T3 orchestration | `:orchestration` |
-| T1 features | `:feature:{lists, profile, onboarding, explore, library, book_detail, reading, session, scan, settings, app_update}` |
+| T1 features | `:feature:{lists, profile, onboarding, explore, library, book_detail, reading, session, scan, settings, app_update, widget}` |
 | T0 core | `:core:{domain, database, network, notification, preferences, identity, book, lists, deadlines, personal, profile, connectivity, designsystem, component, uibinding, presentation}` |
 
 ### What each `core:*` module holds (Softcover roster)

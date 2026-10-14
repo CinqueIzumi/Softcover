@@ -48,6 +48,7 @@ mockkVersion = "1.13.17"
 turbineVersion = "1.2.0"
 appUpdateVersion = "2.1.0"
 workVersion = "2.10.1"
+glanceVersion = "1.2.0"
 reorderableVersion = "2.4.3"
 cameraX = "1.4.2"
 mlkitBarcode = "17.3.0"
@@ -153,6 +154,8 @@ turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine
 play-app-update = { group = "com.google.android.play", name = "app-update", version.ref = "appUpdateVersion" }
 play-app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "appUpdateVersion" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workVersion" }
+androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glanceVersion" }
+androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glanceVersion" }
 reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.ref = "reorderableVersion" }
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraX" }
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }

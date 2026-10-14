@@ -71,4 +71,5 @@ include(":feature:session")
 include(":feature:scan")
 include(":feature:settings")
 include(":feature:app_update")
+include(":feature:widget")
  

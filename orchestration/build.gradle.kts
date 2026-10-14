@@ -75,6 +75,8 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.koin.android)
             implementation(libs.androidx.splash)
+
+            implementation(project(":feature:widget"))
         }
 
         androidHostTest.dependencies {

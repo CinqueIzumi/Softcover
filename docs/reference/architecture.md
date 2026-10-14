@@ -21,7 +21,7 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
 :orchestration        # Nav host (MainActivity, RootScreen, bottom bars), AppNavigator / AppEntryPoint
                       #   impls, cross-feature orchestration use cases, the softcoverModules aggregate
 :feature:*            # Leaf features: lists, profile, onboarding, explore, library, book_detail,
-                      #   reading, session, scan, settings, app_update
+                      #   reading, session, scan, settings, app_update, widget
 :core:*               # domain, database, network, designsystem, presentation, component, uibinding,
                       #   notification, preferences, identity, book, lists, deadlines, personal,
                       #   profile, connectivity
