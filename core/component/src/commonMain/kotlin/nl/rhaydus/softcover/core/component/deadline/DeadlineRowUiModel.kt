@@ -9,12 +9,12 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
  * What [DeadlineRow] renders: the "Finish by" [title], the status [badge] and the [goal] sentence
- * under them. [isExpired] lets the host dim the surfaces around the row.
+ * under them. A paused book has no [badge]. [isExpired] lets the host dim the surfaces around the row.
  */
 @Immutable
 data class DeadlineRowUiModel(
     val title: String,
-    val badge: BadgeUiModel,
+    val badge: BadgeUiModel?,
     val goal: String,
     val isExpired: Boolean,
 ) {
@@ -37,6 +37,12 @@ data class DeadlineRowUiModel(
                 ),
                 goal = "You're 40 pages behind schedule. Read 22 pages/day for the next 12 days to " +
                     "finish on time.",
+                isExpired = false,
+            ),
+            "On hold" to DeadlineRowUiModel(
+                title = "Finish by 28 Aug",
+                badge = null,
+                goal = "On hold. Resume to get back on pace.",
                 isExpired = false,
             ),
             "Expired" to DeadlineRowUiModel(

@@ -270,7 +270,7 @@ internal class SettingsLocalDataSourceImpl(
     }
 
     override suspend fun resetAllSettings() {
-        appSettingsDataStore.store.updateData { AppSettingsEntity() }
+        appSettingsDataStore.store.updateData { AppSettingsEntity(pausedShelfSeeded = true) }
     }
 
     override val libraryTabOrder: Flow<List<String>> = appSettingsDataStore.store.data

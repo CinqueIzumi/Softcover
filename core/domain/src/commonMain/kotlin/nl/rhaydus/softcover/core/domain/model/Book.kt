@@ -31,6 +31,9 @@ data class Book(
     val status: BookStatus
         get() = userBook?.status ?: BookStatus.None
 
+    val isPaused: Boolean
+        get() = status == BookStatus.Paused
+
     val effectiveReleaseDate: LocalDate?
         get() = currentEdition?.releaseDate ?: defaultEdition?.releaseDate ?: releaseDate
 

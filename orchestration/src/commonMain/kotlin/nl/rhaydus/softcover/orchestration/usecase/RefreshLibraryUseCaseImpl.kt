@@ -32,9 +32,9 @@ internal class RefreshLibraryUseCaseImpl(
         withContext(dispatchers.io) {
             when (scope) {
                 RefreshScope.All -> refreshAll(userId = userId)
-                is RefreshScope.ByStatus -> booksRepository.refreshUserBooks(
+                is RefreshScope.ByStatuses -> booksRepository.refreshUserBooks(
                     userId = userId,
-                    statusFilter = scope.status,
+                    statusFilter = scope.statuses,
                 )
                 is RefreshScope.ByList -> refreshSingleList(
                     userId = userId,

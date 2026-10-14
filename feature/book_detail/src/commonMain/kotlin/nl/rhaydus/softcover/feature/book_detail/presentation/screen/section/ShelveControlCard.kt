@@ -52,6 +52,7 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsPausedClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadingClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsWantToReadClickAction
@@ -125,6 +126,22 @@ internal fun ShelveControlCard(
                         onClick = {
                             book?.let {
                                 runAction(OnMarkBookAsReadingClickAction(book = it))
+                            }
+                        },
+                        readingStatus = state.shelveReadingStatus,
+                    )
+
+                    ShelveRow(
+                        label = "Paused",
+                        iconRes = drawableIconResource(
+                            icon = SoftcoverIcon.Pause,
+                            contentDescription = "",
+                        ),
+                        selected = status == BookStatus.Paused,
+                        isLoading = isLoading,
+                        onClick = {
+                            book?.let {
+                                runAction(OnMarkBookAsPausedClickAction(book = it))
                             }
                         },
                         readingStatus = state.shelveReadingStatus,

@@ -39,10 +39,14 @@
 
 ### Shelve control
 
-- A bar-less `SHELVE THIS BOOK` label over a `surfaceContainerLow` card of three rows: Want to read /
-  Reading / Read. The active row fills `primary` / `onPrimary`; active Reading shows `{pct}% · p. {page}`
-  (time-based for audiobooks), active Read the read date when known.
-- All three rows are enabled for an off-shelf book: Reading or Read shelves it there in one step.
+- A bar-less `SHELVE THIS BOOK` label over a `surfaceContainerLow` card of four rows: Want to read /
+  Reading / Paused / Read. The active row fills `primary` / `onPrimary`; active Reading or Paused shows
+  `{pct}% · p. {page}` (time-based for audiobooks), active Read the read date when known.
+- All four rows are enabled for an off-shelf book: Reading, Paused or Read shelves it there in one step.
+  Reading on a paused book resumes it.
+- Paused while the book's reading session is open (timer running or paused) asks first through the
+  shared end-session sheet. "End session and pause" stops the session, then pauses; "Keep reading"
+  leaves both as they were.
 - Writes are optimistic; failure shakes the card (`Modifier.shakeOnError`) with "Couldn't save — tap to
   retry". Read plays the mark-as-read celebration. While loading, each row is masked and inert.
 
@@ -54,10 +58,15 @@
 
 ### Book-detail in-progress stat
 
-- The Reading-shelf hero stat: an "In progress" `SectionHeader` with a trailing `Update` pill (opens the
-  Update progress sheet, whose "Mark as read" runs the shelve control's Read path), the percentage in
-  `statHero`, a `ProgressBar`, a `p. {x} of {y}` / `{n} pages to go` row, an optional pace forecast
-  ("Finish in {x} reading days"), and the `DeadlineRow` when a deadline is set.
+- The Reading-shelf hero stat, shown for a Paused book too (its `Update` pill records progress, which
+  resumes the book), though the pace forecast stays Reading-only. An "In progress" `SectionHeader` with a
+  trailing `Update` pill (opens the Update progress sheet, whose "Mark as read" runs the shelve control's
+  Read path), the percentage in `statHero`, a `ProgressBar`, a `p. {x} of {y}` / `{n} pages to go` row, an
+  optional pace forecast ("Finish in {x} reading days"), and the `DeadlineRow` when a deadline is set.
+- A Paused book never reads as in progress. The section header reads "On hold", the counts row reads
+  `{n} pages left` (`{t} left` for an audiobook), and the progress sheet it opens carries an "On hold"
+  eyebrow and an "Update and resume" primary button. The `DeadlineRow` drops its status badge and
+  its goal reads "On hold. Resume to get back on pace." The percentage, bar and `p. {x} of {y}` stay.
 - The forecast and `DeadlineRow` reveal in place; The Book lens's Tags and Find it sections do the same.
   Voices and About reserve their footprint with masked stand-ins while loading (see "Section footprint
   reserved while loading", cross-cutting.md).

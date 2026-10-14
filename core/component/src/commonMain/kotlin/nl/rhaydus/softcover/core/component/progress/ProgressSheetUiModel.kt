@@ -80,16 +80,19 @@ data class ProgressSheetUiModel(
             )
         }
 
-        fun scaffoldFor(bookTitle: String): SheetScaffoldUiModel = SheetScaffoldUiModel(
+        fun scaffoldFor(
+            bookTitle: String,
+            isPaused: Boolean = false,
+        ): SheetScaffoldUiModel = SheetScaffoldUiModel(
             header = SheetHeaderUiModel(
                 section = SectionHeaderUiModel.Section(
-                    eyebrow = "Reading progress",
+                    eyebrow = if (isPaused) "On hold" else "Reading progress",
                     headline = bookTitle,
                 ),
             ),
             footer = SheetFooterUiModel.Stacked(
                 primary = SheetFooterButton(
-                    label = "Update progress",
+                    label = if (isPaused) "Update and resume" else "Update progress",
                     dismissesSheet = true,
                 ),
                 secondary = SheetFooterButton(

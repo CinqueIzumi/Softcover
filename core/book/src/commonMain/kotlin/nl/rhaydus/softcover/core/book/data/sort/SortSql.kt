@@ -22,10 +22,12 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
  *   without a value sort with the smallest end.
  * - `DATE_FINISHED` resolves its value from a `COALESCE` chain whose candidates are a mix of plain
  *   ISO dates (`finishedAt`, `lastReadDate` → `YYYY-MM-DD`) and ISO datetimes (the finished-journal
- *   `updatedAt` and `createdAt` → `YYYY-MM-DDTHH:MM:SS`). Cross-row comparison is lexicographic, so
- *   ordering is exact at year/month/day granularity; two books that resolve to the same calendar
- *   day via different-shaped strings may tie-break inconsistently. Accepted because the sort and the
- *   `LibraryStats.finishedYear()` filter it mirrors both operate at year granularity.
+ *   `updatedAt` and `createdAt` → `YYYY-MM-DDTHH:MM:SS`). The two datetimes are stored in UTC and
+ *   converted with `'localtime'` so they bucket into the same calendar day the user sees.
+ *   Cross-row comparison is lexicographic, so ordering is exact at year/month/day granularity; two
+ *   books that resolve to the same calendar day via different-shaped strings may tie-break
+ *   inconsistently. Accepted because the sort and the `LibraryStats.finishedYear()` filter it mirrors
+ *   both operate at year granularity.
  */
 internal fun LibrarySortMode.toOrderByFragment(direction: SortDirection): String {
     val dir = direction.sqlKeyword()
@@ -39,9 +41,10 @@ internal fun LibrarySortMode.toOrderByFragment(direction: SortDirection): String
                 (SELECT MAX(finishedAt) FROM user_book_reads
                     WHERE userBookId = ub.id AND finishedAt IS NOT NULL),
                 ub.lastReadDate,
-                (SELECT MAX(updatedAt) FROM reading_journals
+                (SELECT strftime('%Y-%m-%dT%H:%M:%S', MAX(updatedAt), 'localtime')
+                    FROM reading_journals
                     WHERE userBookId = ub.id AND event = 'user_book_read_finished'),
-                ub.createdAt
+                strftime('%Y-%m-%dT%H:%M:%S', ub.createdAt, 'localtime')
             ) $dir
         """.trimIndent()
 

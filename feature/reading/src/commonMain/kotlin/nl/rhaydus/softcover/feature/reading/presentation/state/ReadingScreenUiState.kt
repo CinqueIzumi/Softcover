@@ -72,6 +72,10 @@ internal data class ReadingScreenUiState(
     val wantToReadBooks: ImmutableList<Book>? = null,
     val trendingBooks: ImmutableList<Book> = persistentListOf(),
 
+    val onHoldHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "On hold",
+        headline = "Set aside for now",
+    ),
     val pickUpNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Pick up next"),
     val trendingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Trending now"),
     val emptyCurrentlyReading: EmptyStateUiModel = EmptyStateUiModel(
@@ -114,6 +118,8 @@ internal data class ReadingScreenUiState(
      */
     val alsoReading: BookCardSet<Book> = BookCardSet.standIns(ALSO_READING_STAND_IN_CARDS),
     val pickUpNext: BookCardSet<Book> = BookCardSet.standIns(PICK_UP_NEXT_STAND_IN_CARDS),
+
+    val onHold: BookCardSet<Book> = BookCardSet.empty(),
 
     val deadlineCoverOverlays: ImmutableMap<Int, CoverOverlayUiModel> = persistentMapOf(),
 

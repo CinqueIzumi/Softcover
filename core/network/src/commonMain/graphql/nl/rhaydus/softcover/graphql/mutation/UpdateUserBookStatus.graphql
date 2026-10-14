@@ -1,4 +1,4 @@
-mutation MarkBookAsReading(
+mutation UpdateUserBookStatus(
     $id: Int!,
     $object: UserBookUpdateInput!,
 ) {

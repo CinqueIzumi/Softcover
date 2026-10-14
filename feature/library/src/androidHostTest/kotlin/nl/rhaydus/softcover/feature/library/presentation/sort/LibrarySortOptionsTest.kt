@@ -263,6 +263,30 @@ class LibrarySortOptionsTest {
         }
 
         @Test
+        fun `with a paused book includes PROGRESS`() {
+            // ----- Arrange -----
+            val state = LibraryUiState(
+                booksByTab = persistentMapOf(
+                    LibraryTab.All.id to persistentListOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.Paused,
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = librarySortOptions(
+                tab = LibraryTab.All,
+                state = state,
+            )
+
+            // ----- Assert -----
+            result.contains(LibrarySortMode.PROGRESS) shouldBe true
+        }
+
+        @Test
         fun `with a finished book includes DATE_FINISHED`() {
             // ----- Arrange -----
             val state = LibraryUiState(

@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetFooterEmphasis
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import org.junit.jupiter.api.Nested
@@ -277,6 +278,38 @@ class ProgressSheetMapperTest {
             secondary.dismissesSheet shouldBe true
             secondary.emphasis shouldBe SheetFooterEmphasis.Outlined
             secondary.icon shouldBe SoftcoverIcon.Check
+        }
+
+        @Test
+        fun `a paused book gets the on hold eyebrow and the resume button`() {
+            // ----- Arrange -----
+            val userBook = PreviewData.baseBook.userBook.shouldNotBeNull().copy(status = BookStatus.Paused)
+            val book = PreviewData.baseBook.copy(userBook = userBook)
+
+            // ----- Act -----
+            val scaffold = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE).scaffold
+
+            // ----- Assert -----
+            val eyebrow = scaffold.header.shouldNotBeNull().section.eyebrow
+            val primary = scaffold.footer.shouldBeInstanceOf<SheetFooterUiModel.Stacked>().primary.shouldNotBeNull()
+            eyebrow shouldBe "On hold"
+            primary.label shouldBe "Update and resume"
+        }
+
+        @Test
+        fun `a reading book keeps the reading eyebrow and the update button`() {
+            // ----- Arrange -----
+            val userBook = PreviewData.baseBook.userBook.shouldNotBeNull().copy(status = BookStatus.Reading)
+            val book = PreviewData.baseBook.copy(userBook = userBook)
+
+            // ----- Act -----
+            val scaffold = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE).scaffold
+
+            // ----- Assert -----
+            val eyebrow = scaffold.header.shouldNotBeNull().section.eyebrow
+            val primary = scaffold.footer.shouldBeInstanceOf<SheetFooterUiModel.Stacked>().primary.shouldNotBeNull()
+            eyebrow shouldBe "Reading progress"
+            primary.label shouldBe "Update progress"
         }
     }
 

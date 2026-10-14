@@ -363,4 +363,35 @@ class PendingUserBookWriteStoreTest {
             }
         }
     }
+
+    @Nested
+    inner class HasPending {
+        @Test
+        fun `returns true when the dao has an eligible pending row`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                dao.getPending(maxAttempts = any())
+            } returns listOf(pendingUserBookWriteEntity())
+
+            // ----- Act -----
+            val result = store.hasPending()
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `returns false when the dao has no eligible pending rows`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                dao.getPending(maxAttempts = any())
+            } returns emptyList()
+
+            // ----- Act -----
+            val result = store.hasPending()
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+    }
 }

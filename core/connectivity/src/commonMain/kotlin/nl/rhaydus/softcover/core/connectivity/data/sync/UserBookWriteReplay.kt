@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromJson
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
+import nl.rhaydus.softcover.core.domain.util.localDateOf
 
 /**
  * Replays a single queued user-book mutation. [ReplayOutcome.SYNCED] means the mutation reached the server
@@ -29,7 +30,7 @@ internal class UserBookWriteReplay(
         PendingUserBookWriteKind.MARK_AS_READ -> {
             booksRemoteDataSource.replayMarkBookAsRead(
                 bookId = payload.bookId,
-                userDate = payload.enqueuedAt.substringBefore('T'),
+                userDate = localDateOf(actionAt = payload.enqueuedAt),
                 actionAt = payload.actionAt,
             )
 
@@ -39,6 +40,8 @@ internal class UserBookWriteReplay(
         PendingUserBookWriteKind.UPDATE_RATING -> replayRating(payload = payload)
 
         PendingUserBookWriteKind.UPDATE_REVIEW -> replayReview(payload = payload)
+
+        PendingUserBookWriteKind.SET_STATUS -> replayStatus(payload = payload)
     }
 
     // A rejected write is dropped by the drainer, so its history row must go too or it would stay pending forever.
@@ -81,6 +84,22 @@ internal class UserBookWriteReplay(
         return ReplayOutcome.SYNCED
     }
 
+    private suspend fun replayStatus(payload: PendingUserBookWrite): ReplayOutcome {
+        val statusCode: Int = payload.statusCode ?: run {
+            AppLog.w("Pending status update for user-book ${payload.userBookId} has no status; discarding")
+
+            return ReplayOutcome.DISCARDED
+        }
+
+        booksRemoteDataSource.replayUpdateUserBookStatus(
+            userBookId = payload.userBookId,
+            statusCode = statusCode,
+            userDate = localDateOf(actionAt = payload.enqueuedAt),
+        )
+
+        return ReplayOutcome.SYNCED
+    }
+
     private suspend fun replayReview(payload: PendingUserBookWrite): ReplayOutcome {
         val document = reviewDocumentFromJson(json = payload.reviewSlateJson) ?: run {
             AppLog.w("Pending review update for user-book ${payload.userBookId} has no body; discarding")
@@ -92,7 +111,7 @@ internal class UserBookWriteReplay(
             userBookId = payload.userBookId,
             review = document,
             hasSpoilers = payload.reviewHasSpoilers ?: false,
-            reviewedAt = payload.enqueuedAt.substringBefore('T'),
+            reviewedAt = localDateOf(actionAt = payload.enqueuedAt),
         )
 
         return ReplayOutcome.SYNCED

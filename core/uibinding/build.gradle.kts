@@ -22,6 +22,11 @@ kotlin {
             api(project(":core:domain"))
             api(project(":core:component"))
             api(project(":core:designsystem"))
+            // `ActiveSessionController` is the receiver of the session/ helpers; consumers declare
+            // `:core:presentation` themselves.
+            implementation(project(":core:presentation"))
+            // `ConfirmedPause` exposes `ImmutableSet`.
+            api(libs.kotlinx.collections.immutable)
             // `LocalDate` is the public receiver of `toUnreleasedBadgeUiModel` and of both
             // `DateFormats` formatters — declare it rather than relying on the transitive edge
             // through `:core:domain`, since this module names the type in its own public surface.

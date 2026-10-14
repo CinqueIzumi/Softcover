@@ -399,6 +399,41 @@ class ReadingBookCardMapperTest {
     }
 
     @Nested
+    inner class ToOnHoldCard {
+        @Test
+        fun `renders a standard progress row keyed by book id with no deadline or save failure`() {
+            // ----- Arrange -----
+            val book = book(
+                id = 11,
+                userBookRead = read(progress = 42f),
+            )
+
+            // ----- Act -----
+            val card = book.toOnHoldCard()
+
+            // ----- Assert -----
+            card.key shouldBe BookCardKey.Book(bookId = 11)
+            card.row().size shouldBe BookCardVariant.Row.Size.Standard
+            card.row().deadline.shouldBeNull()
+            card.decorations.shakeOnError shouldBe false
+            progressValue(card = card).label shouldBe "42%"
+        }
+
+        @Test
+        fun `shows zero percent when the paused book has no read`() {
+            // ----- Arrange -----
+            val book = book(userBookRead = null)
+
+            // ----- Act -----
+            val card = book.toOnHoldCard()
+
+            // ----- Assert -----
+            progressValue(card = card).fraction shouldBe 0f
+            progressValue(card = card).label shouldBe "0%"
+        }
+    }
+
+    @Nested
     inner class ToPickUpNextCard {
         @Test
         fun `renders a column tile with the title only`() {

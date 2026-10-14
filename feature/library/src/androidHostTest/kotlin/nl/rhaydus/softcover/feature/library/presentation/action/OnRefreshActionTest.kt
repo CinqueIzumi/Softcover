@@ -67,7 +67,11 @@ class OnRefreshActionTest {
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
+                refreshLibraryUseCase(
+                    scope = RefreshScope.ByStatuses(
+                        statuses = setOf(UserBookStatus.CURRENTLY_READING),
+                    ),
+                )
             } returns Result.success(Unit)
 
             val action = OnRefreshAction()
@@ -82,7 +86,11 @@ class OnRefreshActionTest {
             stateFlow.value.isLoading shouldBe false
 
             coVerify(exactly = 1) {
-                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
+                refreshLibraryUseCase(
+                    scope = RefreshScope.ByStatuses(
+                        statuses = setOf(UserBookStatus.CURRENTLY_READING),
+                    ),
+                )
             }
         }
 
@@ -92,7 +100,11 @@ class OnRefreshActionTest {
             val dependencies = stubDependencies(this)
 
             coEvery {
-                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
+                refreshLibraryUseCase(
+                    scope = RefreshScope.ByStatuses(
+                        statuses = setOf(UserBookStatus.CURRENTLY_READING),
+                    ),
+                )
             } returns Result.failure(RuntimeException("network error"))
 
             val action = OnRefreshAction()

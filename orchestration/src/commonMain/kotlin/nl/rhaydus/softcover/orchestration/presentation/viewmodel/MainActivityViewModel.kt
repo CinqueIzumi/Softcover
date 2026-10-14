@@ -200,11 +200,13 @@ internal class MainActivityViewModel(
 
         val backgroundScope = MainScope()
 
-        // Only Currently Reading: other shelves change only through the website or other clients,
+        // Only Currently Reading and Paused: other shelves change only through the website or other clients,
         // and a full refetch of a large library exhausts the API's per-minute budget.
         backgroundScope.launch {
             refreshLibraryUseCase(
-                scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
+                scope = RefreshScope.ByStatuses(
+                    statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),
+                ),
             ).onApiFailure()
         }
 

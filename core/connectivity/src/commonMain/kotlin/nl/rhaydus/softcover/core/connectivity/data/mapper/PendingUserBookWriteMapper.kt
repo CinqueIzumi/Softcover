@@ -20,6 +20,7 @@ internal fun PendingUserBookWrite.toEntity(): PendingUserBookWriteEntity = Pendi
     enqueuedAt = enqueuedAt,
     actionAt = actionAt,
     progressHistoryId = progressHistoryId,
+    statusCode = statusCode,
 )
 
 /** Null when the persisted `kind` names no known write — a row written by a build that knew more. */
@@ -45,5 +46,6 @@ internal fun PendingUserBookWriteEntity.toPendingUserBookWrite(): PendingUserBoo
         enqueuedAt = enqueuedAt,
         actionAt = actionAt,
         progressHistoryId = progressHistoryId,
+        statusCode = statusCode,
     )
 }

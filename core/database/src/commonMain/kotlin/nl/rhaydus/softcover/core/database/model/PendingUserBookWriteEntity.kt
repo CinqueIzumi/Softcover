@@ -32,4 +32,5 @@ data class PendingUserBookWriteEntity(
     val attempts: Int = 0,
     val actionAt: String? = null,
     val progressHistoryId: Long? = null,
+    val statusCode: Int? = null,
 )

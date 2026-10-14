@@ -10,12 +10,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetDidNotFinishUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetReadUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
@@ -27,10 +23,6 @@ import org.junit.jupiter.api.Test
 
 class LibraryTabCountsCollectorTest {
     private lateinit var getAllUserBooksUseCase: GetAllUserBooksUseCase
-    private lateinit var getCurrentlyReadingUserBooksUseCase: GetCurrentlyReadingUserBooksUseCase
-    private lateinit var getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase
-    private lateinit var getReadUserBooksUseCase: GetReadUserBooksUseCase
-    private lateinit var getDidNotFinishUserBooksUseCase: GetDidNotFinishUserBooksUseCase
     private lateinit var dependencies: LibraryVisibilitySettingsDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
     private lateinit var scope: ActionScope<
@@ -39,23 +31,11 @@ class LibraryTabCountsCollectorTest {
         LibraryVisibilitySettingsLocalVariables,
         >
     private lateinit var allFlow: MutableSharedFlow<List<Book>>
-    private lateinit var currentlyReadingFlow: MutableSharedFlow<List<Book>>
-    private lateinit var wantToReadFlow: MutableSharedFlow<List<Book>>
-    private lateinit var readFlow: MutableSharedFlow<List<Book>>
-    private lateinit var didNotFinishFlow: MutableSharedFlow<List<Book>>
 
     @BeforeEach
     fun setUp() {
         allFlow = MutableSharedFlow(replay = 1)
-        currentlyReadingFlow = MutableSharedFlow(replay = 1)
-        wantToReadFlow = MutableSharedFlow(replay = 1)
-        readFlow = MutableSharedFlow(replay = 1)
-        didNotFinishFlow = MutableSharedFlow(replay = 1)
         getAllUserBooksUseCase = mockk()
-        getCurrentlyReadingUserBooksUseCase = mockk()
-        getWantToReadUserBooksUseCase = mockk()
-        getReadUserBooksUseCase = mockk()
-        getDidNotFinishUserBooksUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -67,51 +47,28 @@ class LibraryTabCountsCollectorTest {
             getAllUserBooksUseCase()
         } returns allFlow
 
-        every {
-            getCurrentlyReadingUserBooksUseCase()
-        } returns currentlyReadingFlow
-
-        every {
-            getWantToReadUserBooksUseCase()
-        } returns wantToReadFlow
-
-        every {
-            getReadUserBooksUseCase()
-        } returns readFlow
-
-        every {
-            getDidNotFinishUserBooksUseCase()
-        } returns didNotFinishFlow
-
         dependencies = mockk<LibraryVisibilitySettingsDependencies>(relaxed = true).also { mock ->
             every {
                 mock.getAllUserBooksUseCase
             } returns getAllUserBooksUseCase
-
-            every {
-                mock.getCurrentlyReadingUserBooksUseCase
-            } returns getCurrentlyReadingUserBooksUseCase
-
-            every {
-                mock.getWantToReadUserBooksUseCase
-            } returns getWantToReadUserBooksUseCase
-
-            every {
-                mock.getReadUserBooksUseCase
-            } returns getReadUserBooksUseCase
-
-            every {
-                mock.getDidNotFinishUserBooksUseCase
-            } returns getDidNotFinishUserBooksUseCase
         }
     }
 
-    private fun books(count: Int): List<Book> = List(count) { mockk() }
+    private fun books(
+        status: BookStatus,
+        count: Int,
+    ): List<Book> = List(count) {
+        mockk<Book>().also { book ->
+            every {
+                book.status
+            } returns status
+        }
+    }
 
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets the counts and the ordered entries from the five flows once all have emitted`() = runTest(UnconfinedTestDispatcher()) {
+        fun `counts books per status code including Paused`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LibraryTabCountsCollector()
             val job = launch {
@@ -120,25 +77,119 @@ class LibraryTabCountsCollectorTest {
                     dependencies = dependencies,
                 )
             }
+            val all = books(
+                status = BookStatus.Reading,
+                count = 3,
+            ) +
+                books(
+                    status = BookStatus.WantToRead,
+                    count = 5,
+                ) +
+                books(
+                    status = BookStatus.Read,
+                    count = 9,
+                ) +
+                books(
+                    status = BookStatus.Paused,
+                    count = 4,
+                ) +
+                books(
+                    status = BookStatus.DidNotFinish,
+                    count = 2,
+                )
 
             // ----- Act -----
-            allFlow.emit(books(20))
-            currentlyReadingFlow.emit(books(3))
-            wantToReadFlow.emit(books(5))
-            readFlow.emit(books(9))
-            didNotFinishFlow.emit(books(2))
+            allFlow.emit(all)
 
             // ----- Assert -----
-            stateFlow.value.totalCount shouldBe 20
             stateFlow.value.statusCounts shouldBe mapOf(
-                UserBookStatus.CURRENTLY_READING.code to 3,
-                UserBookStatus.WANT_TO_READ.code to 5,
-                UserBookStatus.READ.code to 9,
-                UserBookStatus.DID_NOT_FINISH.code to 2,
+                BookStatus.Reading.code to 3,
+                BookStatus.WantToRead.code to 5,
+                BookStatus.Read.code to 9,
+                BookStatus.Paused.code to 4,
+                BookStatus.DidNotFinish.code to 2,
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `total count equals the number of books`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = LibraryTabCountsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            val all = books(
+                status = BookStatus.Reading,
+                count = 2,
+            ) +
+                books(
+                    status = BookStatus.Paused,
+                    count = 1,
+                ) +
+                books(
+                    status = BookStatus.Read,
+                    count = 4,
+                )
+
+            // ----- Act -----
+            allFlow.emit(all)
+
+            // ----- Assert -----
+            stateFlow.value.totalCount shouldBe 7
+            job.cancel()
+        }
+
+        @Test
+        fun `ordered entries show Paused right after Currently Reading with its count`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = LibraryTabCountsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            val all = books(
+                status = BookStatus.Reading,
+                count = 3,
+            ) +
+                books(
+                    status = BookStatus.WantToRead,
+                    count = 5,
+                ) +
+                books(
+                    status = BookStatus.Read,
+                    count = 9,
+                ) +
+                books(
+                    status = BookStatus.Paused,
+                    count = 4,
+                ) +
+                books(
+                    status = BookStatus.DidNotFinish,
+                    count = 2,
+                )
+
+            // ----- Act -----
+            allFlow.emit(all)
+
+            // ----- Assert -----
+            stateFlow.value.orderedEntries.map { it.label } shouldBe listOf(
+                "All",
+                "Currently Reading",
+                "Paused",
+                "Want to Read",
+                "Read",
+                "Did Not Finish",
             )
             stateFlow.value.orderedEntries.map { it.count } shouldBe listOf(
-                20,
+                23,
                 3,
+                4,
                 5,
                 9,
                 2,
@@ -147,7 +198,7 @@ class LibraryTabCountsCollectorTest {
         }
 
         @Test
-        fun `updates to the latest counts when the flows emit multiple times`() = runTest(UnconfinedTestDispatcher()) {
+        fun `a status with no books renders as zero in the entries`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LibraryTabCountsCollector()
             val job = launch {
@@ -156,23 +207,64 @@ class LibraryTabCountsCollectorTest {
                     dependencies = dependencies,
                 )
             }
-            allFlow.emit(books(20))
-            currentlyReadingFlow.emit(books(3))
-            wantToReadFlow.emit(books(5))
-            readFlow.emit(books(9))
-            didNotFinishFlow.emit(books(2))
+            val all = books(
+                status = BookStatus.Reading,
+                count = 2,
+            ) +
+                books(
+                    status = BookStatus.Read,
+                    count = 1,
+                )
 
             // ----- Act -----
-            allFlow.emit(books(25))
-            currentlyReadingFlow.emit(books(4))
+            allFlow.emit(all)
 
             // ----- Assert -----
-            stateFlow.value.totalCount shouldBe 25
+            stateFlow.value.orderedEntries.map { it.count } shouldBe listOf(
+                3,
+                2,
+                0,
+                0,
+                1,
+                0,
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `updates to the latest counts when the flow emits again`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = LibraryTabCountsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            allFlow.emit(
+                books(
+                    status = BookStatus.Paused,
+                    count = 1,
+                ),
+            )
+
+            // ----- Act -----
+            allFlow.emit(
+                books(
+                    status = BookStatus.Paused,
+                    count = 3,
+                ) +
+                    books(
+                        status = BookStatus.Read,
+                        count = 1,
+                    ),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.totalCount shouldBe 4
             stateFlow.value.statusCounts shouldBe mapOf(
-                UserBookStatus.CURRENTLY_READING.code to 4,
-                UserBookStatus.WANT_TO_READ.code to 5,
-                UserBookStatus.READ.code to 9,
-                UserBookStatus.DID_NOT_FINISH.code to 2,
+                BookStatus.Paused.code to 3,
+                BookStatus.Read.code to 1,
             )
             job.cancel()
         }

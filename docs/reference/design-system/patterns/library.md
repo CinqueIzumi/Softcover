@@ -72,6 +72,8 @@
 
 - Every shelf cell is a `BookCard`: `BookCardVariant.Column` (titled grid), `CoverOnly`, or `Row` (list).
 - Grid cells carry a countdown `CoverOverlay` on the cover while a deadline is tracked and a `ProgressBar`
-  beneath while in progress, both height-reserved. The large row is de-carded (top hairline), with
+  beneath while in progress (Reading or Paused), both height-reserved. The large row is de-carded (top hairline), with
   progress and a `NN%`, and a full-width `DeadlineSummaryLine` beneath the row when a deadline is
   tracked; the compact row carries a deadline `Badge` instead.
+- A Paused book's card with a deadline shows "On hold" in place of the date and pace line, with no deadline
+  badge.

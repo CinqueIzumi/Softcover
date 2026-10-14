@@ -48,7 +48,7 @@ class LibrarySelectionPillsTest {
     @Nested
     inner class MoveTargets {
         @Test
-        fun `offers all three shelves when no shelf is being viewed`() {
+        fun `offers every shelf when no shelf is being viewed`() {
             // ----- Arrange -----
             val currentShelf: UserBookStatus? = null
 
@@ -62,6 +62,7 @@ class LibrarySelectionPillsTest {
             pills.moveTargets.map { it.status } shouldBe listOf(
                 UserBookStatus.WANT_TO_READ,
                 UserBookStatus.CURRENTLY_READING,
+                UserBookStatus.PAUSED,
                 UserBookStatus.READ,
             )
         }
@@ -80,6 +81,7 @@ class LibrarySelectionPillsTest {
             // ----- Assert -----
             pills.moveTargets.map { it.status } shouldBe listOf(
                 UserBookStatus.WANT_TO_READ,
+                UserBookStatus.PAUSED,
                 UserBookStatus.READ,
             )
         }
@@ -87,7 +89,12 @@ class LibrarySelectionPillsTest {
         @Test
         fun `every shelf is dropped in turn and the rest stay`() {
             // ----- Arrange -----
-            val shelves = listOf(UserBookStatus.WANT_TO_READ, UserBookStatus.CURRENTLY_READING, UserBookStatus.READ)
+            val shelves = listOf(
+                UserBookStatus.WANT_TO_READ,
+                UserBookStatus.CURRENTLY_READING,
+                UserBookStatus.PAUSED,
+                UserBookStatus.READ,
+            )
 
             // ----- Act -----
             val offered = shelves.map { shelf ->

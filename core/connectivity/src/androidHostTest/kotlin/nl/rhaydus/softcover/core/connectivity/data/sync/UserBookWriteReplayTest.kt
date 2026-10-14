@@ -19,6 +19,9 @@ import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.domain.util.localDateOf
+import java.util.TimeZone
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -27,15 +30,22 @@ class UserBookWriteReplayTest {
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
     private lateinit var progressHistoryLocalDataSource: ProgressHistoryLocalDataSource
     private lateinit var replay: UserBookWriteReplay
+    private lateinit var originalZone: TimeZone
 
     @BeforeEach
     fun setUp() {
+        originalZone = TimeZone.getDefault()
         booksRemoteDataSource = mockk()
         progressHistoryLocalDataSource = mockk(relaxed = true)
         replay = UserBookWriteReplay(
             booksRemoteDataSource = booksRemoteDataSource,
             progressHistoryLocalDataSource = progressHistoryLocalDataSource,
         )
+    }
+
+    @AfterEach
+    fun tearDown() {
+        TimeZone.setDefault(originalZone)
     }
 
     private fun pendingUserBookWrite(
@@ -54,6 +64,7 @@ class UserBookWriteReplayTest {
         enqueuedAt: String = "2026-05-04T12:34:56Z",
         actionAt: String? = null,
         progressHistoryId: Long? = null,
+        statusCode: Int? = null,
     ) = PendingUserBookWrite(
         kind = kind,
         userBookId = userBookId,
@@ -70,6 +81,7 @@ class UserBookWriteReplayTest {
         enqueuedAt = enqueuedAt,
         actionAt = actionAt,
         progressHistoryId = progressHistoryId,
+        statusCode = statusCode,
     )
 
     private fun stubReplayProgress() {
@@ -276,7 +288,7 @@ class UserBookWriteReplayTest {
     @Nested
     inner class MarkAsRead {
         @Test
-        fun `calls replayMarkBookAsRead with the date-only prefix of enqueuedAt and returns SYNCED`() = runTest {
+        fun `calls replayMarkBookAsRead with the local date of enqueuedAt and returns SYNCED`() = runTest {
             // ----- Arrange -----
             val payload = pendingUserBookWrite(
                 kind = PendingUserBookWriteKind.MARK_AS_READ,
@@ -288,7 +300,7 @@ class UserBookWriteReplayTest {
             coJustRun {
                 booksRemoteDataSource.replayMarkBookAsRead(
                     bookId = 300,
-                    userDate = "2026-05-04",
+                    userDate = localDateOf(actionAt = "2026-05-04T12:34:56Z"),
                     actionAt = "2026-05-04T12:34:56Z",
                 )
             }
@@ -301,7 +313,7 @@ class UserBookWriteReplayTest {
             coVerify(exactly = 1) {
                 booksRemoteDataSource.replayMarkBookAsRead(
                     bookId = 300,
-                    userDate = "2026-05-04",
+                    userDate = localDateOf(actionAt = "2026-05-04T12:34:56Z"),
                     actionAt = "2026-05-04T12:34:56Z",
                 )
             }
@@ -381,14 +393,15 @@ class UserBookWriteReplayTest {
         private val review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great book!")))))
 
         @Test
-        fun `passes hasSpoilers and the date-only prefix of enqueuedAt for a valid review body`() = runTest {
+        fun `passes hasSpoilers and the local date of enqueuedAt for a valid review body`() = runTest {
             // ----- Arrange -----
+            TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Kiritimati"))
             val payload = pendingUserBookWrite(
                 kind = PendingUserBookWriteKind.UPDATE_REVIEW,
                 userBookId = 40,
                 reviewSlateJson = review.toJson(),
                 reviewHasSpoilers = true,
-                enqueuedAt = "2026-05-30T10:15:30Z",
+                enqueuedAt = "2026-05-30T12:15:30Z",
             )
 
             coJustRun {
@@ -396,7 +409,7 @@ class UserBookWriteReplayTest {
                     userBookId = 40,
                     review = review,
                     hasSpoilers = true,
-                    reviewedAt = "2026-05-30",
+                    reviewedAt = "2026-05-31",
                 )
             }
 
@@ -410,7 +423,7 @@ class UserBookWriteReplayTest {
                     userBookId = 40,
                     review = review,
                     hasSpoilers = true,
-                    reviewedAt = "2026-05-30",
+                    reviewedAt = "2026-05-31",
                 )
             }
         }
@@ -462,6 +475,82 @@ class UserBookWriteReplayTest {
             // ----- Assert -----
             result shouldBe ReplayOutcome.DISCARDED
             verify { booksRemoteDataSource wasNot Called }
+        }
+    }
+
+    @Nested
+    inner class SetStatus {
+        @Test
+        fun `calls replayUpdateUserBookStatus with the stored status code and the enqueue date and returns SYNCED`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.SET_STATUS,
+                userBookId = 40,
+                statusCode = 3,
+                enqueuedAt = "2026-05-04T12:34:56Z",
+            )
+
+            coJustRun {
+                booksRemoteDataSource.replayUpdateUserBookStatus(
+                    userBookId = 40,
+                    statusCode = 3,
+                    userDate = localDateOf(actionAt = "2026-05-04T12:34:56Z"),
+                )
+            }
+
+            // ----- Act -----
+            val result = replay(payload = payload)
+
+            // ----- Assert -----
+            result shouldBe ReplayOutcome.SYNCED
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.replayUpdateUserBookStatus(
+                    userBookId = 40,
+                    statusCode = 3,
+                    userDate = localDateOf(actionAt = "2026-05-04T12:34:56Z"),
+                )
+            }
+        }
+
+        @Test
+        fun `returns DISCARDED and calls nothing when statusCode is null`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.SET_STATUS,
+                statusCode = null,
+            )
+
+            // ----- Act -----
+            val result = replay(payload = payload)
+
+            // ----- Assert -----
+            result shouldBe ReplayOutcome.DISCARDED
+            verify { booksRemoteDataSource wasNot Called }
+        }
+
+        @Test
+        fun `propagates a remote failure so the drainer can retry`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.SET_STATUS,
+                statusCode = 2,
+            )
+
+            val transient = ServerUnavailableException(message = "down")
+
+            coEvery {
+                booksRemoteDataSource.replayUpdateUserBookStatus(
+                    userBookId = any(),
+                    statusCode = any(),
+                    userDate = any(),
+                )
+            } throws transient
+
+            // ----- Act -----
+            val thrown = shouldThrow<ServerUnavailableException> { replay(payload = payload) }
+
+            // ----- Assert -----
+            thrown shouldBe transient
         }
     }
 }

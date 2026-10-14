@@ -45,6 +45,7 @@ internal fun Book.toStatusCallout(dateStyle: DateStyle): CalloutUiModel? {
         )
 
         BookStatus.Reading,
+        BookStatus.Paused,
         BookStatus.None,
         -> null
     }

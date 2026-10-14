@@ -6,9 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
@@ -38,7 +36,9 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.domain.util.SessionValueCache
 import nl.rhaydus.softcover.core.domain.util.getOrPut
+import nl.rhaydus.softcover.core.domain.util.localDateTimeOf
 import nl.rhaydus.softcover.core.domain.util.refresh
+import nl.rhaydus.softcover.core.domain.util.toUtcJournalTimestamp
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -60,7 +60,7 @@ internal class BooksRepositoryImpl(
 
     private val stagedRemovalMutex = Mutex()
     private val stagedRemovalBookIds = mutableSetOf<Int>()
-    private val inflightRefreshes = mutableMapOf<UserBookStatus?, Deferred<Unit>>()
+    private val inflightRefreshes = mutableMapOf<Set<UserBookStatus>?, Deferred<Unit>>()
 
     // Owned here rather than injected, for the same reason as inflightRefreshes above: which source
     // answers a read, and how fresh that answer has to be, is this class's decision. Constructed
@@ -102,7 +102,7 @@ internal class BooksRepositoryImpl(
 
     override suspend fun refreshUserBooks(
         userId: Int,
-        statusFilter: UserBookStatus?,
+        statusFilter: Set<UserBookStatus>?,
     ) {
         runOrJoin(statusFilter = statusFilter) {
             withContext(appDispatchers.io) {
@@ -115,7 +115,7 @@ internal class BooksRepositoryImpl(
     }
 
     private suspend fun runOrJoin(
-        statusFilter: UserBookStatus?,
+        statusFilter: Set<UserBookStatus>?,
         work: suspend () -> Unit,
     ) {
         val deferred: Deferred<Unit> = inflightMutex.withLock {
@@ -139,17 +139,18 @@ internal class BooksRepositoryImpl(
 
     private suspend fun refreshUserBooksInternal(
         userId: Int,
-        statusFilter: UserBookStatus?,
+        statusFilter: Set<UserBookStatus>?,
     ) {
         val statusIds: Set<Int> = statusFilter
-            ?.let { setOf(it.code) }
+            ?.map { it.code }
+            ?.toSet()
             ?: UserBookStatus.entries.map { it.code }.toSet()
 
         // A status-scoped query omits books that moved to another status on the server. Their local
-        // rows still hold this status, so ask for them by id; otherwise the diff below would delete
+        // rows still hold one of these statuses, so ask for them by id; otherwise the diff below would delete
         // them instead of picking up the new status.
         val idsStoredUnderStatus: List<Int>? = statusFilter?.let {
-            booksLocalDataSource.getUserBookIdsByStatus(status = it)
+            booksLocalDataSource.getUserBookIdsByStatuses(statuses = it)
         }
 
         // Drain the offline write queue, fetch fresh server data, and reconcile owned fields in one
@@ -353,16 +354,16 @@ internal class BooksRepositoryImpl(
             booksLocalDataSource.cacheBook(book = optimistic)
         }
 
-        return runCatching {
+        return writeStatus(
+            book = book,
+            optimistic = optimistic,
+            snapshot = snapshot,
+            status = UserBookStatus.WANT_TO_READ,
+        ) {
             booksRemoteDataSource.markBookAsWantToRead(
                 bookId = book.id,
                 editionId = editionId,
             )
-        }.getOrElse { error ->
-            if (error is CancellationException) throw error
-
-            restoreOptimisticWrite(snapshot = snapshot)
-            throw error
         }.also { updated ->
             booksLocalDataSource.cacheBook(book = updated)
         }
@@ -379,16 +380,90 @@ internal class BooksRepositoryImpl(
             booksLocalDataSource.cacheBook(book = optimistic)
         }
 
-        return runCatching {
+        return writeStatus(
+            book = book,
+            optimistic = optimistic,
+            snapshot = snapshot,
+            status = UserBookStatus.CURRENTLY_READING,
+        ) {
             booksRemoteDataSource.markBookAsReading(
                 book = book,
                 editionId = editionId,
             )
-        }.getOrElse { error ->
-            if (error is CancellationException) throw error
+        }
+    }
 
-            restoreOptimisticWrite(snapshot = snapshot)
-            throw error
+    override suspend fun markBookAsPaused(
+        book: Book,
+        editionId: Int?,
+    ): Book {
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+        val optimistic = book.withMarkedAsPaused()
+
+        if (optimistic !== book) {
+            booksLocalDataSource.cacheBook(book = optimistic)
+        }
+
+        return writeStatus(
+            book = book,
+            optimistic = optimistic,
+            snapshot = snapshot,
+            status = UserBookStatus.PAUSED,
+        ) {
+            booksRemoteDataSource.markBookAsPaused(
+                book = book,
+                editionId = editionId,
+            )
+        }
+    }
+
+    /**
+     * A book that already has a user book queues the change on offline or a transient failure; one without
+     * has no server id to queue against, so any failure rolls the optimistic write back.
+     *
+     * Replay order relies on a queued status being unique per `(userBookId, kind)` (a newer write
+     * REPLACEs the older) and on replay reading the queue `ORDER BY enqueuedAt`.
+     */
+    private suspend fun writeStatus(
+        book: Book,
+        optimistic: Book,
+        snapshot: Book?,
+        status: UserBookStatus,
+        remoteWrite: suspend () -> Book,
+    ): Book {
+        val isQueueable: Boolean = book.userBook != null
+
+        if (isQueueable && networkAvailability.isOnline.value.not()) {
+            offlineSync.enqueueStatusUpdate(
+                book = optimistic,
+                status = status,
+            )
+
+            return optimistic
+        }
+
+        return runCatching { remoteWrite() }.getOrElse { error ->
+            when {
+                error is CancellationException -> throw error
+
+                isQueueable && error is RetryableSyncException -> {
+                    AppLog.w(
+                        error,
+                        "Status change hit a transient error; queued for retry",
+                    )
+
+                    offlineSync.enqueueStatusUpdate(
+                        book = optimistic,
+                        status = status,
+                    )
+                    optimistic
+                }
+
+                else -> {
+                    restoreOptimisticWrite(snapshot = snapshot)
+                    throw error
+                }
+            }
         }
     }
 
@@ -799,6 +874,16 @@ internal class BooksRepositoryImpl(
         return copy(userBook = updatedUserBook)
     }
 
+    private fun Book.withMarkedAsPaused(): Book {
+        val existingUserBook = userBook ?: return this
+
+        if (existingUserBook.status == BookStatus.Paused) return this
+
+        val updatedUserBook: UserBook = existingUserBook.copy(status = BookStatus.Paused)
+
+        return copy(userBook = updatedUserBook)
+    }
+
     private fun Book.withRating(rating: Double): Book {
         val existingUserBook = userBook ?: return this
 
@@ -855,9 +940,8 @@ internal class BooksRepositoryImpl(
         event: JournalEventType,
         actionAt: String? = null,
     ): UserBook {
-        val updatedAt = actionAt
-            ?.let { localDateTimeOf(actionAt = it).toString() }
-            ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString()
+        val updatedAt = (actionAt?.let { Instant.parse(it) } ?: Clock.System.now())
+            .toUtcJournalTimestamp()
 
         val entry = ReadingJournal(
             updatedAt = updatedAt,
@@ -866,9 +950,6 @@ internal class BooksRepositoryImpl(
 
         return copy(journals = journals + entry)
     }
-
-    private fun localDateTimeOf(actionAt: String): LocalDateTime =
-        Instant.parse(actionAt).toLocalDateTime(TimeZone.currentSystemDefault())
 
     override suspend fun updateBookEdition(
         userBook: UserBook,

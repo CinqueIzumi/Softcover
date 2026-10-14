@@ -205,8 +205,8 @@ interface BookDao {
     @Query("SELECT id FROM user_books")
     suspend fun getAllUserBookIds(): List<Int>
 
-    @Query("SELECT id FROM user_books WHERE statusCode = :statusCode")
-    suspend fun getUserBookIdsByStatus(statusCode: Int): List<Int>
+    @Query("SELECT id FROM user_books WHERE statusCode IN (:statusCodes)")
+    suspend fun getUserBookIdsByStatuses(statusCodes: List<Int>): List<Int>
 
     @Query("SELECT id FROM books WHERE id IN (:bookIds)")
     suspend fun getExistingBookIds(bookIds: List<Int>): List<Int>

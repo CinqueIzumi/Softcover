@@ -36,6 +36,7 @@ internal class BookDeadlineCollector : BookDetailCollector {
                     currentPage = it.book?.userBookRead?.currentPage ?: 0,
                     totalSeconds = edition?.audioSeconds,
                     currentSeconds = it.book?.userBookRead?.currentSeconds ?: 0,
+                    isPaused = it.book?.isPaused == true,
                 )
             }
             .distinctUntilChanged()
@@ -74,7 +75,10 @@ internal class BookDeadlineCollector : BookDetailCollector {
                 null
             }
 
-            deadline to computed?.toDeadlineRowUiModel(dateStyle = dateStyle)
+            deadline to computed?.toDeadlineRowUiModel(
+                dateStyle = dateStyle,
+                isPaused = snapshot.isPaused,
+            )
         }.collectLatest { (deadline, row) ->
             scope.setState { state ->
                 state.copy(

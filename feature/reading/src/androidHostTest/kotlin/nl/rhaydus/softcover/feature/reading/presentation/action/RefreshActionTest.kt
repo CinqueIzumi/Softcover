@@ -50,7 +50,11 @@ class RefreshActionTest {
             val refreshingStates = mutableListOf<Boolean>()
 
             coEvery {
-                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
+                refreshLibraryUseCase(
+                    scope = RefreshScope.ByStatuses(
+                        statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),
+                    ),
+                )
             } answers {
                 refreshingStates.add(stateFlow.value.isRefreshing)
                 Result.success(Unit)
@@ -73,7 +77,11 @@ class RefreshActionTest {
             stateFlow.value = ReadingScreenUiState(isRefreshing = false)
 
             coEvery {
-                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
+                refreshLibraryUseCase(
+                    scope = RefreshScope.ByStatuses(
+                        statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),
+                    ),
+                )
             } returns Result.failure(RuntimeException("network error"))
 
             // ----- Act -----
@@ -93,7 +101,11 @@ class RefreshActionTest {
             val loadingStates = mutableListOf<Boolean>()
 
             coEvery {
-                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
+                refreshLibraryUseCase(
+                    scope = RefreshScope.ByStatuses(
+                        statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),
+                    ),
+                )
             } answers {
                 loadingStates.add(stateFlow.value.isLoading)
                 Result.success(Unit)

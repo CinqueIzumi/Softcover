@@ -10,6 +10,8 @@ import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
@@ -28,6 +30,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissVer
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditVerdictDraftAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionPauseClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionPauseSheetDismissedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressMinutesSteppedAction
@@ -69,6 +73,23 @@ internal fun BookDetailOverlays(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
 ) {
+    state.endSessionPauseSheet.modelOrNull?.let { scaffold ->
+        SheetScaffold(
+            model = scaffold,
+            onEvent = { event ->
+                when (event) {
+                    SheetScaffoldEvent.PrimaryClicked -> runAction(OnEndSessionPauseClickAction())
+
+                    SheetScaffoldEvent.Dismissed -> runAction(OnEndSessionPauseSheetDismissedAction())
+
+                    SheetScaffoldEvent.SecondaryClicked,
+                    SheetScaffoldEvent.HeaderActionClicked -> Unit
+                }
+            },
+            content = {},
+        )
+    }
+
     state.shareSheet.modelOrNull?.let { shareSheet ->
         ShareBookBottomSheet(
             model = shareSheet,

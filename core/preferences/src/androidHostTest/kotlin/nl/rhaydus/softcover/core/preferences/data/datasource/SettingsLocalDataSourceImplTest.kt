@@ -292,7 +292,7 @@ class SettingsLocalDataSourceImplTest {
     @Nested
     inner class ResetAllSettings {
         @Test
-        fun `restores every setting to its default`() = runTest {
+        fun `restores every setting to its default but keeps the paused shelf seeded`() = runTest {
             // ----- Arrange -----
             persisted.value = AppSettingsEntity(
                 userId = 42,
@@ -306,7 +306,7 @@ class SettingsLocalDataSourceImplTest {
             dataSource.resetAllSettings()
 
             // ----- Assert -----
-            persisted.value shouldBe AppSettingsEntity()
+            persisted.value shouldBe AppSettingsEntity(pausedShelfSeeded = true)
         }
     }
 }

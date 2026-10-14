@@ -93,5 +93,16 @@ internal fun ReadingBooksColumn(
                 )
             }
         }
+
+        if (state.onHold.isEmpty.not()) {
+            item(key = "on-hold") {
+                OnHoldSection(
+                    header = state.onHoldHeader,
+                    onHold = state.onHold,
+                    runAction = runAction,
+                    onBookClick = onBookClick,
+                )
+            }
+        }
     }
 }

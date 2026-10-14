@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
@@ -46,6 +47,7 @@ import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
+import nl.rhaydus.softcover.core.uibinding.session.ConfirmedPause
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.BOOK_REVIEW_STAND_INS
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.editionCountHeaderFor
@@ -204,6 +206,12 @@ internal data class BookDetailUiState(
 
     val shareSheetRequested: Boolean = false,
 
+    val activeSessionBookId: Int? = null,
+
+    val endSessionPauseRequested: Boolean = false,
+
+    val endSessionPauseSheet: SheetSession<SheetScaffoldUiModel, ConfirmedPause> = SheetSession.Closed,
+
     val chosenShareVariant: ShareCardVariant? = null,
 
     val shareCapture: ShareCaptureState = ShareCaptureState(),
@@ -340,6 +348,16 @@ internal data class BookDetailUiState(
             book.userBook == null -> pendingShelfStatus ?: book.status
             else -> book.status
         }
+
+    val showsInProgressSection: Boolean
+        get() = book?.status == BookStatus.Reading || book?.status == BookStatus.Paused
+
+    /** [verdictBlock] while the book is read; every other status shows no verdict in the Yours lens. */
+    val yoursVerdictBlock: VerdictBlockUiModel?
+        get() = verdictBlock.takeIf { book?.status == BookStatus.Read }
+
+    val hasYoursLeadingBlock: Boolean
+        get() = showsInProgressSection || statusCallout != null
 
     /**
      * Edition ids the user owns, sourced from the local "Owned" list rather than the per-shelf

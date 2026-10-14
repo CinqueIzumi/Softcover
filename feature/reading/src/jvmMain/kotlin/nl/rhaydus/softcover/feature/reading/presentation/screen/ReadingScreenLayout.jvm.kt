@@ -36,6 +36,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripEv
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.ALSO_READING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.AlsoReadingHeader
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.OnHoldSection
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingFeaturedSection
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.rememberReadingCardEventHandler
@@ -101,6 +102,9 @@ internal actual fun ReadingScreenLayout(
                     else -> EmptyCurrentlyReadingScreen(
                         trendingBooks = state.trendingBooks,
                         pickUpNext = state.pickUpNext,
+                        onHold = state.onHold,
+                        onHoldHeader = state.onHoldHeader,
+                        runAction = runAction,
                         trendingTile = state.trendingTile,
                         pickUpNextHeader = state.pickUpNextHeader,
                         trendingHeader = state.trendingHeader,
@@ -187,6 +191,15 @@ private fun DesktopReadingContent(
                         }
                     }
                 }
+            }
+
+            if (state.onHold.isEmpty.not()) {
+                OnHoldSection(
+                    header = state.onHoldHeader,
+                    onHold = state.onHold,
+                    runAction = runAction,
+                    onBookClick = onBookClick,
+                )
             }
         }
 

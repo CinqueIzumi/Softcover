@@ -42,6 +42,7 @@ class BooksByStatusCollectorTest {
     private val readTabId = "status-3"
     private val wantToReadTabId = "status-1"
     private val readingTabId = "status-2"
+    private val pausedTabId = "status-4"
 
     @BeforeEach
     fun setUp() {
@@ -113,6 +114,33 @@ class BooksByStatusCollectorTest {
             // ----- Assert -----
             stateFlow.value.booksByTab.getValue(readTabId) shouldBe listOf(readBook)
             stateFlow.value.booksByTab.getValue(wantToReadTabId) shouldBe listOf(wantToReadBook)
+            job.cancel()
+        }
+
+        @Test
+        fun `the paused status gets its own tab when enabled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val pausedBook = mockk<Book>()
+            val job = launchCollector()
+
+            // ----- Act -----
+            booksByStatus.getValue(UserBookStatus.PAUSED).value = listOf(pausedBook)
+
+            // ----- Assert -----
+            stateFlow.value.booksByTab.getValue(pausedTabId) shouldBe listOf(pausedBook)
+            job.cancel()
+        }
+
+        @Test
+        fun `the paused tab disappears when its status is disabled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            enabledStatusesFlow.value = setOf(UserBookStatus.READ.code)
+
+            // ----- Assert -----
+            stateFlow.value.booksByTab.keys.contains(pausedTabId) shouldBe false
             job.cancel()
         }
 

@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
@@ -17,13 +18,20 @@ import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
 import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.todayIn
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Clock
 
 class LibraryBookCardMapperTest {
     private fun stubBook(
@@ -32,7 +40,12 @@ class LibraryBookCardMapperTest {
         status: BookStatus = BookStatus.Read,
         progress: Float? = null,
         rating: Double = 0.0,
+        paused: Boolean = false,
     ): Book = mockk<Book>(relaxed = true).also { book ->
+        every {
+            book.isPaused
+        } returns paused
+
         every {
             book.id
         } returns 1
@@ -94,6 +107,28 @@ class LibraryBookCardMapperTest {
         dateStyle = DateStyle.entries.first(),
     )
 
+    private fun Book.cardWithDeadline(layout: LibraryGridLayout) = toBookCard(
+        layout = layout,
+        press = BookCardDecorations.Press.Tap,
+        selection = null,
+        deadline = bookDeadline,
+        dateStyle = DateStyle.entries.first(),
+    )
+
+    private val bookDeadline = BookDeadline(
+        bookId = 1,
+        deadlineDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).plus(DatePeriod(days = 10)),
+        setAt = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+        initialPerDay = 10f,
+        unit = DeadlineUnit.PAGES,
+    )
+
+    private fun BookCardVariant.coverBadge() = when (this) {
+        is BookCardVariant.Column -> cover?.badge
+        is BookCardVariant.CoverOnly -> cover.badge
+        is BookCardVariant.Row -> null
+    }
+
     private fun BookEdition.card(layout: LibraryGridLayout) = toEditionCard(
         layout = layout,
         press = BookCardDecorations.Press.Tap,
@@ -147,6 +182,125 @@ class LibraryBookCardMapperTest {
 
             // ----- Assert -----
             variant.shouldBeInstanceOf<BookCardVariant.CoverOnly>()
+        }
+    }
+
+    @Nested
+    inner class PausedDeadline {
+        @Test
+        fun `a reading book with a deadline shows the cover badge on the grids`() {
+            // ----- Arrange -----
+            val book = stubBook(status = BookStatus.Reading)
+
+            // ----- Act -----
+            val column = book.cardWithDeadline(LibraryGridLayout.GRID_TWO_COLUMNS).variant.coverBadge()
+            val coverOnly = book.cardWithDeadline(LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY).variant.coverBadge()
+
+            // ----- Assert -----
+            column.shouldNotBeNull()
+            coverOnly.shouldNotBeNull()
+        }
+
+        @Test
+        fun `a paused book with a deadline shows no cover badge on the grids`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                status = BookStatus.Paused,
+                paused = true,
+            )
+
+            // ----- Act -----
+            val column = book.cardWithDeadline(LibraryGridLayout.GRID_THREE_COLUMNS).variant.coverBadge()
+            val coverOnly = book.cardWithDeadline(LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY).variant.coverBadge()
+
+            // ----- Assert -----
+            column.shouldBeNull()
+            coverOnly.shouldBeNull()
+        }
+
+        @Test
+        fun `a reading book with a deadline shows the compact row badge`() {
+            // ----- Arrange -----
+            val book = stubBook(status = BookStatus.Reading)
+
+            // ----- Act -----
+            val variant = book.cardWithDeadline(LibraryGridLayout.LIST_COMPACT).variant
+
+            // ----- Assert -----
+            variant.shouldBeInstanceOf<BookCardVariant.Row>().trailing.shouldNotBeNull()
+        }
+
+        @Test
+        fun `a paused book with a deadline shows no compact row badge`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                status = BookStatus.Paused,
+                paused = true,
+            )
+
+            // ----- Act -----
+            val variant = book.cardWithDeadline(LibraryGridLayout.LIST_COMPACT).variant
+
+            // ----- Assert -----
+            variant.shouldBeInstanceOf<BookCardVariant.Row>().trailing.shouldBeNull()
+        }
+
+        @Test
+        fun `a paused book with a deadline shows On hold on the large row`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                status = BookStatus.Paused,
+                paused = true,
+            )
+
+            // ----- Act -----
+            val variant = book.cardWithDeadline(LibraryGridLayout.LIST_LARGE).variant
+
+            // ----- Assert -----
+            variant.shouldBeInstanceOf<BookCardVariant.Row>().deadline.shouldNotBeNull().text shouldBe "On hold"
+        }
+
+        @Test
+        fun `a reading book with a deadline shows its date on the large row`() {
+            // ----- Arrange -----
+            val book = stubBook(status = BookStatus.Reading)
+
+            // ----- Act -----
+            val variant = book.cardWithDeadline(LibraryGridLayout.LIST_LARGE).variant
+
+            // ----- Assert -----
+            variant.shouldBeInstanceOf<BookCardVariant.Row>().deadline.shouldNotBeNull().text shouldNotBe "On hold"
+        }
+
+        @Test
+        fun `a paused book without a deadline has no deadline summary`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                status = BookStatus.Paused,
+                paused = true,
+            )
+
+            // ----- Act -----
+            val variant = book.card(LibraryGridLayout.LIST_LARGE).variant
+
+            // ----- Assert -----
+            variant.shouldBeInstanceOf<BookCardVariant.Row>().deadline.shouldBeNull()
+        }
+
+        @Test
+        fun `a paused book keeps its progress on the large row`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                status = BookStatus.Paused,
+                paused = true,
+                progress = 40f,
+            )
+
+            // ----- Act -----
+            val result = book.card(LibraryGridLayout.LIST_LARGE)
+
+            // ----- Assert -----
+            result.decorations.progress.shouldBeInstanceOf<BookCardProgress.Value>()
         }
     }
 

@@ -82,6 +82,14 @@ internal fun Book.toAlsoReadingCard(
     )
 }
 
+/** An "On hold" row: the "Also reading" row with no deadline, cover badge or save failure. */
+internal fun Book.toOnHoldCard(): BookCardUiModel = toAlsoReadingCard(
+    deadlineProgress = null,
+    coverBadge = null,
+    dateStyle = DateStyle.DAY_MONTH_YEAR,
+    mutationFailed = false,
+)
+
 /** A "Pick up next" tile: cover and title only, no progress. */
 internal fun Book.toPickUpNextCard(): BookCardUiModel = BookCardUiModel(
     key = BookCardKey.Book(bookId = id),

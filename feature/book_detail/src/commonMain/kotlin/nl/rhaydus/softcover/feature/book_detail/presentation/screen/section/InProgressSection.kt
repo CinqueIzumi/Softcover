@@ -26,11 +26,12 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdate
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 /**
- * The "In progress" section (Yours lens, `status == Reading`). Section-opener bar + eyebrow, a
- * trailing "Update" pill opening the existing Update-progress sheet, the percent as a `statHero`
- * (tabular), the M3 expressive **wavy** progress indicator (never the flat bar — design-system.md's
- * "wavy always" rule), the `p. x of y` / `n pages to go` counts row, the reading-pace forecast line
- * (hidden when unavailable), and the [DeadlineRow] when a deadline is set.
+ * The "In progress" section (Yours lens, `status` Reading or Paused). Section-opener bar + eyebrow
+ * ("On hold" while Paused), a trailing "Update" pill opening the existing Update-progress sheet, the
+ * percent as a `statHero` (tabular), the M3 expressive **wavy** progress indicator (never the flat bar
+ * - the design system's "wavy always" rule), the `p. x of y` / `n pages to go` counts row (`n pages
+ * left` while Paused), the reading-pace forecast line (hidden when unavailable), and the
+ * [DeadlineRow] when a deadline is set.
  */
 @Composable
 internal fun InProgressSection(

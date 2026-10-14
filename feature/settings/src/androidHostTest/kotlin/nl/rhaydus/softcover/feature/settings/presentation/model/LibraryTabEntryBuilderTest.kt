@@ -80,12 +80,14 @@ class LibraryTabEntryBuilderTest {
                 LibraryTabEntry.Status::class,
                 LibraryTabEntry.Status::class,
                 LibraryTabEntry.Status::class,
+                LibraryTabEntry.Status::class,
                 LibraryTabEntry.CustomList::class,
                 LibraryTabEntry.CustomList::class,
                 LibraryTabEntry.CustomList::class,
             )
             entries.filterIsInstance<LibraryTabEntry.Status>().map { it.status } shouldBe listOf(
                 UserBookStatus.CURRENTLY_READING,
+                UserBookStatus.PAUSED,
                 UserBookStatus.WANT_TO_READ,
                 UserBookStatus.READ,
                 UserBookStatus.DID_NOT_FINISH,
@@ -144,7 +146,7 @@ class LibraryTabEntryBuilderTest {
             val entries = build(draftTabOrder = unknownIds)
 
             // ----- Assert -----
-            entries.size shouldBe 5
+            entries.size shouldBe 6
             entries.none { it.id == "unknown-id-1" } shouldBe true
             entries.none { it.id == "unknown-id-2" } shouldBe true
         }
@@ -175,7 +177,7 @@ class LibraryTabEntryBuilderTest {
                 2,
                 1,
             )
-            entries.size shouldBe 7
+            entries.size shouldBe 8
         }
 
         @Test
@@ -207,7 +209,7 @@ class LibraryTabEntryBuilderTest {
             entries.count { it.id == "list-2" } shouldBe 1
             entries[1].id shouldBe "list-2"
             entries[2].id shouldBe "list-1"
-            entries.size shouldBe 7
+            entries.size shouldBe 8
         }
     }
 
@@ -218,6 +220,7 @@ class LibraryTabEntryBuilderTest {
             // ----- Arrange -----
             val statusCounts = mapOf(
                 UserBookStatus.CURRENTLY_READING.code to 3,
+                UserBookStatus.PAUSED.code to 6,
                 UserBookStatus.WANT_TO_READ.code to 5,
                 UserBookStatus.READ.code to 11,
                 UserBookStatus.DID_NOT_FINISH.code to 2,
@@ -245,6 +248,7 @@ class LibraryTabEntryBuilderTest {
             val statuses = entries.filterIsInstance<LibraryTabEntry.Status>()
             statuses.map { it.count } shouldBe listOf(
                 3,
+                6,
                 5,
                 11,
                 2,
@@ -272,6 +276,7 @@ class LibraryTabEntryBuilderTest {
                 .filterIsInstance<LibraryTabEntry.Status>()
                 .associate { it.status to it.count } shouldBe mapOf(
                 UserBookStatus.CURRENTLY_READING to 0,
+                UserBookStatus.PAUSED to 0,
                 UserBookStatus.WANT_TO_READ to 0,
                 UserBookStatus.READ to 4,
                 UserBookStatus.DID_NOT_FINISH to 0,

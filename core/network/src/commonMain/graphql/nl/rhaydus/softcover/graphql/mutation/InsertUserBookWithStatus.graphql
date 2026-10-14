@@ -1,4 +1,4 @@
-mutation MarkBookAsReadingViaInsert($userBookCreateInput: UserBookCreateInput!) {
+mutation InsertUserBookWithStatus($userBookCreateInput: UserBookCreateInput!) {
     insert_user_book(
         object: $userBookCreateInput
     ) {

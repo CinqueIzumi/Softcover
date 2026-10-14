@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
 import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableSet
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.component.haptics.Feedback
@@ -15,6 +16,7 @@ import nl.rhaydus.toad.ActionScope
 internal class OnBulkMoveShelfAction(
     private val status: UserBookStatus,
     private val explicitBookIds: Set<Int>? = null,
+    private val sessionPauseConfirmed: Boolean = false,
 ) : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
@@ -25,6 +27,19 @@ internal class OnBulkMoveShelfAction(
 
         if (books.isEmpty()) {
             scope.setState { it.copy(isBulkMoveMenuExpanded = false) }
+
+            return
+        }
+
+        val sessionBookId = state.activeSessionBookId
+
+        if (status == UserBookStatus.PAUSED && sessionPauseConfirmed.not() && books.any { it.id == sessionBookId }) {
+            scope.setState {
+                it.copy(
+                    isBulkMoveMenuExpanded = false,
+                    endSessionPauseBookIds = books.map { book -> book.id }.toImmutableSet(),
+                )
+            }
 
             return
         }
@@ -43,6 +58,7 @@ internal class OnBulkMoveShelfAction(
                 UserBookStatus.READ -> dependencies.markBookAsReadUseCase(book = book)
                 UserBookStatus.CURRENTLY_READING -> dependencies.markBookAsReadingUseCase(book = book)
                 UserBookStatus.WANT_TO_READ -> dependencies.markBookAsWantToReadUseCase(book = book)
+                UserBookStatus.PAUSED -> dependencies.pauseBookUseCase(book = book)
                 UserBookStatus.DID_NOT_FINISH -> error(
                     "Bulk move-shelf does not support DID_NOT_FINISH",
                 )

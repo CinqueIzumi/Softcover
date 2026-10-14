@@ -61,7 +61,9 @@ fun DeadlineRow(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                Badge(model = model.badge)
+                model.badge?.let { badge ->
+                    Badge(model = badge)
+                }
             }
 
             Spacer(modifier = Modifier.height(Spacing.xs))

@@ -179,11 +179,47 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe listOf(nextBook)
-            seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
-                seriesId = 200,
-                afterPosition = 4.0,
-            ),
+            seedsSlot.captured shouldBe listOf(
+                SeriesContinuationSeed(
+                    seriesId = 200,
+                    afterPosition = 4.0,
+                ),
             )
+        }
+
+        @Test
+        fun `a series with a Paused book counts as started and seeds from its position`() = runTest {
+            // ----- Arrange -----
+            val pausedBook = bookInSeries(
+                id = 1,
+                seriesId = 250,
+                amountOfBooks = 10,
+                positionsInSeries = listOf(3.0),
+                status = BookStatus.Paused,
+            )
+            val nextBook: Book = mockk(relaxed = true)
+
+            every {
+                booksRepository.books
+            } returns flowOf(listOf(pausedBook))
+
+            val seedsSlot = slot<List<SeriesContinuationSeed>>()
+
+            coEvery {
+                exploreRepository.fetchNextBooksInSeries(seeds = capture(seedsSlot))
+            } returns listOf(nextBook)
+
+            // ----- Act -----
+            val result = useCase().first()
+
+            // ----- Assert -----
+            result shouldBe listOf(nextBook)
+
+            val expectedSeed = SeriesContinuationSeed(
+                seriesId = 250,
+                afterPosition = 3.0,
+            )
+            seedsSlot.captured shouldBe listOf(expectedSeed)
         }
 
         @Test
@@ -434,10 +470,11 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe listOf(nextBook)
-            seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
-                seriesId = 1200,
-                afterPosition = 3.0,
-            ),
+            seedsSlot.captured shouldBe listOf(
+                SeriesContinuationSeed(
+                    seriesId = 1200,
+                    afterPosition = 3.0,
+                ),
             )
         }
 
@@ -474,10 +511,11 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe listOf(nextBook)
-            seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
-                seriesId = 1400,
-                afterPosition = 3.0,
-            ),
+            seedsSlot.captured shouldBe listOf(
+                SeriesContinuationSeed(
+                    seriesId = 1400,
+                    afterPosition = 3.0,
+                ),
             )
         }
 
@@ -542,10 +580,11 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
-            seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
-                seriesId = 1700,
-                afterPosition = 1.0,
-            ),
+            seedsSlot.captured shouldBe listOf(
+                SeriesContinuationSeed(
+                    seriesId = 1700,
+                    afterPosition = 1.0,
+                ),
             )
         }
 
@@ -583,10 +622,11 @@ class GetContinueSeriesBooksUseCaseTest {
 
             coEvery {
                 exploreRepository.fetchNextBooksInSeries(
-                    seeds = listOf(SeriesContinuationSeed(
-                        seriesId = 1800,
-                        afterPosition = 1.0,
-                    ),
+                    seeds = listOf(
+                        SeriesContinuationSeed(
+                            seriesId = 1800,
+                            afterPosition = 1.0,
+                        ),
                     ),
                 )
             } returns listOf(nextBook)
@@ -657,10 +697,11 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe listOf(nextBook)
-            seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
-                seriesId = 2000,
-                afterPosition = 3.0,
-            ),
+            seedsSlot.captured shouldBe listOf(
+                SeriesContinuationSeed(
+                    seriesId = 2000,
+                    afterPosition = 3.0,
+                ),
             )
         }
 
@@ -701,10 +742,11 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe listOf(nextBook)
-            seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
-                seriesId = 2100,
-                afterPosition = 2.0,
-            ),
+            seedsSlot.captured shouldBe listOf(
+                SeriesContinuationSeed(
+                    seriesId = 2100,
+                    afterPosition = 2.0,
+                ),
             )
         }
 
@@ -749,10 +791,11 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
-            seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
-                seriesId = 2200,
-                afterPosition = 2.0,
-            ),
+            seedsSlot.captured shouldBe listOf(
+                SeriesContinuationSeed(
+                    seriesId = 2200,
+                    afterPosition = 2.0,
+                ),
             )
         }
 

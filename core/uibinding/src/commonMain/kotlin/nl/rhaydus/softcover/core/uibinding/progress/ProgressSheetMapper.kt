@@ -84,7 +84,10 @@ fun Book.toProgressSheetUiModel(
             selectedTab = selectedTab,
         ),
         whenRead = readAt.toWhenReadUiModel(now = now),
-        scaffold = ProgressSheetUiModel.scaffoldFor(bookTitle = title),
+        scaffold = ProgressSheetUiModel.scaffoldFor(
+            bookTitle = title,
+            isPaused = isPaused,
+        ),
     )
 }
 
