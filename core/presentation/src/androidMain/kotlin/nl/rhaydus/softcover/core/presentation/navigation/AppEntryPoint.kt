@@ -9,6 +9,9 @@ import android.content.Intent
  * without referencing the concrete Activity class (an upward dependency the module split rejects).
  */
 interface AppEntryPoint {
-    /** Intent that brings the app to the foreground and opens Focus Mode. */
-    fun focusModeIntent(context: Context): Intent
+    /** Intent that brings the app to the foreground and opens [request]. */
+    fun intent(
+        context: Context,
+        request: ExternalNavigationRequest,
+    ): Intent
 }

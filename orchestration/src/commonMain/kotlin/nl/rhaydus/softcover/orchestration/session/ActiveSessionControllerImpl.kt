@@ -1,13 +1,12 @@
 package nl.rhaydus.softcover.orchestration.session
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
@@ -38,7 +37,25 @@ internal class ActiveSessionControllerImpl(
     private val appDispatchers: AppDispatchers,
     private val readingSessionLauncher: ReadingSessionLauncher,
 ) : ActiveSessionController {
-    override val activeSession: StateFlow<ActiveSession?> =
+    private val _activeSession = MutableStateFlow<ActiveSession?>(null)
+
+    override val activeSession: StateFlow<ActiveSession?> = _activeSession.asStateFlow()
+
+    private val _sessionLoaded = MutableStateFlow(false)
+
+    override val sessionLoaded: StateFlow<Boolean> = _sessionLoaded.asStateFlow()
+
+    init {
+        applicationScope.scope.launch {
+            observeSession().collect { session ->
+                _activeSession.value = session
+
+                _sessionLoaded.value = true
+            }
+        }
+    }
+
+    private fun observeSession(): Flow<ActiveSession?> =
         combine(
             observeActiveSessionUseCase(),
             getCurrentlyReadingBooksUseCase(),
@@ -56,15 +73,7 @@ internal class ActiveSessionControllerImpl(
                         ),
                     )
                 }
-        }.stateIn(
-            scope = applicationScope.scope,
-            started = SharingStarted.Eagerly,
-            initialValue = null,
-        )
-
-    private val _pendingFocusMode = MutableStateFlow(false)
-
-    override val pendingFocusMode: StateFlow<Boolean> = _pendingFocusMode.asStateFlow()
+        }
 
     private val _outcomes = MutableSharedFlow<SessionOutcome>(extraBufferCapacity = 1)
 
@@ -144,13 +153,5 @@ internal class ActiveSessionControllerImpl(
                 AppLog.e("$error")
             }
         }
-    }
-
-    override fun requestFocusMode() {
-        _pendingFocusMode.value = true
-    }
-
-    override fun consumeFocusModeRequest() {
-        _pendingFocusMode.value = false
     }
 }

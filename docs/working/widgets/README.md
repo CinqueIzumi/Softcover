@@ -59,7 +59,10 @@ separate decision).
 - Fix the existing trending tests (`BooksRepositoryImplTest`, `GetTrendingBooksUseCaseTest`, the
   Explore/Reading dependency fixtures).
 
-### S3. Opening the app from a widget
+### S3. Opening the app from a widget ✅
+Done: `AppEntryPoint.intent(context, request)` with a strict `softcover://open/...` codec in
+orchestration commonMain (stable tab literals); `ActiveSessionController.sessionLoaded` gates Focus
+Mode; MainActivity ignores the launch intent on restore.
 `ExternalNavigationRequest` sealed type in `:core:presentation` (`OpenTab(Reading|Explore)`,
 `OpenBook(id)`), impl in orchestration. `AppEntryPoint` builds intents; `MainActivity` parses them;
 `BottomBarScreen` consumes (tab switch, `BookDetailPresenter.open`). Cleared on sign-out. Move Focus

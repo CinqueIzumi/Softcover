@@ -9,6 +9,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -240,6 +241,64 @@ class ActiveSessionControllerImplTest {
     }
 
     @Nested
+    inner class SessionLoaded {
+        @Test
+        fun `is false before the underlying flow first emits`() = runTest {
+            // ----- Arrange -----
+            val gatedSession = MutableSharedFlow<ReadingSession?>()
+            every {
+                observeActiveSessionUseCase()
+            } returns gatedSession
+
+            // ----- Act -----
+            val controller = buildController(this)
+
+            // ----- Assert -----
+            controller.sessionLoaded.value shouldBe false
+        }
+
+        @Test
+        fun `is true after the first emission even when it is null`() = runTest {
+            // ----- Arrange -----
+            val gatedSession = MutableSharedFlow<ReadingSession?>()
+            every {
+                observeActiveSessionUseCase()
+            } returns gatedSession
+            val controller = buildController(this)
+
+            // ----- Act -----
+            gatedSession.emit(null)
+
+            // ----- Assert -----
+            controller.sessionLoaded.value shouldBe true
+        }
+
+        @Test
+        fun `activeSession already holds the emitted value when it flips to true`() = runTest {
+            // ----- Arrange -----
+            val gatedSession = MutableSharedFlow<ReadingSession?>()
+            every {
+                observeActiveSessionUseCase()
+            } returns gatedSession
+            booksFlow.value = listOf(stubBook(id = 42))
+            val controller = buildController(this)
+            val sessionAtFlip = mutableListOf<ReadingSession?>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                controller.sessionLoaded.collect { loaded ->
+                    if (loaded) sessionAtFlip.add(controller.activeSession.value?.session)
+                }
+            }
+            val session = stubSession(bookId = 42)
+
+            // ----- Act -----
+            gatedSession.emit(session)
+
+            // ----- Assert -----
+            sessionAtFlip shouldContainExactly listOf(session)
+        }
+    }
+
+    @Nested
     inner class Pause {
         @Test
         fun `invokes pauseReadingSessionUseCase with the active session id`() = runTest {
@@ -385,24 +444,6 @@ class ActiveSessionControllerImplTest {
                     any(),
                 )
             }
-        }
-    }
-
-    @Nested
-    inner class FocusMode {
-        @Test
-        fun `a requested focus mode is pending until it is consumed`() = runTest {
-            // ----- Arrange -----
-            val controller = buildController(this)
-
-            // ----- Act -----
-            controller.requestFocusMode()
-            val pendingAfterRequest = controller.pendingFocusMode.value
-            controller.consumeFocusModeRequest()
-
-            // ----- Assert -----
-            pendingAfterRequest shouldBe true
-            controller.pendingFocusMode.value shouldBe false
         }
     }
 

@@ -30,6 +30,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.notification.SoftcoverNotificationChannel
 import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
@@ -297,7 +298,10 @@ internal class ReadingSessionService : Service() {
     }
 
     private fun focusModePendingIntent(): PendingIntent {
-        val intent = appEntryPoint.focusModeIntent(context = this)
+        val intent = appEntryPoint.intent(
+            context = this,
+            request = ExternalNavigationRequest.OpenFocusMode,
+        )
 
         return PendingIntent.getActivity(
             this,
