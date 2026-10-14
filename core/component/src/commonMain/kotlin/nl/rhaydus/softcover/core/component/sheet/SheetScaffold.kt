@@ -25,6 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -38,6 +39,8 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -118,6 +121,14 @@ internal fun SheetScaffoldContent(
         }
     }
 
+    val footerInset = LocalSheetFooterInset.current
+    val reportsFooterInset = model.footer != null && model.layout != SheetLayout.Scrolling
+
+    DisposableEffect(footerInset, reportsFooterInset) {
+        onDispose { footerInset?.intValue = 0 }
+    }
+
+    val bottomPaddingPx = with(LocalDensity.current) { Spacing.md.roundToPx() }
     val scrollState = rememberScrollState()
     val scrollsBody = model.layout == SheetLayout.Pinned && lazyBody.not()
     val paneTitle = model.header?.let { header -> header.section.headlineText ?: header.section.eyebrow }
@@ -144,7 +155,10 @@ internal fun SheetScaffoldContent(
             onEvent = onEvent,
         )
 
-        CompositionLocalProvider(LocalModalSheetDismiss provides chrome::dismiss) {
+        CompositionLocalProvider(
+            LocalModalSheetDismiss provides chrome::dismiss,
+            LocalSheetFooterInset provides null,
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -182,6 +196,11 @@ internal fun SheetScaffoldContent(
                 model = model.footer,
                 onEvent = onEvent,
                 chrome = chrome,
+                modifier = if (reportsFooterInset) {
+                    Modifier.onSizeChanged { size -> footerInset?.intValue = size.height + bottomPaddingPx }
+                } else {
+                    Modifier
+                },
             )
         }
     }
@@ -319,10 +338,11 @@ private fun SheetFooter(
     model: SheetFooterUiModel,
     onEvent: (SheetScaffoldEvent) -> Unit,
     chrome: SheetChrome,
+    modifier: Modifier = Modifier,
 ) {
     when (model) {
         is SheetFooterUiModel.Stacked -> Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
         ) {
             if (model.primary != null) {
@@ -349,7 +369,7 @@ private fun SheetFooter(
         }
 
         is SheetFooterUiModel.Inline -> Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
