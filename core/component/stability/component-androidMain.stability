@@ -572,7 +572,7 @@ internal fun nl.rhaydus.softcover.core.component.control.PageMiniature(scheme: a
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.core.component.control.PreviewTileFrame(label: kotlin.String, selected: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.BoxScope, kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.core.component.control.PreviewTileFrame(label: kotlin.String, selected: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, enabled: kotlin.Boolean, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.BoxScope, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -580,6 +580,7 @@ internal fun nl.rhaydus.softcover.core.component.control.PreviewTileFrame(label:
     - selected: STABLE (primitive type)
     - onClick: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+    - enabled: STABLE (primitive type)
     - content: STABLE (composable function type)
 
 @Composable
@@ -1307,7 +1308,7 @@ internal fun nl.rhaydus.softcover.core.component.share.BookShareCardBody(model: 
     - model: STABLE (class with no mutable properties)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.share.BookShareCardHeader(eyebrow: kotlin.String, coverUrl: kotlin.String?, title: kotlin.String, author: kotlin.String): kotlin.Unit
+internal fun nl.rhaydus.softcover.core.component.share.BookShareCardHeader(eyebrow: kotlin.String, coverUrl: kotlin.String?, title: kotlin.String, author: kotlin.String): kotlin.Unit
   skippable: true
   restartable: true
   params:

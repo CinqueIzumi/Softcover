@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SchemeBrightness
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.dynamicColorSchemeOrNull
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverColorScheme
 
@@ -34,7 +35,8 @@ private val DIAGONAL_LOWER_HALF: Shape = GenericShape { size, _ ->
  * resolves both sides of the pair itself through [softcoverColorScheme] — in [model]'s chosen spine
  * colour, so the tiles wear the same palette the app does — and through [dynamicColorSchemeOrNull]
  * when [model]'s dynamic colour flag is on, so what the tile promises is what picking it delivers.
- * [ThemeTilePainting.SPLIT] is drawn as one tile split on the diagonal — light above the seam, dark
+ * [ThemeTilePainting.DIM] paints the standalone dim scheme, never consulting the spine colour or
+ * dynamic colour. [ThemeTilePainting.SPLIT] is drawn as one tile split on the diagonal — light above the seam, dark
  * below — rather than as a third flat swatch, because "whichever your device is" has no single colour.
  *
  * It lives in the component library rather than in `feature/settings` because the onboarding theme
@@ -53,7 +55,7 @@ fun <K> ThemePreviewTile(
         darkTheme = false,
     )
         ?: softcoverColorScheme(
-            darkTheme = false,
+            brightness = SchemeBrightness.LIGHT,
             palette = model.palette,
         )
 
@@ -62,13 +64,19 @@ fun <K> ThemePreviewTile(
         darkTheme = true,
     )
         ?: softcoverColorScheme(
-            darkTheme = true,
+            brightness = SchemeBrightness.DARK,
             palette = model.palette,
         )
 
     // The split tile paints the light scheme underneath and clips the dark one over its lower half,
     // so its base is the light one; the other two paintings are simply themselves.
-    val baseScheme = if (model.painting == ThemeTilePainting.DARK) darkScheme else lightScheme
+    val baseScheme = when (model.painting) {
+        ThemeTilePainting.DARK -> darkScheme
+        ThemeTilePainting.DIM -> softcoverColorScheme(brightness = SchemeBrightness.DIM)
+        ThemeTilePainting.LIGHT,
+        ThemeTilePainting.SPLIT,
+        -> lightScheme
+    }
 
     PreviewTileFrame(
         label = model.label,

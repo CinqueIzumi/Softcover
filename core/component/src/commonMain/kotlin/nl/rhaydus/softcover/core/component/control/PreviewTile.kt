@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
@@ -32,6 +33,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private const val TILE_ASPECT_RATIO = 0.78f
+private const val DISABLED_ALPHA = 0.38f
 
 /**
  * The tile chrome every Appearance picker choice shares: a fixed-aspect, clipped, ringed miniature
@@ -44,6 +46,9 @@ private const val TILE_ASPECT_RATIO = 0.78f
  * Selection is carried by a `primary` ring (2dp, against 1dp `outlineVariant` at rest) plus the
  * `primary` label beneath — no check badge, since the ring already says it once — and by
  * [Role.RadioButton] semantics for the reader who can see neither.
+ *
+ * A tile that is not [enabled] is muted and inert: it takes no click and no hover, and reports itself
+ * disabled to assistive tech, while keeping its ring and label so the choice it holds stays legible.
  */
 @Composable
 internal fun PreviewTileFrame(
@@ -51,6 +56,7 @@ internal fun PreviewTileFrame(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -78,10 +84,12 @@ internal fun PreviewTileFrame(
 
     Column(
         modifier = modifier
+            .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .tactileSelectable(
                 selected = selected,
                 onClick = onClick,
                 role = Role.RadioButton,
+                enabled = enabled,
                 hoverShape = null,
                 interactionSource = interactionSource,
             ),
