@@ -21,7 +21,8 @@ import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
@@ -56,7 +57,8 @@ internal class BookDetailDependencies(
     val setBookDeadlineUseCase: SetBookDeadlineUseCase,
     val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,
     val getTopBookReviewsUseCase: GetTopBookReviewsUseCase,
-    val getReadingJournalHistoryUseCase: GetReadingJournalHistoryUseCase,
+    val observeReadingJournalHistoryUseCase: ObserveReadingJournalHistoryUseCase,
+    val refreshReadingJournalHistoryUseCase: RefreshReadingJournalHistoryUseCase,
     val updateBookReviewUseCase: UpdateBookReviewUseCase,
     val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     val getUserTagsUseCase: GetUserTagsUseCase,

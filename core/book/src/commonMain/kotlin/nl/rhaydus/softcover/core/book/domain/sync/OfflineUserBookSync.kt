@@ -14,6 +14,7 @@ interface OfflineUserBookSync {
         newPage: Int?,
         newSeconds: Int?,
         actionAt: String? = null,
+        progressHistoryId: Long? = null,
     )
 
     suspend fun enqueueMarkAsRead(

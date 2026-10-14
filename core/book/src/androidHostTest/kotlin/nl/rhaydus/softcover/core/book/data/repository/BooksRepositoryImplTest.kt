@@ -26,6 +26,7 @@ import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
 import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
@@ -45,6 +46,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 class BooksRepositoryImplTest {
@@ -52,6 +54,7 @@ class BooksRepositoryImplTest {
     private lateinit var booksLocalDataSource: BooksLocalDataSource
     private lateinit var networkAvailability: NetworkAvailabilityProvider
     private lateinit var offlineSync: OfflineUserBookSync
+    private lateinit var progressHistoryLocalDataSource: ProgressHistoryLocalDataSource
     private lateinit var appDispatchers: AppDispatchers
     private lateinit var testScope: TestScope
     private lateinit var repository: BooksRepositoryImpl
@@ -62,6 +65,7 @@ class BooksRepositoryImplTest {
         booksLocalDataSource = mockk(relaxed = true)
         networkAvailability = mockk()
         offlineSync = mockk(relaxed = true)
+        progressHistoryLocalDataSource = mockk(relaxed = true)
 
         val dispatcher = UnconfinedTestDispatcher()
         appDispatchers = AppDispatchers(
@@ -83,6 +87,7 @@ class BooksRepositoryImplTest {
             offlineSync = offlineSync,
             applicationScope = ApplicationScope(scope = testScope),
             appDispatchers = appDispatchers,
+            progressHistoryLocalDataSource = progressHistoryLocalDataSource,
         )
     }
 
@@ -3397,13 +3402,440 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class UpdateBookProgress {
+        private fun historyBook(): Book = mockk(relaxed = true) {
+            every {
+                this@mockk.id
+            } returns 42
+        }
+
+        private fun stubInsertPending(localId: Long) {
+            coEvery {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = any(),
+                    actionAtEpochMillis = any(),
+                    pages = any(),
+                    seconds = any(),
+                )
+            } returns localId
+        }
+
+        @Test
+        fun `inserts a pending history row with the passed actionAt as epoch millis and the new pages and seconds`() = runTest {
+            // ----- Arrange -----
+            val book = historyBook()
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } returns stubBook(userBookId = 1)
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = 120,
+                newSeconds = 3000,
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = 42,
+                    actionAtEpochMillis = 1784667600000L,
+                    pages = 120,
+                    seconds = 3000,
+                )
+            }
+        }
+
+        @Test
+        fun `inserts the pending history row stamped with the current time when actionAt is null`() = runTest {
+            // ----- Arrange -----
+            val book = historyBook()
+            val actionAtSlot = slot<Long>()
+            val before = Clock.System.now()
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } returns stubBook(userBookId = 1)
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = 10,
+                actionAt = null,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = 42,
+                    actionAtEpochMillis = capture(actionAtSlot),
+                    pages = 10,
+                    seconds = null,
+                )
+            }
+
+            val stamped = Instant.fromEpochMilliseconds(actionAtSlot.captured)
+            (stamped >= before) shouldBe true
+            (stamped <= Clock.System.now()) shouldBe true
+        }
+
+        @Test
+        fun `marks the inserted history row synced when the direct remote write succeeds`() = runTest {
+            // ----- Arrange -----
+            val book = historyBook()
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } returns stubBook(userBookId = 1)
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = 10,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.markSynced(localId = 9L)
+            }
+
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.delete(localId = any())
+            }
+        }
+
+        @Test
+        fun `leaves the history row pending when the remote write fails with a retryable error`() = runTest {
+            // ----- Arrange -----
+            val book = historyBook()
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } throws ServerUnavailableException(message = "down")
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = 10,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.markSynced(localId = any())
+            }
+
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.delete(localId = any())
+            }
+
+            coVerify(exactly = 1) {
+                offlineSync.enqueueProgressUpdate(
+                    book = any(),
+                    newPage = 10,
+                    newSeconds = null,
+                    actionAt = any(),
+                    progressHistoryId = 9L,
+                )
+            }
+        }
+
+        @Test
+        fun `leaves the history row pending when offline`() = runTest {
+            // ----- Arrange -----
+            val book = historyBook()
+            stubInsertPending(localId = 9L)
+
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = 10,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = 42,
+                    actionAtEpochMillis = any(),
+                    pages = 10,
+                    seconds = null,
+                )
+            }
+
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.markSynced(localId = any())
+            }
+
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.delete(localId = any())
+            }
+
+            coVerify(exactly = 1) {
+                offlineSync.enqueueProgressUpdate(
+                    book = any(),
+                    newPage = 10,
+                    newSeconds = null,
+                    actionAt = any(),
+                    progressHistoryId = 9L,
+                )
+            }
+        }
+
+        @Test
+        fun `rolls the history row back when the remote write fails with a non-retryable error`() = runTest {
+            // ----- Arrange -----
+            val book = historyBook()
+            val remoteError = RuntimeException("rejected")
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } throws remoteError
+
+            // ----- Act -----
+            val caught = runCatching {
+                repository.updateBookProgress(
+                    book = book,
+                    newPage = 10,
+                )
+            }
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe remoteError
+
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.delete(localId = 9L)
+            }
+
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.markSynced(localId = any())
+            }
+        }
+
+        @Test
+        fun `throws and writes nothing when the book has no user book read`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(userBookId = 1)
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                repository.updateBookProgress(
+                    book = book,
+                    newPage = 10,
+                )
+            }
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = any(),
+                    actionAtEpochMillis = any(),
+                    pages = any(),
+                    seconds = any(),
+                )
+            }
+
+            coVerify(exactly = 0) {
+                offlineSync.enqueueProgressUpdate(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                    progressHistoryId = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `stamps the current time into the remote write, the history row and the queued write when actionAt is null`() = runTest {
+            // ----- Arrange -----
+            val book = historyBook()
+            val remoteSlot = slot<String>()
+            val millisSlot = slot<Long>()
+            val enqueueSlot = slot<String>()
+            val before = Clock.System.now()
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = capture(remoteSlot),
+                )
+            } throws ServerUnavailableException(message = "down")
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = 10,
+                actionAt = null,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = 42,
+                    actionAtEpochMillis = capture(millisSlot),
+                    pages = 10,
+                    seconds = null,
+                )
+            }
+
+            coVerify {
+                offlineSync.enqueueProgressUpdate(
+                    book = any(),
+                    newPage = 10,
+                    newSeconds = null,
+                    actionAt = capture(enqueueSlot),
+                    progressHistoryId = 9L,
+                )
+            }
+
+            Instant.parse(remoteSlot.captured).toEpochMilliseconds() shouldBe millisSlot.captured
+            Instant.parse(enqueueSlot.captured).toEpochMilliseconds() shouldBe millisSlot.captured
+            (Instant.fromEpochMilliseconds(millisSlot.captured) >= before) shouldBe true
+        }
+
+        @Test
+        fun `stamps the current time into the queued write and the history row when offline and actionAt is null`() = runTest {
+            // ----- Arrange -----
+            val book = historyBook()
+            val millisSlot = slot<Long>()
+            val enqueueSlot = slot<String>()
+            stubInsertPending(localId = 9L)
+
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = 10,
+                actionAt = null,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = 42,
+                    actionAtEpochMillis = capture(millisSlot),
+                    pages = 10,
+                    seconds = null,
+                )
+            }
+
+            coVerify {
+                offlineSync.enqueueProgressUpdate(
+                    book = any(),
+                    newPage = 10,
+                    newSeconds = null,
+                    actionAt = capture(enqueueSlot),
+                    progressHistoryId = 9L,
+                )
+            }
+
+            Instant.parse(enqueueSlot.captured).toEpochMilliseconds() shouldBe millisSlot.captured
+        }
+
+        @Test
+        fun `a passed actionAt reaches the remote write, the history row and the queued write as the same instant`() = runTest {
+            // ----- Arrange -----
+            val book = historyBook()
+            val actionAt = "2026-07-21T21:00:00Z"
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = actionAt,
+                )
+            } throws ServerUnavailableException(message = "down")
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = 10,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = 10,
+                    newSeconds = any(),
+                    actionAt = actionAt,
+                )
+            }
+
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = 42,
+                    actionAtEpochMillis = 1784667600000L,
+                    pages = 10,
+                    seconds = null,
+                )
+            }
+
+            coVerify(exactly = 1) {
+                offlineSync.enqueueProgressUpdate(
+                    book = any(),
+                    newPage = 10,
+                    newSeconds = null,
+                    actionAt = actionAt,
+                    progressHistoryId = 9L,
+                )
+            }
+        }
+
         @Test
         fun `updateBookProgress forwards actionAt to remote data source`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(userBookId = 1)
+            val book = historyBook()
             val newPage = 150
             val actionAt = "2026-07-21T21:00:00Z"
-            val expectedBook = stubBook(userBookId = 1)
+            val expectedBook = historyBook()
 
             coEvery {
                 booksRemoteDataSource.updateBookProgress(
@@ -3483,6 +3915,7 @@ class BooksRepositoryImplTest {
                     book = any(),
                     newPage = any(),
                     newSeconds = any(),
+                    actionAt = any(),
                 )
             } returns stubBook(userBookId = 1)
 
@@ -3533,6 +3966,7 @@ class BooksRepositoryImplTest {
                     book = book,
                     newPage = any(),
                     newSeconds = any(),
+                    actionAt = any(),
                 )
             } throws remoteError
 
@@ -3580,6 +4014,7 @@ class BooksRepositoryImplTest {
                     book = book,
                     newPage = any(),
                     newSeconds = any(),
+                    actionAt = any(),
                 )
             } throws OfflineException()
 
@@ -3627,6 +4062,7 @@ class BooksRepositoryImplTest {
                     book = book,
                     newPage = any(),
                     newSeconds = any(),
+                    actionAt = any(),
                 )
             } throws ServerUnavailableException("server error")
 
@@ -3650,6 +4086,8 @@ class BooksRepositoryImplTest {
                     book = any(),
                     newPage = any(),
                     newSeconds = any(),
+                    actionAt = any(),
+                    progressHistoryId = any(),
                 )
             }
         }
@@ -4141,6 +4579,7 @@ class BooksRepositoryImplTest {
                     newPage = any(),
                     newSeconds = any(),
                     actionAt = actionAt,
+                    progressHistoryId = any(),
                 )
             }
 

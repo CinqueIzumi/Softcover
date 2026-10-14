@@ -51,7 +51,12 @@ val connectivityModule = module {
     }
 
     // The store is both the persistence seam the drainer reads and the queue the app enqueues onto.
-    single { PendingUserBookWriteStore(dao = get()) }
+    single {
+        PendingUserBookWriteStore(
+            dao = get(),
+            progressHistoryLocalDataSource = get(),
+        )
+    }
 
     single { PendingListWriteStore(dao = get()) }
 
@@ -59,7 +64,12 @@ val connectivityModule = module {
 
     single<ListWriteQueue> { get<PendingListWriteStore>() }
 
-    single { UserBookWriteReplay(booksRemoteDataSource = get()) }
+    single {
+        UserBookWriteReplay(
+            booksRemoteDataSource = get(),
+            progressHistoryLocalDataSource = get(),
+        )
+    }
 
     single {
         ListWriteReplay(

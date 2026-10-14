@@ -19,6 +19,7 @@ internal fun PendingUserBookWrite.toEntity(): PendingUserBookWriteEntity = Pendi
     reviewHasSpoilers = reviewHasSpoilers,
     enqueuedAt = enqueuedAt,
     actionAt = actionAt,
+    progressHistoryId = progressHistoryId,
 )
 
 /** Null when the persisted `kind` names no known write — a row written by a build that knew more. */
@@ -43,5 +44,6 @@ internal fun PendingUserBookWriteEntity.toPendingUserBookWrite(): PendingUserBoo
         reviewHasSpoilers = reviewHasSpoilers,
         enqueuedAt = enqueuedAt,
         actionAt = actionAt,
+        progressHistoryId = progressHistoryId,
     )
 }

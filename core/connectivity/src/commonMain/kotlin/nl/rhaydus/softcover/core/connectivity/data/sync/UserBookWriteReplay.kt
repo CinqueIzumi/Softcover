@@ -1,11 +1,14 @@
 package nl.rhaydus.softcover.core.connectivity.data.sync
 
+import kotlinx.coroutines.CancellationException
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.offlinesync.ReplayOutcome
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
 import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromJson
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
+import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 
 /**
  * Replays a single queued user-book mutation. [ReplayOutcome.SYNCED] means the mutation reached the server
@@ -18,21 +21,10 @@ import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
  */
 internal class UserBookWriteReplay(
     private val booksRemoteDataSource: BooksRemoteDataSource,
+    private val progressHistoryLocalDataSource: ProgressHistoryLocalDataSource,
 ) {
     suspend operator fun invoke(payload: PendingUserBookWrite): ReplayOutcome = when (payload.kind) {
-        PendingUserBookWriteKind.UPDATE_PROGRESS -> {
-            booksRemoteDataSource.replayUpdateBookProgress(
-                userBookReadId = payload.userBookReadId,
-                editionId = payload.editionId,
-                progressPages = payload.progressPages,
-                progressSeconds = payload.progressSeconds,
-                startedAt = payload.startedAt,
-                finishedAt = payload.finishedAt,
-                actionAt = payload.actionAt,
-            )
-
-            ReplayOutcome.SYNCED
-        }
+        PendingUserBookWriteKind.UPDATE_PROGRESS -> replayProgress(payload = payload)
 
         PendingUserBookWriteKind.MARK_AS_READ -> {
             booksRemoteDataSource.replayMarkBookAsRead(
@@ -47,6 +39,31 @@ internal class UserBookWriteReplay(
         PendingUserBookWriteKind.UPDATE_RATING -> replayRating(payload = payload)
 
         PendingUserBookWriteKind.UPDATE_REVIEW -> replayReview(payload = payload)
+    }
+
+    // A rejected write is dropped by the drainer, so its history row must go too or it would stay pending forever.
+    private suspend fun replayProgress(payload: PendingUserBookWrite): ReplayOutcome {
+        runCatching {
+            booksRemoteDataSource.replayUpdateBookProgress(
+                userBookReadId = payload.userBookReadId,
+                editionId = payload.editionId,
+                progressPages = payload.progressPages,
+                progressSeconds = payload.progressSeconds,
+                startedAt = payload.startedAt,
+                finishedAt = payload.finishedAt,
+                actionAt = payload.actionAt,
+            )
+        }.onFailure { error ->
+            val isRejection = error !is CancellationException && error !is RetryableSyncException
+
+            if (isRejection) {
+                payload.progressHistoryId?.let { progressHistoryLocalDataSource.delete(localId = it) }
+            }
+        }.getOrThrow()
+
+        payload.progressHistoryId?.let { progressHistoryLocalDataSource.markSynced(localId = it) }
+
+        return ReplayOutcome.SYNCED
     }
 
     private suspend fun replayRating(payload: PendingUserBookWrite): ReplayOutcome {

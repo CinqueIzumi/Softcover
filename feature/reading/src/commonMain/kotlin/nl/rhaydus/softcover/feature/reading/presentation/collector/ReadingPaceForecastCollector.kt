@@ -1,14 +1,15 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.common.AppLog
+import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
@@ -49,34 +50,29 @@ internal class ReadingPaceForecastCollector : ReadingCollector {
             }
             .distinctUntilChanged()
 
-        // Keyed on the featured bookId *and* the committed progress snapshot (not just bookId) so a
-        // landed progress write — which changes currentPage/currentSeconds in state only once the
-        // write actually commits — refetches the journal history instead of leaving it stale.
-        val journalHistoryFlow = combine(featuredBookIdFlow, progressSnapshotFlow) { bookId, snapshot ->
-            bookId to snapshot
+        val journalHistoryFlow = featuredBookIdFlow.flatMapLatest { bookId ->
+            if (bookId == null) {
+                flowOf(emptyList())
+            } else {
+                dependencies.observeReadingJournalHistoryUseCase(bookId = bookId)
+            }
         }
-            .distinctUntilChanged()
-            .flatMapLatest { (bookId, _) ->
-                if (bookId == null) {
-                    flowOf(emptyList())
-                } else {
-                    flow {
-                        val history = dependencies.getReadingJournalHistoryUseCase(bookId = bookId)
-                            .onFailure { AppLog.e("$it") }
-                            .getOrDefault(emptyList())
 
-                        emit(history)
-                    }
+        coroutineScope {
+            launch {
+                featuredBookIdFlow.filterNotNull().collectLatest { bookId ->
+                    dependencies.refreshReadingJournalHistoryUseCase(bookId = bookId)
                 }
             }
 
-        combine(journalHistoryFlow, progressSnapshotFlow) { history, snapshot ->
-            computeForecast(
-                history = history,
-                snapshot = snapshot,
-            )
-        }.collectLatest { forecast ->
-            scope.setState { it.copy(featuredBookPace = forecast?.toPaceLine()) }
+            combine(journalHistoryFlow, progressSnapshotFlow) { history, snapshot ->
+                computeForecast(
+                    history = history,
+                    snapshot = snapshot,
+                )
+            }.collectLatest { forecast ->
+                scope.setState { it.copy(featuredBookPace = forecast?.toPaceLine()) }
+            }
         }
     }
 

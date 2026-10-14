@@ -21,7 +21,8 @@ import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
@@ -68,7 +69,8 @@ internal class BookDetailScreenScreenModel(
     private val setBookDeadlineUseCase: SetBookDeadlineUseCase,
     private val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,
     private val getTopBookReviewsUseCase: GetTopBookReviewsUseCase,
-    private val getReadingJournalHistoryUseCase: GetReadingJournalHistoryUseCase,
+    private val observeReadingJournalHistoryUseCase: ObserveReadingJournalHistoryUseCase,
+    private val refreshReadingJournalHistoryUseCase: RefreshReadingJournalHistoryUseCase,
     private val updateBookReviewUseCase: UpdateBookReviewUseCase,
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     private val getUserTagsUseCase: GetUserTagsUseCase,
@@ -114,7 +116,8 @@ internal class BookDetailScreenScreenModel(
         setBookDeadlineUseCase = setBookDeadlineUseCase,
         clearBookDeadlineUseCase = clearBookDeadlineUseCase,
         getTopBookReviewsUseCase = getTopBookReviewsUseCase,
-        getReadingJournalHistoryUseCase = getReadingJournalHistoryUseCase,
+        observeReadingJournalHistoryUseCase = observeReadingJournalHistoryUseCase,
+        refreshReadingJournalHistoryUseCase = refreshReadingJournalHistoryUseCase,
         updateBookReviewUseCase = updateBookReviewUseCase,
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
         getUserTagsUseCase = getUserTagsUseCase,

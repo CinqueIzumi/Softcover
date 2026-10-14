@@ -143,6 +143,57 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
+        fun `progressHistoryId is carried into the enqueued payload`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = stubUserBook(id = 10),
+                userBookRead = stubUserBookRead(id = 20),
+            )
+
+            // ----- Act -----
+            syncImpl.enqueueProgressUpdate(
+                book = book,
+                newPage = 150,
+                newSeconds = null,
+                actionAt = "2026-07-21T21:00:00Z",
+                progressHistoryId = 77L,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                userBookWriteQueue.enqueue(
+                    payload = match { write ->
+                        write.kind == PendingUserBookWriteKind.UPDATE_PROGRESS &&
+                            write.progressHistoryId == 77L
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `payload has no progressHistoryId when none is passed`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = stubUserBook(id = 10),
+                userBookRead = stubUserBookRead(id = 20),
+            )
+
+            // ----- Act -----
+            syncImpl.enqueueProgressUpdate(
+                book = book,
+                newPage = 150,
+                newSeconds = null,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                userBookWriteQueue.enqueue(
+                    payload = match { write -> write.progressHistoryId == null },
+                )
+            }
+        }
+
+        @Test
         fun `book with no userBook — enqueue is not called`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {

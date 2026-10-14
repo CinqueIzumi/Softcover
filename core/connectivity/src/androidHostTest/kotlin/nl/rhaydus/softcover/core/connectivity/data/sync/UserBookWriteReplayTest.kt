@@ -11,9 +11,11 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.offlinesync.ReplayOutcome
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
 import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
+import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
@@ -23,12 +25,17 @@ import org.junit.jupiter.api.Test
 
 class UserBookWriteReplayTest {
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
+    private lateinit var progressHistoryLocalDataSource: ProgressHistoryLocalDataSource
     private lateinit var replay: UserBookWriteReplay
 
     @BeforeEach
     fun setUp() {
         booksRemoteDataSource = mockk()
-        replay = UserBookWriteReplay(booksRemoteDataSource = booksRemoteDataSource)
+        progressHistoryLocalDataSource = mockk(relaxed = true)
+        replay = UserBookWriteReplay(
+            booksRemoteDataSource = booksRemoteDataSource,
+            progressHistoryLocalDataSource = progressHistoryLocalDataSource,
+        )
     }
 
     private fun pendingUserBookWrite(
@@ -46,6 +53,7 @@ class UserBookWriteReplayTest {
         reviewHasSpoilers: Boolean? = null,
         enqueuedAt: String = "2026-05-04T12:34:56Z",
         actionAt: String? = null,
+        progressHistoryId: Long? = null,
     ) = PendingUserBookWrite(
         kind = kind,
         userBookId = userBookId,
@@ -61,7 +69,36 @@ class UserBookWriteReplayTest {
         reviewHasSpoilers = reviewHasSpoilers,
         enqueuedAt = enqueuedAt,
         actionAt = actionAt,
+        progressHistoryId = progressHistoryId,
     )
+
+    private fun stubReplayProgress() {
+        coJustRun {
+            booksRemoteDataSource.replayUpdateBookProgress(
+                userBookReadId = any(),
+                editionId = any(),
+                progressPages = any(),
+                progressSeconds = any(),
+                startedAt = any(),
+                finishedAt = any(),
+                actionAt = any(),
+            )
+        }
+    }
+
+    private fun stubReplayProgressThrowing(error: Throwable) {
+        coEvery {
+            booksRemoteDataSource.replayUpdateBookProgress(
+                userBookReadId = any(),
+                editionId = any(),
+                progressPages = any(),
+                progressSeconds = any(),
+                startedAt = any(),
+                finishedAt = any(),
+                actionAt = any(),
+            )
+        } throws error
+    }
 
     @Nested
     inner class UpdateProgress {
@@ -128,6 +165,112 @@ class UserBookWriteReplayTest {
             // ----- Act & Assert -----
             shouldThrow<RuntimeException> { replay(payload = payload) }
         }
+
+        @Test
+        fun `marks exactly the payload's history row as synced`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                progressHistoryId = 9L,
+            )
+            stubReplayProgress()
+
+            // ----- Act -----
+            replay(payload = payload)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.markSynced(localId = 9L)
+            }
+
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.delete(localId = any())
+            }
+        }
+
+        @Test
+        fun `touches no history row when the payload has no progressHistoryId`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                progressHistoryId = null,
+            )
+            stubReplayProgress()
+
+            // ----- Act -----
+            val result = replay(payload = payload)
+
+            // ----- Assert -----
+            result shouldBe ReplayOutcome.SYNCED
+
+            verify { progressHistoryLocalDataSource wasNot Called }
+        }
+
+        @Test
+        fun `touches no history row when the payload has no progressHistoryId and the replay throws`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                progressHistoryId = null,
+            )
+            stubReplayProgressThrowing(error = RuntimeException("rejected"))
+
+            // ----- Act -----
+            runCatching { replay(payload = payload) }
+
+            // ----- Assert -----
+            verify { progressHistoryLocalDataSource wasNot Called }
+        }
+
+        @Test
+        fun `deletes the history row and rethrows when the replay fails with a non-retryable exception`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                progressHistoryId = 9L,
+            )
+            val rejection = RuntimeException("rejected")
+            stubReplayProgressThrowing(error = rejection)
+
+            // ----- Act & Assert -----
+            val thrown = shouldThrow<RuntimeException> { replay(payload = payload) }
+
+            thrown shouldBe rejection
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.delete(localId = 9L)
+            }
+
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.markSynced(localId = any())
+            }
+        }
+
+        @Test
+        fun `keeps the history row pending and rethrows when the replay fails with a retryable exception`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                progressHistoryId = 9L,
+            )
+            val transient = ServerUnavailableException(message = "down")
+            stubReplayProgressThrowing(error = transient)
+
+            // ----- Act & Assert -----
+            val thrown = shouldThrow<ServerUnavailableException> { replay(payload = payload) }
+
+            thrown shouldBe transient
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.markSynced(localId = any())
+            }
+
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.delete(localId = any())
+            }
+        }
     }
 
     @Nested
@@ -162,6 +305,26 @@ class UserBookWriteReplayTest {
                     actionAt = "2026-05-04T12:34:56Z",
                 )
             }
+        }
+
+        @Test
+        fun `does not touch the progress history`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(kind = PendingUserBookWriteKind.MARK_AS_READ)
+
+            coJustRun {
+                booksRemoteDataSource.replayMarkBookAsRead(
+                    bookId = any(),
+                    userDate = any(),
+                    actionAt = any(),
+                )
+            }
+
+            // ----- Act -----
+            replay(payload = payload)
+
+            // ----- Assert -----
+            verify { progressHistoryLocalDataSource wasNot Called }
         }
     }
 

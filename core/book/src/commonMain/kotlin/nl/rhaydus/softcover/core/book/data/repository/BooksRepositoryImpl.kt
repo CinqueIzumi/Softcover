@@ -16,6 +16,7 @@ import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
 import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
@@ -49,6 +50,7 @@ internal class BooksRepositoryImpl(
     private val offlineSync: OfflineUserBookSync,
     private val applicationScope: ApplicationScope,
     private val appDispatchers: AppDispatchers,
+    private val progressHistoryLocalDataSource: ProgressHistoryLocalDataSource,
 ) : BooksRepository {
     override val books: Flow<List<Book>> = booksLocalDataSource.allUserBooks
 
@@ -607,6 +609,10 @@ internal class BooksRepositoryImpl(
         newSeconds: Int?,
         actionAt: String?,
     ): Book {
+        if (book.userBook == null || book.userBookRead == null) {
+            throw Exception("Book did not contain a user book read")
+        }
+
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withProgress(
             newPage = newPage,
@@ -614,14 +620,26 @@ internal class BooksRepositoryImpl(
         )
         booksLocalDataSource.cacheBook(book = optimistic)
 
+        val readAt: Instant = actionAt?.let { Instant.parse(it) } ?: Clock.System.now()
+        val readAtIso = readAt.toString()
+
+        val historyId = progressHistoryLocalDataSource.insertPending(
+            bookId = book.id,
+            actionAtEpochMillis = readAt.toEpochMilliseconds(),
+            pages = newPage,
+            seconds = newSeconds,
+        )
+
         if (networkAvailability.isOnline.value) {
             return runCatching {
                 booksRemoteDataSource.updateBookProgress(
                     book = book,
                     newPage = newPage,
                     newSeconds = newSeconds,
-                    actionAt = actionAt,
+                    actionAt = readAtIso,
                 )
+            }.onSuccess {
+                progressHistoryLocalDataSource.markSynced(localId = historyId)
             }.getOrElse { error ->
                 when (error) {
                     is CancellationException -> throw error
@@ -636,13 +654,15 @@ internal class BooksRepositoryImpl(
                             book = optimistic,
                             newPage = newPage,
                             newSeconds = newSeconds,
-                            actionAt = actionAt,
+                            actionAt = readAtIso,
+                            progressHistoryId = historyId,
                         )
                         optimistic
                     }
 
                     else -> {
                         restoreOptimisticWrite(snapshot = snapshot)
+                        progressHistoryLocalDataSource.delete(localId = historyId)
                         throw error
                     }
                 }
@@ -653,7 +673,8 @@ internal class BooksRepositoryImpl(
             book = optimistic,
             newPage = newPage,
             newSeconds = newSeconds,
-            actionAt = actionAt,
+            actionAt = readAtIso,
+            progressHistoryId = historyId,
         )
         return optimistic
     }

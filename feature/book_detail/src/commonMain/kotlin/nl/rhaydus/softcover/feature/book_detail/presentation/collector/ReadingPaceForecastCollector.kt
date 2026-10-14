@@ -1,14 +1,15 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.common.AppLog
+import kotlinx.coroutines.launch
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
@@ -42,36 +43,29 @@ internal class ReadingPaceForecastCollector : BookDetailCollector {
             }
             .distinctUntilChanged()
 
-        // Keyed on the reading-gated bookId *and* the committed progress snapshot (not just
-        // bookId) so a landed progress write — which changes currentPage/currentSeconds in
-        // state only once the write actually commits, never per keystroke of the update sheet
-        // — refetches the journal history instead of leaving it stale (e.g. a session that
-        // crosses midnight needs the new day's entry to show up in the next average).
-        val journalHistoryFlow = combine(readingBookIdFlow, progressSnapshotFlow) { bookId, snapshot ->
-            bookId to snapshot
+        val journalHistoryFlow = readingBookIdFlow.flatMapLatest { bookId ->
+            if (bookId == null) {
+                flowOf(emptyList())
+            } else {
+                dependencies.observeReadingJournalHistoryUseCase(bookId = bookId)
+            }
         }
-            .distinctUntilChanged()
-            .flatMapLatest { (bookId, _) ->
-                if (bookId == null) {
-                    flowOf(emptyList())
-                } else {
-                    flow {
-                        val history = dependencies.getReadingJournalHistoryUseCase(bookId = bookId)
-                            .onFailure { AppLog.e("$it") }
-                            .getOrDefault(emptyList())
 
-                        emit(history)
-                    }
+        coroutineScope {
+            launch {
+                readingBookIdFlow.filterNotNull().collectLatest { bookId ->
+                    dependencies.refreshReadingJournalHistoryUseCase(bookId = bookId)
                 }
             }
 
-        combine(journalHistoryFlow, progressSnapshotFlow) { history, snapshot ->
-            computeForecast(
-                history = history,
-                snapshot = snapshot,
-            )
-        }.collectLatest { forecast ->
-            scope.setState { it.copy(readingPaceForecast = forecast) }
+            combine(journalHistoryFlow, progressSnapshotFlow) { history, snapshot ->
+                computeForecast(
+                    history = history,
+                    snapshot = snapshot,
+                )
+            }.collectLatest { forecast ->
+                scope.setState { it.copy(readingPaceForecast = forecast) }
+            }
         }
     }
 
@@ -110,7 +104,7 @@ internal class ReadingPaceForecastCollector : BookDetailCollector {
      * Journal entries carry a cumulative position (mirroring [nl.rhaydus.softcover.core.domain.model.UserBookRead],
      * which also stores the current position rather than a delta), not a per-day amount, so this
      * takes the chronologically-last position logged on each calendar date — entries arrive
-     * ordered `updated_at` ascending, so `.last()` per date is the day's final position, not its
+     * ordered `action_at` ascending, so `.last()` per date is the day's final position, not its
      * peak — and diffs it against the previous date's position, clamping to 0 so a correction
      * (an edited-down page number) never reads as negative progress.
      */

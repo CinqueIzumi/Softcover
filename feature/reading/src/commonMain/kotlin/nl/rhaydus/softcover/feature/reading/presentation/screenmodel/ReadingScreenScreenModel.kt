@@ -12,7 +12,8 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
@@ -47,7 +48,8 @@ internal class ReadingScreenScreenModel(
     private val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     private val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
     private val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
-    private val getReadingJournalHistoryUseCase: GetReadingJournalHistoryUseCase,
+    private val observeReadingJournalHistoryUseCase: ObserveReadingJournalHistoryUseCase,
+    private val refreshReadingJournalHistoryUseCase: RefreshReadingJournalHistoryUseCase,
     appDispatchers: AppDispatchers,
     flows: List<ReadingCollector>,
 ) : ToadScreenModel<ReadingScreenUiState, ReadingScreenEvent, ReadingScreenDependencies, ReadingCollector, ReadingLocalVariables>(
@@ -76,7 +78,8 @@ internal class ReadingScreenScreenModel(
         getReadingStreakEnabledAsFlowUseCase = getReadingStreakEnabledAsFlowUseCase,
         getLastUsedProgressUnitAsFlowUseCase = getLastUsedProgressUnitAsFlowUseCase,
         setLastUsedProgressUnitUseCase = setLastUsedProgressUnitUseCase,
-        getReadingJournalHistoryUseCase = getReadingJournalHistoryUseCase,
+        observeReadingJournalHistoryUseCase = observeReadingJournalHistoryUseCase,
+        refreshReadingJournalHistoryUseCase = refreshReadingJournalHistoryUseCase,
     )
 
     init {

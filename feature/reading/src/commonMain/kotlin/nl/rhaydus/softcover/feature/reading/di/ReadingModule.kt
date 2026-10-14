@@ -64,7 +64,8 @@ val readingModule = module {
             getReadingStreakEnabledAsFlowUseCase = get(),
             getLastUsedProgressUnitAsFlowUseCase = get(),
             setLastUsedProgressUnitUseCase = get(),
-            getReadingJournalHistoryUseCase = get(),
+            observeReadingJournalHistoryUseCase = get(),
+            refreshReadingJournalHistoryUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
         )

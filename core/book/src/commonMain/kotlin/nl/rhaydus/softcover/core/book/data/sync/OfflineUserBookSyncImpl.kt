@@ -24,6 +24,7 @@ internal class OfflineUserBookSyncImpl(
         newPage: Int?,
         newSeconds: Int?,
         actionAt: String?,
+        progressHistoryId: Long?,
     ) {
         val userBook = book.userBook ?: return
         val userBookRead = book.userBookRead ?: return
@@ -41,6 +42,7 @@ internal class OfflineUserBookSyncImpl(
                 finishedAt = userBookRead.finishedAt,
                 enqueuedAt = Clock.System.now().toString(),
                 actionAt = actionAt,
+                progressHistoryId = progressHistoryId,
             ),
         )
     }

@@ -25,6 +25,7 @@ class PendingUserBookWriteMapperTest {
             reviewHasSpoilers = true,
             enqueuedAt = "2026-01-03T00:00:00Z",
             actionAt = "2026-01-04T00:00:00Z",
+            progressHistoryId = 7L,
         )
 
     private fun entity(kind: String = "UPDATE_REVIEW") = PendingUserBookWriteEntity(
@@ -42,6 +43,7 @@ class PendingUserBookWriteMapperTest {
         reviewHasSpoilers = true,
         enqueuedAt = "2026-01-03T00:00:00Z",
         actionAt = "2026-01-04T00:00:00Z",
+        progressHistoryId = 7L,
     )
 
     @Nested
@@ -71,6 +73,7 @@ class PendingUserBookWriteMapperTest {
                 reviewSlateJson = null,
                 reviewHasSpoilers = null,
                 actionAt = null,
+                progressHistoryId = null,
             )
 
             // ----- Act -----
@@ -87,6 +90,7 @@ class PendingUserBookWriteMapperTest {
                 reviewSlateJson = null,
                 reviewHasSpoilers = null,
                 actionAt = null,
+                progressHistoryId = null,
             )
         }
     }
