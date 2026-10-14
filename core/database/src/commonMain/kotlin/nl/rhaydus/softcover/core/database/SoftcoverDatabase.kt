@@ -14,9 +14,9 @@ import nl.rhaydus.softcover.core.database.dao.HighlightDao
 import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.database.dao.ProgressHistoryDao
+import nl.rhaydus.softcover.core.database.dao.PublishedDocumentDao
 import nl.rhaydus.softcover.core.database.dao.ReadingLogDao
 import nl.rhaydus.softcover.core.database.dao.ReadingSessionDao
-import nl.rhaydus.softcover.core.database.dao.RoadmapDocumentDao
 import nl.rhaydus.softcover.core.database.dao.UserTagVocabularyDao
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.database.model.BookAuthorCrossRef
@@ -35,10 +35,10 @@ import nl.rhaydus.softcover.core.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
 import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.database.model.ProgressHistoryEntity
+import nl.rhaydus.softcover.core.database.model.PublishedDocumentEntity
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
-import nl.rhaydus.softcover.core.database.model.RoadmapDocumentEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
@@ -71,13 +71,13 @@ import kotlin.coroutines.CoroutineContext
         BookTagCrossRef::class,
         ShelfManualOrderEntity::class,
         UserTagVocabularyEntity::class,
-        RoadmapDocumentEntity::class,
+        PublishedDocumentEntity::class,
         ProgressHistoryEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 51,
+    version = 52,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -99,7 +99,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
 
     abstract fun userTagVocabularyDao(): UserTagVocabularyDao
 
-    abstract fun roadmapDocumentDao(): RoadmapDocumentDao
+    abstract fun publishedDocumentDao(): PublishedDocumentDao
 
     abstract fun progressHistoryDao(): ProgressHistoryDao
 
@@ -1365,6 +1365,29 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        // The roadmap cache was a one-row table; the changelog needs a second document, so the cache is
+        // keyed by document instead. The existing roadmap row is carried over under its key.
+        private val MIGRATION_51_52 = object : Migration(51, 52) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS published_documents (
+                            `key` TEXT NOT NULL PRIMARY KEY,
+                            markdown TEXT NOT NULL,
+                            fetchedAtEpochMillis INTEGER NOT NULL
+                        )
+                    """.trimIndent(),
+                )
+                connection.execSQL(
+                    """
+                        INSERT INTO published_documents (`key`, markdown, fetchedAtEpochMillis)
+                        SELECT 'roadmap', markdown, fetchedAtEpochMillis FROM roadmap_documents
+                    """.trimIndent(),
+                )
+                connection.execSQL("DROP TABLE roadmap_documents")
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1417,6 +1440,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_48_49,
             MIGRATION_49_50,
             MIGRATION_50_51,
+            MIGRATION_51_52,
         )
     }
 }

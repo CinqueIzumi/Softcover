@@ -24,6 +24,7 @@ enum class GalleryFamily(val label: String) {
     STATE(label = "States"),
     CELEBRATION(label = "Celebrations"),
     RICHTEXT(label = "Rich text"),
+    DOCUMENT(label = "Documents"),
     PROGRESS(label = "Progress"),
     COVER(label = "Covers"),
     ROW(label = "Rows"),

@@ -278,6 +278,7 @@ Softcover is being actively redesigned. **What's coming, by version, lives in [R
 | [docs/reference/design-system.md](docs/reference/design-system.md) | Color roles, editorial typography, layout primitives, components, and patterns |
 | [docs/reference/code-style.md](docs/reference/code-style.md) | Naming, layout, and whitespace conventions |
 | [docs/rhaydus/0.3.1/](docs/rhaydus/0.3.1/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
+| [CHANGELOG.md](CHANGELOG.md) | Per-version release notes — the source for the in-app What's new page and each GitHub Release |
 | [ROADMAP.md](ROADMAP.md) | Public, user-facing roadmap — generated from the open GitHub milestones; never hand-edited |
 | [docs/working/](docs/working/) | Working notes — audits and reviews kept alongside the code (planned work lives in GitHub Issues) |
 | [CLAUDE.md](CLAUDE.md) | Guidance for Claude Code when working in this repo |

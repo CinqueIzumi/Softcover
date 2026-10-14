@@ -15,16 +15,16 @@ import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.layout.DesktopScrollPage
 import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
+import nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSaveLibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSettingsCategorySelectedAction
-import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.AboutPane
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilitySaveBar
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsCategorySidebar
+import nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
-import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
 internal actual val settingsUsesMasterDetail: Boolean = true
@@ -43,12 +43,15 @@ internal actual fun SettingsScreenLayout(
     navigateToLibraryVisibility: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
+    navigateToWhatsNew: () -> Unit,
     navigateToRoadmap: () -> Unit,
     navigateToComponentGallery: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
-    roadmapState: RoadmapUiState,
-    roadmapRunAction: (RoadmapAction) -> Unit,
+    roadmapState: DocumentPageUiState?,
+    roadmapRunAction: ((DocumentPageAction) -> Unit)?,
+    whatsNewState: DocumentPageUiState?,
+    whatsNewRunAction: ((DocumentPageAction) -> Unit)?,
     onCreateListClick: () -> Unit,
     onStartAppUpdate: () -> Unit,
     openUrl: (String) -> Unit,
@@ -122,6 +125,9 @@ internal actual fun SettingsScreenLayout(
                         sourceHeader = state.aboutSourceHeader,
                         contactHeader = state.aboutContactHeader,
                         openUrl = openUrl,
+                        onWhatsNewClick = {
+                            settingsRunAction(OnSettingsCategorySelectedAction(category = SettingsCategory.WHATS_NEW))
+                        },
                         onRoadmapClick = {
                             settingsRunAction(OnSettingsCategorySelectedAction(category = SettingsCategory.ROADMAP))
                         },
@@ -136,15 +142,30 @@ internal actual fun SettingsScreenLayout(
                     )
                 }
 
-                SettingsCategory.ROADMAP -> DesktopScrollPage(
-                    scrollState = pageScrollState,
-                    masthead = { PageMasthead(model = roadmapState.masthead) },
-                ) {
-                    RoadmapContent(
-                        state = roadmapState,
-                        runAction = roadmapRunAction,
-                        openUrl = openUrl,
-                    )
+                SettingsCategory.WHATS_NEW -> if (whatsNewState != null && whatsNewRunAction != null) {
+                    DesktopScrollPage(
+                        scrollState = pageScrollState,
+                        masthead = { PageMasthead(model = whatsNewState.masthead) },
+                    ) {
+                        DocumentPageContent(
+                            state = whatsNewState,
+                            runAction = whatsNewRunAction,
+                            openUrl = openUrl,
+                        )
+                    }
+                }
+
+                SettingsCategory.ROADMAP -> if (roadmapState != null && roadmapRunAction != null) {
+                    DesktopScrollPage(
+                        scrollState = pageScrollState,
+                        masthead = { PageMasthead(model = roadmapState.masthead) },
+                    ) {
+                        DocumentPageContent(
+                            state = roadmapState,
+                            runAction = roadmapRunAction,
+                            openUrl = openUrl,
+                        )
+                    }
                 }
             }
         }

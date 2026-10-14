@@ -57,7 +57,7 @@
 
 - `AboutContent` (mobile page, desktop fallback and pane): an unheaded italic intro, then three
   `SectionHeader` groups of `SettingsMenuRow`s: **Credits** (Hardcover.app link plus the non-affiliation
-  disclaimer in prose), **Source** (the GitHub repository and Roadmap), **Contact** (report an issue, the
+  disclaimer in prose), **Source** (the GitHub repository, What's new and Roadmap), **Contact** (report an issue, the
   developer's Discord username as `Copyable`, the Hardcover Discord invite).
 - It closes with `VersionFooter`, the app's only version line. No license text.
 

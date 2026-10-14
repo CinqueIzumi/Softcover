@@ -56,6 +56,12 @@ internal fun settingsSidebarFor(selectedCategory: SettingsCategory): SidebarUiMo
                     variant = SidebarRowVariant.Destination(selected = selectedCategory == SettingsCategory.ABOUT),
                 ),
                 SidebarRowUiModel(
+                    key = SettingsSidebarKey.Category(category = SettingsCategory.WHATS_NEW),
+                    label = "What's new",
+                    icon = SoftcoverIcon.LibraryBooks,
+                    variant = SidebarRowVariant.Destination(selected = selectedCategory == SettingsCategory.WHATS_NEW),
+                ),
+                SidebarRowUiModel(
                     key = SettingsSidebarKey.Category(category = SettingsCategory.ROADMAP),
                     label = "Roadmap",
                     icon = SoftcoverIcon.Explore,

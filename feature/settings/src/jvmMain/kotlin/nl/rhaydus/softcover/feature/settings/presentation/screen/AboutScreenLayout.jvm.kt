@@ -22,6 +22,7 @@ internal actual fun AboutScreenLayout(
     contactHeader: SectionHeaderUiModel,
     openUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    onWhatsNewClick: () -> Unit,
     onRoadmapClick: () -> Unit,
     onComponentGalleryUnlocked: () -> Unit,
 ) {
@@ -43,6 +44,7 @@ internal actual fun AboutScreenLayout(
             sourceHeader = sourceHeader,
             contactHeader = contactHeader,
             openUrl = openUrl,
+            onWhatsNewClick = onWhatsNewClick,
             onRoadmapClick = onRoadmapClick,
             onComponentGalleryUnlocked = onComponentGalleryUnlocked,
             modifier = Modifier.fillMaxWidth(),
