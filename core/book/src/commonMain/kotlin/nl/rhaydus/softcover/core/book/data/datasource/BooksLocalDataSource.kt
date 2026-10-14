@@ -17,11 +17,26 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import kotlin.time.Instant
 
 interface BooksLocalDataSource {
     val allUserBooks: Flow<List<Book>>
 
     fun observeUserBook(id: Int): Flow<Book?>
+
+    fun observeTrendingBooks(): Flow<List<Book>>
+
+    fun observeTrendingFetchedAt(): Flow<Instant?>
+
+    suspend fun getTrendingFetchedAt(): Instant?
+
+    suspend fun getExistingUserBookBookIds(ids: List<Int>): List<Int>
+
+    suspend fun replaceTrendingBooks(
+        requestedIds: List<Int>,
+        books: List<Book>,
+        fetchedAt: Instant,
+    )
 
     /**
      * Rewrite the **prefix** of the manual ordering for [status] with [prefixBookIds]
@@ -106,6 +121,40 @@ internal class BooksLocalDataSourceImpl(
             .observeBooks()
             .distinctUntilChanged()
             .toModelsReusingUnchanged()
+
+    override fun observeTrendingBooks(): Flow<List<Book>> = dao
+        .observeTrendingBooks()
+        .distinctUntilChanged()
+        .toModelsReusingUnchanged()
+
+    override fun observeTrendingFetchedAt(): Flow<Instant?> = dao
+        .observeTrendingFetchedAt()
+        .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
+        .distinctUntilChanged()
+
+    override suspend fun getTrendingFetchedAt(): Instant? = dao
+        .getTrendingFetchedAt()
+        ?.let(Instant::fromEpochMilliseconds)
+
+    override suspend fun getExistingUserBookBookIds(ids: List<Int>): List<Int> {
+        if (ids.isEmpty()) return emptyList()
+
+        return dao.getBookIdsWithUserBook(bookIds = ids)
+    }
+
+    override suspend fun replaceTrendingBooks(
+        requestedIds: List<Int>,
+        books: List<Book>,
+        fetchedAt: Instant,
+    ) {
+        deleteStaleCovers(
+            dao.replaceTrendingBooks(
+                requestedIds = requestedIds,
+                books = books,
+                fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
+            ),
+        )
+    }
 
     override fun observeUserBook(id: Int): Flow<Book?> = dao
         .observeBookById(id = id)

@@ -4,8 +4,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
@@ -39,7 +41,9 @@ internal data class ExploreDependencies(
     val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     val undoableBookRemover: UndoableBookRemover,
-    val getTrendingBooksUseCase: GetTrendingBooksUseCase,
+    val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
+    val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
+    val observeTrendingFetchedAtUseCase: ObserveTrendingFetchedAtUseCase,
     val getContinueSeriesBooksUseCase: GetContinueSeriesBooksUseCase,
     val dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
     val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,

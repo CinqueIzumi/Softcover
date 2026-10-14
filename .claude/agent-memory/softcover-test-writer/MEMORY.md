@@ -17,4 +17,5 @@
 - [Composable style resolution is untestable at unit level](feedback_composable_style_resolution_untestable.md) — no compose-ui-test dep in core:component; proxy "style resolution" coverage via enum/sealed-slot fixture coverage instead
 - [`:app` has no testDebug source set by default](feedback_app_module_testdebug_source_set.md) — add JUnit5/MockK/Kotest/coroutines-test + useJUnitPlatform() by hand; static-state ScreenModel test pattern
 - [Change-detector prune judgment](feedback_change_detector_prune_judgment.md) — filename patterns are examples not literal matches; judge each @Nested block by the rule, not the file name
+- [Room @Upsert conflict on host](feedback_room_upsert_conflict_host.md) — second upsert on same key throws SQLException in host tests; seed via other methods
 - [Hoist mockkStatic/mockkObject](feedback_mockk_static_hoisting.md) — @BeforeAll + clearAllMocks per test cut a datasource class 2.4s to 0.7s

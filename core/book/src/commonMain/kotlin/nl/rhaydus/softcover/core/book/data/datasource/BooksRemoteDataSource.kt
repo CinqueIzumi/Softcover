@@ -4,8 +4,6 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import com.apollographql.cache.normalized.FetchPolicy
 import kotlinx.coroutines.withContext
-import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
@@ -59,6 +57,8 @@ import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 interface BooksRemoteDataSource {
     suspend fun fetchBookById(id: Int): Book
@@ -74,7 +74,7 @@ interface BooksRemoteDataSource {
         forceNetwork: Boolean = false,
     ): List<Book>
 
-    suspend fun fetchTrendingBooks(): List<Book>
+    suspend fun fetchTrendingBookIds(): List<Int>
 
     suspend fun markBookAsWantToRead(
         bookId: Int,
@@ -284,28 +284,12 @@ internal class BooksRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun fetchTrendingBooks(): List<Book> {
-        val trendingIds: List<Int> = apolloClient.safeQuery(query = GetTrendingBookIdsQuery())
-            .books_trending
-            ?.ids
-            ?.mapNotNull { it }
-            ?: return emptyList()
-
-        if (trendingIds.isEmpty()) return emptyList()
-
-        val idOrdered = trendingIds.withIndex().associate { it.value to it.index }
-
-        return apolloClient
-            .safeQuery(
-                query = GetBooksByIdsQuery(ids = trendingIds),
-                fetchPolicy = FetchPolicy.CacheFirst,
-            )
-            .books
-            .mapNotNull { it.booksByIdsBookDetailFragment()?.toBook() }
-            // Restore the trending rank lost by the by-ids batch fetch; a book whose id isn't in the
-            // trending set (e.g. an Apollo canonical-merge redirect) sorts last on its null rank.
-            .sortedWith(compareBy(nullsLast()) { book -> idOrdered[book.id] })
-    }
+    override suspend fun fetchTrendingBookIds(): List<Int> = apolloClient
+        .safeQuery(query = GetTrendingBookIdsQuery())
+        .books_trending
+        ?.ids
+        ?.mapNotNull { it }
+        .orEmpty()
 
     override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
         val result = apolloClient.safeQuery(

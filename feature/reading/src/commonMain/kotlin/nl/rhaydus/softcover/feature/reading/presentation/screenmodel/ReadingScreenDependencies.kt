@@ -3,10 +3,11 @@ package nl.rhaydus.softcover.feature.reading.presentation.screenmodel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
@@ -37,7 +38,8 @@ internal data class ReadingScreenDependencies(
     val observePlanTodayDismissalsUseCase: ObservePlanTodayDismissalsUseCase,
     val dismissPlanTodayUseCase: DismissPlanTodayUseCase,
     val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
-    val getTrendingBooksUseCase: GetTrendingBooksUseCase,
+    val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
+    val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
     val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
     val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
     val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,

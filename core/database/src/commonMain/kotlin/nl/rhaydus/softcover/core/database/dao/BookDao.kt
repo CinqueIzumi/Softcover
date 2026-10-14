@@ -31,6 +31,8 @@ import nl.rhaydus.softcover.core.database.model.ListSignatureRow
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
+import nl.rhaydus.softcover.core.database.model.TrendingBookEntity
+import nl.rhaydus.softcover.core.database.model.TrendingMetaEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -56,6 +58,7 @@ interface BookDao {
                 FROM reading_journals
                 GROUP BY userBookId
             ) rj ON ub.id = rj.userBookId
+            WHERE ub.id IS NOT NULL OR b.id IN (SELECT bookId FROM list_books)
             ORDER BY
                 (rj.latestActivity IS NULL) ASC,
                 rj.latestActivity DESC,
@@ -93,6 +96,7 @@ interface BookDao {
             TagEntity::class,
             BookTagCrossRef::class,
             ShelfManualOrderEntity::class,
+            ListBookEntity::class,
         ],
     )
     fun observeBooksRaw(query: RoomRawQuery): Flow<List<BookFullEntity>>
@@ -571,6 +575,95 @@ interface BookDao {
     @Query("SELECT COUNT(*) FROM list_books WHERE bookId = :bookId")
     suspend fun countListBooksForBook(bookId: Int): Int
 
+    @Query("SELECT COUNT(*) FROM trending_books WHERE bookId = :bookId")
+    suspend fun countTrendingForBook(bookId: Int): Int
+
+    @Query("DELETE FROM trending_books")
+    suspend fun deleteAllTrendingBooks()
+
+    @Query("DELETE FROM trending_meta")
+    suspend fun deleteTrendingMeta()
+
+    @Upsert
+    suspend fun upsertTrending(rows: List<TrendingBookEntity>)
+
+    @Upsert
+    suspend fun upsertTrendingMeta(meta: TrendingMetaEntity)
+
+    @Query("SELECT fetchedAtEpochMillis FROM trending_meta WHERE id = 0")
+    fun observeTrendingFetchedAt(): Flow<Long?>
+
+    @Query("SELECT fetchedAtEpochMillis FROM trending_meta WHERE id = 0")
+    suspend fun getTrendingFetchedAt(): Long?
+
+    @Transaction
+    @Query(
+        """
+        SELECT b.*
+        FROM books b
+        INNER JOIN trending_books tb ON tb.bookId = b.id
+        ORDER BY tb.rank ASC
+        """,
+    )
+    fun observeTrendingBooks(): Flow<List<BookFullEntity>>
+
+    @Query("SELECT bookId FROM trending_books")
+    suspend fun getTrendingBookIds(): List<Int>
+
+    @Query("SELECT bookId FROM user_books WHERE bookId IN (:bookIds)")
+    suspend fun getBookIdsWithUserBook(bookIds: List<Int>): List<Int>
+
+    @Query(
+        """
+        SELECT b.id FROM books b
+        WHERE b.id IN (:bookIds)
+          AND b.id NOT IN (SELECT bookId FROM user_books)
+          AND b.id NOT IN (SELECT bookId FROM list_books)
+          AND b.id NOT IN (SELECT bookId FROM trending_books)
+        """,
+    )
+    suspend fun getUnreferencedBookIds(bookIds: List<Int>): List<Int>
+
+    /**
+     * Ranks follow [requestedIds]; books returned under an id that was not requested are appended
+     * after them in [books] order. Returns the evicted cover paths, as [cacheBooks] does.
+     */
+    @Transaction
+    suspend fun replaceTrendingBooks(
+        requestedIds: List<Int>,
+        books: List<Book>,
+        fetchedAtEpochMillis: Long,
+    ): List<String> {
+        val previousIds = getTrendingBookIds()
+        val evictedPaths = cacheBooks(books = books)
+
+        val requested = requestedIds.toSet()
+        val redirectedIds = books.map { it.id }.filterNot { it in requested }.distinct()
+        val candidateIds = requestedIds + redirectedIds
+        val storedIds = getExistingBookIds(bookIds = candidateIds).toSet()
+        val rankedIds = candidateIds.filter { it in storedIds }
+        val rankedIdSet = rankedIds.toSet()
+
+        deleteAllTrendingBooks()
+        upsertTrending(
+            rows = rankedIds.mapIndexed { rank, bookId ->
+                TrendingBookEntity(
+                    bookId = bookId,
+                    rank = rank,
+                )
+            },
+        )
+        upsertTrendingMeta(meta = TrendingMetaEntity(fetchedAtEpochMillis = fetchedAtEpochMillis))
+
+        val leftTrending = previousIds.filterNot { it in rankedIdSet }
+
+        if (leftTrending.isNotEmpty()) {
+            deleteBooksWithChildren(bookIds = getUnreferencedBookIds(bookIds = leftTrending))
+        }
+
+        return evictedPaths
+    }
+
     @Query("SELECT id FROM book_lists")
     suspend fun getAllBookListIds(): List<Int>
 
@@ -609,6 +702,7 @@ interface BookDao {
         SELECT b.id FROM books b
         WHERE b.id NOT IN (SELECT bookId FROM user_books)
           AND b.id NOT IN (SELECT bookId FROM list_books)
+          AND b.id NOT IN (SELECT bookId FROM trending_books)
         """,
     )
     suspend fun getOrphanBookIds(): List<Int>
@@ -636,6 +730,12 @@ interface BookDao {
         newId: Int,
     )
 
+    @Query("UPDATE OR REPLACE trending_books SET bookId = :newId WHERE bookId = :oldId")
+    suspend fun redirectTrendingBooksBookId(
+        oldId: Int,
+        newId: Int,
+    )
+
     @Transaction
     suspend fun redirectBookId(
         oldId: Int,
@@ -652,13 +752,21 @@ interface BookDao {
             oldId = oldId,
             newId = newId,
         )
+
+        redirectTrendingBooksBookId(
+            oldId = oldId,
+            newId = newId,
+        )
     }
 
     @Transaction
     suspend fun deleteOrphanBooks() {
-        val orphanIds = getOrphanBookIds()
+        deleteBooksWithChildren(bookIds = getOrphanBookIds())
+    }
 
-        orphanIds.forEach { bookId ->
+    @Transaction
+    suspend fun deleteBooksWithChildren(bookIds: List<Int>) {
+        bookIds.forEach { bookId ->
             clearBookAuthors(bookId)
             clearEditionAuthors(bookId)
             clearBookTags(bookId = bookId)
@@ -689,6 +797,7 @@ interface BookDao {
         deleteUserBookByUserBookId(userBookId)
 
         if (countListBooksForBook(bookId = bookId) > 0) return
+        if (countTrendingForBook(bookId = bookId) > 0) return
 
         clearBookAuthors(bookId)
         clearEditionAuthors(bookId)
@@ -720,6 +829,8 @@ interface BookDao {
         deleteAllReadingSessions()
         deleteAllReadingLogEntries()
         deleteAllProgressHistory()
+        deleteAllTrendingBooks()
+        deleteTrendingMeta()
 
         deleteAllUserBooks()
         deleteAllBookEditions()

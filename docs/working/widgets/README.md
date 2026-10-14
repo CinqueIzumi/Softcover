@@ -36,7 +36,11 @@ implementer → test-writer → styleCheck → reviewer. No commits or pushes un
 placeholder widget + receiver, wired from `:orchestration` androidMain, stability baseline, roster
 docs updated. All gates green.
 
-### S2. "User books" queries + trending in Room
+### S2. "User books" queries + trending in Room ✅
+Done as below, plus after review: cache + rank + meta in one `replaceTrendingBooks` transaction,
+cleanup scoped to ids that left trending, only library books skip re-caching, a repository mutex
+dedupes concurrent refreshes. Explore stays fully offline-gated (pre-existing; offline trending is a
+separate decision).
 - `observeBooks()` and `getSortedAllUserBooks` require the book to be in `user_books` or
   `list_books` (the invariant `getOrphanBookIds` implies), so trending never leaks into Because You
   Read, genre options, Continue Series or the sync snapshot. Test it.

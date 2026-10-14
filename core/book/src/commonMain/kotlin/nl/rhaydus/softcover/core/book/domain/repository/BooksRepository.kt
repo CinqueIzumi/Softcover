@@ -12,6 +12,8 @@ import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import kotlin.time.Duration
+import kotlin.time.Instant
 
 interface BooksRepository {
     val books: Flow<List<Book>>
@@ -91,21 +93,17 @@ interface BooksRepository {
 
     suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
 
+    /** The books trending on Hardcover this week, in rank order. */
+    fun observeTrendingBooks(): Flow<List<Book>>
+
+    /** When trending was last fetched, or `null` if a fetch has never completed. */
+    fun observeTrendingFetchedAt(): Flow<Instant?>
+
     /**
-     * Fetches the books trending on Hardcover this week - the app's single trending cadence, no
-     * monthly/other fallback. A book-discovery query (consumed by the reading and explore
-     * surfaces), so it lives with the other book queries.
-     *
-     * Served from a process-lifetime session cache: trending is editorial content that turns over at
-     * most daily, so its 2 requests (GetTrendingBookIds + GetBooksByIds) are spent once per session
-     * rather than once per mount. Both the Reading and Explore surfaces read through here, so they
-     * share the one cached result. Caching is success-only, so a failed fetch retries on the next call.
-     *
-     * [forceRefresh] bypasses that cache. Pass it only for explicit user intent (pull-to-refresh):
-     * answering one from the cache spins the indicator, changes nothing, and reports no error, which
-     * reads as a broken button. A fetch on screen mount is not user intent and must leave it `false`.
+     * Fetches trending only when the last completed fetch is older than [maxAge]. Only an explicit
+     * user refresh passes [Duration.ZERO]; a fetch on screen mount is not user intent.
      */
-    suspend fun fetchTrendingBooks(forceRefresh: Boolean = false): List<Book>
+    suspend fun refreshTrendingBooks(maxAge: Duration)
 
     suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
 

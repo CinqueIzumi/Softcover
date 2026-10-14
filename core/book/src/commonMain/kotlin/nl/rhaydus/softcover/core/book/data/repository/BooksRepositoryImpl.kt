@@ -36,11 +36,9 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
-import nl.rhaydus.softcover.core.domain.util.SessionValueCache
-import nl.rhaydus.softcover.core.domain.util.getOrPut
-import nl.rhaydus.softcover.core.domain.util.refresh
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.Instant
 
 internal class BooksRepositoryImpl(
@@ -58,15 +56,11 @@ internal class BooksRepositoryImpl(
 
     private val inflightMutex = Mutex()
 
+    private val trendingRefreshMutex = Mutex()
+
     private val stagedRemovalMutex = Mutex()
     private val stagedRemovalBookIds = mutableSetOf<Int>()
     private val inflightRefreshes = mutableMapOf<UserBookStatus?, Deferred<Unit>>()
-
-    // Owned here rather than injected, for the same reason as inflightRefreshes above: which source
-    // answers a read, and how fresh that answer has to be, is this class's decision. Constructed
-    // directly because the primitive has no dependencies of its own - a Koin binding plus a qualifier
-    // would only route a singleton into the singleton that already owns it.
-    private val trendingBooksCache = SessionValueCache<Unit, List<Book>>()
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return booksLocalDataSource.getBooksFlowByStatus(status = status)
@@ -324,10 +318,36 @@ internal class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchBooksByIds(ids = ids)
     }
 
-    override suspend fun fetchTrendingBooks(forceRefresh: Boolean): List<Book> = if (forceRefresh) {
-        trendingBooksCache.refresh { booksRemoteDataSource.fetchTrendingBooks() }
-    } else {
-        trendingBooksCache.getOrPut { booksRemoteDataSource.fetchTrendingBooks() }
+    override fun observeTrendingBooks(): Flow<List<Book>> = booksLocalDataSource.observeTrendingBooks()
+
+    override fun observeTrendingFetchedAt(): Flow<Instant?> = booksLocalDataSource.observeTrendingFetchedAt()
+
+    override suspend fun refreshTrendingBooks(maxAge: Duration) = trendingRefreshMutex.withLock {
+        val now = Clock.System.now()
+        val lastFetchedAt = booksLocalDataSource.getTrendingFetchedAt()
+
+        if (lastFetchedAt != null && maxAge > Duration.ZERO && now - lastFetchedAt < maxAge) {
+            return@withLock
+        }
+
+        val rankedIds = booksRemoteDataSource.fetchTrendingBookIds().distinct()
+
+        // Only books with a user_books row are skipped: re-caching those would re-insert their
+        // journals and could clobber pending offline state.
+        val userBookIds = booksLocalDataSource.getExistingUserBookBookIds(ids = rankedIds).toSet()
+        val idsToFetch = rankedIds.filterNot { it in userBookIds }
+
+        val fetchedBooks = if (idsToFetch.isEmpty()) {
+            emptyList()
+        } else {
+            booksRemoteDataSource.fetchBooksByIds(ids = idsToFetch).withoutStagedRemovals()
+        }
+
+        booksLocalDataSource.replaceTrendingBooks(
+            requestedIds = rankedIds,
+            books = fetchedBooks,
+            fetchedAt = now,
+        )
     }
 
     override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
