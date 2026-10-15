@@ -26,7 +26,7 @@ internal class OnMarkBookAsPausedClickAction(
 
         scope.currentLocalVariables.bookMutationJobs[book.id]?.cancel()
 
-        val editionId = scope.currentState.previewEdition?.id ?: scope.currentState.scannedEditionId
+        val editionId = scope.currentState.displayedEdition?.id
 
         if (book.userBook == null) {
             scope.setState { it.copy(pendingShelfStatus = BookStatus.Paused) }

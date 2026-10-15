@@ -9,7 +9,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -35,6 +37,14 @@ class PauseBookUseCaseTest {
             every {
                 inputBook.status
             } returns BookStatus.Reading
+
+            every {
+                inputBook.userBook
+            } returns null
+
+            every {
+                inputBook.currentEdition
+            } returns null
 
             coEvery {
                 booksRepository.markBookAsPaused(
@@ -72,6 +82,10 @@ class PauseBookUseCaseTest {
                 inputBook.status
             } returns BookStatus.None
 
+            every {
+                inputBook.userBook
+            } returns null
+
             coEvery {
                 booksRepository.markBookAsPaused(
                     book = inputBook,
@@ -99,6 +113,97 @@ class PauseBookUseCaseTest {
         }
 
         @Test
+        fun `shelved book keeps its stored edition and ignores the requested one`() = runTest {
+            // ----- Arrange -----
+            val inputBook = mockk<Book>()
+            val userBook = mockk<UserBook>()
+            val updatedBook = mockk<Book>()
+
+            every {
+                inputBook.status
+            } returns BookStatus.Reading
+
+            every {
+                inputBook.userBook
+            } returns userBook
+
+            every {
+                userBook.editionId
+            } returns 5
+
+            coEvery {
+                booksRepository.markBookAsPaused(
+                    book = inputBook,
+                    editionId = 5,
+                )
+            } returns updatedBook
+
+            coJustRun {
+                booksRepository.cacheBook(book = updatedBook)
+            }
+
+            // ----- Act -----
+            useCase(
+                book = inputBook,
+                editionId = 99,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRepository.markBookAsPaused(
+                    book = inputBook,
+                    editionId = 5,
+                )
+            }
+        }
+
+        @Test
+        fun `forwards the current edition when none is requested and the book is off the shelf`() = runTest {
+            // ----- Arrange -----
+            val inputBook = mockk<Book>()
+            val currentEdition = mockk<BookEdition>()
+            val updatedBook = mockk<Book>()
+
+            every {
+                inputBook.status
+            } returns BookStatus.None
+
+            every {
+                inputBook.userBook
+            } returns null
+
+            every {
+                inputBook.currentEdition
+            } returns currentEdition
+
+            every {
+                currentEdition.id
+            } returns 7
+
+            coEvery {
+                booksRepository.markBookAsPaused(
+                    book = inputBook,
+                    editionId = 7,
+                )
+            } returns updatedBook
+
+            coJustRun {
+                booksRepository.cacheBook(book = updatedBook)
+            }
+
+            // ----- Act -----
+            useCase(inputBook)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRepository.markBookAsPaused(
+                    book = inputBook,
+                    editionId = 7,
+                )
+            }
+        }
+
+        @Test
         fun `returns failure and skips caching when markBookAsPaused throws`() = runTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()
@@ -107,6 +212,14 @@ class PauseBookUseCaseTest {
             every {
                 inputBook.status
             } returns BookStatus.Reading
+
+            every {
+                inputBook.userBook
+            } returns null
+
+            every {
+                inputBook.currentEdition
+            } returns null
 
             coEvery {
                 booksRepository.markBookAsPaused(
@@ -133,6 +246,14 @@ class PauseBookUseCaseTest {
             every {
                 inputBook.status
             } returns BookStatus.Reading
+
+            every {
+                inputBook.userBook
+            } returns null
+
+            every {
+                inputBook.currentEdition
+            } returns null
 
             coEvery {
                 booksRepository.markBookAsPaused(

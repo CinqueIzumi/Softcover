@@ -16,7 +16,7 @@ class PauseBookUseCase(
 
         val updatedBook: Book = booksRepository.markBookAsPaused(
             book = book,
-            editionId = editionId,
+            editionId = book.statusChangeEditionId(requestedEditionId = editionId),
         )
 
         booksRepository.cacheBook(book = updatedBook)

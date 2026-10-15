@@ -30,6 +30,7 @@ internal class UserBookWriteReplay(
         PendingUserBookWriteKind.MARK_AS_READ -> {
             booksRemoteDataSource.replayMarkBookAsRead(
                 bookId = payload.bookId,
+                editionId = payload.editionId,
                 userDate = localDateOf(actionAt = payload.enqueuedAt),
                 actionAt = payload.actionAt,
             )

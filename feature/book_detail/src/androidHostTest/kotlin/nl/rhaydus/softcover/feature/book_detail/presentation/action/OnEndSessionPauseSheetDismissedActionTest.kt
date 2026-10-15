@@ -48,6 +48,10 @@ class OnEndSessionPauseSheetDismissedActionTest {
             every {
                 mock.userBook
             } returns null
+
+            every {
+                mock.currentEdition
+            } returns null
         }
         stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
