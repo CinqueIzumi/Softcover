@@ -19,6 +19,9 @@ interface BooksRepository {
     /** Emits the cached book with [id], or null while it is not cached. Re-emits only when that book changes. */
     fun observeUserBook(id: Int): Flow<Book?>
 
+    /** Emits the cached books among [ids], in no particular order; uncached ids are absent. */
+    fun observeBooksByIds(ids: List<Int>): Flow<List<Book>>
+
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
 
     /** Library-screen path: all user books sorted via SQL `ORDER BY`. */

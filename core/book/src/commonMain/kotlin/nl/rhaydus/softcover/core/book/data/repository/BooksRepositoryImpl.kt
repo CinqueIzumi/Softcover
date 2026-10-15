@@ -50,6 +50,8 @@ internal class BooksRepositoryImpl(
 
     override fun observeUserBook(id: Int): Flow<Book?> = booksLocalDataSource.observeUserBook(id = id)
 
+    override fun observeBooksByIds(ids: List<Int>): Flow<List<Book>> = booksLocalDataSource.observeBooksByIds(ids = ids)
+
     private val inflightMutex = Mutex()
 
     private val stagedRemovalMutex = Mutex()

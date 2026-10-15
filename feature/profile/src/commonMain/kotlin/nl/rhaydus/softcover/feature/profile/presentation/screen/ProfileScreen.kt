@@ -83,8 +83,8 @@ internal expect fun ProfileScreenLayout(
 )
 
 /**
- * Opens book detail for a tapped "Recently loved" card and warms the detail on finger-down. A loved
- * book has no full `Book`, so the destination is seeded from the card's id and cover URL alone.
+ * Opens book detail for a tapped "Recently loved" card and warms the detail on finger-down. A cached
+ * library book seeds the destination in full; otherwise only the card's id, title and cover URL do.
  */
 @Composable
 private fun rememberRecentlyLovedEventHandler(
@@ -96,16 +96,18 @@ private fun rememberRecentlyLovedEventHandler(
 
     return rememberPrefetchingBookCardEventHandler(
         set = state.recentlyLoved,
-    ) { event, loved ->
+    ) { event, entry ->
         if (event is BookCardEvent.Clicked) {
+            val loved = entry.loved
             val destination = ScreenDestination.BookDetail(
                 id = loved.bookId,
-                initialCover = BookInitialCover(
-                    currentEdition = null,
-                    defaultEdition = null,
-                    fallbackCoverUrl = loved.coverUrl.takeIf { it.isNotBlank() },
-                    title = loved.title,
-                ),
+                initialCover = entry.libraryBook?.let { BookInitialCover.fromBook(it) }
+                    ?: BookInitialCover(
+                        currentEdition = null,
+                        defaultEdition = null,
+                        fallbackCoverUrl = loved.coverUrl.takeIf { it.isNotBlank() },
+                        title = loved.title,
+                    ),
             )
 
             currentNavigator.push(item = appNavigator.screen(destination))
