@@ -1,0 +1,45 @@
+name: CI (PR gate)
+
+on:
+  pull_request:
+    branches: ['release/**']
+
+concurrency:
+  group: ci-fast-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Lint, test & coverage
+    runs-on: ubuntu-latest
+    env:
+      # setup-gradle falls back to the newest entry for the same OS and job key, so sharing the key
+      # with ci-full.yml's Full gate lets PR runs restore what merges save.
+      GRADLE_BUILD_ACTION_CACHE_KEY_JOB: jvm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+
+      - name: Check
+        run: ./gradlew check koverXmlReport :build-logic:test -x lint --continue --stacktrace
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: build/reports/kover/report.xml
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
