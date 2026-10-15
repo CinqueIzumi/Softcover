@@ -10,6 +10,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(project(":core:book"))
             implementation(project(":core:domain"))
             implementation(project(":core:profile"))
             implementation(project(":core:preferences"))

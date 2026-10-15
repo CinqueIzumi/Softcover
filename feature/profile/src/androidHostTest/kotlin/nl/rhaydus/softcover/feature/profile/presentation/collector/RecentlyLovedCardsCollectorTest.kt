@@ -4,13 +4,23 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
+import nl.rhaydus.softcover.core.component.cover.CoverSource
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
@@ -19,6 +29,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.state.RecentlyLovedEntry
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -28,6 +39,9 @@ class RecentlyLovedCardsCollectorTest {
     private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
     private lateinit var eventChannel: Channel<ProfileEvent>
     private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
+    private lateinit var libraryBooks: MutableStateFlow<List<Book>>
+    private lateinit var observeBooksByIdsUseCase: ObserveBooksByIdsUseCase
+    private lateinit var dependencies: ProfileDependencies
 
     @BeforeEach
     fun setUp() {
@@ -38,6 +52,66 @@ class RecentlyLovedCardsCollectorTest {
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
             eventChannel = eventChannel,
         )
+        libraryBooks = MutableStateFlow(emptyList())
+        observeBooksByIdsUseCase = mockk {
+            every {
+                this@mockk(any())
+            } returns libraryBooks
+        }
+        dependencies = mockk(relaxed = true) {
+            every {
+                observeBooksByIdsUseCase
+            } returns this@RecentlyLovedCardsCollectorTest.observeBooksByIdsUseCase
+        }
+    }
+
+    private fun libraryBook(
+        id: Int,
+        editionUrl: String? = null,
+        hasUserBook: Boolean = true,
+    ): Book {
+        val edition = mockk<BookEdition> {
+            every {
+                this@mockk.id
+            } returns 500 + id
+            every {
+                url
+            } returns editionUrl
+            every {
+                localImagePath
+            } returns null
+        }
+
+        return mockk {
+            every {
+                this@mockk.id
+            } returns id
+            every {
+                title
+            } returns "Library $id"
+            every {
+                currentEdition
+            } returns edition
+            every {
+                defaultEdition
+            } returns null
+            every {
+                coverUrl
+            } returns "https://example.com/default$id.jpg"
+            every {
+                userBook
+            } returns if (hasUserBook) mockk<UserBook>() else null
+        }
+    }
+
+    private fun coverUrlOf(key: BookCardKey): String? {
+        val card = stateFlow.value.recentlyLoved.cards.first { it.key == key }
+        val column = card.variant.shouldBeInstanceOf<BookCardVariant.Column>()
+
+        return column.cover.shouldNotBeNull().model.source
+            .shouldNotBeNull()
+            .shouldBeInstanceOf<CoverSource.Remote>()
+            .url
     }
 
     private fun lovedBooks(count: Int): List<LovedBook> = List(count) {
@@ -71,13 +145,14 @@ class RecentlyLovedCardsCollectorTest {
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
+                    dependencies = dependencies,
                 )
             }
 
             // ----- Assert -----
             stateFlow.value.recentlyLoved.cards.shouldNotBeEmpty()
             stateFlow.value.recentlyLoved.cards.forEach { it.isLoading shouldBe true }
+            verify(exactly = 0) { observeBooksByIdsUseCase(any()) }
             job.cancel()
         }
 
@@ -94,12 +169,13 @@ class RecentlyLovedCardsCollectorTest {
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
+                    dependencies = dependencies,
                 )
             }
 
             // ----- Assert -----
             stateFlow.value.recentlyLoved.cards.shouldBeEmpty()
+            verify(exactly = 0) { observeBooksByIdsUseCase(any()) }
             job.cancel()
         }
 
@@ -113,7 +189,7 @@ class RecentlyLovedCardsCollectorTest {
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
+                    dependencies = dependencies,
                 )
             }
 
@@ -134,7 +210,7 @@ class RecentlyLovedCardsCollectorTest {
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
+                    dependencies = dependencies,
                 )
             }
 
@@ -151,6 +227,8 @@ class RecentlyLovedCardsCollectorTest {
         fun `resolves each card key back to the loved book it was built from`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val books = lovedBooks(5)
+            val library = libraryBook(id = 2)
+            libraryBooks.value = listOf(library)
             stateFlow.value = ProfileUiState(readingLife = readingLife(books))
             val collector = RecentlyLovedCardsCollector()
 
@@ -158,13 +236,20 @@ class RecentlyLovedCardsCollectorTest {
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
+                    dependencies = dependencies,
                 )
             }
 
             // ----- Assert -----
             val recentlyLoved = stateFlow.value.recentlyLoved
-            recentlyLoved[BookCardKey.Book(bookId = 2)] shouldBe books[1]
+            recentlyLoved[BookCardKey.Book(bookId = 2)] shouldBe RecentlyLovedEntry(
+                loved = books[1],
+                libraryBook = library,
+            )
+            recentlyLoved[BookCardKey.Book(bookId = 1)] shouldBe RecentlyLovedEntry(
+                loved = books[0],
+                libraryBook = null,
+            )
             recentlyLoved[BookCardKey.Book(bookId = 4)].shouldBeNull()
             job.cancel()
         }
@@ -183,7 +268,7 @@ class RecentlyLovedCardsCollectorTest {
                 val job = launch {
                     collector.onLaunch(
                         scope = scope,
-                        dependencies = mockk<ProfileDependencies>(relaxed = true),
+                        dependencies = dependencies,
                     )
                 }
 
@@ -195,5 +280,160 @@ class RecentlyLovedCardsCollectorTest {
                 stateFlow.value.recentlyLoved.cards.forEach { it.isLoading shouldBe false }
                 job.cancel()
             }
+
+        @Test
+        fun `observes the library books of only the first three loved books`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(5)))
+            val collector = RecentlyLovedCardsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            verify(exactly = 1) { observeBooksByIdsUseCase(listOf(1, 2, 3)) }
+            job.cancel()
+        }
+
+        @Test
+        fun `uses the library book's picked edition cover over the remote cover`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            libraryBooks.value = listOf(
+                libraryBook(
+                    id = 1,
+                    editionUrl = "https://example.com/picked.jpg",
+                ),
+            )
+            stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(1)))
+            val collector = RecentlyLovedCardsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            coverUrlOf(BookCardKey.Book(bookId = 1)) shouldBe "https://example.com/picked.jpg"
+            job.cancel()
+        }
+
+        @Test
+        fun `falls back to the remote cover when the loved book is absent from Room`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                libraryBooks.value = emptyList()
+                stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(1)))
+                val collector = RecentlyLovedCardsCollector()
+
+                // ----- Act -----
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Assert -----
+                coverUrlOf(BookCardKey.Book(bookId = 1)) shouldBe "cover0.jpg"
+                stateFlow.value.recentlyLoved[BookCardKey.Book(bookId = 1)]
+                    .shouldNotBeNull().libraryBook.shouldBeNull()
+                job.cancel()
+            }
+
+        @Test
+        fun `falls back to the remote cover when the Room book has no user book`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                libraryBooks.value = listOf(
+                    libraryBook(
+                        id = 1,
+                        editionUrl = "https://example.com/picked.jpg",
+                        hasUserBook = false,
+                    ),
+                )
+                stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(1)))
+                val collector = RecentlyLovedCardsCollector()
+
+                // ----- Act -----
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Assert -----
+                coverUrlOf(BookCardKey.Book(bookId = 1)) shouldBe "cover0.jpg"
+                stateFlow.value.recentlyLoved[BookCardKey.Book(bookId = 1)]
+                    .shouldNotBeNull().libraryBook.shouldBeNull()
+                job.cancel()
+            }
+
+        @Test
+        fun `updates the card when Room emits a book with a changed edition`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            libraryBooks.value = listOf(
+                libraryBook(
+                    id = 1,
+                    editionUrl = "https://example.com/first.jpg",
+                ),
+            )
+            stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(1)))
+            val collector = RecentlyLovedCardsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            libraryBooks.value = listOf(
+                libraryBook(
+                    id = 1,
+                    editionUrl = "https://example.com/second.jpg",
+                ),
+            )
+
+            // ----- Assert -----
+            coverUrlOf(BookCardKey.Book(bookId = 1)) shouldBe "https://example.com/second.jpg"
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the loved order when Room returns the books in another order`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            libraryBooks.value = listOf(
+                libraryBook(id = 3),
+                libraryBook(id = 1),
+                libraryBook(id = 2),
+            )
+            stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(3)))
+            val collector = RecentlyLovedCardsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.recentlyLoved.cards.map { it.key } shouldBe listOf(
+                BookCardKey.Book(bookId = 1),
+                BookCardKey.Book(bookId = 2),
+                BookCardKey.Book(bookId = 3),
+            )
+            job.cancel()
+        }
     }
 }

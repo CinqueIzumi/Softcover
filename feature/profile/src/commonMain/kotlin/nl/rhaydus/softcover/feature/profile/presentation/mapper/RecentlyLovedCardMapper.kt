@@ -14,44 +14,51 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
 import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
-import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.uibinding.book.byline
 import nl.rhaydus.softcover.core.uibinding.book.ratingPart
+import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.state.RecentlyLovedEntry
 
-/** A "Recently loved" tile: the reader's rating, then the month it landed; a blank author drops the byline. */
-internal fun LovedBook.toRecentlyLovedCard(): BookCardUiModel = BookCardUiModel(
-    key = BookCardKey.Book(bookId = bookId),
+/**
+ * A "Recently loved" tile: the reader's rating, then the month it landed; a blank author drops the byline.
+ * The cover is the library book's when cached, so it follows the picked edition; otherwise the profile's own.
+ */
+internal fun RecentlyLovedEntry.toRecentlyLovedCard(): BookCardUiModel = BookCardUiModel(
+    key = BookCardKey.Book(bookId = loved.bookId),
     variant = BookCardVariant.Column(
-        cover = BookCardCover(
-            model = CoverUiModel(
-                source = coverUrl
-                    .takeIf { it.isNotBlank() }
-                    ?.let {
-                        CoverSource.Remote(
-                            url = it,
-                            persistEditionId = null,
-                        )
-                    },
-                coverlessTitle = title,
-                variant = CoverVariant.Raised,
-                sharedTransitionKey = bookTransitionKey(
-                    element = BookTransitionElement.Cover,
-                    bookId = bookId,
-                ),
-            ),
-        ),
+        cover = BookCardCover(model = toCoverUiModel()),
         text = BookCardContent(
-            title = title,
+            title = loved.title,
             titleTransitionKey = bookTransitionKey(
                 element = BookTransitionElement.Title,
-                bookId = bookId,
+                bookId = loved.bookId,
             ),
-            byline = byline(author = author),
+            byline = byline(author = loved.author),
             supportingLines = persistentListOf(
-                persistentListOf(ratingPart(rating = ratingStars)),
-                persistentListOf(BookCardLinePart.Text(text = monthLabel)),
+                persistentListOf(ratingPart(rating = loved.ratingStars)),
+                persistentListOf(BookCardLinePart.Text(text = loved.monthLabel)),
             ),
         ),
+    ),
+)
+
+private fun RecentlyLovedEntry.toCoverUiModel(): CoverUiModel = libraryBook?.toCoverUiModel(
+    variant = CoverVariant.Raised,
+    shareTransition = true,
+) ?: CoverUiModel(
+    source = loved.coverUrl
+        .takeIf { it.isNotBlank() }
+        ?.let {
+            CoverSource.Remote(
+                url = it,
+                persistEditionId = null,
+            )
+        },
+    coverlessTitle = loved.title,
+    variant = CoverVariant.Raised,
+    sharedTransitionKey = bookTransitionKey(
+        element = BookTransitionElement.Cover,
+        bookId = loved.bookId,
     ),
 )
 
