@@ -193,7 +193,7 @@ val bookModule = module {
     factory {
         MarkBookAsReadUseCase(
             repository = get(),
-            markReadingActivityTodayUseCase = get(),
+            markReadingActivityUseCase = get(),
         )
     }
 
@@ -204,7 +204,7 @@ val bookModule = module {
     factory {
         UpdateBookProgressUseCase(
             repository = get(),
-            markReadingActivityTodayUseCase = get(),
+            markReadingActivityUseCase = get(),
         )
     }
 
