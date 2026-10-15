@@ -11,11 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.style.TextAlign
-import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.model.ButtonStyle
+import androidx.compose.ui.text.style.TextOverflow
+import kotlin.math.roundToInt
+import nl.rhaydus.softcover.core.component.button.PillButton
+import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalSchemeBrightness
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -51,7 +53,7 @@ fun EmptyState(
 @Composable
 private fun CenteredEmptyState(
     model: EmptyStateUiModel,
-    button: EmptyStateButtonUiModel?,
+    button: PillButtonUiModel?,
     onEvent: (EmptyStateEvent) -> Unit,
     modifier: Modifier,
 ) {
@@ -66,12 +68,14 @@ private fun CenteredEmptyState(
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
                 alpha = if (LocalSchemeBrightness.current.isDark) 0.15f else 0.3f,
             ),
+            overflow = TextOverflow.Visible,
             modifier = Modifier
+                .cropToQuoteMark()
                 .quoteGlyphSway()
                 .clearAndSetSemantics {},
         )
 
-        Spacer(modifier = Modifier.height(Spacing.xs))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         SoftcoverText(
             text = model.title,
@@ -95,16 +99,9 @@ private fun CenteredEmptyState(
         button?.let {
             Spacer(modifier = Modifier.height(Spacing.xl))
 
-            RhaydusButton(
-                label = it.label,
-                style = ButtonStyle.FILLED,
-                icon = it.icon?.let { icon ->
-                    drawableIconResource(
-                        icon = icon,
-                        contentDescription = "",
-                    )
-                },
-                onClick = { onEvent(EmptyStateEvent.ButtonClicked) },
+            PillButton(
+                model = it,
+                onEvent = { onEvent(EmptyStateEvent.ButtonClicked) },
             )
         }
     }
@@ -140,3 +137,27 @@ private fun InlineEmptyState(
         }
     }
 }
+
+/**
+ * Sizes the quote glyph to its ink rather than its line box: in the display font the mark covers
+ * only the band between [QUOTE_MARK_TOP_FRACTION] and the sum of both fractions of the measured
+ * height, measured on device.
+ */
+private fun Modifier.cropToQuoteMark(): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints.copy(minHeight = 0))
+    val markTop = (placeable.height * QUOTE_MARK_TOP_FRACTION).roundToInt()
+    val markHeight = (placeable.height * QUOTE_MARK_HEIGHT_FRACTION).roundToInt()
+
+    layout(
+        width = placeable.width,
+        height = markHeight,
+    ) {
+        placeable.place(
+            x = 0,
+            y = -markTop,
+        )
+    }
+}
+
+private const val QUOTE_MARK_TOP_FRACTION = 0.185f
+private const val QUOTE_MARK_HEIGHT_FRACTION = 0.215f

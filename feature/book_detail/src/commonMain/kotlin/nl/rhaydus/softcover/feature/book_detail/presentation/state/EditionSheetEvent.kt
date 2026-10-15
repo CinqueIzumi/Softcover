@@ -8,4 +8,8 @@ internal sealed interface EditionSheetEvent {
     data object Confirmed : EditionSheetEvent
 
     data object Dismissed : EditionSheetEvent
+
+    data object LookUpByIsbnClicked : EditionSheetEvent
+
+    data object RetryClicked : EditionSheetEvent
 }

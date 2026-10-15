@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.scan.presentation.action
 
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.component.sheet.requestClose
+import nl.rhaydus.softcover.core.domain.exception.BookImportPendingException
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
@@ -19,7 +20,10 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
         if (scope.currentState.isAddingBook) return
 
         scope.setState {
-            it.copy(isAddingBook = true)
+            it.copy(
+                isAddingBook = true,
+                isImportPending = false,
+            )
         }
 
         dependencies.addBookByIsbnUseCase(isbn = isbn)
@@ -27,6 +31,7 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
                 scope.setState {
                     it.copy(
                         isAddingBook = false,
+                        isImportPending = false,
                         unknownIsbn = null,
                         unknownIsbnSheet = it.unknownIsbnSheet.requestClose(
                             pending = ResolvedScan(
@@ -43,11 +48,18 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
                     "Failed to add scanned ISBN $isbn to Hardcover",
                 )
 
+                val isPending = error is BookImportPendingException
+
                 scope.setState {
-                    it.copy(isAddingBook = false)
+                    it.copy(
+                        isAddingBook = false,
+                        isImportPending = isPending,
+                    )
                 }
 
-                scope.sendEvent(event = ScanEvent.AddBookFailedEvent())
+                if (isPending.not()) {
+                    scope.sendEvent(event = ScanEvent.AddBookFailedEvent())
+                }
             }
     }
 }

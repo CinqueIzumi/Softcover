@@ -16,9 +16,14 @@ internal class ScanScreenModel(
     private val addBookByIsbnUseCase: AddBookByIsbnUseCase,
     dispatchers: AppDispatchers,
     flows: List<ScanCollector>,
+    prefilledIsbn: String? = null,
+    startInManualEntry: Boolean = false,
 ) : ToadScreenModel<ScanUiState, ScanEvent, ScanDependencies, ScanCollector, LocalScanVariables>(
     initializers = flows,
-    initialState = ScanUiState(),
+    initialState = ScanUiState().seededWith(
+        prefilledIsbn = prefilledIsbn,
+        startInManualEntry = startInManualEntry,
+    ),
     initialLocalVariables = LocalScanVariables(),
 ) {
     override val dependencies: ScanDependencies = ScanDependencies(
@@ -34,3 +39,13 @@ internal class ScanScreenModel(
 
     fun runAction(action: ScanAction) = dispatch(action)
 }
+
+private fun ScanUiState.seededWith(
+    prefilledIsbn: String?,
+    startInManualEntry: Boolean,
+): ScanUiState = copy(
+    isbnField = isbnField.copy(
+        text = prefilledIsbn.orEmpty(),
+        autoFocus = isbnField.autoFocus || startInManualEntry,
+    ),
+)
