@@ -6,9 +6,12 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
+import androidx.glance.color.ColorProvider
 import androidx.glance.material3.ColorProviders
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverColorScheme
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
@@ -21,27 +24,42 @@ internal fun SoftcoverWidgetTheme(
 ) {
     val context = LocalContext.current
 
-    val colors = remember(themeConfiguration) {
+    val resolved = remember(themeConfiguration) {
         val selection = themeConfiguration.themeMode.toSchemeSelection()
 
+        val light = widgetColorScheme(
+            context = context,
+            themeConfiguration = themeConfiguration,
+            darkTheme = selection.dayIsDark,
+        )
+
+        val dark = widgetColorScheme(
+            context = context,
+            themeConfiguration = themeConfiguration,
+            darkTheme = selection.nightIsDark,
+        )
+
         ColorProviders(
-            light = widgetColorScheme(
-                context = context,
-                themeConfiguration = themeConfiguration,
-                darkTheme = selection.dayIsDark,
+            light = light,
+            dark = dark,
+        ) to WidgetExtraColors(
+            surfaceContainerHigh = ColorProvider(
+                day = light.surfaceContainerHigh,
+                night = dark.surfaceContainerHigh,
             ),
-            dark = widgetColorScheme(
-                context = context,
-                themeConfiguration = themeConfiguration,
-                darkTheme = selection.nightIsDark,
+            daySurfaceContainerHigh = ColorProvider(
+                day = light.surfaceContainerHigh,
+                night = Color.Transparent,
             ),
         )
     }
 
-    GlanceTheme(
-        colors = colors,
-        content = content,
-    )
+    CompositionLocalProvider(LocalWidgetExtraColors provides resolved.second) {
+        GlanceTheme(
+            colors = resolved.first,
+            content = content,
+        )
+    }
 }
 
 private fun widgetColorScheme(

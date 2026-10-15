@@ -5,12 +5,82 @@
 //   ./gradlew :widget:stabilityDump
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.SoftcoverWidgetContent(label: kotlin.String, themeConfiguration: nl.rhaydus.softcover.core.domain.model.ThemeConfiguration): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.Arrow(icon: kotlin.Int, step: kotlin.Int, description: kotlin.String, modifier: androidx.glance.GlanceModifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - icon: STABLE (primitive type)
+    - step: STABLE (primitive type)
+    - description: STABLE (String is immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.Backdrop(backdrop: android.graphics.Bitmap?, artwork: nl.rhaydus.softcover.feature.widget.currentlyreading.ReadingArtwork): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - label: STABLE (String is immutable)
-    - themeConfiguration: UNSTABLE (has mutable properties or unstable members)
+    - backdrop: UNSTABLE (has mutable properties or unstable members)
+    - artwork: UNSTABLE (has mutable properties or unstable members)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.CompactReading(content: nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - content: UNSTABLE (has mutable properties or unstable members)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetContent(model: nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetUiModel, openReading: androidx.glance.action.Action): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - model: UNSTABLE (has mutable properties or unstable members)
+    - openReading: RUNTIME (requires runtime check)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.Mask(mask: android.graphics.Bitmap, tint: androidx.glance.unit.ColorProvider, contentScale: androidx.glance.layout.ContentScale): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - mask: UNSTABLE (has mutable properties or unstable members)
+    - tint: RUNTIME (requires runtime check)
+    - contentScale: RUNTIME (requires runtime check)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.Message(headline: kotlin.String, subline: kotlin.String?): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - headline: STABLE (String is immutable)
+    - subline: STABLE (class with no mutable properties)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.NextArrow(modifier: androidx.glance.GlanceModifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.PreviousArrow(modifier: androidx.glance.GlanceModifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.ProgressBar(bars: nl.rhaydus.softcover.feature.widget.progress.WavyProgressBitmaps): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - bars: UNSTABLE (has mutable properties or unstable members)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.TallReading(content: nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - content: UNSTABLE (has mutable properties or unstable members)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.widget.theme.SoftcoverWidgetTheme(themeConfiguration: nl.rhaydus.softcover.core.domain.model.ThemeConfiguration, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit

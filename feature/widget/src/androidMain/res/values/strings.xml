@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="widget_description">Softcover</string>
-    <string name="widget_label">Softcover</string>
+    <string name="currently_reading_widget_description">The book you are reading now, with your progress and a way back to your place.</string>
+    <string name="currently_reading_between_books">Between books</string>
+    <string name="currently_reading_between_books_subline">The next one is waiting on your shelf.</string>
+    <string name="widget_sign_in">Sign in to Softcover</string>
+    <string name="currently_reading_previous_book">Previous book</string>
+    <string name="currently_reading_next_book">Next book</string>
 </resources>

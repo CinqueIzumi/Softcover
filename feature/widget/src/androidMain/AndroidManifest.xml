@@ -3,14 +3,14 @@
 
     <application>
         <receiver
-            android:name="nl.rhaydus.softcover.feature.widget.SoftcoverWidgetReceiver"
+            android:name="nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/softcover_widget_info" />
+                android:resource="@xml/currently_reading_widget_info" />
         </receiver>
     </application>
 

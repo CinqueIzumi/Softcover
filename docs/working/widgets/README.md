@@ -85,7 +85,17 @@ widget module owns its own `CoroutineWorker` (S6); `SoftcoverWorker` stays notif
 - One constructor-injected dependency bundle per widget surface (Koin verify covers it).
 - Decide the worker base (promote a generic one, or the module's own `CoroutineWorker`).
 
-### S5. Currently Reading widget
+### S5. Currently Reading widget ✅
+Done: replaces the S1 placeholder. Pure `resolveShownBookId` / `nextBookId`; models built in a
+`Flow` (cover loaded and bar rendered for the shown book only, cached per instance); cycle callback
+does its read-modify-write inside `updateAppWidgetState` and emits its `GlanceId` on
+`selectionChanges`. System widget radius on 31+ only. `CornerRadius` Dp tokens added behind
+`Corners` for Glance. Progress label is the percent, as on the Reading card.
+Design rounds with the user: portrait, cover-forward, modelled on the Reading hero
+(`FeaturedBackdropCard`). Sizes 2×2 compact and 2×3 tall (default 2×3, min 110×180); no 4×2.
+Backdrop = centre-cropped cover with a software blur (`BLUR_DP` 2, tuned lighter than the hero's 6),
+veil and no-cover wash as white alpha masks tinted by day/night providers (widget theme supplies
+`surfaceContainerHigh`). Foot row: percent + vector chevrons, centred.
 Responsive sizes, cycling `ActionCallback`s storing book id per instance, pure selection function,
 wavy-progress bitmap. UI models built in a `Flow` off-composition; `provideContent` immediately with
 a loading model. No `android:configure`.

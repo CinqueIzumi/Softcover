@@ -18,6 +18,7 @@ kotlin {
             implementation(project(":core:book"))
             implementation(project(":core:designsystem"))
             implementation(project(":core:uibinding"))
+            implementation(project(":core:presentation"))
 
             implementation(libs.rhaydus.coreCommon)
 
