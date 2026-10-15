@@ -2,12 +2,11 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import nl.rhaydus.designsystem.layout.ExpandableFlowRow
+import nl.rhaydus.designsystem.layout.FlowRowExpansion
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -28,13 +29,12 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealTagS
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 /**
- * The "Tags" section (The Book lens): the community tag block (grouped by category, top-5,
+ * The "Tags" section (The Book lens): the community tag block (grouped by category,
  * content-warning tags concealed under [nl.rhaydus.softcover.core.component.chip.ChipTone.Spoiler]
  * until [OnRevealTagSpoilerAction] reveals them in place), followed by the edition colophon line
  * (publisher · format, year · ISBN-13) — folded into one section per the spec, rather than two
  * separate strips.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun TagsSection(
     state: BookDetailUiState,
@@ -66,32 +66,60 @@ internal fun TagsSection(
             }
 
             groups.forEach { group ->
-                Spacer(modifier = Modifier.height(Spacing.md))
+                key(group.label) {
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
-                SoftcoverText(
-                    text = group.label,
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.SemiBold,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                    SoftcoverText(
+                        text = group.label,
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.SemiBold,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
 
-                Spacer(modifier = Modifier.height(Spacing.sm))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
 
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-                ) {
-                    group.chips.forEach { chip ->
-                        key(chip.key) {
+                    ExpandableFlowRow(
+                        modifier = Modifier.animateContentSize(
+                            animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                        ),
+                        collapsedLines = 2,
+                        expansion = FlowRowExpansion.Progressive(linesPerExpand = 2),
+                        collapsible = true,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        showMoreIndicator = { onExpand ->
                             Chip(
-                                model = chip,
+                                model = state.communityTagsShowMoreChip,
                                 onEvent = { event ->
                                     if (event is ChipEvent.Clicked) {
-                                        runAction(OnRevealTagSpoilerAction(key = event.key))
+                                        onExpand()
                                     }
                                 },
                             )
+                        },
+                        showLessIndicator = { onCollapse ->
+                            Chip(
+                                model = state.communityTagsShowLessChip,
+                                onEvent = { event ->
+                                    if (event is ChipEvent.Clicked) {
+                                        onCollapse()
+                                    }
+                                },
+                            )
+                        },
+                    ) {
+                        group.chips.forEach { chip ->
+                            key(chip.key) {
+                                Chip(
+                                    model = chip,
+                                    onEvent = { event ->
+                                        if (event is ChipEvent.Clicked) {
+                                            runAction(OnRevealTagSpoilerAction(key = event.key))
+                                        }
+                                    },
+                                )
+                            }
                         }
                     }
                 }
