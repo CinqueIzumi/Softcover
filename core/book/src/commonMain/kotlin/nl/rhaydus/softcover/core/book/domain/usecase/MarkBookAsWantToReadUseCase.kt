@@ -16,7 +16,7 @@ class MarkBookAsWantToReadUseCase(
 
         booksRepository.markBookAsWantToRead(
             book = book,
-            editionId = editionId,
+            editionId = book.statusChangeEditionId(requestedEditionId = editionId),
         )
 
         ShelfMutationOutcome.Applied

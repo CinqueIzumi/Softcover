@@ -82,6 +82,29 @@ class OnMarkBookAsPausedClickActionTest {
         } returns userBook
     }
 
+    private fun stubEdition(id: Int): BookEdition = mockk<BookEdition>().also { mock ->
+        every {
+            mock.id
+        } returns id
+    }
+
+    private fun stubStateBook(
+        editions: List<BookEdition>,
+        currentEdition: BookEdition?,
+    ): Book = mockk<Book>().also { mock ->
+        every {
+            mock.userBook
+        } returns null
+
+        every {
+            mock.editions
+        } returns editions
+
+        every {
+            mock.currentEdition
+        } returns currentEdition
+    }
+
     @Nested
     inner class Execute {
         @Test
@@ -322,6 +345,106 @@ class OnMarkBookAsPausedClickActionTest {
                 pauseBookUseCase(
                     book = book,
                     editionId = 55,
+                )
+            }
+        }
+
+        @Test
+        fun `sends the scanned edition id even when a preview is set`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stubStateBook(
+                    editions = listOf(stubEdition(id = 555)),
+                    currentEdition = stubEdition(id = 77),
+                ),
+                previewEdition = stubEdition(id = 55),
+                scannedEditionId = 555,
+            )
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                pauseBookUseCase(
+                    book = book,
+                    editionId = 555,
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            OnMarkBookAsPausedClickAction(book = book).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                pauseBookUseCase(
+                    book = book,
+                    editionId = 555,
+                )
+            }
+        }
+
+        @Test
+        fun `falls back to the book's current edition id when off-shelf without preview or scan`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stubStateBook(
+                    editions = emptyList(),
+                    currentEdition = stubEdition(id = 77),
+                ),
+                previewEdition = null,
+            )
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                pauseBookUseCase(
+                    book = book,
+                    editionId = 77,
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            OnMarkBookAsPausedClickAction(book = book).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                pauseBookUseCase(
+                    book = book,
+                    editionId = 77,
+                )
+            }
+        }
+
+        @Test
+        fun `forwards null as editionId when nothing resolves an edition`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            stateFlow.value = buildBookDetailUiState().copy(previewEdition = null)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                pauseBookUseCase(
+                    book = book,
+                    editionId = null,
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            OnMarkBookAsPausedClickAction(book = book).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                pauseBookUseCase(
+                    book = book,
+                    editionId = null,
                 )
             }
         }

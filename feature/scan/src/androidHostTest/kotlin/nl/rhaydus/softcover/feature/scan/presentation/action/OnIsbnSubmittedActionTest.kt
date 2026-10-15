@@ -271,7 +271,10 @@ class OnIsbnSubmittedActionTest {
             // ----- Arrange -----
             val existingSheet = UnknownIsbnSheetUiModel(
                 isbn = "9780451524935",
-                scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
+                scaffold = unknownIsbnSheetScaffoldFor(
+                isAdding = false,
+                isImportPending = false,
+            ),
             )
             val existingSession = SheetSession.Open<UnknownIsbnSheetUiModel, ResolvedScan>(model = existingSheet)
             stateFlow.value = ScanUiState(unknownIsbnSheet = existingSession)
@@ -298,5 +301,33 @@ class OnIsbnSubmittedActionTest {
 
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ScanEvent.ResolutionFailedEvent>()
         }
-    }
+    
+
+        @Test
+        fun `resets the pending flag when a new unknown isbn is requested`() = runTest {
+            // ----- Arrange -----
+            val normalizedIsbn = "9780451524935"
+            stateFlow.value = ScanUiState(isImportPending = true)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                resolveBookByIsbnUseCase(isbn = normalizedIsbn)
+            } returns Result.success(IsbnLookupResult.UnknownEdition(normalizedIsbn = normalizedIsbn))
+
+            val action = OnIsbnSubmittedAction(
+                isbn = normalizedIsbn,
+                origin = IsbnOrigin.Manual,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isImportPending shouldBe false
+            stateFlow.value.unknownIsbn shouldBe normalizedIsbn
+        }
+}
 }

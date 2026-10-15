@@ -16,6 +16,7 @@ internal actual fun ApplyPlatformThemeAppearance(themeMode: ThemeMode) {
         val overrideStyle: UIUserInterfaceStyle = when (themeMode) {
             ThemeMode.LIGHT -> UIUserInterfaceStyle.UIUserInterfaceStyleLight
             ThemeMode.DARK -> UIUserInterfaceStyle.UIUserInterfaceStyleDark
+            ThemeMode.DIM -> UIUserInterfaceStyle.UIUserInterfaceStyleDark
             ThemeMode.SYSTEM -> UIUserInterfaceStyle.UIUserInterfaceStyleUnspecified
         }
 

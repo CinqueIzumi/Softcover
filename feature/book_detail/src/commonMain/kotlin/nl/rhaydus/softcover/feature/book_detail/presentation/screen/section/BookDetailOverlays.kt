@@ -32,6 +32,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSea
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionPauseClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionPauseSheetDismissedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLookUpEditionByIsbnClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressMinutesSteppedAction
@@ -45,6 +46,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareSizeT
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareTagPickerToggledAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareTagToggledAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareVariantSelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSubmitTagDraftAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagDraftChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagEditorCategoryChangeAction
@@ -199,8 +201,8 @@ internal fun BookDetailOverlays(
         )
     }
 
-    val editionSheet = state.editionSheet
-    if (state.showEditEditionSheet && editionSheet != null) {
+    val editionSheet = state.editionSheet.modelOrNull
+    if (editionSheet != null) {
         EditionBottomSheetSelector(
             model = editionSheet,
             onEvent = { event ->
@@ -216,6 +218,10 @@ internal fun BookDetailOverlays(
                     EditionSheetEvent.Confirmed -> runAction(OnNewEditionSaveClickAction())
 
                     EditionSheetEvent.Dismissed -> runAction(OnDismissEditEditionSheetClickAction())
+
+                    EditionSheetEvent.LookUpByIsbnClicked -> runAction(OnLookUpEditionByIsbnClickAction())
+
+                    EditionSheetEvent.RetryClicked -> runAction(OnShowEditEditionSheetClickAction())
                 }
             },
         )

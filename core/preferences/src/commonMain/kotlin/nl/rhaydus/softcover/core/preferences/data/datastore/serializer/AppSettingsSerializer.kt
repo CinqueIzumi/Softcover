@@ -12,7 +12,10 @@ internal object AppSettingsSerializer : OkioSerializer<AppSettingsEntity> {
     override val defaultValue: AppSettingsEntity
         get() = AppSettingsEntity()
 
-    private val json: Json = Json { ignoreUnknownKeys = true }
+    private val json: Json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
 
     override suspend fun readFrom(source: BufferedSource): AppSettingsEntity {
         return try {

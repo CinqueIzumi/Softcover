@@ -7,6 +7,8 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UiScale
+import nl.rhaydus.softcover.core.preferences.data.datastore.serializer.LibrarySortModeMapSerializer
+import nl.rhaydus.softcover.core.preferences.data.datastore.serializer.SortDirectionMapSerializer
 
 @Serializable
 internal data class AppSettingsEntity(
@@ -16,7 +18,9 @@ internal data class AppSettingsEntity(
     val themeConfig: ThemeConfigurationEntity = ThemeConfigurationEntity(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     val libraryGridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+    @Serializable(with = LibrarySortModeMapSerializer::class)
     val librarySortModeByTab: Map<String, LibrarySortMode> = emptyMap(),
+    @Serializable(with = SortDirectionMapSerializer::class)
     val librarySortDirectionByTab: Map<String, SortDirection> = emptyMap(),
     val dismissedPlanTodayByBook: Map<Int, String> = emptyMap(),
     val enabledStatusCodes: Set<Int> = setOf(1, 3, 4, 5),

@@ -474,11 +474,12 @@ class UserBookWriteReplayTest {
     @Nested
     inner class MarkAsRead {
         @Test
-        fun `calls replayMarkBookAsRead with the local date of enqueuedAt and returns SYNCED`() = runTest {
+        fun `calls replayMarkBookAsRead with the payload edition id and the local date of enqueuedAt and returns SYNCED`() = runTest {
             // ----- Arrange -----
             val payload = pendingUserBookWrite(
                 kind = PendingUserBookWriteKind.MARK_AS_READ,
                 bookId = 300,
+                editionId = 321,
                 enqueuedAt = "2026-05-04T12:34:56Z",
                 actionAt = "2026-05-04T12:34:56Z",
             )
@@ -486,6 +487,7 @@ class UserBookWriteReplayTest {
             coJustRun {
                 booksRemoteDataSource.replayMarkBookAsRead(
                     bookId = 300,
+                    editionId = 321,
                     userDate = localDateOf(actionAt = "2026-05-04T12:34:56Z"),
                     actionAt = "2026-05-04T12:34:56Z",
                 )
@@ -499,6 +501,7 @@ class UserBookWriteReplayTest {
             coVerify(exactly = 1) {
                 booksRemoteDataSource.replayMarkBookAsRead(
                     bookId = 300,
+                    editionId = 321,
                     userDate = localDateOf(actionAt = "2026-05-04T12:34:56Z"),
                     actionAt = "2026-05-04T12:34:56Z",
                 )
@@ -513,6 +516,7 @@ class UserBookWriteReplayTest {
             coJustRun {
                 booksRemoteDataSource.replayMarkBookAsRead(
                     bookId = any(),
+                    editionId = any(),
                     userDate = any(),
                     actionAt = any(),
                 )

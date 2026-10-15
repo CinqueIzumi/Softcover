@@ -8,8 +8,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
 
 /**
- * Which of the light/dark pair each theme choice paints in its preview tile: the two explicit modes
- * paint themselves, and `SYSTEM` — which has no single colour — paints the diagonal split.
+ * How each theme choice paints its preview tile: the three explicit modes paint themselves, and
+ * `SYSTEM` — which has no single colour — paints the diagonal split.
  *
  * Feature-local by R6: the Appearance screen is the only consumer, and it is the only place that
  * knows a `SYSTEM` choice reads as "whichever your device is". It is promoted to `:core:uibinding`
@@ -18,12 +18,14 @@ import nl.rhaydus.softcover.core.domain.model.ThemeMode
 private fun ThemeMode.toTilePainting(): ThemeTilePainting = when (this) {
     ThemeMode.LIGHT -> ThemeTilePainting.LIGHT
     ThemeMode.DARK -> ThemeTilePainting.DARK
+    ThemeMode.DIM -> ThemeTilePainting.DIM
     ThemeMode.SYSTEM -> ThemeTilePainting.SPLIT
 }
 
 /**
  * One keyed tile per [ThemeMode], marking [selected] as the reader's chosen mode and building its
- * [ThemePreviewTileUiModel] from [palette] and [dynamicColor]. Invoked off the composition — in
+ * [ThemePreviewTileUiModel] from [palette] and [dynamicColor]. The `DIM` tile always carries
+ * `dynamicColor = false`, because Dim paints its own colours and ignores both. Invoked off the composition — in
  * [nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector]
  * and as [nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState]'s own
  * default — so the Appearance screen's render never calls [toTilePainting] itself, nor assembles the
@@ -41,7 +43,7 @@ internal fun themeChoicesFor(
             painting = mode.toTilePainting(),
             selected = mode == selected,
             palette = palette,
-            dynamicColor = dynamicColor,
+            dynamicColor = dynamicColor && mode != ThemeMode.DIM,
         )
     }
     .toImmutableList()

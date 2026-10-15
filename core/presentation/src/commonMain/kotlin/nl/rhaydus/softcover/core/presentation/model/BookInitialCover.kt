@@ -31,6 +31,14 @@ data class BookInitialCover(
             rating = book.rating,
         )
 
+        fun forScannedEdition(
+            book: Book,
+            editionId: Int?,
+        ): BookInitialCover = fromBook(book = book).copy(
+            currentEdition = book.editions.firstOrNull { it.id == editionId } ?: book.currentEdition,
+            scannedEditionId = editionId,
+        )
+
         fun fromEdition(edition: BookEdition): BookInitialCover = BookInitialCover(
             currentEdition = edition,
             defaultEdition = null,

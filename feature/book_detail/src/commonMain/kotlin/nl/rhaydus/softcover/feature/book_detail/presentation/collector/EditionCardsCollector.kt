@@ -30,7 +30,7 @@ internal class EditionCardsCollector : BookDetailCollector {
         scope.state
             .map {
                 EditionCardsSnapshot(
-                    editions = it.editions.filterByEditionSearch(it.editionSheet?.searchQuery.orEmpty()),
+                    editions = it.editions.filterByEditionSearch(it.editionSearchQuery),
                     fallbackEdition = it.book?.defaultEdition ?: it.initialCover?.defaultEdition,
                     selectedEditionId = it.selectedEditionId,
                     trackedEditionId = it.displayedEdition?.id,

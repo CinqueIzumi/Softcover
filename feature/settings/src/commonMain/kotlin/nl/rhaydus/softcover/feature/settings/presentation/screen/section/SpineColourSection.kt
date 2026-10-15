@@ -25,8 +25,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnColorPaletteSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.displayToggleActionFor
+import nl.rhaydus.softcover.feature.settings.presentation.model.DynamicColorSlotUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
-import nl.rhaydus.softcover.feature.settings.presentation.util.supportsDynamicColor
 
 /** The spine-colour picker wraps after three tiles, so its five sit as a 3 + 2 grid. */
 private const val PALETTE_TILES_PER_ROW = 3
@@ -41,8 +41,9 @@ private const val PALETTE_TILES_PER_ROW = 3
  * Dynamic colour is this section's tail rather than a Display switch, because it is the alternative
  * *scheme source*: while it is on it takes the whole scheme from the wallpaper and the palette steps
  * aside, so the gloss says so and picking any tile takes the page back
- * ([OnColorPaletteSelectedAction]). It stays gated on [supportsDynamicColor], so on iOS and desktop
- * the section is the tiles alone.
+ * ([OnColorPaletteSelectedAction]). The tail is [SettingsScreenUiState.dynamicColorSlot]: the switch, a
+ * gloss while Dim is the theme, or nothing on iOS and desktop. While Dim is the theme the whole section
+ * steps back: its tiles render muted and inert, as [SettingsScreenUiState.spineColourSection] says.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -88,33 +89,47 @@ internal fun SpineColourSection(
         Spacer(modifier = Modifier.height(Spacing.md))
 
         SoftcoverText(
-            text = if (state.dynamicColorToggleRow.checked) {
-                "Dynamic colour is on. Pick a spine colour to switch back."
-            } else {
-                state.paletteGloss
-            },
+            text = state.spineColourSection.gloss,
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        if (supportsDynamicColor()) {
-            Spacer(modifier = Modifier.height(Spacing.lg))
+        when (val slot = state.dynamicColorSlot) {
+            is DynamicColorSlotUiModel.Toggle -> {
+                Spacer(modifier = Modifier.height(Spacing.lg))
 
-            Divider()
+                Divider()
 
-            ToggleRow(
-                model = state.dynamicColorToggleRow,
-                onEvent = { event ->
-                    when (event) {
-                        is ToggleEvent.Toggled -> runAction(
-                            displayToggleActionFor(
-                                key = state.dynamicColorToggleRow.key,
-                                newValue = event.checked,
-                            ),
-                        )
-                    }
-                },
-            )
+                ToggleRow(
+                    model = slot.row,
+                    onEvent = { event ->
+                        when (event) {
+                            is ToggleEvent.Toggled -> runAction(
+                                displayToggleActionFor(
+                                    key = slot.row.key,
+                                    newValue = event.checked,
+                                ),
+                            )
+                        }
+                    },
+                )
+            }
+
+            is DynamicColorSlotUiModel.Gloss -> {
+                Spacer(modifier = Modifier.height(Spacing.lg))
+
+                Divider()
+
+                Spacer(modifier = Modifier.height(Spacing.md))
+
+                SoftcoverText(
+                    text = slot.text,
+                    style = MaterialTheme.editorialTypography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            DynamicColorSlotUiModel.Hidden -> Unit
         }
     }
 }

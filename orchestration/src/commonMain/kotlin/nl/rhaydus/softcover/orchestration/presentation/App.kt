@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Surface
@@ -41,9 +42,9 @@ import nl.rhaydus.softcover.core.domain.appupdate.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.cover.ProvideCoverImagePersister
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
-import nl.rhaydus.softcover.core.presentation.theme.isDark
 import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
+import nl.rhaydus.softcover.core.uibinding.theme.toSchemeBrightness
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CompleteAppUpdateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
@@ -83,10 +84,10 @@ internal fun App() {
 
     SoftcoverTheme(
         palette = spinePalette,
-        // `isDark()` stays in composition on purpose: "follow the device" resolves through
-        // `isSystemInDarkTheme()`, which only exists here. Reading a platform signal is not mapping —
-        // `component-contract.md` R9 names this as its one carve-out.
-        darkTheme = themeConfig.themeMode.isDark(),
+        // `isSystemInDarkTheme()` stays in composition on purpose: "follow the device" is a platform
+        // signal that only exists here. Reading it is not mapping — `component-contract.md` R9 names
+        // this as its one carve-out.
+        brightness = themeConfig.themeMode.toSchemeBrightness(systemInDark = isSystemInDarkTheme()),
         dynamicColor = themeConfig.useDynamicColor,
     ) {
         val haptics = LocalHaptics.current
