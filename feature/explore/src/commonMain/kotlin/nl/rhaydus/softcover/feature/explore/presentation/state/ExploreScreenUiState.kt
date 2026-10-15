@@ -43,10 +43,6 @@ internal data class ExploreScreenUiState(
     val recentSearchChips: ChipSet<String> = ChipSet(),
     val queriedBooks: ImmutableList<Book> = persistentListOf(),
     val featuredCover: CoverUiModel? = null,
-    // One map keyed by book id: an overlay carries no per-rail `sharedTransitionKey` surface, so the
-    // same book yields an identical overlay everywhere it appears. `featuredReleaseBadge` does not
-    // gate on `isUnreleased` - the featured hero is by construction the upcoming-release card, so it
-    // badges on `effectiveReleaseDate` alone.
     val unreleasedCoverOverlays: ImmutableMap<Int, CoverOverlayUiModel> = persistentMapOf(),
     val featuredReleaseBadge: BadgeUiModel? = null,
     // Loading stand-ins until the surface has loaded.
