@@ -71,6 +71,7 @@ class GetContinueSeriesBooksUseCase(
             .filter { it.positionsInSeries.isNotEmpty() }
             .filter {
                 it.userBook?.status == BookStatus.Reading ||
+                    it.userBook?.status == BookStatus.Paused ||
                     it.userBook?.status == BookStatus.Read
             }
             .mapNotNull { book -> book.bookSeries?.let { series -> book to series } }

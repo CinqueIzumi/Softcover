@@ -400,7 +400,9 @@ class MainActivityViewModelTest {
             // ----- Assert -----
             coVerify(exactly = 1) {
                 refreshLibraryUseCase(
-                    scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
+                    scope = RefreshScope.ByStatuses(
+                        statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),
+                    ),
                 )
             }
             coVerify(exactly = 0) { refreshLibraryUseCase(scope = RefreshScope.All) }

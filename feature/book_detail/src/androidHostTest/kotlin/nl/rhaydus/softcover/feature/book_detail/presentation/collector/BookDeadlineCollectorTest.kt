@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -68,6 +69,7 @@ class BookDeadlineCollectorTest {
         id: Int = 1,
         pages: Int? = 300,
         currentPage: Int? = 50,
+        paused: Boolean = false,
     ): Book {
         val edition = mockk<BookEdition> {
             every {
@@ -107,6 +109,10 @@ class BookDeadlineCollectorTest {
             every {
                 this@mockk.userBookRead
             } returns userBookRead
+
+            every {
+                this@mockk.isPaused
+            } returns paused
         }
     }
 
@@ -165,6 +171,34 @@ class BookDeadlineCollectorTest {
             ).toDeadlineRowUiModel(dateStyle = stateFlow.value.dateStyle)
             stateFlow.value.deadlineRow shouldBe expected
             stateFlow.value.deadline shouldBe deadline
+            job.cancel()
+        }
+
+        @Test
+        fun `a paused book publishes an on hold row without a badge`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = stubBook(
+                id = 1,
+                pages = 300,
+                currentPage = 0,
+                paused = true,
+            )
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
+            val collector = BookDeadlineCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            deadlineFlow.emit(buildDeadline(bookId = 1))
+
+            // ----- Assert -----
+            val row = stateFlow.value.deadlineRow.shouldNotBeNull()
+            row.badge.shouldBeNull()
+            row.goal shouldBe "On hold. Resume to get back on pace."
             job.cancel()
         }
 

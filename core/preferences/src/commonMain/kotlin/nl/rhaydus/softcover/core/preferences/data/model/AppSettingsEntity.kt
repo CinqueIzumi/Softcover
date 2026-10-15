@@ -23,7 +23,8 @@ internal data class AppSettingsEntity(
     @Serializable(with = SortDirectionMapSerializer::class)
     val librarySortDirectionByTab: Map<String, SortDirection> = emptyMap(),
     val dismissedPlanTodayByBook: Map<Int, String> = emptyMap(),
-    val enabledStatusCodes: Set<Int> = setOf(1, 3, 5),
+    val enabledStatusCodes: Set<Int> = setOf(1, 3, 4, 5),
+    val pausedShelfSeeded: Boolean = false,
     val enabledListIds: Set<Int> = emptySet(),
     val listDefaultsSeeded: Boolean = false,
     val libraryTabOrder: List<String> = emptyList(),

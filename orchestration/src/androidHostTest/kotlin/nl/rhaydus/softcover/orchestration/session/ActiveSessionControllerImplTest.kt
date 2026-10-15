@@ -8,6 +8,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -15,13 +16,14 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.common.AppDispatchers
-import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
 import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveActiveSessionUseCase
@@ -39,10 +41,10 @@ import kotlin.time.Instant
 
 class ActiveSessionControllerImplTest {
     private val sessionFlow = MutableStateFlow<ReadingSession?>(null)
-    private val booksFlow = MutableStateFlow<List<Book>>(emptyList())
+    private val bookFlow = MutableStateFlow<Book?>(null)
 
     private lateinit var observeActiveSessionUseCase: ObserveActiveSessionUseCase
-    private lateinit var getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase
+    private lateinit var observeUserBookUseCase: ObserveUserBookUseCase
     private lateinit var startReadingSessionUseCase: StartReadingSessionUseCase
     private lateinit var stopReadingSessionUseCase: StopReadingSessionUseCase
     private lateinit var pauseReadingSessionUseCase: PauseReadingSessionUseCase
@@ -63,7 +65,7 @@ class ActiveSessionControllerImplTest {
 
         return ActiveSessionControllerImpl(
             observeActiveSessionUseCase = observeActiveSessionUseCase,
-            getCurrentlyReadingBooksUseCase = getCurrentlyReadingBooksUseCase,
+            observeUserBookUseCase = observeUserBookUseCase,
             startReadingSessionUseCase = startReadingSessionUseCase,
             stopReadingSessionUseCase = stopReadingSessionUseCase,
             pauseReadingSessionUseCase = pauseReadingSessionUseCase,
@@ -97,10 +99,14 @@ class ActiveSessionControllerImplTest {
         id: Int = 42,
         currentPage: Int? = 100,
         currentSeconds: Int? = null,
+        status: BookStatus = BookStatus.Reading,
     ): Book = mockk<Book>().also { book ->
         every {
             book.id
         } returns id
+        every {
+            book.status
+        } returns status
         every {
             book.title
         } returns "Stub Book"
@@ -134,14 +140,14 @@ class ActiveSessionControllerImplTest {
     @BeforeEach
     fun setUp() {
         observeActiveSessionUseCase = mockk()
-        getCurrentlyReadingBooksUseCase = mockk()
+        observeUserBookUseCase = mockk()
 
         every {
             observeActiveSessionUseCase()
         } returns sessionFlow
         every {
-            getCurrentlyReadingBooksUseCase()
-        } returns booksFlow
+            observeUserBookUseCase(id = any())
+        } returns bookFlow
 
         startReadingSessionUseCase = mockk(relaxed = true)
         stopReadingSessionUseCase = mockk(relaxed = true)
@@ -153,17 +159,68 @@ class ActiveSessionControllerImplTest {
     @Nested
     inner class ActiveSessionFlow {
         @Test
-        fun `emits null when session bookId is not found in the books list`() = runTest {
+        fun `emits null when the book row is gone`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
-            val book = stubBook(id = 99)
 
             // ----- Act -----
-            booksFlow.value = listOf(book)
+            bookFlow.value = null
             sessionFlow.value = stubSession(bookId = 42)
 
             // ----- Assert -----
             controller.activeSession.value shouldBe null
+        }
+
+        @Test
+        fun `keeps emitting the session when the book is Paused`() = runTest {
+            // ----- Arrange -----
+            val controller = buildController(this)
+            val book = stubBook(
+                id = 42,
+                status = BookStatus.Paused,
+            )
+
+            // ----- Act -----
+            bookFlow.value = book
+            sessionFlow.value = stubSession(bookId = 42)
+
+            // ----- Assert -----
+            controller.activeSession.value.shouldNotBeNull().book shouldBe book
+        }
+
+        @Test
+        fun `keeps emitting the session when the book becomes Read`() = runTest {
+            // ----- Arrange -----
+            val controller = buildController(this)
+
+            bookFlow.value = stubBook(id = 42)
+            sessionFlow.value = stubSession(bookId = 42)
+
+            val readBook = stubBook(
+                id = 42,
+                status = BookStatus.Read,
+            )
+
+            // ----- Act -----
+            bookFlow.value = readBook
+
+            // ----- Assert -----
+            controller.activeSession.value.shouldNotBeNull().book shouldBe readBook
+        }
+
+        @Test
+        fun `observes the book of the session being active`() = runTest {
+            // ----- Arrange -----
+            val controller = buildController(this)
+
+            bookFlow.value = stubBook(id = 7)
+
+            // ----- Act -----
+            sessionFlow.value = stubSession(bookId = 7)
+
+            // ----- Assert -----
+            controller.activeSession.value.shouldNotBeNull()
+            verify { observeUserBookUseCase(id = 7) }
         }
 
         @Test
@@ -174,7 +231,7 @@ class ActiveSessionControllerImplTest {
             val session = stubSession(bookId = 42)
 
             // ----- Act -----
-            booksFlow.value = listOf(book)
+            bookFlow.value = book
             sessionFlow.value = session
 
             // ----- Assert -----
@@ -192,7 +249,7 @@ class ActiveSessionControllerImplTest {
             val controller = buildController(this)
             val book = stubBook(id = 42)
 
-            booksFlow.value = listOf(book)
+            bookFlow.value = book
             sessionFlow.value = stubSession(bookId = 42)
 
             // ----- Act -----
@@ -208,7 +265,7 @@ class ActiveSessionControllerImplTest {
             val controller = buildController(this)
 
             // ----- Act -----
-            booksFlow.value = listOf(stubBook(id = 42))
+            bookFlow.value = stubBook(id = 42)
             sessionFlow.value = stubSession(bookId = 42)
 
             // ----- Assert -----
@@ -228,7 +285,7 @@ class ActiveSessionControllerImplTest {
             )
 
             // ----- Act -----
-            booksFlow.value = listOf(stubBook(id = 42))
+            bookFlow.value = stubBook(id = 42)
             sessionFlow.value = stubSession(bookId = 42)
 
             // ----- Assert -----
@@ -250,7 +307,7 @@ class ActiveSessionControllerImplTest {
                 bookId = 42,
             )
 
-            booksFlow.value = listOf(stubBook(id = 42))
+            bookFlow.value = stubBook(id = 42)
             sessionFlow.value = session
 
             // ----- Act -----
@@ -284,7 +341,7 @@ class ActiveSessionControllerImplTest {
                 bookId = 42,
             )
 
-            booksFlow.value = listOf(stubBook(id = 42))
+            bookFlow.value = stubBook(id = 42)
             sessionFlow.value = session
 
             // ----- Act -----
@@ -311,7 +368,7 @@ class ActiveSessionControllerImplTest {
                 bookId = 42,
             )
 
-            booksFlow.value = listOf(book)
+            bookFlow.value = book
             sessionFlow.value = session
 
             // ----- Act -----
@@ -355,7 +412,7 @@ class ActiveSessionControllerImplTest {
             val book = stubBook(id = 42)
             val session = stubSession(bookId = 42)
 
-            booksFlow.value = listOf(book)
+            bookFlow.value = book
             sessionFlow.value = session
 
             // ----- Act -----
@@ -446,6 +503,36 @@ class ActiveSessionControllerImplTest {
         }
 
         @Test
+        fun `start begins the session from the given book page and seconds`() = runTest {
+            // ----- Arrange -----
+            val controller = buildController(this)
+            val book = stubBook(
+                currentPage = 55,
+                currentSeconds = 300,
+            )
+
+            coEvery {
+                startReadingSessionUseCase(
+                    any(),
+                    any(),
+                    any(),
+                )
+            } returns 1L
+
+            // ----- Act -----
+            controller.start(book)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                startReadingSessionUseCase(
+                    bookId = 42,
+                    startPage = 55,
+                    startSeconds = 300,
+                )
+            }
+        }
+
+        @Test
         fun `start emits StartFailed when the use case throws`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
@@ -509,7 +596,7 @@ class ActiveSessionControllerImplTest {
                 controller = controller,
             )
 
-            booksFlow.value = listOf(stubBook(id = 42))
+            bookFlow.value = stubBook(id = 42)
             sessionFlow.value = stubSession(
                 id = 3L,
                 bookId = 42,
@@ -531,7 +618,7 @@ class ActiveSessionControllerImplTest {
                 controller = controller,
             )
 
-            booksFlow.value = listOf(stubBook(id = 42))
+            bookFlow.value = stubBook(id = 42)
             sessionFlow.value = stubSession(
                 id = 3L,
                 bookId = 42,

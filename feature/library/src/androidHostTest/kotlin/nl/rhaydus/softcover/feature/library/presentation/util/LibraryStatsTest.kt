@@ -8,10 +8,26 @@ import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import java.util.TimeZone
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryStatsTest {
+    private lateinit var originalZone: TimeZone
+
+    @BeforeEach
+    fun setUp() {
+        originalZone = TimeZone.getDefault()
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+    }
+
+    @AfterEach
+    fun tearDown() {
+        TimeZone.setDefault(originalZone)
+    }
+
     // region Fixtures
     private fun buildEdition(
         id: Int = 1,
@@ -322,6 +338,68 @@ class LibraryStatsTest {
 
             // ----- Assert -----
             result shouldBe 2021
+        }
+
+        @Test
+        fun `a journal at UTC year-end evening counts toward the next year in a zone ahead of UTC`() {
+            // ----- Arrange -----
+            TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"))
+            val journals = listOf(buildFinishedJournal("2025-12-31T23:30:00.000000"))
+            val book = buildBook(userBook = buildUserBook(journals = journals))
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2026
+        }
+
+        @Test
+        fun `a journal at UTC new-year morning counts toward the previous year in a zone behind UTC`() {
+            // ----- Arrange -----
+            TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Pago_Pago"))
+            val journals = listOf(buildFinishedJournal("2026-01-01T05:00:00.000000"))
+            val book = buildBook(userBook = buildUserBook(journals = journals))
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2025
+        }
+
+        @Test
+        fun `createdAt at UTC year-end evening falls back to the next local year`() {
+            // ----- Arrange -----
+            TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"))
+            val book = buildBook(
+                userBook = buildUserBook(
+                    journals = emptyList(),
+                    createdAt = "2025-12-31T23:30:00.000000",
+                ),
+            )
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2026
+        }
+
+        @Test
+        fun `finishedAt is a plain date and is not shifted by the device zone`() {
+            // ----- Arrange -----
+            TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Pago_Pago"))
+            val book = buildBook(
+                userBook = buildUserBook(),
+                userBookRead = buildUserBookRead(finishedAt = "2026-01-01"),
+            )
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2026
         }
 
         @Test

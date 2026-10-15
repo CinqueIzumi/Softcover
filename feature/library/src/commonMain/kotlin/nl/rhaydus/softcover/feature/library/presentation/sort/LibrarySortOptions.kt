@@ -48,7 +48,7 @@ internal fun librarySortOptions(
     }
 
     val books = state.booksByTab[tab.id].orEmpty()
-    val hasInProgress = books.any { it.status == BookStatus.Reading }
+    val hasInProgress = books.any { it.status == BookStatus.Reading || it.status == BookStatus.Paused }
     val hasFinished = books.any { it.status == BookStatus.Read }
     val hasDeadlines = books.any { it.id in state.deadlines }
 

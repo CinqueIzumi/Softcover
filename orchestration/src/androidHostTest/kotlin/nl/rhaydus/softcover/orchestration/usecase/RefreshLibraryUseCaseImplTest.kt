@@ -265,18 +265,18 @@ class RefreshLibraryUseCaseImplTest {
     }
 
     @Nested
-    inner class ByStatusScope {
+    inner class ByStatusesScope {
         @Test
         fun `calls refreshUserBooks with the given statusFilter and never touches lists`() = runTest {
             // ----- Arrange -----
-            val status = UserBookStatus.WANT_TO_READ
+            val statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED)
 
             coEvery {
                 getUserIdUseCase()
             } returns Result.success(55)
 
             // ----- Act -----
-            val result = useCase(scope = RefreshScope.ByStatus(status = status))
+            val result = useCase(scope = RefreshScope.ByStatuses(statuses = statuses))
 
             // ----- Assert -----
             result.isSuccess shouldBe true
@@ -284,7 +284,7 @@ class RefreshLibraryUseCaseImplTest {
             coVerify {
                 booksRepository.refreshUserBooks(
                     userId = 55,
-                    statusFilter = status,
+                    statusFilter = statuses,
                 )
             }
 

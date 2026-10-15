@@ -5,9 +5,7 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.cache.normalized.FetchPolicy
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
@@ -25,12 +23,10 @@ import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.GetUserBooksQuery.Data.Me.User_book.Companion.userBookFragment
+import nl.rhaydus.softcover.InsertUserBookWithStatusMutation
+import nl.rhaydus.softcover.InsertUserBookWithStatusMutation.Data.Insert_user_book.User_book.Companion.userBookFragment as insertUserBookWithStatusFragment
 import nl.rhaydus.softcover.MarkBookAsReadMutation
 import nl.rhaydus.softcover.MarkBookAsReadMutation.Data.Insert_user_book.User_book.Companion.userBookFragment
-import nl.rhaydus.softcover.MarkBookAsReadingMutation
-import nl.rhaydus.softcover.MarkBookAsReadingMutation.Data.Update_user_book.User_book.Companion.userBookFragment
-import nl.rhaydus.softcover.MarkBookAsReadingViaInsertMutation
-import nl.rhaydus.softcover.MarkBookAsReadingViaInsertMutation.Data.Insert_user_book.User_book.Companion.userBookFragment as markBookAsReadingInsertUserBookFragment
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation.Data.Insert_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.RemoveUserBookMutation
@@ -42,6 +38,8 @@ import nl.rhaydus.softcover.UpdateUserBookRatingMutation
 import nl.rhaydus.softcover.UpdateUserBookRatingMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookRatingUserBookFragment
 import nl.rhaydus.softcover.UpdateUserBookReviewMutation
 import nl.rhaydus.softcover.UpdateUserBookReviewMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookReviewUserBookFragment
+import nl.rhaydus.softcover.UpdateUserBookStatusMutation
+import nl.rhaydus.softcover.UpdateUserBookStatusMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
@@ -49,11 +47,13 @@ import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.database.mapper.reviewSlateFromDocument
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.domain.util.localDateOf
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.type.DatesReadInput
@@ -82,6 +82,11 @@ interface BooksRemoteDataSource {
     ): Book
 
     suspend fun markBookAsReading(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
+
+    suspend fun markBookAsPaused(
         book: Book,
         editionId: Int? = null,
     ): Book
@@ -149,6 +154,12 @@ interface BooksRemoteDataSource {
         editionId: Int?,
         userDate: String,
         actionAt: String? = null,
+    )
+
+    suspend fun replayUpdateUserBookStatus(
+        userBookId: Int,
+        statusCode: Int,
+        userDate: String,
     )
 
     suspend fun replayUpdateBookRating(
@@ -377,15 +388,47 @@ internal class BooksRemoteDataSourceImpl(
     override suspend fun markBookAsReading(
         book: Book,
         editionId: Int?,
+    ): Book = setStatusOrCreate(
+        book = book,
+        status = UserBookStatus.CURRENTLY_READING,
+        editionId = editionId,
+    )
+
+    override suspend fun markBookAsPaused(
+        book: Book,
+        editionId: Int?,
+    ): Book = setStatusOrCreate(
+        book = book,
+        status = UserBookStatus.PAUSED,
+        editionId = editionId,
+    )
+
+    private suspend fun setStatusOrCreate(
+        book: Book,
+        status: UserBookStatus,
+        editionId: Int?,
     ): Book {
-        // No user_book yet → create one directly on Currently Reading via `insert_user_book`
-        // (mirroring the want-to-read / read create paths), so a not-yet-shelved book can start
-        // reading in one step. Only the update path needs an existing user_book id.
-        val userBook = book.userBook
-            ?: return createUserBookAsReading(
+        if (book.userBook == null) {
+            return createUserBookWithStatus(
                 book = book,
+                status = status,
                 editionId = editionId,
             )
+        }
+
+        return updateUserBookStatus(
+            book = book,
+            status = status,
+            editionId = editionId,
+        )
+    }
+
+    private suspend fun updateUserBookStatus(
+        book: Book,
+        status: UserBookStatus,
+        editionId: Int?,
+    ): Book {
+        val userBook = book.userBook ?: throw Exception("User did not have a user book")
 
         val currentDate = Clock.System
             .todayIn(TimeZone.currentSystemDefault())
@@ -394,7 +437,7 @@ internal class BooksRemoteDataSourceImpl(
         val input = UserBookUpdateInput(
             edition_id = Optional.presentIfNotNull(editionId),
             review_has_spoilers = Optional.Present(userBook.reviewHasSpoilers),
-            status_id = Optional.present(UserBookStatus.CURRENTLY_READING.code),
+            status_id = Optional.present(status.code),
             last_read_date = Optional.Present(userBook.lastReadDate),
             rating = Optional.Present(userBook.rating),
             privacy_setting_id = Optional.Present(PrivacySetting.PUBLIC.code),
@@ -406,7 +449,7 @@ internal class BooksRemoteDataSourceImpl(
 
         return apolloClient
             .safeMutation(
-                mutation = MarkBookAsReadingMutation(
+                mutation = UpdateUserBookStatusMutation(
                     id = userBook.id,
                     `object` = input,
                 ),
@@ -417,8 +460,9 @@ internal class BooksRemoteDataSourceImpl(
             ?.toBook() ?: throw Exception("Book could not be mapped")
     }
 
-    private suspend fun createUserBookAsReading(
+    private suspend fun createUserBookWithStatus(
         book: Book,
+        status: UserBookStatus,
         editionId: Int?,
     ): Book {
         val currentDate = Clock.System
@@ -428,18 +472,18 @@ internal class BooksRemoteDataSourceImpl(
         val dataObject = UserBookCreateInput(
             book_id = book.id,
             edition_id = Optional.presentIfNotNull(editionId),
-            status_id = Optional.present(UserBookStatus.CURRENTLY_READING.code),
+            status_id = Optional.present(status.code),
             user_date = Optional.present(currentDate),
             privacy_setting_id = Optional.present(PrivacySetting.PUBLIC.code),
         )
 
         return apolloClient
             .safeMutation(
-                mutation = MarkBookAsReadingViaInsertMutation(userBookCreateInput = dataObject),
+                mutation = InsertUserBookWithStatusMutation(userBookCreateInput = dataObject),
             )
             .insert_user_book
             ?.user_book
-            ?.markBookAsReadingInsertUserBookFragment()
+            ?.insertUserBookWithStatusFragment()
             ?.toBook() ?: throw Exception("Book could not be mapped")
     }
 
@@ -643,7 +687,10 @@ internal class BooksRemoteDataSourceImpl(
                 rating = Optional.Present(userBook.rating),
                 referrer_user_id = Optional.Present(userBook.referrerUserId),
                 review_has_spoilers = Optional.Present(userBook.reviewHasSpoilers),
-                status_id = Optional.present(userBook.status.code),
+                status_id = when (userBook.status) {
+                    BookStatus.None -> Optional.Absent
+                    else -> Optional.present(userBook.status.code)
+                },
                 reviewed_at = Optional.Present(userBook.reviewedAt),
             ),
         )
@@ -711,8 +758,23 @@ internal class BooksRemoteDataSourceImpl(
         apolloClient.safeMutation(mutation = MarkBookAsReadMutation(userBookCreateInput = dataObject))
     }
 
-    private fun localDateOf(actionAt: String): String =
-        Instant.parse(actionAt).toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+    override suspend fun replayUpdateUserBookStatus(
+        userBookId: Int,
+        statusCode: Int,
+        userDate: String,
+    ) {
+        val input = UserBookUpdateInput(
+            status_id = Optional.present(statusCode),
+            user_date = Optional.present(userDate),
+        )
+
+        apolloClient.safeMutation(
+            mutation = UpdateUserBookStatusMutation(
+                id = userBookId,
+                `object` = input,
+            ),
+        )
+    }
 
     override suspend fun replayUpdateBookRating(
         userBookId: Int,

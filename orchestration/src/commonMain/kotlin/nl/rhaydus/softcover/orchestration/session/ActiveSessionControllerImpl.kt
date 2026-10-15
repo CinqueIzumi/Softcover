@@ -1,17 +1,20 @@
 package nl.rhaydus.softcover.orchestration.session
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -28,7 +31,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 internal class ActiveSessionControllerImpl(
     private val observeActiveSessionUseCase: ObserveActiveSessionUseCase,
-    private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
+    private val observeUserBookUseCase: ObserveUserBookUseCase,
     private val startReadingSessionUseCase: StartReadingSessionUseCase,
     private val stopReadingSessionUseCase: StopReadingSessionUseCase,
     private val pauseReadingSessionUseCase: PauseReadingSessionUseCase,
@@ -38,29 +41,30 @@ internal class ActiveSessionControllerImpl(
     private val appDispatchers: AppDispatchers,
     private val readingSessionLauncher: ReadingSessionLauncher,
 ) : ActiveSessionController {
+    @OptIn(ExperimentalCoroutinesApi::class)
     override val activeSession: StateFlow<ActiveSession?> =
-        combine(
-            observeActiveSessionUseCase(),
-            getCurrentlyReadingBooksUseCase(),
-        ) { session, books ->
-            session ?: return@combine null
+        observeActiveSessionUseCase()
+            .flatMapLatest { session ->
+                if (session == null) return@flatMapLatest flowOf(null)
 
-            books.firstOrNull { it.id == session.bookId }
-                ?.let { book ->
-                    ActiveSession(
-                        session = session,
-                        book = book,
-                        ui = toActiveSessionUiModel(
+                observeUserBookUseCase(id = session.bookId).map { book ->
+                    book?.let {
+                        ActiveSession(
                             session = session,
                             book = book,
-                        ),
-                    )
+                            ui = toActiveSessionUiModel(
+                                session = session,
+                                book = book,
+                            ),
+                        )
+                    }
                 }
-        }.stateIn(
-            scope = applicationScope.scope,
-            started = SharingStarted.Eagerly,
-            initialValue = null,
-        )
+            }
+            .stateIn(
+                scope = applicationScope.scope,
+                started = SharingStarted.Eagerly,
+                initialValue = null,
+            )
 
     private val _pendingFocusMode = MutableStateFlow(false)
 

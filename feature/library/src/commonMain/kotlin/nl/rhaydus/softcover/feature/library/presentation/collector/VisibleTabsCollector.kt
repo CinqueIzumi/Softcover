@@ -15,6 +15,7 @@ import nl.rhaydus.toad.ActionScope
 
 private val statusOrder: List<UserBookStatus> = listOf(
     UserBookStatus.CURRENTLY_READING,
+    UserBookStatus.PAUSED,
     UserBookStatus.WANT_TO_READ,
     UserBookStatus.READ,
     UserBookStatus.DID_NOT_FINISH,

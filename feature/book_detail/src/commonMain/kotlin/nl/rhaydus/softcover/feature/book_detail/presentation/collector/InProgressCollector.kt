@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toInProgress
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toInProgressSectionHeader
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -23,7 +24,13 @@ internal class InProgressCollector : BookDetailCollector {
             .map { it.book }
             .distinctUntilChanged()
             .collectLatest { book ->
-                scope.setState { it.copy(inProgress = book?.toInProgress()) }
+                scope.setState {
+                    it.copy(
+                        inProgress = book?.toInProgress(),
+                        inProgressSectionHeader = book?.toInProgressSectionHeader()
+                            ?: it.inProgressSectionHeader,
+                    )
+                }
             }
     }
 }

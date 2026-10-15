@@ -92,7 +92,7 @@ internal val orchestrationModule = module {
     single<ActiveSessionController> {
         ActiveSessionControllerImpl(
             observeActiveSessionUseCase = get(),
-            getCurrentlyReadingBooksUseCase = get(),
+            observeUserBookUseCase = get(),
             startReadingSessionUseCase = get(),
             stopReadingSessionUseCase = get(),
             pauseReadingSessionUseCase = get(),

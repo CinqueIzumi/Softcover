@@ -31,7 +31,6 @@ import nl.rhaydus.softcover.core.component.reorder.reorderLift
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
@@ -300,7 +299,8 @@ internal fun BookList(
                     emptyList()
                 } else {
                     libraryBookContextMenu(
-                        isRead = cardSet[card.key]?.status == BookStatus.Read,
+                        isRead = tabCards.menuByBookId[bookId]?.isRead == true,
+                        isPaused = tabCards.menuByBookId[bookId]?.isPaused == true,
                         selectionMode = selectionMode,
                         isSelected = isSelected,
                         onOpen = { cardSet[card.key]?.let(onBookClick) },
@@ -319,6 +319,14 @@ internal fun BookList(
                                 OnBulkMoveShelfAction(
                                     status = UserBookStatus.READ,
                                     explicitBookIds = targetIds,
+                                ),
+                            )
+                        },
+                        onResumeReading = {
+                            runAction(
+                                OnBulkMoveShelfAction(
+                                    status = UserBookStatus.CURRENTLY_READING,
+                                    explicitBookIds = setOf(bookId),
                                 ),
                             )
                         },
@@ -382,17 +390,20 @@ internal fun BookList(
 /**
  * The desktop right-click menu for a book cover/row. Offers Open + the selection entry point
  * (Select, or Add/Remove-from-selection while a selection is active) plus the per-book operations
- * that reuse the bulk pipeline on a single book (Mark as read — hidden when already Read — Add to
- * list, Remove). Empty on touch (the caller passes an empty list outside desktop / in rearrange mode).
+ * that reuse the bulk pipeline on a single book (Mark as read — hidden when already Read — Resume
+ * reading — only on a Paused book — Add to list, Remove). Empty on touch (the caller passes an empty
+ * list outside desktop / in rearrange mode).
  */
 private fun libraryBookContextMenu(
     isRead: Boolean,
+    isPaused: Boolean,
     selectionMode: Boolean,
     isSelected: Boolean,
     onOpen: () -> Unit,
     onSelect: () -> Unit,
     onToggleSelection: () -> Unit,
     onMarkAsRead: () -> Unit,
+    onResumeReading: () -> Unit,
     onAddToList: () -> Unit,
     onRemove: () -> Unit,
 ): List<DesktopContextMenuItem> = buildList {
@@ -426,6 +437,15 @@ private fun libraryBookContextMenu(
             DesktopContextMenuItem(
                 label = "Mark as read",
                 onClick = onMarkAsRead,
+            ),
+        )
+    }
+
+    if (isPaused) {
+        add(
+            DesktopContextMenuItem(
+                label = "Resume reading",
+                onClick = onResumeReading,
             ),
         )
     }

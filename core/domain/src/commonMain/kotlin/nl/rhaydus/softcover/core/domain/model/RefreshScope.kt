@@ -4,7 +4,7 @@ sealed interface RefreshScope {
 
     data object All : RefreshScope
 
-    data class ByStatus(val status: UserBookStatus) : RefreshScope
+    data class ByStatuses(val statuses: Set<UserBookStatus>) : RefreshScope
 
     data class ByList(val listId: Int) : RefreshScope
 }

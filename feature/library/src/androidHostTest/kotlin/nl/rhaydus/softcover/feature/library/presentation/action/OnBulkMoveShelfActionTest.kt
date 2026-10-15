@@ -19,6 +19,7 @@ import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -37,6 +38,7 @@ class OnBulkMoveShelfActionTest {
     private lateinit var markBookAsReadUseCase: MarkBookAsReadUseCase
     private lateinit var markBookAsReadingUseCase: MarkBookAsReadingUseCase
     private lateinit var markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase
+    private lateinit var pauseBookUseCase: PauseBookUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var eventChannel: Channel<LibraryEvent>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -48,6 +50,7 @@ class OnBulkMoveShelfActionTest {
         markBookAsReadUseCase = mockk(relaxed = true)
         markBookAsReadingUseCase = mockk(relaxed = true)
         markBookAsWantToReadUseCase = mockk(relaxed = true)
+        pauseBookUseCase = mockk(relaxed = true)
         eventChannel = Channel(Channel.BUFFERED)
         stateFlow = MutableStateFlow(LibraryUiState())
         scope = ActionScope(
@@ -96,6 +99,9 @@ class OnBulkMoveShelfActionTest {
             every {
                 mock.markBookAsWantToReadUseCase
             } returns markBookAsWantToReadUseCase
+            every {
+                mock.pauseBookUseCase
+            } returns pauseBookUseCase
         }
 
     @Nested
@@ -213,6 +219,112 @@ class OnBulkMoveShelfActionTest {
             coVerify(exactly = 1) { markBookAsWantToReadUseCase(book = book) }
             coVerify(exactly = 0) { markBookAsReadUseCase(book = any()) }
             coVerify(exactly = 0) { markBookAsReadingUseCase(book = any()) }
+        }
+
+        @Test
+        fun `PAUSED routes to the pause use case`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(book)),
+            )
+
+            coEvery {
+                pauseBookUseCase(book = book)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(status = UserBookStatus.PAUSED).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { pauseBookUseCase(book = book) }
+            coVerify(exactly = 0) { markBookAsReadingUseCase(book = any()) }
+            stateFlow.value.endSessionPauseBookIds shouldBe emptySet()
+        }
+
+        @Test
+        fun `PAUSED with the open session's book asks for confirmation instead of pausing`() = runTest {
+            // ----- Arrange -----
+            val sessionBook = buildBook(id = 1)
+            val otherBook = buildBook(id = 2)
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = persistentSetOf(1, 2),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(sessionBook, otherBook)),
+                activeSessionBookId = 1,
+                isBulkMoveMenuExpanded = true,
+            )
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(status = UserBookStatus.PAUSED).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) { pauseBookUseCase(book = any()) }
+            stateFlow.value.endSessionPauseBookIds shouldBe setOf(1, 2)
+            stateFlow.value.isBulkMoveMenuExpanded shouldBe false
+            stateFlow.value.bulkActionInProgress shouldBe false
+            stateFlow.value.selectionMode shouldBe true
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `PAUSED with a confirmed session pause goes straight to the pause use case`() = runTest {
+            // ----- Arrange -----
+            val sessionBook = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                booksByTab = persistentMapOf(tabKey to persistentListOf(sessionBook)),
+                activeSessionBookId = 1,
+            )
+
+            coEvery {
+                pauseBookUseCase(book = sessionBook)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(
+                status = UserBookStatus.PAUSED,
+                explicitBookIds = setOf(1),
+                sessionPauseConfirmed = true,
+            ).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { pauseBookUseCase(book = sessionBook) }
+            stateFlow.value.endSessionPauseBookIds shouldBe emptySet()
+        }
+
+        @Test
+        fun `moving the session's book to a status other than PAUSED does not ask for confirmation`() = runTest {
+            // ----- Arrange -----
+            val sessionBook = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = persistentSetOf(1),
+                booksByTab = persistentMapOf(tabKey to persistentListOf(sessionBook)),
+                activeSessionBookId = 1,
+            )
+
+            coEvery {
+                markBookAsReadUseCase(book = sessionBook)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(status = UserBookStatus.READ).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { markBookAsReadUseCase(book = sessionBook) }
+            stateFlow.value.endSessionPauseBookIds shouldBe emptySet()
         }
 
         @Test

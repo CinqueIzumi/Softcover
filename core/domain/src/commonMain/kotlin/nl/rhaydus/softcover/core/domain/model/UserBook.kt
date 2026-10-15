@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.domain.model
 
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
+import nl.rhaydus.softcover.core.domain.util.utcJournalTimeToLocalDate
 
 data class UserBook(
     val id: Int,
@@ -57,7 +57,7 @@ data class UserBook(
             .firstOrNull { it.event == type.eventName }
             ?.updatedAt ?: return null
 
-        val date = LocalDateTime.parse(mostRecentUpdatedDate).date
+        val date = utcJournalTimeToLocalDate(mostRecentUpdatedDate) ?: return null
 
         return style.formatter.format(date)
     }

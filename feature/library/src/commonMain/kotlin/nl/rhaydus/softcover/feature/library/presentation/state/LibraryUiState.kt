@@ -32,6 +32,7 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
+import nl.rhaydus.softcover.core.uibinding.session.ConfirmedPause
 import nl.rhaydus.softcover.feature.library.presentation.collector.MastheadSubtitleStandIn
 import nl.rhaydus.softcover.feature.library.presentation.collector.emptyStatesFor
 import nl.rhaydus.softcover.feature.library.presentation.collector.shelfSidebarFor
@@ -247,6 +248,13 @@ internal data class LibraryUiState(
     val bulkRemoveSheet: SheetSession<SheetScaffoldUiModel, Nothing> = SheetSession.Closed,
 
     val isBulkRemoveSheetRequested: Boolean = false,
+
+    val activeSessionBookId: Int? = null,
+
+    /** The books a bulk "Move to Paused" wants to pause while their session is running; non-empty requests the confirm. */
+    val endSessionPauseBookIds: ImmutableSet<Int> = persistentSetOf(),
+
+    val endSessionPauseSheet: SheetSession<SheetScaffoldUiModel, ConfirmedPause> = SheetSession.Closed,
 
     /**
      * The user's full set of custom lists (unfiltered by the enabled-tabs setting), populated by

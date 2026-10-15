@@ -143,6 +143,10 @@ class BookCardModelsCollectorTest {
         } returns status
 
         every {
+            book.isPaused
+        } returns (status == BookStatus.Paused)
+
+        every {
             book.seriesText
         } returns seriesText
 
@@ -1603,6 +1607,66 @@ class BookCardModelsCollectorTest {
             // ----- Assert -----
             val tabCards = stateFlow.value.editionCardsByTab.getValue(listTab.id)
             tabCards.set.payloadByKey.getValue(tabCards.set.cards.cardWithId(7).key) shouldBeSameInstanceAs edition
+            job.cancel()
+        }
+    }
+
+    @Nested
+    inner class BookMenus {
+        @Test
+        fun `a paused book is flagged for the resume reading menu item`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+            val paused = stubBook(
+                id = 1,
+                status = BookStatus.Paused,
+            )
+
+            // ----- Act -----
+            stateFlow.value = bookState(books = listOf(paused))
+
+            // ----- Assert -----
+            val menu = stateFlow.value.bookCardsByTab.getValue("all").menuByBookId.getValue(1)
+            menu.isPaused shouldBe true
+            menu.isRead shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `a read book is flagged as read and not as paused`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+            val read = stubBook(
+                id = 2,
+                status = BookStatus.Read,
+            )
+
+            // ----- Act -----
+            stateFlow.value = bookState(books = listOf(read))
+
+            // ----- Assert -----
+            val menu = stateFlow.value.bookCardsByTab.getValue("all").menuByBookId.getValue(2)
+            menu.isRead shouldBe true
+            menu.isPaused shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `a currently reading book is flagged as neither read nor paused`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+            val reading = stubBook(
+                id = 3,
+                status = BookStatus.Reading,
+            )
+
+            // ----- Act -----
+            stateFlow.value = bookState(books = listOf(reading))
+
+            // ----- Assert -----
+            val menu = stateFlow.value.bookCardsByTab.getValue("all").menuByBookId.getValue(3)
+            menu.isRead shouldBe false
+            menu.isPaused shouldBe false
             job.cancel()
         }
     }

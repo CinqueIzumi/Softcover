@@ -3,9 +3,11 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import nl.rhaydus.common.secondsToHm
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
 import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
@@ -21,7 +23,12 @@ class InProgressMapperTest {
     private fun stubBook(
         read: UserBookRead?,
         edition: BookEdition?,
+        paused: Boolean = false,
     ): Book = mockk<Book> {
+        every {
+            isPaused
+        } returns paused
+
         every {
             userBookRead
         } returns read
@@ -57,6 +64,40 @@ class InProgressMapperTest {
         audioSeconds = audioSeconds,
         readingFormat = ReadingFormat.Audio,
     )
+
+    @Nested
+    inner class ToInProgressSectionHeader {
+        @Test
+        fun `a paused book opens with On hold`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                read = buildRead(),
+                edition = paperEdition(pages = 300),
+                paused = true,
+            )
+
+            // ----- Act -----
+            val result = book.toInProgressSectionHeader()
+
+            // ----- Assert -----
+            result.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "On hold"
+        }
+
+        @Test
+        fun `a reading book opens with In progress`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                read = buildRead(),
+                edition = paperEdition(pages = 300),
+            )
+
+            // ----- Act -----
+            val result = book.toInProgressSectionHeader()
+
+            // ----- Assert -----
+            result.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "In progress"
+        }
+    }
 
     @Nested
     inner class ToInProgress {
@@ -319,6 +360,37 @@ class InProgressMapperTest {
             val model = result.shouldNotBeNull()
             model.summaryStart shouldBe "${secondsToHm(0)} of ${secondsToHm(0)}"
             model.summaryEnd shouldBe "${secondsToHm(0)} left"
+        }
+ 
+        @Test
+        fun `a paused paged book counts the pages left`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                read = buildRead(currentPage = 100),
+                edition = paperEdition(pages = 300),
+                paused = true,
+            )
+
+            // ----- Act -----
+            val result = book.toInProgress()
+
+            // ----- Assert -----
+            result.shouldNotBeNull().summaryEnd shouldBe "200 pages left"
+        }
+
+        @Test
+        fun `a reading paged book counts the pages to go`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                read = buildRead(currentPage = 100),
+                edition = paperEdition(pages = 300),
+            )
+
+            // ----- Act -----
+            val result = book.toInProgress()
+
+            // ----- Assert -----
+            result.shouldNotBeNull().summaryEnd shouldBe "200 pages to go"
         }
     }
 }

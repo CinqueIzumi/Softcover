@@ -83,6 +83,10 @@ internal data class LibrarySelectionPills(
                 label = "Move to Currently Reading",
             ),
             MoveTarget(
+                status = UserBookStatus.PAUSED,
+                label = "Move to Paused",
+            ),
+            MoveTarget(
                 status = UserBookStatus.READ,
                 label = "Mark as Read",
             ),

@@ -253,6 +253,26 @@ class BooksLocalDataSourceImplTest {
         }
 
         @Test
+        fun `PAUSED uses the same event-sorted query as CURRENTLY_READING with its own status code`() = runTest {
+            // ----- Arrange -----
+            val status = UserBookStatus.PAUSED
+            val entity = stubBookFullEntity(id = 2)
+
+            every {
+                dao.getBooksByStatusAndEvents(
+                    statusCode = status.code,
+                    events = listOf("progress_updated", "user_book_read_started"),
+                )
+            } returns flowOf(listOf(entity))
+
+            // ----- Act & Assert -----
+            dataSource.getBooksFlowByStatus(status = status).test {
+                awaitItem() shouldBe listOf(entity.toModel())
+                awaitComplete()
+            }
+        }
+
+        @Test
         fun `READ dispatches to getReadBooks with correct status code`() = runTest {
             // ----- Arrange -----
             val status = UserBookStatus.READ
@@ -327,6 +347,33 @@ class BooksLocalDataSourceImplTest {
             dataSource.getBooksFlowByStatus(status = status).test {
                 awaitItem() shouldBe listOf(entity.toModel())
                 awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class GetUserBookIdsByStatuses {
+        @Test
+        fun `queries the dao with the status codes of every given status`() = runTest {
+            // ----- Arrange -----
+            val statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED)
+
+            coEvery {
+                dao.getUserBookIdsByStatuses(statusCodes = any())
+            } returns listOf(4, 8)
+
+            // ----- Act -----
+            val result = dataSource.getUserBookIdsByStatuses(statuses = statuses)
+
+            // ----- Assert -----
+            result shouldBe listOf(4, 8)
+
+            coVerify(exactly = 1) {
+                dao.getUserBookIdsByStatuses(
+                    statusCodes = match {
+                        it.toSet() == setOf(UserBookStatus.CURRENTLY_READING.code, UserBookStatus.PAUSED.code)
+                    },
+                )
             }
         }
     }
@@ -490,11 +537,12 @@ class BooksLocalDataSourceImplTest {
 
             coEvery {
                 dao.getEditionImageRefsByBookId(bookId = bookId)
-            } returns listOf(EditionImageRef(
-                id = 10,
-                localImagePath = imagePath,
-                localImageUrl = null,
-            ),
+            } returns listOf(
+                EditionImageRef(
+                    id = 10,
+                    localImagePath = imagePath,
+                    localImageUrl = null,
+                ),
             )
 
             // ----- Act -----
@@ -521,11 +569,12 @@ class BooksLocalDataSourceImplTest {
 
             coEvery {
                 dao.getEditionImageRefsByBookId(bookId = bookId)
-            } returns listOf(EditionImageRef(
-                id = 20,
-                localImagePath = null,
-                localImageUrl = null,
-            ),
+            } returns listOf(
+                EditionImageRef(
+                    id = 20,
+                    localImagePath = null,
+                    localImageUrl = null,
+                ),
             )
 
             // ----- Act -----
@@ -596,11 +645,12 @@ class BooksLocalDataSourceImplTest {
             // ----- Arrange -----
             coEvery {
                 dao.getAllEditionImageRefs()
-            } returns listOf(EditionImageRef(
-                id = 3,
-                localImagePath = null,
-                localImageUrl = null,
-            ),
+            } returns listOf(
+                EditionImageRef(
+                    id = 3,
+                    localImagePath = null,
+                    localImageUrl = null,
+                ),
             )
 
             // ----- Act -----

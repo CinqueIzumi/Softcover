@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen.section
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,7 @@ import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
+import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripEvent
 import nl.rhaydus.softcover.feature.reading.presentation.state.StreakStripUiModel
@@ -34,6 +36,9 @@ internal fun EmptyCurrentlyReadingScreen(
     pickUpNextHeader: SectionHeaderUiModel,
     trendingHeader: SectionHeaderUiModel,
     emptyState: EmptyStateUiModel,
+    onHold: BookCardSet<Book>,
+    onHoldHeader: SectionHeaderUiModel,
+    runAction: (ReadingAction) -> Unit,
     trendingBooks: ImmutableList<Book> = persistentListOf(),
     pickUpNext: BookCardSet<Book> = BookCardSet.empty(),
     trendingTile: TrendingTileUiModel? = null,
@@ -55,7 +60,6 @@ internal fun EmptyCurrentlyReadingScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = Spacing.gutter)
             .verticalScroll(rememberScrollState())
             .padding(bottom = rememberBottomBarPadding()),
         verticalArrangement = if (showAdaptive) Arrangement.Top else Arrangement.Center,
@@ -66,11 +70,12 @@ internal fun EmptyCurrentlyReadingScreen(
             modifier = if (showAdaptive) {
                 Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = Spacing.gutter)
                     .padding(top = Spacing.section)
             } else {
                 Modifier
                     .fillMaxSize()
-                    .padding(vertical = Spacing.xl)
+                    .padding(horizontal = Spacing.gutter, vertical = Spacing.xl)
             },
             onEvent = { event ->
                 when (event) {
@@ -92,27 +97,43 @@ internal fun EmptyCurrentlyReadingScreen(
                         StreakStripEvent.Clicked -> onExpandStreak()
                     }
                 },
+                modifier = Modifier.padding(horizontal = Spacing.gutter),
+            )
+        }
+
+        if (onHold.isEmpty.not()) {
+            Spacer(modifier = Modifier.height(Spacing.section))
+
+            OnHoldSection(
+                header = onHoldHeader,
+                onHold = onHold,
+                runAction = runAction,
+                onBookClick = onBookClick,
             )
         }
 
         if (pickUpNext.isEmpty.not()) {
             Spacer(modifier = Modifier.height(Spacing.section))
 
-            PickUpNextSection(
-                cards = pickUpNext.cards,
-                header = pickUpNextHeader,
-                onEvent = onPickUpNextEvent,
-            )
+            Box(modifier = Modifier.padding(horizontal = Spacing.gutter)) {
+                PickUpNextSection(
+                    cards = pickUpNext.cards,
+                    header = pickUpNextHeader,
+                    onEvent = onPickUpNextEvent,
+                )
+            }
         } else if (trendingTile != null) {
             Spacer(modifier = Modifier.height(Spacing.section))
 
-            TrendingTileSection(
-                model = trendingTile,
-                header = trendingHeader,
-                onClick = {
-                    trendingBook?.let(onBookClick)
-                },
-            )
+            Box(modifier = Modifier.padding(horizontal = Spacing.gutter)) {
+                TrendingTileSection(
+                    model = trendingTile,
+                    header = trendingHeader,
+                    onClick = {
+                        trendingBook?.let(onBookClick)
+                    },
+                )
+            }
         }
     }
 }

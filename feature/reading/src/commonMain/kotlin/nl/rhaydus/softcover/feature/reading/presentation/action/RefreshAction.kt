@@ -20,7 +20,9 @@ internal data object RefreshAction : ReadingAction {
 
         dependencies
             .refreshLibraryUseCase(
-                scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
+                scope = RefreshScope.ByStatuses(
+                    statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),
+                ),
             )
             .onApiFailure()
 
