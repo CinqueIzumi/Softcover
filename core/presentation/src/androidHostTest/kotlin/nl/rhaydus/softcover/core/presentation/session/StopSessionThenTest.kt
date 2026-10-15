@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.uibinding.session
+package nl.rhaydus.softcover.core.presentation.session
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -7,7 +7,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 
 class StopSessionThenTest {
     @Nested
