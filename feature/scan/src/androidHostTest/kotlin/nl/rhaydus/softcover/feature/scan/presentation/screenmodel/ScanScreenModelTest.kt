@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnSubmittedActi
 import nl.rhaydus.softcover.feature.scan.presentation.collector.IsbnFieldCollector
 import nl.rhaydus.softcover.feature.scan.presentation.collector.UnknownIsbnSheetCollector
 import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
+import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -35,7 +36,11 @@ class ScanScreenModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun createScreenModel(resolveBookByIsbnUseCase: ResolveBookByIsbnUseCase) = ScanScreenModel(
+    private fun createScreenModel(
+        resolveBookByIsbnUseCase: ResolveBookByIsbnUseCase = mockk(relaxed = true),
+        prefilledIsbn: String? = null,
+        startInManualEntry: Boolean = false,
+    ) = ScanScreenModel(
         resolveBookByIsbnUseCase = resolveBookByIsbnUseCase,
         addBookByIsbnUseCase = mockk(relaxed = true),
         dispatchers = AppDispatchers(
@@ -47,6 +52,8 @@ class ScanScreenModelTest {
             IsbnFieldCollector(),
             UnknownIsbnSheetCollector(),
         ),
+        prefilledIsbn = prefilledIsbn,
+        startInManualEntry = startInManualEntry,
     )
 
     @Nested
@@ -77,6 +84,58 @@ class ScanScreenModelTest {
             // ----- Assert -----
             enabledWhileResolving shouldBe false
             screenModel.state.value.isbnField.enabled shouldBe true
+        }
+    }
+
+    @Nested
+    inner class InitialState {
+        @Test
+        fun `seeds the isbn field with the prefilled isbn`() {
+            // ----- Arrange -----
+            val screenModel = createScreenModel(prefilledIsbn = "9780374710781")
+
+            // ----- Act -----
+            val text = screenModel.state.value.isbnField.text
+
+            // ----- Assert -----
+            text shouldBe "9780374710781"
+        }
+
+        @Test
+        fun `leaves the isbn field empty without a prefilled isbn`() {
+            // ----- Arrange -----
+            val screenModel = createScreenModel(prefilledIsbn = null)
+
+            // ----- Act -----
+            val text = screenModel.state.value.isbnField.text
+
+            // ----- Assert -----
+            text shouldBe ""
+        }
+
+        @Test
+        fun `auto focuses the isbn field when starting in manual entry`() {
+            // ----- Arrange -----
+            val screenModel = createScreenModel(startInManualEntry = true)
+
+            // ----- Act -----
+            val autoFocus = screenModel.state.value.isbnField.autoFocus
+
+            // ----- Assert -----
+            autoFocus shouldBe true
+        }
+
+        @Test
+        fun `keeps the platform auto focus default when not starting in manual entry`() {
+            // ----- Arrange -----
+            val platformDefault = ScanUiState().isbnField.autoFocus
+            val screenModel = createScreenModel(startInManualEntry = false)
+
+            // ----- Act -----
+            val autoFocus = screenModel.state.value.isbnField.autoFocus
+
+            // ----- Assert -----
+            autoFocus shouldBe platformDefault
         }
     }
 }

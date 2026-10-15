@@ -20,12 +20,14 @@ val scanModule = module {
     factory { UnknownIsbnSheetCollector() } bind ScanCollector::class
     factory { IsbnFieldCollector() } bind ScanCollector::class
 
-    factory {
+    factory { params ->
         ScanScreenModel(
             resolveBookByIsbnUseCase = get(),
             addBookByIsbnUseCase = get(),
             dispatchers = get(),
             flows = getAll(),
+            prefilledIsbn = params.getOrNull<String>(),
+            startInManualEntry = params.getOrNull<Boolean>() ?: false,
         )
     }
 }

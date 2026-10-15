@@ -33,7 +33,10 @@ class OnAddUnknownIsbnDismissedActionTest {
     ): SheetSession<UnknownIsbnSheetUiModel, ResolvedScan> {
         val model = UnknownIsbnSheetUiModel(
             isbn = "9780451524935",
-            scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
+            scaffold = unknownIsbnSheetScaffoldFor(
+                isAdding = false,
+                isImportPending = false,
+            ),
         )
 
         return SheetSession.Open(
@@ -171,5 +174,26 @@ class OnAddUnknownIsbnDismissedActionTest {
             stateFlow.value shouldBe resolving
             eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
-    }
+    
+
+        @Test
+        fun `resets the pending flag when the sheet is dismissed`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ScanUiState(
+                unknownIsbn = "9780451524935",
+                unknownIsbnSheet = openSession(),
+                isImportPending = true,
+            )
+            val action = OnAddUnknownIsbnDismissedAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isImportPending shouldBe false
+        }
+}
 }

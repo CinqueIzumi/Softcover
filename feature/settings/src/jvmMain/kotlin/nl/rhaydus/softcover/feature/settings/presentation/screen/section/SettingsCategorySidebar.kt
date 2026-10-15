@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.sidebar.Sidebar
 import nl.rhaydus.softcover.core.component.sidebar.SidebarEvent
@@ -47,7 +48,10 @@ internal fun SettingsCategorySidebar(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(vertical = Spacing.md),
+                .padding(
+                    top = Spacing.md,
+                    bottom = Spacing.md + rememberBottomBarPadding(),
+                ),
         ) {
             PageMasthead(
                 model = state.settingsSidebarMasthead,

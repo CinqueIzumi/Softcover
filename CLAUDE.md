@@ -32,7 +32,9 @@ book tracking platform, on Android (SDK 26+), iOS and desktop (JVM). Shared UI a
 ./gradlew lint                   # Android Lint
 ./gradlew ktlintFormat           # Auto-fix layout rules
 ./gradlew styleCheck             # detekt + ktlint gates
-./gradlew check                  # Everything
+./gradlew check koverXmlReport -x lint  # PR gate: what CI runs on PRs into release/*
+./gradlew check                  # Everything except buildHealth; iOS compiles on macOS only
+./gradlew check buildHealth      # Full gate: CI on release merges and PRs into main
 ```
 
 ## Tests
@@ -67,6 +69,7 @@ descriptions — never hand-edit it. The full rules are in `.claude/rules/roadma
 | Deciding where a module / type belongs, or wiring a cross-feature dependency | [`docs/reference/module-structure.md`](docs/reference/module-structure.md) |
 | Designing or changing any UI surface | [`docs/rhaydus/0.3.1/design-system-foundations.md`](docs/rhaydus/0.3.1/design-system-foundations.md), then the one section you need behind [`docs/reference/design-system.md`](docs/reference/design-system.md) |
 | Building a component under `:core:component` | [`docs/reference/design-system/component-contract.md`](docs/reference/design-system/component-contract.md) |
+| Writing or changing any user-facing text | [`docs/reference/design-system/voice.md`](docs/reference/design-system/voice.md) |
 | Writing Kotlin | [`docs/rhaydus/0.3.1/code-style.md`](docs/rhaydus/0.3.1/code-style.md), then [`docs/reference/code-style.md`](docs/reference/code-style.md) |
 | Looking for an existing component, modifier or util | [`docs/rhaydus/0.3.1/CAPABILITIES.md`](docs/rhaydus/0.3.1/CAPABILITIES.md) |
 

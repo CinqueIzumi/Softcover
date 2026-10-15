@@ -15,7 +15,9 @@ import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipSet
+import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -82,9 +84,11 @@ internal data class BookDetailUiState(
     val topBar: TopBarUiModel = topBarFor(book = null),
     val initialCover: BookInitialCover? = null,
     val fabMenuExpanded: Boolean = false,
-    val showEditEditionSheet: Boolean = false,
+    val editionSheetRequested: Boolean = false,
+    val editionSearchQuery: String = "",
     val editions: ImmutableList<BookEdition> = persistentListOf(),
     val loadingEditions: Boolean = false,
+    val editionsError: String? = null,
 
     /**
      * The edition selector's in-progress pick, set to [displayedEdition]'s id when the sheet opens
@@ -236,8 +240,8 @@ internal data class BookDetailUiState(
     /** `null` until [book] exists. */
     val tagEditorSheet: TagEditorSheetUiModel? = null,
 
-    /** `null` until [book] and [displayedEdition] exist. */
-    val editionSheet: EditionSheetUiModel? = null,
+    /** Opens only once [book] and [displayedEdition] exist; [editionSheetRequested] drives it. */
+    val editionSheet: SheetSession<EditionSheetUiModel, IsbnLookup> = SheetSession.Closed,
 
     val showChooseListsSheet: Boolean = false,
 
@@ -270,6 +274,18 @@ internal data class BookDetailUiState(
     val revealedTagKeys: ImmutableSet<String> = persistentSetOf(),
 
     val tagEditorOpenerChip: ChipUiModel? = null,
+    val communityTagsShowMoreChip: ChipUiModel = ChipUiModel(
+        key = "community-tags-show-more",
+        label = "Show more",
+        tone = ChipTone.Dashed,
+        interaction = ChipInteraction.Clickable,
+    ),
+    val communityTagsShowLessChip: ChipUiModel = ChipUiModel(
+        key = "community-tags-show-less",
+        label = "Show less",
+        tone = ChipTone.Dashed,
+        interaction = ChipInteraction.Clickable,
+    ),
 
     val userTagEditorGroups: ImmutableList<UserTagEditorChipGroup> = persistentListOf(),
     val tagEditorEmptyState: EmptyStateUiModel = EmptyStateUiModel(
@@ -294,12 +310,15 @@ internal data class BookDetailUiState(
      * The edition pinned by an external entry point (a barcode scan), if any. It wins over every
      * other edition — including the persisted on-shelf edition — so a scan always shows the exact
      * edition that was scanned. Resolved from [book]'s editions (so it carries the locally-overlaid
-     * `owned` flag — e.g. the owned cover badge shows for a scanned edition the user owns); falls
-     * back to [initialCover] for the pre-load frame before the book has loaded.
+     * `owned` flag — e.g. the owned cover badge shows for a scanned edition the user owns); then from
+     * [editions], which holds an edition just added on Hardcover before [book] has it; then from
+     * [initialCover] for the pre-load frame before the book has loaded.
      */
     val scannedEdition: BookEdition?
         get() = scannedEditionId?.let { id ->
-            book?.editions?.firstOrNull { it.id == id } ?: initialCover?.currentEdition?.takeIf { it.id == id }
+            book?.editions?.firstOrNull { it.id == id }
+                ?: editions.firstOrNull { it.id == id }
+                ?: initialCover?.currentEdition?.takeIf { it.id == id }
         }
 
     /**
@@ -355,5 +374,5 @@ internal data class BookDetailUiState(
     fun isEditionOwned(edition: BookEdition?): Boolean = edition != null && edition.id in ownedEditionIds
 
     val filteredEditions: List<BookEdition>
-        get() = editions.filterByEditionSearch(editionSheet?.searchQuery.orEmpty())
+        get() = editions.filterByEditionSearch(editionSearchQuery)
 }

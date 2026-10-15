@@ -27,18 +27,11 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * Maps every tag surface on the book page to [ChipUiModel]s off the composition
- * (`component-contract.md` § 7.2 R9): [BookDetailUiState.userTagChips] ("Your tags", read-only,
- * `UserTagsSection`), [BookDetailUiState.communityTagGroups] (the community tag block, `TagsSection`,
- * grouped by category, top-5 per category, content-warning tags [ChipTone.Spoiler] until their key
- * reaches [BookDetailUiState.revealedTagKeys]), [BookDetailUiState.tagEditorOpenerChip] (the
- * "Add tags" / "Edit tags" opener) and [BookDetailUiState.userTagEditorGroups] (the tag editor's own
- * collection, `TagEditorCollection`).
- *
- * The top-5-per-category cap and category order mirror `TagsSection`'s own `remember(tags)` block
- * exactly, moved here so the grouping/sorting work runs once per [BookDetailUiState.book] change
- * rather than being recomputed (memoized, but still composition-bound) on every recomposition. The
- * editor grouping mirrors the same [EDITABLE_CATEGORIES] order `TagEditorBottomSheet` used to compute
- * in composition, plus a trailing "Other" group for any tag outside that set.
+ * (`component-contract.md` § 7.2 R9): [BookDetailUiState.userTagChips] ("Your tags", read-only),
+ * [BookDetailUiState.communityTagGroups] (grouped by category, every tag by popularity,
+ * content-warning tags [ChipTone.Spoiler] until their key reaches [BookDetailUiState.revealedTagKeys]),
+ * [BookDetailUiState.tagEditorOpenerChip] (the "Add tags" / "Edit tags" opener) and
+ * [BookDetailUiState.userTagEditorGroups] (the tag editor's own collection).
  */
 internal class TagChipModelsCollector : BookDetailCollector {
     override suspend fun onLaunch(
@@ -76,10 +69,9 @@ internal class TagChipModelsCollector : BookDetailCollector {
 private val COMMUNITY_TAG_CATEGORIES: List<TagCategory> = listOf(
     TagCategory.GENRE,
     TagCategory.MOOD,
+    TagCategory.TAG,
     TagCategory.CONTENT_WARNING,
 )
-
-private const val COMMUNITY_TAGS_PER_CATEGORY = 5
 
 private val UserTag.chipKey: String
     get() = "${category.name}:$name"
@@ -109,17 +101,21 @@ private fun tagEditorOpenerChip(hasTags: Boolean): ChipUiModel = ChipUiModel(
     leading = if (hasTags) null else ChipLeading.Icon(icon = SoftcoverIcon.Add),
 )
 
+private fun TagCategory.communityGroupLabel(): String = when (this) {
+    TagCategory.TAG -> "Other tags"
+    else -> label
+}
+
 private fun List<Tag>.toTagCategoryChipGroups(revealedTagKeys: Set<String>): List<TagCategoryChipGroup> =
     COMMUNITY_TAG_CATEGORIES.mapNotNull { category ->
-        val topTags = filter { it.category == category }
+        val categoryTags = filter { it.category == category }
             .sortedByDescending { it.count }
-            .take(COMMUNITY_TAGS_PER_CATEGORY)
 
-        if (topTags.isEmpty()) return@mapNotNull null
+        if (categoryTags.isEmpty()) return@mapNotNull null
 
         TagCategoryChipGroup(
-            category = category,
-            chips = topTags.map { tag ->
+            label = category.communityGroupLabel(),
+            chips = categoryTags.map { tag ->
                 val key = tag.id.toString()
                 val concealed = category == TagCategory.CONTENT_WARNING && key !in revealedTagKeys
 

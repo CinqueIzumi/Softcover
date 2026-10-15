@@ -28,6 +28,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SchemeBrightness
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutSheetOpenAction
@@ -245,7 +246,7 @@ private fun SingleColumnProfile(
 @StandardPreview
 @Composable
 private fun ProfileScreenDesktopLightPreview() {
-    SoftcoverTheme(darkTheme = false) {
+    SoftcoverTheme(brightness = SchemeBrightness.LIGHT) {
         ProfileScreenLayout(
             state = ProfileScreenPreviewState,
             runAction = {},
@@ -258,7 +259,7 @@ private fun ProfileScreenDesktopLightPreview() {
 @StandardPreview
 @Composable
 private fun ProfileScreenDesktopDarkPreview() {
-    SoftcoverTheme(darkTheme = true) {
+    SoftcoverTheme(brightness = SchemeBrightness.DARK) {
         ProfileScreenLayout(
             state = ProfileScreenPreviewState,
             runAction = {},
