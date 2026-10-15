@@ -26,6 +26,8 @@ import nl.rhaydus.softcover.core.component.deadline.DeadlineRow
 import nl.rhaydus.softcover.core.component.deadline.DeadlineRowUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.component.document.MarkdownDocument
+import nl.rhaydus.softcover.core.component.document.MarkdownDocumentUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMasthead
@@ -40,6 +42,20 @@ import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 
 internal val primitiveEntries: ImmutableList<GalleryEntry> = persistentListOf(
+    galleryEntry(
+        name = "MarkdownDocument",
+        family = GalleryFamily.DOCUMENT,
+        blurb = "A published markdown document as an editorial spread: section headings, hanging-indent " +
+            "lists, prose, quotes and rules, with links reported as events.",
+        previews = MarkdownDocumentUiModel,
+        content = { model, modifier ->
+            MarkdownDocument(
+                model = model,
+                onEvent = {},
+                modifier = modifier,
+            )
+        },
+    ),
     galleryEntry(
         name = "RichText",
         family = GalleryFamily.RICHTEXT,

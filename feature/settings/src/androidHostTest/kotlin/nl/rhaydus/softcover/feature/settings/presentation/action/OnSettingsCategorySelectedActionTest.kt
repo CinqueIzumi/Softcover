@@ -61,5 +61,27 @@ class OnSettingsCategorySelectedActionTest {
             rows.single { it.selected }.key shouldBe
                 SettingsSidebarKey.Category(category = SettingsCategory.ROADMAP)
         }
+
+        @Test
+        fun `selecting What's new moves the selection onto its row`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = SettingsScreenUiState(
+                selectedCategory = SettingsCategory.APPEARANCE,
+                settingsSidebar = settingsSidebarFor(selectedCategory = SettingsCategory.APPEARANCE),
+            )
+            val action = OnSettingsCategorySelectedAction(category = SettingsCategory.WHATS_NEW)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectedCategory shouldBe SettingsCategory.WHATS_NEW
+            val rows = stateFlow.value.settingsSidebar.sections.flatMap { it.rows }
+            rows.single { it.selected }.key shouldBe
+                SettingsSidebarKey.Category(category = SettingsCategory.WHATS_NEW)
+        }
     }
 }

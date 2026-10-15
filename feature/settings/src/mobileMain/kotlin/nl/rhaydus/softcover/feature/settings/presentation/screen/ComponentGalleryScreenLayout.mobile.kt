@@ -18,7 +18,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGaller
 import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState
 
 /**
- * No pull-to-refresh here — the gallery has nothing to refresh, unlike [RoadmapScreenLayout]'s use of
+ * No pull-to-refresh here — the gallery has nothing to refresh, unlike [DocumentPageScreenLayout]'s use of
  * the same chrome shape.
  */
 @OptIn(ExperimentalMaterial3Api::class)

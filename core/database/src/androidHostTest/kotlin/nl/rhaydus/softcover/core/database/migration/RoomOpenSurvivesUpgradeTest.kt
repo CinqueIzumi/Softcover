@@ -27,7 +27,7 @@ class RoomOpenSurvivesUpgradeTest {
     @TempDir
     lateinit var tempDir: File
 
-    private val latest = ExportedSchema.load(version = 53)
+    private val latest = ExportedSchema.load(version = 54)
 
     private fun databaseFile(): File = File(
         tempDir,
@@ -125,7 +125,7 @@ class RoomOpenSurvivesUpgradeTest {
 
     private fun assertMatchesLatestSchema(file: File) {
         withConnection(file) { connection ->
-            connection.userVersion() shouldBe 53L
+            connection.userVersion() shouldBe 54L
             connection.identityHash() shouldBe latest.identityHash
             connection.userTables() shouldBe latest.tableNames
             connection.userTables() shouldNotContain "reading_log_entries"
@@ -139,7 +139,7 @@ class RoomOpenSurvivesUpgradeTest {
         private val schema52 = ExportedSchema.load(version = 52)
 
         @Test
-        fun `every user table keeps its rows after the production builder upgrades to 53`() {
+        fun `every user table keeps its rows after the production builder upgrades to 54`() {
             // ----- Arrange -----
             val file = databaseFile()
             writeOldDatabase(
@@ -212,7 +212,7 @@ class RoomOpenSurvivesUpgradeTest {
         }
 
         @Test
-        fun `the schema Room leaves behind is the exported v53 schema without reading_log_entries`() {
+        fun `the schema Room leaves behind is the exported v54 schema without reading_log_entries`() {
             // ----- Arrange -----
             val file = databaseFile()
             writeOldDatabase(
@@ -228,7 +228,7 @@ class RoomOpenSurvivesUpgradeTest {
         }
 
         @Test
-        fun `a database already on 53 reopens with its rows intact`() {
+        fun `a database already on 54 reopens with its rows intact`() {
             // ----- Arrange -----
             val file = databaseFile()
             writeOldDatabase(
@@ -257,7 +257,7 @@ class RoomOpenSurvivesUpgradeTest {
         private val schema42 = ExportedSchema.load(version = 42)
 
         @Test
-        fun `every user table keeps its rows through the whole chain to 53`() {
+        fun `every user table keeps its rows through the whole chain to 54`() {
             // ----- Arrange -----
             val file = databaseFile()
             writeOldDatabase(
@@ -299,7 +299,7 @@ class RoomOpenSurvivesUpgradeTest {
         }
 
         @Test
-        fun `the schema Room leaves behind is the exported v53 schema`() {
+        fun `the schema Room leaves behind is the exported v54 schema`() {
             // ----- Arrange -----
             val file = databaseFile()
             writeOldDatabase(

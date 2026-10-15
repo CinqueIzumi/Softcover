@@ -42,5 +42,6 @@ introduce any region.
   an editorial spread, never raw markdown.
 - A `"3.2.0: Title"` heading becomes a `SectionHeader` eyebrow + headline; list items hang-indent; a
   thematic break is a hairline; a blockquote is an accent-bar aside; links are `LinkAnnotation.Url` runs.
-- Used by Settings → About → Roadmap (`RoadmapContent`, rendering `ROADMAP.md`); reuse it for the next
+- Rendered by the `:core:component` `MarkdownDocument`. Used by Settings → About → Roadmap (`ROADMAP.md`)
+  and What's new (one per `CHANGELOG.md` entry, under its version header); reuse it for the next
   markdown-shaped document rather than a second renderer.

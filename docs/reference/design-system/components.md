@@ -85,6 +85,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **SoftcoverText** — `text` — the one text leaf; shows a stand-in under the skeleton mask while loading.
 - **FadeThroughText** — `text` — `SoftcoverText` that fades when its text changes.
 - **RichText** — `richtext` — read-only formatted, spoiler-maskable prose.
+- **MarkdownDocument** — `document` — a parsed markdown document as an editorial spread; links leave as `LinkClicked`.
 - **VerdictSheet** — `verdict` — the combined rating-and-review editor.
 - **VerdictBlock** — `verdict` — book-page rating and review card that opens the verdict sheet.
 

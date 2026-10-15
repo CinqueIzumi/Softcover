@@ -27,14 +27,14 @@ import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
+import nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
-import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
+import nl.rhaydus.softcover.feature.settings.presentation.model.DocumentPage
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
-import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
+import nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
-import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import org.koin.compose.koinInject
 
@@ -71,19 +71,25 @@ object SettingsScreen : Screen {
 
         // Desktop hosts the Roadmap pane inline in the master–detail surface, so it needs the model
         // under the Settings lifecycle for the same reason as Library tabs above. Mobile pushes
-        // `RoadmapScreen` (its own model) instead, and must not spin up a second one here — that would
+        // `DocumentPageScreen` (its own model) instead, and must not spin up a second one here — that would
         // also fire a needless network refresh on every visit to Settings.
         val roadmapModel = if (settingsUsesMasterDetail) {
-            koinScreenModel<RoadmapScreenModel>()
+            koinDocumentPageScreenModel(page = DocumentPage.ROADMAP)
         } else {
             null
         }
 
-        val roadmapState = if (roadmapModel != null) {
-            roadmapModel.state.collectAsStateWithLifecycle().value
+        val roadmapState = roadmapModel?.state?.collectAsStateWithLifecycle()?.value
+
+        // Same reasoning as the Roadmap model above: desktop hosts What's new inline, mobile pushes
+        // `DocumentPageScreen` with its own model.
+        val whatsNewModel = if (settingsUsesMasterDetail) {
+            koinDocumentPageScreenModel(page = DocumentPage.WHATS_NEW)
         } else {
-            RoadmapUiState()
+            null
         }
+
+        val whatsNewState = whatsNewModel?.state?.collectAsStateWithLifecycle()?.value
 
         SettingsScreenLayout(
             state = state,
@@ -103,8 +109,11 @@ object SettingsScreen : Screen {
             navigateToAbout = {
                 navigator.parent?.push(AboutScreen())
             },
+            navigateToWhatsNew = {
+                navigator.parent?.push(DocumentPageScreen(DocumentPage.WHATS_NEW))
+            },
             navigateToRoadmap = {
-                navigator.parent?.push(RoadmapScreen())
+                navigator.parent?.push(DocumentPageScreen(DocumentPage.ROADMAP))
             },
             navigateToComponentGallery = {
                 navigator.parent?.push(ComponentGalleryScreen())
@@ -112,7 +121,9 @@ object SettingsScreen : Screen {
             libraryVisibilityState = libraryVisibilityState,
             libraryVisibilityRunAction = { action -> libraryVisibilityModel?.runAction(action) },
             roadmapState = roadmapState,
-            roadmapRunAction = { action -> roadmapModel?.runAction(action) },
+            roadmapRunAction = roadmapModel?.let { model -> model::runAction },
+            whatsNewState = whatsNewState,
+            whatsNewRunAction = whatsNewModel?.let { model -> model::runAction },
             onCreateListClick = {
                 createListPresenter?.open(onListCreated = null)
             },
@@ -132,8 +143,8 @@ object SettingsScreen : Screen {
 
 /**
  * Whether the desktop master–detail Settings surface is in use (`true` on `jvmMain`, `false` on
- * `mobileMain`). It gates the eager creation of the Library-tabs screen model in [SettingsScreen]:
- * only the desktop layout hosts that pane inline. Mirrors the `wideGridTabsUseDetailPane` seam.
+ * `mobileMain`). It gates the eager creation of the Library-tabs and document-page screen models in
+ * [SettingsScreen]: only the desktop layout hosts those panes inline. Mirrors the `wideGridTabsUseDetailPane` seam.
  */
 internal expect val settingsUsesMasterDetail: Boolean
 
@@ -141,11 +152,11 @@ internal expect val settingsUsesMasterDetail: Boolean
  * The Settings screen body. Desktop (`jvmMain`) and mobile (`mobileMain`) each provide a bespoke
  * `actual`: the shared `ScreenModel` / state / actions wire up identically in [SettingsScreen.Content],
  * and only the rendered layout branches — mobile keeps the scrolling editorial menu that pushes its
- * sub-pages, desktop renders a category-sidebar master–detail. `expect` cannot carry default argument
- * values, so every parameter is supplied explicitly at the single call site above. [roadmapState] /
- * [roadmapRunAction] back the desktop master–detail pane's `Roadmap` category; [navigateToRoadmap]
- * mirrors [navigateToAbout]'s shape (mobile pushes [RoadmapScreen] from its own menu row, desktop
- * leaves it unused in favour of its sidebar's local category selection). [navigateToComponentGallery]
+ * sub-pages, desktop renders a category-sidebar master–detail. [roadmapState] / [roadmapRunAction] and
+ * [whatsNewState] / [whatsNewRunAction] back the desktop pane's `Roadmap` and `What's new` categories
+ * and are null on mobile, which pushes [DocumentPageScreen] through [navigateToRoadmap] /
+ * [navigateToWhatsNew] instead; desktop leaves those two unused in favour of its sidebar's category
+ * selection. [navigateToComponentGallery]
  * is the inverse: desktop wires it to the master–detail `About` category's own version-footer easter
  * egg (`component-contract.md` § 7.5), while mobile leaves it unused — [AboutScreen], which mobile
  * pushes instead, wires that same gesture to its own navigator directly.
@@ -159,12 +170,15 @@ internal expect fun SettingsScreenLayout(
     navigateToLibraryVisibility: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
+    navigateToWhatsNew: () -> Unit,
     navigateToRoadmap: () -> Unit,
     navigateToComponentGallery: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
-    roadmapState: RoadmapUiState,
-    roadmapRunAction: (RoadmapAction) -> Unit,
+    roadmapState: DocumentPageUiState?,
+    roadmapRunAction: ((DocumentPageAction) -> Unit)?,
+    whatsNewState: DocumentPageUiState?,
+    whatsNewRunAction: ((DocumentPageAction) -> Unit)?,
     onCreateListClick: () -> Unit,
     onStartAppUpdate: () -> Unit,
     openUrl: (String) -> Unit,

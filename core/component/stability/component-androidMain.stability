@@ -767,6 +767,50 @@ public fun nl.rhaydus.softcover.core.component.divider.VerticalDivider(modifier:
     - ink: STABLE (class with no mutable properties)
 
 @Composable
+public fun nl.rhaydus.softcover.core.component.document.MarkdownDocument(model: nl.rhaydus.softcover.core.component.document.MarkdownDocumentUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.document.MarkdownDocumentEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.document.MarkdownDocumentBlock(block: nl.rhaydus.softcover.core.component.document.MarkdownDocumentBlockUiModel, isLoading: kotlin.Boolean, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.document.MarkdownDocumentEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - block: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+    - onEvent: STABLE (function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.document.MarkdownDocumentBlockQuote(spans: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.document.MarkdownDocumentSpanUiModel>, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.document.MarkdownDocumentEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - spans: STABLE (known stable type)
+    - onEvent: STABLE (function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.document.MarkdownDocumentList(items: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.document.MarkdownDocumentListItemUiModel>, isLoading: kotlin.Boolean, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.document.MarkdownDocumentEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - items: STABLE (known stable type)
+    - isLoading: STABLE (primitive type)
+    - onEvent: STABLE (function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.document.markdownAnnotatedString(spans: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.document.MarkdownDocumentSpanUiModel>, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.document.MarkdownDocumentEvent, kotlin.Unit>, leadingMarker: kotlin.String?): androidx.compose.ui.text.AnnotatedString
+  skippable: true
+  restartable: true
+  params:
+    - spans: STABLE (known stable type)
+    - onEvent: STABLE (function type)
+    - leadingMarker: STABLE (class with no mutable properties)
+
+@Composable
 internal fun nl.rhaydus.softcover.core.component.field.HeroTextField(model: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, focusRequester: androidx.compose.ui.focus.FocusRequester): kotlin.Unit
   skippable: true
   restartable: true

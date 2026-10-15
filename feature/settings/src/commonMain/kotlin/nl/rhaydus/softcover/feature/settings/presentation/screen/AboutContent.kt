@@ -38,6 +38,7 @@ internal fun AboutContent(
     sourceHeader: SectionHeaderUiModel,
     contactHeader: SectionHeaderUiModel,
     openUrl: (String) -> Unit,
+    onWhatsNewClick: () -> Unit,
     onRoadmapClick: () -> Unit,
     onComponentGalleryUnlocked: () -> Unit,
     modifier: Modifier = Modifier,
@@ -62,6 +63,7 @@ internal fun AboutContent(
         SourceSection(
             header = sourceHeader,
             openUrl = openUrl,
+            onWhatsNewClick = onWhatsNewClick,
             onRoadmapClick = onRoadmapClick,
         )
 
@@ -121,6 +123,7 @@ private fun CreditsSection(
 private fun SourceSection(
     header: SectionHeaderUiModel,
     openUrl: (String) -> Unit,
+    onWhatsNewClick: () -> Unit,
     onRoadmapClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -135,6 +138,14 @@ private fun SourceSection(
                     gloss = "Read the code, or help build it.",
                     icon = SoftcoverIcon.History,
                     target = SettingsMenuRowTarget.ExternalLink(onClick = { openUrl(GITHUB_REPO_URL) }),
+                )
+            }
+            row {
+                SettingsMenuRow(
+                    title = "What's new",
+                    gloss = "What changed in each version.",
+                    icon = SoftcoverIcon.LibraryBooks,
+                    target = SettingsMenuRowTarget.SubPage(onClick = onWhatsNewClick),
                 )
             }
             row {
