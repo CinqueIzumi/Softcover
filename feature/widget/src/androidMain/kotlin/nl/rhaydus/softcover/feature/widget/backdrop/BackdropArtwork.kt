@@ -1,10 +1,9 @@
-package nl.rhaydus.softcover.feature.widget.currentlyreading
+package nl.rhaydus.softcover.feature.widget.backdrop
 
 import android.graphics.Bitmap
-import nl.rhaydus.softcover.feature.widget.backdrop.GradientMasks
 
 /** The pre-rendered images behind the shown book; backdrops are `null` while the book has no cover. */
-internal class ReadingArtwork(
+internal class BackdropArtwork(
     val compactBackdrop: Bitmap?,
     val tallBackdrop: Bitmap?,
     val gradients: GradientMasks,

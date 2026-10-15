@@ -18,14 +18,21 @@ implementer → test-writer → styleCheck → reviewer. No commits or pushes un
   handled later, out of scope. Ignore the active `domain-out-of-uistate` tracker and dim mode.
 - Trending persisted in Room; Explore and Reading's `TrendingBooksLoader` read it as the one source.
 - Wavy progress drawn as a bitmap by a pure `CanvasDrawScope` renderer matching `ProgressBar`.
-- Config via a widget configuration activity (on placement, skippable, reconfigurable on 12+).
+- Config via a widget configuration activity: shown on every placement (no
+  `configuration_optional`), skippable, reconfigurable on 12+. Discoverability: a widget with
+  settings names its source in the header and tapping the header opens its settings (all API
+  levels); the app's Settings gets a Widgets section (S8).
 - **Currently Reading:** 2×2 and 4×2. ‹ › cycle through the Reading shelf (most recently updated
   first, wraps); "2/4" on 4×2; arrows hidden for one book; the cycled book is kept by id and stays
   after progress on another book; falls back to the first if it leaves the shelf. No settings
   screen. Tap opens the Reading tab. Empty: "Between books".
-- **Random from Want-to-Read:** 2×2 and 4×2, "WHAT NEXT?" eyebrow, shuffle button, tap opens the
-  book. Pick kept per instance; re-pick cadence setting daily (default) / weekly / only on shuffle;
-  re-pick if the book leaves Want-to-Read.
+- **Random pick:** same portrait look as Currently Reading (blurred cover backdrop, 2×2 and 2×3,
+  default 2×3), "WHAT NEXT?" eyebrow, shuffle button, tap opens the book. "Pick from" setting:
+  Want to Read (default), Owned (unread), or any of the user's lists (unread); unread = not Read and
+  not Currently Reading. Pool queried locally from Room (lists are synced); a deleted list falls back
+  to Want to Read. Pick kept per instance; re-pick cadence setting daily (default) / weekly / only
+  on shuffle; re-pick if the book leaves the pool. Header shows the source ("WHAT NEXT? · OWNED");
+  tapping it opens this widget's settings.
 - **Trending this week:** 4×2 cover row with rank numerals; 4×3+ ranked list of five (plain
   `Column`). Cover → book detail, header → Explore. Refresh setting daily (default) / twice daily
   (2 API requests per refresh).
@@ -100,8 +107,12 @@ Responsive sizes, cycling `ActionCallback`s storing book id per instance, pure s
 wavy-progress bitmap. UI models built in a `Flow` off-composition; `provideContent` immediately with
 a loading model. No `android:configure`.
 
-### S6. Settings screen + Random pick + maintenance worker
-TOAD configuration activity in the app theme. Skip writes defaults, `RESULT_OK`, and updates (also on
+### S6. Settings screen + Random pick + maintenance worker ✅
+Done: `randompick/` (pure `buildPool` / `resolvePick` / `shufflePick`, `RandomPickStore` resolving and
+persisting in one `updateAppWidgetState`), `settings/` TOAD activity (loads once per ScreenModel;
+rejects ids not owned by its receiver; saving clears the pick only when settings changed),
+`worker/` hourly unique work scheduled from `onUpdate` (KEEP), cancelled when no Softcover widget
+remains. Backdrop artwork shared in `backdrop/` with Currently Reading. 34 tests after audit.TOAD configuration activity in the app theme. Skip writes defaults, `RESULT_OK`, and updates (also on
 API ≤ 30). Settings in per-instance Glance state (ids/enums only). Pure pick/cadence function,
 evaluated lazily in `provideGlance`. Shuffle action. One unique periodic maintenance worker,
 scheduled in `onEnabled`, updated on config change, cancelled in `onDisabled`; `updatePeriodMillis=0`.
@@ -110,7 +121,12 @@ scheduled in `onEnabled`, updated on config change, cancelled in `onDisabled`; `
 Cover-row and ranked-list layouts. The worker refreshes trending at the shortest interval among
 placed instances, network-constrained, skipped when signed out.
 
-### S8. Docs
+### S8. Widgets section in Settings
+Lists placed widgets with Edit (opens that instance's configuration activity) and "Add to home
+screen" buttons via `AppWidgetManager.requestPinAppWidget` (API 26+, hidden when the launcher does
+not support pinning).
+
+### S9. Docs
 `docs/reference/design-system/patterns/widgets.md` (`patterns.md` is at its 8 KB budget: link only),
 architecture deltas.
 

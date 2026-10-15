@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.widget.currentlyreading
 
 import android.graphics.Bitmap
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.feature.widget.backdrop.BackdropArtwork
 import nl.rhaydus.softcover.feature.widget.progress.WavyProgressBitmaps
 
 internal data class CurrentlyReadingWidgetUiModel(
@@ -23,7 +24,7 @@ internal data class CurrentlyReadingWidgetUiModel(
             val cover: Bitmap?,
             val progress: WavyProgressBitmaps,
             val position: String?,
-            val artwork: ReadingArtwork? = null,
+            val artwork: BackdropArtwork? = null,
         ) : Content
     }
 }

@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import kotlin.time.Duration.Companion.seconds
 
@@ -37,6 +38,7 @@ internal class WidgetRefresher(
     private val getUserIdAsFlow: GetUserIdAsFlowUseCase,
     private val getCurrentlyReadingUserBooks: GetCurrentlyReadingUserBooksUseCase,
     private val getWantToReadUserBooks: GetWantToReadUserBooksUseCase,
+    private val getAllUserLists: GetAllUserListsUseCase,
     private val observeTrendingBooks: ObserveTrendingBooksUseCase,
 ) {
     private val placedWidgets = MutableStateFlow<Set<String>>(emptySet())
@@ -92,6 +94,7 @@ internal class WidgetRefresher(
             .asSignal(),
         getCurrentlyReadingUserBooks().asSignal(),
         getWantToReadUserBooks().asSignal(),
+        getAllUserLists().asSignal(),
         observeTrendingBooks().asSignal(),
     )
 

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.widget.currentlyreading
 
-import android.graphics.Bitmap
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
@@ -40,10 +39,11 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.CornerRadius
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
+import nl.rhaydus.softcover.feature.widget.backdrop.Backdrop
+import nl.rhaydus.softcover.feature.widget.backdrop.Mask
 import nl.rhaydus.softcover.feature.widget.progress.WavyProgressBitmaps
 import nl.rhaydus.softcover.feature.widget.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.theme.SoftcoverWidgetTheme
@@ -340,58 +340,6 @@ private fun TallReading(content: CurrentlyReadingWidgetUiModel.Content.Reading) 
             }
         }
     }
-}
-
-@Composable
-private fun Backdrop(
-    backdrop: Bitmap?,
-    artwork: ReadingArtwork,
-) {
-    val extra = LocalWidgetExtraColors.current
-
-    if (backdrop != null) {
-        Image(
-            provider = ImageProvider(backdrop),
-            contentDescription = null,
-            modifier = GlanceModifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-        )
-    } else {
-        Mask(
-            mask = artwork.gradients.washPrimary,
-            tint = GlanceTheme.colors.primary,
-        )
-
-        Mask(
-            mask = artwork.gradients.washTertiary,
-            tint = GlanceTheme.colors.tertiary,
-        )
-    }
-
-    Mask(
-        mask = artwork.gradients.veil,
-        tint = extra.surfaceContainerHigh,
-    )
-
-    Mask(
-        mask = artwork.gradients.veilLift,
-        tint = extra.daySurfaceContainerHigh,
-    )
-}
-
-@Composable
-private fun Mask(
-    mask: Bitmap,
-    tint: ColorProvider,
-    contentScale: ContentScale = ContentScale.FillBounds,
-) {
-    Image(
-        provider = ImageProvider(mask),
-        contentDescription = null,
-        modifier = GlanceModifier.fillMaxSize(),
-        contentScale = contentScale,
-        colorFilter = ColorFilter.tint(tint),
-    )
 }
 
 @Composable

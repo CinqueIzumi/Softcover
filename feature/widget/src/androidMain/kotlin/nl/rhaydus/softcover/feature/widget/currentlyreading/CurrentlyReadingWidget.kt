@@ -1,15 +1,14 @@
 package nl.rhaydus.softcover.feature.widget.currentlyreading
 
 import android.content.Context
-import android.graphics.Bitmap
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
-import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import kotlin.math.roundToInt
@@ -17,13 +16,12 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
 import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
-import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
-import nl.rhaydus.softcover.core.uibinding.cover.resolveCoverSource
+import nl.rhaydus.softcover.feature.widget.backdrop.BackdropArtworkRenderer
+import nl.rhaydus.softcover.feature.widget.backdrop.BookCoverLoader
 import nl.rhaydus.softcover.feature.widget.progress.WavyProgressBitmaps
 import nl.rhaydus.softcover.feature.widget.progress.renderWavyProgress
 import org.koin.core.component.KoinComponent
@@ -62,9 +60,13 @@ internal class CurrentlyReadingWidget : GlanceAppWidget(), KoinComponent {
         val themeConfigurations = dependencies.getThemeConfiguration()
         val initialTheme = themeConfigurations.firstOrNull() ?: ThemeConfiguration()
 
-        val artwork = ReadingArtworkRenderer(density)
+        val artwork = BackdropArtworkRenderer(density)
 
-        var lastCover: Pair<CoverSource, Bitmap>? = null
+        val covers = BookCoverLoader(
+            context = context,
+            density = density,
+        )
+
         var lastProgress: Pair<Float, WavyProgressBitmaps>? = null
 
         val models = currentlyReadingWidgetModels(
@@ -75,20 +77,7 @@ internal class CurrentlyReadingWidget : GlanceAppWidget(), KoinComponent {
                 .onStart { emit(id) }
                 .filter { it == id }
                 .map { context.readSelectedBookId(id) },
-            loadCover = { book ->
-                val source = resolveCoverSource(
-                    edition = book.currentEdition,
-                    defaultEdition = book.defaultEdition,
-                    fallbackCoverUrl = book.coverUrl,
-                )
-
-                lastCover?.takeIf { it.first == source }?.second
-                    ?: loadCoverBitmap(
-                        context = context,
-                        source = source,
-                        sizePx = (86 * density).roundToInt(),
-                    )?.also { bitmap -> source?.let { lastCover = it to bitmap } }
-            },
+            loadCover = covers::load,
             renderArtwork = artwork::render,
             renderProgress = { fraction ->
                 lastProgress?.takeIf { it.first == fraction }?.second

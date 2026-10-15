@@ -12,6 +12,27 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/currently_reading_widget_info" />
         </receiver>
+
+        <receiver
+            android:name="nl.rhaydus.softcover.feature.widget.randompick.RandomPickWidgetReceiver"
+            android:exported="true"
+            android:label="@string/random_pick_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/random_pick_widget_info" />
+        </receiver>
+
+        <activity
+            android:name="nl.rhaydus.softcover.feature.widget.settings.RandomPickSettingsActivity"
+            android:exported="true"
+            android:label="@string/random_pick_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

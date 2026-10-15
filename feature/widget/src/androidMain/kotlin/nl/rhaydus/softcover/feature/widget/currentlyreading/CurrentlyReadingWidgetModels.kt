@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.mapLatest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.uibinding.format.percentLabel
+import nl.rhaydus.softcover.feature.widget.backdrop.BackdropArtwork
 import nl.rhaydus.softcover.feature.widget.progress.WavyProgressBitmaps
 
 private class WidgetInputs(
@@ -26,7 +27,7 @@ internal fun currentlyReadingWidgetModels(
     selectedBookId: Flow<Int?>,
     loadCover: suspend (Book) -> Bitmap?,
     renderProgress: (fraction: Float) -> WavyProgressBitmaps,
-    renderArtwork: suspend (cover: Bitmap?) -> ReadingArtwork? = { null },
+    renderArtwork: suspend (cover: Bitmap?) -> BackdropArtwork? = { null },
 ): Flow<CurrentlyReadingWidgetUiModel> = combine(
     isSignedIn,
     themeConfiguration,
@@ -47,7 +48,7 @@ internal fun currentlyReadingWidgetModels(
 private suspend fun WidgetInputs.toContent(
     loadCover: suspend (Book) -> Bitmap?,
     renderProgress: (fraction: Float) -> WavyProgressBitmaps,
-    renderArtwork: suspend (cover: Bitmap?) -> ReadingArtwork?,
+    renderArtwork: suspend (cover: Bitmap?) -> BackdropArtwork?,
 ): CurrentlyReadingWidgetUiModel.Content {
     if (isSignedIn.not()) return CurrentlyReadingWidgetUiModel.Content.SignedOut
 

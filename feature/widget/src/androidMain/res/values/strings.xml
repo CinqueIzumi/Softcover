@@ -6,4 +6,9 @@
     <string name="widget_sign_in">Sign in to Softcover</string>
     <string name="currently_reading_previous_book">Previous book</string>
     <string name="currently_reading_next_book">Next book</string>
+    <string name="random_pick_widget_description">A book from your shelves, chosen for you.</string>
+    <string name="random_pick_empty_headline">Nothing waiting here yet</string>
+    <string name="random_pick_empty_subline">Add a few books, or pick another shelf.</string>
+    <string name="random_pick_shuffle">Pick another book</string>
+    <string name="random_pick_widget_label">Random pick</string>
 </resources>

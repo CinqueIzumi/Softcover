@@ -1,22 +1,20 @@
-package nl.rhaydus.softcover.feature.widget.currentlyreading
+package nl.rhaydus.softcover.feature.widget.backdrop
 
 import android.graphics.Bitmap
 import kotlin.coroutines.coroutineContext
 import kotlin.math.roundToInt
 import kotlinx.coroutines.ensureActive
-import nl.rhaydus.softcover.feature.widget.backdrop.renderBackdrop
-import nl.rhaydus.softcover.feature.widget.backdrop.renderGradientMasks
 
 /** Renders for one widget instance and keeps the backdrops of the last cover it was given. */
-internal class ReadingArtworkRenderer(private val density: Float) {
+internal class BackdropArtworkRenderer(private val density: Float) {
     private val gradients = renderGradientMasks()
 
     private var lastBackdrops: Triple<Bitmap, Bitmap, Bitmap>? = null
 
-    suspend fun render(cover: Bitmap?): ReadingArtwork {
+    suspend fun render(cover: Bitmap?): BackdropArtwork {
         val backdrops = cover?.let { backdropsFor(it) }
 
-        return ReadingArtwork(
+        return BackdropArtwork(
             compactBackdrop = backdrops?.second,
             tallBackdrop = backdrops?.third,
             gradients = gradients,
