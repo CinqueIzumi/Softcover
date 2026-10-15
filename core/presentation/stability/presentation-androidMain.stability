@@ -41,12 +41,6 @@ public fun nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBo
     - onEvent: STABLE (function type)
 
 @Composable
-public fun nl.rhaydus.softcover.core.presentation.theme.isDark(): kotlin.Boolean
-  skippable: true
-  restartable: true
-  params:
-
-@Composable
 public fun nl.rhaydus.softcover.core.presentation.util.TabReselectEffect(tab: cafe.adriel.voyager.navigator.tab.Tab, onReselect: kotlin.coroutines.SuspendFunction0<kotlin.Boolean>): kotlin.Unit
   skippable: false
   restartable: true
