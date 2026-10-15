@@ -133,18 +133,24 @@ private fun nl.rhaydus.softcover.feature.widget.randompick.ShuffleButton(): kotl
   params:
 
 @Composable
-public fun nl.rhaydus.softcover.feature.widget.settings.RandomPickSettingsScreen.Content(): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.widget.settings.WidgetSettingsLayout(themeConfiguration: nl.rhaydus.softcover.core.domain.model.ThemeConfiguration, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - themeConfiguration: UNSTABLE (has mutable properties or unstable members)
+    - content: STABLE (composable function type)
+
+@Composable
+public fun nl.rhaydus.softcover.feature.widget.settings.randompick.RandomPickSettingsScreen.Content(): kotlin.Unit
   skippable: true
   restartable: true
   params:
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.settings.RandomPickSettingsScreen.RandomPickSettingsLayout(state: nl.rhaydus.softcover.feature.widget.settings.RandomPickSettingsUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.widget.settings.action.RandomPickSettingsAction, kotlin.Unit>): kotlin.Unit
-  skippable: false
+public fun nl.rhaydus.softcover.feature.widget.settings.trending.TrendingSettingsScreen.Content(): kotlin.Unit
+  skippable: true
   restartable: true
   params:
-    - state: UNSTABLE (has mutable properties or unstable members)
-    - runAction: STABLE (function type)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.widget.theme.SoftcoverWidgetTheme(themeConfiguration: nl.rhaydus.softcover.core.domain.model.ThemeConfiguration, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
@@ -153,4 +159,69 @@ internal fun nl.rhaydus.softcover.feature.widget.theme.SoftcoverWidgetTheme(them
   params:
     - themeConfiguration: UNSTABLE (has mutable properties or unstable members)
     - content: STABLE (composable function type)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.trending.Cover(cover: android.graphics.Bitmap?, width: kotlin.Int, height: kotlin.Int): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - cover: UNSTABLE (has mutable properties or unstable members)
+    - width: STABLE (primitive type)
+    - height: STABLE (primitive type)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.trending.CoverTile(item: nl.rhaydus.softcover.feature.widget.trending.TrendingWidgetUiModel.Item, openBook: androidx.glance.action.Action): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - item: UNSTABLE (has mutable properties or unstable members)
+    - openBook: RUNTIME (requires runtime check)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.trending.Header(openExplore: androidx.glance.action.Action, openSettings: androidx.glance.action.Action): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - openExplore: RUNTIME (requires runtime check)
+    - openSettings: RUNTIME (requires runtime check)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.trending.ListRow(item: nl.rhaydus.softcover.feature.widget.trending.TrendingWidgetUiModel.Item, openBook: androidx.glance.action.Action): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - item: UNSTABLE (has mutable properties or unstable members)
+    - openBook: RUNTIME (requires runtime check)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.trending.Message(headline: kotlin.String, subline: kotlin.String?, openExplore: androidx.glance.action.Action, openSettings: androidx.glance.action.Action, showHeader: kotlin.Boolean): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - headline: STABLE (String is immutable)
+    - subline: STABLE (class with no mutable properties)
+    - openExplore: RUNTIME (requires runtime check)
+    - openSettings: RUNTIME (requires runtime check)
+    - showHeader: STABLE (primitive type)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.trending.Ranked(items: nl.rhaydus.softcover.feature.widget.trending.TrendingWidgetUiModel.Content.Ranked, openExplore: androidx.glance.action.Action, openSettings: androidx.glance.action.Action, openBook: kotlin.Function1<@[ParameterName(name = \): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - items: STABLE (class with no mutable properties)
+    - openExplore: RUNTIME (requires runtime check)
+    - openSettings: RUNTIME (requires runtime check)
+    - openBook: STABLE (function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.widget.trending.TrendingWidgetContent(model: nl.rhaydus.softcover.feature.widget.trending.TrendingWidgetUiModel, openApp: androidx.glance.action.Action, openExplore: androidx.glance.action.Action, openSettings: androidx.glance.action.Action, openBook: kotlin.Function1<@[ParameterName(name = \): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - model: UNSTABLE (has mutable properties or unstable members)
+    - openApp: RUNTIME (requires runtime check)
+    - openExplore: RUNTIME (requires runtime check)
+    - openSettings: RUNTIME (requires runtime check)
+    - openBook: STABLE (function type)
 

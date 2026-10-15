@@ -35,7 +35,9 @@ implementer → test-writer → styleCheck → reviewer. No commits or pushes un
   tapping it opens this widget's settings.
 - **Trending this week:** 4×2 cover row with rank numerals; 4×3+ ranked list of five (plain
   `Column`). Cover → book detail, header → Explore. Refresh setting daily (default) / twice daily
-  (2 API requests per refresh).
+  (2 API requests per refresh); a small settings icon at the header's end opens it. Explore stays
+  offline-gated (cached trending in Explore is a separate issue).
+- Focus Mode: a widget tap opens the app into Focus Mode; the request applies underneath.
 - Signed out: "Sign in to Softcover".
 
 ## Steps
@@ -112,14 +114,21 @@ Done: `randompick/` (pure `buildPool` / `resolvePick` / `shufflePick`, `RandomPi
 persisting in one `updateAppWidgetState`), `settings/` TOAD activity (loads once per ScreenModel;
 rejects ids not owned by its receiver; saving clears the pick only when settings changed),
 `worker/` hourly unique work scheduled from `onUpdate` (KEEP), cancelled when no Softcover widget
-remains. Backdrop artwork shared in `backdrop/` with Currently Reading. 34 tests after audit.TOAD configuration activity in the app theme. Skip writes defaults, `RESULT_OK`, and updates (also on
+remains. Backdrop artwork shared in `backdrop/` with Currently Reading. 34 tests after audit.
+TOAD configuration activity in the app theme. Skip writes defaults, `RESULT_OK`, and updates (also on
 API ≤ 30). Settings in per-instance Glance state (ids/enums only). Pure pick/cadence function,
 evaluated lazily in `provideGlance`. Shuffle action. One unique periodic maintenance worker,
 scheduled in `onEnabled`, updated on config change, cancelled in `onDisabled`; `updatePeriodMillis=0`.
 
-### S7. Trending widget
-Cover-row and ranked-list layouts. The worker refreshes trending at the shortest interval among
-placed instances, network-constrained, skipped when signed out.
+### S7. Trending widget ✅
+Done: `trending/` (cover row up to five, ranked list at 4×3+, header opens Explore, tune icon opens
+settings; covers loaded for the top five only), `TrendingStore` and a pure
+`resolveTrendingRefreshInterval`, `worker/TrendingRefreshScheduler` and `TrendingRefreshWorker`
+(unique periodic work, network-constrained, `UPDATE` at the shortest placed cadence, cancelled when
+none remains, skipped when signed out, `retry` on a failed refresh). `settings/` now has a shared
+`WidgetSettingsActivity` and `WidgetSettingsLayout`, with per-widget screens in `settings/randompick/`
+and `settings/trending/`. No Skip button: Back keeps the stored settings (`RESULT_OK` is set up front).
+The worker refreshes with `maxAge` at half the period so an early run still fetches. 9 tests after audit.
 
 ### S8. Widgets section in Settings
 Lists placed widgets with Edit (opens that instance's configuration activity) and "Add to home
@@ -129,6 +138,11 @@ not support pinning).
 ### S9. Docs
 `docs/reference/design-system/patterns/widgets.md` (`patterns.md` is at its 8 KB budget: link only),
 architecture deltas.
+
+### S10. Device crash sweep (last)
+Claude drives Medium_Phone (emulator-5554) with a scripted run per widget: place, resize through
+every size, tap every target, reconfigure, remove, and a cold start after process death
+(`am stop-app`). Clear the crash buffer first; `adb logcat -b crash` must stay empty after every run.
 
 ## Risks
 

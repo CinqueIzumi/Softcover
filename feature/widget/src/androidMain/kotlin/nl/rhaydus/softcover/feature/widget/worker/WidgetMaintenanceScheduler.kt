@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.widget.worker
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
@@ -22,6 +24,14 @@ internal class WidgetMaintenanceScheduler(
         )
     }
 
+    fun requestCancelIfUnused() {
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            CANCEL_WORK_NAME,
+            ExistingWorkPolicy.REPLACE,
+            OneTimeWorkRequestBuilder<WidgetMaintenanceCancelWorker>().build(),
+        )
+    }
+
     suspend fun cancelIfUnused() {
         val manager = GlanceAppWidgetManager(context)
 
@@ -32,5 +42,6 @@ internal class WidgetMaintenanceScheduler(
 
     private companion object {
         const val WORK_NAME = "widget_maintenance"
+        const val CANCEL_WORK_NAME = "widget_maintenance_cancel"
     }
 }

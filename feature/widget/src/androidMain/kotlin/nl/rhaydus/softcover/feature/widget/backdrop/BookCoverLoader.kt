@@ -2,17 +2,21 @@ package nl.rhaydus.softcover.feature.widget.backdrop
 
 import android.content.Context
 import android.graphics.Bitmap
+import java.util.Collections
 import kotlin.math.roundToInt
 import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
 import nl.rhaydus.softcover.core.uibinding.cover.resolveCoverSource
 
+/** Loads book covers for one widget instance, keeping the last [capacity] while their sources are unchanged. */
 internal class BookCoverLoader(
     private val context: Context,
     private val density: Float,
+    private val coverHeightDp: Int = DEFAULT_COVER_HEIGHT_DP,
+    private val capacity: Int = 1,
 ) {
-    private var last: Pair<CoverSource, Bitmap>? = null
+    private val loaded = Collections.synchronizedMap(LinkedHashMap<CoverSource, Bitmap>())
 
     suspend fun load(book: Book): Bitmap? {
         val source = resolveCoverSource(
@@ -21,15 +25,33 @@ internal class BookCoverLoader(
             fallbackCoverUrl = book.coverUrl,
         )
 
-        return last?.takeIf { it.first == source }?.second
+        return source?.let { loaded[it] }
             ?: loadCoverBitmap(
                 context = context,
                 source = source,
-                sizePx = (COVER_HEIGHT_DP * density).roundToInt(),
-            )?.also { bitmap -> source?.let { last = it to bitmap } }
+                sizePx = (coverHeightDp * density).roundToInt(),
+            )?.also { bitmap ->
+                source?.let {
+                    remember(
+                        source = it,
+                        bitmap = bitmap,
+                    )
+                }
+            }
+    }
+
+    private fun remember(
+        source: CoverSource,
+        bitmap: Bitmap,
+    ) {
+        synchronized(loaded) {
+            loaded[source] = bitmap
+
+            if (loaded.size > capacity) loaded.remove(loaded.keys.first())
+        }
     }
 
     private companion object {
-        const val COVER_HEIGHT_DP = 86
+        const val DEFAULT_COVER_HEIGHT_DP = 86
     }
 }

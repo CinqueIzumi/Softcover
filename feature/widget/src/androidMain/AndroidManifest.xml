@@ -33,6 +33,27 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+
+        <receiver
+            android:name="nl.rhaydus.softcover.feature.widget.trending.TrendingWidgetReceiver"
+            android:exported="true"
+            android:label="@string/trending_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/trending_widget_info" />
+        </receiver>
+
+        <activity
+            android:name="nl.rhaydus.softcover.feature.widget.settings.TrendingSettingsActivity"
+            android:exported="true"
+            android:label="@string/trending_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

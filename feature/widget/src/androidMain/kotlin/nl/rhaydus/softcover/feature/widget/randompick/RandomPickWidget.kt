@@ -1,13 +1,10 @@
 package nl.rhaydus.softcover.feature.widget.randompick
 
-import android.appwidget.AppWidgetManager
 import android.content.Context
-import android.content.Intent
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.glance.GlanceId
 import androidx.glance.action.Action
 import androidx.glance.appwidget.GlanceAppWidget
@@ -27,6 +24,7 @@ import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.feature.widget.backdrop.BackdropArtworkRenderer
 import nl.rhaydus.softcover.feature.widget.backdrop.BookCoverLoader
 import nl.rhaydus.softcover.feature.widget.settings.RandomPickSettingsActivity
+import nl.rhaydus.softcover.feature.widget.settings.widgetSettingsIntent
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -54,8 +52,9 @@ internal class RandomPickWidget : GlanceAppWidget(), KoinComponent {
         val density = context.resources.displayMetrics.density
 
         val openSettings = actionStartActivity(
-            settingsIntent(
+            widgetSettingsIntent(
                 context = context,
+                activityClass = RandomPickSettingsActivity::class.java,
                 appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id),
             ),
         )
@@ -123,20 +122,4 @@ internal class RandomPickWidget : GlanceAppWidget(), KoinComponent {
             )
         }
     }
-}
-
-/** The data URI keeps each instance's PendingIntent distinct, since Intents differing only in extras share one. */
-private fun settingsIntent(
-    context: Context,
-    appWidgetId: Int,
-): Intent = Intent(
-    context,
-    RandomPickSettingsActivity::class.java,
-).apply {
-    action = AppWidgetManager.ACTION_APPWIDGET_CONFIGURE
-    data = "softcover://widget/random-pick/$appWidgetId".toUri()
-    putExtra(
-        AppWidgetManager.EXTRA_APPWIDGET_ID,
-        appWidgetId,
-    )
 }

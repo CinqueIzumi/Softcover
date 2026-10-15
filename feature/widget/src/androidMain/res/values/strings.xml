@@ -11,4 +11,10 @@
     <string name="random_pick_empty_subline">Add a few books, or pick another shelf.</string>
     <string name="random_pick_shuffle">Pick another book</string>
     <string name="random_pick_widget_label">Random pick</string>
+    <string name="trending_widget_label">Trending this week</string>
+    <string name="trending_widget_description">What readers are picking up this week, ranked.</string>
+    <string name="trending_eyebrow">TRENDING THIS WEEK</string>
+    <string name="trending_empty_headline">Nothing is trending yet</string>
+    <string name="trending_empty_subline">Check back after the next refresh.</string>
+    <string name="trending_settings">Widget settings</string>
 </resources>
