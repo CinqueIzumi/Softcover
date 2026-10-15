@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.widget
 
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import nl.rhaydus.softcover.feature.widget.refresh.RefreshingWidgetReceiver
 
-internal class SoftcoverWidgetReceiver : GlanceAppWidgetReceiver() {
+internal class SoftcoverWidgetReceiver : RefreshingWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = SoftcoverWidget()
 }

@@ -5,9 +5,18 @@
 //   ./gradlew :widget:stabilityDump
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.SoftcoverWidgetContent(label: kotlin.String): kotlin.Unit
-  skippable: true
+private fun nl.rhaydus.softcover.feature.widget.SoftcoverWidgetContent(label: kotlin.String, themeConfiguration: nl.rhaydus.softcover.core.domain.model.ThemeConfiguration): kotlin.Unit
+  skippable: false
   restartable: true
   params:
     - label: STABLE (String is immutable)
+    - themeConfiguration: UNSTABLE (has mutable properties or unstable members)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.widget.theme.SoftcoverWidgetTheme(themeConfiguration: nl.rhaydus.softcover.core.domain.model.ThemeConfiguration, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - themeConfiguration: UNSTABLE (has mutable properties or unstable members)
+    - content: STABLE (composable function type)
 

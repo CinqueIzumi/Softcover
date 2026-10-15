@@ -12,7 +12,16 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
+            implementation(project(":core:domain"))
+            implementation(project(":core:preferences"))
+            implementation(project(":core:identity"))
+            implementation(project(":core:book"))
             implementation(project(":core:designsystem"))
+            implementation(project(":core:uibinding"))
+
+            implementation(libs.rhaydus.coreCommon)
+
+            implementation(libs.koin.android)
 
             implementation(libs.androidx.glance.appwidget)
             implementation(libs.androidx.glance.material3)

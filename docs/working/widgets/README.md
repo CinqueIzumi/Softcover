@@ -11,7 +11,9 @@ implementer → test-writer → styleCheck → reviewer. No commits or pushes un
 ## Decisions
 
 - Android only. Widgets follow palette, dark mode (day/night providers for System) and Glance's
-  dynamic colour. System serif/sans stand in for Fraunces/Inter.
+  dynamic colour. System serif/sans stand in for Fraunces/Inter. Widgets paint on the app's paper
+  (`background` / `onBackground`), never Glance's `widgetBackground` (that maps to
+  `secondaryContainer`, an accent tint).
 - Room: treat v51 (this base) as current; migrate 51 → 52. Chain merges with other branches are
   handled later, out of scope. Ignore the active `domain-out-of-uistate` tracker and dim mode.
 - Trending persisted in Room; Explore and Reading's `TrendingBooksLoader` read it as the one source.
@@ -68,7 +70,13 @@ Mode; MainActivity ignores the launch intent on restore.
 `BottomBarScreen` consumes (tab switch, `BookDetailPresenter.open`). Cleared on sign-out. Move Focus
 Mode onto the same contract.
 
-### S4. Shared widget layer
+### S4. Shared widget layer ✅
+Done: `startPlatformAppServices` hook; `WidgetRefresher` + pure `refreshSignals` (placement-gated,
+1 s debounce, per-source error isolation) fed by `RefreshingWidgetReceiver`; `SoftcoverWidgetTheme`
+(exhaustive `ThemeMode` → day/night pair, dynamic on 31+); `loadCoverBitmap` in `:core:uibinding`
+shared with `ReadingSessionService`; `SoftcoverWidgetDependencies` via Koin. Widgets collect their
+inputs inside `provideContent` (a live session only recomposes on `updateAll`). Worker base: the
+widget module owns its own `CoroutineWorker` (S6); `SoftcoverWorker` stays notification-only.
 - `expect fun startPlatformAppServices(koin)` called from `startAppServices`.
 - Refresher: trigger only, debounced, inactive when no widget is placed.
 - Widget theme from `softcoverColorScheme`; exhaustive `ThemeMode` mapping.
