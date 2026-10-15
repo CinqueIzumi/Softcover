@@ -27,12 +27,11 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * Maps every tag surface on the book page to [ChipUiModel]s off the composition
- * (`component-contract.md` § 7.2 R9): [BookDetailUiState.userTagChips] ("Your tags", read-only,
- * `UserTagsSection`), [BookDetailUiState.communityTagGroups] (the community tag block, `TagsSection`,
- * grouped by category, top-5 per category, content-warning tags [ChipTone.Spoiler] until their key
- * reaches [BookDetailUiState.revealedTagKeys]), [BookDetailUiState.tagEditorOpenerChip] (the
- * "Add tags" / "Edit tags" opener) and [BookDetailUiState.userTagEditorGroups] (the tag editor's own
- * collection, `TagEditorCollection`).
+ * (`component-contract.md` § 7.2 R9): [BookDetailUiState.userTagChips] ("Your tags", read-only),
+ * [BookDetailUiState.communityTagGroups] (grouped by category, every tag by popularity,
+ * content-warning tags [ChipTone.Spoiler] until their key reaches [BookDetailUiState.revealedTagKeys]),
+ * [BookDetailUiState.tagEditorOpenerChip] (the "Add tags" / "Edit tags" opener) and
+ * [BookDetailUiState.userTagEditorGroups] (the tag editor's own collection).
  */
 internal class TagChipModelsCollector : BookDetailCollector {
     override suspend fun onLaunch(
@@ -74,8 +73,6 @@ private val COMMUNITY_TAG_CATEGORIES: List<TagCategory> = listOf(
     TagCategory.CONTENT_WARNING,
 )
 
-private const val COMMUNITY_TAGS_PER_CATEGORY = 5
-
 private val UserTag.chipKey: String
     get() = "${category.name}:$name"
 
@@ -111,15 +108,14 @@ private fun TagCategory.communityGroupLabel(): String = when (this) {
 
 private fun List<Tag>.toTagCategoryChipGroups(revealedTagKeys: Set<String>): List<TagCategoryChipGroup> =
     COMMUNITY_TAG_CATEGORIES.mapNotNull { category ->
-        val topTags = filter { it.category == category }
+        val categoryTags = filter { it.category == category }
             .sortedByDescending { it.count }
-            .take(COMMUNITY_TAGS_PER_CATEGORY)
 
-        if (topTags.isEmpty()) return@mapNotNull null
+        if (categoryTags.isEmpty()) return@mapNotNull null
 
         TagCategoryChipGroup(
             label = category.communityGroupLabel(),
-            chips = topTags.map { tag ->
+            chips = categoryTags.map { tag ->
                 val key = tag.id.toString()
                 val concealed = category == TagCategory.CONTENT_WARNING && key !in revealedTagKeys
 
