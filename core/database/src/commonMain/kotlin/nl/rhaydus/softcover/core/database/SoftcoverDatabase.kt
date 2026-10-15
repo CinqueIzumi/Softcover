@@ -14,7 +14,6 @@ import nl.rhaydus.softcover.core.database.dao.HighlightDao
 import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.database.dao.ProgressHistoryDao
-import nl.rhaydus.softcover.core.database.dao.ReadingLogDao
 import nl.rhaydus.softcover.core.database.dao.ReadingSessionDao
 import nl.rhaydus.softcover.core.database.dao.RoadmapDocumentDao
 import nl.rhaydus.softcover.core.database.dao.UserTagVocabularyDao
@@ -36,7 +35,6 @@ import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
 import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.database.model.ProgressHistoryEntity
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
-import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.database.model.RoadmapDocumentEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
@@ -66,7 +64,6 @@ import kotlin.coroutines.CoroutineContext
         DismissedContinueSeriesEntity::class,
         HighlightEntity::class,
         ReadingSessionEntity::class,
-        ReadingLogEntryEntity::class,
         TagEntity::class,
         BookTagCrossRef::class,
         ShelfManualOrderEntity::class,
@@ -77,7 +74,7 @@ import kotlin.coroutines.CoroutineContext
     views = [
         BookEditionView::class
     ],
-    version = 52,
+    version = 53,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -94,8 +91,6 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun highlightDao(): HighlightDao
 
     abstract fun readingSessionDao(): ReadingSessionDao
-
-    abstract fun readingLogDao(): ReadingLogDao
 
     abstract fun userTagVocabularyDao(): UserTagVocabularyDao
 
@@ -1371,6 +1366,12 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_52_53 = object : Migration(52, 53) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("DROP TABLE IF EXISTS reading_log_entries")
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1424,6 +1425,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_49_50,
             MIGRATION_50_51,
             MIGRATION_51_52,
+            MIGRATION_52_53,
         )
     }
 }
