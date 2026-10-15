@@ -103,6 +103,12 @@ internal class SettingsRepositoryImpl(
 
     override val listDefaultsSeeded: Flow<Boolean> = settingsLocalDataSource.listDefaultsSeeded
 
+    override val readThroughsBackfilled: Flow<Boolean> = settingsLocalDataSource.readThroughsBackfilled
+
+    override suspend fun markReadThroughsBackfilled() {
+        settingsLocalDataSource.markReadThroughsBackfilled()
+    }
+
     override suspend fun seedEnabledListIds(ids: Set<Int>) {
         settingsLocalDataSource.seedEnabledListIds(ids = ids)
     }

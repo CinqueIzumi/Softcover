@@ -22,12 +22,9 @@ import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.core.component.sheet.withModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
-import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
-import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.DrainPendingListWritesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
@@ -40,10 +37,11 @@ import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
 import nl.rhaydus.softcover.orchestration.presentation.ReAuthLogOut
 import nl.rhaydus.softcover.orchestration.presentation.ReAuthSheetUiModel
 import nl.rhaydus.softcover.orchestration.presentation.toSheetUiModel
+import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryOnStartUseCase
 
 internal class MainActivityViewModel(
     private val getUserIdUseCase: GetUserIdUseCase,
-    private val refreshLibraryUseCase: RefreshLibraryUseCase,
+    private val refreshLibraryOnStartUseCase: RefreshLibraryOnStartUseCase,
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
     private val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
     private val drainPendingListWritesUseCase: DrainPendingListWritesUseCase,
@@ -200,14 +198,8 @@ internal class MainActivityViewModel(
 
         val backgroundScope = MainScope()
 
-        // Only Currently Reading and Paused: other shelves change only through the website or other clients,
-        // and a full refetch of a large library exhausts the API's per-minute budget.
         backgroundScope.launch {
-            refreshLibraryUseCase(
-                scope = RefreshScope.ByStatuses(
-                    statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),
-                ),
-            ).onApiFailure()
+            refreshLibraryOnStartUseCase().onApiFailure()
         }
 
         backgroundScope.launch {
