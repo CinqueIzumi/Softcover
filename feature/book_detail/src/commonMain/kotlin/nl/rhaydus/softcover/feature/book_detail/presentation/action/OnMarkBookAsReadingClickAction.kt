@@ -17,8 +17,7 @@ internal class OnMarkBookAsReadingClickAction(private val book: Book) : BookDeta
     ) {
         scope.currentLocalVariables.bookMutationJobs[book.id]?.cancel()
 
-        // A previewed or scanned edition (off-shelf) becomes the created user book's edition.
-        val editionId = scope.currentState.previewEdition?.id ?: scope.currentState.scannedEditionId
+        val editionId = scope.currentState.displayedEdition?.id
 
         if (book.userBook == null) {
             scope.setState { it.copy(pendingShelfStatus = BookStatus.Reading) }

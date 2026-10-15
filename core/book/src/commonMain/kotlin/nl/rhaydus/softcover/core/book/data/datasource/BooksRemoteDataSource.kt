@@ -146,6 +146,7 @@ interface BooksRemoteDataSource {
 
     suspend fun replayMarkBookAsRead(
         bookId: Int,
+        editionId: Int?,
         userDate: String,
         actionAt: String? = null,
     )
@@ -391,7 +392,7 @@ internal class BooksRemoteDataSourceImpl(
             .toString()
 
         val input = UserBookUpdateInput(
-            edition_id = Optional.Present(book.currentEdition?.id),
+            edition_id = Optional.presentIfNotNull(editionId),
             review_has_spoilers = Optional.Present(userBook.reviewHasSpoilers),
             status_id = Optional.present(UserBookStatus.CURRENTLY_READING.code),
             last_read_date = Optional.Present(userBook.lastReadDate),
@@ -692,6 +693,7 @@ internal class BooksRemoteDataSourceImpl(
 
     override suspend fun replayMarkBookAsRead(
         bookId: Int,
+        editionId: Int?,
         userDate: String,
         actionAt: String?,
     ) {
@@ -699,6 +701,7 @@ internal class BooksRemoteDataSourceImpl(
 
         val dataObject = UserBookCreateInput(
             book_id = bookId,
+            edition_id = Optional.presentIfNotNull(editionId),
             status_id = Optional.present(UserBookStatus.READ.code),
             user_date = Optional.present(resolvedUserDate),
             action_at = Optional.presentIfNotNull(actionAt),

@@ -1305,6 +1305,53 @@ class BooksRemoteDataSourceImplTest {
             }
 
         @Test
+        fun `update path sends the passed editionId rather than the book's current edition`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook(id = 7)
+            val book = stubBook(userBook = userBook)
+            val editionId = 42
+            val expectedBook = stubBook()
+            val mutationData = mockk<MarkBookAsReadingMutation.Data>()
+            val updateUserBook = mockk<MarkBookAsReadingMutation.Data.Update_user_book>()
+            val userBookEntry = mockk<MarkBookAsReadingMutation.Data.Update_user_book.User_book>()
+
+            every {
+                book.currentEdition
+            } returns stubBookEdition(id = 10)
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<MarkBookAsReadingMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book
+            } returns updateUserBook
+
+            every {
+                updateUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.markBookAsReading(
+                book = book,
+                editionId = editionId,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<MarkBookAsReadingMutation> {
+                        it.`object`.edition_id == Optional.presentIfNotNull(editionId)
+                    },
+                )
+            }
+        }
+
+        @Test
         fun `throws when mutation returns null update_user_book wrapper`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook(id = 7)
@@ -1825,10 +1872,11 @@ class BooksRemoteDataSourceImplTest {
         fun `returns updated book copy with new page and appended journal entry on success`() = runTest {
             // ----- Arrange -----
             val newPage = 120
-            val existingJournals = listOf(ReadingJournal(
-                updatedAt = "2024-01-01T00:00:00.000000",
-                event = "status_updated",
-            ),
+            val existingJournals = listOf(
+                ReadingJournal(
+                    updatedAt = "2024-01-01T00:00:00.000000",
+                    event = "status_updated",
+                ),
             )
             val userBook = stubUserBook(
                 id = 3,
@@ -2391,6 +2439,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Act -----
             dataSource.replayMarkBookAsRead(
                 bookId = 11,
+                editionId = null,
                 userDate = "2026-01-01",
                 actionAt = actionAt,
             )
@@ -2418,6 +2467,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Act -----
             dataSource.replayMarkBookAsRead(
                 bookId = 11,
+                editionId = null,
                 userDate = userDate,
                 actionAt = null,
             )
@@ -2428,6 +2478,56 @@ class BooksRemoteDataSourceImplTest {
                     mutation = match<MarkBookAsReadMutation> {
                         it.userBookCreateInput.user_date == Optional.present(userDate) &&
                             it.userBookCreateInput.action_at is Optional.Absent
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `sets edition_id to the given editionId`() = runTest {
+            // ----- Arrange -----
+            val editionId = 55
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<MarkBookAsReadMutation>())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            dataSource.replayMarkBookAsRead(
+                bookId = 11,
+                editionId = editionId,
+                userDate = "2026-01-01",
+            )
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<MarkBookAsReadMutation> {
+                        it.userBookCreateInput.edition_id == Optional.presentIfNotNull(editionId)
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `leaves edition_id Absent when editionId is null`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                apolloClient.safeMutation(mutation = any<MarkBookAsReadMutation>())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            dataSource.replayMarkBookAsRead(
+                bookId = 11,
+                editionId = null,
+                userDate = "2026-01-01",
+            )
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<MarkBookAsReadMutation> {
+                        it.userBookCreateInput.edition_id is Optional.Absent
                     },
                 )
             }
