@@ -23,6 +23,8 @@ interface BooksLocalDataSource {
 
     fun observeUserBook(id: Int): Flow<Book?>
 
+    fun observeBooksByIds(ids: List<Int>): Flow<List<Book>>
+
     /**
      * Rewrite the **prefix** of the manual ordering for [status] with [prefixBookIds]
      * (position = index). Positions beyond `prefixBookIds.size` are intentionally left intact so
@@ -113,6 +115,12 @@ internal class BooksLocalDataSourceImpl(
         .map { entity -> entity?.toModel() }
         .distinctUntilChanged()
         .flowOn(appDispatchers.default)
+
+    override fun observeBooksByIds(ids: List<Int>): Flow<List<Book>> = dao
+        .observeBooksByIds(ids = ids)
+        .distinctUntilChanged()
+        .toModelsReusingUnchanged()
+        .distinctUntilChanged()
 
     override suspend fun getAllUserBookIds(): List<Int> {
         return dao.getAllUserBookIds()

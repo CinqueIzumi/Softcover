@@ -5,6 +5,8 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.every
+import io.mockk.mockk
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
@@ -13,7 +15,10 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
 import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
+import nl.rhaydus.softcover.feature.profile.presentation.state.RecentlyLovedEntry
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -34,6 +39,48 @@ class RecentlyLovedCardMapperTest {
         monthLabel = monthLabel,
     )
 
+    private fun LovedBook.toCard(libraryBook: Book? = null): BookCardUiModel =
+        RecentlyLovedEntry(
+            loved = this,
+            libraryBook = libraryBook,
+        ).toRecentlyLovedCard()
+
+    private fun libraryBook(
+        id: Int,
+        editionUrl: String?,
+        coverUrl: String = "https://example.com/default.jpg",
+    ): Book {
+        val edition = mockk<BookEdition> {
+            every {
+                this@mockk.id
+            } returns 99
+            every {
+                url
+            } returns editionUrl
+            every {
+                localImagePath
+            } returns null
+        }
+
+        return mockk {
+            every {
+                this@mockk.id
+            } returns id
+            every {
+                title
+            } returns "Library title"
+            every {
+                currentEdition
+            } returns edition
+            every {
+                defaultEdition
+            } returns null
+            every {
+                this@mockk.coverUrl
+            } returns coverUrl
+        }
+    }
+
     private fun BookCardUiModel.column(): BookCardVariant.Column =
         variant.shouldBeInstanceOf<BookCardVariant.Column>()
 
@@ -45,7 +92,7 @@ class RecentlyLovedCardMapperTest {
             val book = lovedBook(bookId = 42)
 
             // ----- Act -----
-            val result = book.toRecentlyLovedCard()
+            val result = book.toCard()
 
             // ----- Assert -----
             result.key shouldBe BookCardKey.Book(bookId = 42)
@@ -60,7 +107,7 @@ class RecentlyLovedCardMapperTest {
             )
 
             // ----- Act -----
-            val lines = book.toRecentlyLovedCard().column().text.supportingLines
+            val lines = book.toCard().column().text.supportingLines
 
             // ----- Assert -----
             lines shouldBe listOf(
@@ -82,7 +129,7 @@ class RecentlyLovedCardMapperTest {
             val book = lovedBook(ratingStars = 4.0)
 
             // ----- Act -----
-            val lines = book.toRecentlyLovedCard().column().text.supportingLines
+            val lines = book.toCard().column().text.supportingLines
 
             // ----- Assert -----
             lines.first() shouldBe listOf(
@@ -99,7 +146,7 @@ class RecentlyLovedCardMapperTest {
             val book = lovedBook(ratingStars = 4.26)
 
             // ----- Act -----
-            val lines = book.toRecentlyLovedCard().column().text.supportingLines
+            val lines = book.toCard().column().text.supportingLines
 
             // ----- Assert -----
             lines.first() shouldBe listOf(
@@ -119,7 +166,7 @@ class RecentlyLovedCardMapperTest {
             )
 
             // ----- Act -----
-            val text = book.toRecentlyLovedCard().column().text
+            val text = book.toCard().column().text
 
             // ----- Assert -----
             text.title shouldBe "Dune"
@@ -132,7 +179,7 @@ class RecentlyLovedCardMapperTest {
             val book = lovedBook(author = "   ")
 
             // ----- Act -----
-            val text = book.toRecentlyLovedCard().column().text
+            val text = book.toCard().column().text
 
             // ----- Assert -----
             text.byline.shouldBeNull()
@@ -144,7 +191,7 @@ class RecentlyLovedCardMapperTest {
             val book = lovedBook(author = "")
 
             // ----- Act -----
-            val text = book.toRecentlyLovedCard().column().text
+            val text = book.toCard().column().text
 
             // ----- Assert -----
             text.byline.shouldBeNull()
@@ -156,7 +203,7 @@ class RecentlyLovedCardMapperTest {
             val book = lovedBook(coverUrl = "https://example.com/dune.jpg")
 
             // ----- Act -----
-            val source = book.toRecentlyLovedCard().column().cover.shouldNotBeNull().model.source
+            val source = book.toCard().column().cover.shouldNotBeNull().model.source
 
             // ----- Assert -----
             source.shouldNotBeNull().shouldBeInstanceOf<CoverSource.Remote>().url shouldBe "https://example.com/dune.jpg"
@@ -171,11 +218,60 @@ class RecentlyLovedCardMapperTest {
             )
 
             // ----- Act -----
-            val cover = book.toRecentlyLovedCard().column().cover.shouldNotBeNull().model
+            val cover = book.toCard().column().cover.shouldNotBeNull().model
 
             // ----- Assert -----
             cover.source.shouldBeNull()
             cover.coverlessTitle shouldBe "Dune"
+        }
+
+        @Test
+        fun `uses the library book's picked edition cover over the profile cover when it is present`() {
+            // ----- Arrange -----
+            val book = lovedBook(
+                bookId = 7,
+                coverUrl = "https://example.com/profile.jpg",
+            )
+            val library = libraryBook(
+                id = 7,
+                editionUrl = "https://example.com/picked.jpg",
+            )
+
+            // ----- Act -----
+            val cover = book.toCard(libraryBook = library).column().cover.shouldNotBeNull().model
+
+            // ----- Assert -----
+            cover.source.shouldNotBeNull().shouldBeInstanceOf<CoverSource.Remote>().url shouldBe
+                "https://example.com/picked.jpg"
+            cover.sharedTransitionKey shouldBe bookTransitionKey(
+                element = BookTransitionElement.Cover,
+                bookId = 7,
+            )
+        }
+
+        @Test
+        fun `keeps the loved book's title and rating when a library book supplies the cover`() {
+            // ----- Arrange -----
+            val book = lovedBook(
+                title = "Dune",
+                ratingStars = 4.5,
+            )
+            val library = libraryBook(
+                id = 7,
+                editionUrl = "https://example.com/picked.jpg",
+            )
+
+            // ----- Act -----
+            val text = book.toCard(libraryBook = library).column().text
+
+            // ----- Assert -----
+            text.title shouldBe "Dune"
+            text.supportingLines.first() shouldBe listOf(
+                BookCardLinePart.Rating(
+                    label = "4.5",
+                    contentDescription = "Rated 4.5 out of 5",
+                ),
+            )
         }
 
         @Test
@@ -184,7 +280,7 @@ class RecentlyLovedCardMapperTest {
             val book = lovedBook()
 
             // ----- Act -----
-            val result = book.toRecentlyLovedCard()
+            val result = book.toCard()
 
             // ----- Assert -----
             result.column().hasMenu shouldBe false
@@ -201,7 +297,7 @@ class RecentlyLovedCardMapperTest {
             val book = lovedBook(bookId = 42)
 
             // ----- Act -----
-            val column = book.toRecentlyLovedCard().column()
+            val column = book.toCard().column()
 
             // ----- Assert -----
             column.text.titleTransitionKey shouldBe bookTransitionKey(
@@ -220,7 +316,7 @@ class RecentlyLovedCardMapperTest {
             val book = lovedBook(ratingStars = 4.5)
 
             // ----- Act -----
-            val lines = book.toRecentlyLovedCard().column().text.supportingLines
+            val lines = book.toCard().column().text.supportingLines
 
             // ----- Assert -----
             val ratings = lines.flatten().filterIsInstance<BookCardLinePart.Rating>()
@@ -234,8 +330,8 @@ class RecentlyLovedCardMapperTest {
             val second = lovedBook(bookId = 2)
 
             // ----- Act -----
-            val firstKey = first.toRecentlyLovedCard().column().text.titleTransitionKey
-            val secondKey = second.toRecentlyLovedCard().column().text.titleTransitionKey
+            val firstKey = first.toCard().column().text.titleTransitionKey
+            val secondKey = second.toCard().column().text.titleTransitionKey
 
             // ----- Assert -----
             firstKey.shouldNotBeNull() shouldNotBe secondKey

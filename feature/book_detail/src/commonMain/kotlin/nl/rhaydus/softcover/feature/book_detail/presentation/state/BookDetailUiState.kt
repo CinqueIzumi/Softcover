@@ -15,7 +15,9 @@ import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipSet
+import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -296,6 +298,18 @@ internal data class BookDetailUiState(
     val revealedTagKeys: ImmutableSet<String> = persistentSetOf(),
 
     val tagEditorOpenerChip: ChipUiModel? = null,
+    val communityTagsShowMoreChip: ChipUiModel = ChipUiModel(
+        key = "community-tags-show-more",
+        label = "Show more",
+        tone = ChipTone.Dashed,
+        interaction = ChipInteraction.Clickable,
+    ),
+    val communityTagsShowLessChip: ChipUiModel = ChipUiModel(
+        key = "community-tags-show-less",
+        label = "Show less",
+        tone = ChipTone.Dashed,
+        interaction = ChipInteraction.Clickable,
+    ),
 
     val userTagEditorGroups: ImmutableList<UserTagEditorChipGroup> = persistentListOf(),
     val tagEditorEmptyState: EmptyStateUiModel = EmptyStateUiModel(

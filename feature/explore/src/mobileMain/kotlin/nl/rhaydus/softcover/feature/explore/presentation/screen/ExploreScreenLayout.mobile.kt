@@ -1,8 +1,10 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
@@ -158,6 +160,7 @@ internal actual fun ExploreScreenLayout(
                 },
             )
         },
+        contentWindowInsets = WindowInsets.statusBars,
     ) { padding ->
         if (isOnline.not()) {
             state.offlineEmptyState?.let { offlineEmptyState ->
