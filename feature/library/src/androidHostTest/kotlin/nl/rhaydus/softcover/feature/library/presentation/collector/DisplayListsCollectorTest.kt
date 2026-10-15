@@ -93,7 +93,6 @@ class DisplayListsCollectorTest {
             positionsInSeries = emptyList(),
             isCompilation = false,
             userBook = userBook,
-            userBookRead = null,
         )
     }
 

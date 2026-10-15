@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.core.component.progress
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -26,6 +28,45 @@ class ProgressSheetUiModelTest {
         canDecreaseMinutes = false,
         canIncreaseMinutes = true,
     )
+
+    @Nested
+    inner class ScaffoldFor {
+        @Test
+        fun `a paused book swaps the eyebrow and the primary label`() {
+            // ----- Arrange -----
+            val title = "The Starless Sea"
+
+            // ----- Act -----
+            val paused = ProgressSheetUiModel.scaffoldFor(
+                bookTitle = title,
+                isPaused = true,
+            )
+            val reading = ProgressSheetUiModel.scaffoldFor(bookTitle = title)
+
+            // ----- Assert -----
+            paused.header.shouldNotBeNull().section.eyebrow shouldBe "On hold"
+            reading.header.shouldNotBeNull().section.eyebrow shouldNotBe "On hold"
+            paused.footer.shouldNotBeNull().primary.shouldNotBeNull().label shouldBe "Update and resume"
+            reading.footer.shouldNotBeNull().primary.shouldNotBeNull().label shouldNotBe "Update and resume"
+        }
+
+        @Test
+        fun `pausing leaves the headline and the secondary button alone`() {
+            // ----- Arrange -----
+            val title = "The Starless Sea"
+
+            // ----- Act -----
+            val paused = ProgressSheetUiModel.scaffoldFor(
+                bookTitle = title,
+                isPaused = true,
+            )
+            val reading = ProgressSheetUiModel.scaffoldFor(bookTitle = title)
+
+            // ----- Assert -----
+            paused.header.shouldNotBeNull().section.headlineText shouldBe title
+            paused.footer.shouldNotBeNull().secondary shouldBe reading.footer.shouldNotBeNull().secondary
+        }
+    }
 
     @Nested
     inner class TabsFor {

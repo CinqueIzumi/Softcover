@@ -21,6 +21,7 @@ internal class OnAddUnknownIsbnDismissedAction : ScanAction {
             it.copy(
                 unknownIsbnSheet = SheetSession.Closed,
                 unknownIsbn = null,
+                isImportPending = false,
             )
         }
 

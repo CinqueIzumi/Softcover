@@ -351,8 +351,8 @@ private fun ActiveSession.progressSubtitle(): String? {
 
     if (edition?.isAudiobook == true) return null
 
-    val currentPage = book.userBookRead?.currentPage ?: return null
-    val percent = book.userBookRead?.progress?.let { "${it.toInt()}%" }
+    val currentPage = book.currentRead?.currentPage ?: return null
+    val percent = book.currentRead?.progress?.let { "${it.toInt()}%" }
 
     return if (percent != null) "Page $currentPage · $percent" else "Page $currentPage"
 }

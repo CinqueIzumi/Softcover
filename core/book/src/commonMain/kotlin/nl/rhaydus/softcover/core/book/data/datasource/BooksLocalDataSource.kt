@@ -56,7 +56,7 @@ interface BooksLocalDataSource {
 
     suspend fun getAllUserBookIds(): List<Int>
 
-    suspend fun getUserBookIdsByStatus(status: UserBookStatus): List<Int>
+    suspend fun getUserBookIdsByStatuses(statuses: Set<UserBookStatus>): List<Int>
 
     suspend fun getExistingBookIds(ids: List<Int>): List<Int>
 
@@ -118,8 +118,8 @@ internal class BooksLocalDataSourceImpl(
         return dao.getAllUserBookIds()
     }
 
-    override suspend fun getUserBookIdsByStatus(status: UserBookStatus): List<Int> {
-        return dao.getUserBookIdsByStatus(statusCode = status.code)
+    override suspend fun getUserBookIdsByStatuses(statuses: Set<UserBookStatus>): List<Int> {
+        return dao.getUserBookIdsByStatuses(statusCodes = statuses.map { it.code })
     }
 
     override suspend fun getExistingBookIds(ids: List<Int>): List<Int> {
@@ -172,7 +172,9 @@ internal class BooksLocalDataSourceImpl(
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return when (status) {
-            UserBookStatus.CURRENTLY_READING -> dao.getBooksByStatusAndEvents(
+            UserBookStatus.CURRENTLY_READING,
+            UserBookStatus.PAUSED,
+            -> dao.getBooksByStatusAndEvents(
                 statusCode = status.code,
                 events = listOf("progress_updated", "user_book_read_started"),
             )

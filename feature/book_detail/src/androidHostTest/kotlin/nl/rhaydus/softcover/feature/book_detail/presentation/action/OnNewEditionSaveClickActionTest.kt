@@ -103,7 +103,7 @@ class OnNewEditionSaveClickActionTest {
                 book = book,
                 editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
-                showEditEditionSheet = true,
+                editionSheetRequested = true,
             )
             dependencies = stubDependencies(this)
 
@@ -170,7 +170,7 @@ class OnNewEditionSaveClickActionTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
                 book = null,
-                showEditEditionSheet = true,
+                editionSheetRequested = true,
             )
             dependencies = stubDependencies(this)
 
@@ -203,7 +203,7 @@ class OnNewEditionSaveClickActionTest {
                 editions = persistentListOf(stubEdition(id = 5)),
                 selectedEditionId = 5,
                 scannedEditionId = 42,
-                showEditEditionSheet = true,
+                editionSheetRequested = true,
             )
             stateFlow.value = initialState
             dependencies = stubDependencies(this)
@@ -274,7 +274,7 @@ class OnNewEditionSaveClickActionTest {
                 book = book,
                 editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
-                showEditEditionSheet = true,
+                editionSheetRequested = true,
             )
             dependencies = stubDependencies(this)
 
@@ -288,7 +288,7 @@ class OnNewEditionSaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.previewEdition shouldBe edition
-            stateFlow.value.showEditEditionSheet shouldBe true
+            stateFlow.value.editionSheetRequested shouldBe true
             eventChannel.tryReceive().getOrNull() shouldBe null
             coVerify(exactly = 0) {
                 updateBookEditionUseCase(
@@ -308,7 +308,7 @@ class OnNewEditionSaveClickActionTest {
                 editions = persistentListOf(edition),
                 selectedEditionId = edition.id,
                 scannedEditionId = 42,
-                showEditEditionSheet = true,
+                editionSheetRequested = true,
             )
             dependencies = stubDependencies(this)
 

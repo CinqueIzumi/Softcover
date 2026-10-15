@@ -7,7 +7,9 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
@@ -290,9 +292,65 @@ class SettingsLocalDataSourceImplTest {
     }
 
     @Nested
+    inner class ReadThroughsBackfilled {
+        @Test
+        fun `emits false for a fresh store`() = runTest {
+            // ----- Arrange -----
+            persisted.value = AppSettingsEntity()
+
+            // ----- Act -----
+            val flag = dataSource.readThroughsBackfilled.first()
+
+            // ----- Assert -----
+            flag shouldBe false
+        }
+
+        @Test
+        fun `emits true after markReadThroughsBackfilled`() = runTest {
+            // ----- Arrange -----
+            dataSource.readThroughsBackfilled.test {
+                awaitItem() shouldBe false
+
+                // ----- Act -----
+                dataSource.markReadThroughsBackfilled()
+
+                // ----- Assert -----
+                awaitItem() shouldBe true
+            }
+        }
+
+        @Test
+        fun `decodes to false when the stored settings lack the key`() {
+            // ----- Arrange -----
+            val stored = """{"userId":5}"""
+
+            // ----- Act -----
+            val decoded = Json.decodeFromString<AppSettingsEntity>(stored)
+
+            // ----- Assert -----
+            decoded.userId shouldBe 5
+            decoded.readThroughsBackfilled shouldBe false
+        }
+    }
+
+    @Nested
     inner class ResetAllSettings {
         @Test
-        fun `restores every setting to its default`() = runTest {
+        fun `returns the backfilled flag to false`() = runTest {
+            // ----- Arrange -----
+            persisted.value = AppSettingsEntity(readThroughsBackfilled = true)
+
+            // ----- Act -----
+            dataSource.resetAllSettings()
+
+            // ----- Assert -----
+            dataSource.readThroughsBackfilled.test {
+                awaitItem() shouldBe false
+            }
+        }
+
+        @Test
+        fun `restores every setting to its default but keeps the paused shelf seeded`() = runTest {
             // ----- Arrange -----
             persisted.value = AppSettingsEntity(
                 userId = 42,
@@ -306,7 +364,7 @@ class SettingsLocalDataSourceImplTest {
             dataSource.resetAllSettings()
 
             // ----- Assert -----
-            persisted.value shouldBe AppSettingsEntity()
+            persisted.value shouldBe AppSettingsEntity(pausedShelfSeeded = true)
         }
     }
 }

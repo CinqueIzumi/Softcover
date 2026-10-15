@@ -44,7 +44,6 @@ class LibraryUiStateTest {
         isCompilation = false,
         tags = emptyList(),
         userBook = null,
-        userBookRead = null,
     )
 
     private fun buildState(

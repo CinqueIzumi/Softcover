@@ -19,7 +19,7 @@ class MarkBookAsReadUseCase(
 
         val updatedBook = repository.markBookAsRead(
             book = book,
-            editionId = editionId,
+            editionId = book.statusChangeEditionId(requestedEditionId = editionId),
             actionAt = actionAt,
         )
 

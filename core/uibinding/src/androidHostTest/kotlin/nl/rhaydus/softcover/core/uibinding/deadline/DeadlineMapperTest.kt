@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.core.uibinding.deadline
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.component.badge.BadgeSize
@@ -260,6 +262,39 @@ class DeadlineMapperTest {
             // ----- Assert -----
             result.text shouldBe "02/09/2026 • Expired"
         }
+
+        @Test
+        fun `a paused book reads On hold in place of the date and pace`() {
+            // ----- Arrange -----
+            val subject = progress()
+
+            // ----- Act -----
+            val result = subject.toDeadlineSummaryUiModel(
+                dateStyle = DateStyle.DAY_MONTH_YEAR,
+                isPaused = true,
+            )
+
+            // ----- Assert -----
+            result.text shouldBe "On hold"
+        }
+
+        @Test
+        fun `a paused expired book still reads On hold`() {
+            // ----- Arrange -----
+            val subject = progress(
+                isExpired = true,
+                isOnTrack = false,
+            )
+
+            // ----- Act -----
+            val result = subject.toDeadlineSummaryUiModel(
+                dateStyle = DateStyle.DAY_MONTH_YEAR,
+                isPaused = true,
+            )
+
+            // ----- Assert -----
+            result.text shouldBe "On hold"
+        }
     }
 
     @Nested
@@ -390,6 +425,55 @@ class DeadlineMapperTest {
 
             // ----- Assert -----
             result.goal shouldBe "Deadline passed 1 day ago."
+        }
+ 
+        @Test
+        fun `a paused book has no badge and a goal that asks to resume`() {
+            // ----- Arrange -----
+            val subject = progress()
+
+            // ----- Act -----
+            val result = subject.toDeadlineRowUiModel(
+                dateStyle = DateStyle.DAY_MONTH_YEAR,
+                isPaused = true,
+            )
+
+            // ----- Assert -----
+            result.badge.shouldBeNull()
+            result.goal shouldBe "On hold. Resume to get back on pace."
+            result.title shouldBe "Finish by 02/09/2026"
+        }
+
+        @Test
+        fun `a book that is not paused keeps its badge`() {
+            // ----- Arrange -----
+            val subject = progress()
+
+            // ----- Act -----
+            val result = rowOf(subject)
+
+            // ----- Assert -----
+            result.badge.shouldNotBeNull()
+        }
+
+        @Test
+        fun `a paused expired book keeps the expired flag but drops the badge`() {
+            // ----- Arrange -----
+            val subject = progress(
+                daysRemaining = -3,
+                isExpired = true,
+                isOnTrack = false,
+            )
+
+            // ----- Act -----
+            val result = subject.toDeadlineRowUiModel(
+                dateStyle = DateStyle.DAY_MONTH_YEAR,
+                isPaused = true,
+            )
+
+            // ----- Assert -----
+            result.isExpired shouldBe true
+            result.badge.shouldBeNull()
         }
     }
 }

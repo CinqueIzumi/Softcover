@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
  */
 class RecordBookProgressUseCase(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
+    private val resumeIfPausedUseCase: ResumeIfPausedUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
 ) {
     suspend operator fun invoke(
@@ -38,12 +39,17 @@ class RecordBookProgressUseCase(
                 actionAt = actionAt,
             )
         } else {
-            updateBookProgressUseCase(
-                book = book,
-                newPage = newPage,
-                newSeconds = newSeconds,
-                actionAt = actionAt,
-            ).map { null }
+            resumeIfPausedUseCase(book = book).fold(
+                onSuccess = { resumedBook ->
+                    updateBookProgressUseCase(
+                        book = resumedBook,
+                        newPage = newPage,
+                        newSeconds = newSeconds,
+                        actionAt = actionAt,
+                    ).map { null }
+                },
+                onFailure = { error -> Result.failure(error) },
+            )
         }
     }
 }

@@ -9,7 +9,10 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
+import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
+import nl.rhaydus.softcover.core.component.callout.CalloutVariant
 import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
+import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -19,7 +22,6 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
-import nl.rhaydus.softcover.feature.book_detail.presentation.editionSheetWithQuery
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -173,6 +175,28 @@ class BookDetailUiStateTest {
         }
 
         @Test
+        fun `resolves scanned edition from editions when the book does not carry it`() {
+            // ----- Arrange -----
+            val scannedEdition = stubEdition(id = 42)
+            val book = stubBook(
+                userBook = null,
+                currentEdition = null,
+                editions = persistentListOf(stubEdition(id = 1)),
+            )
+            val state = buildBookDetailUiState().copy(
+                book = book,
+                editions = persistentListOf(scannedEdition),
+                scannedEditionId = 42,
+            )
+
+            // ----- Act -----
+            val result = state.scannedEdition
+
+            // ----- Assert -----
+            result shouldBe scannedEdition
+        }
+
+        @Test
         fun `falls back to book currentEdition when scannedEditionId is null and userBook is present`() {
             // ----- Arrange -----
             val bookEdition = stubEdition(id = 10)
@@ -242,7 +266,7 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val state = buildBookDetailUiState().copy(
                 editions = persistentListOf(editionWithIsbn, editionWithoutIsbn),
-                editionSheet = editionSheetWithQuery(query = ""),
+                editionSearchQuery = "",
             )
 
             // ----- Act -----
@@ -257,7 +281,7 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val state = buildBookDetailUiState().copy(
                 editions = persistentListOf(editionWithIsbn, editionWithoutIsbn),
-                editionSheet = editionSheetWithQuery(query = "Penguin"),
+                editionSearchQuery = "Penguin",
             )
 
             // ----- Act -----
@@ -272,7 +296,7 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val state = buildBookDetailUiState().copy(
                 editions = persistentListOf(editionNullBoth),
-                editionSheet = editionSheetWithQuery(query = "anything"),
+                editionSearchQuery = "anything",
             )
 
             // ----- Act -----
@@ -788,6 +812,124 @@ class BookDetailUiStateTest {
 
             // ----- Assert -----
             result shouldBe BookStatus.Read
+        }
+    }
+
+    @Nested
+    inner class YoursLensBlocks {
+        private fun bookWithStatus(status: BookStatus): Book = mockk<Book>().also { mock ->
+            every {
+                mock.status
+            } returns status
+        }
+
+        private fun stateWithStatus(status: BookStatus): BookDetailUiState = buildBookDetailUiState()
+            .copy(book = bookWithStatus(status))
+
+        private val callout = CalloutUiModel(
+            variant = CalloutVariant.Neutral(),
+            eyebrow = "Eyebrow",
+            body = "Body",
+        )
+
+        @Test
+        fun `shows the in progress section while reading`() {
+            // ----- Arrange -----
+            val state = stateWithStatus(BookStatus.Reading)
+
+            // ----- Act -----
+            val result = state.showsInProgressSection
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `shows the in progress section while paused`() {
+            // ----- Arrange -----
+            val state = stateWithStatus(BookStatus.Paused)
+
+            // ----- Act -----
+            val result = state.showsInProgressSection
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `hides the in progress section for every other status`() {
+            // ----- Arrange -----
+            val others = BookStatus.entries - setOf(BookStatus.Reading, BookStatus.Paused)
+
+            // ----- Act -----
+            val results = others.map { stateWithStatus(it).showsInProgressSection }
+
+            // ----- Assert -----
+            results.none { it } shouldBe true
+        }
+
+        @Test
+        fun `hides the in progress section when no book is loaded`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState()
+
+            // ----- Act -----
+            val result = state.showsInProgressSection
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `keeps the verdict block only when the book is read`() {
+            // ----- Arrange -----
+            val verdict = VerdictBlockUiModel.Empty
+            val read = stateWithStatus(BookStatus.Read).copy(verdictBlock = verdict)
+            val paused = stateWithStatus(BookStatus.Paused).copy(verdictBlock = verdict)
+
+            // ----- Act -----
+            val readResult = read.yoursVerdictBlock
+            val pausedResult = paused.yoursVerdictBlock
+
+            // ----- Assert -----
+            readResult shouldBe verdict
+            pausedResult.shouldBeNull()
+        }
+
+        @Test
+        fun `has a leading block when the in progress section shows`() {
+            // ----- Arrange -----
+            val state = stateWithStatus(BookStatus.Paused)
+
+            // ----- Act -----
+            val result = state.hasYoursLeadingBlock
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `has a leading block when only a status callout is present`() {
+            // ----- Arrange -----
+            val state = stateWithStatus(BookStatus.Read).copy(statusCallout = callout)
+
+            // ----- Act -----
+            val result = state.hasYoursLeadingBlock
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `has no leading block without an in progress section or a status callout`() {
+            // ----- Arrange -----
+            val state = stateWithStatus(BookStatus.Read)
+
+            // ----- Act -----
+            val result = state.hasYoursLeadingBlock
+
+            // ----- Assert -----
+            result shouldBe false
         }
     }
 }

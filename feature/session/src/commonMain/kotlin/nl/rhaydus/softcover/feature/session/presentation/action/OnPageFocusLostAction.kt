@@ -27,7 +27,7 @@ internal data object OnPageFocusLostAction : FocusModeAction {
 
         val storedPage = dependencies.activeSessionController.activeSession.value
             ?.book
-            ?.userBookRead
+            ?.currentRead
             ?.currentPage
             ?: 0
 

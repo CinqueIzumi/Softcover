@@ -3,12 +3,16 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCaptureProgress
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
+import nl.rhaydus.softcover.core.component.share.ShareCardFormat
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.sheet.isClosing
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
@@ -17,6 +21,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareCardSize
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareCardVariant
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.shareSheetFor
@@ -45,15 +50,23 @@ class OnShareBookClickActionTest {
         progress: ShareCaptureProgress = ShareCaptureProgress.Idle,
     ): ShareSheetUiModel = shareSheetFor(
         card = BookShareCardUiModel(
-            coverUrl = null,
+            cover = CoverUiModel(
+                source = null,
+                coverlessTitle = "Piranesi",
+                variant = CoverVariant.Floating,
+            ),
             title = "Piranesi",
             author = "Susanna Clarke",
             statsLine = null,
             description = null,
+            format = ShareCardFormat.Story,
         ),
         bookTitle = "Piranesi",
         variant = ShareCardVariant.BOOK,
         hasUpdateCard = false,
+        size = ShareCardSize.STORY,
+        hasExpandableText = false,
+        tagPicker = null,
         progress = progress,
     )
 
@@ -72,6 +85,24 @@ class OnShareBookClickActionTest {
 
     @Nested
     inner class Execute {
+        @Test
+        fun `resets the chosen size to story`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = PreviewData.baseBook,
+                chosenShareSize = ShareCardSize.FULL_TEXT,
+            )
+
+            // ----- Act -----
+            OnShareBookClickAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.chosenShareSize shouldBe ShareCardSize.STORY
+        }
+
         @Test
         fun `requests the share sheet and clears the chosen variant`() = runTest {
             // ----- Arrange -----
@@ -143,6 +174,28 @@ class OnShareBookClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.shareCapture shouldBe ShareCaptureState()
+        }
+
+        @Test
+        fun `clears the share tag selections and collapses the picker`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = PreviewData.baseBook,
+                selectedBookShareTags = persistentSetOf("Cozy"),
+                deselectedUpdateShareTags = persistentSetOf("epic"),
+                shareTagPickerExpanded = true,
+            )
+
+            // ----- Act -----
+            OnShareBookClickAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectedBookShareTags shouldBe persistentSetOf<String>()
+            stateFlow.value.deselectedUpdateShareTags shouldBe persistentSetOf<String>()
+            stateFlow.value.shareTagPickerExpanded shouldBe false
         }
     }
 }

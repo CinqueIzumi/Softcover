@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShelveReading
 import kotlin.math.roundToInt
 
 internal fun Book.toShelveReadingStatus(): ShelveReadingStatusUiModel? {
-    val read = userBookRead ?: return null
+    val read = currentRead ?: return null
     val isAudiobook = currentEdition?.isAudiobook == true
 
     return ShelveReadingStatusUiModel(

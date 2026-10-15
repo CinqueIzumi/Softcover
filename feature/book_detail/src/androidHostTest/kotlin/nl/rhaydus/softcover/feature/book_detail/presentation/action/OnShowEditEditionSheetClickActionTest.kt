@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -244,13 +246,13 @@ class OnShowEditEditionSheetClickActionTest {
         }
 
         @Test
-        fun `sets showEditEditionSheet to true on memoized second open`() = runTest {
+        fun `sets editionSheetRequested to true on memoized second open`() = runTest {
             // ----- Arrange -----
             val bookId = 5
             val book = stubBook(id = bookId)
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
-                showEditEditionSheet = false,
+                editionSheetRequested = false,
             )
             localVariablesFlow.value = BookDetailLocalVariables(editionsLoadedForBookId = bookId)
             dependencies = stubDependencies(this)
@@ -264,7 +266,7 @@ class OnShowEditEditionSheetClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe true
+            stateFlow.value.editionSheetRequested shouldBe true
         }
 
         @Test
@@ -289,7 +291,81 @@ class OnShowEditEditionSheetClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.loadingEditions shouldBe false
-            stateFlow.value.showEditEditionSheet shouldBe true
+            stateFlow.value.editionSheetRequested shouldBe true
+        }
+
+        @Test
+        fun `sets a non-null editionsError after use case failure`() = runTest {
+            // ----- Arrange -----
+            val bookId = 99
+            stateFlow.value = buildBookDetailUiState().copy(book = stubBook(id = bookId))
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                getEditionsByBookIdUseCase(bookId = bookId)
+            } returns Result.failure(RuntimeException("network error"))
+
+            // ----- Act -----
+            OnShowEditEditionSheetClickAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.editionsError.shouldNotBeNull()
+        }
+
+        @Test
+        fun `clears editionsError when a retry succeeds`() = runTest {
+            // ----- Arrange -----
+            val bookId = 99
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stubBook(id = bookId),
+                editionsError = "Couldn't load the editions.",
+            )
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                getEditionsByBookIdUseCase(bookId = bookId)
+            } returns Result.success(emptyList())
+
+            // ----- Act -----
+            OnShowEditEditionSheetClickAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.editionsError.shouldBeNull()
+        }
+
+        @Test
+        fun `clears editionsError at the start of a retry while the fetch is in flight`() = runTest {
+            // ----- Arrange -----
+            val bookId = 99
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stubBook(id = bookId),
+                editionsError = "Couldn't load the editions.",
+            )
+            dependencies = stubDependencies(this)
+
+            var errorAtInvocation: String? = "unset"
+
+            coEvery {
+                getEditionsByBookIdUseCase(bookId = bookId)
+            } coAnswers {
+                errorAtInvocation = stateFlow.value.editionsError
+                Result.success(emptyList())
+            }
+
+            // ----- Act -----
+            OnShowEditEditionSheetClickAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            errorAtInvocation.shouldBeNull()
         }
 
         @Test
@@ -331,7 +407,7 @@ class OnShowEditEditionSheetClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe false
+            stateFlow.value.editionSheetRequested shouldBe false
             coVerify(exactly = 0) {
                 getEditionsByBookIdUseCase(bookId = any())
             }

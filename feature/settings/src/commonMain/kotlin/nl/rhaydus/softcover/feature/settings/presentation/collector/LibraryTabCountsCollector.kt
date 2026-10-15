@@ -2,8 +2,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.collector
 
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
@@ -16,21 +15,8 @@ internal class LibraryTabCountsCollector : LibraryVisibilityCollector {
         scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>,
         dependencies: LibraryVisibilitySettingsDependencies,
     ) {
-        combine(
-            dependencies.getAllUserBooksUseCase(),
-            dependencies.getCurrentlyReadingUserBooksUseCase(),
-            dependencies.getWantToReadUserBooksUseCase(),
-            dependencies.getReadUserBooksUseCase(),
-            dependencies.getDidNotFinishUserBooksUseCase(),
-        ) { all, currentlyReading, wantToRead, read, didNotFinish ->
-            val statusCounts: Map<Int, Int> = mapOf(
-                UserBookStatus.CURRENTLY_READING.code to currentlyReading.size,
-                UserBookStatus.WANT_TO_READ.code to wantToRead.size,
-                UserBookStatus.READ.code to read.size,
-                UserBookStatus.DID_NOT_FINISH.code to didNotFinish.size,
-            )
-
-            all.size to statusCounts
+        dependencies.getAllUserBooksUseCase().map { all ->
+            all.size to all.groupingBy { book -> book.status.code }.eachCount()
         }.collectLatest { (totalCount, statusCounts) ->
             scope.setState { state ->
                 state

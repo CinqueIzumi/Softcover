@@ -16,7 +16,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
-import nl.rhaydus.softcover.feature.book_detail.presentation.editionSheetWithQuery
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -87,7 +86,7 @@ class EditionCardsCollectorTest {
                     buildEdition(id = 1).copy(publisher = "Tor"),
                     buildEdition(id = 2).copy(publisher = "Penguin"),
                 ),
-                editionSheet = editionSheetWithQuery(query = "penguin"),
+                editionSearchQuery = "penguin",
             )
             val collector = EditionCardsCollector()
 
@@ -193,7 +192,7 @@ class EditionCardsCollectorTest {
                     buildEdition(id = 2).copy(publisher = "Penguin"),
                     buildEdition(id = 3).copy(publisher = "Tor"),
                 ),
-                editionSheet = editionSheetWithQuery(query = "tor"),
+                editionSearchQuery = "tor",
             )
             val collector = EditionCardsCollector()
 

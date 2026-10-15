@@ -37,10 +37,14 @@ fun DeadlineProgress.toCoverOverlayUiModel(): CoverOverlayUiModel =
 /**
  * A deadline's progress as the summary line's text, in [dateStyle]'s date format. The pace is the
  * status label once the deadline is expired, otherwise the required pace rounded up to a whole unit.
+ * A paused book reads "On hold" in place of the date and pace.
  */
 fun DeadlineProgress.toDeadlineSummaryUiModel(
     dateStyle: DateStyle,
+    isPaused: Boolean = false,
 ): DeadlineSummaryUiModel {
+    if (isPaused) return DeadlineSummaryUiModel(text = "On hold")
+
     val dateText = dateStyle.formatter.format(deadline)
 
     val paceText = if (status == DeadlineStatus.Expired) {
@@ -58,13 +62,17 @@ fun DeadlineProgress.toDeadlineSummaryUiModel(
 /**
  * A deadline's progress as the deadline card: the "Finish by" date in [dateStyle], the status badge
  * and the goal sentence. An expired deadline says how long ago it passed; otherwise the goal states
- * the pace needed for the remaining days, prefixed by how far behind the reader is when they are.
+ * the pace needed for the remaining days, prefixed by how far behind the reader is when they are. A
+ * paused book has no badge and a goal that asks to resume.
  */
-fun DeadlineProgress.toDeadlineRowUiModel(dateStyle: DateStyle): DeadlineRowUiModel =
+fun DeadlineProgress.toDeadlineRowUiModel(
+    dateStyle: DateStyle,
+    isPaused: Boolean = false,
+): DeadlineRowUiModel =
     DeadlineRowUiModel(
         title = "Finish by ${dateStyle.formatter.format(deadline)}",
-        badge = toBadgeUiModel(),
-        goal = goalText(),
+        badge = if (isPaused) null else toBadgeUiModel(),
+        goal = if (isPaused) "On hold. Resume to get back on pace." else goalText(),
         isExpired = isExpired,
     )
 

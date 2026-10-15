@@ -3,14 +3,12 @@ package nl.rhaydus.softcover.core.presentation.model
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBook
-import nl.rhaydus.softcover.core.domain.model.UserBookRead
 
 data class BookInitialCover(
     val currentEdition: BookEdition?,
     val defaultEdition: BookEdition?,
     val fallbackCoverUrl: String?,
     val userBook: UserBook? = null,
-    val userBookRead: UserBookRead? = null,
     val title: String? = null,
     /** Null when unknown; blank when the book has no series, unlike `Book.seriesText`, which is null then. */
     val seriesText: String? = null,
@@ -28,10 +26,17 @@ data class BookInitialCover(
             defaultEdition = book.defaultEdition,
             fallbackCoverUrl = book.coverUrl,
             userBook = book.userBook,
-            userBookRead = book.userBookRead,
             title = book.title,
             seriesText = book.seriesText.orEmpty(),
             rating = book.rating,
+        )
+
+        fun forScannedEdition(
+            book: Book,
+            editionId: Int?,
+        ): BookInitialCover = fromBook(book = book).copy(
+            currentEdition = book.editions.firstOrNull { it.id == editionId } ?: book.currentEdition,
+            scannedEditionId = editionId,
         )
 
         fun fromEdition(edition: BookEdition): BookInitialCover = BookInitialCover(

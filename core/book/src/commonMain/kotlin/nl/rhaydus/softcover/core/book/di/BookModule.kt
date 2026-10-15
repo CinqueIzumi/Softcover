@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetDidNotFinishUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.GetPausedUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedBooksByStatusUseCase
@@ -26,10 +27,12 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ResumeIfPausedUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.StageBookRemovalUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UndoBookRemovalUseCase
@@ -64,6 +67,8 @@ val bookModule = module {
             userBookWriteQueue = get(),
             userBookWriteDrainer = get(),
             booksLocalDataSource = get(),
+            networkAvailability = get(),
+            applicationScope = get(),
         )
     }
 
@@ -120,6 +125,10 @@ val bookModule = module {
     }
 
     factory {
+        GetPausedUserBooksUseCase(booksRepository = get())
+    }
+
+    factory {
         GetDidNotFinishUserBooksUseCase(booksRepository = get())
     }
 
@@ -157,6 +166,14 @@ val bookModule = module {
 
     factory {
         MarkBookAsReadingUseCase(booksRepository = get())
+    }
+
+    factory {
+        PauseBookUseCase(booksRepository = get())
+    }
+
+    factory {
+        ResumeIfPausedUseCase(booksRepository = get())
     }
 
     factory {
@@ -211,6 +228,7 @@ val bookModule = module {
     factory {
         RecordBookProgressUseCase(
             markBookAsReadUseCase = get(),
+            resumeIfPausedUseCase = get(),
             updateBookProgressUseCase = get(),
         )
     }

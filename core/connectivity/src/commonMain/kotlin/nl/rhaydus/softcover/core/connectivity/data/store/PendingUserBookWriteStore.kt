@@ -34,6 +34,8 @@ internal class PendingUserBookWriteStore(
         dao.insertReplacing(entity = payload.toEntity())
     }
 
+    override suspend fun hasPending(): Boolean = dao.getPending().isNotEmpty()
+
     override suspend fun getPending(maxAttempts: Int): List<PendingWrite<PendingUserBookWrite>> =
         dao.getPending(maxAttempts = maxAttempts).mapNotNull { entity ->
             val payload: PendingUserBookWrite? = entity.toPendingUserBookWrite()

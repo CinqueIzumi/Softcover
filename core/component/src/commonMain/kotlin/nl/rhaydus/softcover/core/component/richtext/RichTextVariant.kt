@@ -4,5 +4,6 @@ enum class RichTextVariant {
     Body,
     Verdict,
     ShareCard,
+    ShareCardFullText,
     CommunityReview,
 }

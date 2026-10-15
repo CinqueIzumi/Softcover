@@ -4,6 +4,8 @@ import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
@@ -66,15 +68,31 @@ class FilterOptionsInputsTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         tags = emptyList(),
-        userBook = null,
-        userBookRead = finishedYear?.let {
-            UserBookRead(
+        userBook = finishedYear?.let {
+            UserBook(
                 id = id,
-                currentPage = null,
-                currentSeconds = null,
-                progress = 1f,
-                startedAt = null,
-                finishedAt = "$it-06-15",
+                status = BookStatus.Read,
+                dateAdded = "2020-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = null,
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+                reads = listOf(
+                    UserBookRead(
+                        id = id,
+                        currentPage = null,
+                        currentSeconds = null,
+                        progress = 1f,
+                        startedAt = null,
+                        finishedAt = "$it-06-15",
+                    ),
+                ),
             )
         },
     )

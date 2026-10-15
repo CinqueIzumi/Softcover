@@ -16,8 +16,14 @@ class UnknownIsbnSheetScaffoldBuilderTest {
             val idleInput = false
 
             // ----- Act -----
-            val adding = unknownIsbnSheetScaffoldFor(isAdding = addingInput)
-            val idle = unknownIsbnSheetScaffoldFor(isAdding = idleInput)
+            val adding = unknownIsbnSheetScaffoldFor(
+                isAdding = addingInput,
+                isImportPending = false,
+            )
+            val idle = unknownIsbnSheetScaffoldFor(
+                isAdding = idleInput,
+                isImportPending = false,
+            )
 
             // ----- Assert -----
             adding.busy shouldBe true
@@ -31,8 +37,14 @@ class UnknownIsbnSheetScaffoldBuilderTest {
             val idleInput = false
 
             // ----- Act -----
-            val adding = unknownIsbnSheetScaffoldFor(isAdding = addingInput)
-            val idle = unknownIsbnSheetScaffoldFor(isAdding = idleInput)
+            val adding = unknownIsbnSheetScaffoldFor(
+                isAdding = addingInput,
+                isImportPending = false,
+            )
+            val idle = unknownIsbnSheetScaffoldFor(
+                isAdding = idleInput,
+                isImportPending = false,
+            )
 
             // ----- Assert -----
             val addingLabel = adding.footer.shouldNotBeNull().primary.shouldNotBeNull().label
@@ -47,8 +59,14 @@ class UnknownIsbnSheetScaffoldBuilderTest {
             val idleInput = false
 
             // ----- Act -----
-            val adding = unknownIsbnSheetScaffoldFor(isAdding = addingInput).footer.shouldNotBeNull()
-            val idle = unknownIsbnSheetScaffoldFor(isAdding = idleInput).footer.shouldNotBeNull()
+            val adding = unknownIsbnSheetScaffoldFor(
+                isAdding = addingInput,
+                isImportPending = false,
+            ).footer.shouldNotBeNull()
+            val idle = unknownIsbnSheetScaffoldFor(
+                isAdding = idleInput,
+                isImportPending = false,
+            ).footer.shouldNotBeNull()
 
             // ----- Assert -----
             adding.secondary.shouldNotBeNull().dismissesSheet shouldBe true
@@ -56,5 +74,41 @@ class UnknownIsbnSheetScaffoldBuilderTest {
             adding.primary.shouldNotBeNull().dismissesSheet shouldBe false
             idle.primary.shouldNotBeNull().dismissesSheet shouldBe false
         }
-    }
+    
+
+        @Test
+        fun `adding wins over a pending import`() {
+            // ----- Arrange -----
+            val addingInput = true
+            val pendingInput = true
+
+            // ----- Act -----
+            val scaffold = unknownIsbnSheetScaffoldFor(
+                isAdding = addingInput,
+                isImportPending = pendingInput,
+            )
+
+            // ----- Assert -----
+            scaffold.busy shouldBe true
+            scaffold.footer.shouldNotBeNull().primary.shouldNotBeNull().running shouldBe true
+        }
+
+        @Test
+        fun `a pending import alone leaves the primary button idle and enabled`() {
+            // ----- Arrange -----
+            val addingInput = false
+            val pendingInput = true
+
+            // ----- Act -----
+            val primary = unknownIsbnSheetScaffoldFor(
+                isAdding = addingInput,
+                isImportPending = pendingInput,
+            ).footer.shouldNotBeNull().primary.shouldNotBeNull()
+
+            // ----- Assert -----
+            primary.running shouldBe false
+            primary.enabled shouldBe true
+            primary.dismissesSheet shouldBe false
+        }
+}
 }

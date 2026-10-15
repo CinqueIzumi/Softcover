@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagsLoad
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -139,7 +140,7 @@ class TagSuggestionsCollectorTest {
             stateFlow.value.tagSuggestions shouldBe listOf(fantasy)
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userTags = persistentListOf(fantasy))
+            stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(persistentListOf(fantasy)))
 
             // ----- Assert -----
             stateFlow.value.tagSuggestions shouldBe emptyList()

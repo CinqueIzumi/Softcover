@@ -32,6 +32,7 @@ class LibrarySortOptionsTest {
         reviewedAt = null,
         updatedAt = null,
         journals = emptyList(),
+        reads = emptyList(),
     )
 
     private fun buildBook(
@@ -55,7 +56,6 @@ class LibrarySortOptionsTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         userBook = buildUserBook(status = status),
-        userBookRead = null,
     )
 
     private fun buildDeadline(bookId: Int) = BookDeadline(
@@ -247,6 +247,30 @@ class LibrarySortOptionsTest {
                         buildBook(
                             id = 1,
                             status = BookStatus.Reading,
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = librarySortOptions(
+                tab = LibraryTab.All,
+                state = state,
+            )
+
+            // ----- Assert -----
+            result.contains(LibrarySortMode.PROGRESS) shouldBe true
+        }
+
+        @Test
+        fun `with a paused book includes PROGRESS`() {
+            // ----- Arrange -----
+            val state = LibraryUiState(
+                booksByTab = persistentMapOf(
+                    LibraryTab.All.id to persistentListOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.Paused,
                         ),
                     ),
                 ),

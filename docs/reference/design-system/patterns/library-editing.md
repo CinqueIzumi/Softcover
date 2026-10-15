@@ -13,6 +13,14 @@ the masthead, sheets, and grid these modes sit inside.
   shelves) and Add to list (`ChooseListsBottomSheet`, tristate per list, stays in selection afterwards)
   pills, and a trash circle opening the bulk-remove sheet (`OnBulkRemoveSheetExpandedChangeAction`) whose
   confirm runs an undoable removal. Masthead, search, control line and chip row hide.
+- Move offers "Move to Paused" after Currently Reading. When the selection holds the book of the running
+  reading session (timer paused or not), the move opens the end-session confirm first
+  (`endSessionPauseSheetScaffold`, `:core:uibinding`): "End this session?", primary "End session and pause",
+  secondary "Keep reading". Confirming stops the session once the sheet has hidden, then pauses.
+- Desktop right-click on a Paused book adds "Resume reading", moving that book to Currently Reading; the
+  mapper decides it (`LibraryBookMenuUiModel`), the grid never reads the book's status.
+- A Paused shelf with no books reads "Nothing on hold" (masthead) over "Books you set aside wait here until
+  you pick them back up."
 - Per-cover selection marks are `BookCardSelection`. Back, the exit circle, a tab switch or deselecting
   the last book exits.
 

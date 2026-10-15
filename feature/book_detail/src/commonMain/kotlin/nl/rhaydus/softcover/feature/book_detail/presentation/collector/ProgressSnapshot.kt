@@ -6,4 +6,6 @@ internal data class ProgressSnapshot(
     val currentPage: Int,
     val totalSeconds: Int?,
     val currentSeconds: Int,
+    val isPaused: Boolean = false,
+    val startedAt: String? = null,
 )

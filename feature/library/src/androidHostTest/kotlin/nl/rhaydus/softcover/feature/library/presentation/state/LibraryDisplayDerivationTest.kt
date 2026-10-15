@@ -58,6 +58,7 @@ class LibraryDisplayDerivationTest {
         reviewedAt = null,
         updatedAt = null,
         journals = emptyList(),
+        reads = emptyList(),
     )
 
     private fun buildBook(
@@ -88,7 +89,6 @@ class LibraryDisplayDerivationTest {
         isCompilation = false,
         tags = tags,
         userBook = userBook,
-        userBookRead = null,
     )
 
     @Nested

@@ -35,6 +35,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
@@ -119,6 +120,9 @@ internal actual fun ReadingScreenLayout(
                         else -> EmptyCurrentlyReadingScreen(
                             trendingBooks = state.trendingBooks,
                             pickUpNext = state.pickUpNext,
+                            onHold = state.onHold,
+                            onHoldHeader = state.onHoldHeader,
+                            runAction = runAction,
                             trendingTile = state.trendingTile,
                             pickUpNextHeader = state.pickUpNextHeader,
                             trendingHeader = state.trendingHeader,
@@ -173,12 +177,17 @@ private fun previewBook(
         editions = listOf(edition),
         defaultEdition = edition,
         authors = edition.authors,
-        userBookRead = PreviewData.baseBook.userBookRead?.copy(
-            currentPage = currentPage,
-            currentSeconds = currentSeconds,
-            progress = progress,
+        userBook = PreviewData.baseBook.userBook?.copy(
+            status = BookStatus.Reading,
+            editionId = editionId,
+            reads = PreviewData.baseBook.userBook?.reads.orEmpty().map { read ->
+                read.copy(
+                    currentPage = currentPage,
+                    currentSeconds = currentSeconds,
+                    progress = progress,
+                )
+            },
         ),
-        userBook = PreviewData.baseBook.userBook?.copy(editionId = editionId),
         bookSeries = series,
         positionsInSeries = positionsInSeries,
     )

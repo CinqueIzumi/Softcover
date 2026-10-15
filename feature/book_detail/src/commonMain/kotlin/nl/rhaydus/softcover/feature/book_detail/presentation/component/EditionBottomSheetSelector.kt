@@ -3,13 +3,16 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.component
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
@@ -19,7 +22,8 @@ import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.sheet.LazySheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
-import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.component.state.EmptyState
+import nl.rhaydus.softcover.core.component.state.EmptyStateEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -96,14 +100,30 @@ private fun LazyListScope.editionItems(
     if (model.cards.isEmpty()) {
         item {
             Box(
-                modifier = Modifier.fillParentMaxSize(),
-                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.md),
+                contentAlignment = Alignment.TopCenter,
             ) {
-                SoftcoverText(
-                    text = model.emptyMessage,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.editorialTypography.body,
-                )
+                val error = model.error
+                val emptyState = model.emptyState
+
+                if (error != null) {
+                    InlineErrorState(
+                        message = error,
+                        onRetry = { onEvent(EditionSheetEvent.RetryClicked) },
+                        textStyle = MaterialTheme.editorialTypography.bodySmall,
+                    )
+                } else if (emptyState != null) {
+                    EmptyState(
+                        model = emptyState,
+                        onEvent = { event ->
+                            when (event) {
+                                EmptyStateEvent.ButtonClicked -> onEvent(EditionSheetEvent.LookUpByIsbnClicked)
+                            }
+                        },
+                    )
+                }
             }
         }
     } else {

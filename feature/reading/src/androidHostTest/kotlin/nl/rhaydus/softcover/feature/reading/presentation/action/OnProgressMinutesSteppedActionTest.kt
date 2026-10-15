@@ -6,6 +6,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
@@ -35,13 +36,18 @@ class OnProgressMinutesSteppedActionTest {
     }
 
     private fun bookAt(currentSeconds: Int?): Book = PreviewData.baseBook.copy(
-        userBookRead = UserBookRead(
-            id = 1,
-            currentPage = null,
-            currentSeconds = currentSeconds,
-            progress = 0f,
-            startedAt = null,
-            finishedAt = null,
+        userBook = PreviewData.baseBook.userBook?.copy(
+            status = BookStatus.Reading,
+            reads = listOf(
+                UserBookRead(
+                id = 1,
+                currentPage = null,
+                currentSeconds = currentSeconds,
+                progress = 0f,
+                startedAt = null,
+                finishedAt = null,
+                ),
+            ),
         ),
     )
 

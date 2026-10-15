@@ -71,20 +71,23 @@ fun Book.toProgressSheetUiModel(
 
         ProgressSheetMedium.Paged(
             totalPages = totalPages,
-            currentPage = userBookRead?.currentPage ?: 0,
+            currentPage = currentRead?.currentPage ?: 0,
             suffix = if (totalPages > 0) "of $totalPages pages" else null,
         )
     }
 
     return ProgressSheetUiModel(
         medium = medium,
-        progressPercent = userBookRead?.progress?.roundToInt() ?: 0,
+        progressPercent = currentRead?.progress?.roundToInt() ?: 0,
         tabs = ProgressSheetUiModel.tabsFor(
             medium = medium,
             selectedTab = selectedTab,
         ),
         whenRead = readAt.toWhenReadUiModel(now = now),
-        scaffold = ProgressSheetUiModel.scaffoldFor(bookTitle = title),
+        scaffold = ProgressSheetUiModel.scaffoldFor(
+            bookTitle = title,
+            isPaused = isPaused,
+        ),
     )
 }
 
@@ -111,4 +114,4 @@ private fun Int.toClockText(): String {
 
 /** Where the book's listening position currently stands, the seed for a fresh [ProgressTimeDraft]. */
 val Book.progressCurrentSeconds: Int
-    get() = userBookRead?.currentSeconds ?: 0
+    get() = currentRead?.currentSeconds ?: 0

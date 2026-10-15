@@ -95,6 +95,7 @@ internal fun editionSheetPreviewModel(): EditionSheetUiModel {
         countHeader = editionCountHeaderFor(count = cards.size),
         searchQuery = "",
         searchPlaceholder = "Search by ISBN or publisher",
-        emptyMessage = "No editions match your search",
+        emptyState = null,
+        error = null,
     )
 }

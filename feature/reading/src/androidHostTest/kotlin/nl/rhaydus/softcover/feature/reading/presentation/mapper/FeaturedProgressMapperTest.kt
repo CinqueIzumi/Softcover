@@ -7,8 +7,10 @@ import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -68,8 +70,10 @@ class FeaturedProgressMapperTest {
         bookSeries = null,
         positionsInSeries = emptyList(),
         isCompilation = false,
-        userBook = null,
-        userBookRead = userBookRead,
+        userBook = PreviewData.baseBook.userBook?.copy(
+            status = BookStatus.Reading,
+            reads = listOfNotNull(userBookRead),
+        ),
     )
 
     @Nested

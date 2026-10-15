@@ -42,6 +42,8 @@ class SoftcoverModulesVerificationTest {
                     BookInitialCover::class,
                     // passed via parametersOf at the document page screen call site
                     DocumentPage::class,
+                    // passed via parametersOf at BarcodeScannerScreen call site
+                    Boolean::class,
                     // getAll() calls return a List assembled at runtime, never a bound type
                     List::class,
                 ),

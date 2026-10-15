@@ -37,6 +37,7 @@ Open only the one you need, and only the section named:
 | Layering, DI, navigation, dispatchers | `docs/reference/architecture.md`, then the foundation `architecture.md` section it points to |
 | A component under `:core:component` | `docs/reference/design-system/component-contract.md` § 7.2 (only where that file exists) |
 | Brand, typography, layout, patterns | `docs/reference/design-system.md` (the index), then one section file |
+| User-facing text | `docs/reference/design-system/voice.md` |
 | Style | enforced by ktlint / detekt; the review-only rules are in `docs/reference/code-style.md` § Review-only rules |
 
 Path-scoped rules under `.claude/rules/` load on their own when you read a matching file; do not go looking

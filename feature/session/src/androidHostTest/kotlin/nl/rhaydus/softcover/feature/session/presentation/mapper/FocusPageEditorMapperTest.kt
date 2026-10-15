@@ -32,7 +32,7 @@ class FocusPageEditorMapperTest {
         } returns if (hasDefaultEdition) stubEdition(defaultPages) else null
 
         every {
-            userBookRead
+            currentRead
         } returns storedProgress?.let { progress ->
             mockk<UserBookRead> {
                 every {

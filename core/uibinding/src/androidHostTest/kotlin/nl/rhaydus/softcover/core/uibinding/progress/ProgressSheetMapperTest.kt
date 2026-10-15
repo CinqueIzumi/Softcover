@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetFooterEmphasis
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import org.junit.jupiter.api.Nested
@@ -54,8 +55,11 @@ class ProgressSheetMapperTest {
 
         return PreviewData.baseBook.copy(
             editions = listOf(audioEdition),
-            userBook = PreviewData.baseBook.userBook?.copy(editionId = audioEdition.id),
-            userBookRead = PreviewData.baseBook.userBookRead?.copy(currentSeconds = currentSeconds),
+            userBook = PreviewData.baseBook.userBook?.copy(
+                status = BookStatus.Reading,
+                editionId = audioEdition.id,
+                reads = PreviewData.baseBook.userBook?.reads.orEmpty().map { it.copy(currentSeconds = currentSeconds) },
+            ),
         )
     }
 
@@ -183,9 +187,9 @@ class ProgressSheetMapperTest {
     @Nested
     inner class CurrentProgress {
         @Test
-        fun `currentPage is 0 when userBookRead is null`() {
+        fun `currentPage is 0 when there is no current read`() {
             // ----- Arrange -----
-            val book = PreviewData.baseBook.copy(userBookRead = null)
+            val book = PreviewData.baseBook.copy(userBook = PreviewData.baseBook.userBook?.copy(reads = emptyList()))
 
             // ----- Act -----
             val result = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE)
@@ -196,7 +200,7 @@ class ProgressSheetMapperTest {
         }
 
         @Test
-        fun `currentSeconds is 0 when userBookRead is null`() {
+        fun `currentSeconds is 0 when there is no current read`() {
             // ----- Arrange -----
             val audioEdition = PreviewData.baseEdition.copy(
                 id = 40,
@@ -205,8 +209,11 @@ class ProgressSheetMapperTest {
             )
             val book = PreviewData.baseBook.copy(
                 editions = listOf(audioEdition),
-                userBook = PreviewData.baseBook.userBook?.copy(editionId = audioEdition.id),
-                userBookRead = null,
+                userBook = PreviewData.baseBook.userBook?.copy(
+                    status = BookStatus.Reading,
+                    editionId = audioEdition.id,
+                    reads = emptyList(),
+                ),
             )
 
             // ----- Act -----
@@ -224,7 +231,10 @@ class ProgressSheetMapperTest {
         fun `progressPercent rounds 34,6 up to 35`() {
             // ----- Arrange -----
             val book = PreviewData.baseBook.copy(
-                userBookRead = PreviewData.baseBook.userBookRead?.copy(progress = 34.6f),
+                userBook = PreviewData.baseBook.userBook?.copy(
+                    status = BookStatus.Reading,
+                    reads = PreviewData.baseBook.userBook?.reads.orEmpty().map { it.copy(progress = 34.6f) },
+                ),
             )
 
             // ----- Act -----
@@ -238,7 +248,10 @@ class ProgressSheetMapperTest {
         fun `progressPercent rounds 34,4 down to 34`() {
             // ----- Arrange -----
             val book = PreviewData.baseBook.copy(
-                userBookRead = PreviewData.baseBook.userBookRead?.copy(progress = 34.4f),
+                userBook = PreviewData.baseBook.userBook?.copy(
+                    status = BookStatus.Reading,
+                    reads = PreviewData.baseBook.userBook?.reads.orEmpty().map { it.copy(progress = 34.4f) },
+                ),
             )
 
             // ----- Act -----
@@ -277,6 +290,38 @@ class ProgressSheetMapperTest {
             secondary.dismissesSheet shouldBe true
             secondary.emphasis shouldBe SheetFooterEmphasis.Outlined
             secondary.icon shouldBe SoftcoverIcon.Check
+        }
+
+        @Test
+        fun `a paused book gets the on hold eyebrow and the resume button`() {
+            // ----- Arrange -----
+            val userBook = PreviewData.baseBook.userBook.shouldNotBeNull().copy(status = BookStatus.Paused)
+            val book = PreviewData.baseBook.copy(userBook = userBook)
+
+            // ----- Act -----
+            val scaffold = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE).scaffold
+
+            // ----- Assert -----
+            val eyebrow = scaffold.header.shouldNotBeNull().section.eyebrow
+            val primary = scaffold.footer.shouldBeInstanceOf<SheetFooterUiModel.Stacked>().primary.shouldNotBeNull()
+            eyebrow shouldBe "On hold"
+            primary.label shouldBe "Update and resume"
+        }
+
+        @Test
+        fun `a reading book keeps the reading eyebrow and the update button`() {
+            // ----- Arrange -----
+            val userBook = PreviewData.baseBook.userBook.shouldNotBeNull().copy(status = BookStatus.Reading)
+            val book = PreviewData.baseBook.copy(userBook = userBook)
+
+            // ----- Act -----
+            val scaffold = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE).scaffold
+
+            // ----- Assert -----
+            val eyebrow = scaffold.header.shouldNotBeNull().section.eyebrow
+            val primary = scaffold.footer.shouldBeInstanceOf<SheetFooterUiModel.Stacked>().primary.shouldNotBeNull()
+            eyebrow shouldBe "Reading progress"
+            primary.label shouldBe "Update progress"
         }
     }
 
@@ -508,7 +553,7 @@ class ProgressSheetMapperTest {
         @Test
         fun `is zero without a read`() {
             // ----- Arrange -----
-            val book = PreviewData.baseBook.copy(userBookRead = null)
+            val book = PreviewData.baseBook.copy(userBook = PreviewData.baseBook.userBook?.copy(reads = emptyList()))
 
             // ----- Act -----
             val result = book.progressCurrentSeconds

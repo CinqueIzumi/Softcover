@@ -47,11 +47,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
-import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsPausedClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadingClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsWantToReadClickAction
@@ -63,7 +62,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShelveReading
 internal fun ShelveControlCard(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
-    dateStyle: DateStyle,
 ) {
     val book = state.book
     val isLoading = state.loadingBookDetails && book == null
@@ -131,6 +129,22 @@ internal fun ShelveControlCard(
                     )
 
                     ShelveRow(
+                        label = "Paused",
+                        iconRes = drawableIconResource(
+                            icon = SoftcoverIcon.Pause,
+                            contentDescription = "",
+                        ),
+                        selected = status == BookStatus.Paused,
+                        isLoading = isLoading,
+                        onClick = {
+                            book?.let {
+                                runAction(OnMarkBookAsPausedClickAction(book = it))
+                            }
+                        },
+                        readingStatus = state.shelveReadingStatus,
+                    )
+
+                    ShelveRow(
                         label = "Read",
                         iconRes = drawableIconResource(
                             icon = SoftcoverIcon.BookmarkCheck,
@@ -140,12 +154,7 @@ internal fun ShelveControlCard(
                         isLoading = isLoading,
                         onClick = { book?.let { runAction(OnMarkBookAsReadClickAction(book = it)) } },
                         celebrationKey = state.markAsReadBurst.triggerKey,
-                        trailingStatus = book?.let {
-                            readStatusDateTrailing(
-                                book = it,
-                                dateStyle = dateStyle,
-                            )
-                        },
+                        trailingStatus = state.shelveReadDate,
                     )
                 }
             }
@@ -156,19 +165,6 @@ internal fun ShelveControlCard(
             modifier = Modifier.matchParentSize(),
         )
     }
-}
-
-/** Live "Read" trailing status: the read date, when known. */
-private fun readStatusDateTrailing(
-    book: Book,
-    dateStyle: DateStyle,
-): String? {
-    val userBook = book.userBook ?: return null
-
-    return userBook.getReadDateString(
-        style = dateStyle,
-        finishedAt = book.userBookRead?.finishedAt,
-    )
 }
 
 @Composable

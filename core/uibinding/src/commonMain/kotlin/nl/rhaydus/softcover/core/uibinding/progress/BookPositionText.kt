@@ -17,25 +17,28 @@ fun Book.resolvedTotalPages(): Int = currentEdition?.pages ?: defaultEdition?.pa
 /**
  * The book's position and what is left, in time for an audiobook and pages otherwise; null without a
  * read or a current edition. What is left never goes below zero, so a position past the end reads
- * "0 pages to go".
+ * "0 pages to go", or "0 pages left" for a paused book.
  */
 fun Book.toPositionText(): BookPositionText? {
-    val read = userBookRead ?: return null
+    val read = currentRead ?: return null
     val edition = currentEdition ?: return null
 
     return read.toPositionText(
         edition = edition,
         totalPages = resolvedTotalPages(),
+        isPaused = isPaused,
     )
 }
 
 /**
  * This read's position in [edition], in time for an audiobook and in pages against [totalPages]
  * otherwise. For a caller that resolves its own edition rather than using [Book.currentEdition].
+ * A paused read counts pages "left" rather than "to go".
  */
 fun UserBookRead.toPositionText(
     edition: BookEdition,
     totalPages: Int,
+    isPaused: Boolean = false,
 ): BookPositionText {
     if (edition.isAudiobook) {
         val totalSeconds = edition.audioSeconds ?: 0
@@ -48,9 +51,10 @@ fun UserBookRead.toPositionText(
     }
 
     val readPages = currentPage ?: 0
+    val unit = if (isPaused) "left" else "to go"
 
     return BookPositionText(
         position = "p. $readPages of $totalPages",
-        remaining = "${(totalPages - readPages).coerceAtLeast(0)} pages to go",
+        remaining = "${(totalPages - readPages).coerceAtLeast(0)} pages $unit",
     )
 }

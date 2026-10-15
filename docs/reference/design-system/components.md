@@ -28,7 +28,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Chips
 
-- **Chip** — `chip` — the one chip, in seven tones with leading and trailing slots.
+- **Chip** — `chip` — the one chip, in eight tones with leading and trailing slots; a trailing `Disclosure` is a drop-down arrow that turns over while expanded.
 - **ChipFlow** — `chip` — wraps a `ChipSet` in one flow row.
 
 ## Covers & cards

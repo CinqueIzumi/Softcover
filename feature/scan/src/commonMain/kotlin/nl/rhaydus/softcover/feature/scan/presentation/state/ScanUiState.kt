@@ -12,6 +12,7 @@ private const val SCAN_TITLE = "Scan a barcode"
 internal data class ScanUiState(
     val isResolving: Boolean = false,
     val isAddingBook: Boolean = false,
+    val isImportPending: Boolean = false,
 
     /**
      * The manual ISBN entry. Its text is the stored draft; `IsbnFieldCollector` keeps `enabled` in step

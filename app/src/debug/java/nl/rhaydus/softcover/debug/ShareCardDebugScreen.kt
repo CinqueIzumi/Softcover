@@ -38,6 +38,8 @@ import nl.rhaydus.designsystem.share.SaveOutcome
 import nl.rhaydus.designsystem.share.ShareCardCapture
 import nl.rhaydus.designsystem.share.rememberGalleryWritePermissionRequester
 import nl.rhaydus.designsystem.share.rememberShareCardCapture
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.QuoteShareCardUiModel
@@ -257,7 +259,11 @@ object ShareCardDebugScreen : Screen {
     }
 
     private val SampleBook = BookShareCardUiModel(
-        coverUrl = null,
+        cover = CoverUiModel(
+            source = null,
+            coverlessTitle = "Lonesome Dove",
+            variant = CoverVariant.Floating,
+        ),
         title = "Lonesome Dove",
         author = "Larry McMurtry",
         statsLine = "★ 4.6 · Your 9/10 · 1985 · 945 pages",

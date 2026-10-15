@@ -47,7 +47,6 @@ internal class UserBooksFlowCollector : BookDetailCollector {
 
         return copy(
             userBook = localBook.userBook,
-            userBookRead = localBook.userBookRead,
             editions = overlaidEditions,
         )
     }

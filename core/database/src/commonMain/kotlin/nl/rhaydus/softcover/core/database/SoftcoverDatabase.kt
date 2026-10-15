@@ -15,7 +15,6 @@ import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.database.dao.ProgressHistoryDao
 import nl.rhaydus.softcover.core.database.dao.PublishedDocumentDao
-import nl.rhaydus.softcover.core.database.dao.ReadingLogDao
 import nl.rhaydus.softcover.core.database.dao.ReadingSessionDao
 import nl.rhaydus.softcover.core.database.dao.UserTagVocabularyDao
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
@@ -37,7 +36,6 @@ import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.database.model.ProgressHistoryEntity
 import nl.rhaydus.softcover.core.database.model.PublishedDocumentEntity
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
-import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
@@ -66,7 +64,6 @@ import kotlin.coroutines.CoroutineContext
         DismissedContinueSeriesEntity::class,
         HighlightEntity::class,
         ReadingSessionEntity::class,
-        ReadingLogEntryEntity::class,
         TagEntity::class,
         BookTagCrossRef::class,
         ShelfManualOrderEntity::class,
@@ -77,7 +74,7 @@ import kotlin.coroutines.CoroutineContext
     views = [
         BookEditionView::class
     ],
-    version = 52,
+    version = 54,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -94,8 +91,6 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun highlightDao(): HighlightDao
 
     abstract fun readingSessionDao(): ReadingSessionDao
-
-    abstract fun readingLogDao(): ReadingLogDao
 
     abstract fun userTagVocabularyDao(): UserTagVocabularyDao
 
@@ -1365,9 +1360,21 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_51_52 = object : Migration(51, 52) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE pending_user_book_writes ADD COLUMN statusCode INTEGER DEFAULT NULL")
+            }
+        }
+
+        private val MIGRATION_52_53 = object : Migration(52, 53) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("DROP TABLE IF EXISTS reading_log_entries")
+            }
+        }
+
         // The roadmap cache was a one-row table; the changelog needs a second document, so the cache is
         // keyed by document instead. The existing roadmap row is carried over under its key.
-        private val MIGRATION_51_52 = object : Migration(51, 52) {
+        private val MIGRATION_53_54 = object : Migration(53, 54) {
             override fun migrate(connection: SQLiteConnection) {
                 connection.execSQL(
                     """
@@ -1441,6 +1448,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_49_50,
             MIGRATION_50_51,
             MIGRATION_51_52,
+            MIGRATION_52_53,
+            MIGRATION_53_54,
         )
     }
 }

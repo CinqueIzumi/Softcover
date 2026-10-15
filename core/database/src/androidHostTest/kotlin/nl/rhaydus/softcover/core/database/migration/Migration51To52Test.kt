@@ -4,9 +4,7 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import org.junit.jupiter.api.AfterEach
@@ -34,10 +32,24 @@ class Migration51To52Test {
     private fun buildV51Schema(conn: SQLiteConnection) {
         conn.execSQL(
             """
-            CREATE TABLE IF NOT EXISTS roadmap_documents (
-                id INTEGER NOT NULL PRIMARY KEY,
-                markdown TEXT NOT NULL,
-                fetchedAtEpochMillis INTEGER NOT NULL
+            CREATE TABLE IF NOT EXISTS pending_user_book_writes (
+                localId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                kind TEXT NOT NULL,
+                userBookId INTEGER NOT NULL,
+                userBookReadId INTEGER NOT NULL,
+                bookId INTEGER NOT NULL,
+                editionId INTEGER,
+                progressPages INTEGER,
+                progressSeconds INTEGER,
+                startedAt TEXT,
+                finishedAt TEXT,
+                rating REAL,
+                reviewSlateJson TEXT,
+                reviewHasSpoilers INTEGER,
+                enqueuedAt TEXT NOT NULL,
+                attempts INTEGER NOT NULL DEFAULT 0,
+                actionAt TEXT,
+                progressHistoryId INTEGER
             )
             """.trimIndent(),
         )
@@ -50,7 +62,6 @@ class Migration51To52Test {
             val names = mutableListOf<String>()
 
             while (stmt.step()) {
-                // PRAGMA table_info columns: cid, name, type, notnull, dflt_value, pk
                 names.add(stmt.getText(1))
             }
 
@@ -60,157 +71,65 @@ class Migration51To52Test {
         }
     }
 
-    private fun primaryKeyColumns(table: String): List<String> {
-        val stmt = connection.prepare("PRAGMA table_info($table)")
+    @Test
+    fun `migration runs cleanly from a real v51 database`() {
+        // ----- Arrange -----
+        val db = connection
 
-        try {
-            val names = mutableListOf<String>()
+        // ----- Act -----
+        val result = runCatching { migration.migrate(db) }
 
-            while (stmt.step()) {
-                if (stmt.getLong(5) > 0L) {
-                    names.add(stmt.getText(1))
-                }
-            }
-
-            return names
-        } finally {
-            stmt.close()
-        }
-    }
-
-    private fun sqliteMasterNames(type: String): List<String> {
-        val stmt = connection.prepare("SELECT name FROM sqlite_master WHERE type = '$type'")
-
-        try {
-            val names = mutableListOf<String>()
-
-            while (stmt.step()) {
-                names.add(stmt.getText(0))
-            }
-
-            return names
-        } finally {
-            stmt.close()
-        }
-    }
-
-    private fun publishedRows(): List<Triple<String, String, Long>> {
-        val stmt = connection.prepare(
-            "SELECT `key`, markdown, fetchedAtEpochMillis FROM published_documents",
-        )
-
-        try {
-            val rows = mutableListOf<Triple<String, String, Long>>()
-
-            while (stmt.step()) {
-                rows.add(
-                    Triple(
-                        stmt.getText(0),
-                        stmt.getText(1),
-                        stmt.getLong(2),
-                    ),
-                )
-            }
-
-            return rows
-        } finally {
-            stmt.close()
-        }
+        // ----- Assert -----
+        result.isSuccess.shouldBeTrue()
     }
 
     @Nested
-    inner class RealV51Database {
+    inner class StatusCodeColumn {
         @Test
-        fun `migration runs cleanly from a real v51 database`() {
+        fun `pending_user_book_writes gains a statusCode column`() {
             // ----- Arrange -----
             val db = connection
 
             // ----- Act -----
-            val result = runCatching { migration.migrate(db) }
+            migration.migrate(db)
 
             // ----- Assert -----
-            result.isSuccess.shouldBeTrue()
+            columnNames("pending_user_book_writes") shouldContain "statusCode"
         }
-    }
 
-    @Nested
-    inner class RoadmapRowCarryOver {
         @Test
-        fun `existing roadmap row is carried over under the roadmap key`() {
+        fun `existing pending write survives migration with statusCode reading NULL`() {
             // ----- Arrange -----
             connection.execSQL(
-                "INSERT INTO roadmap_documents (id, markdown, fetchedAtEpochMillis) " +
-                    "VALUES (1, '# Roadmap', 1700000000000)",
+                """
+                INSERT INTO pending_user_book_writes (
+                    kind, userBookId, userBookReadId, bookId, editionId,
+                    progressPages, enqueuedAt, attempts, actionAt, progressHistoryId
+                ) VALUES (
+                    'UPDATE_PROGRESS', 10, 20, 30, NULL,
+                    150, '2024-01-01T00:00:00', 2, '2024-01-01T00:00:00', 9
+                )
+                """.trimIndent(),
             )
 
             // ----- Act -----
             migration.migrate(connection)
 
             // ----- Assert -----
-            publishedRows() shouldBe listOf(
-                Triple(
-                    "roadmap",
-                    "# Roadmap",
-                    1700000000000L,
-                ),
+            val stmt = connection.prepare(
+                "SELECT kind, progressPages, attempts, progressHistoryId, statusCode FROM pending_user_book_writes WHERE userBookId = 10",
             )
-        }
 
-        @Test
-        fun `empty roadmap_documents yields an empty published_documents`() {
-            // ----- Arrange -----
-            val db = connection
-
-            // ----- Act -----
-            migration.migrate(db)
-
-            // ----- Assert -----
-            publishedRows().shouldBeEmpty()
-        }
-    }
-
-    @Nested
-    inner class TableShape {
-        @Test
-        fun `roadmap_documents is dropped after migration`() {
-            // ----- Arrange -----
-            val db = connection
-
-            // ----- Act -----
-            migration.migrate(db)
-
-            // ----- Assert -----
-            val tables = sqliteMasterNames(type = "table")
-            tables shouldNotContain "roadmap_documents"
-            tables shouldContain "published_documents"
-        }
-
-        @Test
-        fun `published_documents has the entity columns after migration`() {
-            // ----- Arrange -----
-            val db = connection
-
-            // ----- Act -----
-            migration.migrate(db)
-
-            // ----- Assert -----
-            columnNames("published_documents") shouldBe listOf(
-                "key",
-                "markdown",
-                "fetchedAtEpochMillis",
-            )
-        }
-
-        @Test
-        fun `published_documents is keyed on key alone`() {
-            // ----- Arrange -----
-            val db = connection
-
-            // ----- Act -----
-            migration.migrate(db)
-
-            // ----- Assert -----
-            primaryKeyColumns("published_documents") shouldBe listOf("key")
+            try {
+                stmt.step().shouldBeTrue()
+                stmt.getText(0) shouldBe "UPDATE_PROGRESS"
+                stmt.getLong(1) shouldBe 150L
+                stmt.getLong(2) shouldBe 2L
+                stmt.getLong(3) shouldBe 9L
+                stmt.isNull(4).shouldBeTrue()
+            } finally {
+                stmt.close()
+            }
         }
     }
 }

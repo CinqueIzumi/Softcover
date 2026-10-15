@@ -43,6 +43,14 @@ data class ThemePreviewTileUiModel<K>(
                 palette = SpinePalette.DEFAULT,
                 dynamicColor = false,
             ),
+            "Dim" to ThemePreviewTileUiModel(
+                key = "dim",
+                label = "Dim",
+                painting = ThemeTilePainting.DIM,
+                selected = false,
+                palette = SpinePalette.DEFAULT,
+                dynamicColor = false,
+            ),
             "System" to ThemePreviewTileUiModel(
                 key = "system",
                 label = "System",

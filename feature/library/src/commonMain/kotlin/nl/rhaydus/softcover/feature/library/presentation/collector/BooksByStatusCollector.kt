@@ -27,33 +27,23 @@ internal class BooksByStatusCollector : LibraryCollector {
     ) {
         // Each status tab has its own persisted sort. The DAO emits an already-sorted list per
         // status; flatMapLatest re-subscribes whenever the user changes that tab's sort settings.
+        val statuses = UserBookStatus.entries
+        val perStatusFlows = statuses.map { status ->
+            booksForStatus(
+                dependencies = dependencies,
+                status = status,
+            )
+        }
+
+        val booksPerStatusFlow = combine(perStatusFlows) { it.toList() }
+
         combine(
             dependencies.getEnabledStatusCodesAsFlowUseCase(),
-            booksForStatus(
-                dependencies = dependencies,
-                status = UserBookStatus.CURRENTLY_READING,
-            ),
-            booksForStatus(
-                dependencies = dependencies,
-                status = UserBookStatus.WANT_TO_READ,
-            ),
-            booksForStatus(
-                dependencies = dependencies,
-                status = UserBookStatus.READ,
-            ),
-            booksForStatus(
-                dependencies = dependencies,
-                status = UserBookStatus.DID_NOT_FINISH,
-            ),
-        ) { enabledStatuses: Set<Int>, currentlyReading: List<Book>, wantToRead: List<Book>, read: List<Book>, didNotFinish: List<Book> ->
+            booksPerStatusFlow,
+        ) { enabledStatuses, booksPerStatus ->
             val activeCodes = UserBookStatus.activeLibraryCodes(enabledCodes = enabledStatuses)
 
-            val booksByStatus: Map<UserBookStatus, List<Book>> = mapOf(
-                UserBookStatus.CURRENTLY_READING to currentlyReading,
-                UserBookStatus.WANT_TO_READ to wantToRead,
-                UserBookStatus.READ to read,
-                UserBookStatus.DID_NOT_FINISH to didNotFinish,
-            )
+            val booksByStatus: Map<UserBookStatus, List<Book>> = statuses.zip(booksPerStatus).toMap()
 
             booksByStatus
                 .filterKeys { it.code in activeCodes }

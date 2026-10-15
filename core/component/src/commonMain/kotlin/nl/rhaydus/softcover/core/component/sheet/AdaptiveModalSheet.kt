@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.widthIn
@@ -23,8 +24,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -54,6 +58,12 @@ private const val PANEL_ENTER_SCALE = 0.92f
 internal val LocalSheetClosing = compositionLocalOf { false }
 
 /**
+ * The height, in pixels, the bottom sheet's snackbar keeps clear at the bottom: a [SheetScaffold] footer
+ * reports it so the snackbar floats above the buttons. Null outside a bottom sheet.
+ */
+internal val LocalSheetFooterInset = compositionLocalOf<MutableIntState?> { null }
+
+/**
  * A modal surface that is a bottom sheet below expanded widths and an animated, elevated panel at
  * expanded widths.
  *
@@ -63,8 +73,8 @@ internal val LocalSheetClosing = compositionLocalOf { false }
  * are refused while [dismissOnTapOutside] is false, and back while [dismissOnBackPress] is false. A
  * [LocalModalSheetDismiss] hide still plays when both are refused.
  *
- * Each sheet window hosts the app snackbar, below the content on the bottom sheet, so callers never add
- * their own and it never covers a footer.
+ * Each sheet window hosts the app snackbar, so callers never add their own. On the bottom sheet it floats
+ * over the content, above a [SheetScaffold] footer, so the sheet never resizes for it.
  */
 @Composable
 fun AdaptiveModalSheet(
@@ -113,6 +123,7 @@ private fun BottomSheetForm(
     var closing by remember { mutableStateOf(false) }
     var dismissSent by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val footerInset = remember { mutableIntStateOf(0) }
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
         confirmValueChange = { target ->
@@ -157,13 +168,23 @@ private fun BottomSheetForm(
             LocalSnackbarHostLevel provides sheetLevel,
             LocalSheetClosing provides closing,
             LocalModalSheetDismiss provides dismiss,
+            LocalSheetFooterInset provides footerInset,
         ) {
-            content()
+            Box {
+                Column(content = content)
 
-            SheetSnackbar(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                insetNavigationBars = false,
-            )
+                SheetSnackbar(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .offset {
+                            IntOffset(
+                                x = 0,
+                                y = -footerInset.intValue,
+                            )
+                        },
+                    insetNavigationBars = false,
+                )
+            }
         }
     }
 }
