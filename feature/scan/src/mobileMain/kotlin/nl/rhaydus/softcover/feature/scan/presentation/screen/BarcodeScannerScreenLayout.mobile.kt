@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.scan.presentation.screen
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -48,6 +49,7 @@ internal actual fun BarcodeScannerScreenLayout(
         Box(
             modifier = Modifier
                 .padding(padding)
+                .consumeWindowInsets(padding)
                 .fillMaxSize(),
         ) {
             when {
