@@ -87,7 +87,7 @@ class TagChipModelsCollectorTest {
         }
 
         @Test
-        fun `groups community tags into GENRE, MOOD, CONTENT_WARNING in that order`() =
+        fun `groups community tags into Genre, Mood, Other tags, Content warning in that order`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val tags = listOf(
@@ -130,11 +130,44 @@ class TagChipModelsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(book = book)
 
                 // ----- Assert -----
-                stateFlow.value.communityTagGroups.map { it.category } shouldBe listOf(
-                    TagCategory.GENRE,
-                    TagCategory.MOOD,
-                    TagCategory.CONTENT_WARNING,
+                stateFlow.value.communityTagGroups.map { it.label } shouldBe listOf(
+                    "Genre",
+                    "Mood",
+                    "Other tags",
+                    "Content warning",
                 )
+                job.cancel()
+            }
+
+        @Test
+        fun `TAG tags form an Other tags group of plain chips capped at 5 by count descending`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val tags = (1..6).map { i ->
+                    Tag(
+                        id = i,
+                        name = "tag-$i",
+                        category = TagCategory.TAG,
+                        count = i * 10,
+                    )
+                }
+                val book = stubBook(tags)
+                val collector = TagChipModelsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(book = book)
+
+                // ----- Assert -----
+                val group = stateFlow.value.communityTagGroups.single { it.label == "Other tags" }
+                group.chips.map { it.label } shouldBe listOf("tag-6", "tag-5", "tag-4", "tag-3", "tag-2")
+                group.chips.all { it.tone == ChipTone.Tonal } shouldBe true
+                group.chips.all { it.interaction == ChipInteraction.Inert } shouldBe true
                 job.cancel()
             }
 
@@ -162,7 +195,7 @@ class TagChipModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(book = book)
 
             // ----- Assert -----
-            val genreGroup = stateFlow.value.communityTagGroups.single { it.category == TagCategory.GENRE }
+            val genreGroup = stateFlow.value.communityTagGroups.single { it.label == "Genre" }
             genreGroup.chips.size shouldBe 5
             genreGroup.chips.map { it.label } shouldBe listOf(
                 "genre-6",
@@ -209,11 +242,11 @@ class TagChipModelsCollectorTest {
 
                 // ----- Assert -----
                 val groups = stateFlow.value.communityTagGroups
-                groups.single { it.category == TagCategory.CONTENT_WARNING }
+                groups.single { it.label == "Content warning" }
                     .chips.all { it.tone == ChipTone.Spoiler } shouldBe true
-                groups.single { it.category == TagCategory.GENRE }
+                groups.single { it.label == "Genre" }
                     .chips.none { it.tone == ChipTone.Spoiler } shouldBe true
-                groups.single { it.category == TagCategory.MOOD }
+                groups.single { it.label == "Mood" }
                     .chips.none { it.tone == ChipTone.Spoiler } shouldBe true
                 job.cancel()
             }
@@ -247,9 +280,9 @@ class TagChipModelsCollectorTest {
 
             // ----- Assert -----
             val groups = stateFlow.value.communityTagGroups
-            groups.single { it.category == TagCategory.GENRE }
+            groups.single { it.label == "Genre" }
                 .chips.all { it.interaction == ChipInteraction.Inert } shouldBe true
-            groups.single { it.category == TagCategory.CONTENT_WARNING }
+            groups.single { it.label == "Content warning" }
                 .chips.all { it.interaction == ChipInteraction.Clickable } shouldBe true
             job.cancel()
         }

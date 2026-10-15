@@ -69,7 +69,7 @@ internal fun TagsSection(
                 Spacer(modifier = Modifier.height(Spacing.md))
 
                 SoftcoverText(
-                    text = group.category.label,
+                    text = group.label,
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.SemiBold,
                     ),
