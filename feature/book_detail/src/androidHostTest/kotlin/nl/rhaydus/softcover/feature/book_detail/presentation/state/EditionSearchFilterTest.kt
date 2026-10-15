@@ -81,5 +81,31 @@ class EditionSearchFilterTest {
             // ----- Assert -----
             result.shouldBeEmpty()
         }
+
+        @Test
+        fun `matches a hyphenated ISBN query against an unhyphenated ISBN-13`() {
+            // ----- Arrange -----
+            val target = buildEdition(id = 3).copy(isbn13 = "9780374710781")
+            val query = "978-0-374-71078-1"
+
+            // ----- Act -----
+            val result = (editions + target).filterByEditionSearch(query = query)
+
+            // ----- Assert -----
+            result shouldBe listOf(target)
+        }
+
+        @Test
+        fun `matches the publisher against the raw query without stripping hyphens`() {
+            // ----- Arrange -----
+            val hyphenated = buildEdition(id = 3).copy(publisher = "Farrar-Straus")
+            val query = " Farrar-Straus "
+
+            // ----- Act -----
+            val result = (editions + hyphenated).filterByEditionSearch(query = query)
+
+            // ----- Assert -----
+            result shouldBe listOf(hyphenated)
+        }
     }
 }

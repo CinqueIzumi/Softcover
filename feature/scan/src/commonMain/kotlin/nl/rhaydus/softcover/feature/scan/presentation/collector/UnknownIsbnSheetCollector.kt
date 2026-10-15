@@ -19,9 +19,13 @@ internal class UnknownIsbnSheetCollector : ScanCollector {
         dependencies: ScanDependencies,
     ) {
         scope.state
-            .map { state -> state.unknownIsbn to state.isAddingBook }
+            .map { state -> Triple(
+                    first = state.unknownIsbn,
+                    second = state.isAddingBook,
+                    third = state.isImportPending,
+                ) }
             .distinctUntilChanged()
-            .collectLatest { (isbn, isAdding) ->
+            .collectLatest { (isbn, isAdding, isImportPending) ->
                 scope.setState {
                     it.copy(
                         unknownIsbnSheet = if (isbn == null || it.unknownIsbn == null) {
@@ -30,7 +34,10 @@ internal class UnknownIsbnSheetCollector : ScanCollector {
                             it.unknownIsbnSheet.openOrUpdate(
                                 model = UnknownIsbnSheetUiModel(
                                     isbn = isbn,
-                                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = isAdding),
+                                    scaffold = unknownIsbnSheetScaffoldFor(
+                                        isAdding = isAdding,
+                                        isImportPending = isImportPending,
+                                    ),
                                 ),
                             )
                         },

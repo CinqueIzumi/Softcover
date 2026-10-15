@@ -13,6 +13,6 @@ internal data class OnEditionSearchQueryChangeAction(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(editionSheet = it.editionSheet?.copy(searchQuery = query)) }
+        scope.setState { it.copy(editionSearchQuery = query) }
     }
 }
