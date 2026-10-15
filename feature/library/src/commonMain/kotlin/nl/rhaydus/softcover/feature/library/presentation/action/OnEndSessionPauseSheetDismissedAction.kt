@@ -4,7 +4,7 @@ import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.sheet.dismissed
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.uibinding.session.stopSessionThen
+import nl.rhaydus.softcover.core.presentation.session.stopSessionThen
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables

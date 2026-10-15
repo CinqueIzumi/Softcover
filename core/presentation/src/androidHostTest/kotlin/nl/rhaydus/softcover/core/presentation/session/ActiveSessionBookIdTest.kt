@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.uibinding.session
+package nl.rhaydus.softcover.core.presentation.session
 
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -9,8 +9,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.session.ActiveSession
-import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

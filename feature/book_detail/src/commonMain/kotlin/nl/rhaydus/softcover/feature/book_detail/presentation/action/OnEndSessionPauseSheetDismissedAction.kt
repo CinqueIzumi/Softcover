@@ -2,7 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.sheet.dismissed
-import nl.rhaydus.softcover.core.uibinding.session.stopSessionThen
+import nl.rhaydus.softcover.core.presentation.session.stopSessionThen
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
