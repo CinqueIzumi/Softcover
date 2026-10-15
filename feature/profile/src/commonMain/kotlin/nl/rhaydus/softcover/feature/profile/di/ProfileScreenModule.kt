@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.profile.di
 
+import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
@@ -19,6 +20,7 @@ import org.koin.dsl.module
 
 val profileScreenModule = module {
     includes(
+        bookModule,
         dispatcherModule,
         profileModule,
         preferencesModule,
@@ -35,6 +37,7 @@ val profileScreenModule = module {
             refreshUserProfileDataUseCase = get(),
             getHideUntaggedAuthorsAsFlowUseCase = get(),
             setHideUntaggedAuthorsUseCase = get(),
+            observeBooksByIdsUseCase = get(),
         )
     }
 
