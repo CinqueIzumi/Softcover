@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.computeTagSuggestions
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.tagsOrEmpty
 import nl.rhaydus.toad.ActionScope
 
 /**
@@ -28,7 +29,7 @@ internal class TagSuggestionsCollector : BookDetailCollector {
                 TagEditorQuery(
                     input = state.tagEditorInput,
                     category = state.tagEditorCategory,
-                    applied = state.userTags,
+                    applied = state.userTags.tagsOrEmpty,
                 )
             }
             .distinctUntilChanged()

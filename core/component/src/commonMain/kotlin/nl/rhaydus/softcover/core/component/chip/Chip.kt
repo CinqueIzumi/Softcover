@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.core.component.chip
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -25,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
@@ -39,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.modifier.tactileToggleable
@@ -323,6 +327,26 @@ private fun ChipTrailingSlot(
             )
         }
 
+        is ChipTrailing.Disclosure -> {
+            val playMotion = playDecorativeMotion()
+            val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+            val rotation by animateFloatAsState(
+                targetValue = if (trailing.expanded) 180f else 0f,
+                animationSpec = if (playMotion) spatialSpec else snap(),
+                label = "ChipDisclosureRotation",
+            )
+
+            ChipIconSlot(
+                icon = SoftcoverIcon.ArrowDropDown,
+                contentDescription = trailing.label,
+                tint = style.ink,
+                size = 18.dp,
+                insets = insets,
+                onClick = null,
+                rotation = rotation,
+            )
+        }
+
         is ChipTrailing.Dismiss -> {
             ChipIconSlot(
                 icon = SoftcoverIcon.Close,
@@ -344,6 +368,7 @@ private fun ChipIconSlot(
     size: Dp,
     insets: PaddingValues,
     onClick: (() -> Unit)?,
+    rotation: Float = 0f,
 ) {
     val resource = drawableIconResource(
         icon = icon,
@@ -371,7 +396,9 @@ private fun ChipIconSlot(
             painter = resource.getIconPainter(),
             contentDescription = resource.contentDescription,
             tint = tint,
-            modifier = Modifier.size(size),
+            modifier = Modifier
+                .size(size)
+                .graphicsLayer { rotationZ = rotation },
         )
     }
 }

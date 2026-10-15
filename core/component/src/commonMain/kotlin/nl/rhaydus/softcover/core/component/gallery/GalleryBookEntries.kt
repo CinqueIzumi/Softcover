@@ -88,7 +88,7 @@ internal val bookEntries: ImmutableList<GalleryEntry> = persistentListOf(
         blurb = "The exportable share-card family — book, reading update, stat, quote, year recap, and reading life.",
         previews = ShareCardUiModel,
         content = { model, modifier ->
-            // A share card sets its own fixed export width (300-420dp),
+            // A share card sets its own fixed export size (up to 360dp wide),
             // wider than the gallery's fixture tile on a phone. Render it at its true size and
             // let it be panned rather than clipping or squashing an artifact meant for export.
             Box(

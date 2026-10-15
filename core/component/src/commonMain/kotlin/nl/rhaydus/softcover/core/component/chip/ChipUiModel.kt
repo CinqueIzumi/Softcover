@@ -88,6 +88,11 @@ data class ChipUiModel(
                 label = "Contains a major death",
                 tone = ChipTone.Spoiler,
             ),
+            "Over media" to ChipUiModel(
+                key = "over-media",
+                label = "Slow burn",
+                tone = ChipTone.OverMedia,
+            ),
             "Spoiler toggle, marked" to ChipUiModel(
                 key = "spoiler-toggle-marked",
                 label = "Contains a major death",
@@ -114,6 +119,24 @@ data class ChipUiModel(
                 key = "leading-icon",
                 label = "Just now",
                 leading = ChipLeading.Icon(icon = SoftcoverIcon.DateRange),
+            ),
+            "Disclosure" to ChipUiModel(
+                key = "disclosure",
+                label = "Tags · 3",
+                tone = ChipTone.Choice,
+                trailing = ChipTrailing.Disclosure(
+                    expanded = false,
+                    label = "Show tags",
+                ),
+            ),
+            "Disclosure, expanded" to ChipUiModel(
+                key = "disclosure-expanded",
+                label = "Tags · 3",
+                tone = ChipTone.Choice,
+                trailing = ChipTrailing.Disclosure(
+                    expanded = true,
+                    label = "Hide tags",
+                ),
             ),
             "Dismissible" to ChipUiModel(
                 key = "dismissible",

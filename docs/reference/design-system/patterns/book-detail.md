@@ -2,9 +2,12 @@
 
 ### Book-detail tag block
 
-- The Book lens's `Tags` section, after About: Genre, Mood and Content warning, each the top five tags by
-  popularity (`taggable_counts.count`) as a `labelLarge` sub-label over a wrapping `FlowRow` of read-only
-  `Chip`s, under a bar-less `TAGS` label.
+- The Book lens's `Tags` section, after About: Genre, Mood, Other tags (the Hardcover Tag category) and
+  Content warning, in that order, each all its tags by popularity (`taggable_counts.count`) as a
+  `labelLarge` sub-label over an `ExpandableFlowRow` of read-only `Chip`s, under a bar-less `TAGS` label.
+- Each row collapses to two lines (`Progressive(linesPerExpand = 2)`, collapsible); the "Show more" /
+  "Show less" affordances are `ChipTone.Dashed` `Chip`s, and the height change rides
+  `animateContentSize`. The expansion lives in the row, so it resets on a lens switch.
 - Content-warning chips render as `ChipTone.Spoiler` and reveal in place one per tap (the inline spoiler
   reveal); revealed keys live in `BookDetailUiState.revealedTagKeys` for the screen instance.
 - The edition colophon line closes the section; the section is skipped only with neither tags nor a

@@ -15,7 +15,9 @@ import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipSet
+import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -200,8 +202,8 @@ internal data class BookDetailUiState(
     val failedMutationBookIds: ImmutableSet<Int> = persistentSetOf(),
     val failedMutationEditionIds: ImmutableSet<Int> = persistentSetOf(),
 
-    val currentUsername: String? = null,
-    val currentUserAvatarUrl: String? = null,
+    /** `null` until the profile flow has emitted; its fields are `null` for a signed-out or blank profile. */
+    val currentUser: CurrentUserIdentity? = null,
 
     /** The share sheet for the chosen variant. */
     val shareSheet: SheetSession<ShareSheetUiModel, Nothing> = SheetSession.Closed,
@@ -215,6 +217,16 @@ internal data class BookDetailUiState(
     val endSessionPauseSheet: SheetSession<SheetScaffoldUiModel, ConfirmedPause> = SheetSession.Closed,
 
     val chosenShareVariant: ShareCardVariant? = null,
+
+    val chosenShareSize: ShareCardSize = ShareCardSize.STORY,
+
+    /** Include set: the community tags put on the Book card; none until the reader picks. */
+    val selectedBookShareTags: ImmutableSet<String> = persistentSetOf(),
+
+    /** Exclude set: the reader's own tags deselected from the My update card, which starts with all of them on. */
+    val deselectedUpdateShareTags: ImmutableSet<String> = persistentSetOf(),
+
+    val shareTagPickerExpanded: Boolean = false,
 
     val shareCapture: ShareCaptureState = ShareCaptureState(),
 
@@ -257,7 +269,7 @@ internal data class BookDetailUiState(
 
     val chooseListsSheet: ChooseListsUiModel? = null,
 
-    val userTags: ImmutableList<UserTag> = persistentListOf(),
+    val userTags: UserTagsLoad = UserTagsLoad.Loading,
     val showTagEditorSheet: Boolean = false,
     val tagEditorCategory: TagCategory = TagCategory.TAG,
     val tagEditorInput: String = "",
@@ -280,6 +292,18 @@ internal data class BookDetailUiState(
     val revealedTagKeys: ImmutableSet<String> = persistentSetOf(),
 
     val tagEditorOpenerChip: ChipUiModel? = null,
+    val communityTagsShowMoreChip: ChipUiModel = ChipUiModel(
+        key = "community-tags-show-more",
+        label = "Show more",
+        tone = ChipTone.Dashed,
+        interaction = ChipInteraction.Clickable,
+    ),
+    val communityTagsShowLessChip: ChipUiModel = ChipUiModel(
+        key = "community-tags-show-less",
+        label = "Show less",
+        tone = ChipTone.Dashed,
+        interaction = ChipInteraction.Clickable,
+    ),
 
     val userTagEditorGroups: ImmutableList<UserTagEditorChipGroup> = persistentListOf(),
     val tagEditorEmptyState: EmptyStateUiModel = EmptyStateUiModel(

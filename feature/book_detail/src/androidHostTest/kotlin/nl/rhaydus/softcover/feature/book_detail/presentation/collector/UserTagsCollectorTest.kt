@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagsLoad
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -95,7 +96,7 @@ class UserTagsCollectorTest {
             stateFlow.value = stateFlow.value.copy(book = book)
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe tags
+            stateFlow.value.userTags shouldBe UserTagsLoad.Loaded(tags.toImmutableList())
             job.cancel()
         }
 
@@ -115,21 +116,14 @@ class UserTagsCollectorTest {
             stateFlow.value = stateFlow.value.copy(book = book)
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe emptyList()
+            stateFlow.value.userTags shouldBe UserTagsLoad.Loading
             job.cancel()
         }
 
         @Test
-        fun `preserves existing userTags when failure occurs`() = runTest(UnconfinedTestDispatcher()) {
+        fun `marks userTags as failed when the load fails`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubShelvedBook(id = 3)
-            val existingTags = listOf(
-                UserTag(
-                    name = "sci-fi",
-                    category = TagCategory.GENRE,
-                ),
-            )
-            stateFlow.value = stateFlow.value.copy(userTags = existingTags.toImmutableList())
 
             coEvery {
                 getUserTagsUseCase(bookId = 3)
@@ -147,7 +141,7 @@ class UserTagsCollectorTest {
             stateFlow.value = stateFlow.value.copy(book = book)
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe existingTags
+            stateFlow.value.userTags shouldBe UserTagsLoad.Failed
             job.cancel()
         }
 
@@ -185,13 +179,13 @@ class UserTagsCollectorTest {
             }
 
             stateFlow.value = stateFlow.value.copy(book = bookA)
-            stateFlow.value.userTags shouldBe tagsA
+            stateFlow.value.userTags shouldBe UserTagsLoad.Loaded(tagsA.toImmutableList())
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = bookB)
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe tagsB
+            stateFlow.value.userTags shouldBe UserTagsLoad.Loaded(tagsB.toImmutableList())
             job.cancel()
         }
 
@@ -219,7 +213,7 @@ class UserTagsCollectorTest {
             }
 
             stateFlow.value = stateFlow.value.copy(book = book)
-            stateFlow.value.userTags shouldBe tags
+            stateFlow.value.userTags shouldBe UserTagsLoad.Loaded(tags.toImmutableList())
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = null)
@@ -227,7 +221,7 @@ class UserTagsCollectorTest {
             // ----- Assert -----
             // collectLatest returns early for null; existing tags remain from the previous successful load
             // (the collector does not actively clear tags — it simply stops loading)
-            stateFlow.value.userTags shouldBe tags
+            stateFlow.value.userTags shouldBe UserTagsLoad.Loaded(tags.toImmutableList())
             job.cancel()
         }
     }
