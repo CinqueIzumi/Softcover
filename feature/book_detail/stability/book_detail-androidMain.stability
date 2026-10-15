@@ -45,6 +45,15 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.component.Sha
     - onEvent: STABLE (function type)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareTagPicker(model: nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareTagPickerUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorAddBlock(selectedCategoryKey: kotlin.String, categoryChips: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.chip.ChipUiModel>, namingField: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, suggestionChips: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.chip.ChipUiModel>, onCategoryChipEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>, onNamingFieldEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, onSuggestionChipEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
