@@ -260,7 +260,6 @@ class ProgressSheetCollectorTest {
             val book = PreviewData.baseBook.copy(
                 editions = persistentListOf(audioEdition),
                 defaultEdition = audioEdition,
-                userBookRead = null,
             )
             val collector = ProgressSheetCollector()
             val job = launch {
@@ -303,7 +302,6 @@ class ProgressSheetCollectorTest {
             val book = PreviewData.baseBook.copy(
                 editions = persistentListOf(audioEdition),
                 defaultEdition = audioEdition,
-                userBookRead = null,
             )
             val collector = ProgressSheetCollector()
             val job = launch {

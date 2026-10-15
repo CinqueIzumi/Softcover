@@ -182,10 +182,7 @@ private fun readStatusDateTrailing(
 ): String? {
     val userBook = book.userBook ?: return null
 
-    return userBook.getReadDateString(
-        style = dateStyle,
-        finishedAt = book.userBookRead?.finishedAt,
-    )
+    return userBook.getReadDateString(style = dateStyle)
 }
 
 @Composable

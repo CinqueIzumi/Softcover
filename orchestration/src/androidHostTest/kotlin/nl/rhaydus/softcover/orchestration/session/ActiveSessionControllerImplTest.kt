@@ -133,7 +133,7 @@ class ActiveSessionControllerImplTest {
         }
 
         every {
-            book.userBookRead
+            book.currentRead
         } returns userBookRead
     }
 

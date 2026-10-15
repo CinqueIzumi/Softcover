@@ -176,7 +176,7 @@ class ShareCardsCollectorTest {
         } returns userBook
 
         every {
-            this@mockk.userBookRead
+            this@mockk.currentRead
         } returns null
     }
 

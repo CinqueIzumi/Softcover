@@ -25,20 +25,14 @@ import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookStatus
-import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
-import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.domain.util.SessionValueCache
 import nl.rhaydus.softcover.core.domain.util.getOrPut
-import nl.rhaydus.softcover.core.domain.util.localDateTimeOf
 import nl.rhaydus.softcover.core.domain.util.refresh
-import nl.rhaydus.softcover.core.domain.util.toUtcJournalTimestamp
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -684,7 +678,7 @@ internal class BooksRepositoryImpl(
         newSeconds: Int?,
         actionAt: String?,
     ): Book {
-        if (book.userBook == null || book.userBookRead == null) {
+        if (book.userBook == null || book.currentRead == null) {
             throw Exception("Book did not contain a user book read")
         }
 
@@ -704,6 +698,19 @@ internal class BooksRepositoryImpl(
             pages = newPage,
             seconds = newSeconds,
         )
+
+        // A placeholder read has no server id yet, so the write can only wait for replay to resolve one.
+        if (book.currentRead?.isPlaceholder == true) {
+            offlineSync.enqueueProgressUpdate(
+                book = optimistic,
+                newPage = newPage,
+                newSeconds = newSeconds,
+                actionAt = readAtIso,
+                progressHistoryId = historyId,
+            )
+
+            return optimistic
+        }
 
         if (networkAvailability.isOnline.value) {
             return runCatching {
@@ -812,143 +819,6 @@ internal class BooksRepositoryImpl(
         }
 
         booksLocalDataSource.cacheBook(book = snapshot)
-    }
-
-    private fun Book.withProgress(
-        newPage: Int?,
-        newSeconds: Int?,
-    ): Book {
-        val existingRead = userBookRead ?: return this
-        val edition = currentEdition
-
-        val totalPages = edition?.pages
-        val totalSeconds = edition?.audioSeconds
-
-        val progress: Float = when {
-            newSeconds != null && totalSeconds != null && totalSeconds > 0 ->
-                (newSeconds.toFloat() / totalSeconds.toFloat() * 100f).coerceIn(
-                    0f,
-                    100f,
-                )
-
-            newPage != null && totalPages != null && totalPages > 0 ->
-                (newPage.toFloat() / totalPages.toFloat() * 100f).coerceIn(
-                    0f,
-                    100f,
-                )
-
-            else -> existingRead.progress
-        }
-
-        val updatedUserBook: UserBook? = userBook?.withAppendedJournal(
-            event = JournalEventType.ProgressUpdated,
-        )
-
-        return copy(
-            userBook = updatedUserBook,
-            userBookRead = existingRead.copy(
-                currentPage = newPage ?: existingRead.currentPage,
-                currentSeconds = newSeconds ?: existingRead.currentSeconds,
-                progress = progress,
-            ),
-        )
-    }
-
-    private fun Book.withMarkedAsWantToRead(): Book {
-        val existingUserBook = userBook ?: return this
-
-        if (existingUserBook.status == BookStatus.WantToRead) return this
-
-        val updatedUserBook: UserBook = existingUserBook.copy(status = BookStatus.WantToRead)
-
-        return copy(userBook = updatedUserBook)
-    }
-
-    private fun Book.withMarkedAsReading(): Book {
-        val existingUserBook = userBook ?: return this
-
-        val updatedUserBook: UserBook = existingUserBook
-            .copy(status = BookStatus.Reading)
-            .withAppendedJournal(event = JournalEventType.UserBookReadStarted)
-
-        return copy(userBook = updatedUserBook)
-    }
-
-    private fun Book.withMarkedAsPaused(): Book {
-        val existingUserBook = userBook ?: return this
-
-        if (existingUserBook.status == BookStatus.Paused) return this
-
-        val updatedUserBook: UserBook = existingUserBook.copy(status = BookStatus.Paused)
-
-        return copy(userBook = updatedUserBook)
-    }
-
-    private fun Book.withRating(rating: Double): Book {
-        val existingUserBook = userBook ?: return this
-
-        if (existingUserBook.rating == rating) return this
-
-        val updatedUserBook: UserBook = existingUserBook.copy(rating = rating)
-
-        return copy(userBook = updatedUserBook)
-    }
-
-    private fun Book.withReview(
-        review: ReviewDocument,
-        hasSpoilers: Boolean,
-    ): Book {
-        val existingUserBook = userBook ?: return this
-
-        // A blank document clears the review; the optimistic copy stores what the user wrote, which the
-        // next server refresh overwrites with Hardcover's canonical `review_slate`.
-        val normalizedReview: ReviewDocument? = review.takeUnless { it.isBlank() }
-
-        val updatedUserBook: UserBook = existingUserBook.copy(
-            reviewDocument = normalizedReview,
-            reviewHasSpoilers = hasSpoilers,
-        )
-
-        return copy(userBook = updatedUserBook)
-    }
-
-    private fun Book.withMarkedAsRead(actionAt: String?): Book {
-        val existingUserBook = userBook ?: return this
-        val existingRead = userBookRead
-
-        val finishedDate = actionAt
-            ?.let { localDateTimeOf(actionAt = it).date.toString() }
-            ?: Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
-
-        val updatedUserBook: UserBook = existingUserBook
-            .copy(status = BookStatus.Read)
-            .withAppendedJournal(
-                event = JournalEventType.StatusFinished,
-                actionAt = actionAt,
-            )
-
-        return copy(
-            userBook = updatedUserBook,
-            userBookRead = existingRead?.copy(
-                finishedAt = finishedDate,
-                progress = 100f,
-            ) ?: existingRead,
-        )
-    }
-
-    private fun UserBook.withAppendedJournal(
-        event: JournalEventType,
-        actionAt: String? = null,
-    ): UserBook {
-        val updatedAt = (actionAt?.let { Instant.parse(it) } ?: Clock.System.now())
-            .toUtcJournalTimestamp()
-
-        val entry = ReadingJournal(
-            updatedAt = updatedAt,
-            event = event.eventName,
-        )
-
-        return copy(journals = journals + entry)
     }
 
     override suspend fun updateBookEdition(

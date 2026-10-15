@@ -84,7 +84,6 @@ class GetContinueSeriesBooksUseCaseTest {
             status,
             lastReadDate,
         ),
-        userBookRead = null,
     )
 
     private fun dismissedBook(

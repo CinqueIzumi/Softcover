@@ -31,7 +31,7 @@ internal fun Book.toAlsoReadingCard(
     dateStyle: DateStyle,
     mutationFailed: Boolean,
 ): BookCardUiModel {
-    val progress = userBookRead?.progress ?: 0f
+    val progress = currentRead?.progress ?: 0f
 
     val fraction = progress / 100f
 

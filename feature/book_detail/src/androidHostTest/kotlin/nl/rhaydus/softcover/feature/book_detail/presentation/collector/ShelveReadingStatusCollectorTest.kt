@@ -42,7 +42,7 @@ class ShelveReadingStatusCollectorTest {
 
     private fun stubBook(progress: Float): Book = mockk<Book> {
         every {
-            userBookRead
+            currentRead
         } returns UserBookRead(
             id = 1,
             currentPage = 10,

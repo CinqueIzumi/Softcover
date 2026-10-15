@@ -26,8 +26,10 @@ data class Book(
     val tags: List<Tag> = emptyList(),
 
     val userBook: UserBook?,
-    val userBookRead: UserBookRead?,
 ) {
+    val currentRead: UserBookRead?
+        get() = userBook?.currentRead
+
     val status: BookStatus
         get() = userBook?.status ?: BookStatus.None
 

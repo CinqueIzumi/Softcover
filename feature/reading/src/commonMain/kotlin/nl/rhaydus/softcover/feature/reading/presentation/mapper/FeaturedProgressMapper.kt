@@ -11,7 +11,7 @@ import nl.rhaydus.softcover.core.uibinding.progress.resolvedTotalPages
 import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
 
 internal fun Book.toFeaturedProgress(): FeaturedProgressUiModel {
-    val progress = userBookRead?.progress ?: 0f
+    val progress = currentRead?.progress ?: 0f
     val edition = currentEdition
 
     val pageLead: StatNumberUiModel
@@ -19,14 +19,14 @@ internal fun Book.toFeaturedProgress(): FeaturedProgressUiModel {
 
     if (edition?.isAudiobook == true) {
         pageLead = StatNumberUiModel(
-            value = (userBookRead?.currentSeconds ?: 0).toDouble(),
+            value = (currentRead?.currentSeconds ?: 0).toDouble(),
             format = StatNumberFormat.Duration,
             variant = StatNumberVariant.BodyStrong,
         )
         pageTail = edition.audioSeconds?.let { " of ${secondsToHm(it)}" }
     } else {
         pageLead = StatNumberUiModel(
-            value = (userBookRead?.currentPage ?: 0).toDouble(),
+            value = (currentRead?.currentPage ?: 0).toDouble(),
             format = StatNumberFormat.Plain,
             variant = StatNumberVariant.BodyStrong,
             prefix = "Page ",

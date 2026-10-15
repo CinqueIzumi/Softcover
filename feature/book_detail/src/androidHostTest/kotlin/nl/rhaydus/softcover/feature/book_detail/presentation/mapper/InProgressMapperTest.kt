@@ -30,7 +30,7 @@ class InProgressMapperTest {
         } returns paused
 
         every {
-            userBookRead
+            currentRead
         } returns read
 
         every {

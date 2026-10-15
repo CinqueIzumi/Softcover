@@ -56,7 +56,7 @@ class BookDeadlineMapperTest {
         }
 
         every {
-            book.userBookRead
+            book.currentRead
         } returns if (hasRead) {
             mockk<UserBookRead>(relaxed = true).also { read ->
                 every {

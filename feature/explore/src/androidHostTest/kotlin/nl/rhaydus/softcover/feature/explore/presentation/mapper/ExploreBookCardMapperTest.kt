@@ -68,7 +68,6 @@ class ExploreBookCardMapperTest {
         positionsInSeries = positionsInSeries,
         isCompilation = false,
         userBook = userBook,
-        userBookRead = null,
     )
 
     private fun titleKey(
@@ -319,6 +318,7 @@ class ExploreBookCardMapperTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
             val input = book(userBook = savedBook)
 

@@ -10,7 +10,7 @@ internal fun Book.toFocusPageEditor(draft: String): FocusPageEditorUiModel {
     val totalPages = pageCount()
 
     if (totalPages <= 0) {
-        val percent = userBookRead?.progress ?: 0f
+        val percent = currentRead?.progress ?: 0f
 
         return FocusPageEditorUiModel(
             caption = "${percent.roundToInt()}% complete",

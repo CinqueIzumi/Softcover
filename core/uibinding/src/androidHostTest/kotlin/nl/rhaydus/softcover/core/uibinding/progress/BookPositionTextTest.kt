@@ -14,7 +14,7 @@ class BookPositionTextTest {
     private fun read(
         currentPage: Int? = null,
         currentSeconds: Int? = null,
-    ): UserBookRead = PreviewData.baseBook.userBookRead.shouldNotBeNull().copy(
+    ): UserBookRead = PreviewData.baseBook.userBook.shouldNotBeNull().reads.first().copy(
         currentPage = currentPage,
         currentSeconds = currentSeconds,
     )
@@ -180,7 +180,7 @@ class BookPositionTextTest {
         @Test
         fun `is null without a read`() {
             // ----- Arrange -----
-            val subject = PreviewData.baseBook.copy(userBookRead = null)
+            val subject = PreviewData.baseBook.copy(userBook = PreviewData.baseBook.userBook?.copy(reads = emptyList()))
 
             // ----- Act -----
             val result = subject.toPositionText()
@@ -205,8 +205,11 @@ class BookPositionTextTest {
             val subject = PreviewData.baseBook.copy(
                 editions = listOf(current),
                 defaultEdition = default,
-                userBook = PreviewData.baseBook.userBook?.copy(editionId = current.id),
-                userBookRead = read(currentPage = 50),
+                userBook = PreviewData.baseBook.userBook?.copy(
+                    status = BookStatus.Reading,
+                    editionId = current.id,
+                    reads = listOf(read(currentPage = 50)),
+                ),
             )
 
             // ----- Act -----
@@ -230,8 +233,10 @@ class BookPositionTextTest {
             )
             val subject = PreviewData.baseBook.copy(
                 editions = listOf(edition),
-                userBook = paused.copy(editionId = edition.id),
-                userBookRead = read(currentPage = 100),
+                userBook = paused.copy(
+                    editionId = edition.id,
+                    reads = listOf(read(currentPage = 100)),
+                ),
             )
 
             // ----- Act -----
@@ -251,8 +256,10 @@ class BookPositionTextTest {
             )
             val subject = PreviewData.baseBook.copy(
                 editions = listOf(edition),
-                userBook = reading.copy(editionId = edition.id),
-                userBookRead = read(currentPage = 100),
+                userBook = reading.copy(
+                    editionId = edition.id,
+                    reads = listOf(read(currentPage = 100)),
+                ),
             )
 
             // ----- Act -----

@@ -115,7 +115,7 @@ class DeadlineModelsCollectorTest {
         } returns edition
 
         every {
-            book.userBookRead
+            book.currentRead
         } returns userBookRead
     }
 

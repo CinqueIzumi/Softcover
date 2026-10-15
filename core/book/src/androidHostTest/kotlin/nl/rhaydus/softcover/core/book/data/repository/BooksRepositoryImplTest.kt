@@ -23,6 +23,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.platform.NetworkAvailabilityProvider
+import nl.rhaydus.softcover.core.book.baseBook
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
@@ -105,7 +106,7 @@ class BooksRepositoryImplTest {
         } returns if (userBookId != null) stubUserBook(userBookId) else null
 
         every {
-            this@mockk.userBookRead
+            this@mockk.currentRead
         } returns null
     }
 
@@ -1383,6 +1384,7 @@ class BooksRepositoryImplTest {
             reviewedAt = null,
             updatedAt = null,
             journals = emptyList(),
+            reads = emptyList(),
         )
 
         @Test
@@ -1599,6 +1601,7 @@ class BooksRepositoryImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = listOf(existingJournal),
+                reads = emptyList(),
             )
             val book = Book(
                 id = 42,
@@ -1616,7 +1619,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = userBook,
-                userBookRead = null,
             )
             val expectedBook = stubBook(userBookId = 1)
             val slot = slot<Book>()
@@ -1853,11 +1855,11 @@ class BooksRepositoryImplTest {
                     reviewedAt = null,
                     updatedAt = null,
                     journals = listOf(existingJournal),
+                    reads = emptyList(),
                 )
             } else {
                 null
             },
-            userBookRead = null,
         )
 
         private fun goOffline() {
@@ -2328,6 +2330,7 @@ class BooksRepositoryImplTest {
             reviewedAt = null,
             updatedAt = null,
             journals = emptyList(),
+            reads = emptyList(),
         )
 
         @Test
@@ -2373,7 +2376,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = userBook,
-                userBookRead = null,
             )
             val remoteBook = stubBook(userBookId = 5)
             val capturedBooks = mutableListOf<Book>()
@@ -2525,7 +2527,6 @@ class BooksRepositoryImplTest {
                     id = userBookId,
                     rating = 3.0,
                 ),
-                userBookRead = null,
             )
             val snapshot = stubBook(userBookId = userBookId)
 
@@ -2592,7 +2593,6 @@ class BooksRepositoryImplTest {
                     id = userBookId,
                     rating = 3.0,
                 ),
-                userBookRead = null,
             )
             val snapshot = stubBook(userBookId = userBookId)
 
@@ -2659,7 +2659,6 @@ class BooksRepositoryImplTest {
                     id = userBookId,
                     rating = 3.0,
                 ),
-                userBookRead = null,
             )
 
             every {
@@ -2725,7 +2724,6 @@ class BooksRepositoryImplTest {
                         rating = 3.0,
                         status = BookStatus.Read,
                     ),
-                    userBookRead = null,
                 )
 
                 // The caller passes a pre-finish snapshot still marked Reading (e.g. the Reading
@@ -2750,7 +2748,6 @@ class BooksRepositoryImplTest {
                         rating = 3.0,
                         status = BookStatus.Reading,
                     ),
-                    userBookRead = null,
                 )
                 val remoteBook = stubBook(userBookId = userBookId)
                 val capturedBooks = mutableListOf<Book>()
@@ -2806,6 +2803,7 @@ class BooksRepositoryImplTest {
             reviewedAt = null,
             updatedAt = null,
             journals = emptyList(),
+            reads = emptyList(),
         )
 
         @Test
@@ -2900,7 +2898,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = stubUserBookForReview(id = userBookId),
-                userBookRead = null,
             )
 
             every {
@@ -2967,7 +2964,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = stubUserBookForReview(id = userBookId),
-                userBookRead = null,
             )
             val snapshot = Book(
                 id = bookId,
@@ -2985,7 +2981,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = stubUserBookForReview(id = userBookId),
-                userBookRead = null,
             )
 
             every {
@@ -3061,7 +3056,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = stubUserBookForReview(id = userBookId),
-                userBookRead = null,
             )
             val snapshot = Book(
                 id = bookId,
@@ -3079,7 +3073,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = stubUserBookForReview(id = userBookId),
-                userBookRead = null,
             )
 
             every {
@@ -3213,7 +3206,6 @@ class BooksRepositoryImplTest {
                         id = userBookId,
                         status = BookStatus.Read,
                     ),
-                    userBookRead = null,
                 )
 
                 // The caller passes a pre-finish snapshot still marked Reading (e.g. the Reading
@@ -3237,7 +3229,6 @@ class BooksRepositoryImplTest {
                         id = userBookId,
                         status = BookStatus.Reading,
                     ),
-                    userBookRead = null,
                 )
                 val remoteBook = stubBook(userBookId = userBookId)
                 val capturedBooks = mutableListOf<Book>()
@@ -4464,6 +4455,7 @@ class BooksRepositoryImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = listOf(existingJournal),
+                reads = emptyList(),
             )
             val userBookRead = UserBookRead(
                 id = 1,
@@ -4488,8 +4480,7 @@ class BooksRepositoryImplTest {
                 bookSeries = null,
                 positionsInSeries = emptyList(),
                 isCompilation = false,
-                userBook = userBook,
-                userBookRead = userBookRead,
+                userBook = userBook.copy(reads = listOf(userBookRead)),
             )
             val slot = slot<Book>()
 
@@ -4678,6 +4669,130 @@ class BooksRepositoryImplTest {
                 )
             }
         }
+
+        private fun readingBook(read: UserBookRead): Book {
+            val userBook = baseBook.userBook.shouldNotBeNull()
+
+            return baseBook.copy(
+                userBook = userBook.copy(
+                    status = BookStatus.Reading,
+                    reads = listOf(read),
+                ),
+            )
+        }
+
+        @Test
+        fun `placeholder current read — caches optimistically, records history and enqueues without calling the remote`() = runTest {
+            // ----- Arrange -----
+            val placeholderRead = UserBookRead(
+                id = -1,
+                currentPage = null,
+                currentSeconds = null,
+                progress = 0f,
+                startedAt = "2026-07-21",
+                finishedAt = null,
+            )
+            val book = readingBook(read = placeholderRead)
+            val cached = slot<Book>()
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = capture(cached))
+            } returns Unit
+
+            // ----- Act -----
+            val result = repository.updateBookProgress(
+                book = book,
+                newPage = 25,
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Assert -----
+            cached.captured.currentRead.shouldNotBeNull().currentPage shouldBe 25
+            result shouldBe cached.captured
+
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = book.id,
+                    actionAtEpochMillis = any(),
+                    pages = 25,
+                    seconds = null,
+                )
+            }
+
+            coVerify(exactly = 1) {
+                offlineSync.enqueueProgressUpdate(
+                    book = cached.captured,
+                    newPage = 25,
+                    newSeconds = null,
+                    actionAt = "2026-07-21T21:00:00Z",
+                    progressHistoryId = 9L,
+                )
+            }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `real current read — calls the remote with that read and does not enqueue`() = runTest {
+            // ----- Arrange -----
+            val realRead = UserBookRead(
+                id = 7,
+                currentPage = 10,
+                currentSeconds = null,
+                progress = 10f,
+                startedAt = "2026-07-21",
+                finishedAt = null,
+            )
+            val book = readingBook(read = realRead)
+            val remoteBook = stubBook(userBookId = 1)
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } returns remoteBook
+
+            // ----- Act -----
+            val result = repository.updateBookProgress(
+                book = book,
+                newPage = 25,
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Assert -----
+            result shouldBe remoteBook
+
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.updateBookProgress(
+                    book = book,
+                    newPage = 25,
+                    newSeconds = null,
+                    actionAt = "2026-07-21T21:00:00Z",
+                )
+            }
+
+            coVerify(exactly = 0) {
+                offlineSync.enqueueProgressUpdate(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                    progressHistoryId = any(),
+                )
+            }
+        }
     }
 
     @Nested
@@ -4792,6 +4907,7 @@ class BooksRepositoryImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = listOf(existingJournal),
+                reads = emptyList(),
             )
             val userBookRead = UserBookRead(
                 id = 1,
@@ -4816,8 +4932,7 @@ class BooksRepositoryImplTest {
                 bookSeries = null,
                 positionsInSeries = emptyList(),
                 isCompilation = false,
-                userBook = userBook,
-                userBookRead = userBookRead,
+                userBook = userBook.copy(reads = listOf(userBookRead)),
             )
             val slot = slot<Book>()
 
@@ -4868,6 +4983,7 @@ class BooksRepositoryImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
             val userBookRead = UserBookRead(
                 id = 1,
@@ -4892,8 +5008,7 @@ class BooksRepositoryImplTest {
                 bookSeries = null,
                 positionsInSeries = emptyList(),
                 isCompilation = false,
-                userBook = userBook,
-                userBookRead = userBookRead,
+                userBook = userBook.copy(reads = listOf(userBookRead)),
             )
             val slot = slot<Book>()
 
@@ -4920,7 +5035,7 @@ class BooksRepositoryImplTest {
             )
 
             // ----- Assert -----
-            slot.captured.userBookRead?.finishedAt shouldBe expectedFinishedAt
+            slot.captured.currentRead?.finishedAt shouldBe expectedFinishedAt
         }
 
         @Test
@@ -5097,14 +5212,25 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class OfflineBehavior {
-        private fun stubUserBook(id: Int = 1): UserBook = mockk(relaxed = true) {
-            every {
-                this@mockk.id
-            } returns id
-            every {
-                this@mockk.editionId
-            } returns null
-        }
+        private fun stubUserBook(
+            id: Int = 1,
+            reads: List<UserBookRead> = emptyList(),
+        ): UserBook = UserBook(
+            id = id,
+            status = BookStatus.Reading,
+            dateAdded = "2026-01-01",
+            createdAt = null,
+            privacySettingId = 1,
+            reviewHasSpoilers = false,
+            editionId = null,
+            lastReadDate = null,
+            rating = null,
+            referrerUserId = null,
+            reviewedAt = null,
+            updatedAt = null,
+            journals = emptyList(),
+            reads = reads,
+        )
 
         private fun stubUserBookRead(id: Int = 1): UserBookRead = UserBookRead(
             id = id,
@@ -5133,8 +5259,10 @@ class BooksRepositoryImplTest {
             bookSeries = null,
             positionsInSeries = emptyList(),
             isCompilation = false,
-            userBook = stubUserBook(id = userBookId),
-            userBookRead = stubUserBookRead(id = userBookReadId),
+            userBook = stubUserBook(
+                id = userBookId,
+                reads = listOf(stubUserBookRead(id = userBookReadId)),
+            ),
         )
 
         @Test
@@ -5404,14 +5532,16 @@ class BooksRepositoryImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = journals,
-            ),
-            userBookRead = UserBookRead(
-                id = 1,
-                currentPage = 50,
-                currentSeconds = null,
-                progress = 0.5f,
-                startedAt = null,
-                finishedAt = null,
+                reads = listOf(
+                    UserBookRead(
+                        id = 1,
+                        currentPage = 50,
+                        currentSeconds = null,
+                        progress = 0.5f,
+                        startedAt = null,
+                        finishedAt = null,
+                    ),
+                ),
             ),
         )
 

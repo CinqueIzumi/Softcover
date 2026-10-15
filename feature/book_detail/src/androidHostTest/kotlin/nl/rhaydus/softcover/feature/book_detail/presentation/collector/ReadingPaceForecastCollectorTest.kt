@@ -129,7 +129,7 @@ class ReadingPaceForecastCollectorTest {
             } returns edition
 
             every {
-                this@mockk.userBookRead
+                this@mockk.currentRead
             } returns userBookRead
 
             every {

@@ -83,7 +83,7 @@ class UserBooksFlowCollectorTest {
         owned = owned,
     )
 
-    private fun buildUserBook(): UserBook = UserBook(
+    private fun buildUserBook(reads: List<UserBookRead> = emptyList()): UserBook = UserBook(
         id = 1,
         status = BookStatus.None,
         dateAdded = "2024-01-01",
@@ -97,6 +97,7 @@ class UserBooksFlowCollectorTest {
         reviewedAt = null,
         updatedAt = null,
         journals = emptyList(),
+        reads = reads,
     )
 
     private fun buildUserBookRead(): UserBookRead = UserBookRead(
@@ -115,7 +116,6 @@ class UserBooksFlowCollectorTest {
         description: String = "Remote description",
         editions: List<BookEdition> = emptyList(),
         userBook: UserBook? = null,
-        userBookRead: UserBookRead? = null,
     ): Book = Book(
         id = id,
         title = title,
@@ -132,7 +132,6 @@ class UserBooksFlowCollectorTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         userBook = userBook,
-        userBookRead = userBookRead,
     )
 
     // -------------------------------------------------------------------------
@@ -190,16 +189,16 @@ class UserBooksFlowCollectorTest {
         }
 
         @Test
-        fun `overlays userBookRead from local book onto state book when ids match`() = runTest(UnconfinedTestDispatcher()) {
+        fun `overlays the reads carried by the local user book onto state book when ids match`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val localUserBookRead = buildUserBookRead()
             val remoteBook = buildBook(
                 id = 10,
-                userBookRead = null,
+                userBook = null,
             )
             val localBook = buildBook(
                 id = 10,
-                userBookRead = localUserBookRead,
+                userBook = buildUserBook(reads = listOf(localUserBookRead)),
             )
             stateFlow.value = buildBookDetailUiState().copy(book = remoteBook)
             val collector = UserBooksFlowCollector()
@@ -214,7 +213,7 @@ class UserBooksFlowCollectorTest {
             userBooksFlow.emit(localBook)
 
             // ----- Assert -----
-            stateFlow.value.book.shouldNotBeNull().userBookRead shouldBe localUserBookRead
+            stateFlow.value.book.shouldNotBeNull().userBook.shouldNotBeNull().reads shouldBe listOf(localUserBookRead)
             job.cancel()
         }
 

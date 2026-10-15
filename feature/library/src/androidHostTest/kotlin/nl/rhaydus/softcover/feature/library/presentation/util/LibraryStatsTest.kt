@@ -56,6 +56,7 @@ class LibraryStatsTest {
         journals: List<ReadingJournal> = emptyList(),
         createdAt: String? = null,
         lastReadDate: String? = null,
+        reads: List<UserBookRead> = emptyList(),
     ) = UserBook(
         id = 1,
         status = BookStatus.Read,
@@ -70,6 +71,7 @@ class LibraryStatsTest {
         reviewedAt = null,
         updatedAt = null,
         journals = journals,
+        reads = reads,
     )
 
     private fun buildUserBookRead(finishedAt: String? = null) = UserBookRead(
@@ -86,7 +88,6 @@ class LibraryStatsTest {
         currentEditionPages: Int? = null,
         defaultEditionPages: Int? = null,
         userBook: UserBook? = null,
-        userBookRead: UserBookRead? = null,
     ): Book {
         val ownedEdition = if (currentEditionPages != null) {
             buildEdition(
@@ -125,7 +126,6 @@ class LibraryStatsTest {
             positionsInSeries = emptyList(),
             isCompilation = false,
             userBook = userBook,
-            userBookRead = userBookRead,
         )
     }
 
@@ -263,7 +263,7 @@ class LibraryStatsTest {
         }
 
         @Test
-        fun `finishedAt takes precedence over lastReadDate, journal, and createdAt`() {
+        fun `the latest finishedAt wins over an older lastReadDate, journal, and createdAt`() {
             // ----- Arrange -----
             val journals = listOf(buildFinishedJournal("2019-06-01T00:00:00"))
             val book = buildBook(
@@ -271,8 +271,8 @@ class LibraryStatsTest {
                     journals = journals,
                     lastReadDate = "2020-03-15",
                     createdAt = "2018-01-01T00:00:00",
+                    reads = listOf(buildUserBookRead(finishedAt = "2022-05-10")),
                 ),
-                userBookRead = buildUserBookRead(finishedAt = "2022-05-10"),
             )
 
             // ----- Act -----
@@ -291,8 +291,8 @@ class LibraryStatsTest {
                     journals = journals,
                     lastReadDate = "2020-03-15",
                     createdAt = "2018-01-01T00:00:00",
+                    reads = listOf(buildUserBookRead(finishedAt = null)),
                 ),
-                userBookRead = buildUserBookRead(finishedAt = null),
             )
 
             // ----- Act -----
@@ -310,8 +310,8 @@ class LibraryStatsTest {
                     journals = emptyList(),
                     lastReadDate = null,
                     createdAt = "2017-11-20T08:30:00",
+                    reads = listOf(buildUserBookRead(finishedAt = null)),
                 ),
-                userBookRead = buildUserBookRead(finishedAt = null),
             )
 
             // ----- Act -----
@@ -329,8 +329,8 @@ class LibraryStatsTest {
                     journals = emptyList(),
                     lastReadDate = "2021-08-22",
                     createdAt = null,
+                    reads = listOf(buildUserBookRead(finishedAt = "garbage")),
                 ),
-                userBookRead = buildUserBookRead(finishedAt = "garbage"),
             )
 
             // ----- Act -----
@@ -391,8 +391,7 @@ class LibraryStatsTest {
             // ----- Arrange -----
             TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Pago_Pago"))
             val book = buildBook(
-                userBook = buildUserBook(),
-                userBookRead = buildUserBookRead(finishedAt = "2026-01-01"),
+                userBook = buildUserBook(reads = listOf(buildUserBookRead(finishedAt = "2026-01-01"))),
             )
 
             // ----- Act -----
@@ -410,8 +409,8 @@ class LibraryStatsTest {
                     journals = emptyList(),
                     lastReadDate = null,
                     createdAt = null,
+                    reads = listOf(buildUserBookRead(finishedAt = null)),
                 ),
-                userBookRead = buildUserBookRead(finishedAt = null),
             )
 
             // ----- Act -----

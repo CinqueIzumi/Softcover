@@ -50,7 +50,7 @@ class MastheadCollectorTest {
 
     private fun stubBook(userBookRead: UserBookRead? = null): Book = mockk<Book>(relaxed = true).also { book ->
         every {
-            book.userBookRead
+            book.currentRead
         } returns userBookRead
     }
 

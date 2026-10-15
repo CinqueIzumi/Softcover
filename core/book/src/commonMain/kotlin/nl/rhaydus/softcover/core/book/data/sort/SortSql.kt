@@ -63,9 +63,20 @@ internal fun LibrarySortMode.toOrderByFragment(direction: SortDirection): String
         LibrarySortMode.RATING ->
             "b.rating $dir"
 
+        // Mirrors UserBook.currentRead: placeholder reads (negative id) are the newest, so they order first.
         LibrarySortMode.PROGRESS -> """
             COALESCE(
-                (SELECT MAX(progress) FROM user_book_reads WHERE userBookId = ub.id),
+                CASE
+                    WHEN ub.statusCode IN (2, 4) THEN
+                        (SELECT progress FROM user_book_reads WHERE userBookId = ub.id
+                            ORDER BY (finishedAt IS NULL) DESC, (id < 0) DESC, id DESC LIMIT 1)
+                    WHEN ub.statusCode = 3 THEN
+                        (SELECT progress FROM user_book_reads WHERE userBookId = ub.id
+                            ORDER BY (finishedAt IS NOT NULL) DESC, finishedAt DESC, (id < 0) DESC, id DESC LIMIT 1)
+                    WHEN ub.statusCode = 5 THEN
+                        (SELECT progress FROM user_book_reads WHERE userBookId = ub.id
+                            ORDER BY (id < 0) DESC, id DESC LIMIT 1)
+                END,
                 0
             ) $dir
         """.trimIndent()

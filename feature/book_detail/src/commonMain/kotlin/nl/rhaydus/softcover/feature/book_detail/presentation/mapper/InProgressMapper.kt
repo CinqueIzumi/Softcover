@@ -16,7 +16,7 @@ internal fun Book.toInProgressSectionHeader(): SectionHeaderUiModel =
 
 /** Null when the book has no read or no current edition, which is when the section has nothing to show. */
 internal fun Book.toInProgress(): InProgressUiModel? {
-    val read = userBookRead ?: return null
+    val read = currentRead ?: return null
     val text = toPositionText() ?: return null
 
     return InProgressUiModel(

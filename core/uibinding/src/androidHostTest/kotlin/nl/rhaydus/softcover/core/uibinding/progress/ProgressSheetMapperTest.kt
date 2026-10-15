@@ -55,8 +55,11 @@ class ProgressSheetMapperTest {
 
         return PreviewData.baseBook.copy(
             editions = listOf(audioEdition),
-            userBook = PreviewData.baseBook.userBook?.copy(editionId = audioEdition.id),
-            userBookRead = PreviewData.baseBook.userBookRead?.copy(currentSeconds = currentSeconds),
+            userBook = PreviewData.baseBook.userBook?.copy(
+                status = BookStatus.Reading,
+                editionId = audioEdition.id,
+                reads = PreviewData.baseBook.userBook?.reads.orEmpty().map { it.copy(currentSeconds = currentSeconds) },
+            ),
         )
     }
 
@@ -184,9 +187,9 @@ class ProgressSheetMapperTest {
     @Nested
     inner class CurrentProgress {
         @Test
-        fun `currentPage is 0 when userBookRead is null`() {
+        fun `currentPage is 0 when there is no current read`() {
             // ----- Arrange -----
-            val book = PreviewData.baseBook.copy(userBookRead = null)
+            val book = PreviewData.baseBook.copy(userBook = PreviewData.baseBook.userBook?.copy(reads = emptyList()))
 
             // ----- Act -----
             val result = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE)
@@ -197,7 +200,7 @@ class ProgressSheetMapperTest {
         }
 
         @Test
-        fun `currentSeconds is 0 when userBookRead is null`() {
+        fun `currentSeconds is 0 when there is no current read`() {
             // ----- Arrange -----
             val audioEdition = PreviewData.baseEdition.copy(
                 id = 40,
@@ -206,8 +209,11 @@ class ProgressSheetMapperTest {
             )
             val book = PreviewData.baseBook.copy(
                 editions = listOf(audioEdition),
-                userBook = PreviewData.baseBook.userBook?.copy(editionId = audioEdition.id),
-                userBookRead = null,
+                userBook = PreviewData.baseBook.userBook?.copy(
+                    status = BookStatus.Reading,
+                    editionId = audioEdition.id,
+                    reads = emptyList(),
+                ),
             )
 
             // ----- Act -----
@@ -225,7 +231,10 @@ class ProgressSheetMapperTest {
         fun `progressPercent rounds 34,6 up to 35`() {
             // ----- Arrange -----
             val book = PreviewData.baseBook.copy(
-                userBookRead = PreviewData.baseBook.userBookRead?.copy(progress = 34.6f),
+                userBook = PreviewData.baseBook.userBook?.copy(
+                    status = BookStatus.Reading,
+                    reads = PreviewData.baseBook.userBook?.reads.orEmpty().map { it.copy(progress = 34.6f) },
+                ),
             )
 
             // ----- Act -----
@@ -239,7 +248,10 @@ class ProgressSheetMapperTest {
         fun `progressPercent rounds 34,4 down to 34`() {
             // ----- Arrange -----
             val book = PreviewData.baseBook.copy(
-                userBookRead = PreviewData.baseBook.userBookRead?.copy(progress = 34.4f),
+                userBook = PreviewData.baseBook.userBook?.copy(
+                    status = BookStatus.Reading,
+                    reads = PreviewData.baseBook.userBook?.reads.orEmpty().map { it.copy(progress = 34.4f) },
+                ),
             )
 
             // ----- Act -----
@@ -541,7 +553,7 @@ class ProgressSheetMapperTest {
         @Test
         fun `is zero without a read`() {
             // ----- Arrange -----
-            val book = PreviewData.baseBook.copy(userBookRead = null)
+            val book = PreviewData.baseBook.copy(userBook = PreviewData.baseBook.userBook?.copy(reads = emptyList()))
 
             // ----- Act -----
             val result = book.progressCurrentSeconds

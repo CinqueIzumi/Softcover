@@ -93,7 +93,6 @@ class BookCardModelsCollectorTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         userBook = null,
-        userBookRead = null,
     )
 
     private fun columnOf(card: BookCardUiModel) =

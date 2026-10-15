@@ -29,9 +29,6 @@ class BookInitialCoverTest {
             userBook
         } returns null
         every {
-            userBookRead
-        } returns null
-        every {
             this@mockk.title
         } returns title
         every {

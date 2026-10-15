@@ -47,7 +47,7 @@ class FeaturedBookCollectorTest {
 
         val book = mockk<Book>(relaxed = true)
         every {
-            book.userBookRead
+            book.currentRead
         } returns read
 
         return book

@@ -79,8 +79,8 @@ internal class ActiveSessionControllerImpl(
             runCatching {
                 startReadingSessionUseCase(
                     bookId = book.id,
-                    startPage = book.userBookRead?.currentPage,
-                    startSeconds = book.userBookRead?.currentSeconds,
+                    startPage = book.currentRead?.currentPage,
+                    startSeconds = book.currentRead?.currentSeconds,
                 )
 
                 readingSessionLauncher.start()
@@ -122,8 +122,8 @@ internal class ActiveSessionControllerImpl(
             runCatching {
                 stopReadingSessionUseCase(
                     id = current.session.id,
-                    endPage = current.book.userBookRead?.currentPage,
-                    endSeconds = current.book.userBookRead?.currentSeconds,
+                    endPage = current.book.currentRead?.currentPage,
+                    endSeconds = current.book.currentRead?.currentSeconds,
                 )
             }.onSuccess {
                 _outcomes.emit(SessionOutcome.Stopped)

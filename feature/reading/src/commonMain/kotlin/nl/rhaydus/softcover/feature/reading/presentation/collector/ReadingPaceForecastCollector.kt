@@ -43,9 +43,9 @@ internal class ReadingPaceForecastCollector : ReadingCollector {
                 ProgressSnapshot(
                     bookId = book?.id,
                     totalPages = edition?.pages,
-                    currentPage = book?.userBookRead?.currentPage ?: 0,
+                    currentPage = book?.currentRead?.currentPage ?: 0,
                     totalSeconds = edition?.audioSeconds,
-                    currentSeconds = book?.userBookRead?.currentSeconds ?: 0,
+                    currentSeconds = book?.currentRead?.currentSeconds ?: 0,
                 )
             }
             .distinctUntilChanged()

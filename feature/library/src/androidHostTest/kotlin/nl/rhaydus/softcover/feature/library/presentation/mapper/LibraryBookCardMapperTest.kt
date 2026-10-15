@@ -75,7 +75,7 @@ class LibraryBookCardMapperTest {
         } returns status
 
         every {
-            book.userBookRead
+            book.currentRead
         } returns progress?.let { value ->
             mockk<UserBookRead>(relaxed = true).also { read ->
                 every {

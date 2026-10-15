@@ -171,7 +171,7 @@ class BookCardModelsCollectorTest {
         } returns (edition?.authorString?.takeIf { it.isNotBlank() } ?: authors.joinToString(", ") { it.name })
 
         every {
-            book.userBookRead
+            book.currentRead
         } returns if (progress != null || currentPage != null || currentSeconds != null) {
             mockk<UserBookRead>(relaxed = true).also { read ->
                 every {

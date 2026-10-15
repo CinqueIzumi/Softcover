@@ -305,9 +305,10 @@ interface BookDao {
 
             insertJournals(journals = userBook.journals.map { it.toEntity(userBookId = userBookId) })
 
-            book.userBookRead?.let { userBookRead ->
-                insertUserBookRead(userBookRead.toEntity(userBookId = userBookId))
-            }
+            // Replace-all rather than upsert: `userBook.reads` must be the complete set, since any read missing from it is deleted.
+            deleteUserBookRead(userBookId = userBookId)
+
+            insertUserBookReads(userBookReads = userBook.reads.map { it.toEntity(userBookId = userBookId) })
         }
 
         // Insert editions, evicting locally-cached covers whose URL changed
@@ -467,6 +468,9 @@ interface BookDao {
 
     @Upsert
     suspend fun insertUserBookRead(userBookRead: UserBookReadEntity)
+
+    @Upsert
+    suspend fun insertUserBookReads(userBookReads: List<UserBookReadEntity>)
 
     @Upsert
     suspend fun insertEditions(editions: List<BookEditionEntity>)

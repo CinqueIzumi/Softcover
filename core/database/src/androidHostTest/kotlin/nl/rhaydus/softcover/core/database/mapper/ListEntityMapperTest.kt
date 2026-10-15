@@ -174,11 +174,11 @@ class ListEntityMapperTest {
     private fun stubUserBookWithJournals(
         userBook: UserBookEntity = stubUserBookEntity(),
         journals: List<ReadingJournalEntity> = emptyList(),
-        userBookRead: UserBookReadEntity? = null,
+        userBookReads: List<UserBookReadEntity> = emptyList(),
     ): UserBookWithJournals = UserBookWithJournals(
         userBook = userBook,
         journals = journals,
-        userBookRead = userBookRead,
+        userBookReads = userBookReads,
     )
 
     private fun stubBookFullEntity(

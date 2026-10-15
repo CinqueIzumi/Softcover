@@ -135,7 +135,7 @@ class ReadingPaceForecastCollectorTest {
             book.currentEdition
         } returns edition
         every {
-            book.userBookRead
+            book.currentRead
         } returns userBookRead
     }
 

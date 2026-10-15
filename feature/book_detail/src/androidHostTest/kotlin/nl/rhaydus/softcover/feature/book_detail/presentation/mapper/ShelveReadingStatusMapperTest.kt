@@ -20,7 +20,7 @@ class ShelveReadingStatusMapperTest {
         edition: BookEdition?,
     ): Book = mockk<Book> {
         every {
-            userBookRead
+            currentRead
         } returns read
 
         every {
