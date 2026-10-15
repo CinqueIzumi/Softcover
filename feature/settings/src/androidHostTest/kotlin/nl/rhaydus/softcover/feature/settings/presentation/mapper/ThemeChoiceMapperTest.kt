@@ -28,4 +28,43 @@ class ThemeChoiceMapperTest {
             }
         }
     }
+
+    @Nested
+    inner class DynamicColor {
+        @Test
+        fun `dim tile is never dynamic even when dynamic colour is on`() {
+            // ----- Arrange -----
+            val dynamicColor = true
+
+            // ----- Act -----
+            val result = themeChoicesFor(
+                selected = ThemeMode.LIGHT,
+                palette = SpinePalette.DEFAULT,
+                dynamicColor = dynamicColor,
+            )
+
+            // ----- Assert -----
+            result.first { it.key == ThemeMode.DIM }.dynamicColor shouldBe false
+        }
+
+        @Test
+        fun `other tiles carry the dynamic colour input`() {
+            listOf(true, false).forEach { dynamicColor ->
+                // ----- Arrange -----
+                val others = ThemeMode.entries.filter { it != ThemeMode.DIM }
+
+                // ----- Act -----
+                val result = themeChoicesFor(
+                    selected = ThemeMode.LIGHT,
+                    palette = SpinePalette.DEFAULT,
+                    dynamicColor = dynamicColor,
+                )
+
+                // ----- Assert -----
+                others.forEach { mode ->
+                    result.first { it.key == mode }.dynamicColor shouldBe dynamicColor
+                }
+            }
+        }
+    }
 }

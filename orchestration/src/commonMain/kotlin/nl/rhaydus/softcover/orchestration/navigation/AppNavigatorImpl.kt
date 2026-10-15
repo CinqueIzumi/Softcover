@@ -28,7 +28,11 @@ internal class AppNavigatorImpl : AppNavigator {
             transitionSurface = destination.transitionSurface,
         )
 
-        ScreenDestination.BarcodeScanner -> BarcodeScannerScreen()
+        is ScreenDestination.BarcodeScanner -> BarcodeScannerScreen(
+            startInManualEntry = destination.startInManualEntry,
+            prefilledIsbn = destination.prefilledIsbn,
+            onResolved = destination.onResolved,
+        )
 
         ScreenDestination.LibraryVisibilitySettings -> LibraryVisibilitySettingsScreen()
 

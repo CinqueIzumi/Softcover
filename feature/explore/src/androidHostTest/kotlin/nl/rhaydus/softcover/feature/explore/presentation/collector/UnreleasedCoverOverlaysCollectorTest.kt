@@ -56,6 +56,7 @@ class UnreleasedCoverOverlaysCollectorTest {
         id: Int,
         isUnreleased: Boolean = true,
         effectiveReleaseDate: LocalDate? = RELEASE_DATE,
+        releaseDate: LocalDate? = RELEASE_DATE,
     ): Book = mockk {
         every {
             this@mockk.id
@@ -68,6 +69,10 @@ class UnreleasedCoverOverlaysCollectorTest {
         every {
             this@mockk.effectiveReleaseDate
         } returns effectiveReleaseDate
+
+        every {
+            this@mockk.releaseDate
+        } returns releaseDate
     }
 
     @Nested
@@ -188,10 +193,24 @@ class UnreleasedCoverOverlaysCollectorTest {
         }
 
         @Test
-        fun `featuredReleaseBadge uses the Featured copy and is unaffected by the cover-overlay corner`() =
+        fun `featuredReleaseBadge uses the book-level releaseDate over the edition-derived date`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                val featured = stubBook(id = 6)
+                val bookDebut = LocalDate(
+                    2026,
+                    9,
+                    15,
+                )
+                val editionDate = LocalDate(
+                    2026,
+                    12,
+                    8,
+                )
+                val featured = stubBook(
+                    id = 6,
+                    effectiveReleaseDate = editionDate,
+                    releaseDate = bookDebut,
+                )
                 stateFlow.value = ExploreScreenUiState(featuredUpcomingRelease = featured)
                 val collector = UnreleasedCoverOverlaysCollector()
 
@@ -204,7 +223,7 @@ class UnreleasedCoverOverlaysCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.featuredReleaseBadge shouldBe RELEASE_DATE.toFeaturedUnreleasedBadgeUiModel()
+                stateFlow.value.featuredReleaseBadge shouldBe bookDebut.toFeaturedUnreleasedBadgeUiModel()
                 job.cancel()
             }
 
@@ -255,7 +274,8 @@ class UnreleasedCoverOverlaysCollectorTest {
             // ----- Arrange -----
             val featured = stubBook(
                 id = 8,
-                effectiveReleaseDate = null,
+                effectiveReleaseDate = RELEASE_DATE,
+                releaseDate = null,
             )
             stateFlow.value = ExploreScreenUiState(featuredUpcomingRelease = featured)
             val collector = UnreleasedCoverOverlaysCollector()

@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.core.component.share
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,7 +28,6 @@ import nl.rhaydus.softcover.core.component.modifier.rememberShakeTrigger
 import nl.rhaydus.softcover.core.component.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * The share sheet every share card goes through: a [SheetScaffold] around a scaled preview of
@@ -39,7 +38,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
  * [ShareCardSheetEvent.Shared] closes the sheet through its [nl.rhaydus.softcover.core.component.sheet.SheetSession].
  * A second capture is ignored until the running one ends; the scaffold's busy state only locks the
  * footer. Outcome snackbars, haptics and the preview's settle or shake are handled here.
- * [aboveCard] renders over the preview, in the sheet's centred column.
+ * [aboveCard] and [belowCard] render over and under the preview, in the sheet's centred column; the host
+ * emits its own gap after [aboveCard] content.
  */
 @Composable
 fun ShareCardSheetContent(
@@ -47,6 +47,7 @@ fun ShareCardSheetContent(
     onEvent: (ShareCardSheetEvent) -> Unit,
     modifier: Modifier = Modifier,
     aboveCard: @Composable ColumnScope.() -> Unit = {},
+    belowCard: @Composable ColumnScope.() -> Unit = {},
 ) {
     val capture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
     val coroutineScope = rememberCoroutineScope()
@@ -180,6 +181,7 @@ fun ShareCardSheetContent(
                     scaleY = settleScale.value
                 },
             aboveCard = aboveCard,
+            belowCard = belowCard,
         )
     }
 }
@@ -192,23 +194,33 @@ internal fun ShareCardSheetBody(
     modifier: Modifier = Modifier,
     previewModifier: Modifier = Modifier,
     aboveCard: @Composable ColumnScope.() -> Unit = {},
+    belowCard: @Composable ColumnScope.() -> Unit = {},
 ) {
+    val maxHeight by animateDpAsState(
+        targetValue = model.previewMaxHeight,
+        animationSpec = if (playDecorativeMotion()) {
+            MaterialTheme.motionScheme.defaultSpatialSpec()
+        } else {
+            snap()
+        },
+    )
+
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         aboveCard()
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
-
         ScaledShareCardPreview(
             capture = capture,
             maxWidth = model.previewMaxWidth,
-            maxHeight = model.previewMaxHeight,
+            maxHeight = maxHeight,
             modifier = previewModifier,
         ) {
             ShareCard(model = model.card)
         }
+
+        belowCard()
     }
 }
 

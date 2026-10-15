@@ -28,6 +28,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissVer
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditVerdictDraftAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLookUpEditionByIsbnClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressMinutesSteppedAction
@@ -37,7 +38,11 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUser
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRequestCreateListAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveVerdictAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareCaptureEventAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareSizeToggledAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareTagPickerToggledAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareTagToggledAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareVariantSelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSubmitTagDraftAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagDraftChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagEditorCategoryChangeAction
@@ -55,6 +60,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditor
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.EditionSheetEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetOption
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.TagEditorSheetEvent
 
 /**
@@ -76,6 +82,21 @@ internal fun BookDetailOverlays(
                 when (event) {
                     is ShareSheetEvent.VariantSelected -> runAction(
                         OnShareVariantSelectedAction(variant = event.variant),
+                    )
+
+                    is ShareSheetEvent.OptionClicked -> runAction(
+                        when (event.option) {
+                            ShareSheetOption.FULL_TEXT -> OnShareSizeToggledAction()
+
+                            ShareSheetOption.TAGS -> OnShareTagPickerToggledAction()
+                        },
+                    )
+
+                    is ShareSheetEvent.TagToggled -> runAction(
+                        OnShareTagToggledAction(
+                            variant = event.variant,
+                            tag = event.tag,
+                        ),
                     )
 
                     is ShareSheetEvent.CaptureReported -> runAction(
@@ -159,8 +180,8 @@ internal fun BookDetailOverlays(
         )
     }
 
-    val editionSheet = state.editionSheet
-    if (state.showEditEditionSheet && editionSheet != null) {
+    val editionSheet = state.editionSheet.modelOrNull
+    if (editionSheet != null) {
         EditionBottomSheetSelector(
             model = editionSheet,
             onEvent = { event ->
@@ -176,6 +197,10 @@ internal fun BookDetailOverlays(
                     EditionSheetEvent.Confirmed -> runAction(OnNewEditionSaveClickAction())
 
                     EditionSheetEvent.Dismissed -> runAction(OnDismissEditEditionSheetClickAction())
+
+                    EditionSheetEvent.LookUpByIsbnClicked -> runAction(OnLookUpEditionByIsbnClickAction())
+
+                    EditionSheetEvent.RetryClicked -> runAction(OnShowEditEditionSheetClickAction())
                 }
             },
         )

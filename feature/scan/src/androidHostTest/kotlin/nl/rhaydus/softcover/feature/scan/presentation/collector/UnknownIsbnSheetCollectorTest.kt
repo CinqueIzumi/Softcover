@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.scan.presentation.collector
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,7 +68,10 @@ class UnknownIsbnSheetCollectorTest {
             // ----- Assert -----
             val model = stateFlow.value.unknownIsbnSheet.modelOrNull.shouldNotBeNull()
             model.isbn shouldBe ISBN
-            model.scaffold shouldBe unknownIsbnSheetScaffoldFor(isAdding = false)
+            model.scaffold shouldBe unknownIsbnSheetScaffoldFor(
+                isAdding = false,
+                isImportPending = false,
+            )
             stateFlow.value.unknownIsbnSheet.isClosing shouldBe false
         }
 
@@ -86,7 +90,10 @@ class UnknownIsbnSheetCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.unknownIsbnSheet.modelOrNull.shouldNotBeNull().scaffold shouldBe
-                unknownIsbnSheetScaffoldFor(isAdding = true)
+                unknownIsbnSheetScaffoldFor(
+                isAdding = true,
+                isImportPending = false,
+            )
         }
 
         @Test
@@ -114,9 +121,15 @@ class UnknownIsbnSheetCollectorTest {
             stateFlow.update { it.copy(isAddingBook = false) }
 
             // ----- Assert -----
-            whileAdding.modelOrNull.shouldNotBeNull().scaffold shouldBe unknownIsbnSheetScaffoldFor(isAdding = true)
+            whileAdding.modelOrNull.shouldNotBeNull().scaffold shouldBe unknownIsbnSheetScaffoldFor(
+                isAdding = true,
+                isImportPending = false,
+            )
             stateFlow.value.unknownIsbnSheet.modelOrNull.shouldNotBeNull().scaffold shouldBe
-                unknownIsbnSheetScaffoldFor(isAdding = false)
+                unknownIsbnSheetScaffoldFor(
+                isAdding = false,
+                isImportPending = false,
+            )
         }
 
         @Test
@@ -173,7 +186,10 @@ class UnknownIsbnSheetCollectorTest {
             val session = stateFlow.value.unknownIsbnSheet
             session.isClosing shouldBe true
             session.modelOrNull.shouldNotBeNull().scaffold shouldBe
-                unknownIsbnSheetScaffoldFor(isAdding = true).requestingClose()
+                unknownIsbnSheetScaffoldFor(
+                isAdding = true,
+                isImportPending = false,
+            ).requestingClose()
             session.dismissed() shouldBe pending
         }
 
@@ -216,7 +232,30 @@ class UnknownIsbnSheetCollectorTest {
             // ----- Assert -----
             stateFlow.value.unknownIsbnSheet.dismissed() shouldBe pending
         }
-    }
+    
+
+        @Test
+        fun `rebuilds the open sheet model when the import becomes pending`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector()
+            stateFlow.update { it.copy(unknownIsbn = ISBN) }
+            val modelBefore = stateFlow.value.unknownIsbnSheet.modelOrNull.shouldNotBeNull()
+
+            // ----- Act -----
+            stateFlow.update { it.copy(isImportPending = true) }
+
+            // ----- Assert -----
+            val session = stateFlow.value.unknownIsbnSheet
+            val modelAfter = session.modelOrNull.shouldNotBeNull()
+            modelAfter shouldNotBe modelBefore
+            modelAfter.isbn shouldBe ISBN
+            modelAfter.scaffold shouldBe unknownIsbnSheetScaffoldFor(
+                isAdding = false,
+                isImportPending = true,
+            )
+            session.isClosing shouldBe false
+        }
+}
 
     private companion object {
         const val ISBN = "9780451524935"

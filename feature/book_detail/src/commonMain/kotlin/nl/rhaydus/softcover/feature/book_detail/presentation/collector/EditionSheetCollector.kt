@@ -5,8 +5,17 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.button.PillButtonContent
+import nl.rhaydus.softcover.core.component.button.PillButtonSize
+import nl.rhaydus.softcover.core.component.button.PillButtonTone
+import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.openOrUpdate
+import nl.rhaydus.softcover.core.component.sheet.requestClose
+import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyStateVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -33,7 +42,9 @@ internal class EditionSheetCollector : BookDetailCollector {
                     isLoading = it.loadingEditions,
                     cards = it.editionCards,
                     countHeader = it.editionCountHeader,
-                    searchQuery = it.editionSheet?.searchQuery.orEmpty(),
+                    searchQuery = it.editionSearchQuery,
+                    isRequested = it.editionSheetRequested,
+                    error = it.editionsError,
                 )
             }
             .distinctUntilChanged()
@@ -42,30 +53,40 @@ internal class EditionSheetCollector : BookDetailCollector {
                 val currentEdition = snapshot.currentEdition
 
                 scope.setState {
-                    it.copy(
-                        editionSheet = if (bookTitle == null || currentEdition == null) {
-                            null
-                        } else {
-                            EditionSheetUiModel(
-                                scaffold = editionSheetScaffoldFor(
-                                    bookTitle = bookTitle,
+                    val sheet = it.editionSheet
+                    val model = if (bookTitle == null || currentEdition == null) {
+                        null
+                    } else {
+                        EditionSheetUiModel(
+                            scaffold = editionSheetScaffoldFor(
+                                bookTitle = bookTitle,
+                                currentEdition = currentEdition,
+                                selectedEdition = selectedEditionFor(
+                                    editions = snapshot.editions,
+                                    selectedEditionId = snapshot.selectedEditionId,
                                     currentEdition = currentEdition,
-                                    selectedEdition = selectedEditionFor(
-                                        editions = snapshot.editions,
-                                        selectedEditionId = snapshot.selectedEditionId,
-                                        currentEdition = currentEdition,
-                                    ),
-                                    cover = snapshot.cover,
-                                    isLoading = snapshot.isLoading,
                                 ),
-                                cards = snapshot.cards,
-                                countHeader = snapshot.countHeader,
-                                searchQuery = snapshot.searchQuery,
-                                searchPlaceholder = SEARCH_PLACEHOLDER,
-                                emptyMessage = EMPTY_MESSAGE,
-                            )
-                        },
-                    )
+                                cover = snapshot.cover,
+                                isLoading = snapshot.isLoading,
+                            ),
+                            cards = snapshot.cards,
+                            countHeader = snapshot.countHeader,
+                            searchQuery = snapshot.searchQuery,
+                            searchPlaceholder = SEARCH_PLACEHOLDER,
+                            emptyState = noMatchingEditionEmptyState().takeIf {
+                                snapshot.isLoading.not() &&
+                                    snapshot.error == null &&
+                                    snapshot.editions.isEmpty()
+                            },
+                            error = snapshot.error,
+                        )
+                    }
+
+                    when {
+                        snapshot.isRequested.not() -> it.copy(editionSheet = sheet.requestClose())
+                        model == null -> it
+                        else -> it.copy(editionSheet = sheet.openOrUpdate(model = model))
+                    }
                 }
             }
     }
@@ -80,10 +101,27 @@ internal class EditionSheetCollector : BookDetailCollector {
         val cards: ImmutableList<BookCardUiModel>,
         val countHeader: SectionHeaderUiModel,
         val searchQuery: String,
+        val isRequested: Boolean,
+        val error: String?,
     )
 
     private companion object {
         const val SEARCH_PLACEHOLDER = "Search by ISBN or publisher"
-        const val EMPTY_MESSAGE = "No editions match your search"
+
+        fun noMatchingEditionEmptyState() = EmptyStateUiModel(
+            title = "Not among these editions",
+            body = "Hardcover may not have it yet. Look it up by ISBN to find it or add it.",
+            variant = EmptyStateVariant.Centered(
+                button = PillButtonUiModel(
+                    key = "look-up-by-isbn",
+                    content = PillButtonContent.Label(
+                        text = "Look up by ISBN",
+                        leadingIcon = SoftcoverIcon.BarcodeScanner,
+                    ),
+                    tone = PillButtonTone.Filled,
+                    size = PillButtonSize.Large,
+                ),
+            ),
+        )
     }
 }

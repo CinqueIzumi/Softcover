@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,7 +27,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
-import nl.rhaydus.softcover.core.presentation.theme.isDark
+import nl.rhaydus.softcover.core.uibinding.theme.toSchemeBrightness
 import nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGalleryAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnGalleryFamilySelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnGalleryPaletteSelectedAction
@@ -175,7 +176,7 @@ private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
 
     SoftcoverTheme(
         palette = state.resolvedPalette,
-        darkTheme = themeMode.isDark(),
+        brightness = themeMode.toSchemeBrightness(systemInDark = isSystemInDarkTheme()),
         dynamicColor = dynamicColor,
     ) {
         Surface(

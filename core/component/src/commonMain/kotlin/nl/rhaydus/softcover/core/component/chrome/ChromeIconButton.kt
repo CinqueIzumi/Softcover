@@ -7,13 +7,14 @@ import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.OverMediaInk
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.OverMediaScrim
 
 /**
  * The icon-only button of a bar or strip.
@@ -53,6 +54,6 @@ fun ChromeIconButton(
 
 @Composable
 fun overMediaIconButtonColors(): IconButtonColors = IconButtonDefaults.iconButtonColors(
-    containerColor = Color.Black.copy(alpha = 0.35f),
-    contentColor = Color.White,
+    containerColor = OverMediaScrim.copy(alpha = 0.35f),
+    contentColor = OverMediaInk,
 )

@@ -3,6 +3,10 @@ package nl.rhaydus.softcover.core.component.state
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
+import nl.rhaydus.softcover.core.component.button.PillButtonContent
+import nl.rhaydus.softcover.core.component.button.PillButtonSize
+import nl.rhaydus.softcover.core.component.button.PillButtonTone
+import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
@@ -23,9 +27,14 @@ data class EmptyStateUiModel(
                 title = "Between books",
                 body = "Your next one might already be on your Want to read shelf.",
                 variant = EmptyStateVariant.Centered(
-                    button = EmptyStateButtonUiModel(
-                        label = "Find a book",
-                        icon = SoftcoverIcon.Search,
+                    button = PillButtonUiModel(
+                        key = "find-a-book",
+                        content = PillButtonContent.Label(
+                            text = "Find a book",
+                            leadingIcon = SoftcoverIcon.Search,
+                        ),
+                        tone = PillButtonTone.Filled,
+                        size = PillButtonSize.Large,
                     ),
                 ),
             ),

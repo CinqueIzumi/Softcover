@@ -18,6 +18,7 @@ import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SchemeBrightness
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutSheetOpenAction
@@ -98,7 +99,7 @@ internal actual fun ProfileScreenLayout(
 @StandardPreview
 @Composable
 private fun ProfileScreenLightPreview() {
-    SoftcoverTheme(darkTheme = false) {
+    SoftcoverTheme(brightness = SchemeBrightness.LIGHT) {
         ProfileScreenLayout(
             state = ProfileScreenPreviewState,
             runAction = {},
@@ -111,7 +112,7 @@ private fun ProfileScreenLightPreview() {
 @StandardPreview
 @Composable
 private fun ProfileScreenDarkPreview() {
-    SoftcoverTheme(darkTheme = true) {
+    SoftcoverTheme(brightness = SchemeBrightness.DARK) {
         ProfileScreenLayout(
             state = ProfileScreenPreviewState,
             runAction = {},

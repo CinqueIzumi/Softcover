@@ -16,7 +16,7 @@ class MarkBookAsReadingUseCase(
 
         val updatedBook: Book = booksRepository.markBookAsReading(
             book = book,
-            editionId = editionId,
+            editionId = book.statusChangeEditionId(requestedEditionId = editionId),
         )
 
         booksRepository.cacheBook(book = updatedBook)

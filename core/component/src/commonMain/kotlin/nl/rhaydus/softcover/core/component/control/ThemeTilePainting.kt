@@ -12,6 +12,9 @@ enum class ThemeTilePainting {
     LIGHT,
     DARK,
 
+    /** The standalone warm, low-contrast scheme, painted whatever the palette or dynamic colour. */
+    DIM,
+
     /** Light above a bottom-left-to-top-right seam, dark below — "whichever your device is". */
     SPLIT,
 }

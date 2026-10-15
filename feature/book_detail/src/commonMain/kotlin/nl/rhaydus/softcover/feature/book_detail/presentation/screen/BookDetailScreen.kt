@@ -6,6 +6,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -15,9 +16,11 @@ import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
 import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailOverlayNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPaneCloseHandler
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.navigation.TransientNavArg
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
@@ -25,11 +28,13 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookRev
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnCelebrateMarkedAsReadAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenVerdictSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnScannedEditionReturnedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 class BookDetailScreen(
@@ -40,7 +45,9 @@ class BookDetailScreen(
     // The key must include the book id: Voyager's ScreenModelStore is keyed by the screen key, so a
     // class-constant key makes every book share one BookDetailScreenScreenModel. That surfaces in the
     // two-pane (each book is a fresh nested navigator) as "every selection shows the first book."
-    override val key: ScreenKey = "book-detail-$id"
+    // The unique suffix ends the id: Voyager disposes by `key.startsWith(screen.key)`, so a bare
+    // "book-detail-1" would also dispose "book-detail-12".
+    override val key: ScreenKey = "book-detail-$id-$uniqueScreenKey"
 
     @Composable
     override fun Content() {
@@ -72,6 +79,8 @@ class BookDetailScreen(
         val haptics = LocalHaptics.current
 
         val uriHandler = LocalUriHandler.current
+
+        val appNavigator = koinInject<AppNavigator>()
 
         ObserveAsEvents(flow = screenModel.events) {
             if (it is FeedbackEvent) haptics.play(it.feedback)
@@ -116,6 +125,34 @@ class BookDetailScreen(
 
                             screenModel.runAction(OnShowChooseListsSheetAction())
                         },
+                    )
+                }
+
+                is BookDetailEvent.OpenIsbnLookupEvent -> {
+                    overlayNavigator.push(
+                        item = appNavigator.screen(
+                            ScreenDestination.BarcodeScanner(
+                                startInManualEntry = true,
+                                prefilledIsbn = it.prefilledIsbn,
+                                onResolved = { book, editionId ->
+                                    if (book.id == id) {
+                                        screenModel.runAction(OnScannedEditionReturnedAction(editionId = editionId))
+                                    } else {
+                                        overlayNavigator.push(
+                                            item = appNavigator.screen(
+                                                ScreenDestination.BookDetail(
+                                                    id = book.id,
+                                                    initialCover = BookInitialCover.forScannedEdition(
+                                                        book = book,
+                                                        editionId = editionId,
+                                                    ),
+                                                ),
+                                            ),
+                                        )
+                                    }
+                                },
+                            ),
+                        ),
                     )
                 }
 

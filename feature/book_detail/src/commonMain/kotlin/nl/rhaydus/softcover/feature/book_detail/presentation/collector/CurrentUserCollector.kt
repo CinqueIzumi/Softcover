@@ -5,12 +5,12 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.CurrentUserIdentity
 import nl.rhaydus.toad.ActionScope
 
 /**
  * Keeps the current user's identity (username + avatar) in state so the personalised share card can
- * attribute the update to the reader. Sourced from the cached profile, so it resolves before the
- * share sheet is opened in practice.
+ * attribute the update to the reader.
  */
 internal class CurrentUserCollector : BookDetailCollector {
     override suspend fun onLaunch(
@@ -18,12 +18,12 @@ internal class CurrentUserCollector : BookDetailCollector {
         dependencies: BookDetailDependencies,
     ) {
         dependencies.observeUserProfileDataUseCase().collectLatest { profile ->
-            scope.setState {
-                it.copy(
-                    currentUsername = profile?.username?.takeIf { username -> username.isNotBlank() },
-                    currentUserAvatarUrl = profile?.profileImageUrl?.takeIf { url -> url.isNotBlank() },
-                )
-            }
+            val identity = CurrentUserIdentity(
+                username = profile?.username?.takeIf { username -> username.isNotBlank() },
+                avatarUrl = profile?.profileImageUrl?.takeIf { url -> url.isNotBlank() },
+            )
+
+            scope.setState { it.copy(currentUser = identity) }
         }
     }
 }

@@ -1,18 +1,32 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
+import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.ShareCardFormat
 import nl.rhaydus.softcover.core.component.verdict.verdictScoreOf
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import kotlin.math.roundToInt
 
-internal fun Book.toBookShareCardUiModel(edition: BookEdition?): BookShareCardUiModel {
+internal fun Book.toBookShareCardUiModel(
+    edition: BookEdition?,
+    format: ShareCardFormat,
+    selectedTags: Set<String> = emptySet(),
+): BookShareCardUiModel {
     val resolvedEdition = edition ?: defaultEdition
 
     return BookShareCardUiModel(
-        coverUrl = resolvedEdition?.localImagePath
-            ?: resolvedEdition?.url
-            ?: coverUrl,
+        cover = resolvedEdition.toCoverUiModel(
+            defaultEdition = defaultEdition,
+            coverlessTitle = title,
+            variant = CoverVariant.Floating,
+            fallbackCoverUrl = coverUrl.takeIf { it.isNotBlank() },
+        ),
         title = title,
         author = authors.firstOrNull()?.name.orEmpty(),
         statsLine = statsLineOf(
@@ -22,6 +36,20 @@ internal fun Book.toBookShareCardUiModel(edition: BookEdition?): BookShareCardUi
             pageCount = resolvedEdition?.pages,
         ),
         description = description.takeIf { it.isNotBlank() },
+        tags = shareTagCandidates()
+            .values
+            .flatten()
+            .filter { it in selectedTags }
+            .map { name ->
+                ChipUiModel(
+                    key = name,
+                    label = name,
+                    tone = ChipTone.OverMedia,
+                    interaction = ChipInteraction.Inert,
+                )
+            }
+            .toImmutableList(),
+        format = format,
     )
 }
 

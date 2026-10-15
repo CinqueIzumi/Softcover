@@ -55,6 +55,9 @@ as given. If it is absent, run the single command in `## Verify`, or nothing.
 7. **Stability baselines:** a `<module>/stability/*.stability` hunk where a parameter loses `STABLE` or a
    composable goes from `skippable: true` to `false` is 🔴 unless the change justifies it. Re-dumping the
    baseline accepts whatever changed, so this diff is the only place a regression is caught.
+8. **Copy:** every added or changed user-facing string is checked against
+   `docs/reference/design-system/voice.md`. A tell from §8.2, a mechanics break from §8.3, or a gloss that
+   misdescribes the behaviour is 🟡; give the replacement line.
 
 Check your memory index for recurring traps in the area before you conclude.
 

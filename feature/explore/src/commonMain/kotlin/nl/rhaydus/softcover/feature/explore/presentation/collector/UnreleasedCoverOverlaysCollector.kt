@@ -56,8 +56,11 @@ internal class UnreleasedCoverOverlaysCollector : ExploreCollector {
                                 snapshot.continueSeriesBooks +
                                 snapshot.queriedBooks
                         ).toUnreleasedCoverOverlays().toImmutableMap(),
+                        // The book's own debut, the date the featured query filters on: an edition's
+                        // date can fall outside the window the card promises. No isUnreleased gate,
+                        // since that query only returns unreleased books.
                         featuredReleaseBadge = snapshot.featuredUpcomingRelease
-                            ?.effectiveReleaseDate
+                            ?.releaseDate
                             ?.toFeaturedUnreleasedBadgeUiModel(),
                     )
                 }
