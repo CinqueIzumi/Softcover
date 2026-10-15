@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
-import nl.rhaydus.softcover.core.uibinding.session.activeSessionBookId
+import nl.rhaydus.softcover.core.presentation.session.activeSessionBookId
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables

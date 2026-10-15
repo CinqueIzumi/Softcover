@@ -66,7 +66,7 @@ class BookInitialCoverTest {
             userBook
         } returns null
         every {
-            userBookRead
+            currentRead
         } returns null
         every {
             title
