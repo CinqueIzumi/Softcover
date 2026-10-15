@@ -16,15 +16,14 @@ import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SpineCo
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.ThemeSection
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.UiScaleSection
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
-import nl.rhaydus.softcover.feature.settings.presentation.util.supportsDynamicColor
 
 /**
  * The Appearance settings body, shared by the mobile [AppearanceSettingsScreen] page and the desktop
  * Settings master–detail pane. Rows sit flat on the page background, hairline-divided — never boxed
  * cards. The theme picker leads on every platform — it is the one control that repaints the whole app
  * — followed by the spine-colour picker, which carries the dynamic-colour switch beneath its tiles
- * (gated on [supportsDynamicColor], always `false` on desktop) since that switch replaces the very
- * look those tiles offer. The Display section that follows renders whichever toggle rows
+ * (absent on platforms without dynamic colour, a gloss while Dim is the theme) since that switch
+ * replaces the very look those tiles offer. The Display section that follows renders whichever toggle rows
  * [SettingsScreenUiState.displayToggleRows] holds — the floating-bar and shelf-swipe rows are already
  * dropped there on desktop, reading streak always shows. [showUiScaleControl] is desktop-only (hidden
  * on mobile, where the OS handles DPI) and surfaces the "Display scale" picker directly after the two

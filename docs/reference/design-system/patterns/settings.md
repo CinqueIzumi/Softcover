@@ -23,11 +23,11 @@
 
 ### Theme picker (preview tiles)
 
-- Leads the Appearance body on every platform: a `SectionHeader` (**Theme** / "The coat it wears"), one
-  `ThemePreviewTile` per `ThemeMode` (Light, Dark, System), weighted but capped at 128dp, then one italic
-  gloss line explaining System.
+- Leads the Appearance body on every platform: a `SectionHeader` (**Theme** / "Light, dark or dim"), one
+  `ThemePreviewTile` per `ThemeMode` (Light, Dark, Dim, System) in a 2 x 2 `FlowRow` of equal measured
+  widths (capped at 128dp), then one italic gloss line explaining Dim and System.
 - A pick writes straight through; the whole app repaints.
-- Brightness decisions read `LocalDarkTheme`, never `isSystemInDarkTheme()`; platform chrome follows the
+- Brightness decisions read `LocalSchemeBrightness.current.isDark`, never `isSystemInDarkTheme()`; platform chrome follows the
   resolved mode through `ApplyPlatformThemeAppearance`.
 
 ### Spine-colour picker (the featured personalisation)
@@ -35,8 +35,13 @@
 - Under the theme picker: a `SectionHeader` (**Spine colour** / "The paper and the ink"), one
   `ColorPalettePreviewTile` per `ColorPalette`, house palette first, in a 3 + 2 `FlowRow` of equal
   measured widths (capped at 128dp), then a gloss line naming the selected palette (`SpinePalette.gloss`).
-- Dynamic colour is the section's tail `ToggleRow` (only where `supportsDynamicColor()`); a tile tap
-  turns it off (`SetColorPaletteUseCase`). Writes straight through.
+- Dynamic colour is the section's tail (`SettingsScreenUiState.dynamicColorSlot`): a `ToggleRow` where the
+  platform supports it, nothing elsewhere; a tile tap turns it off (`SetColorPaletteUseCase`). Writes
+  straight through.
+- While Dim is the theme the section steps back (`spineColourSection`): its tiles render muted and inert
+  (`ColorPalettePreviewTileUiModel.enabled = false`), the gloss says spine colours return with Light, Dark
+  or System, and the dynamic-colour tail becomes a gloss (empty where the platform has none). Nothing is
+  written; the stored palette and dynamic-colour choices wait for the next theme.
 
 ### Appearance settings rows (flat, hairline-separated)
 

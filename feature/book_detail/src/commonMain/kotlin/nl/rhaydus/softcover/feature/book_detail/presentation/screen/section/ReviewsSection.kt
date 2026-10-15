@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +29,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalSchemeBrightness
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -108,7 +108,7 @@ private fun ReviewCard(
         shape = Corners.lg,
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            val quoteAlpha = if (isSystemInDarkTheme()) 0.22f else 0.32f
+            val quoteAlpha = if (LocalSchemeBrightness.current.isDark) 0.22f else 0.32f
 
             SoftcoverText(
                 text = "“",

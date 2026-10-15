@@ -17,7 +17,7 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalSchemeBrightness
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -64,7 +64,7 @@ private fun CenteredEmptyState(
             text = "“",
             style = MaterialTheme.editorialTypography.quoteGlyph,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                alpha = if (LocalDarkTheme.current) 0.15f else 0.3f,
+                alpha = if (LocalSchemeBrightness.current.isDark) 0.15f else 0.3f,
             ),
             modifier = Modifier
                 .quoteGlyphSway()

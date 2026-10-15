@@ -18,14 +18,17 @@ import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.domain.model.UiScale
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.dateStyleRowsFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.displayToggleRowsFor
-import nl.rhaydus.softcover.feature.settings.presentation.mapper.dynamicColorToggleRowFor
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.dynamicColorSlotFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.paletteChoicesFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.settingsSidebarFor
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.spineColourSectionFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.themeChoicesFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.uiScaleRowsFor
 import nl.rhaydus.softcover.feature.settings.presentation.model.DisplayToggle
+import nl.rhaydus.softcover.feature.settings.presentation.model.DynamicColorSlotUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsChoiceRowUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsSidebarKey
+import nl.rhaydus.softcover.feature.settings.presentation.model.SpineColourSectionUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsCategory
 import nl.rhaydus.softcover.feature.settings.presentation.util.settingsDisplayToggleAvailability
 import nl.rhaydus.toad.UiState
@@ -96,8 +99,10 @@ internal data class SettingsScreenUiState(
     ),
     val themeSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Theme",
-        headline = "Light or dark",
+        headline = "Light, dark or dim",
     ),
+    val themeGloss: String =
+        "Dim is a warmer, softer dark for reading at night. System follows your device's light and dark setting.",
     val spineColourSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Spine colour",
         headline = "Paper and ink",
@@ -126,7 +131,16 @@ internal data class SettingsScreenUiState(
             readingStreakEnabledChecked = true,
         )
     },
-    val dynamicColorToggleRow: ToggleRowUiModel<DisplayToggle> = dynamicColorToggleRowFor(checked = false),
+    val dynamicColorSlot: DynamicColorSlotUiModel = dynamicColorSlotFor(
+        themeMode = ThemeMode.DEFAULT,
+        supportsDynamicColor = settingsDisplayToggleAvailability().showsDynamicColorToggle,
+        useDynamicColor = false,
+    ),
+    val spineColourSection: SpineColourSectionUiModel = spineColourSectionFor(
+        themeMode = ThemeMode.DEFAULT,
+        useDynamicColor = false,
+        paletteGloss = SpinePalette.DEFAULT.gloss,
+    ),
     val dateStyleRows: ImmutableList<SettingsChoiceRowUiModel<DateStyle>> = dateStyleRowsFor(
         examples = emptyMap(),
         selected = DateStyle.DAY_MONTH_YEAR,
@@ -136,7 +150,6 @@ internal data class SettingsScreenUiState(
     val versionLabel: String = "Version $appVersionName ($appVersionCode)",
     val uiScaleRows: ImmutableList<SettingsChoiceRowUiModel<UiScale>> = uiScaleRowsFor(selected = UiScale.DEFAULT),
     val spinePalette: SpinePalette = SpinePalette.DEFAULT,
-    val paletteGloss: String = SpinePalette.DEFAULT.gloss,
     val themeChoices: ImmutableList<ThemePreviewTileUiModel<ThemeMode>> = themeChoicesFor(
         selected = ThemeMode.DEFAULT,
         palette = SpinePalette.DEFAULT,
