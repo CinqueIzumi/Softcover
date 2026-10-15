@@ -42,6 +42,11 @@ internal fun Book.toBookCard(
     dateStyle: DateStyle,
 ): BookCardUiModel {
     val deadlineProgress = toDeadlineProgress(deadline)
+    val badgedDeadline = deadlineProgress.takeUnless { isPaused }
+    val deadlineSummary = deadlineProgress?.toDeadlineSummaryUiModel(
+        dateStyle = dateStyle,
+        isPaused = isPaused,
+    )
 
     val variant: BookCardVariant
     val decorations: BookCardDecorations
@@ -56,7 +61,7 @@ internal fun Book.toBookCard(
                         variant = CoverVariant.Shelf,
                         shareTransition = true,
                     ),
-                    badge = deadlineProgress?.toCountdownCoverOverlayUiModel(),
+                    badge = badgedDeadline?.toCountdownCoverOverlayUiModel(),
                 ),
             )
             decorations = gridDecorations(
@@ -74,7 +79,7 @@ internal fun Book.toBookCard(
                         variant = CoverVariant.Shelf,
                         shareTransition = true,
                     ),
-                    badge = deadlineProgress?.toCountdownCoverOverlayUiModel(),
+                    badge = badgedDeadline?.toCountdownCoverOverlayUiModel(),
                 ),
                 text = BookCardContent(
                     title = title,
@@ -99,7 +104,7 @@ internal fun Book.toBookCard(
                         element = BookTransitionElement.Title,
                     ),
                 ),
-                trailing = deadlineProgress?.toBadgeUiModel()?.let { BookCardTrailing.Badge(model = it) },
+                trailing = badgedDeadline?.toBadgeUiModel()?.let { BookCardTrailing.Badge(model = it) },
             )
             decorations = BookCardDecorations(
                 selection = selection,
@@ -133,9 +138,7 @@ internal fun Book.toBookCard(
                         ),
                     )?.let { persistentListOf(it) } ?: persistentListOf(),
                 ),
-                deadline = deadlineProgress?.toDeadlineSummaryUiModel(
-                    dateStyle = dateStyle,
-                ),
+                deadline = deadlineSummary,
             )
             decorations = BookCardDecorations(
                 progress = labelledProgress(),
@@ -221,10 +224,10 @@ private fun Book.gridDecorations(
     selection: BookCardSelection?,
     press: BookCardDecorations.Press,
 ): BookCardDecorations {
-    val progress = userBookRead?.progress
+    val progress = currentRead?.progress
 
     return BookCardDecorations(
-        progress = if (status == BookStatus.Reading && progress != null) {
+        progress = if ((status == BookStatus.Reading || status == BookStatus.Paused) && progress != null) {
             BookCardProgress.Value(
                 fraction = progress / 100f,
                 label = null,
@@ -238,9 +241,9 @@ private fun Book.gridDecorations(
 }
 
 private fun Book.labelledProgress(): BookCardProgress.Value? {
-    val progress = userBookRead?.progress
+    val progress = currentRead?.progress
 
-    if (status != BookStatus.Reading || progress == null) return null
+    if ((status != BookStatus.Reading && status != BookStatus.Paused) || progress == null) return null
 
     val fraction = progress / 100f
 

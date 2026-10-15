@@ -6,9 +6,12 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCaptureProgress
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
+import nl.rhaydus.softcover.core.component.share.ShareCardFormat
 import nl.rhaydus.softcover.core.component.share.ShareCardSheetEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.sheet.isClosing
@@ -18,6 +21,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareCardSize
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareCardVariant
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.shareSheetFor
@@ -46,15 +50,23 @@ class OnShareCaptureEventActionTest {
         progress: ShareCaptureProgress = ShareCaptureProgress.Idle,
     ): ShareSheetUiModel = shareSheetFor(
         card = BookShareCardUiModel(
-            coverUrl = null,
+            cover = CoverUiModel(
+                source = null,
+                coverlessTitle = "Piranesi",
+                variant = CoverVariant.Floating,
+            ),
             title = "Piranesi",
             author = "Susanna Clarke",
             statsLine = null,
             description = null,
+            format = ShareCardFormat.Story,
         ),
         bookTitle = "Piranesi",
         variant = ShareCardVariant.BOOK,
         hasUpdateCard = false,
+        size = ShareCardSize.STORY,
+        hasExpandableText = false,
+        tagPicker = null,
         progress = progress,
     )
 

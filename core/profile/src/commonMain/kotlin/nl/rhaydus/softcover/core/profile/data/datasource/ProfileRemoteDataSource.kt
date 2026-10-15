@@ -131,7 +131,7 @@ internal class ProfileRemoteDataSourceImpl(
     private fun GetUserProfileDataQuery.Data.Me.recentlyLoved(): List<LovedBook> = recently_loved.map { loved ->
         LovedBook(
             bookId = loved.book.id,
-            coverUrl = loved.book.image?.url.orEmpty(),
+            coverUrl = (loved.edition?.image?.url ?: loved.book.image?.url).orEmpty(),
             title = loved.book.title.orEmpty(),
             author = loved.book.contributions
                 .mapNotNull { it.author?.name }

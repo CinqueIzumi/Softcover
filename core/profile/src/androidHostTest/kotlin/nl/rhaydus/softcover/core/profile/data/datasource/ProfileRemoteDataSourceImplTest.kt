@@ -112,11 +112,13 @@ class ProfileRemoteDataSourceImplTest {
         title: String?,
         imageUrl: String?,
         authorNames: List<String?>,
+        edition: GetUserProfileDataQuery.Data.Me.Recently_loved.Edition? = null,
     ): GetUserProfileDataQuery.Data.Me.Recently_loved = GetUserProfileDataQuery.Data.Me.Recently_loved(
         __typename = "user_books",
         id = 1,
         rating = rating,
         last_read_date = lastReadDate,
+        edition = edition,
         book = GetUserProfileDataQuery.Data.Me.Recently_loved.Book(
             __typename = "books",
             title = title,
@@ -141,6 +143,18 @@ class ProfileRemoteDataSourceImplTest {
             id = 1,
         ),
     )
+
+    private fun lovedEdition(imageUrl: String?): GetUserProfileDataQuery.Data.Me.Recently_loved.Edition =
+        GetUserProfileDataQuery.Data.Me.Recently_loved.Edition(
+            __typename = "editions",
+            image = imageUrl?.let {
+                GetUserProfileDataQuery.Data.Me.Recently_loved.Edition.Image(
+                    __typename = "images",
+                    url = it,
+                )
+            },
+            id = 2,
+        )
 
     private fun me(
         bio: String? = "A bio",
@@ -713,6 +727,110 @@ class ProfileRemoteDataSourceImplTest {
                     monthLabel = "",
                 ),
             )
+        }
+
+        @Test
+        fun `recentlyLoved prefers the picked edition cover over the book cover`() = runTest {
+            // ----- Arrange -----
+            mockProfileQuery(
+                me(
+                    recentlyLoved = listOf(
+                        lovedEntry(
+                            rating = 4.0,
+                            lastReadDate = null,
+                            title = "Dune",
+                            imageUrl = "book.jpg",
+                            authorNames = emptyList(),
+                            edition = lovedEdition(imageUrl = "edition.jpg"),
+                        ),
+                    ),
+                ),
+            )
+            mockEmptyStatsQuery()
+
+            // ----- Act -----
+            val result = dataSource.getUserProfileSnapshot()
+
+            // ----- Assert -----
+            result.recentlyLoved.map { it.coverUrl } shouldBe listOf("edition.jpg")
+        }
+
+        @Test
+        fun `recentlyLoved uses the book cover when there is no picked edition`() = runTest {
+            // ----- Arrange -----
+            mockProfileQuery(
+                me(
+                    recentlyLoved = listOf(
+                        lovedEntry(
+                            rating = 4.0,
+                            lastReadDate = null,
+                            title = "Dune",
+                            imageUrl = "book.jpg",
+                            authorNames = emptyList(),
+                            edition = null,
+                        ),
+                    ),
+                ),
+            )
+            mockEmptyStatsQuery()
+
+            // ----- Act -----
+            val result = dataSource.getUserProfileSnapshot()
+
+            // ----- Assert -----
+            result.recentlyLoved.map { it.coverUrl } shouldBe listOf("book.jpg")
+        }
+
+        @Test
+        fun `recentlyLoved uses the book cover when the picked edition has no image`() = runTest {
+            // ----- Arrange -----
+            mockProfileQuery(
+                me(
+                    recentlyLoved = listOf(
+                        lovedEntry(
+                            rating = 4.0,
+                            lastReadDate = null,
+                            title = "Dune",
+                            imageUrl = "book.jpg",
+                            authorNames = emptyList(),
+                            edition = lovedEdition(imageUrl = null),
+                        ),
+                    ),
+                ),
+            )
+            mockEmptyStatsQuery()
+
+            // ----- Act -----
+            val result = dataSource.getUserProfileSnapshot()
+
+            // ----- Assert -----
+            result.recentlyLoved.map { it.coverUrl } shouldBe listOf("book.jpg")
+        }
+
+        @Test
+        fun `recentlyLoved has an empty cover when neither edition nor book has an image`() = runTest {
+            // ----- Arrange -----
+            mockProfileQuery(
+                me(
+                    recentlyLoved = listOf(
+                        lovedEntry(
+                            rating = 4.0,
+                            lastReadDate = null,
+                            title = "Dune",
+                            imageUrl = null,
+                            authorNames = emptyList(),
+                            edition = lovedEdition(imageUrl = null),
+                        ),
+                    ),
+                ),
+            )
+            mockEmptyStatsQuery()
+
+            // ----- Act -----
+            val result = dataSource.getUserProfileSnapshot()
+
+            // ----- Assert -----
+            result.recentlyLoved.map { it.coverUrl } shouldBe listOf("")
         }
     }
 

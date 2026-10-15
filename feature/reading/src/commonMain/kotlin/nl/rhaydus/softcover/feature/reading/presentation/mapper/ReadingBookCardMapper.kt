@@ -31,7 +31,7 @@ internal fun Book.toAlsoReadingCard(
     dateStyle: DateStyle,
     mutationFailed: Boolean,
 ): BookCardUiModel {
-    val progress = userBookRead?.progress ?: 0f
+    val progress = currentRead?.progress ?: 0f
 
     val fraction = progress / 100f
 
@@ -81,6 +81,14 @@ internal fun Book.toAlsoReadingCard(
         ),
     )
 }
+
+/** An "On hold" row: the "Also reading" row with no deadline, cover badge or save failure. */
+internal fun Book.toOnHoldCard(): BookCardUiModel = toAlsoReadingCard(
+    deadlineProgress = null,
+    coverBadge = null,
+    dateStyle = DateStyle.DAY_MONTH_YEAR,
+    mutationFailed = false,
+)
 
 /** A "Pick up next" tile: cover and title only, no progress. */
 internal fun Book.toPickUpNextCard(): BookCardUiModel = BookCardUiModel(

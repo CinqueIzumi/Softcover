@@ -49,7 +49,7 @@ class CurrentlyReadingWidgetModelsTest {
                 authorString
             } returns "Author $id"
             every {
-                userBookRead
+                currentRead
             } returns read
         }
     }

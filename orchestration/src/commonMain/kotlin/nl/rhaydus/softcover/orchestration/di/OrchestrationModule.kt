@@ -42,6 +42,7 @@ import nl.rhaydus.softcover.orchestration.presentation.viewmodel.MainActivityVie
 import nl.rhaydus.softcover.orchestration.session.ActiveSessionControllerImpl
 import nl.rhaydus.softcover.orchestration.usecase.InitializeUserIdAndBooksUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.ReAuthenticateUseCaseImpl
+import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryOnStartUseCase
 import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.ResetUserDataUseCaseImpl
 import org.koin.dsl.bind
@@ -96,7 +97,7 @@ internal val orchestrationModule = module {
     single<ActiveSessionController> {
         ActiveSessionControllerImpl(
             observeActiveSessionUseCase = get(),
-            getCurrentlyReadingBooksUseCase = get(),
+            observeUserBookUseCase = get(),
             startReadingSessionUseCase = get(),
             stopReadingSessionUseCase = get(),
             pauseReadingSessionUseCase = get(),
@@ -111,7 +112,7 @@ internal val orchestrationModule = module {
     single<MainActivityViewModel> {
         MainActivityViewModel(
             getUserIdUseCase = get(),
-            refreshLibraryUseCase = get(),
+            refreshLibraryOnStartUseCase = get(),
             getThemeConfigurationUseCase = get(),
             refreshReadingActivityUseCase = get(),
             drainPendingListWritesUseCase = get(),
@@ -145,6 +146,13 @@ internal val orchestrationModule = module {
             resetUserDataUseCase = get(),
             refreshLibraryUseCase = get(),
             refreshUserProfileDataUseCase = get(),
+        )
+    }
+
+    factory {
+        RefreshLibraryOnStartUseCase(
+            settingsRepository = get(),
+            refreshLibraryUseCase = get(),
         )
     }
 

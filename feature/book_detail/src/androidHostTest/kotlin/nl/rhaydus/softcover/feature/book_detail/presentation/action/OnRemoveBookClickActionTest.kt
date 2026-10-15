@@ -70,7 +70,6 @@ class OnRemoveBookClickActionTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         userBook = mockk(),
-        userBookRead = mockk(),
     )
 
     @Nested
@@ -122,7 +121,6 @@ class OnRemoveBookClickActionTest {
 
             val updated = stateFlow.value.book.shouldNotBeNull()
             updated.userBook.shouldBeNull()
-            updated.userBookRead.shouldBeNull()
             updated.id shouldBe 42
         }
 

@@ -1,16 +1,19 @@
 package nl.rhaydus.softcover.orchestration.session
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -27,7 +30,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 internal class ActiveSessionControllerImpl(
     private val observeActiveSessionUseCase: ObserveActiveSessionUseCase,
-    private val getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase,
+    private val observeUserBookUseCase: ObserveUserBookUseCase,
     private val startReadingSessionUseCase: StartReadingSessionUseCase,
     private val stopReadingSessionUseCase: StopReadingSessionUseCase,
     private val pauseReadingSessionUseCase: PauseReadingSessionUseCase,
@@ -48,6 +51,8 @@ internal class ActiveSessionControllerImpl(
     init {
         applicationScope.scope.launch {
             observeSession().collect { session ->
+                // The session is published before the flag so a collector that sees `sessionLoaded`
+                // never reads a stale null from `activeSession`.
                 _activeSession.value = session
 
                 _sessionLoaded.value = true
@@ -55,25 +60,25 @@ internal class ActiveSessionControllerImpl(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeSession(): Flow<ActiveSession?> =
-        combine(
-            observeActiveSessionUseCase(),
-            getCurrentlyReadingBooksUseCase(),
-        ) { session, books ->
-            session ?: return@combine null
+        observeActiveSessionUseCase()
+            .flatMapLatest { session ->
+                if (session == null) return@flatMapLatest flowOf(null)
 
-            books.firstOrNull { it.id == session.bookId }
-                ?.let { book ->
-                    ActiveSession(
-                        session = session,
-                        book = book,
-                        ui = toActiveSessionUiModel(
+                observeUserBookUseCase(id = session.bookId).map { book ->
+                    book?.let {
+                        ActiveSession(
                             session = session,
                             book = book,
-                        ),
-                    )
+                            ui = toActiveSessionUiModel(
+                                session = session,
+                                book = book,
+                            ),
+                        )
+                    }
                 }
-        }
+            }
 
     private val _outcomes = MutableSharedFlow<SessionOutcome>(extraBufferCapacity = 1)
 
@@ -84,8 +89,8 @@ internal class ActiveSessionControllerImpl(
             runCatching {
                 startReadingSessionUseCase(
                     bookId = book.id,
-                    startPage = book.userBookRead?.currentPage,
-                    startSeconds = book.userBookRead?.currentSeconds,
+                    startPage = book.currentRead?.currentPage,
+                    startSeconds = book.currentRead?.currentSeconds,
                 )
 
                 readingSessionLauncher.start()
@@ -127,8 +132,8 @@ internal class ActiveSessionControllerImpl(
             runCatching {
                 stopReadingSessionUseCase(
                     id = current.session.id,
-                    endPage = current.book.userBookRead?.currentPage,
-                    endSeconds = current.book.userBookRead?.currentSeconds,
+                    endPage = current.book.currentRead?.currentPage,
+                    endSeconds = current.book.currentRead?.currentSeconds,
                 )
             }.onSuccess {
                 _outcomes.emit(SessionOutcome.Stopped)

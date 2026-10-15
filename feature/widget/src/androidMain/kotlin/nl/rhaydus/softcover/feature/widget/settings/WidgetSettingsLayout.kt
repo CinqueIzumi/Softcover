@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.widget.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -15,7 +16,7 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
-import nl.rhaydus.softcover.core.presentation.theme.isDark
+import nl.rhaydus.softcover.core.uibinding.theme.toSchemeBrightness
 import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
 
 @Composable
@@ -25,7 +26,7 @@ internal fun WidgetSettingsLayout(
 ) {
     SoftcoverTheme(
         palette = themeConfiguration.colorPalette.toSpinePalette(),
-        darkTheme = themeConfiguration.themeMode.isDark(),
+        brightness = themeConfiguration.themeMode.toSchemeBrightness(systemInDark = isSystemInDarkTheme()),
         dynamicColor = themeConfiguration.useDynamicColor,
     ) {
         Column(

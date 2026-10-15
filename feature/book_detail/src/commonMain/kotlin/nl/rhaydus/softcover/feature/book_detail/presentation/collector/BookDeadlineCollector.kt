@@ -33,9 +33,10 @@ internal class BookDeadlineCollector : BookDetailCollector {
                 ProgressSnapshot(
                     bookId = it.book?.id,
                     totalPages = edition?.pages,
-                    currentPage = it.book?.userBookRead?.currentPage ?: 0,
+                    currentPage = it.book?.currentRead?.currentPage ?: 0,
                     totalSeconds = edition?.audioSeconds,
-                    currentSeconds = it.book?.userBookRead?.currentSeconds ?: 0,
+                    currentSeconds = it.book?.currentRead?.currentSeconds ?: 0,
+                    isPaused = it.book?.isPaused == true,
                 )
             }
             .distinctUntilChanged()
@@ -74,7 +75,10 @@ internal class BookDeadlineCollector : BookDetailCollector {
                 null
             }
 
-            deadline to computed?.toDeadlineRowUiModel(dateStyle = dateStyle)
+            deadline to computed?.toDeadlineRowUiModel(
+                dateStyle = dateStyle,
+                isPaused = snapshot.isPaused,
+            )
         }.collectLatest { (deadline, row) ->
             scope.setState { state ->
                 state.copy(

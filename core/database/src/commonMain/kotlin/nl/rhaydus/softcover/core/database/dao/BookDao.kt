@@ -73,6 +73,10 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE id = :id LIMIT 1")
     fun observeBookById(id: Int): Flow<BookFullEntity?>
 
+    @Transaction
+    @Query("SELECT * FROM books WHERE id IN (:ids)")
+    fun observeBooksByIds(ids: List<Int>): Flow<List<BookFullEntity>>
+
     /**
      * Dynamic-sort variant used by the library screen. The caller composes a SELECT against
      * `books` (and joins `user_books`) and supplies the ORDER BY fragment — see
@@ -209,8 +213,8 @@ interface BookDao {
     @Query("SELECT id FROM user_books")
     suspend fun getAllUserBookIds(): List<Int>
 
-    @Query("SELECT id FROM user_books WHERE statusCode = :statusCode")
-    suspend fun getUserBookIdsByStatus(statusCode: Int): List<Int>
+    @Query("SELECT id FROM user_books WHERE statusCode IN (:statusCodes)")
+    suspend fun getUserBookIdsByStatuses(statusCodes: List<Int>): List<Int>
 
     @Query("SELECT id FROM books WHERE id IN (:bookIds)")
     suspend fun getExistingBookIds(bookIds: List<Int>): List<Int>
@@ -309,9 +313,10 @@ interface BookDao {
 
             insertJournals(journals = userBook.journals.map { it.toEntity(userBookId = userBookId) })
 
-            book.userBookRead?.let { userBookRead ->
-                insertUserBookRead(userBookRead.toEntity(userBookId = userBookId))
-            }
+            // Replace-all rather than upsert: `userBook.reads` must be the complete set, since any read missing from it is deleted.
+            deleteUserBookRead(userBookId = userBookId)
+
+            insertUserBookReads(userBookReads = userBook.reads.map { it.toEntity(userBookId = userBookId) })
         }
 
         // Insert editions, evicting locally-cached covers whose URL changed
@@ -473,6 +478,9 @@ interface BookDao {
     suspend fun insertUserBookRead(userBookRead: UserBookReadEntity)
 
     @Upsert
+    suspend fun insertUserBookReads(userBookReads: List<UserBookReadEntity>)
+
+    @Upsert
     suspend fun insertEditions(editions: List<BookEditionEntity>)
 
     @Upsert
@@ -550,9 +558,6 @@ interface BookDao {
 
     @Query("DELETE FROM reading_sessions")
     suspend fun deleteAllReadingSessions()
-
-    @Query("DELETE FROM reading_log_entries")
-    suspend fun deleteAllReadingLogEntries()
 
     @Query("DELETE FROM progress_history")
     suspend fun deleteAllProgressHistory()
@@ -827,7 +832,6 @@ interface BookDao {
         deleteAllPendingListWrites()
         deleteAllHighlights()
         deleteAllReadingSessions()
-        deleteAllReadingLogEntries()
         deleteAllProgressHistory()
         deleteAllTrendingBooks()
         deleteTrendingMeta()

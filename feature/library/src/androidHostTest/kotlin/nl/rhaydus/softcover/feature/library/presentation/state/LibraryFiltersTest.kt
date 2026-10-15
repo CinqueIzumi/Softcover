@@ -4,7 +4,9 @@ import io.kotest.matchers.shouldBe
 import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -70,15 +72,31 @@ class LibraryFiltersTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         tags = tags,
-        userBook = null,
-        userBookRead = finishedYear?.let {
-            UserBookRead(
+        userBook = finishedYear?.let {
+            UserBook(
                 id = id,
-                currentPage = null,
-                currentSeconds = null,
-                progress = 1f,
-                startedAt = null,
-                finishedAt = "$it-06-15",
+                status = BookStatus.Read,
+                dateAdded = "2020-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = null,
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+                reads = listOf(
+                    UserBookRead(
+                        id = id,
+                        currentPage = null,
+                        currentSeconds = null,
+                        progress = 1f,
+                        startedAt = null,
+                        finishedAt = "$it-06-15",
+                    ),
+                ),
             )
         },
     )

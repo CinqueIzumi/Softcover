@@ -30,10 +30,7 @@ internal class OnRemoveBookClickAction(val book: Book) : BookDetailAction {
             .onSuccess {
                 scope.setState { state ->
                     state.copy(selectedLens = BookDetailLens.THE_BOOK).withBook(
-                        book = state.book?.copy(
-                            userBook = null,
-                            userBookRead = null,
-                        ),
+                        book = state.book?.copy(userBook = null),
                     )
                 }
             }

@@ -253,6 +253,26 @@ class BooksLocalDataSourceImplTest {
         }
 
         @Test
+        fun `PAUSED uses the same event-sorted query as CURRENTLY_READING with its own status code`() = runTest {
+            // ----- Arrange -----
+            val status = UserBookStatus.PAUSED
+            val entity = stubBookFullEntity(id = 2)
+
+            every {
+                dao.getBooksByStatusAndEvents(
+                    statusCode = status.code,
+                    events = listOf("progress_updated", "user_book_read_started"),
+                )
+            } returns flowOf(listOf(entity))
+
+            // ----- Act & Assert -----
+            dataSource.getBooksFlowByStatus(status = status).test {
+                awaitItem() shouldBe listOf(entity.toModel())
+                awaitComplete()
+            }
+        }
+
+        @Test
         fun `READ dispatches to getReadBooks with correct status code`() = runTest {
             // ----- Arrange -----
             val status = UserBookStatus.READ
@@ -327,6 +347,33 @@ class BooksLocalDataSourceImplTest {
             dataSource.getBooksFlowByStatus(status = status).test {
                 awaitItem() shouldBe listOf(entity.toModel())
                 awaitComplete()
+            }
+        }
+    }
+
+    @Nested
+    inner class GetUserBookIdsByStatuses {
+        @Test
+        fun `queries the dao with the status codes of every given status`() = runTest {
+            // ----- Arrange -----
+            val statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED)
+
+            coEvery {
+                dao.getUserBookIdsByStatuses(statusCodes = any())
+            } returns listOf(4, 8)
+
+            // ----- Act -----
+            val result = dataSource.getUserBookIdsByStatuses(statuses = statuses)
+
+            // ----- Assert -----
+            result shouldBe listOf(4, 8)
+
+            coVerify(exactly = 1) {
+                dao.getUserBookIdsByStatuses(
+                    statusCodes = match {
+                        it.toSet() == setOf(UserBookStatus.CURRENTLY_READING.code, UserBookStatus.PAUSED.code)
+                    },
+                )
             }
         }
     }
@@ -490,11 +537,12 @@ class BooksLocalDataSourceImplTest {
 
             coEvery {
                 dao.getEditionImageRefsByBookId(bookId = bookId)
-            } returns listOf(EditionImageRef(
-                id = 10,
-                localImagePath = imagePath,
-                localImageUrl = null,
-            ),
+            } returns listOf(
+                EditionImageRef(
+                    id = 10,
+                    localImagePath = imagePath,
+                    localImageUrl = null,
+                ),
             )
 
             // ----- Act -----
@@ -521,11 +569,12 @@ class BooksLocalDataSourceImplTest {
 
             coEvery {
                 dao.getEditionImageRefsByBookId(bookId = bookId)
-            } returns listOf(EditionImageRef(
-                id = 20,
-                localImagePath = null,
-                localImageUrl = null,
-            ),
+            } returns listOf(
+                EditionImageRef(
+                    id = 20,
+                    localImagePath = null,
+                    localImageUrl = null,
+                ),
             )
 
             // ----- Act -----
@@ -596,11 +645,12 @@ class BooksLocalDataSourceImplTest {
             // ----- Arrange -----
             coEvery {
                 dao.getAllEditionImageRefs()
-            } returns listOf(EditionImageRef(
-                id = 3,
-                localImagePath = null,
-                localImageUrl = null,
-            ),
+            } returns listOf(
+                EditionImageRef(
+                    id = 3,
+                    localImagePath = null,
+                    localImageUrl = null,
+                ),
             )
 
             // ----- Act -----
@@ -773,6 +823,69 @@ class BooksLocalDataSourceImplTest {
             // ----- Assert -----
             val sql = querySlot.captured.sql
             sql shouldNotContain "shelf_manual_order"
+        }
+    }
+
+    @Nested
+    inner class ObserveBooksByIds {
+        @Test
+        fun `emits the DAO entities mapped to books for the requested ids`() = runTest {
+            // ----- Arrange -----
+            val first = stubBookFullEntity(id = 1)
+            val second = stubBookFullEntity(id = 2)
+
+            every {
+                dao.observeBooksByIds(ids = listOf(1, 2))
+            } returns flowOf(listOf(first, second))
+
+            // ----- Act -----
+            val emissions = dataSource.observeBooksByIds(ids = listOf(1, 2)).toList()
+
+            // ----- Assert -----
+            emissions shouldBe listOf(listOf(first.toModel(), second.toModel()))
+        }
+
+        @Test
+        fun `an equal re-emission from the DAO does not re-emit downstream`() = runTest {
+            // ----- Arrange -----
+            val entity = stubBookFullEntity(id = 1)
+
+            every {
+                dao.observeBooksByIds(ids = listOf(1))
+            } returns flowOf(
+                listOf(entity),
+                listOf(entity.copy()),
+            )
+
+            // ----- Act -----
+            val emissions = dataSource.observeBooksByIds(ids = listOf(1)).toList()
+
+            // ----- Assert -----
+            emissions.size shouldBe 1
+        }
+
+        @Test
+        fun `an unchanged row keeps its Book instance while a changed row is re-mapped`() = runTest {
+            // ----- Arrange -----
+            val untouched = stubBookFullEntity(id = 1)
+            val changing = stubBookFullEntity(id = 2)
+            val changed = changing.copy(book = changing.book.copy(title = "Changed"))
+
+            every {
+                dao.observeBooksByIds(ids = listOf(1, 2))
+            } returns flowOf(
+                listOf(untouched, changing),
+                listOf(untouched.copy(), changed),
+            )
+
+            // ----- Act -----
+            val emissions = dataSource.observeBooksByIds(ids = listOf(1, 2)).toList()
+
+            // ----- Assert -----
+            emissions.size shouldBe 2
+            emissions[1][0] shouldBeSameInstanceAs emissions[0][0]
+            emissions[1][1] shouldNotBeSameInstanceAs emissions[0][1]
+            emissions[1][1] shouldBe changed.toModel()
         }
     }
 

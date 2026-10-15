@@ -32,6 +32,7 @@ import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVoc
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.RecordAppliedTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabularyUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ActiveSessionBookCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDeadlineCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDetailCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CalloutsCollector
@@ -42,6 +43,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyle
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionCardsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSelectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EndSessionPauseSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ExternalLinksCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.InProgressCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
@@ -65,6 +67,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserLists
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserTagsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.VerdictReviewCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.VerdictSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.YourReadsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -110,12 +113,15 @@ val bookDetailModule = module {
     factory { VerdictSheetCollector() } bind BookDetailCollector::class
     factory { InProgressCollector() } bind BookDetailCollector::class
     factory { ShelveReadingStatusCollector() } bind BookDetailCollector::class
+    factory { YourReadsCollector() } bind BookDetailCollector::class
     factory { ShareCardsCollector() } bind BookDetailCollector::class
     factory { TagEditorSheetCollector() } bind BookDetailCollector::class
     factory { EditionSheetCollector() } bind BookDetailCollector::class
     factory { ProgressSheetCollector() } bind BookDetailCollector::class
     factory { ChooseListsCollector() } bind BookDetailCollector::class
     factory { ShelveControlHeaderCollector() } bind BookDetailCollector::class
+    factory { ActiveSessionBookCollector() } bind BookDetailCollector::class
+    factory { EndSessionPauseSheetCollector() } bind BookDetailCollector::class
     factory { LensToggleCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
@@ -197,6 +203,8 @@ val bookDetailModule = module {
             markBookAsReadingUseCase = get(),
             undoableBookRemover = get(),
             markBookAsReadUseCase = get(),
+            pauseBookUseCase = get(),
+            activeSessionController = get(),
             saveBookVerdictUseCase = get(),
             flows = getAll(),
             offlineCopy = get(),

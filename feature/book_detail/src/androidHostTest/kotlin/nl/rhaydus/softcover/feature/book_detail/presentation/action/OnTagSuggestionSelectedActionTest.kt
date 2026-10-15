@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -21,6 +22,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagsLoad
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.tagsOrEmpty
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -81,6 +84,7 @@ class OnTagSuggestionSelectedActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
+                userTags = UserTagsLoad.Loaded(persistentListOf()),
                 tagEditorCategory = TagCategory.MOOD,
                 tagSuggestionChips = listOf(
                     ChipUiModel(
@@ -103,7 +107,7 @@ class OnTagSuggestionSelectedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe listOf(suggestion)
+            stateFlow.value.userTags.tagsOrEmpty shouldBe listOf(suggestion)
         }
 
         @Test
@@ -119,7 +123,7 @@ class OnTagSuggestionSelectedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe emptyList()
+            stateFlow.value.userTags shouldBe UserTagsLoad.Loading
             coVerify(exactly = 0) {
                 saveUserTagsUseCase(
                     any(),

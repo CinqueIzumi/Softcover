@@ -9,6 +9,10 @@ import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
+import nl.rhaydus.softcover.core.component.button.PillButtonContent
+import nl.rhaydus.softcover.core.component.button.PillButtonSize
+import nl.rhaydus.softcover.core.component.button.PillButtonTone
+import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
@@ -20,7 +24,6 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
-import nl.rhaydus.softcover.core.component.state.EmptyStateButtonUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateVariant
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
@@ -72,15 +75,24 @@ internal data class ReadingScreenUiState(
     val wantToReadBooks: ImmutableList<Book>? = null,
     val trendingBooks: ImmutableList<Book> = persistentListOf(),
 
+    val onHoldHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "On hold",
+        headline = "Set aside for now",
+    ),
     val pickUpNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Pick up next"),
     val trendingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Trending now"),
     val emptyCurrentlyReading: EmptyStateUiModel = EmptyStateUiModel(
         title = "Between books",
         body = "Your next one might already be on your Want to read shelf.",
         variant = EmptyStateVariant.Centered(
-            button = EmptyStateButtonUiModel(
-                label = "Find a book",
-                icon = SoftcoverIcon.Search,
+            button = PillButtonUiModel(
+                key = "find-a-book",
+                content = PillButtonContent.Label(
+                    text = "Find a book",
+                    leadingIcon = SoftcoverIcon.Search,
+                ),
+                tone = PillButtonTone.Filled,
+                size = PillButtonSize.Large,
             ),
         ),
     ),
@@ -114,6 +126,8 @@ internal data class ReadingScreenUiState(
      */
     val alsoReading: BookCardSet<Book> = BookCardSet.standIns(ALSO_READING_STAND_IN_CARDS),
     val pickUpNext: BookCardSet<Book> = BookCardSet.standIns(PICK_UP_NEXT_STAND_IN_CARDS),
+
+    val onHold: BookCardSet<Book> = BookCardSet.empty(),
 
     val deadlineCoverOverlays: ImmutableMap<Int, CoverOverlayUiModel> = persistentMapOf(),
 

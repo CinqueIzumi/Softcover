@@ -30,7 +30,7 @@ internal class OnRefreshAction : LibraryAction {
         LibraryTab.All,
         -> RefreshScope.All
 
-        is LibraryTab.Status -> RefreshScope.ByStatus(status = status)
+        is LibraryTab.Status -> RefreshScope.ByStatuses(statuses = setOf(status))
 
         is LibraryTab.CustomList -> RefreshScope.ByList(listId = listId)
     }

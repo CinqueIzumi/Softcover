@@ -60,7 +60,7 @@ private suspend fun WidgetInputs.toContent(
     ) ?: return CurrentlyReadingWidgetUiModel.Content.Empty
 
     val book = books.first { it.id == shownId }
-    val fraction = (book.userBookRead?.progress ?: 0f) / 100f
+    val fraction = (book.currentRead?.progress ?: 0f) / 100f
 
     val cover = loadCover(book)
 

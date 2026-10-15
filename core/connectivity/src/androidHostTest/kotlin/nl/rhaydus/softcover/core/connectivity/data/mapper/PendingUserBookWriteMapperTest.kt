@@ -26,6 +26,7 @@ class PendingUserBookWriteMapperTest {
             enqueuedAt = "2026-01-03T00:00:00Z",
             actionAt = "2026-01-04T00:00:00Z",
             progressHistoryId = 7L,
+            statusCode = 3,
         )
 
     private fun entity(kind: String = "UPDATE_REVIEW") = PendingUserBookWriteEntity(
@@ -44,6 +45,7 @@ class PendingUserBookWriteMapperTest {
         enqueuedAt = "2026-01-03T00:00:00Z",
         actionAt = "2026-01-04T00:00:00Z",
         progressHistoryId = 7L,
+        statusCode = 3,
     )
 
     @Nested
@@ -74,6 +76,7 @@ class PendingUserBookWriteMapperTest {
                 reviewHasSpoilers = null,
                 actionAt = null,
                 progressHistoryId = null,
+                statusCode = null,
             )
 
             // ----- Act -----
@@ -91,6 +94,7 @@ class PendingUserBookWriteMapperTest {
                 reviewHasSpoilers = null,
                 actionAt = null,
                 progressHistoryId = null,
+                statusCode = null,
             )
         }
     }
@@ -107,6 +111,18 @@ class PendingUserBookWriteMapperTest {
 
             // ----- Assert -----
             result shouldBe write(kind = PendingUserBookWriteKind.UPDATE_RATING)
+        }
+
+        @Test
+        fun `maps the stored status code of a SET_STATUS entity`() {
+            // ----- Arrange -----
+            val input = entity(kind = "SET_STATUS").copy(statusCode = 5)
+
+            // ----- Act -----
+            val result = input.toPendingUserBookWrite()
+
+            // ----- Assert -----
+            result?.statusCode shouldBe 5
         }
 
         @Test

@@ -1,83 +1,61 @@
 package nl.rhaydus.softcover.core.database.migration
 
 import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.execSQL
 
-/** Read-only helpers for inspecting a raw SQLite connection in migration tests. */
-object SqliteInspection {
-    fun names(
-        connection: SQLiteConnection,
-        type: String,
-    ): List<String> = column(
-        connection = connection,
-        sql = "SELECT name FROM sqlite_master WHERE type = '$type' AND name NOT LIKE 'sqlite_%' " +
-            "AND name <> 'room_master_table'",
-    )
+internal fun SQLiteConnection.userTables(): Set<String> =
+    queryStrings(
+        "SELECT name FROM sqlite_master WHERE type = 'table' " +
+            "AND name NOT LIKE 'sqlite_%' AND name NOT IN ('room_master_table', 'android_metadata')",
+    ).toSet()
 
-    fun columnNames(
-        connection: SQLiteConnection,
-        table: String,
-    ): List<String> = column(
-        connection = connection,
-        sql = "SELECT name FROM pragma_table_info('$table')",
-    )
+internal fun SQLiteConnection.indexNames(): Set<String> =
+    queryStrings("SELECT name FROM sqlite_master WHERE type = 'index' AND name NOT LIKE 'sqlite_%'")
+        .toSet()
 
-    /** Every row of [table], each cell rendered as text (null stays null). */
-    fun rows(
-        connection: SQLiteConnection,
-        table: String,
-    ): List<List<String?>> {
-        val stmt = connection.prepare("SELECT * FROM `$table` ORDER BY 1")
+internal fun SQLiteConnection.viewNames(): Set<String> =
+    queryStrings("SELECT name FROM sqlite_master WHERE type = 'view'").toSet()
 
-        try {
-            val rows = mutableListOf<List<String?>>()
-            val width = stmt.getColumnCount()
+internal fun SQLiteConnection.columnNames(table: String): List<String> =
+    queryRows("PRAGMA table_info(`$table`)").map { requireNotNull(it[1]) }
 
-            while (stmt.step()) {
-                rows.add(List(width) { if (stmt.isNull(it)) null else stmt.getText(it) })
-            }
+internal fun SQLiteConnection.userVersion(): Long =
+    requireNotNull(queryRows("PRAGMA user_version").single().single()).toLong()
 
-            return rows
-        } finally {
-            stmt.close()
+internal fun SQLiteConnection.identityHash(): String =
+    requireNotNull(queryRows("SELECT identity_hash FROM room_master_table").single().single())
+
+internal fun SQLiteConnection.countRows(table: String): Int =
+    requireNotNull(queryRows("SELECT COUNT(*) FROM `$table`").single().single()).toInt()
+
+/** Every row of [table] ordered by rowid, restricted to [columns], each value rendered as text. */
+internal fun SQLiteConnection.snapshot(
+    table: String,
+    columns: List<String>,
+): List<List<String?>> {
+    val select = columns.joinToString(",") { "`$it`" }
+
+    return queryRows("SELECT $select FROM `$table` ORDER BY rowid")
+}
+
+private fun SQLiteConnection.queryStrings(sql: String): List<String> =
+    queryRows(sql).map { requireNotNull(it.single()) }
+
+private fun SQLiteConnection.queryRows(sql: String): List<List<String?>> {
+    val statement = prepare(sql)
+
+    try {
+        val rows = mutableListOf<List<String?>>()
+
+        while (statement.step()) {
+            rows.add(
+                (0 until statement.getColumnCount()).map { index ->
+                    if (statement.isNull(index)) null else statement.getText(index)
+                },
+            )
         }
-    }
 
-    fun userVersion(connection: SQLiteConnection): Long {
-        val stmt = connection.prepare("PRAGMA user_version")
-
-        try {
-            stmt.step()
-
-            return stmt.getLong(0)
-        } finally {
-            stmt.close()
-        }
-    }
-
-    fun execAll(
-        connection: SQLiteConnection,
-        statements: List<String>,
-    ) {
-        statements.forEach { connection.execSQL(it) }
-    }
-
-    private fun column(
-        connection: SQLiteConnection,
-        sql: String,
-    ): List<String> {
-        val stmt = connection.prepare(sql)
-
-        try {
-            val values = mutableListOf<String>()
-
-            while (stmt.step()) {
-                values.add(stmt.getText(0))
-            }
-
-            return values
-        } finally {
-            stmt.close()
-        }
+        return rows
+    } finally {
+        statement.close()
     }
 }

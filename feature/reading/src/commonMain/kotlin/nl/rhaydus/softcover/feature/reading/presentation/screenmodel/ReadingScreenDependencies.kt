@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.screenmodel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.GetPausedUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
@@ -38,6 +39,7 @@ internal data class ReadingScreenDependencies(
     val observePlanTodayDismissalsUseCase: ObservePlanTodayDismissalsUseCase,
     val dismissPlanTodayUseCase: DismissPlanTodayUseCase,
     val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
+    val getPausedUserBooksUseCase: GetPausedUserBooksUseCase,
     val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
     val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
     val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,

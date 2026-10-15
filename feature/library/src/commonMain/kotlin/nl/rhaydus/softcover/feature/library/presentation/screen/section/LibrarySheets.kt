@@ -14,6 +14,8 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveShee
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkToggleListMembershipAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnChooseListsSheetDismissedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnCreateListRequestedAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnEndSessionPauseClickAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnEndSessionPauseSheetDismissedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftChipToggledAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftClearAllAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftTagSearchChangedAction
@@ -70,6 +72,23 @@ internal fun LibrarySheets(
                     }
 
                     SheetScaffoldEvent.Dismissed -> runAction(OnBulkRemoveSheetExpandedChangeAction(shown = false))
+
+                    SheetScaffoldEvent.SecondaryClicked,
+                    SheetScaffoldEvent.HeaderActionClicked -> Unit
+                }
+            },
+            content = {},
+        )
+    }
+
+    state.endSessionPauseSheet.modelOrNull?.let { scaffold ->
+        SheetScaffold(
+            model = scaffold,
+            onEvent = { event ->
+                when (event) {
+                    SheetScaffoldEvent.PrimaryClicked -> runAction(OnEndSessionPauseClickAction())
+
+                    SheetScaffoldEvent.Dismissed -> runAction(OnEndSessionPauseSheetDismissedAction())
 
                     SheetScaffoldEvent.SecondaryClicked,
                     SheetScaffoldEvent.HeaderActionClicked -> Unit

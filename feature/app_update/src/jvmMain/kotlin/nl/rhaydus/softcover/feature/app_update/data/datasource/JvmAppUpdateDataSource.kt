@@ -10,11 +10,11 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
+import nl.rhaydus.softcover.core.domain.app.VersionComparator
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.data.install.DesktopInstallerLauncher
 import nl.rhaydus.softcover.feature.app_update.data.model.AppRelease
 import nl.rhaydus.softcover.feature.app_update.data.release.ReleaseSource
-import nl.rhaydus.softcover.feature.app_update.data.version.VersionComparator
 import java.io.File
 import kotlin.system.exitProcess
 

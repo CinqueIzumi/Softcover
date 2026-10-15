@@ -30,4 +30,5 @@ internal fun createAppSettingsDataStore(
             serializer = AppSettingsSerializer,
             producePath = producePath,
         ),
+        migrations = listOf(PausedShelfMigration),
     )

@@ -38,6 +38,7 @@ class FeaturedCardMapperTest {
         reviewedAt = null,
         updatedAt = null,
         journals = emptyList(),
+        reads = emptyList(),
     )
 
     private fun book(
@@ -63,7 +64,6 @@ class FeaturedCardMapperTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         userBook = userBook,
-        userBookRead = null,
     )
 
     @Nested

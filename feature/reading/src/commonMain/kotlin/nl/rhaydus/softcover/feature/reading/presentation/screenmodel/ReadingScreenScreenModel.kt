@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.GetPausedUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
@@ -43,6 +44,7 @@ internal class ReadingScreenScreenModel(
     private val observePlanTodayDismissalsUseCase: ObservePlanTodayDismissalsUseCase,
     private val dismissPlanTodayUseCase: DismissPlanTodayUseCase,
     private val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
+    private val getPausedUserBooksUseCase: GetPausedUserBooksUseCase,
     private val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
     private val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
     private val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
@@ -74,6 +76,7 @@ internal class ReadingScreenScreenModel(
         observePlanTodayDismissalsUseCase = observePlanTodayDismissalsUseCase,
         dismissPlanTodayUseCase = dismissPlanTodayUseCase,
         getWantToReadUserBooksUseCase = getWantToReadUserBooksUseCase,
+        getPausedUserBooksUseCase = getPausedUserBooksUseCase,
         observeTrendingBooksUseCase = observeTrendingBooksUseCase,
         refreshTrendingBooksUseCase = refreshTrendingBooksUseCase,
         observeRecentReadingActivityUseCase = observeRecentReadingActivityUseCase,

@@ -45,6 +45,15 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.component.Sha
     - onEvent: STABLE (function type)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareTagPicker(model: nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareTagPickerUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorAddBlock(selectedCategoryKey: kotlin.String, categoryChips: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.chip.ChipUiModel>, namingField: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, suggestionChips: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.chip.ChipUiModel>, onCategoryChipEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>, onNamingFieldEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, onSuggestionChipEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
@@ -268,6 +277,13 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.sectio
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+private fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ReadThroughRow(model: nl.rhaydus.softcover.feature.book_detail.presentation.state.ReadThroughRowUiModel): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+
+@Composable
 private fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ReviewCard(review: nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel, onRevealSpoilerClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
@@ -292,13 +308,12 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.sectio
     - runAction: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ShelveControlCard(state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>, dateStyle: nl.rhaydus.softcover.core.domain.model.DateStyle): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ShelveControlCard(state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - state: UNSTABLE (has mutable properties or unstable members)
     - runAction: STABLE (function type)
-    - dateStyle: STABLE (class with no mutable properties)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ShelveRow(label: kotlin.String, iconRes: nl.rhaydus.designsystem.icon.RhaydusIconResource, selected: kotlin.Boolean, isLoading: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, trailingStatus: kotlin.String?, readingStatus: nl.rhaydus.softcover.feature.book_detail.presentation.state.ShelveReadingStatusUiModel?, celebrationKey: kotlin.Int, enabled: kotlin.Boolean): kotlin.Unit
@@ -339,6 +354,14 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.sectio
   params:
     - state: UNSTABLE (has mutable properties or unstable members)
     - runAction: STABLE (function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.YourReadsSection(model: nl.rhaydus.softcover.feature.book_detail.presentation.state.YourReadsUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.YoursLensContent(state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>): kotlin.Unit

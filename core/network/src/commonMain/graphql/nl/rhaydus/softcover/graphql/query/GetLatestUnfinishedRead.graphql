@@ -1,0 +1,13 @@
+query GetLatestUnfinishedRead($userBookId: Int!) {
+    user_book_reads(
+        where: {
+            user_book_id: { _eq: $userBookId }
+            finished_at: { _is_null: true }
+        }
+        order_by: { id: desc }
+        limit: 1
+    ) {
+        id
+        started_at
+    }
+}

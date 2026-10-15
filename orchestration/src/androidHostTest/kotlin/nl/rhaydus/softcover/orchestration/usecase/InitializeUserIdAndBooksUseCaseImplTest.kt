@@ -52,6 +52,40 @@ class InitializeUserIdAndBooksUseCaseImplTest {
         }
 
         @Test
+        fun `marks the read-throughs backfilled after a successful refresh`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 7
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            useCase()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { settingsRepository.markReadThroughsBackfilled() }
+        }
+
+        @Test
+        fun `does not mark the read-throughs backfilled when the refresh fails`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                settingsRepository.getUserIdFromBackend()
+            } returns 7
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.failure(RuntimeException("refresh error"))
+
+            // ----- Act -----
+            useCase()
+
+            // ----- Assert -----
+            coVerify(exactly = 0) { settingsRepository.markReadThroughsBackfilled() }
+        }
+
+        @Test
         fun `returns failure when getUserIdFromBackend throws`() = runTest {
             // ----- Arrange -----
             val expectedError = RuntimeException("backend error")

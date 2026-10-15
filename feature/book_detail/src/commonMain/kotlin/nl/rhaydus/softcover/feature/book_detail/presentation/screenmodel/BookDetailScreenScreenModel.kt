@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
@@ -28,6 +29,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressU
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
@@ -58,6 +60,8 @@ internal class BookDetailScreenScreenModel(
     private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     private val undoableBookRemover: UndoableBookRemover,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
+    private val pauseBookUseCase: PauseBookUseCase,
+    private val activeSessionController: ActiveSessionController,
     private val saveBookVerdictUseCase: SaveBookVerdictUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
@@ -105,6 +109,8 @@ internal class BookDetailScreenScreenModel(
         markBookAsReadingUseCase = markBookAsReadingUseCase,
         undoableBookRemover = undoableBookRemover,
         markBookAsReadUseCase = markBookAsReadUseCase,
+        pauseBookUseCase = pauseBookUseCase,
+        activeSessionController = activeSessionController,
         saveBookVerdictUseCase = saveBookVerdictUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         observeCurrentDateUseCase = observeCurrentDateUseCase,

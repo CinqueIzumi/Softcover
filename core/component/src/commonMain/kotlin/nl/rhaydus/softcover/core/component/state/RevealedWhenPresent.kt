@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 /**
@@ -18,7 +19,8 @@ import androidx.compose.ui.Modifier
  * and may never arrive at all, so they take no height until they do.
  *
  * [content] renders the last non-null value, so an exit animation keeps drawing the row it shrinks
- * instead of collapsing the frame [value] turns null. Both transitions are no-ops when decorative
+ * instead of collapsing the frame [value] turns null. The row grows down from its top edge, so rows above it
+stay put. Both transitions are no-ops when decorative
  * motion is off.
  */
 @Composable
@@ -36,9 +38,15 @@ fun <T : Any> RevealedWhenPresent(
     AnimatedVisibility(
         visible = value != null,
         modifier = modifier,
-        enter = expandVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()) +
+        enter = expandVertically(
+            animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+            expandFrom = Alignment.Top,
+        ) +
             fadeIn(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
-        exit = shrinkVertically(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()) +
+        exit = shrinkVertically(
+            animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+            shrinkTowards = Alignment.Top,
+        ) +
             fadeOut(animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()),
     ) {
         lastValue?.let { shown ->

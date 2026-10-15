@@ -18,5 +18,7 @@ paths:
   foundation or pattern in its section file under `docs/reference/design-system/`. `softcover-reviewer`
   treats a missing update as a blocker. A localized tweak to one screen that does not change the system
   needs no update.
+- **Every user-facing string follows `docs/reference/design-system/voice.md`** (enforced by review). Read it
+  before writing or changing any label, headline, gloss, caption, empty state, snackbar or dialog text.
 - `:core:presentation` is not a component home; shared components go in `:core:component`.
 - Check `docs/rhaydus/0.3.1/CAPABILITIES.md` before hand-rolling a component, modifier or util.

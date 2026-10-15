@@ -150,13 +150,16 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.Al
     - model: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen(pickUpNextHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, trendingHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, emptyState: nl.rhaydus.softcover.core.component.state.EmptyStateUiModel, trendingBooks: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.domain.model.Book>, pickUpNext: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, trendingTile: nl.rhaydus.softcover.feature.reading.presentation.state.TrendingTileUiModel?, streakEnabled: kotlin.Boolean, streakStrip: nl.rhaydus.softcover.feature.reading.presentation.state.StreakStripUiModel, onExpandStreak: kotlin.Function0<kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, onNavigateToSearch: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen(pickUpNextHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, trendingHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, emptyState: nl.rhaydus.softcover.core.component.state.EmptyStateUiModel, onHold: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, onHoldHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, trendingBooks: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.domain.model.Book>, pickUpNext: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, trendingTile: nl.rhaydus.softcover.feature.reading.presentation.state.TrendingTileUiModel?, streakEnabled: kotlin.Boolean, streakStrip: nl.rhaydus.softcover.feature.reading.presentation.state.StreakStripUiModel, onExpandStreak: kotlin.Function0<kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, onNavigateToSearch: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - pickUpNextHeader: STABLE (marked @Stable or @Immutable)
     - trendingHeader: STABLE (marked @Stable or @Immutable)
     - emptyState: STABLE (marked @Stable or @Immutable)
+    - onHold: STABLE (marked @Stable or @Immutable)
+    - onHoldHeader: STABLE (marked @Stable or @Immutable)
+    - runAction: STABLE (function type)
     - trendingBooks: STABLE (known stable type)
     - pickUpNext: STABLE (marked @Stable or @Immutable)
     - trendingTile: STABLE (marked @Stable or @Immutable)
@@ -243,6 +246,17 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.Fe
     - isLoading: STABLE (primitive type)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.OnHoldSection(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, onHold: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - header: STABLE (marked @Stable or @Immutable)
+    - onHold: STABLE (marked @Stable or @Immutable)
+    - runAction: STABLE (function type)
+    - onBookClick: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.PickUpNextSection(cards: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel>, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
@@ -302,6 +316,15 @@ internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.Tr
     - model: STABLE (marked @Stable or @Immutable)
     - header: STABLE (marked @Stable or @Immutable)
     - onClick: STABLE (function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.rememberOnHoldCardEventHandler(onHold: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>): kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>
+  skippable: true
+  restartable: true
+  params:
+    - onHold: STABLE (marked @Stable or @Immutable)
+    - runAction: STABLE (function type)
+    - onBookClick: STABLE (function type)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.reading.presentation.screen.section.rememberReadingCardEventHandler(alsoReading: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction, kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>): kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>

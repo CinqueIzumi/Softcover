@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.scan.presentation.screen
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
+import nl.rhaydus.softcover.core.component.sheet.isOpen
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -48,6 +50,7 @@ internal actual fun BarcodeScannerScreenLayout(
         Box(
             modifier = Modifier
                 .padding(padding)
+                .consumeWindowInsets(padding)
                 .fillMaxSize(),
         ) {
             when {
@@ -65,7 +68,7 @@ internal actual fun BarcodeScannerScreenLayout(
                 )
 
                 cameraGranted -> ScannerContent(
-                    cameraPaused = state.isResolving || state.unknownIsbnSheet != null,
+                    cameraPaused = state.isResolving || state.unknownIsbnSheet.isOpen,
                     onIsbnSubmit = onIsbnSubmit,
                     onEnterManually = onEnterManually,
                 )

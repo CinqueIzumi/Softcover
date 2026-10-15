@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
@@ -40,9 +42,16 @@ class InProgressCollectorTest {
         dependencies = mockk(relaxed = true)
     }
 
-    private fun stubBook(progress: Float): Book = mockk<Book> {
+    private fun stubBook(
+        progress: Float,
+        paused: Boolean = false,
+    ): Book = mockk<Book> {
         every {
-            userBookRead
+            isPaused
+        } returns paused
+
+        every {
+            currentRead
         } returns UserBookRead(
             id = 1,
             currentPage = 10,
@@ -80,6 +89,31 @@ class InProgressCollectorTest {
             val model = stateFlow.value.inProgress.shouldNotBeNull()
             model.percent.value shouldBe 10.0
             model.summaryStart shouldBe "p. 10 of 100"
+            job.cancel()
+        }
+
+        @Test
+        fun `a paused book sets the On hold section header`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stubBook(
+                    progress = 10f,
+                    paused = true,
+                ),
+            )
+            val collector = InProgressCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            val header = stateFlow.value.inProgressSectionHeader
+            header.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "On hold"
             job.cancel()
         }
 

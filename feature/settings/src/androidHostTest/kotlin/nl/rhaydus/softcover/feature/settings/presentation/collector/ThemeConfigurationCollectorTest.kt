@@ -76,8 +76,34 @@ class ThemeConfigurationCollectorTest {
             // ----- Assert -----
             stateFlow.value.themeMode shouldBe ThemeMode.DARK
             stateFlow.value.colorPalette shouldBe ColorPalette.SEA
-            stateFlow.value.dynamicColorToggleRow.checked shouldBe true
             job.cancel()
         }
+
+        @Test
+        fun `steps the spine section back when Dim arrives with dynamic colour still on`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val collector = ThemeConfigurationCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                themeConfigFlow.emit(
+                    ThemeConfiguration(
+                        themeMode = ThemeMode.DIM,
+                        colorPalette = ColorPalette.SEA,
+                        useDynamicColor = true,
+                    ),
+                )
+
+                // ----- Assert -----
+                stateFlow.value.spineColourSection.interactive shouldBe false
+                stateFlow.value.paletteChoices.none { it.enabled } shouldBe true
+                job.cancel()
+            }
     }
 }

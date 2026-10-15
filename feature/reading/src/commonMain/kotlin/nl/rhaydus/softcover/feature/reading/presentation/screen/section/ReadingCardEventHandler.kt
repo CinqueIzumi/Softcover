@@ -30,3 +30,24 @@ internal fun rememberReadingCardEventHandler(
             -> Unit
     }
 }
+
+@Composable
+internal fun rememberOnHoldCardEventHandler(
+    onHold: BookCardSet<Book>,
+    runAction: (ReadingAction) -> Unit,
+    onBookClick: (Book) -> Unit,
+): (BookCardEvent) -> Unit = rememberPrefetchingBookCardEventHandler(
+    set = onHold,
+) { event, book ->
+    when (event) {
+        is BookCardEvent.Clicked -> onBookClick(book)
+
+        is BookCardEvent.TrailingClicked -> runAction(OnShowProgressSheetClickAction(book = book))
+
+        is BookCardEvent.ShakeEnded,
+        is BookCardEvent.LongClicked,
+        is BookCardEvent.PressStarted,
+        is BookCardEvent.MenuClicked,
+            -> Unit
+    }
+}

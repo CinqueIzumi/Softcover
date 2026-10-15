@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.library.di
 
-import org.koin.dsl.bind
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
@@ -9,6 +7,7 @@ import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.feature.library.presentation.collector.ActiveFilterChipsCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.ActiveSessionBookCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.AllBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ArrangeDraftChipsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ArrangeSheetCollector
@@ -21,6 +20,7 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.ChooseListsCo
 import nl.rhaydus.softcover.feature.library.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.DisplayListsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.EmptyStatesCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.EndSessionPauseSheetCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterChipModelsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterDraftChipsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterOptionsCollector
@@ -35,6 +35,8 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.ShelvesSheetC
 import nl.rhaydus.softcover.feature.library.presentation.collector.SortModeCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.VisibleTabsCollector
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
 val libraryModule = module {
     includes(
@@ -79,6 +81,8 @@ val libraryModule = module {
     factory { ArrangeSheetCollector() } bind LibraryCollector::class
     factory { ShelvesSheetCollector() } bind LibraryCollector::class
     factory { BulkRemoveSheetCollector() } bind LibraryCollector::class
+    factory { ActiveSessionBookCollector() } bind LibraryCollector::class
+    factory { EndSessionPauseSheetCollector() } bind LibraryCollector::class
 
     factory { DisplayListsCollector() } bind LibraryCollector::class
 
@@ -103,6 +107,8 @@ val libraryModule = module {
             markBookAsReadUseCase = get(),
             markBookAsReadingUseCase = get(),
             markBookAsWantToReadUseCase = get(),
+            pauseBookUseCase = get(),
+            activeSessionController = get(),
             undoableBookRemover = get(),
             reorderShelfBooksUseCase = get(),
             addBookToListUseCase = get(),

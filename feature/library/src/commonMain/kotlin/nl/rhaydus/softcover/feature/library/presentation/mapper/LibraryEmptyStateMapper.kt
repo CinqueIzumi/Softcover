@@ -5,15 +5,18 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 
 internal fun LibraryTab.toEmptyStateUiModel(): EmptyStateUiModel {
-    val isDnf = this is LibraryTab.Status && status == UserBookStatus.DID_NOT_FINISH
+    val shelfStatus = (this as? LibraryTab.Status)?.status
 
-    return if (isDnf) {
-        EmptyStateUiModel(
+    return when (shelfStatus) {
+        UserBookStatus.DID_NOT_FINISH -> EmptyStateUiModel(
             title = "Nothing abandoned",
             body = "Books you stop reading end up here. So far, none.",
         )
-    } else {
-        EmptyStateUiModel(
+        UserBookStatus.PAUSED -> EmptyStateUiModel(
+            title = "Nothing on hold",
+            body = "Books you set aside wait here until you pick them back up.",
+        )
+        else -> EmptyStateUiModel(
             title = "An empty shelf",
             body = "Nothing on your $label list yet. " +
                 "Books you add will show up here.",

@@ -1,128 +1,150 @@
 package nl.rhaydus.softcover.core.database.migration
 
-import java.io.File
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.io.File
 
-/** Reads Room's exported schema JSON for one database version. */
-object ExportedSchema {
-    private const val DIRECTORY = "schemas/nl.rhaydus.softcover.core.database.SoftcoverDatabase"
-
-    private fun database(version: Int): JsonObject {
-        val text = File("$DIRECTORY/$version.json").readText()
-
-        return Json.parseToJsonElement(text)
-            .jsonObject
-            .getValue("database")
-            .jsonObject
-    }
-
-    private fun entities(version: Int): JsonArray = database(version).getValue("entities").jsonArray
-
-    private fun views(version: Int): JsonArray = database(version).getValue("views").jsonArray
-
-    private fun indices(entity: JsonElement): JsonArray = entity.jsonObject["indices"]?.jsonArray ?: JsonArray(emptyList())
-
-    private fun JsonElement.text(key: String): String = jsonObject.getValue(key).jsonPrimitive.content
-
-    private fun String.forName(
-        placeholder: String,
-        name: String,
-    ): String = replace(
-        "\${$placeholder}",
-        name,
+/**
+ * A Room schema as exported to `core/database/schemas`, loaded so tests can recreate the exact
+ * database a shipped release would have on disk.
+ */
+internal class ExportedSchema private constructor(
+    val version: Int,
+    val identityHash: String,
+    val tables: List<Table>,
+    private val views: List<Pair<String, String>>,
+    private val setupQueries: List<String>,
+) {
+    class Column(
+        val name: String,
+        val affinity: String,
     )
 
-    fun tableNames(version: Int): List<String> {
-        val entities = entities(version)
+    class Table(
+        val name: String,
+        val columns: List<Column>,
+        val parents: Set<String>,
+        val createSql: String,
+        val indexSql: List<String>,
+        val indexNames: List<String>,
+    )
 
-        return entities.map { it.text("tableName") }
-    }
+    val tableNames: Set<String> get() = tables.map { it.name }.toSet()
 
-    fun indexNames(version: Int): List<String> {
-        val indexElements = entities(version).flatMap { indices(it) }
+    val indexNames: Set<String> get() = tables.flatMap { it.indexNames }.toSet()
 
-        return indexElements.map { it.text("name") }
-    }
+    val viewNames: Set<String> get() = views.map { it.first }.toSet()
 
-    fun viewNames(version: Int): List<String> = views(version).map { it.text("viewName") }
+    fun table(name: String): Table = tables.single { it.name == name }
 
-    /** Tables, then indices, then views, each as an executable statement. */
-    fun createStatements(version: Int): List<String> {
-        val tables = entities(version).map {
-            it.text("createSql").forName(
-                placeholder = "TABLE_NAME",
-                name = it.text("tableName"),
-            )
-        }
-        val indexStatements = entities(version).flatMap { entity ->
-            val table = entity.text("tableName")
-            val indexElements = indices(entity)
-
-            indexElements.map {
-                it.text("createSql").forName(
-                    placeholder = "TABLE_NAME",
-                    name = table,
-                )
-            }
-        }
-        val viewStatements = views(version).map {
-            it.text("createSql").forName(
-                placeholder = "VIEW_NAME",
-                name = it.text("viewName"),
-            )
+    /** Creates every table, index and view, writes the identity hash and sets `user_version`. */
+    fun createIn(connection: SQLiteConnection) {
+        tables.forEach { table ->
+            connection.execSQL(table.createSql)
+            table.indexSql.forEach { connection.execSQL(it) }
         }
 
-        return tables + indexStatements + viewStatements
+        views.forEach { (name, sql) ->
+            connection.execSQL(sql.replace(
+                "\${VIEW_NAME}",
+                name,
+            ),)
+        }
+
+        setupQueries.forEach { connection.execSQL(it) }
+        connection.execSQL("PRAGMA user_version = $version")
     }
-
-    fun createSql(
-        version: Int,
-        table: String,
-    ): String = entities(version)
-        .single { it.text("tableName") == table }
-        .text("createSql")
-        .forName(
-            placeholder = "TABLE_NAME",
-            name = table,
-        )
-
-    fun columnNames(
-        version: Int,
-        table: String,
-    ): List<String> = entities(version)
-        .single { it.jsonObject.getValue("tableName").jsonPrimitive.content == table }
-        .jsonObject.getValue("fields").jsonArray
-        .map { it.jsonObject.getValue("columnName").jsonPrimitive.content }
 
     /**
-     * One-row insert filling every column by affinity (1 / 1.5 / 'x'). Integer `1` everywhere
-     * satisfies every foreign key once each table holds its single row.
+     * Inserts one row into every table (parents before children, so foreign keys hold). Every
+     * integer column is 1, so each foreign key finds its parent row.
      */
-    fun seedInsert(
-        version: Int,
-        table: String,
-    ): String {
-        val fields = entities(version)
-            .single { it.jsonObject.getValue("tableName").jsonPrimitive.content == table }
-            .jsonObject.getValue("fields").jsonArray
-        val columns = fields.joinToString { "`${it.jsonObject.getValue("columnName").jsonPrimitive.content}`" }
-        val values = fields.joinToString {
-            when (it.jsonObject.getValue("affinity").jsonPrimitive.content) {
-                "INTEGER" -> "1"
-                "REAL" -> "1.5"
-                else -> "'x'"
-            }
-        }
+    fun seedOneRowPerTable(connection: SQLiteConnection) {
+        val remaining = tables.toMutableList()
+        val done = mutableSetOf<String>()
 
-        return "INSERT INTO `$table` ($columns) VALUES ($values)"
+        while (remaining.isNotEmpty()) {
+            val next = remaining.first { table -> (table.parents - table.name).all { it in done } }
+
+            remaining.remove(next)
+            done.add(next.name)
+
+            val columns = next.columns.joinToString(",") { "`${it.name}`" }
+            val values = next.columns.joinToString(",") { seedLiteral(it.affinity) }
+
+            connection.execSQL("INSERT INTO `${next.name}` ($columns) VALUES ($values)")
+        }
     }
 
-    fun setupQueries(version: Int): List<String> = database(version).getValue("setupQueries").jsonArray
-        .map { it.jsonPrimitive.content }
+    private fun seedLiteral(affinity: String): String = when (affinity) {
+        "INTEGER" -> "1"
+        "REAL" -> "1.5"
+        "BLOB" -> "x'01'"
+        else -> "'x'"
+    }
+
+    companion object {
+        fun load(version: Int): ExportedSchema {
+            val file = File(
+                "schemas/nl.rhaydus.softcover.core.database.SoftcoverDatabase/$version.json",
+            )
+            val database = Json.parseToJsonElement(file.readText())
+                .jsonObject.getValue("database").jsonObject
+
+            val tables = database.getValue("entities").jsonArray.map { entity ->
+                val obj = entity.jsonObject
+                val name = obj.getValue("tableName").jsonPrimitive.content
+                val indices = obj.optionalArray("indices")
+
+                Table(
+                    name = name,
+                    columns = obj.getValue("fields").jsonArray.map { field ->
+                        Column(
+                            name = field.jsonObject.getValue("columnName").jsonPrimitive.content,
+                            affinity = field.jsonObject.getValue("affinity").jsonPrimitive.content,
+                        )
+                    },
+                    parents = obj.optionalArray("foreignKeys")
+                        .map { it.jsonObject.getValue("table").jsonPrimitive.content }
+                        .toSet(),
+                    createSql = obj.getValue("createSql").jsonPrimitive.content
+                        .replace(
+                            "\${TABLE_NAME}",
+                            name,
+                        ),
+                    indexSql = indices.map {
+                        it.jsonObject.getValue("createSql").jsonPrimitive.content
+                            .replace(
+                                "\${TABLE_NAME}",
+                                name,
+                            )
+                    },
+                    indexNames = indices.map {
+                        it.jsonObject.getValue("name").jsonPrimitive.content
+                    },
+                )
+            }
+
+            return ExportedSchema(
+                version = version,
+                identityHash = database.getValue("identityHash").jsonPrimitive.content,
+                tables = tables,
+                views = database.optionalArray("views").map {
+                    it.jsonObject.getValue("viewName").jsonPrimitive.content to
+                        it.jsonObject.getValue("createSql").jsonPrimitive.content
+                },
+                setupQueries = database.getValue("setupQueries").jsonArray
+                    .map { it.jsonPrimitive.content },
+            )
+        }
+
+        private fun JsonObject.optionalArray(key: String): JsonArray =
+            this[key]?.jsonArray ?: JsonArray(emptyList())
+    }
 }

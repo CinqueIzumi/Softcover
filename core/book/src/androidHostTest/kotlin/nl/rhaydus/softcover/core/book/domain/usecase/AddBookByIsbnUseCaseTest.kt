@@ -1,12 +1,15 @@
 package nl.rhaydus.softcover.core.book.domain.usecase
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.baseBook
-import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
+import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.exception.BookImportPendingException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -39,7 +42,7 @@ class AddBookByIsbnUseCaseTest {
             // ----- Arrange -----
             coEvery {
                 booksRepository.addBookByIsbn(isbn = isbn)
-            } returns CreatedBook(
+            } returns BookImport.Created(
                 bookId = bookId,
                 editionId = editionId,
             )
@@ -64,7 +67,7 @@ class AddBookByIsbnUseCaseTest {
             // ----- Arrange -----
             coEvery {
                 booksRepository.addBookByIsbn(isbn = isbn)
-            } returns CreatedBook(
+            } returns BookImport.Created(
                 bookId = bookId,
                 editionId = null,
             )
@@ -105,7 +108,7 @@ class AddBookByIsbnUseCaseTest {
             // ----- Arrange -----
             coEvery {
                 booksRepository.addBookByIsbn(isbn = isbn)
-            } returns CreatedBook(
+            } returns BookImport.Created(
                 bookId = bookId,
                 editionId = editionId,
             )
@@ -119,6 +122,100 @@ class AddBookByIsbnUseCaseTest {
 
             // ----- Assert -----
             result.isFailure shouldBe true
+        }
+
+        @Test
+        fun `Fetching then Created re-calls the repository and succeeds with the hydrated book`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRepository.addBookByIsbn(isbn = isbn)
+            } returnsMany listOf(
+                BookImport.Fetching,
+                BookImport.Created(
+                    bookId = bookId,
+                    editionId = editionId,
+                ),
+            )
+
+            coEvery {
+                fetchBookByIdUseCase(id = bookId)
+            } returns Result.success(book)
+
+            // ----- Act -----
+            val result = useCase(isbn)
+
+            // ----- Assert -----
+            result.getOrNull() shouldBe IsbnLookupResult.Found(
+                book = book,
+                editionId = editionId,
+            )
+            coVerify(exactly = 2) {
+                booksRepository.addBookByIsbn(isbn = isbn)
+            }
+        }
+
+        @Test
+        fun `always Fetching fails with BookImportPendingException once the wait budget is spent`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRepository.addBookByIsbn(isbn = isbn)
+            } returns BookImport.Fetching
+
+            // ----- Act -----
+            val result = useCase(isbn)
+
+            // ----- Assert -----
+            result.exceptionOrNull().shouldBeInstanceOf<BookImportPendingException>()
+            testScheduler.currentTime shouldBe 60_000L
+            coVerify(exactly = 0) {
+                fetchBookByIdUseCase(id = any())
+            }
+        }
+
+        @Test
+        fun `spaces Fetching attempts by at least one second and at most the backoff cap`() = runTest {
+            // ----- Arrange -----
+            val callTimes = mutableListOf<Long>()
+
+            coEvery {
+                booksRepository.addBookByIsbn(isbn = isbn)
+            } coAnswers {
+                callTimes += testScheduler.currentTime
+                BookImport.Fetching
+            }
+
+            // ----- Act -----
+            val result = useCase(isbn)
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+
+            val gaps = callTimes.zipWithNext { earlier, later -> later - earlier }
+
+            gaps.forEach { gap ->
+                (gap in 1_000L..5_000L) shouldBe true
+            }
+            gaps.first() shouldBe 1_000L
+            testScheduler.currentTime shouldBe callTimes.last()
+        }
+
+        @Test
+        fun `first call is made without waiting`() = runTest {
+            // ----- Arrange -----
+            var firstCallTime: Long? = null
+
+            coEvery {
+                booksRepository.addBookByIsbn(isbn = isbn)
+            } coAnswers {
+                if (firstCallTime == null) firstCallTime = testScheduler.currentTime
+                BookImport.Fetching
+            }
+
+            // ----- Act -----
+            useCase(isbn)
+
+            // ----- Assert -----
+            firstCallTime shouldBe 0L
         }
     }
 }

@@ -139,6 +139,7 @@ class PillButtonsCollectorTest {
             // ----- Assert -----
             stateFlow.value.selectionPills.moveTargets.map { it.status } shouldBe listOf(
                 UserBookStatus.WANT_TO_READ,
+                UserBookStatus.PAUSED,
                 UserBookStatus.READ,
             )
             job.cancel()
@@ -187,7 +188,7 @@ class PillButtonsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.selectionPills.moveTargets.size shouldBe 3
+            stateFlow.value.selectionPills.moveTargets.size shouldBe 4
             job.cancel()
         }
     }

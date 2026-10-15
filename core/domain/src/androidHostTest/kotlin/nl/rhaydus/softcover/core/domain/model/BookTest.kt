@@ -61,7 +61,6 @@ class BookTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         userBook = userBook,
-        userBookRead = null,
     )
 
     private fun buildUserBook(editionId: Int?): UserBook = mockk<UserBook>().also {
@@ -221,6 +220,60 @@ class BookTest {
 
             // ----- Assert -----
             result shouldBe BookStatus.None
+        }
+    }
+
+    // ----- isPaused -----
+
+    @Nested
+    inner class IsPaused {
+        @Test
+        fun `is true when the user book is paused`() {
+            // ----- Arrange -----
+            val userBook = buildUserBook(editionId = null)
+            every {
+                userBook.status
+            } returns BookStatus.Paused
+            val book = buildBook(
+                editions = listOf(buildEdition(id = 1)),
+                userBook = userBook,
+            )
+
+            // ----- Act -----
+            val result = book.isPaused
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `is false when the user book is reading`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(buildEdition(id = 1)),
+                userBook = buildUserBook(editionId = null),
+            )
+
+            // ----- Act -----
+            val result = book.isPaused
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `is false when there is no user book`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(buildEdition(id = 1)),
+                userBook = null,
+            )
+
+            // ----- Act -----
+            val result = book.isPaused
+
+            // ----- Assert -----
+            result shouldBe false
         }
     }
 

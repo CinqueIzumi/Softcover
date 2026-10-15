@@ -66,6 +66,10 @@ interface SettingsLocalDataSource {
 
     val listDefaultsSeeded: Flow<Boolean>
 
+    val readThroughsBackfilled: Flow<Boolean>
+
+    suspend fun markReadThroughsBackfilled()
+
     suspend fun seedEnabledListIds(ids: Set<Int>)
 
     suspend fun resetLibraryVisibilityPreferences()
@@ -235,6 +239,16 @@ internal class SettingsLocalDataSourceImpl(
         .map { it.listDefaultsSeeded }
         .distinctUntilChanged()
 
+    override val readThroughsBackfilled: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.readThroughsBackfilled }
+        .distinctUntilChanged()
+
+    override suspend fun markReadThroughsBackfilled() {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(readThroughsBackfilled = true)
+        }
+    }
+
     override suspend fun seedEnabledListIds(ids: Set<Int>) {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(
@@ -270,7 +284,7 @@ internal class SettingsLocalDataSourceImpl(
     }
 
     override suspend fun resetAllSettings() {
-        appSettingsDataStore.store.updateData { AppSettingsEntity() }
+        appSettingsDataStore.store.updateData { AppSettingsEntity(pausedShelfSeeded = true) }
     }
 
     override val libraryTabOrder: Flow<List<String>> = appSettingsDataStore.store.data

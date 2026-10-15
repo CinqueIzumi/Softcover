@@ -98,7 +98,6 @@ class BookCardModelsCollectorTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         userBook = null,
-        userBookRead = null,
     )
 
     private fun List<BookCardUiModel>.card(id: Int): BookCardUiModel = first { (it.key as BookCardKey.Book).bookId == id }

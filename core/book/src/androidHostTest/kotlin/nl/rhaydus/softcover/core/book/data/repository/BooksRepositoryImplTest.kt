@@ -24,6 +24,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.platform.NetworkAvailabilityProvider
+import nl.rhaydus.softcover.core.book.baseBook
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
@@ -36,6 +37,7 @@ import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
@@ -43,6 +45,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import java.util.TimeZone as JavaTimeZone
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -51,6 +54,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 class BooksRepositoryImplTest {
@@ -106,7 +110,7 @@ class BooksRepositoryImplTest {
         } returns if (userBookId != null) stubUserBook(userBookId) else null
 
         every {
-            this@mockk.userBookRead
+            this@mockk.currentRead
         } returns null
     }
 
@@ -207,6 +211,7 @@ class BooksRepositoryImplTest {
                         UserBookStatus.WANT_TO_READ.code,
                         UserBookStatus.CURRENTLY_READING.code,
                         UserBookStatus.READ.code,
+                        UserBookStatus.PAUSED.code,
                         UserBookStatus.DID_NOT_FINISH.code,
                     ),
                 )
@@ -236,6 +241,7 @@ class BooksRepositoryImplTest {
                         UserBookStatus.WANT_TO_READ.code,
                         UserBookStatus.CURRENTLY_READING.code,
                         UserBookStatus.READ.code,
+                        UserBookStatus.PAUSED.code,
                         UserBookStatus.DID_NOT_FINISH.code,
                     ),
                 )
@@ -259,7 +265,7 @@ class BooksRepositoryImplTest {
             } returns listOf(fetchedBook)
 
             coEvery {
-                booksLocalDataSource.getUserBookIdsByStatus(status = status)
+                booksLocalDataSource.getUserBookIdsByStatuses(statuses = setOf(status))
             } returns listOf(10, staleLocalId)
 
             coEvery {
@@ -271,7 +277,7 @@ class BooksRepositoryImplTest {
             // ----- Act -----
             repository.refreshUserBooks(
                 userId = userId,
-                statusFilter = status,
+                statusFilter = setOf(status),
             )
 
             // ----- Assert -----
@@ -284,7 +290,7 @@ class BooksRepositoryImplTest {
             }
 
             coVerify {
-                booksLocalDataSource.getUserBookIdsByStatus(status = status)
+                booksLocalDataSource.getUserBookIdsByStatuses(statuses = setOf(status))
             }
 
             coVerify {
@@ -299,7 +305,7 @@ class BooksRepositoryImplTest {
             val status = UserBookStatus.CURRENTLY_READING
 
             coEvery {
-                booksLocalDataSource.getUserBookIdsByStatus(status = status)
+                booksLocalDataSource.getUserBookIdsByStatuses(statuses = setOf(status))
             } returns listOf(4, 8)
 
             coEvery {
@@ -319,7 +325,7 @@ class BooksRepositoryImplTest {
             // ----- Act -----
             repository.refreshUserBooks(
                 userId = userId,
-                statusFilter = status,
+                statusFilter = setOf(status),
             )
 
             // ----- Assert -----
@@ -353,7 +359,7 @@ class BooksRepositoryImplTest {
             }
 
             coEvery {
-                booksLocalDataSource.getUserBookIdsByStatus(status = status)
+                booksLocalDataSource.getUserBookIdsByStatuses(statuses = setOf(status))
             } returns listOf(movedUserBookId)
 
             coEvery {
@@ -373,7 +379,7 @@ class BooksRepositoryImplTest {
             // ----- Act -----
             repository.refreshUserBooks(
                 userId = userId,
-                statusFilter = status,
+                statusFilter = setOf(status),
             )
 
             // ----- Assert -----
@@ -401,7 +407,7 @@ class BooksRepositoryImplTest {
             val deletedId = 2
 
             coEvery {
-                booksLocalDataSource.getUserBookIdsByStatus(status = status)
+                booksLocalDataSource.getUserBookIdsByStatuses(statuses = setOf(status))
             } returns listOf(keptId, deletedId)
 
             coEvery {
@@ -421,12 +427,99 @@ class BooksRepositoryImplTest {
             // ----- Act -----
             repository.refreshUserBooks(
                 userId = userId,
-                statusFilter = status,
+                statusFilter = setOf(status),
             )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
                 booksLocalDataSource.removeUserBooksById(ids = listOf(deletedId))
+            }
+        }
+
+        @Test
+        fun `multi-status filter requests exactly those codes and re-fetches local rows under any of them`() = runTest {
+            // ----- Arrange -----
+            val userId = 20
+            val statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED)
+            val readingId = 4
+            val pausedId = 8
+
+            coEvery {
+                booksLocalDataSource.getUserBookIdsByStatuses(statuses = statuses)
+            } returns listOf(readingId, pausedId)
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(
+                    userId = any(),
+                    statusIds = any(),
+                    userBookIds = any(),
+                )
+            } returns emptyList()
+
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = statuses,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = setOf(
+                        UserBookStatus.CURRENTLY_READING.code,
+                        UserBookStatus.PAUSED.code,
+                    ),
+                    userBookIds = setOf(readingId, pausedId),
+                )
+            }
+        }
+
+        @Test
+        fun `multi-status filter removes only filtered rows the server no longer returns`() = runTest {
+            // ----- Arrange -----
+            val userId = 20
+            val statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED)
+            val keptId = 1
+            val deletedPausedId = 2
+
+            coEvery {
+                booksLocalDataSource.getUserBookIdsByStatuses(statuses = statuses)
+            } returns listOf(keptId, deletedPausedId)
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(
+                    userId = any(),
+                    statusIds = any(),
+                    userBookIds = any(),
+                )
+            } returns listOf(stubBook(userBookId = keptId))
+
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } coAnswers {
+                firstArg<suspend () -> List<Book>>().invoke()
+            }
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = statuses,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(deletedPausedId))
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.getAllUserBookIds()
             }
         }
 
@@ -473,7 +566,7 @@ class BooksRepositoryImplTest {
             }
 
             coVerify(exactly = 0) {
-                booksLocalDataSource.getUserBookIdsByStatus(status = any())
+                booksLocalDataSource.getUserBookIdsByStatuses(statuses = any())
             }
         }
 
@@ -1295,6 +1388,7 @@ class BooksRepositoryImplTest {
             reviewedAt = null,
             updatedAt = null,
             journals = emptyList(),
+            reads = emptyList(),
         )
 
         @Test
@@ -1511,6 +1605,7 @@ class BooksRepositoryImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = listOf(existingJournal),
+                reads = emptyList(),
             )
             val book = Book(
                 id = 42,
@@ -1528,7 +1623,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = userBook,
-                userBookRead = null,
             )
             val expectedBook = stubBook(userBookId = 1)
             val slot = slot<Book>()
@@ -1726,6 +1820,501 @@ class BooksRepositoryImplTest {
     }
 
     @Nested
+    inner class StatusWrites {
+        private val existingJournal = ReadingJournal(
+            updatedAt = "2026-01-01T10:00:00",
+            event = "some_existing_event",
+        )
+
+        private fun statusBook(
+            status: BookStatus,
+            isShelved: Boolean = true,
+        ): Book = Book(
+            id = 42,
+            title = "Test Book",
+            editions = emptyList(),
+            defaultEdition = null,
+            rating = 0.0,
+            description = "",
+            releaseYear = 2020,
+            coverUrl = "",
+            authors = emptyList(),
+            usersCount = 0,
+            ratingsCount = 0,
+            bookSeries = null,
+            positionsInSeries = emptyList(),
+            isCompilation = false,
+            userBook = if (isShelved) {
+                UserBook(
+                    id = 7,
+                    status = status,
+                    dateAdded = "2026-01-01",
+                    createdAt = null,
+                    privacySettingId = 1,
+                    reviewHasSpoilers = false,
+                    editionId = null,
+                    lastReadDate = null,
+                    rating = null,
+                    referrerUserId = null,
+                    reviewedAt = null,
+                    updatedAt = null,
+                    journals = listOf(existingJournal),
+                    reads = emptyList(),
+                )
+            } else {
+                null
+            },
+        )
+
+        private fun goOffline() {
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
+        }
+
+        @Test
+        fun `markBookAsPaused writes an optimistic Paused status without a journal event and returns the remote book`() =
+            runTest {
+                // ----- Arrange -----
+                val book = statusBook(status = BookStatus.Reading)
+                val remoteBook = stubBook(userBookId = 7)
+                val slot = slot<Book>()
+
+                coEvery {
+                    booksRemoteDataSource.markBookAsPaused(
+                        book = book,
+                        editionId = any(),
+                    )
+                } returns remoteBook
+
+                coEvery {
+                    booksLocalDataSource.cacheBook(book = capture(slot))
+                } returns Unit
+
+                // ----- Act -----
+                val result = repository.markBookAsPaused(book = book)
+
+                // ----- Assert -----
+                result shouldBe remoteBook
+                val capturedUserBook = slot.captured.userBook.shouldNotBeNull()
+                capturedUserBook.status shouldBe BookStatus.Paused
+                capturedUserBook.journals shouldBe listOf(existingJournal)
+            }
+
+        @Test
+        fun `markBookAsPaused skips the optimistic write for an already Paused book but still calls remote`() =
+            runTest {
+                // ----- Arrange -----
+                val book = statusBook(status = BookStatus.Paused)
+                val remoteBook = stubBook(userBookId = 7)
+
+                coEvery {
+                    booksRemoteDataSource.markBookAsPaused(
+                        book = book,
+                        editionId = any(),
+                    )
+                } returns remoteBook
+
+                // ----- Act -----
+                repository.markBookAsPaused(book = book)
+
+                // ----- Assert -----
+                coVerify(exactly = 0) {
+                    booksLocalDataSource.cacheBook(book = any())
+                }
+                coVerify(exactly = 1) {
+                    booksRemoteDataSource.markBookAsPaused(
+                        book = book,
+                        editionId = any(),
+                    )
+                }
+            }
+
+        @Test
+        fun `markBookAsPaused forwards editionId to the remote data source`() = runTest {
+            // ----- Arrange -----
+            val book = statusBook(status = BookStatus.Reading)
+            val editionId = 99
+
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = book,
+                    editionId = editionId,
+                )
+            } returns stubBook(userBookId = 7)
+
+            // ----- Act -----
+            repository.markBookAsPaused(
+                book = book,
+                editionId = editionId,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = book,
+                    editionId = editionId,
+                )
+            }
+        }
+
+        @Test
+        fun `markBookAsPaused restores the snapshot and rethrows on a non-transient failure without queueing`() =
+            runTest {
+                // ----- Arrange -----
+                val book = statusBook(status = BookStatus.Reading)
+                val snapshot = stubBook(userBookId = 7)
+                val remoteError = RuntimeException("rejected")
+
+                coEvery {
+                    booksLocalDataSource.getBookById(id = book.id)
+                } returns snapshot
+
+                coEvery {
+                    booksRemoteDataSource.markBookAsPaused(
+                        book = book,
+                        editionId = any(),
+                    )
+                } throws remoteError
+
+                // ----- Act -----
+                val caught = runCatching { repository.markBookAsPaused(book = book) }
+
+                // ----- Assert -----
+                caught.exceptionOrNull() shouldBe remoteError
+                coVerify(exactly = 1) {
+                    booksLocalDataSource.cacheBook(book = snapshot)
+                }
+                coVerify(exactly = 0) {
+                    offlineSync.enqueueStatusUpdate(
+                        book = any(),
+                        status = any(),
+                    )
+                }
+            }
+
+        @Test
+        fun `markBookAsPaused rethrows cancellation without rollback or queueing`() = runTest {
+            // ----- Arrange -----
+            val book = statusBook(status = BookStatus.Reading)
+            val snapshot = stubBook(userBookId = 7)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns snapshot
+
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = book,
+                    editionId = any(),
+                )
+            } throws CancellationException("cancelled")
+
+            // ----- Act & Assert -----
+            shouldThrow<CancellationException> {
+                repository.markBookAsPaused(book = book)
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+            coVerify(exactly = 0) {
+                offlineSync.enqueueStatusUpdate(
+                    book = any(),
+                    status = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `markBookAsPaused when offline queues SET_STATUS for a shelved book without calling remote`() = runTest {
+            // ----- Arrange -----
+            goOffline()
+
+            val book = statusBook(status = BookStatus.Reading)
+            val slot = slot<Book>()
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = capture(slot))
+            } returns Unit
+
+            // ----- Act -----
+            val result = repository.markBookAsPaused(book = book)
+
+            // ----- Assert -----
+            result shouldBe slot.captured
+            result.userBook.shouldNotBeNull().status shouldBe BookStatus.Paused
+            coVerify(exactly = 1) {
+                offlineSync.enqueueStatusUpdate(
+                    book = result,
+                    status = UserBookStatus.PAUSED,
+                )
+            }
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = any(),
+                    editionId = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `markBookAsPaused queues SET_STATUS and keeps the optimistic book when remote throws a transient error`() =
+            runTest {
+                // ----- Arrange -----
+                val book = statusBook(status = BookStatus.Reading)
+                val slot = slot<Book>()
+
+                coEvery {
+                    booksLocalDataSource.cacheBook(book = capture(slot))
+                } returns Unit
+
+                coEvery {
+                    booksRemoteDataSource.markBookAsPaused(
+                        book = book,
+                        editionId = any(),
+                    )
+                } throws ServerUnavailableException(message = "502")
+
+                // ----- Act -----
+                val result = repository.markBookAsPaused(book = book)
+
+                // ----- Assert -----
+                result shouldBe slot.captured
+                coVerify(exactly = 1) {
+                    offlineSync.enqueueStatusUpdate(
+                        book = result,
+                        status = UserBookStatus.PAUSED,
+                    )
+                }
+                coVerify(exactly = 1) {
+                    booksLocalDataSource.cacheBook(book = any())
+                }
+            }
+
+        @Test
+        fun `markBookAsPaused for an off-shelf book stays online-only and rolls back when offline`() = runTest {
+            // ----- Arrange -----
+            goOffline()
+
+            val book = statusBook(
+                status = BookStatus.None,
+                isShelved = false,
+            )
+
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = book,
+                    editionId = any(),
+                )
+            } throws OfflineException()
+
+            // ----- Act & Assert -----
+            shouldThrow<OfflineException> {
+                repository.markBookAsPaused(book = book)
+            }
+
+            coVerify(exactly = 0) {
+                offlineSync.enqueueStatusUpdate(
+                    book = any(),
+                    status = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `markBookAsPaused for an off-shelf book does not queue a transient failure`() = runTest {
+            // ----- Arrange -----
+            val book = statusBook(
+                status = BookStatus.None,
+                isShelved = false,
+            )
+            val error = ServerUnavailableException(message = "502")
+
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = book,
+                    editionId = any(),
+                )
+            } throws error
+
+            // ----- Act -----
+            val caught = runCatching { repository.markBookAsPaused(book = book) }
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe error
+            coVerify(exactly = 0) {
+                offlineSync.enqueueStatusUpdate(
+                    book = any(),
+                    status = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `markBookAsWantToRead when offline queues SET_STATUS for a shelved book without calling remote`() =
+            runTest {
+                // ----- Arrange -----
+                goOffline()
+
+                val book = statusBook(status = BookStatus.Reading)
+
+                // ----- Act -----
+                val result = repository.markBookAsWantToRead(book = book)
+
+                // ----- Assert -----
+                result.userBook.shouldNotBeNull().status shouldBe BookStatus.WantToRead
+                coVerify(exactly = 1) {
+                    offlineSync.enqueueStatusUpdate(
+                        book = result,
+                        status = UserBookStatus.WANT_TO_READ,
+                    )
+                }
+                coVerify(exactly = 0) {
+                    booksRemoteDataSource.markBookAsWantToRead(
+                        bookId = any(),
+                        editionId = any(),
+                    )
+                }
+            }
+
+        @Test
+        fun `markBookAsWantToRead queues SET_STATUS when remote throws a transient error`() = runTest {
+            // ----- Arrange -----
+            val book = statusBook(status = BookStatus.Reading)
+
+            coEvery {
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = book.id,
+                    editionId = any(),
+                )
+            } throws OfflineException()
+
+            // ----- Act -----
+            val result = repository.markBookAsWantToRead(book = book)
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().status shouldBe BookStatus.WantToRead
+            coVerify(exactly = 1) {
+                offlineSync.enqueueStatusUpdate(
+                    book = result,
+                    status = UserBookStatus.WANT_TO_READ,
+                )
+            }
+        }
+
+        @Test
+        fun `markBookAsWantToRead for an off-shelf book is not queued on failure`() = runTest {
+            // ----- Arrange -----
+            val book = statusBook(
+                status = BookStatus.None,
+                isShelved = false,
+            )
+
+            coEvery {
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = book.id,
+                    editionId = any(),
+                )
+            } throws OfflineException()
+
+            // ----- Act -----
+            val caught = runCatching { repository.markBookAsWantToRead(book = book) }
+
+            // ----- Assert -----
+            caught.exceptionOrNull().shouldNotBeNull()
+            coVerify(exactly = 0) {
+                offlineSync.enqueueStatusUpdate(
+                    book = any(),
+                    status = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `markBookAsReading when offline queues SET_STATUS for a shelved book without calling remote`() =
+            runTest {
+                // ----- Arrange -----
+                goOffline()
+
+                val book = statusBook(status = BookStatus.Paused)
+
+                // ----- Act -----
+                val result = repository.markBookAsReading(book = book)
+
+                // ----- Assert -----
+                result.userBook.shouldNotBeNull().status shouldBe BookStatus.Reading
+                coVerify(exactly = 1) {
+                    offlineSync.enqueueStatusUpdate(
+                        book = result,
+                        status = UserBookStatus.CURRENTLY_READING,
+                    )
+                }
+                coVerify(exactly = 0) {
+                    booksRemoteDataSource.markBookAsReading(
+                        book = any(),
+                        editionId = any(),
+                    )
+                }
+            }
+
+        @Test
+        fun `markBookAsReading queues SET_STATUS when remote throws a transient error`() = runTest {
+            // ----- Arrange -----
+            val book = statusBook(status = BookStatus.Paused)
+
+            coEvery {
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = any(),
+                )
+            } throws ServerUnavailableException(message = "503")
+
+            // ----- Act -----
+            val result = repository.markBookAsReading(book = book)
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().status shouldBe BookStatus.Reading
+            coVerify(exactly = 1) {
+                offlineSync.enqueueStatusUpdate(
+                    book = result,
+                    status = UserBookStatus.CURRENTLY_READING,
+                )
+            }
+        }
+
+        @Test
+        fun `markBookAsReading for an off-shelf book is not queued when offline`() = runTest {
+            // ----- Arrange -----
+            goOffline()
+
+            val book = statusBook(
+                status = BookStatus.None,
+                isShelved = false,
+            )
+
+            coEvery {
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = any(),
+                )
+            } throws OfflineException()
+
+            // ----- Act -----
+            val caught = runCatching { repository.markBookAsReading(book = book) }
+
+            // ----- Assert -----
+            caught.exceptionOrNull().shouldNotBeNull()
+            coVerify(exactly = 0) {
+                offlineSync.enqueueStatusUpdate(
+                    book = any(),
+                    status = any(),
+                )
+            }
+        }
+    }
+
+    @Nested
     inner class UpdateBookRating {
         private fun stubUserBookWithRating(
             id: Int,
@@ -1745,6 +2334,7 @@ class BooksRepositoryImplTest {
             reviewedAt = null,
             updatedAt = null,
             journals = emptyList(),
+            reads = emptyList(),
         )
 
         @Test
@@ -1790,7 +2380,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = userBook,
-                userBookRead = null,
             )
             val remoteBook = stubBook(userBookId = 5)
             val capturedBooks = mutableListOf<Book>()
@@ -1942,7 +2531,6 @@ class BooksRepositoryImplTest {
                     id = userBookId,
                     rating = 3.0,
                 ),
-                userBookRead = null,
             )
             val snapshot = stubBook(userBookId = userBookId)
 
@@ -2009,7 +2597,6 @@ class BooksRepositoryImplTest {
                     id = userBookId,
                     rating = 3.0,
                 ),
-                userBookRead = null,
             )
             val snapshot = stubBook(userBookId = userBookId)
 
@@ -2076,7 +2663,6 @@ class BooksRepositoryImplTest {
                     id = userBookId,
                     rating = 3.0,
                 ),
-                userBookRead = null,
             )
 
             every {
@@ -2142,7 +2728,6 @@ class BooksRepositoryImplTest {
                         rating = 3.0,
                         status = BookStatus.Read,
                     ),
-                    userBookRead = null,
                 )
 
                 // The caller passes a pre-finish snapshot still marked Reading (e.g. the Reading
@@ -2167,7 +2752,6 @@ class BooksRepositoryImplTest {
                         rating = 3.0,
                         status = BookStatus.Reading,
                     ),
-                    userBookRead = null,
                 )
                 val remoteBook = stubBook(userBookId = userBookId)
                 val capturedBooks = mutableListOf<Book>()
@@ -2223,6 +2807,7 @@ class BooksRepositoryImplTest {
             reviewedAt = null,
             updatedAt = null,
             journals = emptyList(),
+            reads = emptyList(),
         )
 
         @Test
@@ -2317,7 +2902,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = stubUserBookForReview(id = userBookId),
-                userBookRead = null,
             )
 
             every {
@@ -2384,7 +2968,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = stubUserBookForReview(id = userBookId),
-                userBookRead = null,
             )
             val snapshot = Book(
                 id = bookId,
@@ -2402,7 +2985,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = stubUserBookForReview(id = userBookId),
-                userBookRead = null,
             )
 
             every {
@@ -2478,7 +3060,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = stubUserBookForReview(id = userBookId),
-                userBookRead = null,
             )
             val snapshot = Book(
                 id = bookId,
@@ -2496,7 +3077,6 @@ class BooksRepositoryImplTest {
                 positionsInSeries = emptyList(),
                 isCompilation = false,
                 userBook = stubUserBookForReview(id = userBookId),
-                userBookRead = null,
             )
 
             every {
@@ -2630,7 +3210,6 @@ class BooksRepositoryImplTest {
                         id = userBookId,
                         status = BookStatus.Read,
                     ),
-                    userBookRead = null,
                 )
 
                 // The caller passes a pre-finish snapshot still marked Reading (e.g. the Reading
@@ -2654,7 +3233,6 @@ class BooksRepositoryImplTest {
                         id = userBookId,
                         status = BookStatus.Reading,
                     ),
-                    userBookRead = null,
                 )
                 val remoteBook = stubBook(userBookId = userBookId)
                 val capturedBooks = mutableListOf<Book>()
@@ -3881,6 +4459,7 @@ class BooksRepositoryImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = listOf(existingJournal),
+                reads = emptyList(),
             )
             val userBookRead = UserBookRead(
                 id = 1,
@@ -3905,8 +4484,7 @@ class BooksRepositoryImplTest {
                 bookSeries = null,
                 positionsInSeries = emptyList(),
                 isCompilation = false,
-                userBook = userBook,
-                userBookRead = userBookRead,
+                userBook = userBook.copy(reads = listOf(userBookRead)),
             )
             val slot = slot<Book>()
 
@@ -4095,6 +4673,130 @@ class BooksRepositoryImplTest {
                 )
             }
         }
+
+        private fun readingBook(read: UserBookRead): Book {
+            val userBook = baseBook.userBook.shouldNotBeNull()
+
+            return baseBook.copy(
+                userBook = userBook.copy(
+                    status = BookStatus.Reading,
+                    reads = listOf(read),
+                ),
+            )
+        }
+
+        @Test
+        fun `placeholder current read — caches optimistically, records history and enqueues without calling the remote`() = runTest {
+            // ----- Arrange -----
+            val placeholderRead = UserBookRead(
+                id = -1,
+                currentPage = null,
+                currentSeconds = null,
+                progress = 0f,
+                startedAt = "2026-07-21",
+                finishedAt = null,
+            )
+            val book = readingBook(read = placeholderRead)
+            val cached = slot<Book>()
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = capture(cached))
+            } returns Unit
+
+            // ----- Act -----
+            val result = repository.updateBookProgress(
+                book = book,
+                newPage = 25,
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Assert -----
+            cached.captured.currentRead.shouldNotBeNull().currentPage shouldBe 25
+            result shouldBe cached.captured
+
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = book.id,
+                    actionAtEpochMillis = any(),
+                    pages = 25,
+                    seconds = null,
+                )
+            }
+
+            coVerify(exactly = 1) {
+                offlineSync.enqueueProgressUpdate(
+                    book = cached.captured,
+                    newPage = 25,
+                    newSeconds = null,
+                    actionAt = "2026-07-21T21:00:00Z",
+                    progressHistoryId = 9L,
+                )
+            }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `real current read — calls the remote with that read and does not enqueue`() = runTest {
+            // ----- Arrange -----
+            val realRead = UserBookRead(
+                id = 7,
+                currentPage = 10,
+                currentSeconds = null,
+                progress = 10f,
+                startedAt = "2026-07-21",
+                finishedAt = null,
+            )
+            val book = readingBook(read = realRead)
+            val remoteBook = stubBook(userBookId = 1)
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } returns remoteBook
+
+            // ----- Act -----
+            val result = repository.updateBookProgress(
+                book = book,
+                newPage = 25,
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Assert -----
+            result shouldBe remoteBook
+
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.updateBookProgress(
+                    book = book,
+                    newPage = 25,
+                    newSeconds = null,
+                    actionAt = "2026-07-21T21:00:00Z",
+                )
+            }
+
+            coVerify(exactly = 0) {
+                offlineSync.enqueueProgressUpdate(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                    progressHistoryId = any(),
+                )
+            }
+        }
     }
 
     @Nested
@@ -4209,6 +4911,7 @@ class BooksRepositoryImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = listOf(existingJournal),
+                reads = emptyList(),
             )
             val userBookRead = UserBookRead(
                 id = 1,
@@ -4233,8 +4936,7 @@ class BooksRepositoryImplTest {
                 bookSeries = null,
                 positionsInSeries = emptyList(),
                 isCompilation = false,
-                userBook = userBook,
-                userBookRead = userBookRead,
+                userBook = userBook.copy(reads = listOf(userBookRead)),
             )
             val slot = slot<Book>()
 
@@ -4285,6 +4987,7 @@ class BooksRepositoryImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
             val userBookRead = UserBookRead(
                 id = 1,
@@ -4309,8 +5012,7 @@ class BooksRepositoryImplTest {
                 bookSeries = null,
                 positionsInSeries = emptyList(),
                 isCompilation = false,
-                userBook = userBook,
-                userBookRead = userBookRead,
+                userBook = userBook.copy(reads = listOf(userBookRead)),
             )
             val slot = slot<Book>()
 
@@ -4337,7 +5039,7 @@ class BooksRepositoryImplTest {
             )
 
             // ----- Assert -----
-            slot.captured.userBookRead?.finishedAt shouldBe expectedFinishedAt
+            slot.captured.currentRead?.finishedAt shouldBe expectedFinishedAt
         }
 
         @Test
@@ -4514,14 +5216,25 @@ class BooksRepositoryImplTest {
 
     @Nested
     inner class OfflineBehavior {
-        private fun stubUserBook(id: Int = 1): UserBook = mockk(relaxed = true) {
-            every {
-                this@mockk.id
-            } returns id
-            every {
-                this@mockk.editionId
-            } returns null
-        }
+        private fun stubUserBook(
+            id: Int = 1,
+            reads: List<UserBookRead> = emptyList(),
+        ): UserBook = UserBook(
+            id = id,
+            status = BookStatus.Reading,
+            dateAdded = "2026-01-01",
+            createdAt = null,
+            privacySettingId = 1,
+            reviewHasSpoilers = false,
+            editionId = null,
+            lastReadDate = null,
+            rating = null,
+            referrerUserId = null,
+            reviewedAt = null,
+            updatedAt = null,
+            journals = emptyList(),
+            reads = reads,
+        )
 
         private fun stubUserBookRead(id: Int = 1): UserBookRead = UserBookRead(
             id = id,
@@ -4550,8 +5263,10 @@ class BooksRepositoryImplTest {
             bookSeries = null,
             positionsInSeries = emptyList(),
             isCompilation = false,
-            userBook = stubUserBook(id = userBookId),
-            userBookRead = stubUserBookRead(id = userBookReadId),
+            userBook = stubUserBook(
+                id = userBookId,
+                reads = listOf(stubUserBookRead(id = userBookReadId)),
+            ),
         )
 
         @Test
@@ -4911,6 +5626,164 @@ class BooksRepositoryImplTest {
                     fetchedAt = any(),
                 )
             }
+        }
+    }
+
+    @Nested
+    inner class JournalTimestamps {
+        private lateinit var originalZone: JavaTimeZone
+
+        @BeforeEach
+        fun pinZone() {
+            originalZone = JavaTimeZone.getDefault()
+        }
+
+        @AfterEach
+        fun restoreZone() {
+            JavaTimeZone.setDefault(originalZone)
+        }
+
+        private fun readingBook(journals: List<ReadingJournal> = emptyList()): Book = Book(
+            id = 42,
+            title = "Test Book",
+            editions = emptyList(),
+            defaultEdition = null,
+            rating = 0.0,
+            description = "",
+            releaseYear = 2020,
+            coverUrl = "",
+            authors = emptyList(),
+            usersCount = 0,
+            ratingsCount = 0,
+            bookSeries = null,
+            positionsInSeries = emptyList(),
+            isCompilation = false,
+            userBook = UserBook(
+                id = 1,
+                status = BookStatus.Reading,
+                dateAdded = "2026-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = null,
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = journals,
+                reads = listOf(
+                    UserBookRead(
+                        id = 1,
+                        currentPage = 50,
+                        currentSeconds = null,
+                        progress = 0.5f,
+                        startedAt = null,
+                        finishedAt = null,
+                    ),
+                ),
+            ),
+        )
+
+        private suspend fun markReadAndCaptureJournals(
+            book: Book,
+            actionAt: String?,
+        ): List<ReadingJournal> {
+            val slot = slot<Book>()
+
+            coEvery {
+                booksRemoteDataSource.markBookAsRead(
+                    book = any(),
+                    editionId = any(),
+                    actionAt = any(),
+                )
+            } returns stubBook(userBookId = 1)
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = capture(slot))
+            } returns Unit
+
+            repository.markBookAsRead(
+                book = book,
+                actionAt = actionAt,
+            )
+
+            return slot.captured.userBook.shouldNotBeNull().journals
+        }
+
+        @Test
+        fun `an optimistic journal entry is stamped in naive UTC with microsecond precision`() = runTest {
+            // ----- Arrange -----
+            JavaTimeZone.setDefault(JavaTimeZone.getTimeZone("Pacific/Kiritimati"))
+            val before = Clock.System.now()
+
+            // ----- Act -----
+            val journals = markReadAndCaptureJournals(
+                book = readingBook(),
+                actionAt = null,
+            )
+
+            // ----- Assert -----
+            val after = Clock.System.now()
+            val stamped = journals.single().updatedAt
+            stamped.matches(Regex("""\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}""")) shouldBe true
+            val stampedInstant = Instant.parse("${stamped}Z")
+            (stampedInstant >= before - 1.seconds) shouldBe true
+            (stampedInstant <= after + 1.seconds) shouldBe true
+        }
+
+        @Test
+        fun `a backdated actionAt is converted to UTC whatever the device zone`() = runTest {
+            // ----- Arrange -----
+            JavaTimeZone.setDefault(JavaTimeZone.getTimeZone("Pacific/Pago_Pago"))
+
+            // ----- Act -----
+            val journals = markReadAndCaptureJournals(
+                book = readingBook(),
+                actionAt = "2026-07-21T21:00:00+02:00",
+            )
+
+            // ----- Assert -----
+            journals.single().updatedAt shouldBe "2026-07-21T19:00:00.000000"
+        }
+
+        @Test
+        fun `a locally stamped entry sorts after a server entry from earlier the same UTC evening`() = runTest {
+            // ----- Arrange -----
+            JavaTimeZone.setDefault(JavaTimeZone.getTimeZone("Pacific/Pago_Pago"))
+            val serverEntry = ReadingJournal(
+                updatedAt = "2026-07-21T20:59:59.999999",
+                event = JournalEventType.StatusFinished.eventName,
+            )
+
+            // ----- Act -----
+            val journals = markReadAndCaptureJournals(
+                book = readingBook(journals = listOf(serverEntry)),
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Assert -----
+            journals.sortedByDescending { it.updatedAt }.first() shouldBe journals.last()
+            journals.last().updatedAt shouldBe "2026-07-21T21:00:00.000000"
+        }
+
+        @Test
+        fun `a locally stamped entry sorts before a server entry from later the same UTC evening`() = runTest {
+            // ----- Arrange -----
+            JavaTimeZone.setDefault(JavaTimeZone.getTimeZone("Pacific/Kiritimati"))
+            val serverEntry = ReadingJournal(
+                updatedAt = "2026-07-21T21:00:00.500000",
+                event = JournalEventType.StatusFinished.eventName,
+            )
+
+            // ----- Act -----
+            val journals = markReadAndCaptureJournals(
+                book = readingBook(journals = listOf(serverEntry)),
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Assert -----
+            journals.sortedByDescending { it.updatedAt }.first() shouldBe serverEntry
         }
     }
 }

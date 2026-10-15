@@ -8,15 +8,20 @@ import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.network.di.httpModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
-import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapBundledDataSource
-import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapBundledDataSourceImpl
-import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapLocalDataSource
-import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapLocalDataSourceImpl
-import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapRemoteDataSource
-import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapRemoteDataSourceImpl
+import nl.rhaydus.softcover.feature.settings.data.datasource.PublishedDocumentBundledDataSource
+import nl.rhaydus.softcover.feature.settings.data.datasource.PublishedDocumentBundledDataSourceImpl
+import nl.rhaydus.softcover.feature.settings.data.datasource.PublishedDocumentLocalDataSource
+import nl.rhaydus.softcover.feature.settings.data.datasource.PublishedDocumentLocalDataSourceImpl
+import nl.rhaydus.softcover.feature.settings.data.datasource.PublishedDocumentRemoteDataSource
+import nl.rhaydus.softcover.feature.settings.data.datasource.PublishedDocumentRemoteDataSourceImpl
+import nl.rhaydus.softcover.feature.settings.data.repository.ChangelogRepositoryImpl
+import nl.rhaydus.softcover.feature.settings.data.repository.PublishedDocumentCache
 import nl.rhaydus.softcover.feature.settings.data.repository.RoadmapRepositoryImpl
+import nl.rhaydus.softcover.feature.settings.domain.repository.ChangelogRepository
 import nl.rhaydus.softcover.feature.settings.domain.repository.RoadmapRepository
+import nl.rhaydus.softcover.feature.settings.domain.usecase.ObserveChangelogUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ObserveRoadmapUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.RefreshChangelogUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.RefreshRoadmapUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetColorPaletteUseCase
@@ -30,21 +35,26 @@ import nl.rhaydus.softcover.feature.settings.presentation.collector.AppUpdateCol
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ComponentGalleryCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DisplayToggleRowsCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.DocumentPageCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.DocumentPageContentCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.DocumentPageRefreshCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.GalleryThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryTabCountsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.PersistedLibraryVisibilityCollector
-import nl.rhaydus.softcover.feature.settings.presentation.collector.RoadmapCollector
-import nl.rhaydus.softcover.feature.settings.presentation.collector.RoadmapDocumentCollector
-import nl.rhaydus.softcover.feature.settings.presentation.collector.RoadmapRefreshCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UiScaleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UserListsCollector
+import nl.rhaydus.softcover.feature.settings.presentation.model.DocumentPage
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.ComponentGalleryScreenModel
+import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.DocumentPageScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
-import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
+import nl.rhaydus.softcover.feature.settings.presentation.source.ChangelogPageSource
+import nl.rhaydus.softcover.feature.settings.presentation.source.DocumentPageSource
+import nl.rhaydus.softcover.feature.settings.presentation.source.RoadmapPageSource
+import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -123,54 +133,82 @@ val settingsModule = module {
             setLibraryTabOrderUseCase = get(),
             getAllUserListsUseCase = get(),
             getAllUserBooksUseCase = get(),
-            getCurrentlyReadingUserBooksUseCase = get(),
-            getWantToReadUserBooksUseCase = get(),
-            getReadUserBooksUseCase = get(),
-            getDidNotFinishUserBooksUseCase = get(),
             refreshLibraryUseCase = get(),
             applicationScope = get(),
             appDispatchers = get(),
             flows = getAll(),
         )
     }
-    // region Roadmap
-    // The Roadmap screen reads the repo's published ROADMAP.md: fetched live so a milestone edit
-    // reaches readers with no app release, cached as raw markdown, and backed by the build-time
-    // bundled copy until the first fetch lands. The DAO is bound here rather than in `databaseModule`
+    // region Published documents
+    // Documents published from the repo (the roadmap) are fetched live so an edit reaches readers with
+    // no app release, cached as raw markdown keyed by document, and backed by the build-time bundled
+    // copy until the first fetch lands. The DAO is bound here rather than in `databaseModule`
     // — the local convention is that the consumer of a DAO owns its binding.
-    single { get<SoftcoverDatabase>().roadmapDocumentDao() }
+    single { get<SoftcoverDatabase>().publishedDocumentDao() }
 
-    single<RoadmapRemoteDataSource> {
-        RoadmapRemoteDataSourceImpl(
+    single<PublishedDocumentRemoteDataSource> {
+        PublishedDocumentRemoteDataSourceImpl(
             httpEngine = get(),
             appDispatchers = get(),
         )
     }
 
-    single<RoadmapLocalDataSource> { RoadmapLocalDataSourceImpl(dao = get()) }
+    single<PublishedDocumentLocalDataSource> { PublishedDocumentLocalDataSourceImpl(dao = get()) }
 
-    single<RoadmapBundledDataSource> { RoadmapBundledDataSourceImpl(appDispatchers = get()) }
+    single<PublishedDocumentBundledDataSource> { PublishedDocumentBundledDataSourceImpl(appDispatchers = get()) }
 
-    single<RoadmapRepository> {
-        RoadmapRepositoryImpl(
+    single {
+        PublishedDocumentCache(
             remoteDataSource = get(),
             localDataSource = get(),
             bundledDataSource = get(),
         )
     }
 
+    single<RoadmapRepository> { RoadmapRepositoryImpl(documentCache = get()) }
+
     factory { ObserveRoadmapUseCase(roadmapRepository = get()) }
 
     factory { RefreshRoadmapUseCase(roadmapRepository = get()) }
-
-    factory { RoadmapDocumentCollector() } bind RoadmapCollector::class
-
-    factory { RoadmapRefreshCollector() } bind RoadmapCollector::class
+    // endregion
+    // region Changelog
+    single<ChangelogRepository> { ChangelogRepositoryImpl(documentCache = get()) }
 
     factory {
-        RoadmapScreenModel(
+        ObserveChangelogUseCase(
+            changelogRepository = get(),
+            appVersionProvider = get(),
+        )
+    }
+
+    factory { RefreshChangelogUseCase(changelogRepository = get()) }
+    // endregion
+    // region Document pages
+    // One stack renders both the Roadmap and What's new pages; the page arrives as a Koin parameter and
+    // selects its source.
+    factory { DocumentPageContentCollector() } bind DocumentPageCollector::class
+
+    factory { DocumentPageRefreshCollector() } bind DocumentPageCollector::class
+
+    factory<DocumentPageSource>(named(DocumentPage.ROADMAP.name)) {
+        RoadmapPageSource(
             observeRoadmapUseCase = get(),
             refreshRoadmapUseCase = get(),
+        )
+    }
+
+    factory<DocumentPageSource>(named(DocumentPage.WHATS_NEW.name)) {
+        ChangelogPageSource(
+            observeChangelogUseCase = get(),
+            refreshChangelogUseCase = get(),
+            appVersionProvider = get(),
+        )
+    }
+
+    factory { (page: DocumentPage) ->
+        DocumentPageScreenModel(
+            page = page,
+            source = get(named(page.name)),
             appDispatchers = get(),
             flows = getAll(),
         )

@@ -70,6 +70,8 @@ private fun subtitleFor(
                     "Nothing lined up yet"
                 tab is LibraryTab.Status && tab.status == UserBookStatus.CURRENTLY_READING ->
                     "Nothing on the go right now"
+                tab is LibraryTab.Status && tab.status == UserBookStatus.PAUSED ->
+                    "Nothing on hold"
                 else -> "No books here yet"
             },
         )

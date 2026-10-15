@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
@@ -17,6 +18,7 @@ internal data class ProfileDependencies(
     val resetUserDataUseCase: ResetUserDataUseCase,
     val getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
     val setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
+    val observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

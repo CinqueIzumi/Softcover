@@ -19,3 +19,4 @@
 - [Change-detector prune judgment](feedback_change_detector_prune_judgment.md) — filename patterns are examples not literal matches; judge each @Nested block by the rule, not the file name
 - [Room @Upsert conflict on host](feedback_room_upsert_conflict_host.md) — second upsert on same key throws SQLException in host tests; seed via other methods
 - [Hoist mockkStatic/mockkObject](feedback_mockk_static_hoisting.md) — @BeforeAll + clearAllMocks per test cut a datasource class 2.4s to 0.7s
+- [Room upsert conflict untestable on host](feedback_room_upsert_conflict_untestable.md) — second @Upsert of an existing row throws bare SQLException; test delete+insert steps directly

@@ -129,10 +129,14 @@ private fun BookDetailScreenReadingPreview() {
             modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
         ) {
             val book = PreviewData.baseBook.copy(
-                userBook = PreviewData.baseBook.userBook?.copy(status = BookStatus.Reading),
-                userBookRead = PreviewData.baseBook.userBookRead?.copy(
-                    currentPage = 20,
-                    progress = 0.8f,
+                userBook = PreviewData.baseBook.userBook?.copy(
+                    status = BookStatus.Reading,
+                    reads = PreviewData.baseBook.userBook?.reads.orEmpty().map { read ->
+                        read.copy(
+                            currentPage = 20,
+                            progress = 0.8f,
+                        )
+                    },
                 ),
                 bookSeries = BookSeries(
                     id = 1,

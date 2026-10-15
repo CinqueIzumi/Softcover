@@ -1,0 +1,98 @@
+name: CI (full gate)
+
+# Branch rulesets require these job names (and ci-fast.yml's) by name. A job skipped by `if:` counts
+# as a passing required check, so the PR tier and the full tier are split by trigger into two
+# workflows instead.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, 'release/**']
+    # ROADMAP.md is regenerated and committed to main by the Roadmap workflow whenever a
+    # milestone description changes. Running the full build for a markdown commit buys nothing.
+    # Left off `pull_request` on purpose: a path-filtered run leaves its required checks pending,
+    # which blocks the PR.
+    paths-ignore:
+      - "ROADMAP.md"
+      - "docs/**"
+      - "**/*.md"
+
+# PR runs cancel when superseded; push runs are keyed by commit so a merge is never cancelled.
+concurrency:
+  group: ci-full-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  full-gate:
+    name: Full gate
+    runs-on: ubuntu-latest
+    env:
+      # Must match ci-fast.yml's key.
+      GRADLE_BUILD_ACTION_CACHE_KEY_JOB: jvm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+
+      - name: Check
+        run: ./gradlew check buildHealth koverXmlReport :build-logic:test --continue --stacktrace
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: build/reports/kover/report.xml
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  ios-compile:
+    name: iOS compile
+    # The iOS compile gates in the root build are guarded to macOS hosts, so only this job runs them.
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+
+      # Kotlin version: keep in sync with `kotlin` in gradle/libs.versions.toml.
+      - name: Restore Kotlin/Native cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-2.3.21
+
+      - name: Compile iOS
+        # The 6g/12g heap ceilings in gradle.properties exceed the runner's 7 GB RAM; klib
+        # compilation needs no LTO heap.
+        run: >-
+          ./gradlew compileKotlinIosArm64 compileKotlinIosSimulatorArm64 --continue --stacktrace
+          -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.native.jvmArgs=-Xmx3g
+
+      - name: Save Kotlin/Native cache
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-2.3.21

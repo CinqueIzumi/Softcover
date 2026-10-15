@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagsLoad
 import nl.rhaydus.toad.ActionScope
 
 private typealias TagScope = ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -15,8 +16,8 @@ private typealias TagScope = ActionScope<BookDetailUiState, BookDetailEvent, Boo
 /**
  * Persists the user's complete tag set optimistically. The new set lands in state immediately so the
  * chips react at once; the save then re-sends the whole list (the upsert contract) and overwrites the
- * set with the server's canonical response on success, or rolls back to [BookDetailUiState.userTags]'s
- * prior value on failure (where `safeMutation` has already surfaced the global error).
+ * set with the server's canonical response on success, or rolls back to the prior set on failure
+ * (where `safeMutation` has already surfaced the global error). A no-op unless the tags have loaded.
  */
 internal suspend fun TagScope.commitUserTags(
     newSet: List<UserTag>,
@@ -24,9 +25,9 @@ internal suspend fun TagScope.commitUserTags(
 ) {
     val bookId = currentState.book?.id ?: return
 
-    val previous = currentState.userTags
+    val previous = currentState.userTags as? UserTagsLoad.Loaded ?: return
 
-    setState { it.copy(userTags = newSet.toImmutableList()) }
+    setState { it.copy(userTags = UserTagsLoad.Loaded(newSet.toImmutableList())) }
 
     currentLocalVariables.tagSaveJob?.cancelAndJoin()
 
@@ -36,7 +37,7 @@ internal suspend fun TagScope.commitUserTags(
             tags = newSet,
         )
             .onSuccess { saved ->
-                setState { it.copy(userTags = saved.toImmutableList()) }
+                setState { it.copy(userTags = UserTagsLoad.Loaded(saved.toImmutableList())) }
 
                 dependencies.recordAppliedTagsUseCase(saved)
             }

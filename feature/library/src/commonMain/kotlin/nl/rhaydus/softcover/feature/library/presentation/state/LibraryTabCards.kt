@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 
@@ -17,4 +19,5 @@ import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 internal data class LibraryTabCards<out T : Any>(
     val layout: LibraryGridLayout,
     val set: BookCardSet<T>,
+    val menuByBookId: ImmutableMap<Int, LibraryBookMenuUiModel> = persistentMapOf(),
 )

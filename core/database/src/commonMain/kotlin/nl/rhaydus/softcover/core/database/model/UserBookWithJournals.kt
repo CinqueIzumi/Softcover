@@ -17,5 +17,5 @@ data class UserBookWithJournals(
         parentColumn = "id",
         entityColumn = "userBookId",
     )
-    val userBookRead: UserBookReadEntity?,
+    val userBookReads: List<UserBookReadEntity>,
 )

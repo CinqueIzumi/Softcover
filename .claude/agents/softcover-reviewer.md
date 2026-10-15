@@ -52,9 +52,17 @@ as given. If it is absent, run the single command in `## Verify`, or nothing.
    duplicates a fact already stated elsewhere, or puts content in the wrong file per the routing table is 🟡.
 6. **Comments and KDoc:** flag comments that restate the code and missing docs on non-obvious behaviour
    (the `document-code` standard).
-7. **Stability baselines:** a `<module>/stability/*.stability` hunk where a parameter loses `STABLE` or a
+7. **Tests:** test files in scope are reviewed like source, whether or not the brief mentions them. Each
+   test must pass the checks in `.claude/rules/tests.md`; one that fails "it would be missed", "behaviour,
+   not implementation" or the change-detector ban is 🟡 with a delete suggestion. Every `@Test` sits in a
+   `@Nested inner class` and carries all three AAA markers (`Act & Assert` only when the assertion is the
+   act) — no gate checks either, so grep for them.
+8. **Stability baselines:** a `<module>/stability/*.stability` hunk where a parameter loses `STABLE` or a
    composable goes from `skippable: true` to `false` is 🔴 unless the change justifies it. Re-dumping the
    baseline accepts whatever changed, so this diff is the only place a regression is caught.
+8. **Copy:** every added or changed user-facing string is checked against
+   `docs/reference/design-system/voice.md`. A tell from §8.2, a mechanics break from §8.3, or a gloss that
+   misdescribes the behaviour is 🟡; give the replacement line.
 
 Check your memory index for recurring traps in the area before you conclude.
 

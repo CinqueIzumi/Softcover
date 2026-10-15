@@ -171,16 +171,24 @@ jobs:
     needs: [android, desktop]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
           merge-multiple: true
 
+      # CHANGELOG.md is the single source of release notes; a tag without an entry fails here,
+      # before anything is published.
+      - name: Extract release notes
+        run: python3 scripts/changelog/extract_release_notes.py "$GITHUB_REF_NAME" --output "$RUNNER_TEMP/release-notes.md"
+
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
           files: artifacts/*
+          body_path: ${{ runner.temp }}/release-notes.md
           # Tags with a pre-release suffix (e.g. v2.4.0-rc1) are flagged as pre-releases.
           prerelease: ${{ contains(github.ref_name, '-') }}
           fail_on_unmatched_files: true

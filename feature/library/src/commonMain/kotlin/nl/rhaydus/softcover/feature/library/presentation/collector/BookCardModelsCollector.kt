@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -12,6 +14,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -19,6 +22,7 @@ import nl.rhaydus.softcover.feature.library.presentation.mapper.standInCards
 import nl.rhaydus.softcover.feature.library.presentation.mapper.toBookCard
 import nl.rhaydus.softcover.feature.library.presentation.mapper.toEditionCard
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryBookMenuUiModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryTabCards
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -99,6 +103,7 @@ private inline fun <I, T : Any> cachedTab(
     previous: CachedTab<I, T>?,
     inputs: I,
     layout: LibraryGridLayout,
+    menuByBookId: () -> ImmutableMap<Int, LibraryBookMenuUiModel> = { persistentMapOf() },
     build: () -> List<Pair<T, BookCardUiModel>>,
 ): CachedTab<I, T> = if (previous != null && previous.inputs == inputs) {
     previous
@@ -110,6 +115,7 @@ private inline fun <I, T : Any> cachedTab(
         cards = LibraryTabCards(
             layout = layout,
             set = built.map { (payload, card) -> card to payload }.toBookCardSet(),
+            menuByBookId = menuByBookId(),
         ),
     )
 }
@@ -159,6 +165,14 @@ private fun BookCardModelsSnapshot.toBookCards(
                 previous = previous[tab.id],
                 inputs = inputs,
                 layout = inputs.layout,
+                menuByBookId = {
+                    books.associate { book ->
+                        book.id to LibraryBookMenuUiModel(
+                            isRead = book.status == BookStatus.Read,
+                            isPaused = book.isPaused,
+                        )
+                    }.toImmutableMap()
+                },
             ) {
                 books.mapIndexed { index, book ->
                     book to book.toBookCard(

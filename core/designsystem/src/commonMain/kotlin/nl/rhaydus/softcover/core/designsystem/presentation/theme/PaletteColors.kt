@@ -7,7 +7,8 @@ package nl.rhaydus.softcover.core.designsystem.presentation.theme
  * accents rather than as one shared set of surface hexes.
  *
  * The only colours a palette does **not** own are the ones that must not move: the black scrim and
- * the fixed printed inks (`RatingGold`, the mood inks, `MonogramCoverInk`).
+ * the fixed printed inks (`RatingGold`, the mood inks, `MonogramCoverInk`, `OverMediaScrim` and
+ * `OverMediaInk`).
  */
 internal data class PaletteColors(
     val primary: AccentFamily,

@@ -57,6 +57,16 @@
   `NN%`, and a full-width `DeadlineSummaryLine` beneath when a deadline is tracked.
 - A trailing pencil chip (no chevron, `DesktopTooltip`) opens the Update progress sheet.
 
+### Reading on-hold row
+
+- The paused books sit under a `SectionHeader` ("On hold" eyebrow, "Set aside for now" headline), below the
+  "also reading" rows and above Pick up next. The section is absent when nothing is on hold.
+- Each row is identical to the secondary row (flat, top hairline, `titleMedium` title, progress with `NN%`),
+  with no deadline.
+- Trailing: only the pencil chip, which opens the Update progress sheet; logging progress there resumes the
+  book. There is no session chip; sessions start only from the featured card.
+- With nothing in Currently Reading, the "Between books" empty state still shows, with the section beneath it.
+
 ### Mark-as-read celebration
 
 - Only a transition to Read celebrates (book-detail Read row, Reading "Mark as Read", progress reaching

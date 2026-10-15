@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.book.domain.repository
 
 import kotlinx.coroutines.flow.Flow
-import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
+import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
@@ -20,6 +20,9 @@ interface BooksRepository {
 
     /** Emits the cached book with [id], or null while it is not cached. Re-emits only when that book changes. */
     fun observeUserBook(id: Int): Flow<Book?>
+
+    /** Emits the cached books among [ids], in no particular order; uncached ids are absent. */
+    fun observeBooksByIds(ids: List<Int>): Flow<List<Book>>
 
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
 
@@ -49,12 +52,13 @@ interface BooksRepository {
 
     /**
      * Re-fetches the user's books from the remote and reconciles them with the local cache.
-     * When [statusFilter] is null, refreshes every status; otherwise refreshes only that status's
-     * books. This is a books-only operation — list refresh is owned by [nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository].
+     * When [statusFilter] is null, refreshes every status; otherwise refreshes only the books under
+     * those statuses. This is a books-only operation — list refresh is owned by
+     * [nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository].
      */
     suspend fun refreshUserBooks(
         userId: Int,
-        statusFilter: UserBookStatus? = null,
+        statusFilter: Set<UserBookStatus>? = null,
     )
 
     /**
@@ -89,7 +93,7 @@ interface BooksRepository {
      * [OfflineException] when offline, mirroring
      * [fetchEditionMatchesForIsbns].
      */
-    suspend fun addBookByIsbn(isbn: String): CreatedBook
+    suspend fun addBookByIsbn(isbn: String): BookImport
 
     suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
 
@@ -105,7 +109,14 @@ interface BooksRepository {
      */
     suspend fun refreshTrendingBooks(maxAge: Duration)
 
-    suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
+    /**
+     * [forceNetwork] bypasses the Apollo cache. Pass it only on explicit user action that can have just
+     * created an edition on Hardcover (the ISBN lookup returning), never on a screen mount.
+     */
+    suspend fun getEditionsByBookId(
+        bookId: Int,
+        forceNetwork: Boolean = false,
+    ): List<BookEdition>
 
     suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition>
 
@@ -129,6 +140,11 @@ interface BooksRepository {
     ): Book
 
     suspend fun markBookAsReading(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
+
+    suspend fun markBookAsPaused(
         book: Book,
         editionId: Int? = null,
     ): Book

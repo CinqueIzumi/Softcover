@@ -6,8 +6,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
  * Advances a book's reading progress, auto-completing it when the new position reaches the end of
  * the current edition. Wraps [UpdateBookProgressUseCase] and [MarkBookAsReadUseCase] so every
  * "where am I now" entry point — the reading screen, Focus Mode, and the lock-screen quick update —
- * shares one canonical finished-vs-progress decision. Each of those wrapped use cases marks today's
- * reading activity on success, so the streak strip updates whichever branch runs.
+ * shares one canonical finished-vs-progress decision.
  *
  * The success value reports which branch ran: the [ShelfMutationOutcome] from the finish when the
  * position reached the end (so a caller can fire finish effects — e.g. the verdict prompt — only on
@@ -15,6 +14,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
  */
 class RecordBookProgressUseCase(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
+    private val resumeIfPausedUseCase: ResumeIfPausedUseCase,
     private val updateBookProgressUseCase: UpdateBookProgressUseCase,
 ) {
     suspend operator fun invoke(
@@ -38,12 +38,17 @@ class RecordBookProgressUseCase(
                 actionAt = actionAt,
             )
         } else {
-            updateBookProgressUseCase(
-                book = book,
-                newPage = newPage,
-                newSeconds = newSeconds,
-                actionAt = actionAt,
-            ).map { null }
+            resumeIfPausedUseCase(book = book).fold(
+                onSuccess = { resumedBook ->
+                    updateBookProgressUseCase(
+                        book = resumedBook,
+                        newPage = newPage,
+                        newSeconds = newSeconds,
+                        actionAt = actionAt,
+                    ).map { null }
+                },
+                onFailure = { error -> Result.failure(error) },
+            )
         }
     }
 }

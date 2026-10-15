@@ -8,8 +8,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
+import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -17,19 +18,19 @@ import org.junit.jupiter.api.Test
 
 class MarkBookAsReadUseCaseTest {
     private lateinit var repository: BooksRepository
-    private lateinit var markReadingActivityTodayUseCase: MarkReadingActivityTodayUseCase
+    private lateinit var markReadingActivityUseCase: MarkReadingActivityUseCase
     private lateinit var useCase: MarkBookAsReadUseCase
 
     @BeforeEach
     fun setUp() {
         repository = mockk()
-        markReadingActivityTodayUseCase = mockk()
+        markReadingActivityUseCase = mockk()
         coEvery {
-            markReadingActivityTodayUseCase()
+            markReadingActivityUseCase(any())
         } returns Unit
         useCase = MarkBookAsReadUseCase(
             repository = repository,
-            markReadingActivityTodayUseCase = markReadingActivityTodayUseCase,
+            markReadingActivityUseCase = markReadingActivityUseCase,
         )
     }
 
@@ -44,6 +45,14 @@ class MarkBookAsReadUseCaseTest {
             every {
                 inputBook.status
             } returns BookStatus.Reading
+
+            every {
+                inputBook.userBook
+            } returns null
+
+            every {
+                inputBook.currentEdition
+            } returns null
 
             coEvery {
                 repository.markBookAsRead(
@@ -69,7 +78,7 @@ class MarkBookAsReadUseCaseTest {
                 )
             }
             coVerify(exactly = 1) { repository.cacheBook(book = updatedBook) }
-            coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
+            coVerify(exactly = 1) { markReadingActivityUseCase(any()) }
         }
 
         @Test
@@ -82,6 +91,10 @@ class MarkBookAsReadUseCaseTest {
             every {
                 inputBook.status
             } returns BookStatus.Reading
+
+            every {
+                inputBook.userBook
+            } returns null
 
             coEvery {
                 repository.markBookAsRead(
@@ -107,7 +120,7 @@ class MarkBookAsReadUseCaseTest {
                     editionId = editionId,
                 )
             }
-            coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
+            coVerify(exactly = 1) { markReadingActivityUseCase(any()) }
         }
 
         @Test
@@ -120,6 +133,14 @@ class MarkBookAsReadUseCaseTest {
             every {
                 inputBook.status
             } returns BookStatus.Reading
+
+            every {
+                inputBook.userBook
+            } returns null
+
+            every {
+                inputBook.currentEdition
+            } returns null
 
             coEvery {
                 repository.markBookAsRead(
@@ -147,7 +168,47 @@ class MarkBookAsReadUseCaseTest {
                     actionAt = actionAt,
                 )
             }
-            coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
+            coVerify(exactly = 1) { markReadingActivityUseCase(actionAt) }
+        }
+
+        @Test
+        fun `forwards a null actionAt to the reading activity mark`() = runTest {
+            // ----- Arrange -----
+            val inputBook = mockk<Book>()
+            val updatedBook = mockk<Book>()
+
+            every {
+                inputBook.status
+            } returns BookStatus.Reading
+
+            every {
+                inputBook.userBook
+            } returns null
+
+            every {
+                inputBook.currentEdition
+            } returns null
+
+            coEvery {
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = null,
+                    actionAt = null,
+                )
+            } returns updatedBook
+
+            coJustRun {
+                repository.cacheBook(book = updatedBook)
+            }
+
+            // ----- Act -----
+            useCase(
+                book = inputBook,
+                actionAt = null,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { markReadingActivityUseCase(null) }
         }
 
         @Test
@@ -159,6 +220,14 @@ class MarkBookAsReadUseCaseTest {
             every {
                 inputBook.status
             } returns BookStatus.Reading
+
+            every {
+                inputBook.userBook
+            } returns null
+
+            every {
+                inputBook.currentEdition
+            } returns null
 
             coEvery {
                 repository.markBookAsRead(
@@ -174,7 +243,7 @@ class MarkBookAsReadUseCaseTest {
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
             coVerify(exactly = 0) { repository.cacheBook(book = any()) }
-            coVerify(exactly = 0) { markReadingActivityTodayUseCase() }
+            coVerify(exactly = 0) { markReadingActivityUseCase(any()) }
         }
 
         @Test
@@ -187,6 +256,14 @@ class MarkBookAsReadUseCaseTest {
             every {
                 inputBook.status
             } returns BookStatus.Reading
+
+            every {
+                inputBook.userBook
+            } returns null
+
+            every {
+                inputBook.currentEdition
+            } returns null
 
             coEvery {
                 repository.markBookAsRead(
@@ -205,7 +282,53 @@ class MarkBookAsReadUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
-            coVerify(exactly = 0) { markReadingActivityTodayUseCase() }
+            coVerify(exactly = 0) { markReadingActivityUseCase(any()) }
+        }
+
+        @Test
+        fun `forwards the current edition when none is requested and the book is off the shelf`() = runTest {
+            // ----- Arrange -----
+            val inputBook = mockk<Book>()
+            val currentEdition = mockk<BookEdition>()
+            val updatedBook = mockk<Book>()
+
+            every {
+                inputBook.status
+            } returns BookStatus.Reading
+
+            every {
+                inputBook.userBook
+            } returns null
+
+            every {
+                inputBook.currentEdition
+            } returns currentEdition
+
+            every {
+                currentEdition.id
+            } returns 7
+
+            coEvery {
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = 7,
+                )
+            } returns updatedBook
+
+            coJustRun {
+                repository.cacheBook(book = updatedBook)
+            }
+
+            // ----- Act -----
+            useCase(inputBook)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = 7,
+                )
+            }
         }
 
         @Test
@@ -229,7 +352,7 @@ class MarkBookAsReadUseCaseTest {
                 )
             }
             coVerify(exactly = 0) { repository.cacheBook(any()) }
-            coVerify(exactly = 0) { markReadingActivityTodayUseCase() }
+            coVerify(exactly = 0) { markReadingActivityUseCase(any()) }
         }
     }
 }

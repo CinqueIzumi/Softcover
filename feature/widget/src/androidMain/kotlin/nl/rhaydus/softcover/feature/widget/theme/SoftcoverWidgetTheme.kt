@@ -13,6 +13,7 @@ import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.color.ColorProvider
 import androidx.glance.material3.ColorProviders
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SchemeBrightness
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverColorScheme
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
@@ -30,13 +31,13 @@ internal fun SoftcoverWidgetTheme(
         val light = widgetColorScheme(
             context = context,
             themeConfiguration = themeConfiguration,
-            darkTheme = selection.dayIsDark,
+            brightness = selection.day,
         )
 
         val dark = widgetColorScheme(
             context = context,
             themeConfiguration = themeConfiguration,
-            darkTheme = selection.nightIsDark,
+            brightness = selection.night,
         )
 
         ColorProviders(
@@ -65,15 +66,17 @@ internal fun SoftcoverWidgetTheme(
 private fun widgetColorScheme(
     context: Context,
     themeConfiguration: ThemeConfiguration,
-    darkTheme: Boolean,
+    brightness: SchemeBrightness,
 ): ColorScheme {
-    val dynamic = themeConfiguration.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val dynamic = themeConfiguration.useDynamicColor &&
+        brightness != SchemeBrightness.DIM &&
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
     return when {
-        dynamic && darkTheme -> dynamicDarkColorScheme(context)
+        dynamic && brightness.isDark -> dynamicDarkColorScheme(context)
         dynamic -> dynamicLightColorScheme(context)
         else -> softcoverColorScheme(
-            darkTheme = darkTheme,
+            brightness = brightness,
             palette = themeConfiguration.colorPalette.toSpinePalette(),
         )
     }

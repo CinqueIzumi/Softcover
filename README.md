@@ -4,7 +4,9 @@ A [Hardcover.app](https://hardcover.app/) client for **Android, iOS, and desktop
 
 A Kotlin Multiplatform app: domain, data, and UI are shared across all three platforms via Compose Multiplatform. Android targets 8.0+.
 
-[![CI](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci.yml/badge.svg)](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci.yml)
+<a href="https://play.google.com/store/apps/details?id=nl.rhaydus.softcover"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="80"></a>
+
+[![CI](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci-full.yml/badge.svg)](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci-full.yml)
 [![codecov](https://codecov.io/gh/CinqueIzumi/Softcover/branch/main/graph/badge.svg)](https://codecov.io/gh/CinqueIzumi/Softcover)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.11.0-4285F4?logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/compose-multiplatform/)
@@ -212,7 +214,7 @@ flowchart LR
 
 ### Prerequisites
 - Android Studio (latest stable) — for Android
-- JDK 17 — for the desktop target and the build toolchain
+- Any JDK can launch Gradle; the Gradle daemon is pinned to JDK 17 (`gradle/gradle-daemon-jvm.properties`) and auto-provisioned
 - Xcode (latest stable) — for iOS (macOS only)
 - A Hardcover.app account and API token
 
@@ -220,7 +222,8 @@ flowchart LR
 ```bash
 ./gradlew assembleDebug          # Build a debug APK
 ./gradlew assembleRelease        # Build a release APK
-./gradlew test                   # Run unit tests
+./gradlew test                   # Run :app / :desktopApp / :detekt-rules unit tests only
+./gradlew testAndroidHostTest --continue   # Run the KMP module unit tests
 ./gradlew :app:test              # Run unit tests for the app module
 ./gradlew connectedAndroidTest   # Run instrumented tests (device/emulator required)
 ./gradlew lint                   # Run Android Lint
@@ -278,6 +281,7 @@ Softcover is being actively redesigned. **What's coming, by version, lives in [R
 | [docs/reference/design-system.md](docs/reference/design-system.md) | Color roles, editorial typography, layout primitives, components, and patterns |
 | [docs/reference/code-style.md](docs/reference/code-style.md) | Naming, layout, and whitespace conventions |
 | [docs/rhaydus/0.3.1/](docs/rhaydus/0.3.1/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
+| [CHANGELOG.md](CHANGELOG.md) | Per-version release notes — the source for the in-app What's new page and each GitHub Release |
 | [ROADMAP.md](ROADMAP.md) | Public, user-facing roadmap — generated from the open GitHub milestones; never hand-edited |
 | [docs/working/](docs/working/) | Working notes — audits and reviews kept alongside the code (planned work lives in GitHub Issues) |
 | [CLAUDE.md](CLAUDE.md) | Guidance for Claude Code when working in this repo |
@@ -299,3 +303,5 @@ Softcover is being actively redesigned. **What's coming, by version, lives in [R
 ## Disclaimer
 
 This project is an independent, open-source application and is **not affiliated with, endorsed by, or sponsored by** [Hardcover.app](https://hardcover.app/).
+
+Google Play and the Google Play logo are trademarks of Google LLC.

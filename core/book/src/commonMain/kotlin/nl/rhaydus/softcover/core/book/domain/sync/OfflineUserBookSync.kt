@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.book.domain.sync
 
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 
 /**
  * Owns the offline-first user-book write path: queuing optimistic mutations that could not reach the
@@ -20,6 +21,11 @@ interface OfflineUserBookSync {
     suspend fun enqueueMarkAsRead(
         book: Book,
         actionAt: String? = null,
+    )
+
+    suspend fun enqueueStatusUpdate(
+        book: Book,
+        status: UserBookStatus,
     )
 
     suspend fun enqueueRatingUpdate(

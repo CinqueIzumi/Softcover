@@ -63,7 +63,7 @@ class FocusPageEditorCollectorTest {
                 } returns totalPages
             }
             every {
-                userBookRead
+                currentRead
             } returns mockk(relaxed = true) {
                 every {
                     this@mockk.currentPage

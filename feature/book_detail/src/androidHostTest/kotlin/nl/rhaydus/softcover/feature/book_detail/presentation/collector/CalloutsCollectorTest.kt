@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
@@ -43,6 +44,7 @@ class CalloutsCollectorTest {
     private fun stubBook(
         status: BookStatus,
         shelvedEditionId: Int?,
+        readDate: String? = null,
     ): Book {
         val userBook = mockk<UserBook> {
             every {
@@ -52,6 +54,10 @@ class CalloutsCollectorTest {
             every {
                 getFallbackDateString(style = any())
             } returns "FALLBACK"
+
+            every {
+                getReadDateString(style = any())
+            } returns readDate
         }
 
         return mockk<Book> {
@@ -170,5 +176,55 @@ class CalloutsCollectorTest {
                     .shouldBeInstanceOf<CalloutActionUiModel.Busy>()
                 job.cancel()
             }
+
+        @Test
+        fun `sets shelveReadDate to the formatted read date of the user book`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stubBook(
+                    status = BookStatus.Read,
+                    shelvedEditionId = 10,
+                    readDate = "12/03/2026",
+                ),
+            )
+            val collector = CalloutsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.shelveReadDate shouldBe "12/03/2026"
+            job.cancel()
+        }
+
+        @Test
+        fun `shelveReadDate is null when the user book has no read date`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stubBook(
+                    status = BookStatus.Reading,
+                    shelvedEditionId = 10,
+                    readDate = null,
+                ),
+            )
+            val collector = CalloutsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.shelveReadDate.shouldBeNull()
+            job.cancel()
+        }
     }
 }

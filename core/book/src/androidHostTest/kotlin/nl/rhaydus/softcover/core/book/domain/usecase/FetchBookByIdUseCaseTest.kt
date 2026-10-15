@@ -63,7 +63,6 @@ class FetchBookByIdUseCaseTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         userBook = null,
-        userBookRead = null,
     )
 
     @Nested

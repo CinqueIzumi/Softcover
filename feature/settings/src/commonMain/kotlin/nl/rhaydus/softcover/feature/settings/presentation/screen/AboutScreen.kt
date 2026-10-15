@@ -10,6 +10,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
+import nl.rhaydus.softcover.feature.settings.presentation.model.DocumentPage
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 
 class AboutScreen : Screen {
@@ -31,7 +32,8 @@ class AboutScreen : Screen {
             contactHeader = state.aboutContactHeader,
             openUrl = uriHandler::openUri,
             onNavigateBack = navigator::pop,
-            onRoadmapClick = { navigator.push(RoadmapScreen()) },
+            onWhatsNewClick = { navigator.push(DocumentPageScreen(DocumentPage.WHATS_NEW)) },
+            onRoadmapClick = { navigator.push(DocumentPageScreen(DocumentPage.ROADMAP)) },
             onComponentGalleryUnlocked = { navigator.push(ComponentGalleryScreen()) },
         )
     }
@@ -41,11 +43,10 @@ class AboutScreen : Screen {
  * The About screen body. Desktop (`jvmMain`) and mobile (`mobileMain`) each provide a bespoke `actual`
  * around the shared [AboutContent]; only the chrome (top bar vs static back bar) branches. On desktop
  * this standalone page is a fallback — the primary entry is the Settings master–detail pane's `About`
- * category. `expect` cannot carry default argument values, so every parameter is supplied explicitly at
- * the single call site above. [onRoadmapClick] pushes [RoadmapScreen] onto this screen's own navigator —
- * About always reaches Roadmap by pushing, even on desktop, since the master–detail pane's own `About`
- * category swaps to `Roadmap` through a separate, locally-wired callback instead (see
- * `SettingsScreenLayout`'s `AboutPane`). [onComponentGalleryUnlocked] fires from the version footer's
+ * category. [onWhatsNewClick] and [onRoadmapClick] push [DocumentPageScreen] onto this screen's own
+ * navigator, even on desktop, since the master–detail pane's own `About` category selects the `What's
+ * new` and `Roadmap` categories through its own callbacks instead (see `SettingsScreenLayout`).
+ * [onComponentGalleryUnlocked] fires from the version footer's
  * seven-tap easter egg (`component-contract.md` § 7.5) and, on this standalone page, pushes
  * [ComponentGalleryScreen] onto this screen's own navigator — the master–detail pane's `About`
  * category wires the same gesture to its own local navigator instead (see `section/AboutPane.kt`'s
@@ -60,6 +61,7 @@ internal expect fun AboutScreenLayout(
     contactHeader: SectionHeaderUiModel,
     openUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    onWhatsNewClick: () -> Unit,
     onRoadmapClick: () -> Unit,
     onComponentGalleryUnlocked: () -> Unit,
 )

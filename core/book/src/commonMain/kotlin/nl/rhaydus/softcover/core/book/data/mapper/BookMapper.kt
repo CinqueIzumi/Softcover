@@ -116,6 +116,7 @@ private fun UserBookFragment.toUserBook(): UserBook {
         updatedAt = updated_at,
         createdAt = created_at,
         journals = journals,
+        reads = user_book_reads.mapNotNull { it.userBookReadFragment()?.toUserBookRead() },
     )
 }
 
@@ -210,8 +211,6 @@ internal fun UserBookFragment.toBook(): Book? {
 
     val editions = listOfNotNull(selectedEdition)
 
-    val userBookReadFragment = user_book_reads.firstOrNull()?.userBookReadFragment()
-
     return Book(
         id = listFragment.id,
         canonicalId = listFragment.canonicalIdOrNull(),
@@ -232,7 +231,6 @@ internal fun UserBookFragment.toBook(): Book? {
         isCompilation = listFragment.compilation,
         tags = listFragment.tags(),
         userBook = toUserBook(),
-        userBookRead = userBookReadFragment?.toUserBookRead(),
     )
 }
 
@@ -264,7 +262,6 @@ fun BookDetailFragment.toBook(): Book? {
         isCompilation = listFragment.compilation,
         tags = listFragment.tags(),
         userBook = null,
-        userBookRead = null,
     )
 }
 

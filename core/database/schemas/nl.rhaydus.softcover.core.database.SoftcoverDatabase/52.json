@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 52,
-    "identityHash": "b91baf03c2fecf9cfabd054e73ff0771",
+    "identityHash": "69724dfb980cc25c9543638b9fa8b163",
     "entities": [
       {
         "tableName": "books",
@@ -718,7 +718,7 @@
       },
       {
         "tableName": "pending_user_book_writes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `kind` TEXT NOT NULL, `userBookId` INTEGER NOT NULL, `userBookReadId` INTEGER NOT NULL, `bookId` INTEGER NOT NULL, `editionId` INTEGER, `progressPages` INTEGER, `progressSeconds` INTEGER, `startedAt` TEXT, `finishedAt` TEXT, `rating` REAL, `reviewSlateJson` TEXT, `reviewHasSpoilers` INTEGER, `enqueuedAt` TEXT NOT NULL, `attempts` INTEGER NOT NULL, `actionAt` TEXT, `progressHistoryId` INTEGER)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `kind` TEXT NOT NULL, `userBookId` INTEGER NOT NULL, `userBookReadId` INTEGER NOT NULL, `bookId` INTEGER NOT NULL, `editionId` INTEGER, `progressPages` INTEGER, `progressSeconds` INTEGER, `startedAt` TEXT, `finishedAt` TEXT, `rating` REAL, `reviewSlateJson` TEXT, `reviewHasSpoilers` INTEGER, `enqueuedAt` TEXT NOT NULL, `attempts` INTEGER NOT NULL, `actionAt` TEXT, `progressHistoryId` INTEGER, `statusCode` INTEGER)",
         "fields": [
           {
             "fieldPath": "localId",
@@ -810,6 +810,11 @@
           {
             "fieldPath": "progressHistoryId",
             "columnName": "progressHistoryId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "statusCode",
+            "columnName": "statusCode",
             "affinity": "INTEGER"
           }
         ],
@@ -1436,67 +1441,6 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_progress_history_bookId` ON `${TABLE_NAME}` (`bookId`)"
           }
         ]
-      },
-      {
-        "tableName": "trending_books",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `rank` INTEGER NOT NULL, PRIMARY KEY(`bookId`), FOREIGN KEY(`bookId`) REFERENCES `books`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
-        "fields": [
-          {
-            "fieldPath": "bookId",
-            "columnName": "bookId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rank",
-            "columnName": "rank",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "bookId"
-          ]
-        },
-        "foreignKeys": [
-          {
-            "table": "books",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "bookId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
-        ]
-      },
-      {
-        "tableName": "trending_meta",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `fetchedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fetchedAtEpochMillis",
-            "columnName": "fetchedAtEpochMillis",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "id"
-          ]
-        }
       }
     ],
     "views": [
@@ -1507,7 +1451,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b91baf03c2fecf9cfabd054e73ff0771')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '69724dfb980cc25c9543638b9fa8b163')"
     ]
   }
 }

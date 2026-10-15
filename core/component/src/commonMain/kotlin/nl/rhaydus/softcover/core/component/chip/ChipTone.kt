@@ -9,4 +9,5 @@ enum class ChipTone {
     Outlined,
     Dashed,
     Spoiler,
+    OverMedia,
 }
