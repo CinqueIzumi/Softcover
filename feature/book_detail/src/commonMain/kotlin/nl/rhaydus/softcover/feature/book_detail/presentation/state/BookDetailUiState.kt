@@ -174,6 +174,12 @@ internal data class BookDetailUiState(
 
     val statusCallout: CalloutUiModel? = null,
 
+    /** The Yours lens "Your reads" section, mapped by `YourReadsCollector`; null while the book has no read. */
+    val yourReads: YourReadsUiModel? = null,
+
+    /** The Shelve card's Read-row date, mapped by `CalloutsCollector`; null while the book has no read date. */
+    val shelveReadDate: String? = null,
+
     val scanEditionCallout: CalloutUiModel? = null,
 
     /** Null while the edition is unknown. */
