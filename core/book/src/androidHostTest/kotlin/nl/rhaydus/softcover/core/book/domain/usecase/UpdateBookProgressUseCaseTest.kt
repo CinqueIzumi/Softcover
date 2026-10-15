@@ -7,7 +7,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
+import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -15,19 +15,19 @@ import org.junit.jupiter.api.Test
 
 class UpdateBookProgressUseCaseTest {
     private lateinit var repository: BooksRepository
-    private lateinit var markReadingActivityTodayUseCase: MarkReadingActivityTodayUseCase
+    private lateinit var markReadingActivityUseCase: MarkReadingActivityUseCase
     private lateinit var useCase: UpdateBookProgressUseCase
 
     @BeforeEach
     fun setUp() {
         repository = mockk()
-        markReadingActivityTodayUseCase = mockk()
+        markReadingActivityUseCase = mockk()
         coEvery {
-            markReadingActivityTodayUseCase()
+            markReadingActivityUseCase(any())
         } returns Unit
         useCase = UpdateBookProgressUseCase(
             repository = repository,
-            markReadingActivityTodayUseCase = markReadingActivityTodayUseCase,
+            markReadingActivityUseCase = markReadingActivityUseCase,
         )
     }
 
@@ -66,7 +66,7 @@ class UpdateBookProgressUseCaseTest {
                 )
             }
             coVerify(exactly = 1) { repository.cacheBook(book = updatedBook) }
-            coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
+            coVerify(exactly = 1) { markReadingActivityUseCase(any()) }
         }
 
         @Test
@@ -105,6 +105,36 @@ class UpdateBookProgressUseCaseTest {
                     actionAt = actionAt,
                 )
             }
+            coVerify(exactly = 1) { markReadingActivityUseCase(actionAt) }
+        }
+
+        @Test
+        fun `forwards a null actionAt to the reading activity mark`() = runTest {
+            // ----- Arrange -----
+            val inputBook = mockk<Book>()
+            val updatedBook = mockk<Book>()
+
+            coEvery {
+                repository.updateBookProgress(
+                    book = inputBook,
+                    newPage = 150,
+                    actionAt = null,
+                )
+            } returns updatedBook
+
+            coJustRun {
+                repository.cacheBook(book = updatedBook)
+            }
+
+            // ----- Act -----
+            useCase(
+                book = inputBook,
+                newPage = 150,
+                actionAt = null,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { markReadingActivityUseCase(null) }
         }
 
         @Test
@@ -131,7 +161,7 @@ class UpdateBookProgressUseCaseTest {
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
             coVerify(exactly = 0) { repository.cacheBook(book = any()) }
-            coVerify(exactly = 0) { markReadingActivityTodayUseCase() }
+            coVerify(exactly = 0) { markReadingActivityUseCase(any()) }
         }
 
         @Test
@@ -162,7 +192,7 @@ class UpdateBookProgressUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
-            coVerify(exactly = 0) { markReadingActivityTodayUseCase() }
+            coVerify(exactly = 0) { markReadingActivityUseCase(any()) }
         }
     }
 }
