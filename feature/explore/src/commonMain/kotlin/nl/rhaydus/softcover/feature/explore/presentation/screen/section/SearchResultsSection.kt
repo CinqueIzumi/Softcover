@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import nl.rhaydus.designsystem.component.InlineErrorState
+import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -60,7 +61,11 @@ internal fun ColumnScope.SearchResultsSection(
             onRetry = { runAction(OnRetrySearchAction) },
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = Spacing.gutter),
+                .padding(
+                    start = Spacing.gutter,
+                    end = Spacing.gutter,
+                    bottom = rememberBottomBarPadding(),
+                ),
             textStyle = MaterialTheme.editorialTypography.bodySmall,
         )
 
@@ -74,8 +79,10 @@ internal fun ColumnScope.SearchResultsSection(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    horizontal = Spacing.gutter,
-                    vertical = Spacing.xl,
+                    start = Spacing.gutter,
+                    end = Spacing.gutter,
+                    top = Spacing.xl,
+                    bottom = Spacing.xl + rememberBottomBarPadding(),
                 ),
         )
 

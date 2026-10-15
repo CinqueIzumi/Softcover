@@ -6,7 +6,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 
 <a href="https://play.google.com/store/apps/details?id=nl.rhaydus.softcover"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="80"></a>
 
-[![CI](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci.yml/badge.svg)](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci.yml)
+[![CI](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci-full.yml/badge.svg)](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci-full.yml)
 [![codecov](https://codecov.io/gh/CinqueIzumi/Softcover/branch/main/graph/badge.svg)](https://codecov.io/gh/CinqueIzumi/Softcover)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.11.0-4285F4?logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/compose-multiplatform/)
@@ -214,7 +214,7 @@ flowchart LR
 
 ### Prerequisites
 - Android Studio (latest stable) — for Android
-- JDK 17 — for the desktop target and the build toolchain
+- Any JDK can launch Gradle; the Gradle daemon is pinned to JDK 17 (`gradle/gradle-daemon-jvm.properties`) and auto-provisioned
 - Xcode (latest stable) — for iOS (macOS only)
 - A Hardcover.app account and API token
 
@@ -222,7 +222,8 @@ flowchart LR
 ```bash
 ./gradlew assembleDebug          # Build a debug APK
 ./gradlew assembleRelease        # Build a release APK
-./gradlew test                   # Run unit tests
+./gradlew test                   # Run :app / :desktopApp / :detekt-rules unit tests only
+./gradlew testAndroidHostTest --continue   # Run the KMP module unit tests
 ./gradlew :app:test              # Run unit tests for the app module
 ./gradlew connectedAndroidTest   # Run instrumented tests (device/emulator required)
 ./gradlew lint                   # Run Android Lint
