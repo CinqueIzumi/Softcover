@@ -8,6 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -18,9 +20,11 @@ import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
 import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.component.sheet.modelOrNull
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.presentation.navigation.TransientNavArg
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnConfirmedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnDismissedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnChangedAction
@@ -35,21 +39,33 @@ import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanScreenMode
 import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
 
-class BarcodeScannerScreen : Screen {
+class BarcodeScannerScreen(
+    private val startInManualEntry: Boolean = false,
+    private val prefilledIsbn: String? = null,
+    @TransientNavArg private val onResolved: ((Book, Int?) -> Unit)? = null,
+) : Screen {
+    override val key: ScreenKey = uniqueScreenKey
+
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
         val appNavigator = koinInject<AppNavigator>()
 
-        val screenModel = koinScreenModel<ScanScreenModel>()
+        val screenModel = koinScreenModel<ScanScreenModel> {
+            parametersOf(
+                prefilledIsbn,
+                startInManualEntry,
+            )
+        }
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
         val hasCamera = isCameraAvailable()
 
-        var manualMode by remember { mutableStateOf(hasCamera.not()) }
+        var manualMode by remember { mutableStateOf(startInManualEntry || hasCamera.not()) }
 
         val initialCameraGranted = isCameraPermissionGranted()
 
@@ -62,7 +78,7 @@ class BarcodeScannerScreen : Screen {
         }
 
         LaunchedEffect(Unit) {
-            if (hasCamera && cameraGranted.not()) permissionRequester.request()
+            if (startInManualEntry.not() && hasCamera && cameraGranted.not()) permissionRequester.request()
         }
 
         val haptics = LocalHaptics.current
@@ -72,23 +88,26 @@ class BarcodeScannerScreen : Screen {
 
             when (event) {
                 is ScanEvent.BookResolvedEvent -> {
-                    val scannedEdition = event.book.editions.firstOrNull { it.id == event.editionId }
-
                     navigator.pop()
 
-                    navigator.push(
-                        item = appNavigator.screen(
-                            ScreenDestination.BookDetail(
-                                id = event.book.id,
-                                initialCover = BookInitialCover
-                                    .fromBook(book = event.book)
-                                    .copy(
-                                        currentEdition = scannedEdition ?: event.book.currentEdition,
-                                        scannedEditionId = event.editionId,
+                    if (onResolved != null) {
+                        onResolved(
+                            event.book,
+                            event.editionId,
+                        )
+                    } else {
+                        navigator.push(
+                            item = appNavigator.screen(
+                                ScreenDestination.BookDetail(
+                                    id = event.book.id,
+                                    initialCover = BookInitialCover.forScannedEdition(
+                                        book = event.book,
+                                        editionId = event.editionId,
                                     ),
+                                ),
                             ),
-                        ),
-                    )
+                        )
+                    }
                 }
 
                 is ScanEvent.InvalidIsbnEvent -> {

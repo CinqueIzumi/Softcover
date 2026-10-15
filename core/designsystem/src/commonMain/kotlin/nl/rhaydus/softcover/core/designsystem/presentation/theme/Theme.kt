@@ -97,56 +97,105 @@ private fun darkSchemeFor(palette: PaletteColors) = darkColorScheme(
     surfaceContainerHighest = palette.neutral.tone22,
 )
 
-// Both halves of every palette are built once, at class-init, rather than per call: the schemes are
-// read during composition (by the theme itself and by all eight Appearance preview tiles), and a
-// freshly-built ColorScheme each time would hand the theme a new identity on every recomposition.
+// Every scheme is built once, at class-init, rather than per call: the schemes are read during
+// composition (by the theme itself and by the Appearance preview tiles), and a freshly-built
+// ColorScheme each time would hand the theme a new identity on every recomposition.
 private val lightSchemes: Map<SpinePalette, ColorScheme> = SpinePalette.entries
     .associateWith { lightSchemeFor(palette = it.colors) }
 
 private val darkSchemes: Map<SpinePalette, ColorScheme> = SpinePalette.entries
     .associateWith { darkSchemeFor(palette = it.colors) }
 
+private val dimScheme: ColorScheme = darkColorScheme(
+    primary = dimPrimary,
+    onPrimary = dimOnPrimary,
+    primaryContainer = dimPrimaryContainer,
+    onPrimaryContainer = dimOnPrimaryContainer,
+    secondary = dimSecondary,
+    onSecondary = dimOnSecondary,
+    secondaryContainer = dimSecondaryContainer,
+    onSecondaryContainer = dimOnSecondaryContainer,
+    tertiary = dimTertiary,
+    onTertiary = dimOnTertiary,
+    tertiaryContainer = dimTertiaryContainer,
+    onTertiaryContainer = dimOnTertiaryContainer,
+    inversePrimary = dimInversePrimary,
+    error = dimError,
+    onError = dimOnError,
+    errorContainer = dimErrorContainer,
+    onErrorContainer = dimOnErrorContainer,
+    background = dimBackground,
+    onBackground = dimOnBackground,
+    surface = dimSurface,
+    onSurface = dimOnSurface,
+    surfaceVariant = dimSurfaceVariant,
+    onSurfaceVariant = dimOnSurfaceVariant,
+    outline = dimOutline,
+    outlineVariant = dimOutlineVariant,
+    inverseSurface = dimInverseSurface,
+    inverseOnSurface = dimInverseOnSurface,
+    surfaceDim = dimSurfaceDim,
+    surfaceBright = dimSurfaceBright,
+    surfaceContainerLowest = dimSurfaceContainerLowest,
+    surfaceContainerLow = dimSurfaceContainerLow,
+    surfaceContainer = dimSurfaceContainer,
+    surfaceContainerHigh = dimSurfaceContainerHigh,
+    surfaceContainerHighest = dimSurfaceContainerHighest,
+    scrim = scrimDark,
+)
+
 /**
- * The brand color scheme for one side of the light/dark pair in one [palette], independent of what
- * the app is currently painting in. [SoftcoverTheme] resolves its own scheme through this, and the
- * Appearance screen's preview tiles paint *other* palettes and *the other* brightness through it
- * — which is why the schemes are reachable from outside this file rather than being read off
- * `MaterialTheme` at the call site (a tile has to show the look the reader has *not* picked).
+ * The brand color scheme for one [brightness] in one [palette], independent of what the app is
+ * currently painting in. [SoftcoverTheme] resolves its own scheme through this, and the Appearance
+ * screen's preview tiles paint *other* palettes and *the other* brightness through it — which is why
+ * the schemes are reachable from outside this file rather than being read off `MaterialTheme` at
+ * the call site (a tile has to show the look the reader has *not* picked). [SchemeBrightness.DIM]
+ * ignores [palette].
  */
 fun softcoverColorScheme(
-    darkTheme: Boolean,
+    brightness: SchemeBrightness,
     palette: SpinePalette = SpinePalette.DEFAULT,
-): ColorScheme = if (darkTheme) {
-    darkSchemes.getValue(palette)
-} else {
-    lightSchemes.getValue(palette)
+): ColorScheme = when (brightness) {
+    SchemeBrightness.LIGHT -> lightSchemes.getValue(palette)
+    SchemeBrightness.DARK -> darkSchemes.getValue(palette)
+    SchemeBrightness.DIM -> dimScheme
 }
 
 /**
- * The app's theme, resolved from a [palette] token and an already-decided brightness.
+ * The app's theme, resolved from a [palette] token and an already-decided [brightness].
  *
- * [darkTheme] is a `Boolean` rather than a three-way mode because "follow the device" is a *reader
- * preference*, not a token: resolving it needs the persisted setting, so it belongs one layer up
- * (`:core:presentation`'s `ThemeMode.isDark()`). Defaulting to `isSystemInDarkTheme()` keeps a
- * bare `SoftcoverTheme { }` — the shape every `@Preview` uses — painting the way the host does.
+ * "Follow the device" is a *reader preference*, not a token: resolving it needs the persisted
+ * setting, so it belongs one layer up (`:core:uibinding`'s `ThemeMode.toSchemeBrightness`).
+ * Defaulting to the host's light or dark keeps a bare `SoftcoverTheme { }` — the shape every
+ * `@Preview` uses — painting the way the host does. [SchemeBrightness.DIM] ignores both [palette]
+ * and [dynamicColor].
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SoftcoverTheme(
     palette: SpinePalette = SpinePalette.DEFAULT,
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    brightness: SchemeBrightness = if (isSystemInDarkTheme()) {
+        SchemeBrightness.DARK
+    } else {
+        SchemeBrightness.LIGHT
+    },
     // Dynamic color is available on Android 12+; iOS has no equivalent and falls back to the brand scheme.
     // While it is on it *replaces* the chosen palette outright — the wallpaper's own scheme is the whole
     // point of it — which is why picking a palette turns it back off (SetColorPaletteUseCase).
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = dynamicColorSchemeOrNull(
-        useDynamicColor = dynamicColor,
-        darkTheme = darkTheme,
-    )
+    val dynamicScheme = if (brightness == SchemeBrightness.DIM) {
+        null
+    } else {
+        dynamicColorSchemeOrNull(
+            useDynamicColor = dynamicColor,
+            darkTheme = brightness.isDark,
+        )
+    }
+    val colorScheme = dynamicScheme
         ?: softcoverColorScheme(
-            darkTheme = darkTheme,
+            brightness = brightness,
             palette = palette,
         )
 
@@ -163,7 +212,7 @@ fun SoftcoverTheme(
         EditorialTheme(editorialTypography = softcoverFoundationEditorialTypography()) {
             CompositionLocalProvider(
                 LocalEditorialTypography provides defaultEditorialTypography(),
-                LocalDarkTheme provides darkTheme,
+                LocalSchemeBrightness provides brightness,
                 LocalHaptics provides rememberHaptics(),
                 LocalMotion provides if (playMotion) Motion.Full else Motion.Reduced,
                 content = content,

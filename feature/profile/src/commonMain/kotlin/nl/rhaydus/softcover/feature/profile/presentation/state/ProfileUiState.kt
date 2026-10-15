@@ -13,7 +13,6 @@ import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
-import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
@@ -40,7 +39,7 @@ internal data class ProfileUiState(
 
     val isShareSheetRequested: Boolean = false,
     val shareCapture: ShareCaptureState = ShareCaptureState(),
-    val recentlyLoved: BookCardSet<LovedBook> = BookCardSet.standIns(RECENTLY_LOVED_STAND_IN_CARDS),
+    val recentlyLoved: BookCardSet<RecentlyLovedEntry> = BookCardSet.standIns(RECENTLY_LOVED_STAND_IN_CARDS),
     val hideUntaggedAuthors: Boolean = false,
 
     /** Mapped by \`HideUntaggedAuthorsCollector\` alongside [hideUntaggedAuthors]. */

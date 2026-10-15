@@ -19,7 +19,6 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
-import nl.rhaydus.softcover.feature.book_detail.presentation.editionSheetWithQuery
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -173,6 +172,28 @@ class BookDetailUiStateTest {
         }
 
         @Test
+        fun `resolves scanned edition from editions when the book does not carry it`() {
+            // ----- Arrange -----
+            val scannedEdition = stubEdition(id = 42)
+            val book = stubBook(
+                userBook = null,
+                currentEdition = null,
+                editions = persistentListOf(stubEdition(id = 1)),
+            )
+            val state = buildBookDetailUiState().copy(
+                book = book,
+                editions = persistentListOf(scannedEdition),
+                scannedEditionId = 42,
+            )
+
+            // ----- Act -----
+            val result = state.scannedEdition
+
+            // ----- Assert -----
+            result shouldBe scannedEdition
+        }
+
+        @Test
         fun `falls back to book currentEdition when scannedEditionId is null and userBook is present`() {
             // ----- Arrange -----
             val bookEdition = stubEdition(id = 10)
@@ -242,7 +263,7 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val state = buildBookDetailUiState().copy(
                 editions = persistentListOf(editionWithIsbn, editionWithoutIsbn),
-                editionSheet = editionSheetWithQuery(query = ""),
+                editionSearchQuery = "",
             )
 
             // ----- Act -----
@@ -257,7 +278,7 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val state = buildBookDetailUiState().copy(
                 editions = persistentListOf(editionWithIsbn, editionWithoutIsbn),
-                editionSheet = editionSheetWithQuery(query = "Penguin"),
+                editionSearchQuery = "Penguin",
             )
 
             // ----- Act -----
@@ -272,7 +293,7 @@ class BookDetailUiStateTest {
             // ----- Arrange -----
             val state = buildBookDetailUiState().copy(
                 editions = persistentListOf(editionNullBoth),
-                editionSheet = editionSheetWithQuery(query = "anything"),
+                editionSearchQuery = "anything",
             )
 
             // ----- Act -----

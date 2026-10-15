@@ -573,7 +573,7 @@ internal fun nl.rhaydus.softcover.core.component.control.PageMiniature(scheme: a
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.core.component.control.PreviewTileFrame(label: kotlin.String, selected: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.BoxScope, kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.core.component.control.PreviewTileFrame(label: kotlin.String, selected: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, enabled: kotlin.Boolean, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.BoxScope, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -581,6 +581,7 @@ internal fun nl.rhaydus.softcover.core.component.control.PreviewTileFrame(label:
     - selected: STABLE (primitive type)
     - onClick: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+    - enabled: STABLE (primitive type)
     - content: STABLE (composable function type)
 
 @Composable
@@ -1761,7 +1762,7 @@ public fun nl.rhaydus.softcover.core.component.snackbar.SoftcoverSnackbarHost(mo
     - snackbarModifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.state.CenteredEmptyState(model: nl.rhaydus.softcover.core.component.state.EmptyStateUiModel, button: nl.rhaydus.softcover.core.component.state.EmptyStateButtonUiModel?, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.state.EmptyStateEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+private fun nl.rhaydus.softcover.core.component.state.CenteredEmptyState(model: nl.rhaydus.softcover.core.component.state.EmptyStateUiModel, button: nl.rhaydus.softcover.core.component.button.PillButtonUiModel?, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.state.EmptyStateEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:

@@ -140,8 +140,8 @@ RichText(model = state.book?.userBook?.reviewDocument?.toRichTextUiModel())
 VerdictBlock(model = state.verdictBlock, onEvent = onEvent)
 ```
 
-Carve-out: reading a **platform** signal in composition is not mapping. `ThemeMode.isDark()` (which resolves
-through `isSystemInDarkTheme()`), resolving a `CompositionLocal`, measuring a window size class and reading
+Carve-out: reading a **platform** signal in composition is not mapping. `isSystemInDarkTheme()` (fed to
+`ThemeMode.toSchemeBrightness`), resolving a `CompositionLocal`, measuring a window size class and reading
 the platform brightness stay where they are. The rule is about domain data.
 
 **R10 — A UI model is never built in composition. It arrives on the `UiState`.** A composable never

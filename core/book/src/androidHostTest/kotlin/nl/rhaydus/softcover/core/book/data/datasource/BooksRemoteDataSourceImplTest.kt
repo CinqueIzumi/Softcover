@@ -42,7 +42,7 @@ import nl.rhaydus.softcover.UpdateUserBookReviewMutation
 import nl.rhaydus.softcover.core.book.baseBook
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
-import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
+import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -2996,7 +2996,7 @@ class BooksRemoteDataSourceImplTest {
             val result = dataSource.addBookByIsbn(isbn = isbn)
 
             // ----- Assert -----
-            result shouldBe CreatedBook(
+            result shouldBe BookImport.Created(
                 bookId = 42,
                 editionId = 110,
             )
@@ -3034,11 +3034,15 @@ class BooksRemoteDataSourceImplTest {
                 upsertBook.edition
             } returns null
 
+            every {
+                upsertBook.edition_id
+            } returns null
+
             // ----- Act -----
             val result = dataSource.addBookByIsbn(isbn = isbn)
 
             // ----- Assert -----
-            result shouldBe CreatedBook(
+            result shouldBe BookImport.Created(
                 bookId = 42,
                 editionId = null,
             )
@@ -3070,32 +3074,157 @@ class BooksRemoteDataSourceImplTest {
         }
 
         @Test
-        fun `throws when book is absent from upsert_book response`() = runTest {
+        fun `returns Fetching when status is fetching and no book or id is present`() = runTest {
             // ----- Arrange -----
-            val isbn = "9780451524935"
-            val mutationData = mockk<CreateBookMutation.Data>()
-            val upsertBook = mockk<CreateBookMutation.Data.Upsert_book>()
+            stubUpsertBook(
+                upsertBook = upsertBookResponse(status = "fetching"),
+            )
 
-            coEvery {
-                apolloClient.safeMutation(mutation = any<CreateBookMutation>())
-            } returns mutationData
+            // ----- Act -----
+            val result = dataSource.addBookByIsbn(isbn = "9780451524935")
 
-            every {
-                mutationData.upsert_book
-            } returns upsertBook
+            // ----- Assert -----
+            result shouldBe BookImport.Fetching
+        }
 
-            every {
-                upsertBook.errors
-            } returns null
+        @Test
+        fun `returns Created from the nested book and edition ids when a book is present`() = runTest {
+            // ----- Arrange -----
+            stubUpsertBook(
+                upsertBook = upsertBookResponse(
+                    id = 1,
+                    topLevelEditionId = 2,
+                    status = "fetching",
+                    book = CreateBookMutation.Data.Upsert_book.Book(
+                        __typename = "books",
+                        id = 42,
+                        slug = null,
+                        title = null,
+                    ),
+                    edition = CreateBookMutation.Data.Upsert_book.Edition(
+                        __typename = "editions",
+                        id = 110,
+                        title = null,
+                    ),
+                ),
+            )
 
-            every {
-                upsertBook.book
-            } returns null
+            // ----- Act -----
+            val result = dataSource.addBookByIsbn(isbn = "9780451524935")
+
+            // ----- Assert -----
+            result shouldBe BookImport.Created(
+                bookId = 42,
+                editionId = 110,
+            )
+        }
+
+        @Test
+        fun `returns Created from top-level id and edition_id when book is absent`() = runTest {
+            // ----- Arrange -----
+            stubUpsertBook(
+                upsertBook = upsertBookResponse(
+                    id = 77,
+                    topLevelEditionId = 88,
+                    status = "success",
+                ),
+            )
+
+            // ----- Act -----
+            val result = dataSource.addBookByIsbn(isbn = "9780451524935")
+
+            // ----- Assert -----
+            result shouldBe BookImport.Created(
+                bookId = 77,
+                editionId = 88,
+            )
+        }
+
+        @Test
+        fun `ignores blank errors and still returns Fetching`() = runTest {
+            // ----- Arrange -----
+            stubUpsertBook(
+                upsertBook = upsertBookResponse(
+                    status = "fetching",
+                    errors = listOf("", "  ", null),
+                ),
+            )
+
+            // ----- Act -----
+            val result = dataSource.addBookByIsbn(isbn = "9780451524935")
+
+            // ----- Assert -----
+            result shouldBe BookImport.Fetching
+        }
+
+        @Test
+        fun `throws when errors are non-blank even if a book is present`() = runTest {
+            // ----- Arrange -----
+            stubUpsertBook(
+                upsertBook = upsertBookResponse(
+                    errors = listOf("Rejected"),
+                    book = CreateBookMutation.Data.Upsert_book.Book(
+                        __typename = "books",
+                        id = 42,
+                        slug = null,
+                        title = null,
+                    ),
+                ),
+            )
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {
-                dataSource.addBookByIsbn(isbn = isbn)
+                dataSource.addBookByIsbn(isbn = "9780451524935")
             }
+        }
+
+        @Test
+        fun `throws when no book is returned and the status is not fetching`() = runTest {
+            // ----- Arrange -----
+            stubUpsertBook(
+                upsertBook = upsertBookResponse(status = "error"),
+            )
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.addBookByIsbn(isbn = "9780451524935")
+            }
+        }
+
+        @Test
+        fun `throws when no book is returned and the status is null`() = runTest {
+            // ----- Arrange -----
+            stubUpsertBook(
+                upsertBook = upsertBookResponse(status = null),
+            )
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.addBookByIsbn(isbn = "9780451524935")
+            }
+        }
+
+        private fun upsertBookResponse(
+            id: Int? = null,
+            topLevelEditionId: Int? = null,
+            status: String? = null,
+            errors: List<String?>? = null,
+            book: CreateBookMutation.Data.Upsert_book.Book? = null,
+            edition: CreateBookMutation.Data.Upsert_book.Edition? = null,
+        ): CreateBookMutation.Data.Upsert_book = CreateBookMutation.Data.Upsert_book(
+            __typename = "UpsertBookOutput",
+            id = id,
+            edition_id = topLevelEditionId,
+            status = status,
+            errors = errors,
+            book = book,
+            edition = edition,
+        )
+
+        private fun stubUpsertBook(upsertBook: CreateBookMutation.Data.Upsert_book) {
+            coEvery {
+                apolloClient.safeMutation(mutation = any<CreateBookMutation>())
+            } returns CreateBookMutation.Data(upsert_book = upsertBook)
         }
     }
 }

@@ -21,7 +21,9 @@ paths:
   exist. Run the bare task, which always scans the whole repo (`-Pktlint.root=<dir>` narrows ktlint).
   `detekt*` and compile tasks are per-module.
 - After changing a `:detekt-rules` rule, run `./gradlew --stop` and then the detekt tasks with
-  `--rerun-tasks`. Otherwise detekt stays UP-TO-DATE and runs the old rule jar.
+  `--rerun-tasks`. Otherwise detekt stays UP-TO-DATE and runs the old rule jar. With the build cache on, a
+  stale-daemon result is also stored in the local build cache; `--rerun-tasks` bypasses cache reads, so the
+  recipe holds.
 - A `SpinePalette` entry added without its `ColorPalette` compiles clean and stays unselectable; only
   `SpinePaletteMapperTest`'s bijection test (`:core:uibinding`) catches it.
 - `stabilityCheck` (part of `check`, not `styleCheck`) compares every Compose module with its baseline in

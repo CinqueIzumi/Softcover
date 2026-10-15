@@ -40,6 +40,7 @@ internal class OnIsbnSubmittedAction(
                         scope.setState {
                             it.copy(
                                 isResolving = false,
+                                isImportPending = false,
                                 unknownIsbn = result.normalizedIsbn,
                             )
                         }

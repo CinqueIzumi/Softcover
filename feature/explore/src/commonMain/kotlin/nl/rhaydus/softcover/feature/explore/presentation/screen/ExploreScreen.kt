@@ -71,7 +71,7 @@ object ExploreScreen : Screen {
                     }
                 },
                 onScanClick = {
-                    navigator.parent?.push(item = appNavigator.screen(ScreenDestination.BarcodeScanner))
+                    navigator.parent?.push(item = appNavigator.screen(ScreenDestination.BarcodeScanner()))
                 },
                 isOnline = isOnline,
             )

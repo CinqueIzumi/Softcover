@@ -576,97 +576,119 @@ dependencyAnalysis {
     }
 }
 
+// Dependency edges are snapshotted as plain data once every project is evaluated, so the task body
+// never touches `Project`/`Configuration` state and stays safe under parallel execution.
+val moduleGraphProjectEdges = mutableListOf<List<String>>()
+val moduleGraphExternalEdges = mutableListOf<List<String>>()
+
+gradle.projectsEvaluated {
+    subprojects.forEach { module ->
+        module.configurations.forEach { configuration ->
+            configuration.dependencies.forEach { dependency ->
+                when (dependency) {
+                    is ProjectDependency ->
+                        moduleGraphProjectEdges += listOf(module.path, dependency.path, configuration.name)
+
+                    is ExternalModuleDependency ->
+                        moduleGraphExternalEdges += listOf(
+                            module.path,
+                            configuration.name,
+                            dependency.group.orEmpty(),
+                            dependency.name,
+                        )
+                }
+            }
+        }
+    }
+}
+
 tasks.register("checkModuleGraph") {
     group = "verification"
     description = "Fails on any module dependency that breaks the tier DAG " +
         "(MODULE_STRUCTURE_GUIDELINES §2), re-exports a data module (§10), or breaches " +
         "component-library isolation."
 
+    val projectEdges = moduleGraphProjectEdges
+    val externalEdges = moduleGraphExternalEdges
+
     doLast {
         val violations = mutableListOf<String>()
         var edges = 0
 
-        subprojects.forEach { module ->
-            val fromTier = tierOf(module.path) ?: return@forEach
+        projectEdges.forEach edge@{ (fromPath, toPath, configurationName) ->
+            val fromTier = tierOf(fromPath) ?: return@edge
             val allowed = allowedTargetTiers.getValue(fromTier)
 
-            module.configurations.forEach { configuration ->
-                configuration.dependencies
-                    .filterIsInstance<ProjectDependency>()
-                    .forEach { dependency ->
-                        if (dependency.path == module.path) return@forEach
+            if (toPath == fromPath) return@edge
 
-                        val targetTier = tierOf(dependency.path) ?: return@forEach
-                        edges++
+            val targetTier = tierOf(toPath) ?: return@edge
+            edges++
 
-                        if (targetTier !in allowed) {
-                            violations += "${module.path} → ${dependency.path}  " +
-                                "($fromTier may depend only on $allowed)"
-                        }
+            if (targetTier !in allowed) {
+                violations += "$fromPath → $toPath  " +
+                    "($fromTier may depend only on $allowed)"
+            }
 
-                        // api-visibility rule: a declared `api` edge to a data-area module must be
-                        // allowlisted above. Match every declarable api bucket — plain `api`
-                        // (android-only modules) and the KMP/variant `<sourceSet>Api` configs
-                        // (`commonMainApi`, `androidMainApi`, `debugApi`, …) — but never the test ones,
-                        // where an api edge can't leak into a production consumer's graph.
-                        val isApiEdge = configuration.name.endsWith("api", ignoreCase = true) &&
-                            configuration.name.contains("test", ignoreCase = true).not()
+            // api-visibility rule: a declared `api` edge to a data-area module must be
+            // allowlisted in `allowedApiDataEdges`. Match every declarable api bucket — plain `api`
+            // (android-only modules) and the KMP/variant `<sourceSet>Api` configs
+            // (`commonMainApi`, `androidMainApi`, `debugApi`, …) — but never the test ones,
+            // where an api edge can't leak into a production consumer's graph.
+            val isApiEdge = configurationName.endsWith("api", ignoreCase = true) &&
+                configurationName.contains("test", ignoreCase = true).not()
 
-                        if (
-                            isApiEdge &&
-                            dependency.path in apiSignOffModules &&
-                            (module.path to dependency.path) !in allowedApiDataEdges
-                        ) {
-                            violations += "${module.path} → api(${dependency.path})  " +
-                                "(must be implementation-depended unless allowlisted in " +
-                                "allowedApiDataEdges — MODULE_STRUCTURE_GUIDELINES §10)"
-                        }
+            if (
+                isApiEdge &&
+                toPath in apiSignOffModules &&
+                (fromPath to toPath) !in allowedApiDataEdges
+            ) {
+                violations += "$fromPath → api($toPath)  " +
+                    "(must be implementation-depended unless allowlisted in " +
+                    "allowedApiDataEdges — MODULE_STRUCTURE_GUIDELINES §10)"
+            }
 
-                        if (module.path in zeroProjectDependencyModules) {
-                            violations += "${module.path} → ${dependency.path}  " +
-                                "(tokens only — this module must declare NO project dependency at " +
-                                "all. See docs/reference/module-structure.md § The UI stack — target shape)"
-                        }
+            if (fromPath in zeroProjectDependencyModules) {
+                violations += "$fromPath → $toPath  " +
+                    "(tokens only — this module must declare NO project dependency at " +
+                    "all. See docs/reference/module-structure.md § The UI stack — target shape)"
+            }
 
-                        if ((module.path to dependency.path) in bannedReverseEdges) {
-                            violations += "${module.path} → ${dependency.path}  " +
-                                "(wrong direction — the UI stack layers component → designsystem and " +
-                                "uibinding → component; a stayer may never depend on a mover. See " +
-                                "docs/reference/module-structure.md § Build wiring conventions)"
-                        }
+            if ((fromPath to toPath) in bannedReverseEdges) {
+                violations += "$fromPath → $toPath  " +
+                    "(wrong direction — the UI stack layers component → designsystem and " +
+                    "uibinding → component; a stayer may never depend on a mover. See " +
+                    "docs/reference/module-structure.md § Build wiring conventions)"
+            }
 
-                        // Component-library isolation: an explicit per-module allowlist, tighter than
-                        // the tier rule.
-                        val allowedProjects = componentLibraryAllowedProjects[module.path]
+            // Component-library isolation: an explicit per-module allowlist, tighter than
+            // the tier rule.
+            val allowedProjects = componentLibraryAllowedProjects[fromPath]
 
-                        if (allowedProjects != null && dependency.path !in allowedProjects) {
-                            violations += "${module.path} → ${dependency.path}  " +
-                                "(component library may depend only on $allowedProjects — " +
-                                "no domain, data, DI or navigation)"
-                        }
-                    }
+            if (allowedProjects != null && toPath !in allowedProjects) {
+                violations += "$fromPath → $toPath  " +
+                    "(component library may depend only on $allowedProjects — " +
+                    "no domain, data, DI or navigation)"
+            }
+        }
 
-                // Deliberately NOT restricted to non-test configurations, unlike the
-                // api-visibility check above. That one skips test configs because a test-only `api`
-                // edge cannot leak into a consumer's graph, which is a statement about leakage. This
-                // one is a statement about the module itself: the component library renders from UI
-                // models and needs no DI, navigation, or network client to be exercised — in tests
-                // least of all. Do not "fix" the asymmetry by adding a test exclusion.
-                if (module.path in componentLibraryAllowedProjects) {
-                    configuration.dependencies
-                        .filterIsInstance<ExternalModuleDependency>()
-                        .forEach { dependency ->
-                            val coordinate = "${dependency.group}:${dependency.name}"
+        // Deliberately NOT restricted to non-test configurations, unlike the
+        // api-visibility rule. That one skips test configs because a test-only `api`
+        // edge cannot leak into a consumer's graph, which is a statement about leakage. This
+        // one is a statement about the module itself: the component library renders from UI
+        // models and needs no DI, navigation, or network client to be exercised — in tests
+        // least of all. Do not "fix" the asymmetry by adding a test exclusion.
+        externalEdges.forEach external@{ (fromPath, _, group, name) ->
+            if (tierOf(fromPath) == null) return@external
+            if (fromPath !in componentLibraryAllowedProjects) return@external
 
-                            if (coordinate in conventionProvidedCoordinates) return@forEach
+            val coordinate = "$group:$name"
 
-                            if (dependency.group in componentLibraryBannedGroups) {
-                                violations += "${module.path} → $coordinate  " +
-                                    "(component library may not depend on " +
-                                    "${dependency.group} — DI, navigation and networking are banned)"
-                            }
-                        }
-                }
+            if (coordinate in conventionProvidedCoordinates) return@external
+
+            if (group in componentLibraryBannedGroups) {
+                violations += "$fromPath → $coordinate  " +
+                    "(component library may not depend on " +
+                    "$group — DI, navigation and networking are banned)"
             }
         }
 
