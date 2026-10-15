@@ -9,6 +9,12 @@ sealed interface ChipTrailing {
         val description: String? = null,
     ) : ChipTrailing
 
+    /** A drop-down arrow that turns upside down while [expanded]; [label] describes what a tap does. */
+    data class Disclosure(
+        val expanded: Boolean,
+        val label: String,
+    ) : ChipTrailing
+
     /** Its own tap target reporting [ChipEvent.Dismissed], described by [label]. */
     data class Dismiss(val label: String) : ChipTrailing
 }

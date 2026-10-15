@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.CurrentUserIdentity
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -84,8 +85,10 @@ class CurrentUserCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.currentUsername shouldBe "frodo"
-            stateFlow.value.currentUserAvatarUrl shouldBe "https://example.com/frodo.png"
+            stateFlow.value.currentUser shouldBe CurrentUserIdentity(
+                username = "frodo",
+                avatarUrl = "https://example.com/frodo.png",
+            )
         }
 
         @Test
@@ -100,12 +103,14 @@ class CurrentUserCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.currentUsername shouldBe null
-            stateFlow.value.currentUserAvatarUrl shouldBe null
+            stateFlow.value.currentUser shouldBe CurrentUserIdentity(
+                username = null,
+                avatarUrl = null,
+            )
         }
 
         @Test
-        fun `clears the identity when the profile goes away`() = runTest(UnconfinedTestDispatcher()) {
+        fun `resets to an empty identity when the profile goes away`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             profileFlow.value = profile(
                 username = "frodo",
@@ -117,8 +122,10 @@ class CurrentUserCollectorTest {
             profileFlow.value = null
 
             // ----- Assert -----
-            stateFlow.value.currentUsername shouldBe null
-            stateFlow.value.currentUserAvatarUrl shouldBe null
+            stateFlow.value.currentUser shouldBe CurrentUserIdentity(
+                username = null,
+                avatarUrl = null,
+            )
         }
     }
 }

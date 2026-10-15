@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.OverMediaInk
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover
 
@@ -115,7 +116,9 @@ private fun RichTextBody(
 
         RichTextVariant.Verdict -> typography.bodyLarge.copy(fontStyle = FontStyle.Normal)
 
-        RichTextVariant.ShareCard -> typography.body.copy(
+        RichTextVariant.ShareCard,
+        RichTextVariant.ShareCardFullText,
+        -> typography.body.copy(
             fontStyle = FontStyle.Normal,
             textAlign = TextAlign.Center,
         )
@@ -130,10 +133,16 @@ private fun RichTextBody(
         RichTextVariant.CommunityReview,
         -> colors.onSurface
 
-        RichTextVariant.ShareCard -> colors.onSurfaceVariant
+        RichTextVariant.ShareCard,
+        RichTextVariant.ShareCardFullText,
+        -> OverMediaInk.copy(alpha = 0.92f)
     }
 
-    val coverColor: Color = colors.spoilerCover
+    val coverColor: Color = if (model.variant.isOverMedia()) {
+        OverMediaInk.copy(alpha = 0.85f)
+    } else {
+        colors.spoilerCover
+    }
 
     var revealed by remember(model) { mutableStateOf(emptySet<Int>()) }
 
@@ -142,6 +151,9 @@ private fun RichTextBody(
     val currentOnEvent by rememberUpdatedState(onEvent)
 
     val reportsTaps = model.variant == RichTextVariant.Verdict
+
+    // A spoiler revealed on the share preview would be captured into the exported image.
+    val revealsSpoilers = model.variant.isOverMedia().not()
 
     val (annotated: AnnotatedString, spoilerRanges: List<IntRange>) = remember(model, revealed, coverColor) {
         buildRichText(
@@ -162,7 +174,7 @@ private fun RichTextBody(
 
             onTextLayout(it)
         },
-        modifier = if (spoilerRanges.isNotEmpty() || reportsTaps) {
+        modifier = if ((revealsSpoilers && spoilerRanges.isNotEmpty()) || reportsTaps) {
             modifier.pointerInput(spoilerRanges) {
                 detectTapGestures { position ->
                     val layout = layoutResult ?: return@detectTapGestures
@@ -184,10 +196,22 @@ private fun RichTextBody(
     )
 }
 
+private fun RichTextVariant.isOverMedia(): Boolean = when (this) {
+    RichTextVariant.ShareCard,
+    RichTextVariant.ShareCardFullText,
+    -> true
+
+    RichTextVariant.Body,
+    RichTextVariant.Verdict,
+    RichTextVariant.CommunityReview,
+    -> false
+}
+
 private fun RichTextVariant.lineCap(): Int = when (this) {
     RichTextVariant.Body -> Int.MAX_VALUE
     RichTextVariant.Verdict -> 8
     RichTextVariant.ShareCard -> 5
+    RichTextVariant.ShareCardFullText -> Int.MAX_VALUE
     RichTextVariant.CommunityReview -> 8
 }
 

@@ -156,14 +156,12 @@ private fun <K> ProseSegments(
     onEvent: (SegmentedControlEvent<K>) -> Unit,
     modifier: Modifier,
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.selectableGroup(),
-    ) {
+    Row(modifier = modifier.selectableGroup()) {
         SoftcoverText(
             text = variant.prefix,
             style = MaterialTheme.editorialTypography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.alignByBaseline(),
         )
 
         model.options.forEachIndexed { index, option ->
@@ -172,6 +170,7 @@ private fun <K> ProseSegments(
                     text = " / ",
                     style = MaterialTheme.editorialTypography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    modifier = Modifier.alignByBaseline(),
                 )
             }
 
@@ -182,6 +181,7 @@ private fun <K> ProseSegments(
                 onSelect = {
                     onEvent(SegmentedControlEvent.Selected(key = option.key))
                 },
+                modifier = Modifier.alignByBaseline(),
             )
         }
 
@@ -189,6 +189,7 @@ private fun <K> ProseSegments(
             text = variant.suffix,
             style = MaterialTheme.editorialTypography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.alignByBaseline(),
         )
     }
 }
@@ -205,6 +206,7 @@ private fun ProseWord(
     isSelected: Boolean,
     enabled: Boolean,
     onSelect: () -> Unit,
+    modifier: Modifier,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val scheme = MaterialTheme.colorScheme
@@ -226,7 +228,7 @@ private fun ProseWord(
     )
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .minimumInteractiveComponentSize()
             .alpha(disabledAlpha)
             .tactileSelectable(
@@ -241,7 +243,7 @@ private fun ProseWord(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .width(IntrinsicSize.Min)
+                .width(IntrinsicSize.Max)
                 .hoverHighlight(
                     interactionSource = interactionSource,
                     shape = Corners.pill,
