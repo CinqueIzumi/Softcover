@@ -94,6 +94,7 @@ class ReadingPaceForecastCollectorTest {
         audioSeconds: Int? = null,
         currentPage: Int = 100,
         currentSeconds: Int = 0,
+        startedAt: String? = null,
     ): Book {
         val edition = mockk<BookEdition> {
             every {
@@ -112,6 +113,10 @@ class ReadingPaceForecastCollectorTest {
             every {
                 this@mockk.currentSeconds
             } returns currentSeconds
+
+            every {
+                this@mockk.startedAt
+            } returns startedAt
         }
         val userBook = mockk<UserBook> {
             every {
@@ -388,6 +393,86 @@ class ReadingPaceForecastCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.readingPaceForecast shouldBe null
+            job.cancel()
+        }
+
+        @Test
+        fun `ignores journal entries dated before the current read started`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            historyFlow(1).value = listOf(
+                entry(
+                    day = 1,
+                    pages = 20,
+                ),
+                entry(
+                    day = 2,
+                    pages = 50,
+                ),
+                entry(
+                    day = 10,
+                    pages = 30,
+                ),
+            )
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stubBook(
+                    currentPage = 30,
+                    startedAt = "2026-01-10",
+                ),
+            )
+            val collector = ReadingPaceForecastCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            val forecast = stateFlow.value.readingPaceForecast.shouldNotBeNull()
+            forecast.avgPerReadingDay shouldBe 30f
+            forecast.forecastReadingDays shouldBe 9
+            job.cancel()
+        }
+
+        @Test
+        fun `counts every journal entry when the current read has no start date`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            historyFlow(1).value = listOf(
+                entry(
+                    day = 1,
+                    pages = 20,
+                ),
+                entry(
+                    day = 2,
+                    pages = 50,
+                ),
+                entry(
+                    day = 10,
+                    pages = 30,
+                ),
+            )
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stubBook(
+                    currentPage = 30,
+                    startedAt = null,
+                ),
+            )
+            val collector = ReadingPaceForecastCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            val forecast = stateFlow.value.readingPaceForecast.shouldNotBeNull()
+            forecast.avgPerReadingDay shouldBe 25f
+            forecast.forecastReadingDays shouldBe 11
             job.cancel()
         }
     }

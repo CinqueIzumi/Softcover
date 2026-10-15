@@ -113,7 +113,12 @@ class ReadingPaceForecastCollectorTest {
     private fun stubUserBookRead(
         currentPage: Int? = null,
         currentSeconds: Int? = null,
+        startedAt: String? = null,
     ): UserBookRead = mockk<UserBookRead>(relaxed = true).also { read ->
+        every {
+            read.startedAt
+        } returns startedAt
+
         every {
             read.currentPage
         } returns currentPage
@@ -543,6 +548,94 @@ class ReadingPaceForecastCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.featuredBookPace shouldBe "25 pages/day · about 4 days to go"
+            job.cancel()
+        }
+
+        @Test
+        fun `ignores journal entries dated before the current read started`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            historyFlow(1).value = listOf(
+                journalEntry(
+                    date = date(1),
+                    pages = 20,
+                ),
+                journalEntry(
+                    date = date(2),
+                    pages = 50,
+                ),
+                journalEntry(
+                    date = date(10),
+                    pages = 30,
+                ),
+            )
+            stateFlow.value = ReadingScreenUiState(
+                books = persistentListOf(
+                    stubBook(
+                        edition = stubEdition(pages = 300),
+                        userBookRead = stubUserBookRead(
+                            currentPage = 30,
+                            startedAt = "2026-01-10",
+                        ),
+                    ),
+                ),
+            )
+            val dependencies = buildDependencies(this)
+            val collector = ReadingPaceForecastCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.featuredBookPace shouldBe "30 pages/day · about 9 days to go"
+            job.cancel()
+        }
+
+        @Test
+        fun `counts every journal entry when the current read has no start date`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            historyFlow(1).value = listOf(
+                journalEntry(
+                    date = date(1),
+                    pages = 20,
+                ),
+                journalEntry(
+                    date = date(2),
+                    pages = 50,
+                ),
+                journalEntry(
+                    date = date(10),
+                    pages = 30,
+                ),
+            )
+            stateFlow.value = ReadingScreenUiState(
+                books = persistentListOf(
+                    stubBook(
+                        edition = stubEdition(pages = 300),
+                        userBookRead = stubUserBookRead(
+                            currentPage = 30,
+                            startedAt = null,
+                        ),
+                    ),
+                ),
+            )
+            val dependencies = buildDependencies(this)
+            val collector = ReadingPaceForecastCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.featuredBookPace shouldBe "25 pages/day · about 11 days to go"
             job.cancel()
         }
     }
