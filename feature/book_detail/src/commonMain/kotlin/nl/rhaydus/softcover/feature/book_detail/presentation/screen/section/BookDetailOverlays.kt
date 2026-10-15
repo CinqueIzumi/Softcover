@@ -41,6 +41,9 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUser
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRequestCreateListAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveVerdictAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareCaptureEventAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareSizeToggledAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareTagPickerToggledAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareTagToggledAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareVariantSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSubmitTagDraftAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagDraftChangeAction
@@ -59,6 +62,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditor
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.EditionSheetEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetOption
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.TagEditorSheetEvent
 
 /**
@@ -97,6 +101,21 @@ internal fun BookDetailOverlays(
                 when (event) {
                     is ShareSheetEvent.VariantSelected -> runAction(
                         OnShareVariantSelectedAction(variant = event.variant),
+                    )
+
+                    is ShareSheetEvent.OptionClicked -> runAction(
+                        when (event.option) {
+                            ShareSheetOption.FULL_TEXT -> OnShareSizeToggledAction()
+
+                            ShareSheetOption.TAGS -> OnShareTagPickerToggledAction()
+                        },
+                    )
+
+                    is ShareSheetEvent.TagToggled -> runAction(
+                        OnShareTagToggledAction(
+                            variant = event.variant,
+                            tag = event.tag,
+                        ),
                     )
 
                     is ShareSheetEvent.CaptureReported -> runAction(

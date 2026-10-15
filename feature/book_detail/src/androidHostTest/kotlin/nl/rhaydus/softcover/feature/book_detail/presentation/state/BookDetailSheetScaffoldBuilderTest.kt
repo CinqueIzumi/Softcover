@@ -3,15 +3,18 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.mockk
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.ShareCardFormat
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
+import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.domain.model.Author
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -244,40 +247,60 @@ class BookDetailSheetScaffoldBuilderTest {
     @Nested
     inner class ShareSheetFor {
         private val card = BookShareCardUiModel(
-            coverUrl = null,
+            cover = CoverUiModel(
+                source = null,
+                coverlessTitle = "Dune",
+                variant = CoverVariant.Floating,
+            ),
             title = "Dune",
             author = "Frank Herbert",
             statsLine = null,
             description = null,
+            format = ShareCardFormat.Story,
         )
 
         @Test
-        fun `names the book in the scaffold description for each variant`() {
+        fun `headlines the scaffold with the book title for each variant`() {
             // ----- Arrange -----
             val bookTitle = "Dune"
-            val bookVariant = ShareCardVariant.BOOK
-            val updateVariant = ShareCardVariant.MY_UPDATE
+            val variants = ShareCardVariant.entries
 
             // ----- Act -----
-            val book = shareSheetFor(
+            val headlines = variants.map { variant ->
+                shareSheetFor(
+                    card = card,
+                    bookTitle = bookTitle,
+                    variant = variant,
+                    hasUpdateCard = true,
+                    size = ShareCardSize.STORY,
+                    hasExpandableText = false,
+                    tagPicker = null,
+                ).sheet.scaffold.header.shouldNotBeNull().section as SectionHeaderUiModel.Section
+            }
+
+            // ----- Assert -----
+            headlines.map { it.headlineText } shouldBe variants.map { bookTitle }
+            headlines.map { it.description }.distinct() shouldBe listOf(null)
+        }
+
+        @Test
+        fun `pins the scaffold layout`() {
+            // ----- Arrange -----
+            val bookTitle = "Dune"
+
+            // ----- Act -----
+            val result = shareSheetFor(
                 card = card,
                 bookTitle = bookTitle,
-                variant = bookVariant,
-                hasUpdateCard = true,
-            )
-            val update = shareSheetFor(
-                card = card,
-                bookTitle = bookTitle,
-                variant = updateVariant,
-                hasUpdateCard = true,
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
+                size = ShareCardSize.STORY,
+                hasExpandableText = false,
+                tagPicker = null,
             )
 
             // ----- Assert -----
-            book.sheet.scaffold.header.shouldNotBeNull().section.descriptionText().shouldNotBeNull() shouldContain "Dune"
-            update.sheet.scaffold.header.shouldNotBeNull().section.descriptionText().shouldNotBeNull() shouldContain "Dune"
-            val bookDescription = book.sheet.scaffold.header.shouldNotBeNull().section.descriptionText()
-            val updateDescription = update.sheet.scaffold.header.shouldNotBeNull().section.descriptionText()
-            bookDescription shouldNotBe updateDescription
+            result.sheet.scaffold.layout shouldBe SheetLayout.Pinned
         }
 
         @Test
@@ -292,17 +315,253 @@ class BookDetailSheetScaffoldBuilderTest {
                 bookTitle = bookTitle,
                 variant = variant,
                 hasUpdateCard = true,
+                size = ShareCardSize.STORY,
+                hasExpandableText = false,
+                tagPicker = null,
             )
             val withoutUpdateCard = shareSheetFor(
                 card = card,
                 bookTitle = bookTitle,
                 variant = variant,
                 hasUpdateCard = false,
+                size = ShareCardSize.STORY,
+                hasExpandableText = false,
+                tagPicker = null,
             )
 
             // ----- Assert -----
             withUpdateCard.variantToggle.shouldNotBeNull()
             withoutUpdateCard.variantToggle.shouldBeNull()
+        }
+
+        @Test
+        fun `full text chip is present when the card has expandable text`() {
+            // ----- Arrange -----
+            val hasExpandableText = true
+
+            // ----- Act -----
+            val result = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
+                size = ShareCardSize.STORY,
+                hasExpandableText = hasExpandableText,
+                tagPicker = null,
+            )
+
+            // ----- Assert -----
+            result.options.chips.map { it.label } shouldBe listOf("Full text")
+        }
+
+        @Test
+        fun `options are empty when there is no expandable text and no tag picker`() {
+            // ----- Arrange -----
+            val hasExpandableText = false
+
+            // ----- Act -----
+            val result = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
+                size = ShareCardSize.STORY,
+                hasExpandableText = hasExpandableText,
+                tagPicker = null,
+            )
+
+            // ----- Assert -----
+            result.options.isEmpty shouldBe true
+        }
+
+        @Test
+        fun `full text chip is unselected while the story size is chosen`() {
+            // ----- Arrange -----
+            val hasExpandableText = true
+
+            // ----- Act -----
+            val result = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
+                size = ShareCardSize.STORY,
+                hasExpandableText = hasExpandableText,
+                tagPicker = null,
+            )
+
+            // ----- Assert -----
+            result.options.chips.single().selected shouldBe false
+        }
+
+        @Test
+        fun `full text chip is selected while the full text size is chosen`() {
+            // ----- Arrange -----
+            val hasExpandableText = true
+
+            // ----- Act -----
+            val result = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
+                size = ShareCardSize.FULL_TEXT,
+                hasExpandableText = hasExpandableText,
+                tagPicker = null,
+            )
+
+            // ----- Assert -----
+            result.options.chips.single().selected shouldBe true
+        }
+
+        @Test
+        fun `full text chip resolves to the full text option`() {
+            // ----- Arrange -----
+            val hasExpandableText = true
+
+            // ----- Act -----
+            val result = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
+                size = ShareCardSize.STORY,
+                hasExpandableText = hasExpandableText,
+                tagPicker = null,
+            )
+
+            // ----- Assert -----
+            result.options[result.options.chips.single().key] shouldBe ShareSheetOption.FULL_TEXT
+        }
+
+        @Test
+        fun `tags chip is present when there is a tag picker`() {
+            // ----- Arrange -----
+            val tagPicker = shareTagPickerFor(
+                variant = ShareCardVariant.BOOK,
+                candidates = mapOf(TagCategory.GENRE to listOf("Fantasy", "Mystery")),
+                selected = setOf("Fantasy"),
+                expanded = false,
+            )
+
+            // ----- Act -----
+            val result = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
+                size = ShareCardSize.STORY,
+                hasExpandableText = false,
+                tagPicker = tagPicker,
+            )
+
+            // ----- Assert -----
+            result.options.chips.map { it.label } shouldBe listOf("Tags · 1")
+            result.options[result.options.chips.single().key] shouldBe ShareSheetOption.TAGS
+            result.tagPicker shouldBe tagPicker
+        }
+
+        @Test
+        fun `lists full text before tags when both apply`() {
+            // ----- Arrange -----
+            val tagPicker = shareTagPickerFor(
+                variant = ShareCardVariant.BOOK,
+                candidates = mapOf(TagCategory.GENRE to listOf("Fantasy", "Mystery")),
+                selected = setOf("Fantasy"),
+                expanded = false,
+            )
+
+            // ----- Act -----
+            val result = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
+                size = ShareCardSize.STORY,
+                hasExpandableText = true,
+                tagPicker = tagPicker,
+            )
+
+            // ----- Assert -----
+            result.options.chips.map { result.options[it.key] } shouldBe listOf(
+                ShareSheetOption.FULL_TEXT,
+                ShareSheetOption.TAGS,
+            )
+        }
+
+        @Test
+        fun `expanded tag picker gives the preview less height than a collapsed one`() {
+            // ----- Arrange -----
+            val candidates = mapOf(TagCategory.GENRE to listOf("Fantasy", "Mystery"))
+            val expandedPicker = shareTagPickerFor(
+                variant = ShareCardVariant.BOOK,
+                candidates = candidates,
+                selected = setOf("Fantasy"),
+                expanded = true,
+            )
+            val collapsedPicker = shareTagPickerFor(
+                variant = ShareCardVariant.BOOK,
+                candidates = candidates,
+                selected = setOf("Fantasy"),
+                expanded = false,
+            )
+
+            // ----- Act -----
+            val expanded = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
+                size = ShareCardSize.STORY,
+                hasExpandableText = false,
+                tagPicker = expandedPicker,
+            )
+            val collapsed = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
+                size = ShareCardSize.STORY,
+                hasExpandableText = false,
+                tagPicker = collapsedPicker,
+            )
+
+            // ----- Assert -----
+            (expanded.sheet.previewMaxHeight < collapsed.sheet.previewMaxHeight) shouldBe true
+        }
+
+        @Test
+        fun `collapsed tag picker keeps the same preview height as no tag picker`() {
+            // ----- Arrange -----
+            val collapsedPicker = shareTagPickerFor(
+                variant = ShareCardVariant.BOOK,
+                candidates = mapOf(TagCategory.GENRE to listOf("Fantasy", "Mystery")),
+                selected = setOf("Fantasy"),
+                expanded = false,
+            )
+
+            // ----- Act -----
+            val collapsed = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
+                size = ShareCardSize.STORY,
+                hasExpandableText = false,
+                tagPicker = collapsedPicker,
+            )
+            val withoutPicker = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
+                size = ShareCardSize.STORY,
+                hasExpandableText = false,
+                tagPicker = null,
+            )
+
+            // ----- Assert -----
+            collapsed.sheet.previewMaxHeight shouldBe withoutPicker.sheet.previewMaxHeight
         }
 
         @Test
@@ -319,6 +578,9 @@ class BookDetailSheetScaffoldBuilderTest {
                 bookTitle = bookTitle,
                 variant = variant,
                 hasUpdateCard = hasUpdateCard,
+                size = ShareCardSize.STORY,
+                hasExpandableText = false,
+                tagPicker = null,
             )
 
             // ----- Assert -----

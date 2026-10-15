@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagsLoad
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -77,7 +78,7 @@ class TagChipModelsCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userTags = userTags.toImmutableList())
+            stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(userTags.toImmutableList()))
 
             // ----- Assert -----
             stateFlow.value.userTagChips.map { it.key } shouldBe listOf("GENRE:Fantasy", "MOOD:Cozy")
@@ -336,7 +337,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = persistentListOf())
+                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(persistentListOf()))
 
                 // ----- Assert -----
                 stateFlow.value.tagEditorOpenerChip?.label shouldBe "Add tags"
@@ -362,7 +363,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = userTags.toImmutableList())
+                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(userTags.toImmutableList()))
 
                 // ----- Assert -----
                 stateFlow.value.tagEditorOpenerChip?.label shouldBe "Edit tags"
@@ -400,7 +401,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = userTags.toImmutableList())
+                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(userTags.toImmutableList()))
 
                 // ----- Assert -----
                 stateFlow.value.userTagEditorGroups.map { it.label } shouldBe listOf(
@@ -431,7 +432,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = userTags.toImmutableList())
+                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(userTags.toImmutableList()))
 
                 // ----- Assert -----
                 stateFlow.value.userTagEditorGroups.map { it.label } shouldBe listOf(TagCategory.GENRE.label)
@@ -463,7 +464,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = userTags.toImmutableList())
+                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(userTags.toImmutableList()))
 
                 // ----- Assert -----
                 val chips = stateFlow.value.userTagEditorGroups.flatMap { it.chips }.associateBy { it.label }
@@ -496,7 +497,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = userTags.toImmutableList())
+                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(userTags.toImmutableList()))
 
                 // ----- Assert -----
                 stateFlow.value.userTagByEditorChipKey shouldBe mapOf(

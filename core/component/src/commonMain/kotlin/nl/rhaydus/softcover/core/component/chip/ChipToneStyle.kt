@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.core.component.chip
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.OverMediaInk
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.OverMediaScrim
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover
 
 internal fun ChipTone.style(
@@ -54,6 +56,12 @@ internal fun ChipTone.style(
     ChipTone.Spoiler -> ChipStyle(
         container = scheme.spoilerCover,
         ink = Color.Transparent,
+        weight = FontWeight.Medium,
+    )
+
+    ChipTone.OverMedia -> ChipStyle(
+        container = OverMediaScrim.copy(alpha = 0.4f),
+        ink = OverMediaInk,
         weight = FontWeight.Medium,
     )
 }

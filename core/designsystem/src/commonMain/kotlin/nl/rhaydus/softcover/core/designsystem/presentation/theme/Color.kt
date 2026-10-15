@@ -318,6 +318,10 @@ internal val scrimDark = Color(0xFF000000)
  */
 val RatingGold = Color(0xFFFBBF23)
 
+val OverMediaScrim = Color(0xFF000000)
+
+val OverMediaInk = Color(0xFFFFFFFF)
+
 /**
  * Spoiler redaction treatment, derived from `onSurfaceVariant` so it tracks light/dark. The two roles
  * are deliberately different: in the review editor the author must keep reading their own words, so a

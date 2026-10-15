@@ -1,9 +1,14 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
+import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.toChipSet
 import nl.rhaydus.softcover.core.component.control.SegmentUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
+import nl.rhaydus.softcover.core.component.control.SegmentedControlVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -74,16 +79,17 @@ internal fun shareSheetFor(
     bookTitle: String,
     variant: ShareCardVariant,
     hasUpdateCard: Boolean,
+    size: ShareCardSize,
+    hasExpandableText: Boolean,
+    tagPicker: ShareTagPickerUiModel?,
     progress: ShareCaptureProgress = ShareCaptureProgress.Idle,
 ): ShareSheetUiModel =
     ShareSheetUiModel(
         sheet = ShareCardSheetUiModel(
             card = card,
-            scaffold = shareSheetScaffoldFor(
-                bookTitle = bookTitle,
-                variant = variant,
-            ).withShareCapture(progress = progress),
+            scaffold = shareSheetScaffoldFor(bookTitle = bookTitle).withShareCapture(progress = progress),
             displayName = bookTitle,
+            previewMaxHeight = if (tagPicker?.expanded == true) 280.dp else 440.dp,
         ),
         variantToggle = if (hasUpdateCard) {
             SegmentedControlUiModel(
@@ -96,25 +102,40 @@ internal fun shareSheetFor(
                     }
                     .toImmutableList(),
                 selected = variant,
+                variant = SegmentedControlVariant.Prose(
+                    prefix = "A card for ",
+                    suffix = ".",
+                ),
             )
         } else {
             null
         },
+        options = buildList {
+            if (hasExpandableText) {
+                add(
+                    ChipUiModel(
+                        key = SHARE_FULL_TEXT_KEY,
+                        label = ShareCardSize.FULL_TEXT.label,
+                        tone = ChipTone.Choice,
+                        selected = size == ShareCardSize.FULL_TEXT,
+                    ) to ShareSheetOption.FULL_TEXT,
+                )
+            }
+
+            if (tagPicker != null) add(tagPicker.header to ShareSheetOption.TAGS)
+        }.toChipSet(),
+        tagPicker = tagPicker,
     )
 
-private fun shareSheetScaffoldFor(
-    bookTitle: String,
-    variant: ShareCardVariant,
-): SheetScaffoldUiModel =
+private const val SHARE_FULL_TEXT_KEY = "share-full-text"
+
+private fun shareSheetScaffoldFor(bookTitle: String): SheetScaffoldUiModel =
     SheetScaffoldUiModel(
         header = SheetHeaderUiModel(
             section = SectionHeaderUiModel.Section(
                 eyebrow = "Share",
-                headline = "Share this book",
-                description = when (variant) {
-                    ShareCardVariant.MY_UPDATE -> "Your reading update for $bookTitle"
-                    ShareCardVariant.BOOK -> "A share card for $bookTitle"
-                },
+                headline = bookTitle,
             ),
         ),
+        layout = SheetLayout.Pinned,
     )

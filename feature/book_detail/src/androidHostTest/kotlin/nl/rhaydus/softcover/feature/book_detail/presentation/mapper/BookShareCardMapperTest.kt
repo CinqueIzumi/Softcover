@@ -1,14 +1,21 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import nl.rhaydus.softcover.core.component.cover.CoverSource
+import nl.rhaydus.softcover.core.component.share.ShareCardFormat
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
 
 class BookShareCardMapperTest {
     private fun stubEdition(
@@ -17,6 +24,10 @@ class BookShareCardMapperTest {
         releaseYear: Int = 2021,
         pages: Int? = 320,
     ): BookEdition = mockk {
+        every {
+            this@mockk.id
+        } returns 7
+
         every {
             this@mockk.localImagePath
         } returns localImagePath
@@ -54,6 +65,7 @@ class BookShareCardMapperTest {
         coverUrl: String = "https://book.cover/img.jpg",
         defaultEdition: BookEdition? = null,
         userBook: UserBook? = null,
+        tags: List<Tag> = emptyList(),
     ): Book = mockk {
         every {
             this@mockk.title
@@ -86,6 +98,10 @@ class BookShareCardMapperTest {
         every {
             this@mockk.userBook
         } returns userBook
+
+        every {
+            this@mockk.tags
+        } returns tags
     }
 
     @Nested
@@ -100,7 +116,10 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = null)
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.statsLine shouldBe "Your 9/10"
@@ -116,7 +135,10 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = null)
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.statsLine shouldBe null
@@ -132,7 +154,10 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = null)
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.statsLine shouldBe null
@@ -148,7 +173,10 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = null)
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.statsLine shouldBe null
@@ -166,7 +194,10 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = null)
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.statsLine shouldBe "★ 4.3"
@@ -181,7 +212,10 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = null)
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.statsLine shouldBe null
@@ -203,7 +237,10 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = edition)
+            val result = book.toBookShareCardUiModel(
+                edition = edition,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.statsLine shouldBe "★ 4.0 · Your 6/10 · 2019 · 640 pages"
@@ -222,7 +259,10 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = edition)
+            val result = book.toBookShareCardUiModel(
+                edition = edition,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.statsLine shouldBe null
@@ -249,7 +289,10 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = null)
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.title shouldBe "Emma"
@@ -262,7 +305,10 @@ class BookShareCardMapperTest {
             val book = stubBook(authors = emptyList())
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = null)
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.author shouldBe ""
@@ -274,7 +320,10 @@ class BookShareCardMapperTest {
             val book = stubBook(description = "  ")
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = null)
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.description shouldBe null
@@ -296,7 +345,10 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = edition)
+            val result = book.toBookShareCardUiModel(
+                edition = edition,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.statsLine shouldBe "2019 · 640 pages"
@@ -311,7 +363,10 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = null)
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.statsLine shouldBe "2021 · 100 pages"
@@ -330,7 +385,10 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = edition)
+            val result = book.toBookShareCardUiModel(
+                edition = edition,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.statsLine shouldBe "2020"
@@ -349,27 +407,245 @@ class BookShareCardMapperTest {
             )
 
             // ----- Act -----
-            val result = book.toBookShareCardUiModel(edition = edition)
+            val result = book.toBookShareCardUiModel(
+                edition = edition,
+                format = ShareCardFormat.Story,
+            )
 
             // ----- Assert -----
             result.statsLine shouldBe null
         }
+    }
+
+    @Nested
+    inner class CoverResolution {
+        @TempDir
+        lateinit var tempDir: File
 
         @Test
-        fun `cover prefers the local image path, then the edition url, then the book cover`() {
+        fun `the chosen edition's local file wins over its url`() {
             // ----- Arrange -----
-            val book = stubBook(coverUrl = "book-cover")
-            val local = stubEdition(
-                localImagePath = "local",
-                url = "edition-url",
+            val localFile = File(
+                tempDir,
+                "cover.jpg",
             )
-            val remote = stubEdition(url = "edition-url")
-            val bare = stubEdition()
+            localFile.writeText("img")
+            val book = stubBook(coverUrl = "https://book.cover/img.jpg")
+            val edition = stubEdition(
+                localImagePath = localFile.path,
+                url = "https://edition.cover/img.jpg",
+            )
 
-            // ----- Act & Assert -----
-            book.toBookShareCardUiModel(edition = local).coverUrl shouldBe "local"
-            book.toBookShareCardUiModel(edition = remote).coverUrl shouldBe "edition-url"
-            book.toBookShareCardUiModel(edition = bare).coverUrl shouldBe "book-cover"
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(
+                edition = edition,
+                format = ShareCardFormat.Story,
+            )
+
+            // ----- Assert -----
+            result.cover.source shouldBe CoverSource.Local(
+                path = localFile.path,
+                cacheKey = "https://edition.cover/img.jpg",
+            )
+        }
+
+        @Test
+        fun `the chosen edition's url is used when it has no local file`() {
+            // ----- Arrange -----
+            val book = stubBook(coverUrl = "https://book.cover/img.jpg")
+            val edition = stubEdition(url = "https://edition.cover/img.jpg")
+
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(
+                edition = edition,
+                format = ShareCardFormat.Story,
+            )
+
+            // ----- Assert -----
+            result.cover.source shouldBe CoverSource.Remote(
+                url = "https://edition.cover/img.jpg",
+                persistEditionId = 7,
+            )
+        }
+
+        @Test
+        fun `an imageless chosen edition falls back to the default edition's image`() {
+            // ----- Arrange -----
+            val defaultEdition = stubEdition(url = "https://default.cover/img.jpg")
+            val book = stubBook(
+                coverUrl = "https://book.cover/img.jpg",
+                defaultEdition = defaultEdition,
+            )
+            val edition = stubEdition()
+
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(
+                edition = edition,
+                format = ShareCardFormat.Story,
+            )
+
+            // ----- Assert -----
+            result.cover.source shouldBe CoverSource.Remote(
+                url = "https://default.cover/img.jpg",
+                persistEditionId = 7,
+            )
+        }
+
+        @Test
+        fun `the book cover url is used when no edition has an image`() {
+            // ----- Arrange -----
+            val book = stubBook(coverUrl = "https://book.cover/img.jpg")
+            val edition = stubEdition()
+
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(
+                edition = edition,
+                format = ShareCardFormat.Story,
+            )
+
+            // ----- Assert -----
+            result.cover.source shouldBe CoverSource.Remote(
+                url = "https://book.cover/img.jpg",
+                persistEditionId = null,
+            )
+        }
+
+        @Test
+        fun `the cover carries the book title as its coverless title`() {
+            // ----- Arrange -----
+            val book = stubBook(title = "Test Book")
+
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
+
+            // ----- Assert -----
+            result.cover.coverlessTitle shouldBe "Test Book"
+        }
+
+        @Test
+        fun `a blank book cover url without any edition image leaves the cover coverless`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                title = "Test Book",
+                coverUrl = "",
+            )
+            val edition = stubEdition()
+
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(
+                edition = edition,
+                format = ShareCardFormat.Story,
+            )
+
+            // ----- Assert -----
+            result.cover.source.shouldBeNull()
+            result.cover.coverlessTitle shouldBe "Test Book"
+        }
+    }
+
+    @Nested
+    inner class Format {
+        @Test
+        fun `carries the requested story format onto the card`() {
+            // ----- Arrange -----
+            val book = stubBook()
+
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
+
+            // ----- Assert -----
+            result.format shouldBe ShareCardFormat.Story
+        }
+
+        @Test
+        fun `carries the requested full text format onto the card`() {
+            // ----- Arrange -----
+            val book = stubBook()
+
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.FullText,
+            )
+
+            // ----- Assert -----
+            result.format shouldBe ShareCardFormat.FullText
+        }
+    }
+
+
+    @Nested
+    inner class Tags {
+        private val cozy = Tag(
+            id = 1,
+            name = "Cozy",
+            category = TagCategory.MOOD,
+            count = 9,
+        )
+        private val fantasy = Tag(
+            id = 2,
+            name = "Fantasy",
+            category = TagCategory.GENRE,
+            count = 4,
+        )
+        private val slowBurn = Tag(
+            id = 3,
+            name = "Slow burn",
+            category = TagCategory.TAG,
+            count = 7,
+        )
+
+        @Test
+        fun `carries no tags when none are selected`() {
+            // ----- Arrange -----
+            val book = stubBook(tags = listOf(cozy, fantasy))
+
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+            )
+
+            // ----- Assert -----
+            result.tags shouldBe emptyList()
+        }
+
+        @Test
+        fun `keeps only the selected tags in category order`() {
+            // ----- Arrange -----
+            val book = stubBook(tags = listOf(slowBurn, cozy, fantasy))
+
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+                selectedTags = setOf("Slow burn", "Fantasy"),
+            )
+
+            // ----- Assert -----
+            result.tags.map { it.label } shouldBe listOf("Fantasy", "Slow burn")
+        }
+
+        @Test
+        fun `ignores a selected tag the book does not offer`() {
+            // ----- Arrange -----
+            val book = stubBook(tags = listOf(cozy))
+
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(
+                edition = null,
+                format = ShareCardFormat.Story,
+                selectedTags = setOf("Cozy", "Not a tag"),
+            )
+
+            // ----- Assert -----
+            result.tags.map { it.label } shouldBe listOf("Cozy")
         }
     }
 }
