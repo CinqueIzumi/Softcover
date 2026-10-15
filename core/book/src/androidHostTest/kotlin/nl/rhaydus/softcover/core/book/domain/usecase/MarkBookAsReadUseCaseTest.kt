@@ -181,6 +181,14 @@ class MarkBookAsReadUseCaseTest {
                 inputBook.status
             } returns BookStatus.Reading
 
+            every {
+                inputBook.userBook
+            } returns null
+
+            every {
+                inputBook.currentEdition
+            } returns null
+
             coEvery {
                 repository.markBookAsRead(
                     book = inputBook,
