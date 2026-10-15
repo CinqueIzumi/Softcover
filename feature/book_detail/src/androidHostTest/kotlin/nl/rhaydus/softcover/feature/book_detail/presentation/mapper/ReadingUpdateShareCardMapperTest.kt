@@ -76,6 +76,7 @@ class ReadingUpdateShareCardMapperTest {
         reviewedAt = null,
         updatedAt = null,
         journals = emptyList(),
+        reads = emptyList(),
     )
 
     private fun buildUserBookRead(
@@ -142,8 +143,7 @@ class ReadingUpdateShareCardMapperTest {
         bookSeries = null,
         positionsInSeries = emptyList(),
         isCompilation = false,
-        userBook = userBook,
-        userBookRead = userBookRead,
+        userBook = userBook?.copy(reads = listOfNotNull(userBookRead)),
     )
 
     // ----- username guards -----

@@ -64,7 +64,7 @@ only on modules **below** its tier.
 | `core:book` | the book-operations service: `BooksRepository` + use cases every feature calls (incl. `GetTrendingBooksUseCase`) |
 | `core:lists` | the list-operations service: `ListsRepository`, `GetAllUserListsUseCase`, `AddBookToListUseCase`, `SetEditionAsOwnedUseCase` |
 | `core:deadlines` | the deadline-operations service: `BookDeadlineRepository`, `ObserveBookDeadlineUseCase`, `SetBookDeadlineUseCase` |
-| `core:personal` | the reading-activity service (sessions, highlights, reading log) — no screen |
+| `core:personal` | the reading-activity service (sessions, highlights) — no screen |
 | `core:profile` | the profile-data service consumed by reading/book_detail (the `ProfileScreen` stays a feature) |
 | `core:preferences` | `SettingsRepository`, `Get*AsFlowUseCase` readers, `AppSettingsDataStore`, `ApiKeyLocalDataSource` |
 | `core:identity` | `GetUserIdUseCase`, `UpdateApiKeyUseCase` (storage lives in `core:preferences/data`) |

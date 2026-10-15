@@ -18,12 +18,7 @@ internal fun Book.toStatusCallout(dateStyle: DateStyle): CalloutUiModel? {
         BookStatus.Read -> statusCallout(
             eyebrow = FINISHED_EYEBROW,
             icon = SoftcoverIcon.BookmarkCheck,
-            body = when (
-                val readDate = userBook.getReadDateString(
-                    style = dateStyle,
-                    finishedAt = userBookRead?.finishedAt,
-                )
-            ) {
+            body = when (val readDate = userBook.getReadDateString(style = dateStyle)) {
                 null -> "This book has been in your library since ${userBook.getFallbackDateString(style = dateStyle)}."
                 else -> "You finished this on $readDate."
             },

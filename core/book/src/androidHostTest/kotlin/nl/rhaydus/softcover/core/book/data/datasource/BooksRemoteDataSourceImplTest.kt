@@ -5,6 +5,7 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.api.Query
 import com.apollographql.cache.normalized.FetchPolicy
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
@@ -29,6 +30,7 @@ import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
 import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
+import nl.rhaydus.softcover.GetLatestUnfinishedReadQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.InsertUserBookWithStatusMutation
@@ -114,7 +116,7 @@ class BooksRemoteDataSourceImplTest {
         id: Int = 1,
         canonicalId: Int? = null,
         userBook: UserBook? = null,
-        userBookRead: UserBookRead? = null,
+        currentRead: UserBookRead? = null,
     ): Book = mockk {
         every {
             this@mockk.id
@@ -129,8 +131,8 @@ class BooksRemoteDataSourceImplTest {
         } returns userBook
 
         every {
-            this@mockk.userBookRead
-        } returns userBookRead
+            this@mockk.currentRead
+        } returns currentRead
     }
 
     private fun stubUserBook(
@@ -431,6 +433,100 @@ class BooksRemoteDataSourceImplTest {
 
             // ----- Act -----
             val result = dataSource.fetchBookIdForEdition(editionId = editionId)
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+    }
+
+    @Nested
+    inner class FetchLatestUnfinishedRead {
+        @Test
+        fun `maps the id and startedAt of the first unfinished read`() = runTest {
+            // ----- Arrange -----
+            val queryData = mockk<GetLatestUnfinishedReadQuery.Data>()
+            val readRow = mockk<GetLatestUnfinishedReadQuery.Data.User_book_read>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetLatestUnfinishedReadQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every {
+                queryData.user_book_reads
+            } returns listOf(readRow)
+
+            every {
+                readRow.id
+            } returns 77
+
+            every {
+                readRow.started_at
+            } returns "2026-03-04"
+
+            // ----- Act -----
+            val result = dataSource.fetchLatestUnfinishedRead(userBookId = 5)
+
+            // ----- Assert -----
+            val read = result.shouldNotBeNull()
+            read.id shouldBe 77
+            read.startedAt shouldBe "2026-03-04"
+        }
+
+        @Test
+        fun `keeps a null startedAt as null`() = runTest {
+            // ----- Arrange -----
+            val queryData = mockk<GetLatestUnfinishedReadQuery.Data>()
+            val readRow = mockk<GetLatestUnfinishedReadQuery.Data.User_book_read>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetLatestUnfinishedReadQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every {
+                queryData.user_book_reads
+            } returns listOf(readRow)
+
+            every {
+                readRow.id
+            } returns 78
+
+            every {
+                readRow.started_at
+            } returns null
+
+            // ----- Act -----
+            val result = dataSource.fetchLatestUnfinishedRead(userBookId = 5)
+
+            // ----- Assert -----
+            val read = result.shouldNotBeNull()
+            read.id shouldBe 78
+            read.startedAt shouldBe null
+        }
+
+        @Test
+        fun `returns null when there is no unfinished read`() = runTest {
+            // ----- Arrange -----
+            val queryData = mockk<GetLatestUnfinishedReadQuery.Data>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetLatestUnfinishedReadQuery>(),
+                    fetchPolicy = FetchPolicy.NetworkFirst,
+                )
+            } returns queryData
+
+            every {
+                queryData.user_book_reads
+            } returns emptyList()
+
+            // ----- Act -----
+            val result = dataSource.fetchLatestUnfinishedRead(userBookId = 5)
 
             // ----- Assert -----
             result shouldBe null
@@ -1835,7 +1931,6 @@ class BooksRemoteDataSourceImplTest {
                 positionsInSeries = listOf(1.0),
                 isCompilation = true,
                 userBook = null,
-                userBookRead = null,
             )
 
             stubUserBooksQuery(userBooks = listOf(original))
@@ -1858,7 +1953,6 @@ class BooksRemoteDataSourceImplTest {
             result.positionsInSeries shouldBe canonical.positionsInSeries
             result.isCompilation shouldBe canonical.isCompilation
             result.userBook shouldBe original.userBook
-            result.userBookRead shouldBe original.userBookRead
         }
 
         @Test
@@ -1980,7 +2074,7 @@ class BooksRemoteDataSourceImplTest {
             // ----- Arrange -----
             val book = stubBook(
                 userBook = null,
-                userBookRead = stubUserBookRead(),
+                currentRead = stubUserBookRead(),
             )
 
             // ----- Act & Assert -----
@@ -1993,12 +2087,12 @@ class BooksRemoteDataSourceImplTest {
         }
 
         @Test
-        fun `throws when book has no userBookRead`() = runTest {
+        fun `throws when book has no current read`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook(id = 3)
             val book = stubBook(
                 userBook = userBook,
-                userBookRead = null,
+                currentRead = null,
             )
 
             // ----- Act & Assert -----
@@ -2017,7 +2111,7 @@ class BooksRemoteDataSourceImplTest {
             val userBookRead = stubUserBookRead(id = 5)
             val book = stubBook(
                 userBook = userBook,
-                userBookRead = userBookRead,
+                currentRead = userBookRead,
             )
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
@@ -2077,7 +2171,7 @@ class BooksRemoteDataSourceImplTest {
             val userBookRead = stubUserBookRead(id = 5)
             val book = stubBook(
                 userBook = userBook,
-                userBookRead = userBookRead,
+                currentRead = userBookRead,
             )
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
@@ -2127,7 +2221,7 @@ class BooksRemoteDataSourceImplTest {
             val userBookRead = stubUserBookRead(id = 5)
             val book = stubBook(
                 userBook = userBook,
-                userBookRead = userBookRead,
+                currentRead = userBookRead,
             )
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
@@ -2185,7 +2279,7 @@ class BooksRemoteDataSourceImplTest {
             val userBookRead = stubUserBookRead(id = 5)
             val book = stubBook(
                 userBook = userBook,
-                userBookRead = userBookRead,
+                currentRead = userBookRead,
             )
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
@@ -2243,7 +2337,7 @@ class BooksRemoteDataSourceImplTest {
             val userBookRead = stubUserBookRead(id = 5)
             val book = stubBook(
                 userBook = userBook,
-                userBookRead = userBookRead,
+                currentRead = userBookRead,
             )
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
@@ -2301,7 +2395,7 @@ class BooksRemoteDataSourceImplTest {
             val userBookRead = stubUserBookRead(id = 5)
             val book = stubBook(
                 userBook = userBook,
-                userBookRead = userBookRead,
+                currentRead = userBookRead,
             )
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()

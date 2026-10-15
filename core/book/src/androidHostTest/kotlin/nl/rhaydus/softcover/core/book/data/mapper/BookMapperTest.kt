@@ -1000,7 +1000,6 @@ class BookMapperTest {
             result.defaultEdition.shouldBeNull()
             result.description shouldBe ""
             result.userBook.shouldBeNull()
-            result.userBookRead.shouldBeNull()
         }
 
         @Test
@@ -1202,7 +1201,7 @@ class BookMapperTest {
         }
 
         @Test
-        fun `has no userBookRead when the user book has no reads`() {
+        fun `has no reads when the user book has no reads`() {
             // ----- Arrange -----
             val fragment = stubUserBookFragment(userBookReads = emptyList())
 
@@ -1210,11 +1209,11 @@ class BookMapperTest {
             val result = fragment.toBook().shouldNotBeNull()
 
             // ----- Assert -----
-            result.userBookRead.shouldBeNull()
+            result.userBook.shouldNotBeNull().reads shouldBe emptyList()
         }
 
         @Test
-        fun `maps the first read and ignores later ones`() {
+        fun `maps every read in fragment order`() {
             // ----- Arrange -----
             val firstRead = stubRead(
                 id = 7,
@@ -1234,7 +1233,11 @@ class BookMapperTest {
             val result = fragment.toBook().shouldNotBeNull()
 
             // ----- Assert -----
-            val userBookRead = result.userBookRead.shouldNotBeNull()
+            val reads = result.userBook.shouldNotBeNull().reads
+
+            reads.map { it.id } shouldBe listOf(7, 8)
+
+            val userBookRead = reads.first()
 
             userBookRead.id shouldBe 7
             userBookRead.progress shouldBe 42.5f
@@ -1260,7 +1263,7 @@ class BookMapperTest {
             val result = fragment.toBook().shouldNotBeNull()
 
             // ----- Assert -----
-            result.userBookRead.shouldNotBeNull().progress shouldBe 0f
+            result.userBook.shouldNotBeNull().reads.single().progress shouldBe 0f
         }
     }
 

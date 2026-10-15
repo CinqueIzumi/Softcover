@@ -150,7 +150,6 @@ private fun TwoColumnContent(
             ShelveControlCard(
                 state = state,
                 runAction = runAction,
-                dateStyle = state.dateStyle,
             )
 
             state.scanEditionCallout?.let { scanEditionCallout ->

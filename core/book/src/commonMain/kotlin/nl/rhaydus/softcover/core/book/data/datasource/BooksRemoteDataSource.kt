@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.GetEditionsByBookIdQuery.Data.Edition.Companion.edit
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
 import nl.rhaydus.softcover.GetEditionsByIdsQuery.Data.Edition.Companion.editionDetailFragment as editionsByIdsDetailFragment
 import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
+import nl.rhaydus.softcover.GetLatestUnfinishedReadQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.GetUserBooksQuery.Data.Me.User_book.Companion.userBookFragment
@@ -44,6 +45,7 @@ import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.core.book.domain.model.UnfinishedRead
 import nl.rhaydus.softcover.core.database.mapper.reviewSlateFromDocument
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -64,6 +66,8 @@ interface BooksRemoteDataSource {
     suspend fun fetchBookById(id: Int): Book
 
     suspend fun fetchBookIdForEdition(editionId: Int): Int?
+
+    suspend fun fetchLatestUnfinishedRead(userBookId: Int): UnfinishedRead?
 
     suspend fun fetchEditionMatchesForIsbns(isbns: List<String>): Map<String, IsbnEditionMatch>
 
@@ -219,6 +223,20 @@ internal class BooksRemoteDataSourceImpl(
         )
 
         return result.editions.firstOrNull()?.book_id
+    }
+
+    override suspend fun fetchLatestUnfinishedRead(userBookId: Int): UnfinishedRead? {
+        val result = apolloClient.safeQuery(
+            query = GetLatestUnfinishedReadQuery(userBookId = userBookId),
+            fetchPolicy = FetchPolicy.NetworkFirst,
+        )
+
+        return result.user_book_reads.firstOrNull()?.let { read ->
+            UnfinishedRead(
+                id = read.id,
+                startedAt = read.started_at,
+            )
+        }
     }
 
     override suspend fun fetchEditionMatchesForIsbns(isbns: List<String>): Map<String, IsbnEditionMatch> {
@@ -609,7 +627,7 @@ internal class BooksRemoteDataSourceImpl(
             ?: throw Exception("Book did not contain a user book")
 
         val userBookRead =
-            book.userBookRead ?: throw Exception("Book did not contain a user book read")
+            book.currentRead ?: throw Exception("Book did not contain a user book read")
 
         val isAudiobook = newSeconds != null
 

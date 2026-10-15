@@ -61,7 +61,6 @@ class BookTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         userBook = userBook,
-        userBookRead = null,
     )
 
     private fun buildUserBook(editionId: Int?): UserBook = mockk<UserBook>().also {

@@ -88,7 +88,7 @@ internal fun Book.toReadingUpdateShareCardUiModel(
             author = resolvedAuthor,
             tags = resolvedTags,
             progressLabel = buildProgressLabel(
-                userBookRead = userBookRead,
+                userBookRead = currentRead,
                 edition = resolvedEdition,
             ),
         )

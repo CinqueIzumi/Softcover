@@ -51,7 +51,7 @@ class InProgressCollectorTest {
         } returns paused
 
         every {
-            userBookRead
+            currentRead
         } returns UserBookRead(
             id = 1,
             currentPage = 10,

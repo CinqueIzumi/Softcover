@@ -11,8 +11,8 @@ internal fun Book.toDeadlineProgress(deadline: BookDeadline?): DeadlineProgress?
     val bookDeadline = deadline ?: return null
 
     val current = when (bookDeadline.unit) {
-        DeadlineUnit.PAGES -> userBookRead?.currentPage ?: 0
-        DeadlineUnit.SECONDS -> userBookRead?.currentSeconds ?: 0
+        DeadlineUnit.PAGES -> currentRead?.currentPage ?: 0
+        DeadlineUnit.SECONDS -> currentRead?.currentSeconds ?: 0
     }
     val total = when (bookDeadline.unit) {
         DeadlineUnit.PAGES -> edition.pages ?: 0

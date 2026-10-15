@@ -27,6 +27,8 @@ internal data class AppSettingsEntity(
     val pausedShelfSeeded: Boolean = false,
     val enabledListIds: Set<Int> = emptySet(),
     val listDefaultsSeeded: Boolean = false,
+    // False until one user-book refresh across every status has succeeded on this install.
+    val readThroughsBackfilled: Boolean = false,
     val libraryTabOrder: List<String> = emptyList(),
     val desktopWindowState: DesktopWindowStateEntity = DesktopWindowStateEntity(),
     val readingStreakEnabled: Boolean = true,

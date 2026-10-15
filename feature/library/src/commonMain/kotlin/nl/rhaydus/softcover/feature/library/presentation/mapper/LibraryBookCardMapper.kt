@@ -224,7 +224,7 @@ private fun Book.gridDecorations(
     selection: BookCardSelection?,
     press: BookCardDecorations.Press,
 ): BookCardDecorations {
-    val progress = userBookRead?.progress
+    val progress = currentRead?.progress
 
     return BookCardDecorations(
         progress = if ((status == BookStatus.Reading || status == BookStatus.Paused) && progress != null) {
@@ -241,7 +241,7 @@ private fun Book.gridDecorations(
 }
 
 private fun Book.labelledProgress(): BookCardProgress.Value? {
-    val progress = userBookRead?.progress
+    val progress = currentRead?.progress
 
     if ((status != BookStatus.Reading && status != BookStatus.Paused) || progress == null) return null
 

@@ -26,9 +26,9 @@ internal class OnDeadlinePickedAction(
 
         val total = if (isAudiobook) edition.audioSeconds ?: 0 else edition.pages ?: 0
         val current = if (isAudiobook) {
-            book.userBookRead?.currentSeconds ?: 0
+            book.currentRead?.currentSeconds ?: 0
         } else {
-            book.userBookRead?.currentPage ?: 0
+            book.currentRead?.currentPage ?: 0
         }
         val unit = if (isAudiobook) DeadlineUnit.SECONDS else DeadlineUnit.PAGES
 

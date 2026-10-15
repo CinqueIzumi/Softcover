@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.offlinesync.ReplayOutcome
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
+import nl.rhaydus.softcover.core.book.domain.model.UnfinishedRead
 import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
@@ -281,6 +282,191 @@ class UserBookWriteReplayTest {
 
             coVerify(exactly = 0) {
                 progressHistoryLocalDataSource.delete(localId = any())
+            }
+        }
+    }
+
+    @Nested
+    inner class PlaceholderRead {
+        @Test
+        fun `replays against the resolved read id and start date with no finish date and returns SYNCED`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                userBookId = 10,
+                userBookReadId = -7,
+                editionId = 200,
+                progressPages = 50,
+                progressSeconds = 3600,
+                startedAt = "2026-01-01",
+                finishedAt = "2026-02-02",
+                actionAt = "2026-05-04T12:34:56Z",
+                progressHistoryId = 9L,
+            )
+
+            coEvery {
+                booksRemoteDataSource.fetchLatestUnfinishedRead(userBookId = 10)
+            } returns UnfinishedRead(
+                id = 555,
+                startedAt = "2026-03-03",
+            )
+            stubReplayProgress()
+
+            // ----- Act -----
+            val result = replay(payload = payload)
+
+            // ----- Assert -----
+            result shouldBe ReplayOutcome.SYNCED
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.replayUpdateBookProgress(
+                    userBookReadId = 555,
+                    editionId = 200,
+                    progressPages = 50,
+                    progressSeconds = 3600,
+                    startedAt = "2026-03-03",
+                    finishedAt = null,
+                    actionAt = "2026-05-04T12:34:56Z",
+                )
+            }
+
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.markSynced(localId = 9L)
+            }
+        }
+
+        @Test
+        fun `replays with a null start date when the resolved read has none`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                userBookReadId = -1,
+                startedAt = "2026-01-01",
+            )
+
+            coEvery {
+                booksRemoteDataSource.fetchLatestUnfinishedRead(userBookId = any())
+            } returns UnfinishedRead(
+                id = 555,
+                startedAt = null,
+            )
+            stubReplayProgress()
+
+            // ----- Act -----
+            replay(payload = payload)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.replayUpdateBookProgress(
+                    userBookReadId = 555,
+                    editionId = any(),
+                    progressPages = any(),
+                    progressSeconds = any(),
+                    startedAt = null,
+                    finishedAt = null,
+                    actionAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `returns DISCARDED, replays nothing and deletes the history row when no unfinished read exists`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                userBookId = 10,
+                userBookReadId = -7,
+                progressHistoryId = 9L,
+            )
+
+            coEvery {
+                booksRemoteDataSource.fetchLatestUnfinishedRead(userBookId = 10)
+            } returns null
+
+            // ----- Act -----
+            val result = replay(payload = payload)
+
+            // ----- Assert -----
+            result shouldBe ReplayOutcome.DISCARDED
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.replayUpdateBookProgress(
+                    userBookReadId = any(),
+                    editionId = any(),
+                    progressPages = any(),
+                    progressSeconds = any(),
+                    startedAt = any(),
+                    finishedAt = any(),
+                    actionAt = any(),
+                )
+            }
+
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.delete(localId = 9L)
+            }
+
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.markSynced(localId = any())
+            }
+        }
+
+        @Test
+        fun `returns DISCARDED without touching history when no unfinished read exists and the payload has no history row`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                userBookReadId = -7,
+                progressHistoryId = null,
+            )
+
+            coEvery {
+                booksRemoteDataSource.fetchLatestUnfinishedRead(userBookId = any())
+            } returns null
+
+            // ----- Act -----
+            val result = replay(payload = payload)
+
+            // ----- Assert -----
+            result shouldBe ReplayOutcome.DISCARDED
+            verify { progressHistoryLocalDataSource wasNot Called }
+        }
+
+        @Test
+        fun `keeps the history row pending and rethrows when resolving the read fails with a retryable exception`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                userBookReadId = -7,
+                progressHistoryId = 9L,
+            )
+            val transient = ServerUnavailableException(message = "down")
+
+            coEvery {
+                booksRemoteDataSource.fetchLatestUnfinishedRead(userBookId = any())
+            } throws transient
+
+            // ----- Act & Assert -----
+            val thrown = shouldThrow<ServerUnavailableException> { replay(payload = payload) }
+
+            thrown shouldBe transient
+
+            // ----- Assert -----
+            verify { progressHistoryLocalDataSource wasNot Called }
+        }
+
+        @Test
+        fun `never resolves a read for a positive read id`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                userBookReadId = 100,
+            )
+            stubReplayProgress()
+
+            // ----- Act -----
+            replay(payload = payload)
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchLatestUnfinishedRead(userBookId = any())
             }
         }
     }

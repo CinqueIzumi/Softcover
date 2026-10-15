@@ -13,9 +13,22 @@
 - The edition colophon line closes the section; the section is skipped only with neither tags nor a
   colophon fact.
 
+### Your reads
+
+- The Yours lens, directly after the in-progress/status block and before the verdict, whenever the user book
+  has at least one read (any status); hidden otherwise. Read-only: no row is tappable.
+- Anatomy: a bar-less `YOUR READS` label, an optional summary line ("Read 2× · 2025, 2026", omitted while no
+  read is finished), then one row per read-through, newest first, split by hairline `Divider`s. A row is a
+  `titleSmall` title over a `bodySmall` `onSurfaceVariant` date line, with the rounded progress percent
+  trailing.
+- Row states: "Reading now" / "On hold" for the current read of a Reading / Paused book, "Finished" for a
+  finished read, "Not finished" otherwise. The date line reads "start – finish", "Finished date",
+  "Started date" or "No dates". A not-yet-synced read shows like any other, started today. A finished read
+  shows its recorded percent as-is, which may be below 100.
+
 ### Your tags section
 
-- The Yours lens, between the in-progress/status block and the review, only for a shelved book
+- The Yours lens, between the your-reads section and the review, only for a shelved book
   (`book.userBook != null`): a bar-less `YOUR TAGS` label over one flat wrapping `FlowRow` of the reader's
   own tags, spoiler-flagged ones shown plainly.
 - The row ends with a `ChipTone.Dashed` chip, "Edit tags" (or "+ Add tags" with no tags yet), opening the

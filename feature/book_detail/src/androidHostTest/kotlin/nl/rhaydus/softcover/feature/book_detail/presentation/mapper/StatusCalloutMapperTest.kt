@@ -26,10 +26,6 @@ class StatusCalloutMapperTest {
         every {
             this@mockk.userBook
         } returns userBook
-
-        every {
-            userBookRead
-        } returns null
     }
 
     private fun stubUserBook(
@@ -38,10 +34,7 @@ class StatusCalloutMapperTest {
         fallbackDate: String = "FALLBACK",
     ): UserBook = mockk<UserBook> {
         every {
-            getReadDateString(
-                style = STYLE,
-                finishedAt = null,
-            )
+            getReadDateString(style = STYLE)
         } returns readDate
 
         every {

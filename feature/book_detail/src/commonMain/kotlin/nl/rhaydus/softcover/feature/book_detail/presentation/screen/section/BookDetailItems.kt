@@ -49,7 +49,6 @@ internal fun LazyListScope.bookDetailItems(
         ShelveControlCard(
             state = state,
             runAction = runAction,
-            dateStyle = state.dateStyle,
         )
     }
 

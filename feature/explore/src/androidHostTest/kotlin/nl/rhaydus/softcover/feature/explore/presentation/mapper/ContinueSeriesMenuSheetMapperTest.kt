@@ -38,7 +38,6 @@ class ContinueSeriesMenuSheetMapperTest {
         positionsInSeries = positionsInSeries,
         isCompilation = false,
         userBook = null,
-        userBookRead = null,
     )
 
     @Nested

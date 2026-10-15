@@ -15,15 +15,13 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
-import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
-import nl.rhaydus.softcover.core.domain.model.RefreshScope
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.DrainPendingListWritesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
+import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryOnStartUseCase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -32,7 +30,7 @@ import org.junit.jupiter.api.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainActivityViewModelTest {
     private lateinit var getUserIdUseCase: GetUserIdUseCase
-    private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
+    private lateinit var refreshLibraryOnStartUseCase: RefreshLibraryOnStartUseCase
     private lateinit var getThemeConfigurationUseCase: GetThemeConfigurationUseCase
     private lateinit var refreshReadingActivityUseCase: RefreshReadingActivityUseCase
     private lateinit var drainPendingListWritesUseCase: DrainPendingListWritesUseCase
@@ -45,7 +43,7 @@ class MainActivityViewModelTest {
         Dispatchers.setMain(UnconfinedTestDispatcher())
 
         getUserIdUseCase = mockk(relaxed = true)
-        refreshLibraryUseCase = mockk(relaxed = true)
+        refreshLibraryOnStartUseCase = mockk(relaxed = true)
         getThemeConfigurationUseCase = mockk(relaxed = true)
         refreshReadingActivityUseCase = mockk(relaxed = true)
         drainPendingListWritesUseCase = mockk(relaxed = true)
@@ -61,7 +59,7 @@ class MainActivityViewModelTest {
 
         viewModel = MainActivityViewModel(
             getUserIdUseCase = getUserIdUseCase,
-            refreshLibraryUseCase = refreshLibraryUseCase,
+            refreshLibraryOnStartUseCase = refreshLibraryOnStartUseCase,
             getThemeConfigurationUseCase = getThemeConfigurationUseCase,
             refreshReadingActivityUseCase = refreshReadingActivityUseCase,
             drainPendingListWritesUseCase = drainPendingListWritesUseCase,
@@ -77,7 +75,7 @@ class MainActivityViewModelTest {
 
     private fun createViewModel() = MainActivityViewModel(
         getUserIdUseCase = getUserIdUseCase,
-        refreshLibraryUseCase = refreshLibraryUseCase,
+        refreshLibraryOnStartUseCase = refreshLibraryOnStartUseCase,
         getThemeConfigurationUseCase = getThemeConfigurationUseCase,
         refreshReadingActivityUseCase = refreshReadingActivityUseCase,
         drainPendingListWritesUseCase = drainPendingListWritesUseCase,
@@ -388,7 +386,7 @@ class MainActivityViewModelTest {
     @Nested
     inner class ColdStart {
         @Test
-        fun `refreshes only the currently reading shelf when signed in`() {
+        fun `runs the start-up library refresh once when signed in`() {
             // ----- Arrange -----
             coEvery {
                 getUserIdUseCase()
@@ -398,14 +396,7 @@ class MainActivityViewModelTest {
             createViewModel()
 
             // ----- Assert -----
-            coVerify(exactly = 1) {
-                refreshLibraryUseCase(
-                    scope = RefreshScope.ByStatuses(
-                        statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),
-                    ),
-                )
-            }
-            coVerify(exactly = 0) { refreshLibraryUseCase(scope = RefreshScope.All) }
+            coVerify(exactly = 1) { refreshLibraryOnStartUseCase() }
         }
 
         @Test
@@ -448,7 +439,7 @@ class MainActivityViewModelTest {
 
             // ----- Assert -----
             model.state.value.authenticated shouldBe false
-            coVerify(exactly = 0) { refreshLibraryUseCase(any()) }
+            coVerify(exactly = 0) { refreshLibraryOnStartUseCase() }
             coVerify(exactly = 0) { drainPendingListWritesUseCase() }
             coVerify(exactly = 0) { refreshReadingActivityUseCase() }
         }

@@ -31,10 +31,12 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -101,8 +103,10 @@ class ReadingBookCardMapperTest {
         bookSeries = series,
         positionsInSeries = emptyList(),
         isCompilation = false,
-        userBook = null,
-        userBookRead = userBookRead,
+        userBook = PreviewData.baseBook.userBook?.copy(
+            status = BookStatus.Reading,
+            reads = listOfNotNull(userBookRead),
+        ),
     )
 
     private fun alsoReading(

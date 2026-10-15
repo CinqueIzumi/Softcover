@@ -62,7 +62,7 @@ class OnHoldBooksCollectorTest {
             currentEdition?.isAudiobook
         } returns isAudiobook
         every {
-            userBookRead?.progress
+            currentRead?.progress
         } returns progress
     }
 

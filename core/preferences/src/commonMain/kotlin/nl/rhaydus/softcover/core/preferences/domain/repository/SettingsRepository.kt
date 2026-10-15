@@ -62,6 +62,10 @@ interface SettingsRepository {
 
     val listDefaultsSeeded: Flow<Boolean>
 
+    val readThroughsBackfilled: Flow<Boolean>
+
+    suspend fun markReadThroughsBackfilled()
+
     suspend fun seedEnabledListIds(ids: Set<Int>)
 
     suspend fun resetLibraryVisibilityPreferences()

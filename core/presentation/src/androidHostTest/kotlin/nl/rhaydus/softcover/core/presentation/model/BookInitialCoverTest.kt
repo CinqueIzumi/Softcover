@@ -30,9 +30,6 @@ class BookInitialCoverTest {
             userBook
         } returns null
         every {
-            userBookRead
-        } returns null
-        every {
             this@mockk.title
         } returns title
         every {
@@ -69,7 +66,7 @@ class BookInitialCoverTest {
             userBook
         } returns null
         every {
-            userBookRead
+            currentRead
         } returns null
         every {
             title

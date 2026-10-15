@@ -37,9 +37,12 @@ internal class CalloutsCollector : BookDetailCollector {
                     isUpdating = inputs.isUpdatingScannedEdition,
                 )
 
+                val shelveReadDate = inputs.book?.userBook?.getReadDateString(style = inputs.dateStyle)
+
                 scope.setState { state ->
                     state.copy(
                         statusCallout = statusCallout,
+                        shelveReadDate = shelveReadDate,
                         scanEditionCallout = scanEditionCallout,
                     )
                 }

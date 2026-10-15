@@ -98,6 +98,7 @@ class OfflineUserBookSyncImplTest {
         reviewedAt = null,
         updatedAt = null,
         journals = emptyList(),
+        reads = emptyList(),
     )
 
     private fun stubUserBookRead(
@@ -131,8 +132,7 @@ class OfflineUserBookSyncImplTest {
         bookSeries = null,
         positionsInSeries = emptyList(),
         isCompilation = false,
-        userBook = userBook,
-        userBookRead = userBookRead,
+        userBook = userBook?.copy(reads = userBook.reads + listOfNotNull(userBookRead)),
     )
 
     // ---------------------------------------------------------------------------
@@ -150,8 +150,7 @@ class OfflineUserBookSyncImplTest {
                 currentPage = 100,
             )
             val book = stubBook(
-                userBook = userBook,
-                userBookRead = userBookRead,
+                userBook = userBook.copy(reads = listOf(userBookRead)),
             )
 
             // ----- Act -----
@@ -237,7 +236,7 @@ class OfflineUserBookSyncImplTest {
                 } returns null
 
                 every {
-                    this@mockk.userBookRead
+                    this@mockk.currentRead
                 } returns stubUserBookRead(id = 1)
             }
 
@@ -261,7 +260,7 @@ class OfflineUserBookSyncImplTest {
                 } returns stubUserBook(id = 5)
 
                 every {
-                    this@mockk.userBookRead
+                    this@mockk.currentRead
                 } returns null
             }
 
@@ -274,6 +273,77 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
+        }
+
+        @Test
+        fun `placeholder read — enqueues the negative read id with null startedAt and finishedAt`() = runTest {
+            // ----- Arrange -----
+            val placeholderRead = UserBookRead(
+                id = -10,
+                currentPage = null,
+                currentSeconds = null,
+                progress = 0f,
+                startedAt = "2026-07-21",
+                finishedAt = "2026-07-22",
+            )
+            val book = stubBook(
+                userBook = stubUserBook(id = 10),
+                userBookRead = placeholderRead,
+            )
+
+            // ----- Act -----
+            syncImpl.enqueueProgressUpdate(
+                book = book,
+                newPage = 30,
+                newSeconds = null,
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                userBookWriteQueue.enqueue(
+                    payload = match { write ->
+                        write.kind == PendingUserBookWriteKind.UPDATE_PROGRESS &&
+                            write.userBookReadId == -10 &&
+                            write.startedAt == null &&
+                            write.finishedAt == null &&
+                            write.progressPages == 30
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `real read — enqueues the read dates unchanged`() = runTest {
+            // ----- Arrange -----
+            val realRead = UserBookRead(
+                id = 20,
+                currentPage = 10,
+                currentSeconds = null,
+                progress = 0.1f,
+                startedAt = "2026-07-21",
+                finishedAt = null,
+            )
+            val book = stubBook(
+                userBook = stubUserBook(id = 10),
+                userBookRead = realRead,
+            )
+
+            // ----- Act -----
+            syncImpl.enqueueProgressUpdate(
+                book = book,
+                newPage = 30,
+                newSeconds = null,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                userBookWriteQueue.enqueue(
+                    payload = match { write ->
+                        write.userBookReadId == 20 && write.startedAt == "2026-07-21"
+                    },
+                )
+            }
         }
     }
 
@@ -292,8 +362,7 @@ class OfflineUserBookSyncImplTest {
                 currentPage = 300,
             )
             val book = stubBook(
-                userBook = userBook,
-                userBookRead = userBookRead,
+                userBook = userBook.copy(reads = listOf(userBookRead)),
             )
 
             // ----- Act -----
@@ -326,7 +395,7 @@ class OfflineUserBookSyncImplTest {
                 } returns null
 
                 every {
-                    this@mockk.userBookRead
+                    this@mockk.currentRead
                 } returns stubUserBookRead(id = 1)
             }
 
@@ -346,7 +415,7 @@ class OfflineUserBookSyncImplTest {
                 } returns stubUserBook(id = 5)
 
                 every {
-                    this@mockk.userBookRead
+                    this@mockk.currentRead
                 } returns null
             }
 
@@ -393,7 +462,6 @@ class OfflineUserBookSyncImplTest {
             // ----- Arrange -----
             val book = stubBook(
                 userBook = stubUserBook(id = 10),
-                userBookRead = null,
             )
 
             // ----- Act -----
@@ -438,8 +506,7 @@ class OfflineUserBookSyncImplTest {
             val userBook = stubUserBook(id = 10)
             val userBookRead = stubUserBookRead(id = 20)
             val book = stubBook(
-                userBook = userBook,
-                userBookRead = userBookRead,
+                userBook = userBook.copy(reads = listOf(userBookRead)),
             )
 
             // ----- Act -----
@@ -467,7 +534,6 @@ class OfflineUserBookSyncImplTest {
             val userBook = stubUserBook(id = 10)
             val book = stubBook(
                 userBook = userBook,
-                userBookRead = null,
             )
 
             // ----- Act -----
@@ -523,8 +589,7 @@ class OfflineUserBookSyncImplTest {
             val userBook = stubUserBook(id = 10)
             val userBookRead = stubUserBookRead(id = 20)
             val book = stubBook(
-                userBook = userBook,
-                userBookRead = userBookRead,
+                userBook = userBook.copy(reads = listOf(userBookRead)),
             )
 
             // ----- Act -----
@@ -554,7 +619,6 @@ class OfflineUserBookSyncImplTest {
             val userBook = stubUserBook(id = 10)
             val book = stubBook(
                 userBook = userBook,
-                userBookRead = null,
             )
 
             // ----- Act -----
@@ -741,6 +805,7 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
             val localRead = UserBookRead(
                 id = 1,
@@ -765,6 +830,7 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
             val serverRead = UserBookRead(
                 id = 1,
@@ -776,12 +842,10 @@ class OfflineUserBookSyncImplTest {
             )
 
             val fetchedBook = stubBook(
-                userBook = serverUserBook,
-                userBookRead = serverRead,
+                userBook = serverUserBook.copy(reads = listOf(serverRead)),
             )
             val localBook = fetchedBook.copy(
-                userBook = localUserBook,
-                userBookRead = localRead,
+                userBook = localUserBook.copy(reads = listOf(localRead)),
             )
 
             coEvery {
@@ -798,8 +862,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             val cached = result.first()
-            cached.userBookRead?.currentPage shouldBe 200
-            cached.userBookRead?.progress shouldBe 80f
+            cached.currentRead?.currentPage shouldBe 200
+            cached.currentRead?.progress shouldBe 80f
             cached.userBook?.rating shouldBe 4.5
         }
 
@@ -822,6 +886,7 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
             val localRead = UserBookRead(
                 id = 5,
@@ -837,11 +902,9 @@ class OfflineUserBookSyncImplTest {
             // Server fetch has no userBookRead row yet (lag)
             val fetchedBook = stubBook(
                 userBook = serverUserBook,
-                userBookRead = null,
             )
             val localBook = fetchedBook.copy(
-                userBook = localUserBook,
-                userBookRead = localRead,
+                userBook = localUserBook.copy(reads = listOf(localRead)),
             )
 
             coEvery {
@@ -858,8 +921,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             val cached = result.first()
-            cached.userBookRead?.currentPage shouldBe 200
-            cached.userBookRead?.progress shouldBe 80f
+            cached.currentRead?.currentPage shouldBe 200
+            cached.currentRead?.progress shouldBe 80f
         }
 
         @Test
@@ -881,6 +944,7 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
             val localRead = UserBookRead(
                 id = 1,
@@ -905,6 +969,7 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
             val serverRead = UserBookRead(
                 id = 1,
@@ -916,12 +981,10 @@ class OfflineUserBookSyncImplTest {
             )
 
             val fetchedBook = stubBook(
-                userBook = serverUserBook,
-                userBookRead = serverRead,
+                userBook = serverUserBook.copy(reads = listOf(serverRead)),
             )
             val localBook = fetchedBook.copy(
-                userBook = localUserBook,
-                userBookRead = localRead,
+                userBook = localUserBook.copy(reads = listOf(localRead)),
             )
 
             coEvery {
@@ -939,8 +1002,8 @@ class OfflineUserBookSyncImplTest {
             // ----- Assert -----
             val cached = result.first()
             cached.userBook?.rating shouldBe 5.0
-            cached.userBookRead?.currentPage shouldBe 350
-            cached.userBookRead?.progress shouldBe 100f
+            cached.currentRead?.currentPage shouldBe 350
+            cached.currentRead?.progress shouldBe 100f
         }
 
         @Test
@@ -962,6 +1025,7 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
             val localRead = UserBookRead(
                 id = 1,
@@ -986,6 +1050,7 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
             val serverRead = UserBookRead(
                 id = 1,
@@ -997,12 +1062,10 @@ class OfflineUserBookSyncImplTest {
             )
 
             val fetchedBook = stubBook(
-                userBook = serverUserBook,
-                userBookRead = serverRead,
+                userBook = serverUserBook.copy(reads = listOf(serverRead)),
             )
             val localBook = fetchedBook.copy(
-                userBook = localUserBook,
-                userBookRead = localRead,
+                userBook = localUserBook.copy(reads = listOf(localRead)),
             )
 
             coEvery {
@@ -1020,8 +1083,8 @@ class OfflineUserBookSyncImplTest {
             // ----- Assert -----
             val cached = result.first()
             cached.userBook?.status shouldBe BookStatus.Read
-            cached.userBookRead?.finishedAt shouldBe "2026-05-01"
-            cached.userBookRead?.progress shouldBe 100f
+            cached.currentRead?.finishedAt shouldBe "2026-05-01"
+            cached.currentRead?.progress shouldBe 100f
             cached.userBook?.rating shouldBe 4.8
         }
 
@@ -1046,6 +1109,7 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
 
             val serverUserBook = UserBook(
@@ -1063,11 +1127,11 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
 
             val fetchedBook = stubBook(
                 userBook = serverUserBook,
-                userBookRead = null,
             )
             val localBook = fetchedBook.copy(userBook = localUserBook)
 
@@ -1110,6 +1174,7 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
 
             val serverUserBookForOther = UserBook(
@@ -1126,6 +1191,7 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
 
             val syncedFetchedBook = stubBook(
@@ -1143,6 +1209,7 @@ class OfflineUserBookSyncImplTest {
                     reviewedAt = null,
                     updatedAt = null,
                     journals = emptyList(),
+                    reads = emptyList(),
                 ),
             )
             val otherFetchedBook = stubBook(userBook = serverUserBookForOther)
@@ -1190,6 +1257,7 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
 
             val serverUserBook = UserBook(
@@ -1207,11 +1275,11 @@ class OfflineUserBookSyncImplTest {
                 reviewedAt = null,
                 updatedAt = null,
                 journals = emptyList(),
+                reads = emptyList(),
             )
 
             val fetchedBook = stubBook(
                 userBook = serverUserBook,
-                userBookRead = null,
             )
             val localBook = fetchedBook.copy(userBook = localUserBook)
 
@@ -1235,6 +1303,428 @@ class OfflineUserBookSyncImplTest {
             cached.userBook?.rating shouldBe 5.0
             cached.userBook?.reviewDocument shouldBe localReview
             cached.userBook?.reviewHasSpoilers shouldBe true
+        }
+    }
+
+    @Nested
+    inner class ReconcileReads {
+        private val userBookId = 55
+
+        private fun read(
+            id: Int,
+            page: Int? = null,
+            progress: Float = 0f,
+            startedAt: String? = null,
+            finishedAt: String? = null,
+        ): UserBookRead = UserBookRead(
+            id = id,
+            currentPage = page,
+            currentSeconds = null,
+            progress = progress,
+            startedAt = startedAt,
+            finishedAt = finishedAt,
+        )
+
+        private fun bookWith(
+            status: BookStatus,
+            vararg reads: UserBookRead,
+        ): Book = stubBook(
+            userBook = stubUserBook(id = userBookId).copy(
+                status = status,
+                reads = reads.toList(),
+            ),
+        )
+
+        private suspend fun reconcile(
+            kind: PendingUserBookWriteKind,
+            snapshot: Book,
+            fetched: Book,
+        ): Book {
+            coEvery {
+                userBookWriteDrainer.drain()
+            } returns mapOf(userBookId to setOf(kind))
+            every {
+                booksLocalDataSource.allUserBooks
+            } returns flowOf(listOf(snapshot))
+
+            return syncImpl.drainAndReconcile(fetchFromServer = { listOf(fetched) }).first()
+        }
+
+        @Test
+        fun `UPDATE_PROGRESS — snapshot values apply only to the fetched read with the same id`() = runTest {
+            // ----- Arrange -----
+            val snapshot = bookWith(
+                BookStatus.Reading,
+                read(
+                    id = 10,
+                    page = 80,
+                    progress = 80f,
+                    startedAt = "2026-02-01",
+                ),
+                read(
+                    id = 5,
+                    page = 100,
+                    progress = 100f,
+                    finishedAt = "2025-01-01",
+                ),
+            )
+            val staleCurrent = read(
+                id = 10,
+                page = 20,
+                progress = 20f,
+                startedAt = "2026-02-02",
+            )
+            val olderRead = read(
+                id = 5,
+                page = 90,
+                progress = 90f,
+                finishedAt = "2025-01-02",
+            )
+            val fetched = bookWith(
+                BookStatus.Reading,
+                staleCurrent,
+                olderRead,
+            )
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.UPDATE_PROGRESS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            val reads = result.userBook.shouldNotBeNull().reads
+            reads.first { it.id == 10 } shouldBe read(
+                id = 10,
+                page = 80,
+                progress = 80f,
+                startedAt = "2026-02-01",
+            )
+            reads.first { it.id == 5 } shouldBe olderRead
+        }
+
+        @Test
+        fun `UPDATE_PROGRESS — a genuine snapshot read missing from the fetch is appended`() = runTest {
+            // ----- Arrange -----
+            val snapshotCurrent = read(
+                id = 10,
+                page = 80,
+                progress = 80f,
+                startedAt = "2026-02-01",
+            )
+            val snapshot = bookWith(
+                BookStatus.Reading,
+                snapshotCurrent,
+            )
+            val olderRead = read(
+                id = 5,
+                progress = 100f,
+                finishedAt = "2025-01-01",
+            )
+            val fetched = bookWith(
+                BookStatus.Reading,
+                olderRead,
+            )
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.UPDATE_PROGRESS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().reads shouldBe listOf(olderRead, snapshotCurrent)
+        }
+
+        @Test
+        fun `UPDATE_PROGRESS — a placeholder snapshot read missing from the fetch is not appended`() = runTest {
+            // ----- Arrange -----
+            val snapshot = bookWith(
+                BookStatus.Reading,
+                read(
+                    id = -userBookId,
+                    page = 30,
+                    progress = 30f,
+                    startedAt = "2026-02-01",
+                ),
+            )
+            val olderRead = read(
+                id = 5,
+                progress = 100f,
+                finishedAt = "2025-01-01",
+            )
+            val serverCurrent = read(
+                id = 9,
+                startedAt = "2026-02-01",
+            )
+            val fetched = bookWith(
+                BookStatus.Reading,
+                olderRead,
+                serverCurrent,
+            )
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.UPDATE_PROGRESS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().reads shouldBe listOf(olderRead, serverCurrent)
+        }
+
+        @Test
+        fun `UPDATE_PROGRESS — a fetched read with a different id is never overwritten`() = runTest {
+            // ----- Arrange -----
+            val snapshotCurrent = read(
+                id = 10,
+                page = 80,
+                progress = 80f,
+                startedAt = "2026-02-01",
+            )
+            val snapshot = bookWith(
+                BookStatus.Reading,
+                snapshotCurrent,
+            )
+            val otherRead = read(
+                id = 11,
+                page = 5,
+                progress = 5f,
+                startedAt = "2026-03-01",
+            )
+            val fetched = bookWith(
+                BookStatus.Reading,
+                otherRead,
+            )
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.UPDATE_PROGRESS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            val reads = result.userBook.shouldNotBeNull().reads
+            reads.first { it.id == 11 } shouldBe otherRead
+        }
+
+        @Test
+        fun `MARK_AS_READ — progress and finishedAt apply only to the fetched read with the same id`() = runTest {
+            // ----- Arrange -----
+            val snapshot = bookWith(
+                BookStatus.Read,
+                read(
+                    id = 10,
+                    page = 100,
+                    progress = 100f,
+                    startedAt = "2026-02-01",
+                    finishedAt = "2026-05-01",
+                ),
+            )
+            val staleCurrent = read(
+                id = 10,
+                page = 40,
+                progress = 40f,
+                startedAt = "2026-02-01",
+            )
+            val otherRead = read(
+                id = 9,
+                page = 7,
+                progress = 7f,
+                startedAt = "2025-02-01",
+            )
+            val fetched = bookWith(
+                BookStatus.Reading,
+                staleCurrent,
+                otherRead,
+            )
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.MARK_AS_READ,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            val userBook = result.userBook.shouldNotBeNull()
+            userBook.status shouldBe BookStatus.Read
+            userBook.reads.first { it.id == 10 } shouldBe staleCurrent.copy(
+                progress = 100f,
+                finishedAt = "2026-05-01",
+            )
+            userBook.reads.first { it.id == 9 } shouldBe otherRead
+        }
+
+        @Test
+        fun `MARK_AS_READ — a fetched read with a different id is never overwritten`() = runTest {
+            // ----- Arrange -----
+            val snapshot = bookWith(
+                BookStatus.Read,
+                read(
+                    id = 10,
+                    progress = 100f,
+                    finishedAt = "2026-05-01",
+                ),
+            )
+            val otherRead = read(
+                id = 11,
+                page = 5,
+                progress = 5f,
+                startedAt = "2026-03-01",
+            )
+            val fetched = bookWith(
+                BookStatus.Reading,
+                otherRead,
+            )
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.MARK_AS_READ,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().reads shouldBe listOf(otherRead)
+        }
+
+        @Test
+        fun `SET_STATUS — a local placeholder read is kept when the fetched Reading book has only finished reads`() =
+            runTest {
+                // ----- Arrange -----
+                val placeholder = read(
+                    id = -1,
+                    startedAt = "2026-06-01",
+                )
+                val finished = read(
+                    id = 5,
+                    progress = 100f,
+                    finishedAt = "2025-01-01",
+                )
+                val snapshot = bookWith(
+                    BookStatus.Reading,
+                    placeholder,
+                    finished,
+                )
+                val fetched = bookWith(
+                    BookStatus.Reading,
+                    finished,
+                )
+
+                // ----- Act -----
+                val result = reconcile(
+                    PendingUserBookWriteKind.SET_STATUS,
+                    snapshot,
+                    fetched,
+                )
+
+                // ----- Assert -----
+                val userBook = result.userBook.shouldNotBeNull()
+                userBook.reads shouldBe listOf(finished, placeholder)
+                userBook.currentRead shouldBe placeholder
+            }
+
+        @Test
+        fun `SET_STATUS — a local placeholder read is kept when the fetched book is Paused`() = runTest {
+            // ----- Arrange -----
+            val placeholder = read(
+                id = -1,
+                startedAt = "2026-06-01",
+            )
+            val finished = read(
+                id = 5,
+                progress = 100f,
+                finishedAt = "2025-01-01",
+            )
+            val snapshot = bookWith(
+                BookStatus.Paused,
+                placeholder,
+            )
+            val fetched = bookWith(
+                BookStatus.Paused,
+                finished,
+            )
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.SET_STATUS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().reads shouldBe listOf(finished, placeholder)
+        }
+
+        @Test
+        fun `SET_STATUS — the placeholder is not added when the fetched book already has an unfinished read`() =
+            runTest {
+                // ----- Arrange -----
+                val placeholder = read(
+                    id = -1,
+                    startedAt = "2026-06-01",
+                )
+                val snapshot = bookWith(
+                    BookStatus.Reading,
+                    placeholder,
+                )
+                val serverCurrent = read(
+                    id = 9,
+                    startedAt = "2026-06-01",
+                )
+                val fetched = bookWith(
+                    BookStatus.Reading,
+                    serverCurrent,
+                )
+
+                // ----- Act -----
+                val result = reconcile(
+                    PendingUserBookWriteKind.SET_STATUS,
+                    snapshot,
+                    fetched,
+                )
+
+                // ----- Assert -----
+                result.userBook.shouldNotBeNull().reads shouldBe listOf(serverCurrent)
+            }
+
+        @Test
+        fun `SET_STATUS — the placeholder is not added when the reconciled status is Read`() = runTest {
+            // ----- Arrange -----
+            val placeholder = read(
+                id = -1,
+                startedAt = "2026-06-01",
+            )
+            val snapshot = bookWith(
+                BookStatus.Read,
+                placeholder,
+            )
+            val finished = read(
+                id = 5,
+                progress = 100f,
+                finishedAt = "2025-01-01",
+            )
+            val fetched = bookWith(
+                BookStatus.Reading,
+                finished,
+            )
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.SET_STATUS,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            val userBook = result.userBook.shouldNotBeNull()
+            userBook.status shouldBe BookStatus.Read
+            userBook.reads shouldBe listOf(finished)
         }
     }
 

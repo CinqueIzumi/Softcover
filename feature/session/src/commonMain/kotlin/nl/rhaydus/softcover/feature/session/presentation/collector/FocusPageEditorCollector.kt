@@ -25,7 +25,7 @@ internal class FocusPageEditorCollector : FocusModeCollector {
     ) {
         val activeSession = dependencies.activeSessionController.activeSession.filterNotNull()
 
-        val initialPage = activeSession.firstOrNull()?.book?.userBookRead?.currentPage ?: 0
+        val initialPage = activeSession.firstOrNull()?.book?.currentRead?.currentPage ?: 0
 
         scope.setState { it.copy(pageDraft = TextFieldValue(text = initialPage.toString())) }
 

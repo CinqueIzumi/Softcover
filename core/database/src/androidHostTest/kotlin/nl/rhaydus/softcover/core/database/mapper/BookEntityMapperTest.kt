@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.database.mapper
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -293,7 +294,6 @@ class BookEntityMapperTest {
         positionsInSeries: List<Double> = emptyList(),
         isCompilation: Boolean = false,
         userBook: UserBook? = null,
-        userBookRead: UserBookRead? = null,
     ): Book = mockk {
         every {
             this@mockk.id
@@ -362,10 +362,6 @@ class BookEntityMapperTest {
         every {
             this@mockk.userBook
         } returns userBook
-
-        every {
-            this@mockk.userBookRead
-        } returns userBookRead
     }
     // endregion
     // region Shared stubs for Entity -> UI section
@@ -521,11 +517,11 @@ class BookEntityMapperTest {
     private fun stubUserBookWithJournals(
         userBook: UserBookEntity = stubUserBookEntity(),
         journals: List<ReadingJournalEntity> = emptyList(),
-        userBookRead: UserBookReadEntity? = null,
+        userBookReads: List<UserBookReadEntity> = emptyList(),
     ): UserBookWithJournals = UserBookWithJournals(
         userBook = userBook,
         journals = journals,
-        userBookRead = userBookRead,
+        userBookReads = userBookReads,
     )
 
     private fun stubBookSeriesEntity(
@@ -1122,7 +1118,10 @@ class BookEntityMapperTest {
             )
 
             // ----- Act -----
-            val result = entity.toModel(journals = listOf(journalModel))
+            val result = entity.toModel(
+                journals = listOf(journalModel),
+                reads = emptyList(),
+            )
 
             // ----- Assert -----
             result.id shouldBe 3
@@ -1146,7 +1145,10 @@ class BookEntityMapperTest {
             val entity = stubUserBookEntity(statusCode = 999)
 
             // ----- Act -----
-            val result = entity.toModel(journals = emptyList())
+            val result = entity.toModel(
+                journals = emptyList(),
+                reads = emptyList(),
+            )
 
             // ----- Assert -----
             result.status shouldBe BookStatus.None
@@ -1161,7 +1163,10 @@ class BookEntityMapperTest {
                 val entity = stubUserBookEntity(statusCode = expectedStatus.code)
 
                 // ----- Act -----
-                val result = entity.toModel(journals = emptyList())
+                val result = entity.toModel(
+                journals = emptyList(),
+                reads = emptyList(),
+            )
 
                 // ----- Assert -----
                 result.status shouldBe expectedStatus
@@ -1175,7 +1180,10 @@ class BookEntityMapperTest {
             val entity = stubUserBookEntity(reviewSlateJson = doc.toJson())
 
             // ----- Act -----
-            val result = entity.toModel(journals = emptyList())
+            val result = entity.toModel(
+                journals = emptyList(),
+                reads = emptyList(),
+            )
 
             // ----- Assert -----
             result.reviewDocument shouldBe doc
@@ -1187,7 +1195,10 @@ class BookEntityMapperTest {
             val entity = stubUserBookEntity(reviewSlateJson = null)
 
             // ----- Act -----
-            val result = entity.toModel(journals = emptyList())
+            val result = entity.toModel(
+                journals = emptyList(),
+                reads = emptyList(),
+            )
 
             // ----- Assert -----
             result.reviewDocument shouldBe null
@@ -1316,7 +1327,7 @@ class BookEntityMapperTest {
         }
 
         @Test
-        fun `userBook and userBookRead are null when userBookWithJournals is null`() {
+        fun `userBook is null when userBookWithJournals is null`() {
             // ----- Arrange -----
             val entity = stubBookFullEntity(userBookWithJournals = null)
 
@@ -1325,7 +1336,6 @@ class BookEntityMapperTest {
 
             // ----- Assert -----
             result.userBook shouldBe null
-            result.userBookRead shouldBe null
         }
 
         @Test
@@ -1350,34 +1360,40 @@ class BookEntityMapperTest {
         }
 
         @Test
-        fun `userBookRead is null when userBookWithJournals has null userBookRead`() {
+        fun `reads are empty when userBookWithJournals has no userBookReads`() {
             // ----- Arrange -----
-            val withJournals = stubUserBookWithJournals(userBookRead = null)
+            val withJournals = stubUserBookWithJournals(userBookReads = emptyList())
             val entity = stubBookFullEntity(userBookWithJournals = withJournals)
 
             // ----- Act -----
             val result = entity.toModel()
 
             // ----- Assert -----
-            result.userBookRead shouldBe null
+            result.userBook.shouldNotBeNull().reads shouldBe emptyList()
         }
 
         @Test
-        fun `userBookRead is mapped when userBookWithJournals has non-null userBookRead`() {
+        fun `every userBookRead is mapped onto the user book ordered by id`() {
             // ----- Arrange -----
-            val readEntity = stubUserBookReadEntity(
+            val newerRead = stubUserBookReadEntity(
+                id = 9,
+                currentPage = 10,
+            )
+            val olderRead = stubUserBookReadEntity(
                 id = 7,
                 currentPage = 42,
             )
-            val withJournals = stubUserBookWithJournals(userBookRead = readEntity)
+            val withJournals = stubUserBookWithJournals(userBookReads = listOf(newerRead, olderRead))
             val entity = stubBookFullEntity(userBookWithJournals = withJournals)
 
             // ----- Act -----
             val result = entity.toModel()
 
             // ----- Assert -----
-            result.userBookRead?.id shouldBe 7
-            result.userBookRead?.currentPage shouldBe 42
+            val reads = result.userBook.shouldNotBeNull().reads
+
+            reads.map { it.id } shouldBe listOf(7, 9)
+            reads.map { it.currentPage } shouldBe listOf(42, 10)
         }
 
         @Test

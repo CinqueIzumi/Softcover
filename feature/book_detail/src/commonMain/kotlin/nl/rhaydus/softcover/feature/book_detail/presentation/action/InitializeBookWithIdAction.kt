@@ -24,14 +24,13 @@ internal class InitializeBookWithIdAction(
                 .getOrNull()
 
             scope.setState { state ->
-                // Seed userBook/userBookRead from initialCover so currentEdition resolves
+                // Seed userBook from initialCover so currentEdition resolves
                 // to the user's edition immediately, avoiding a one-frame flash to the
                 // remote book's defaultEdition before UserBooksFlowCollector overlays.
                 val merged = result?.let { fetched ->
                     state.initialCover?.let { initial ->
                         fetched.copy(
                             userBook = fetched.userBook ?: initial.userBook,
-                            userBookRead = fetched.userBookRead ?: initial.userBookRead,
                         )
                     } ?: fetched
                 }

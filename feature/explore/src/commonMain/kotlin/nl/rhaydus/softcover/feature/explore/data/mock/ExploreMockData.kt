@@ -73,7 +73,6 @@ internal object ExploreMockData {
             positionsInSeries = positionsInSeries,
             isCompilation = false,
             userBook = null,
-            userBookRead = null,
         )
     }
 

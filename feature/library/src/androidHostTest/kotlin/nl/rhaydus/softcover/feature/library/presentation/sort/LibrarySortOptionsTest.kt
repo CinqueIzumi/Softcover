@@ -32,6 +32,7 @@ class LibrarySortOptionsTest {
         reviewedAt = null,
         updatedAt = null,
         journals = emptyList(),
+        reads = emptyList(),
     )
 
     private fun buildBook(
@@ -55,7 +56,6 @@ class LibrarySortOptionsTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         userBook = buildUserBook(status = status),
-        userBookRead = null,
     )
 
     private fun buildDeadline(bookId: Int) = BookDeadline(

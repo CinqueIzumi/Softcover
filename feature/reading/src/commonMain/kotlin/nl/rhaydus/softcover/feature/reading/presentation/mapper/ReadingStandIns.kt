@@ -19,7 +19,9 @@ import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 
 private const val ALSO_READING_STAND_IN_COUNT = 2
@@ -128,13 +130,29 @@ internal val FEATURED_STAND_IN_BOOK = Book(
     ),
     positionsInSeries = listOf(1.0),
     isCompilation = false,
-    userBook = null,
-    userBookRead = UserBookRead(
+    userBook = UserBook(
         id = -1,
-        currentPage = 331,
-        currentSeconds = null,
-        progress = 50f,
-        startedAt = null,
-        finishedAt = null,
+        status = BookStatus.Reading,
+        dateAdded = "",
+        createdAt = null,
+        privacySettingId = 1,
+        reviewHasSpoilers = false,
+        editionId = null,
+        lastReadDate = null,
+        rating = null,
+        referrerUserId = null,
+        reviewedAt = null,
+        updatedAt = null,
+        journals = emptyList(),
+        reads = listOf(
+            UserBookRead(
+                id = -1,
+                currentPage = 331,
+                currentSeconds = null,
+                progress = 50f,
+                startedAt = null,
+                finishedAt = null,
+            ),
+        ),
     ),
 )

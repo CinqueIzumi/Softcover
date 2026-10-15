@@ -18,7 +18,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 
 /**
  * The "Yours" lens content (design-system.md's lens-toggle pattern): your-copy sections in order —
- * in-progress / DNF / read / want-to-read status, your verdict (rating + review), your tags. Each section
+ * in-progress / DNF / read / want-to-read status, your reads (every read-through), your verdict (rating + review), your tags. Each section
  * keeps its existing visibility gate, so a section with nothing to show simply doesn't compose.
  */
 @Composable
@@ -45,6 +45,16 @@ internal fun YoursLensContent(
                         .padding(horizontal = Spacing.gutter),
                 )
             }
+        }
+
+        state.yourReads?.let { yourReads ->
+            if (hasLeadingBlock) {
+                Spacer(modifier = Modifier.height(Spacing.section))
+            }
+
+            hasLeadingBlock = true
+
+            YourReadsSection(model = yourReads)
         }
 
         state.yoursVerdictBlock?.let { verdictBlock ->

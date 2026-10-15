@@ -67,7 +67,7 @@ class OnPageFocusLostActionTest {
                 book
             } returns mockk(relaxed = true) {
                 every {
-                    userBookRead
+                    currentRead
                 } returns read
             }
         }

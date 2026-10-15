@@ -6,7 +6,7 @@ import kotlin.math.roundToInt
 
 internal fun List<Book>.averageProgress(): Float? {
     if (isEmpty()) return null
-    val values = mapNotNull { it.userBookRead?.progress }
+    val values = mapNotNull { it.currentRead?.progress }
     if (values.isEmpty()) return null
     return values.average().toFloat()
 }

@@ -47,16 +47,28 @@ internal class UserBookWriteReplay(
 
     // A rejected write is dropped by the drainer, so its history row must go too or it would stay pending forever.
     private suspend fun replayProgress(payload: PendingUserBookWrite): ReplayOutcome {
-        runCatching {
+        val replayed: Boolean = runCatching {
+            val isPlaceholderRead = payload.userBookReadId < 0
+
+            // A negative read id is a local placeholder; the server read it stands for only exists by now.
+            val unfinishedRead = if (isPlaceholderRead) {
+                booksRemoteDataSource.fetchLatestUnfinishedRead(userBookId = payload.userBookId)
+                    ?: return@runCatching false
+            } else {
+                null
+            }
+
             booksRemoteDataSource.replayUpdateBookProgress(
-                userBookReadId = payload.userBookReadId,
+                userBookReadId = unfinishedRead?.id ?: payload.userBookReadId,
                 editionId = payload.editionId,
                 progressPages = payload.progressPages,
                 progressSeconds = payload.progressSeconds,
-                startedAt = payload.startedAt,
-                finishedAt = payload.finishedAt,
+                startedAt = if (unfinishedRead != null) unfinishedRead.startedAt else payload.startedAt,
+                finishedAt = if (unfinishedRead != null) null else payload.finishedAt,
                 actionAt = payload.actionAt,
             )
+
+            true
         }.onFailure { error ->
             val isRejection = error !is CancellationException && error !is RetryableSyncException
 
@@ -64,6 +76,14 @@ internal class UserBookWriteReplay(
                 payload.progressHistoryId?.let { progressHistoryLocalDataSource.delete(localId = it) }
             }
         }.getOrThrow()
+
+        if (replayed.not()) {
+            AppLog.w("Pending progress for user-book ${payload.userBookId} has no unfinished read to land on; discarding")
+
+            payload.progressHistoryId?.let { progressHistoryLocalDataSource.delete(localId = it) }
+
+            return ReplayOutcome.DISCARDED
+        }
 
         payload.progressHistoryId?.let { progressHistoryLocalDataSource.markSynced(localId = it) }
 

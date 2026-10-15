@@ -112,7 +112,7 @@ class OnDeadlinePickedActionTest {
             } returns edition
 
             every {
-                this@mockk.userBookRead
+                this@mockk.currentRead
             } returns userBookRead
         }
     }
@@ -467,7 +467,7 @@ class OnDeadlinePickedActionTest {
                     this@mockk.currentEdition
                 } returns edition
                 every {
-                    this@mockk.userBookRead
+                    this@mockk.currentRead
                 } returns userBookRead
             }
             stateFlow.value = buildBookDetailUiState().copy(book = book)
@@ -530,7 +530,7 @@ class OnDeadlinePickedActionTest {
                     this@mockk.currentEdition
                 } returns edition
                 every {
-                    this@mockk.userBookRead
+                    this@mockk.currentRead
                 } returns null
             }
             stateFlow.value = buildBookDetailUiState().copy(book = book)

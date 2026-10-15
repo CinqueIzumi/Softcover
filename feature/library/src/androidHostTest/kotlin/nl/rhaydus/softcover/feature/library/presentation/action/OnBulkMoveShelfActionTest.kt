@@ -85,7 +85,6 @@ class OnBulkMoveShelfActionTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         userBook = null,
-        userBookRead = null,
     )
 
     private fun stubDependencies(): LibraryDependencies =

@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
@@ -59,7 +60,11 @@ internal class OfflineUserBookSyncImpl(
         progressHistoryId: Long?,
     ) {
         val userBook = book.userBook ?: return
-        val userBookRead = book.userBookRead ?: return
+        val userBookRead = book.currentRead ?: return
+
+        // A placeholder's dates are local guesses; replay takes the server read's own instead.
+        val startedAt = userBookRead.startedAt.takeUnless { userBookRead.isPlaceholder }
+        val finishedAt = userBookRead.finishedAt.takeUnless { userBookRead.isPlaceholder }
 
         enqueueAndScheduleRetry(
             PendingUserBookWrite(
@@ -70,8 +75,8 @@ internal class OfflineUserBookSyncImpl(
                 editionId = userBook.editionId,
                 progressPages = newPage,
                 progressSeconds = newSeconds,
-                startedAt = userBookRead.startedAt,
-                finishedAt = userBookRead.finishedAt,
+                startedAt = startedAt,
+                finishedAt = finishedAt,
                 enqueuedAt = Clock.System.now().toString(),
                 actionAt = actionAt,
                 progressHistoryId = progressHistoryId,
@@ -84,7 +89,7 @@ internal class OfflineUserBookSyncImpl(
         actionAt: String?,
     ) {
         val userBook = book.userBook ?: return
-        val userBookRead = book.userBookRead ?: return
+        val userBookRead = book.currentRead ?: return
 
         enqueueAndScheduleRetry(
             PendingUserBookWrite(
@@ -115,7 +120,7 @@ internal class OfflineUserBookSyncImpl(
                 userBookId = userBook.id,
                 // Unused for SET_STATUS replay (which keys off userBookId); a Want to read book may have
                 // no userBookRead, so fall back to the schema's non-null placeholder.
-                userBookReadId = book.userBookRead?.id ?: 0,
+                userBookReadId = book.currentRead?.id ?: 0,
                 bookId = book.id,
                 editionId = userBook.editionId,
                 progressPages = null,
@@ -140,7 +145,7 @@ internal class OfflineUserBookSyncImpl(
                 userBookId = userBook.id,
                 // Unused for UPDATE_RATING replay (which keys off userBookId); a Read book may have
                 // no userBookRead, so fall back to the schema's non-null placeholder.
-                userBookReadId = book.userBookRead?.id ?: 0,
+                userBookReadId = book.currentRead?.id ?: 0,
                 bookId = book.id,
                 editionId = userBook.editionId,
                 progressPages = null,
@@ -166,7 +171,7 @@ internal class OfflineUserBookSyncImpl(
                 userBookId = userBook.id,
                 // Unused for UPDATE_REVIEW replay (which keys off userBookId); a Read book may have
                 // no userBookRead, so fall back to the schema's non-null placeholder.
-                userBookReadId = book.userBookRead?.id ?: 0,
+                userBookReadId = book.currentRead?.id ?: 0,
                 bookId = book.id,
                 editionId = userBook.editionId,
                 progressPages = null,
@@ -292,13 +297,31 @@ internal class OfflineUserBookSyncImpl(
             val kinds: Set<PendingUserBookWriteKind> = syncedWrites[userBookId] ?: return@map fetched
             val snapshot: Book = snapshots[userBookId] ?: return@map fetched
 
-            kinds.fold(fetched) { book, kind ->
-                book.preserveOwnedFields(
-                    kind = kind,
-                    snapshot = snapshot,
-                )
-            }
+            kinds
+                .fold(fetched) { book, kind ->
+                    book.preserveOwnedFields(
+                        kind = kind,
+                        snapshot = snapshot,
+                    )
+                }
+                .preservePlaceholderRead(snapshot = snapshot)
         }
+    }
+
+    /**
+     * A replayed status change into Reading can outrun the bulk fetch, which then lacks the server's new
+     * unfinished read. Keeping the local placeholder stops `currentRead` falling back to an older finished read.
+     */
+    private fun Book.preservePlaceholderRead(snapshot: Book): Book {
+        val snapshotRead: UserBookRead = snapshot.currentRead?.takeIf { it.isPlaceholder } ?: return this
+        val reconciledUserBook: UserBook = userBook ?: return this
+
+        val isReadingLike: Boolean = reconciledUserBook.status == BookStatus.Reading ||
+            reconciledUserBook.status == BookStatus.Paused
+
+        if (isReadingLike.not() || reconciledUserBook.reads.any { it.isFinished.not() }) return this
+
+        return copy(userBook = reconciledUserBook.copy(reads = reconciledUserBook.reads + snapshotRead))
     }
 
     private fun Book.preserveOwnedFields(
@@ -317,41 +340,58 @@ internal class OfflineUserBookSyncImpl(
     }
 
     private fun Book.preserveProgress(snapshot: Book): Book {
-        val snapshotRead: UserBookRead = snapshot.userBookRead ?: return this
-        // The bulk fetch hasn't surfaced the read row yet (lag) but the local snapshot carries it with
-        // its genuine prior-fetch id, so reinstate it; the next refresh takes the server copy wholesale.
-        val fetchedRead: UserBookRead = userBookRead ?: return copy(userBookRead = snapshotRead)
+        val snapshotRead: UserBookRead = snapshot.currentRead ?: return this
+        val fetchedUserBook: UserBook = userBook ?: return this
 
-        return copy(
-            userBookRead = fetchedRead.copy(
-                currentPage = snapshotRead.currentPage,
-                currentSeconds = snapshotRead.currentSeconds,
-                progress = snapshotRead.progress,
-                startedAt = snapshotRead.startedAt,
-                finishedAt = snapshotRead.finishedAt,
-            ),
-        )
+        val matchingRead: UserBookRead? = fetchedUserBook.reads.firstOrNull { it.id == snapshotRead.id }
+
+        val updatedReads: List<UserBookRead> = when {
+            matchingRead != null -> fetchedUserBook.reads.map { read ->
+                if (read.id == snapshotRead.id) {
+                    read.copy(
+                        currentPage = snapshotRead.currentPage,
+                        currentSeconds = snapshotRead.currentSeconds,
+                        progress = snapshotRead.progress,
+                        startedAt = snapshotRead.startedAt,
+                        finishedAt = snapshotRead.finishedAt,
+                    )
+                } else {
+                    read
+                }
+            }
+
+            // The bulk fetch hasn't surfaced the read row yet (lag) but the local snapshot carries it with
+            // its genuine prior-fetch id, so reinstate it; the next refresh takes the server copy wholesale.
+            snapshotRead.isPlaceholder.not() -> fetchedUserBook.reads + snapshotRead
+
+            else -> fetchedUserBook.reads
+        }
+
+        return copy(userBook = fetchedUserBook.copy(reads = updatedReads))
     }
 
     private fun Book.preserveReadStatus(snapshot: Book): Book {
         val snapshotUserBook: UserBook = snapshot.userBook ?: return this
         val fetchedUserBook: UserBook = userBook ?: return this
 
-        val snapshotRead: UserBookRead? = snapshot.userBookRead
-        val fetchedRead: UserBookRead? = userBookRead
+        val snapshotRead: UserBookRead? = snapshot.currentRead
 
-        val updatedRead: UserBookRead? = if (snapshotRead != null && fetchedRead != null) {
-            fetchedRead.copy(
-                progress = snapshotRead.progress,
-                finishedAt = snapshotRead.finishedAt,
-            )
-        } else {
-            fetchedRead
+        val updatedReads: List<UserBookRead> = fetchedUserBook.reads.map { read ->
+            if (snapshotRead != null && read.id == snapshotRead.id) {
+                read.copy(
+                    progress = snapshotRead.progress,
+                    finishedAt = snapshotRead.finishedAt,
+                )
+            } else {
+                read
+            }
         }
 
         return copy(
-            userBook = fetchedUserBook.copy(status = snapshotUserBook.status),
-            userBookRead = updatedRead,
+            userBook = fetchedUserBook.copy(
+                status = snapshotUserBook.status,
+                reads = updatedReads,
+            ),
         )
     }
 

@@ -20,7 +20,7 @@ fun Book.resolvedTotalPages(): Int = currentEdition?.pages ?: defaultEdition?.pa
  * "0 pages to go", or "0 pages left" for a paused book.
  */
 fun Book.toPositionText(): BookPositionText? {
-    val read = userBookRead ?: return null
+    val read = currentRead ?: return null
     val edition = currentEdition ?: return null
 
     return read.toPositionText(
