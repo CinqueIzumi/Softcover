@@ -433,13 +433,14 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.L
     - runAction: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilitySaveBar(isDirty: kotlin.Boolean, isSaving: kotlin.Boolean, onSave: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilitySaveBar(isDirty: kotlin.Boolean, isSaving: kotlin.Boolean, onSave: kotlin.Function0<kotlin.Unit>, windowInsets: androidx.compose.foundation.layout.WindowInsets): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - isDirty: STABLE (primitive type)
     - isSaving: STABLE (primitive type)
     - onSave: STABLE (function type)
+    - windowInsets: STABLE (marked @Stable or @Immutable)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.ReorderableRow(entry: nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry, isDragging: kotlin.Boolean, onToggle: kotlin.Function1<nl.rhaydus.softcover.core.component.control.ToggleEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
