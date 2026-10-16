@@ -1,12 +1,12 @@
 # Widgets (#93): local plan
 
-Local only, not committed. Branch `93-widgets` (worktree `../Softcover-93`), based on `release/3.2.0`.
+Branch `93-widgets` (worktree `../Softcover-93`), based on `release/3.2.0`, local only.
 Scope: #97 infrastructure, #98 Currently Reading, #99 Random from Want-to-Read, #100 Trending this
 week, #103 per-widget configuration. Out: #101 activity calendar (after 3.4.0), iOS/desktop widgets,
 second wave #206–208, bundled fonts in widgets (Glance cannot use them).
 
-**Working agreement:** one step at a time, then stop for the user to verify. Every step runs
-implementer → test-writer → styleCheck → reviewer. No commits or pushes unless asked.
+**Working agreement:** one step at a time. Every step runs implementer → test-writer → styleCheck →
+reviewer. No commits or pushes unless asked.
 
 ## Decisions
 
@@ -14,140 +14,80 @@ implementer → test-writer → styleCheck → reviewer. No commits or pushes un
   dynamic colour. System serif/sans stand in for Fraunces/Inter. Widgets paint on the app's paper
   (`background` / `onBackground`), never Glance's `widgetBackground` (that maps to
   `secondaryContainer`, an accent tint).
-- Room: treat v51 (this base) as current; migrate 51 → 52. Chain merges with other branches are
-  handled later, out of scope. Ignore the active `domain-out-of-uistate` tracker and dim mode.
-- Trending persisted in Room; Explore and Reading's `TrendingBooksLoader` read it as the one source.
+- Room chain merges with other branches are handled at merge time. Ignore the active
+  `domain-out-of-uistate` tracker and dim mode.
+- Trending persisted in Room per period; Explore and Reading's `TrendingBooksLoader` read it as the
+  one source.
 - Wavy progress drawn as a bitmap by a pure `CanvasDrawScope` renderer matching `ProgressBar`.
-- Config via a widget configuration activity: shown on every placement (no
-  `configuration_optional`), skippable, reconfigurable on 12+. Discoverability: a widget with
-  settings names its source in the header and tapping the header opens its settings (all API
-  levels); the app's Settings gets a Widgets section (S8).
-- **Currently Reading:** 2×2 and 4×2. ‹ › cycle through the Reading shelf (most recently updated
-  first, wraps); "2/4" on 4×2; arrows hidden for one book; the cycled book is kept by id and stays
-  after progress on another book; falls back to the first if it leaves the shelf. No settings
-  screen. Tap opens the Reading tab. Empty: "Between books".
-- **Random pick:** same portrait look as Currently Reading (blurred cover backdrop, 2×2 and 2×3,
-  default 2×3), "WHAT NEXT?" eyebrow, shuffle button, tap opens the book. "Pick from" setting:
-  Want to Read (default), Owned (unread), or any of the user's lists (unread); unread = not Read and
-  not Currently Reading. Pool queried locally from Room (lists are synced); a deleted list falls back
-  to Want to Read. Pick kept per instance; re-pick cadence setting daily (default) / weekly / only
-  on shuffle; re-pick if the book leaves the pool. Header shows the source ("WHAT NEXT? · OWNED");
-  tapping it opens this widget's settings.
-- **Trending this week:** 4×2 cover row with rank numerals; 4×3+ ranked list of five (plain
-  `Column`). Cover → book detail, header → Explore. Refresh setting daily (default) / twice daily
-  (2 API requests per refresh); a small settings icon at the header's end opens it. Explore stays
-  offline-gated (cached trending in Explore is a separate issue).
+- Config via a widget configuration activity, shown on every placement, reconfigurable on 12+. A
+  widget with settings names its source in the header and tapping it opens its settings; the app's
+  Settings has a Widgets page (S8).
+- **Currently Reading:** portrait 2×2 compact and 2×3 tall, blurred cover backdrop. ‹ › cycle the
+  Reading shelf (most recently updated first, wraps), kept by id per instance, falling back to the
+  first. No settings screen. Tap opens Reading; "xx% ✎" opens the progress sheet. Empty: "Between
+  books".
+- **Random pick:** same portrait look, "WHAT NEXT?" eyebrow, shuffle button, tap opens the book.
+  "Pick from": Want to Read (default), Owned (unread) or any user list (unread); a deleted list falls
+  back to Want to Read. Re-pick cadence daily (default) / weekly / only on shuffle; re-pick if the
+  book leaves the pool.
+- **Trending:** top 10 per period at two per page with ‹ › and "1/5", ranked list at 4×3+. Cover →
+  book detail, header → Explore. Period and refresh (daily / twice daily) settings. Explore stays
+  offline-gated.
 - Focus Mode: a widget tap opens the app into Focus Mode; the request applies underneath.
 - Signed out: "Sign in to Softcover".
 
 ## Steps
 
 ### S1. Glance spike + module ✅
-`:feature:widget` (KMP, Android code in `androidMain`, `androidResources.enable`), Glance 1.2.0,
-placeholder widget + receiver, wired from `:orchestration` androidMain, stability baseline, roster
-docs updated. All gates green.
+`:feature:widget` (KMP, Android code in `androidMain`), Glance 1.2.0, wired from `:orchestration`.
 
 ### S2. "User books" queries + trending in Room ✅
-Done as below, plus after review: cache + rank + meta in one `replaceTrendingBooks` transaction,
-cleanup scoped to ids that left trending, only library books skip re-caching, a repository mutex
-dedupes concurrent refreshes. Explore stays fully offline-gated (pre-existing; offline trending is a
-separate decision).
-- `observeBooks()` and `getSortedAllUserBooks` require the book to be in `user_books` or
-  `list_books` (the invariant `getOrphanBookIds` implies), so trending never leaks into Because You
-  Read, genre options, Continue Series or the sync snapshot. Test it.
-- `trending_books(bookId, rank)` + one-row fetched-at meta; migration 51 → 52 + migration test and
-  data-survival test; added to `deleteAllLocalData`.
-- Orphan cleanup excludes `trending_books` and runs inside the trending replace transaction;
-  `redirectBookId` also remaps `trending_books`.
-- Write books via `hydrateReferencedBooks(forceNetwork = false)` + rank-only replace; never
-  re-cache existing user books.
-- `refreshTrendingBooks(maxAge: Duration)`: pull-to-refresh `ZERO`, screen mount 24h, worker the
-  configured interval. `ObserveTrendingBooksUseCase` + `RefreshTrendingBooksUseCase` (Result
-  convention) replace `GetTrendingBooksUseCase`; remove the trending `SessionValueCache`.
-- Migrate callers: `TrendingBooksCollector`, `OnRefreshAction`, `TrendingBooksLoader`,
-  `ExploreScreenScreenModel`, `ReadingScreenScreenModel`, `ExploreModule`, `ReadingModule`,
-  `BookModule`; drop Explore's library overlay. Loading flag = never fetched / in flight.
-- Fix the existing trending tests (`BooksRepositoryImplTest`, `GetTrendingBooksUseCaseTest`, the
-  Explore/Reading dependency fixtures).
+`observeBooks()` / `getSortedAllUserBooks` require `user_books` or `list_books`, so trending never
+leaks into library-derived surfaces. `trending_books` + fetched-at meta (migrations and data-survival
+tests), one `replaceTrendingBooks` transaction, `refreshTrendingBooks(maxAge)` behind
+`ObserveTrendingBooksUseCase` / `RefreshTrendingBooksUseCase`; callers migrated.
 
 ### S3. Opening the app from a widget ✅
-Done: `AppEntryPoint.intent(context, request)` with a strict `softcover://open/...` codec in
-orchestration commonMain (stable tab literals); `ActiveSessionController.sessionLoaded` gates Focus
-Mode; MainActivity ignores the launch intent on restore.
-`ExternalNavigationRequest` sealed type in `:core:presentation` (`OpenTab(Reading|Explore)`,
-`OpenBook(id)`), impl in orchestration. `AppEntryPoint` builds intents; `MainActivity` parses them;
-`BottomBarScreen` consumes (tab switch, `BookDetailPresenter.open`). Cleared on sign-out. Move Focus
-Mode onto the same contract.
+`ExternalNavigationRequest` in `:core:presentation` (tab, book, verdict, Focus Mode),
+`AppEntryPoint.intent` with a strict `softcover://open/...` codec, consumed by `RootScreen` /
+`BottomBarScreen`, cleared on sign-out.
 
 ### S4. Shared widget layer ✅
-Done: `startPlatformAppServices` hook; `WidgetRefresher` + pure `refreshSignals` (placement-gated,
-1 s debounce, per-source error isolation) fed by `RefreshingWidgetReceiver`; `SoftcoverWidgetTheme`
-(exhaustive `ThemeMode` → day/night pair, dynamic on 31+); `loadCoverBitmap` in `:core:uibinding`
-shared with `ReadingSessionService`; `SoftcoverWidgetDependencies` via Koin. Widgets collect their
-inputs inside `provideContent` (a live session only recomposes on `updateAll`). Worker base: the
-widget module owns its own `CoroutineWorker` (S6); `SoftcoverWorker` stays notification-only.
-- `expect fun startPlatformAppServices(koin)` called from `startAppServices`.
-- Refresher: trigger only, debounced, inactive when no widget is placed.
-- Widget theme from `softcoverColorScheme`; exhaustive `ThemeMode` mapping.
-- Move the Coil → Bitmap step into `:core:uibinding` androidMain (second consumer after
-  `ReadingSessionService.ensureCover`); downsample, `allowHardware(false)`, reuse bitmaps.
-- One constructor-injected dependency bundle per widget surface (Koin verify covers it).
-- Decide the worker base (promote a generic one, or the module's own `CoroutineWorker`).
+`startPlatformAppServices`; `WidgetRefresher` + pure `refreshSignals` (placement-gated, debounced,
+per-source error isolation) fed by `RefreshingWidgetReceiver`; `SoftcoverWidgetTheme`; cover bitmap
+loading shared in `:core:uibinding`; one dependency bundle per widget surface.
 
 ### S5. Currently Reading widget ✅
-Done: replaces the S1 placeholder. Pure `resolveShownBookId` / `nextBookId`; models built in a
-`Flow` (cover loaded and bar rendered for the shown book only, cached per instance); cycle callback
-does its read-modify-write inside `updateAppWidgetState` and emits its `GlanceId` on
-`selectionChanges`. System widget radius on 31+ only. `CornerRadius` Dp tokens added behind
-`Corners` for Glance. Progress label is the percent, as on the Reading card.
-Design rounds with the user: portrait, cover-forward, modelled on the Reading hero
-(`FeaturedBackdropCard`). Sizes 2×2 compact and 2×3 tall (default 2×3, min 110×180); no 4×2.
-Backdrop = centre-cropped cover with a software blur (`BLUR_DP` 2, tuned lighter than the hero's 6),
-veil and no-cover wash as white alpha masks tinted by day/night providers (widget theme supplies
-`surfaceContainerHigh`). Foot row: percent + vector chevrons, centred.
-Responsive sizes, cycling `ActionCallback`s storing book id per instance, pure selection function,
-wavy-progress bitmap. UI models built in a `Flow` off-composition; `provideContent` immediately with
-a loading model. No `android:configure`.
+Models built in a `Flow` off-composition; cover and wavy bar for the shown book only; cycle callback
+does its read-modify-write inside `updateAppWidgetState`.
 
 ### S6. Settings screen + Random pick + maintenance worker ✅
-Done: `randompick/` (pure `buildPool` / `resolvePick` / `shufflePick`, `RandomPickStore` resolving and
-persisting in one `updateAppWidgetState`), `settings/` TOAD activity (loads once per ScreenModel;
-rejects ids not owned by its receiver; saving clears the pick only when settings changed),
-`worker/` hourly unique work scheduled from `onUpdate` (KEEP), cancelled when no Softcover widget
-remains. Backdrop artwork shared in `backdrop/` with Currently Reading. 34 tests after audit.
-TOAD configuration activity in the app theme. Skip writes defaults, `RESULT_OK`, and updates (also on
-API ≤ 30). Settings in per-instance Glance state (ids/enums only). Pure pick/cadence function,
-evaluated lazily in `provideGlance`. Shuffle action. One unique periodic maintenance worker,
-scheduled in `onEnabled`, updated on config change, cancelled in `onDisabled`; `updatePeriodMillis=0`.
+TOAD configuration activity in the app theme (loads once, rejects ids not owned by its receiver,
+clears the pick only when settings changed); per-instance Glance state; hourly unique maintenance
+work (KEEP), cancelled when no Softcover widget remains.
 
 ### S7. Trending widget ✅
-Done: `trending/` (cover row up to five, ranked list at 4×3+, header opens Explore, tune icon opens
-settings; covers loaded for the top five only), `TrendingStore` and a pure
-`resolveTrendingRefreshInterval`, `worker/TrendingRefreshScheduler` and `TrendingRefreshWorker`
-(unique periodic work, network-constrained, `UPDATE` at the shortest placed cadence, cancelled when
-none remains, skipped when signed out, `retry` on a failed refresh). `settings/` now has a shared
-`WidgetSettingsActivity` and `WidgetSettingsLayout`, with per-widget screens in `settings/randompick/`
-and `settings/trending/`. No Skip button: Back keeps the stored settings (`RESULT_OK` is set up front).
-The worker refreshes with `maxAge` at half the period so an early run still fetches. 9 tests after audit.
-**Redo ✅:** top 10 at two per page with ‹ › and "1/5" (page per instance); period setting (five
-`TrendingPeriod`s, trending persisted per period in the amended 54 → 55); the worker refreshes only the
-periods in use, plus a one-time catch-up run on every reschedule. Crash-audit fixes: settings screens hold
-only ids and finish via `LocalActivity`, save repaints, workers retry before Koin starts, refresher
-sources deferred, redirect skips `user_books`/drops trending when the target book is missing, blur
-confirmed off main.
+Unique periodic refresh work (network-constrained, `UPDATE` at the shortest placed cadence, only the
+periods in use, one-time catch-up on reschedule, `retry` on failure). Crash-audit fixes: settings
+screens hold only ids, save repaints, workers retry before Koin starts.
 
-### S7b. Update progress from the Currently Reading widget (in progress)
-"xx% ✎" button opens `UpdateProgressActivity` hosting the app's `UpdateProgressBottomSheet` with a
-widget-local copy of Reading's sheet logic (shared extraction is a separate issue). Arrows overlay
-the cover (32dp lanes), title reserves two lines, progress bar follows the widget width.
+### S7b. Update progress from the Currently Reading widget ✅
+`UpdateProgressActivity` hosts the app's `UpdateProgressBottomSheet` with a widget-local copy of
+Reading's sheet logic (shared extraction is a separate issue).
 
 ### S8. Widgets section in Settings ✅
-Done as `HomeScreenWidgets` in `:core:presentation` (Android impl in `:feature:widget` `placed/`, an
-unsupported object on iOS/desktop); Settings › Personalisation › Widgets lists placed instances with
-their settings summary and Edit, plus Add rows when the launcher can pin.
-Lists placed widgets with Edit (opens that instance's configuration activity) and "Add to home
-screen" buttons via `AppWidgetManager.requestPinAppWidget` (API 26+, hidden when the launcher does
-not support pinning).
+`HomeScreenWidgets` in `:core:presentation` (Android impl in `presentation/placed/`, unsupported on
+iOS/desktop). Settings › Personalisation › Widgets lists placed instances with their summary and
+Edit, plus Add rows when the launcher can pin. Widget settings screens have a top bar with Back.
+
+### S9. Module layout ✅
+Done before the convergence pass so its findings cite the final paths. `:feature:widget` follows the
+feature-module layout: `domain/{model,util}`, `data/{datastore,mapper}` (Preferences serialisers split
+out of the models, keys unchanged), `presentation/` by kind (`action`, `collector`, `event`, `state`,
+`screenmodel`, `screen`, `mapper`, `model`, plus `glance`, `callback`, `activity`, `render`, `component`,
+`theme`, `util`, `refresh`, `worker`, `placed`) and `di/`. Generic random-pick action/collector names
+gained a `RandomPick` prefix. Tests mirror their units; stability baseline regenerated (it was stale
+since the trending paging and top-bar commits).
 
 ### S8b. Convergence pass
 A deliberately critical sweep of all widget code on the branch: `:feature:widget` and the code it added or
@@ -161,14 +101,9 @@ disjoint lenses, each finding verified against the code before it counts:
 - looks: every widget at every size in light/dark/palettes, against the app's design system (from the
   user's screenshots; no emulator driving before S11);
 - simplification: over-engineering, one-caller layers, duplicated logic across the three widgets that
-  should be shared, dead code, comments that fail the document-code rules.
-Findings go to the user as one ranked list before any fix; fix rounds by agreement, then tests and audit.
-
-### S9. Module layout
-Reorganise `:feature:widget` into the same folder layout as the app's feature modules
-(`docs/reference/module-structure.md`; e.g. `presentation/` with `action/`, `collector/`, `state/`,
-`screen/`, `mapper/` per surface) instead of flat per-widget packages. Move only, no behaviour change;
-tests move with their sources; stability baseline regenerated.
+  should be shared, dead code, comments that fail the document-code rules, layer rules (presentation
+  reads the `data/datastore` stores directly, with no use case).
+Findings ranked, verified, then fixed; tests and audit after.
 
 ### S10. Docs
 `docs/reference/design-system/patterns/widgets.md` (`patterns.md` is at its 8 KB budget: link only),
@@ -178,9 +113,10 @@ architecture deltas.
 Claude drives Medium_Phone (emulator-5554) with a scripted run per widget: place, resize through
 every size, tap every target, reconfigure, remove, and a cold start after process death
 (`am stop-app`). Clear the crash buffer first; `adb logcat -b crash` must stay empty after every run.
+Maintenance work enqueued by pre-S9 builds (KEEP) still names the old worker class path, so remove
+every widget once first so it is cancelled and re-enqueued under the new path.
 
 ## Risks
 
 - The user-books query change shifts what Library, Explore and sync see; S2 tests it.
-- Glance compatibility with Compose 1.11 / expressive Material 3 alpha (S1 passed the build).
 - RemoteViews bitmap limits: downsample covers, reuse bitmaps across size buckets.

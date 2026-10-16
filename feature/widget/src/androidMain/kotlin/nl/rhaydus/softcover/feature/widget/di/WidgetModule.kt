@@ -1,29 +1,29 @@
 package nl.rhaydus.softcover.feature.widget.di
 
 import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgets
-import nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidget
-import nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetDependencies
-import nl.rhaydus.softcover.feature.widget.placed.AndroidHomeScreenWidgets
-import nl.rhaydus.softcover.feature.widget.placed.WidgetInstanceChanges
-import nl.rhaydus.softcover.feature.widget.progress.LastUsedProgressUnitCollector
-import nl.rhaydus.softcover.feature.widget.progress.ProgressSheetCollector
-import nl.rhaydus.softcover.feature.widget.progress.UpdateProgressScreenModel
-import nl.rhaydus.softcover.feature.widget.progress.UpdateProgressThemeCollector
-import nl.rhaydus.softcover.feature.widget.randompick.RandomPickStore
-import nl.rhaydus.softcover.feature.widget.randompick.RandomPickWidget
-import nl.rhaydus.softcover.feature.widget.randompick.RandomPickWidgetDependencies
-import nl.rhaydus.softcover.feature.widget.refresh.WidgetRefresher
-import nl.rhaydus.softcover.feature.widget.settings.randompick.ListsCollector
-import nl.rhaydus.softcover.feature.widget.settings.randompick.RandomPickSettingsScreenModel
-import nl.rhaydus.softcover.feature.widget.settings.randompick.ThemeCollector
-import nl.rhaydus.softcover.feature.widget.settings.trending.TrendingSettingsScreenModel
-import nl.rhaydus.softcover.feature.widget.settings.trending.TrendingThemeCollector
-import nl.rhaydus.softcover.feature.widget.trending.TrendingStore
-import nl.rhaydus.softcover.feature.widget.trending.TrendingWidget
-import nl.rhaydus.softcover.feature.widget.trending.TrendingWidgetDependencies
-import nl.rhaydus.softcover.feature.widget.worker.OwnedWidgets
-import nl.rhaydus.softcover.feature.widget.worker.TrendingRefreshScheduler
-import nl.rhaydus.softcover.feature.widget.worker.WidgetMaintenanceScheduler
+import nl.rhaydus.softcover.feature.widget.data.datastore.RandomPickStore
+import nl.rhaydus.softcover.feature.widget.data.datastore.TrendingStore
+import nl.rhaydus.softcover.feature.widget.presentation.collector.LastUsedProgressUnitCollector
+import nl.rhaydus.softcover.feature.widget.presentation.collector.ProgressSheetCollector
+import nl.rhaydus.softcover.feature.widget.presentation.collector.RandomPickListsCollector
+import nl.rhaydus.softcover.feature.widget.presentation.collector.RandomPickThemeCollector
+import nl.rhaydus.softcover.feature.widget.presentation.collector.TrendingThemeCollector
+import nl.rhaydus.softcover.feature.widget.presentation.collector.UpdateProgressThemeCollector
+import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidget
+import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidgetDependencies
+import nl.rhaydus.softcover.feature.widget.presentation.glance.OwnedWidgets
+import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidget
+import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidgetDependencies
+import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
+import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidgetDependencies
+import nl.rhaydus.softcover.feature.widget.presentation.placed.AndroidHomeScreenWidgets
+import nl.rhaydus.softcover.feature.widget.presentation.placed.WidgetInstanceChanges
+import nl.rhaydus.softcover.feature.widget.presentation.refresh.WidgetRefresher
+import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.RandomPickSettingsScreenModel
+import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.TrendingSettingsScreenModel
+import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.UpdateProgressScreenModel
+import nl.rhaydus.softcover.feature.widget.presentation.worker.TrendingRefreshScheduler
+import nl.rhaydus.softcover.feature.widget.presentation.worker.WidgetMaintenanceScheduler
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -104,8 +104,8 @@ val widgetModule = module {
             getAllUserLists = get(),
             appDispatchers = get(),
             flows = listOf(
-                ThemeCollector(),
-                ListsCollector(),
+                RandomPickThemeCollector(),
+                RandomPickListsCollector(),
             ),
         )
     }
