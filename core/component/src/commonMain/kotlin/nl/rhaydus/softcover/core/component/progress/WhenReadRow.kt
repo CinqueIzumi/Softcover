@@ -27,7 +27,7 @@ import nl.rhaydus.softcover.core.component.chip.ChipEvent
 @Composable
 internal fun WhenReadRow(
     model: WhenReadUiModel,
-    onEvent: (ProgressSheetEvent) -> Unit,
+    onEvent: (WhenReadEvent) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -38,14 +38,14 @@ internal fun WhenReadRow(
                 when (event) {
                     is ChipEvent.Clicked -> {
                         if (model.chip.selected.not()) {
-                            onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 0))
+                            onEvent(WhenReadEvent.Shifted(minutes = 0))
                         }
 
                         expanded = expanded.not()
                     }
 
                     is ChipEvent.Dismissed -> {
-                        onEvent(ProgressSheetEvent.WhenReadReset)
+                        onEvent(WhenReadEvent.Reset)
                         expanded = false
                     }
 

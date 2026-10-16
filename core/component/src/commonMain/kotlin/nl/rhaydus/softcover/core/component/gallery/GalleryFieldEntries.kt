@@ -10,7 +10,7 @@ internal val fieldEntries: ImmutableList<GalleryEntry> = persistentListOf(
         name = "TextField",
         family = GalleryFamily.FIELD,
         blurb = "A text input: a tonal pill with optional glyph and trailing action, the Material " +
-            "outlined box, a display-size hero, or a centred numeral.",
+            "outlined box, a multi-line box, a display-size hero, or a centred numeral.",
         previews = TextFieldUiModel,
         content = { model, modifier ->
             TextField(

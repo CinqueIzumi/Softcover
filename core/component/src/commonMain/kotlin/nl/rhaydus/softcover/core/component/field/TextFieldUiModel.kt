@@ -92,6 +92,12 @@ data class TextFieldUiModel(
                 ),
                 enabled = false,
             ),
+            "Multiline" to TextFieldUiModel(
+                key = "multiline",
+                text = "",
+                placeholder = "The passage you want to keep",
+                variant = TextFieldVariant.Multiline,
+            ),
             "Hero" to TextFieldUiModel(
                 key = "hero-empty",
                 text = "",

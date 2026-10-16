@@ -13,6 +13,7 @@ private val TextFieldUiModel.keyboardType: KeyboardType
         is TextFieldVariant.Numeral -> KeyboardType.Number
         is TextFieldVariant.Outlined -> if (variant.numeric) KeyboardType.Number else KeyboardType.Text
         is TextFieldVariant.Pill,
+        TextFieldVariant.Multiline,
         TextFieldVariant.Hero -> KeyboardType.Text
     }
 

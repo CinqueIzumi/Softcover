@@ -21,7 +21,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **MorphingButton** — `button` — text button that animates between the filled and tonal styles.
 - **Toggle** — `control` — filled or bare icon toggle, or a display-only switch inside a row that owns the tap.
 - **ToggleRow** — `control` — a title over an optional gloss with a trailing switch; the row is the tap target.
-- **TextField** — `field` — pill, outlined, hero or numeral input, with an optional error state.
+- **TextField** — `field` — pill, outlined, multi-line, hero or numeral input, with an optional error state.
 - **SegmentedControl** — `control` — one-of-N choice as a pill track or as words in a sentence.
 - **ThemePreviewTile** — `control` — mini-page theme choice.
 - **ColorPalettePreviewTile** — `control` — mini-page spine-colour choice.
@@ -36,6 +36,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **Cover** — `cover` — the only book-cover renderer; falls back to a coverless title jacket, never blank.
 - **CoverOverlay** — `badge` — pins a `Badge` to a cover's corner, optionally greying the cover.
 - **BookCard** — `bookcard` — the one book or series card: cover-only, column or row.
+- **QuoteCard** — `quote` — one saved quote in the editorial quote pattern, with a Delete menu.
 - **MoodTile** — `mood` — a mood's title and book count on one of four inks.
 
 ## States & feedback
@@ -64,6 +65,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **LoadingSheet** — `sheet` — full-screen blocking wait.
 - **SoftcoverDatePickerDialog** — `dialog` — single-day calendar dialog.
 - **UpdateProgressBottomSheet** — `progress` — pages, percentage or time reading-progress editor.
+- **QuoteSheet** — `quote` — the add-a-quote editor: passage, position, privacy and backdate.
 - **ProgressBar** — `progress` — determinate wavy bar.
 - **ChooseListsBottomSheet** — `lists` — adds or removes one or many books to the user's lists.
 

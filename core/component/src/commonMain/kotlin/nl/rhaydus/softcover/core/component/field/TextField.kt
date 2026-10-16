@@ -67,6 +67,12 @@ fun TextField(
                 focusRequester = focusRequester,
             )
 
+            is TextFieldVariant.Multiline -> MultilineTextFieldBody(
+                model = model,
+                onEvent = onEvent,
+                focusRequester = focusRequester,
+            )
+
             is TextFieldVariant.Hero -> HeroTextField(
                 model = model,
                 onEvent = onEvent,
