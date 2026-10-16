@@ -1,48 +1,14 @@
 package nl.rhaydus.softcover.core.personal.data.mapper
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.database.model.HighlightEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
-import nl.rhaydus.softcover.core.personal.domain.model.Highlight
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.time.Instant
 
 class PersonalMappersTest {
     // region Fixtures
-    private fun buildHighlightEntity(
-        id: Long = 42L,
-        bookId: Int = 1,
-        quote: String = "A quote",
-        page: Int? = 12,
-        note: String? = "A note",
-        createdAt: String = "2024-03-01T08:00:00Z",
-    ) = HighlightEntity(
-        id = id,
-        bookId = bookId,
-        quote = quote,
-        page = page,
-        note = note,
-        createdAt = createdAt,
-    )
-
-    private fun buildHighlight(
-        id: Long = 42L,
-        bookId: Int = 1,
-        quote: String = "A quote",
-        page: Int? = 12,
-        note: String? = "A note",
-        createdAt: Instant = Instant.parse("2024-03-01T08:00:00Z"),
-    ) = Highlight(
-        id = id,
-        bookId = bookId,
-        quote = quote,
-        page = page,
-        note = note,
-        createdAt = createdAt,
-    )
-
     private fun buildReadingSessionEntity(
         id: Long = 10L,
         bookId: Int = 1,
@@ -67,58 +33,6 @@ class PersonalMappersTest {
         lastPausedAt = lastPausedAt,
     )
     // endregion
-    @Nested
-    inner class HighlightEntityToDomain {
-        @Test
-        fun `maps all fields correctly for a valid entity`() {
-            // ----- Arrange -----
-            val entity = buildHighlightEntity()
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.id shouldBe 42L
-            result.bookId shouldBe 1
-            result.quote shouldBe "A quote"
-            result.page shouldBe 12
-            result.note shouldBe "A note"
-            result.createdAt shouldBe Instant.parse("2024-03-01T08:00:00Z")
-        }
-
-        @Test
-        fun `falls back to Instant EPOCH when createdAt is malformed`() {
-            // ----- Arrange -----
-            val entity = buildHighlightEntity(createdAt = "bad-date")
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.createdAt shouldBe Instant.fromEpochMilliseconds(0)
-        }
-    }
-
-    @Nested
-    inner class HighlightToEntity {
-        @Test
-        fun `maps all fields correctly for a valid domain model`() {
-            // ----- Arrange -----
-            val highlight = buildHighlight()
-
-            // ----- Act -----
-            val result = highlight.toEntity()
-
-            // ----- Assert -----
-            result.id shouldBe 42L
-            result.bookId shouldBe 1
-            result.quote shouldBe "A quote"
-            result.page shouldBe 12
-            result.note shouldBe "A note"
-            result.createdAt shouldBe "2024-03-01T08:00:00Z"
-        }
-    }
-
     @Nested
     inner class ReadingSessionEntityToDomain {
         @Test

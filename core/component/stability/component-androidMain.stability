@@ -820,6 +820,15 @@ internal fun nl.rhaydus.softcover.core.component.field.HeroTextField(model: nl.r
     - focusRequester: STABLE (marked @Stable or @Immutable)
 
 @Composable
+internal fun nl.rhaydus.softcover.core.component.field.MultilineTextFieldBody(model: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, focusRequester: androidx.compose.ui.focus.FocusRequester): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - focusRequester: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.core.component.field.NumeralTextField(model: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, variant: nl.rhaydus.softcover.core.component.field.TextFieldVariant.Numeral, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>, focusRequester: androidx.compose.ui.focus.FocusRequester): kotlin.Unit
   skippable: true
   restartable: true
@@ -1275,7 +1284,7 @@ public fun nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomShee
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.core.component.progress.WhenReadEditor(model: nl.rhaydus.softcover.core.component.progress.WhenReadUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent, kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.core.component.progress.WhenReadEditor(model: nl.rhaydus.softcover.core.component.progress.WhenReadUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.progress.WhenReadEvent, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -1283,12 +1292,97 @@ internal fun nl.rhaydus.softcover.core.component.progress.WhenReadEditor(model: 
     - onEvent: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.core.component.progress.WhenReadRow(model: nl.rhaydus.softcover.core.component.progress.WhenReadUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent, kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.core.component.progress.WhenReadRow(model: nl.rhaydus.softcover.core.component.progress.WhenReadUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.progress.WhenReadEvent, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - model: STABLE (marked @Stable or @Immutable)
     - onEvent: STABLE (function type)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.quote.QuoteCard(model: nl.rhaydus.softcover.core.component.quote.QuoteCardUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.quote.QuoteCardEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.quote.QuoteCardLongPreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.quote.QuoteCardShortPreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.quote.QuotePositionInput(position: nl.rhaydus.softcover.core.component.quote.QuotePositionInputUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.quote.QuoteSheetEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - position: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.quote.QuotePositionSuffix(suffix: kotlin.String?): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - suffix: STABLE (class with no mutable properties)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.quote.QuoteSheet(model: nl.rhaydus.softcover.core.component.quote.QuoteSheetUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.quote.QuoteSheetEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.quote.QuoteSheetBody(model: nl.rhaydus.softcover.core.component.quote.QuoteSheetUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.quote.QuoteSheetEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.quote.QuoteSheetLabel(text: kotlin.String): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - text: STABLE (String is immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.quote.QuoteSheetPagePreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.quote.QuoteSheetPreview(model: nl.rhaydus.softcover.core.component.quote.QuoteSheetUiModel): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.quote.QuoteSheetTimePreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.quote.QuoteTimeColon(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
 
 @Composable
 public fun nl.rhaydus.softcover.core.component.reorder.reorderLift(isDragging: kotlin.Boolean, outset: androidx.compose.ui.unit.Dp): androidx.compose.ui.Modifier

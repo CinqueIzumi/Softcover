@@ -11,6 +11,7 @@ internal class WidgetExtraColors(
     val surfaceContainerHigh: ColorProvider,
     val daySurfaceContainerHigh: ColorProvider,
     val arrowScrim: ColorProvider,
+    val quoteGlyph: ColorProvider,
 )
 
 internal val LocalWidgetExtraColors = staticCompositionLocalOf<WidgetExtraColors> {

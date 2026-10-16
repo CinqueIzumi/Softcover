@@ -22,6 +22,9 @@ sealed interface TextFieldVariant {
         val numeric: Boolean = false,
     ) : TextFieldVariant
 
+    /** An outlined box at least four lines tall that grows with its text. Return adds a line, so it never submits. */
+    data object Multiline : TextFieldVariant
+
     /** Borderless display-face text, centred and shrunk until a long value fits one line. */
     data object Hero : TextFieldVariant
 

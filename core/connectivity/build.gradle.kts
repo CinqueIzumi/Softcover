@@ -13,6 +13,7 @@ kotlin {
             implementation(project(":core:database"))
             implementation(project(":core:book"))
             implementation(project(":core:lists"))
+            implementation(project(":core:personal"))
 
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.corePlatform)

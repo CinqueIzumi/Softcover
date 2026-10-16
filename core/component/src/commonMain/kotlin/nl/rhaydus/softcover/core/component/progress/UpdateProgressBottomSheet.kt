@@ -120,7 +120,13 @@ internal fun ProgressBottomSheetContent(
 
         WhenReadRow(
             model = model.whenRead,
-            onEvent = onEvent,
+            onEvent = { event ->
+                when (event) {
+                    is WhenReadEvent.Shifted -> onEvent(ProgressSheetEvent.WhenReadShifted(minutes = event.minutes))
+
+                    WhenReadEvent.Reset -> onEvent(ProgressSheetEvent.WhenReadReset)
+                }
+            },
         )
 
         Spacer(modifier = Modifier.height(Spacing.xl))

@@ -56,6 +56,10 @@ internal fun SoftcoverWidgetTheme(
                 day = light.surface.copy(alpha = ARROW_SCRIM_ALPHA),
                 night = dark.surface.copy(alpha = ARROW_SCRIM_ALPHA),
             ),
+            quoteGlyph = ColorProvider(
+                day = light.primary.copy(alpha = QUOTE_GLYPH_ALPHA),
+                night = dark.primary.copy(alpha = QUOTE_GLYPH_ALPHA),
+            ),
         )
     }
 
@@ -87,3 +91,4 @@ private fun widgetColorScheme(
 }
 
 private const val ARROW_SCRIM_ALPHA = 0.7f
+private const val QUOTE_GLYPH_ALPHA = 0.16f

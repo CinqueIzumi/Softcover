@@ -25,7 +25,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 @Composable
 internal fun WhenReadEditor(
     model: WhenReadUiModel,
-    onEvent: (ProgressSheetEvent) -> Unit,
+    onEvent: (WhenReadEvent) -> Unit,
 ) {
     val timeStyle = MaterialTheme.editorialTypography.headlineMedium
 
@@ -42,7 +42,7 @@ internal fun WhenReadEditor(
             StepperCircle(
                 icon = SoftcoverIcon.Remove,
                 contentDescription = "Earlier day",
-                onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = -1440)) },
+                onClick = { onEvent(WhenReadEvent.Shifted(minutes = -1440)) },
             )
 
             Spacer(modifier = Modifier.width(Spacing.lg))
@@ -58,7 +58,7 @@ internal fun WhenReadEditor(
             StepperCircle(
                 icon = SoftcoverIcon.Add,
                 contentDescription = "Later day",
-                onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 1440)) },
+                onClick = { onEvent(WhenReadEvent.Shifted(minutes = 1440)) },
                 enabled = model.canShiftLater,
             )
         }
@@ -73,7 +73,7 @@ internal fun WhenReadEditor(
             StepperCircle(
                 icon = SoftcoverIcon.Remove,
                 contentDescription = "Earlier hour",
-                onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = -60)) },
+                onClick = { onEvent(WhenReadEvent.Shifted(minutes = -60)) },
             )
 
             Spacer(modifier = Modifier.width(Spacing.xs))
@@ -81,7 +81,7 @@ internal fun WhenReadEditor(
             StepperCircle(
                 icon = SoftcoverIcon.Remove,
                 contentDescription = "Earlier 15 minutes",
-                onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = -15)) },
+                onClick = { onEvent(WhenReadEvent.Shifted(minutes = -15)) },
             )
 
             Spacer(modifier = Modifier.width(Spacing.md))
@@ -97,7 +97,7 @@ internal fun WhenReadEditor(
             StepperCircle(
                 icon = SoftcoverIcon.Add,
                 contentDescription = "Later 15 minutes",
-                onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 15)) },
+                onClick = { onEvent(WhenReadEvent.Shifted(minutes = 15)) },
                 enabled = model.canShiftLater,
             )
 
@@ -106,7 +106,7 @@ internal fun WhenReadEditor(
             StepperCircle(
                 icon = SoftcoverIcon.Add,
                 contentDescription = "Later hour",
-                onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 60)) },
+                onClick = { onEvent(WhenReadEvent.Shifted(minutes = 60)) },
                 enabled = model.canShiftLater,
             )
         }

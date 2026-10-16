@@ -30,6 +30,8 @@ import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingChanges
 import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidgetReceiver
 import nl.rhaydus.softcover.feature.widget.presentation.glance.OwnedWidgets
+import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidget
+import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidgetReceiver
 import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidgetReceiver
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
@@ -99,6 +101,7 @@ internal class AndroidHomeScreenWidgets(
                 HomeScreenWidgetKind.CurrentlyReading -> CurrentlyReadingWidgetReceiver::class.java
                 HomeScreenWidgetKind.RandomPick -> RandomPickWidgetReceiver::class.java
                 HomeScreenWidgetKind.Trending -> TrendingWidgetReceiver::class.java
+                HomeScreenWidgetKind.Quote -> QuoteWidgetReceiver::class.java
             }
 
             AppWidgetManager.getInstance(context).requestPinAppWidget(
@@ -163,7 +166,9 @@ internal class AndroidHomeScreenWidgets(
         lists: List<BookList>,
     ): PlacedHomeScreenWidget {
         val summary = when (kind) {
-            HomeScreenWidgetKind.CurrentlyReading -> null
+            HomeScreenWidgetKind.CurrentlyReading,
+            HomeScreenWidgetKind.Quote,
+            -> null
 
             HomeScreenWidgetKind.RandomPick -> getRandomPickSettings(appWidgetId = id).getOrThrow().let { settings ->
                 listOf(
@@ -192,6 +197,7 @@ internal class AndroidHomeScreenWidgets(
         is CurrentlyReadingWidget -> HomeScreenWidgetKind.CurrentlyReading
         is RandomPickWidget -> HomeScreenWidgetKind.RandomPick
         is TrendingWidget -> HomeScreenWidgetKind.Trending
+        is QuoteWidget -> HomeScreenWidgetKind.Quote
         else -> null
     }
 

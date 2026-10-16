@@ -34,6 +34,7 @@ private fun HomeScreenWidgetKind.title(): String = when (this) {
     HomeScreenWidgetKind.CurrentlyReading -> "Currently reading"
     HomeScreenWidgetKind.RandomPick -> "Random pick"
     HomeScreenWidgetKind.Trending -> "Trending"
+    HomeScreenWidgetKind.Quote -> "Quote of the day"
 }
 
 private fun HomeScreenWidgetKind.description(): String = when (this) {
@@ -43,10 +44,13 @@ private fun HomeScreenWidgetKind.description(): String = when (this) {
     HomeScreenWidgetKind.RandomPick -> "A book from your shelves, chosen for you."
 
     HomeScreenWidgetKind.Trending -> "What readers are picking up, ranked, two books at a time."
+
+    HomeScreenWidgetKind.Quote -> "One of your saved quotes each day, with arrows to browse the rest."
 }
 
 private fun HomeScreenWidgetKind.icon(): SoftcoverIcon = when (this) {
     HomeScreenWidgetKind.CurrentlyReading -> SoftcoverIcon.Reading
     HomeScreenWidgetKind.RandomPick -> SoftcoverIcon.MenuBook
     HomeScreenWidgetKind.Trending -> SoftcoverIcon.StarFilled
+    HomeScreenWidgetKind.Quote -> SoftcoverIcon.Bookmark
 }

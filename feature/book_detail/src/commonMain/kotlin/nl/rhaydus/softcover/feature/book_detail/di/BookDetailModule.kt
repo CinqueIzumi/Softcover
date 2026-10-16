@@ -50,6 +50,10 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedP
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LensToggleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.OfflineStateCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.QuoteDeleteSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.QuoteSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.QuotesRefreshCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.QuotesSectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPaceForecastCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReviewsSummaryCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShareCardsCollector
@@ -123,6 +127,10 @@ val bookDetailModule = module {
     factory { ActiveSessionBookCollector() } bind BookDetailCollector::class
     factory { EndSessionPauseSheetCollector() } bind BookDetailCollector::class
     factory { LensToggleCollector() } bind BookDetailCollector::class
+    factory { QuotesSectionCollector() } bind BookDetailCollector::class
+    factory { QuotesRefreshCollector() } bind BookDetailCollector::class
+    factory { QuoteSheetCollector() } bind BookDetailCollector::class
+    factory { QuoteDeleteSheetCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())
@@ -231,6 +239,10 @@ val bookDetailModule = module {
             observeUserTagVocabularyUseCase = get(),
             syncUserTagVocabularyUseCase = get(),
             recordAppliedTagsUseCase = get(),
+            addQuoteUseCase = get(),
+            deleteQuoteUseCase = get(),
+            observeBookQuotesUseCase = get(),
+            refreshBookQuotesUseCase = get(),
         )
     }
 }

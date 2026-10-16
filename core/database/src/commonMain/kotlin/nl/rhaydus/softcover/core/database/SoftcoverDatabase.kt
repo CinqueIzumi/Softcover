@@ -10,11 +10,12 @@ import androidx.sqlite.execSQL
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.dao.BookDeadlineDao
 import nl.rhaydus.softcover.core.database.dao.DismissedContinueSeriesDao
-import nl.rhaydus.softcover.core.database.dao.HighlightDao
 import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
+import nl.rhaydus.softcover.core.database.dao.PendingQuoteWriteDao
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.database.dao.ProgressHistoryDao
 import nl.rhaydus.softcover.core.database.dao.PublishedDocumentDao
+import nl.rhaydus.softcover.core.database.dao.QuoteDao
 import nl.rhaydus.softcover.core.database.dao.ReadingSessionDao
 import nl.rhaydus.softcover.core.database.dao.UserTagVocabularyDao
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
@@ -29,12 +30,13 @@ import nl.rhaydus.softcover.core.database.model.BookTagCrossRef
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesBookEntity
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesEntity
 import nl.rhaydus.softcover.core.database.model.EditionAuthorCrossRef
-import nl.rhaydus.softcover.core.database.model.HighlightEntity
 import nl.rhaydus.softcover.core.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
+import nl.rhaydus.softcover.core.database.model.PendingQuoteWriteEntity
 import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.database.model.ProgressHistoryEntity
 import nl.rhaydus.softcover.core.database.model.PublishedDocumentEntity
+import nl.rhaydus.softcover.core.database.model.QuoteEntity
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
@@ -64,7 +66,8 @@ import kotlin.coroutines.CoroutineContext
         PendingListWriteEntity::class,
         DismissedContinueSeriesBookEntity::class,
         DismissedContinueSeriesEntity::class,
-        HighlightEntity::class,
+        QuoteEntity::class,
+        PendingQuoteWriteEntity::class,
         ReadingSessionEntity::class,
         TagEntity::class,
         BookTagCrossRef::class,
@@ -78,7 +81,7 @@ import kotlin.coroutines.CoroutineContext
     views = [
         BookEditionView::class
     ],
-    version = 55,
+    version = 57,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -92,7 +95,9 @@ abstract class SoftcoverDatabase : RoomDatabase() {
 
     abstract fun dismissedContinueSeriesDao(): DismissedContinueSeriesDao
 
-    abstract fun highlightDao(): HighlightDao
+    abstract fun quoteDao(): QuoteDao
+
+    abstract fun pendingQuoteWriteDao(): PendingQuoteWriteDao
 
     abstract fun readingSessionDao(): ReadingSessionDao
 
@@ -1427,6 +1432,51 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        // Quotes replace the never-written local highlights table; Hardcover stores them as
+        // reading_journals rows, so the new table mirrors those plus a sync state.
+        private val MIGRATION_55_56 = object : Migration(55, 56) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS book_quotes (
+                            localId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            remoteId INTEGER,
+                            bookId INTEGER NOT NULL,
+                            editionId INTEGER,
+                            text TEXT NOT NULL,
+                            privacySettingId INTEGER NOT NULL,
+                            actionAtEpochMillis INTEGER NOT NULL,
+                            positionType TEXT,
+                            positionValue REAL,
+                            positionPossible REAL,
+                            positionPercent REAL,
+                            syncState TEXT NOT NULL
+                        )
+                    """.trimIndent(),
+                )
+                connection.execSQL("CREATE INDEX IF NOT EXISTS index_book_quotes_bookId ON book_quotes (bookId)")
+                connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_book_quotes_remoteId ON book_quotes (remoteId)")
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS pending_quote_writes (
+                            localId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            kind TEXT NOT NULL,
+                            quoteLocalId INTEGER NOT NULL,
+                            enqueuedAt TEXT NOT NULL,
+                            attempts INTEGER NOT NULL
+                        )
+                    """.trimIndent(),
+                )
+                connection.execSQL("DROP TABLE IF EXISTS book_highlights")
+            }
+        }
+
+        private val MIGRATION_56_57 = object : Migration(56, 57) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE book_quotes ADD COLUMN bookTitle TEXT")
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1483,6 +1533,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_52_53,
             MIGRATION_53_54,
             MIGRATION_54_55,
+            MIGRATION_55_56,
+            MIGRATION_56_57,
         )
     }
 }

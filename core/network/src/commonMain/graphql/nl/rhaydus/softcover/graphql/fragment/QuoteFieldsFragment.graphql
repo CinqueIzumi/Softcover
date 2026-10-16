@@ -1,0 +1,12 @@
+fragment QuoteFieldsFragment on reading_journals {
+    id
+    action_at
+    entry
+    privacy_setting_id
+    edition_id
+    metadata
+    book_id
+    book {
+        title
+    }
+}
