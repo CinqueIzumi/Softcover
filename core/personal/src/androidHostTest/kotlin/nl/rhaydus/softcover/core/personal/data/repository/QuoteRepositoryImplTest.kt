@@ -5,13 +5,19 @@ import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.database.model.QuoteEntity
 import nl.rhaydus.softcover.core.database.model.QuoteSyncState
 import nl.rhaydus.softcover.core.domain.connectivity.QuoteWriteDrainer
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
+import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.personal.data.datasource.QuoteLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.datasource.QuoteRemoteDataSource
 import org.junit.jupiter.api.BeforeEach
@@ -84,11 +90,13 @@ class QuoteRepositoryImplTest {
                 privacy = PrivacySetting.PRIVATE,
                 actionAt = actionAt,
                 position = null,
+                bookTitle = "Dune",
             )
 
             // ----- Assert -----
             result shouldBe 12L
             saved.captured.actionAtEpochMillis shouldBe actionAt.toEpochMilliseconds()
+            saved.captured.bookTitle shouldBe "Dune"
 
             coVerifyOrder {
                 localDataSource.insertWithWrite(
@@ -121,6 +129,7 @@ class QuoteRepositoryImplTest {
                 privacy = PrivacySetting.PUBLIC,
                 actionAt = null,
                 position = null,
+                bookTitle = null,
             )
 
             // ----- Assert -----
@@ -199,6 +208,58 @@ class QuoteRepositoryImplTest {
                     remote = fetched,
                 )
             }
+        }
+    }
+
+    @Nested
+    inner class RefreshAll {
+        @Test
+        fun `drains before fetching and hands the fetched rows to replaceAllSynced`() = runTest {
+            // ----- Arrange -----
+            val fetched = listOf(entity(localId = 1), entity(localId = 2))
+
+            coJustRun { drainer.drain() }
+
+            coEvery {
+                remoteDataSource.getAllQuotes()
+            } returns fetched
+
+            coJustRun { localDataSource.replaceAllSynced(remote = fetched) }
+
+            // ----- Act -----
+            repository.refreshAll()
+
+            // ----- Assert -----
+            coVerifyOrder {
+                drainer.drain()
+                remoteDataSource.getAllQuotes()
+                localDataSource.replaceAllSynced(remote = fetched)
+            }
+        }
+    }
+
+    @Nested
+    inner class ObserveAll {
+        @Test
+        fun `does not re-emit an unchanged list`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val source = MutableSharedFlow<List<QuoteEntity>>()
+
+            every {
+                localDataSource.observeAll()
+            } returns source
+
+            val emissions = mutableListOf<List<Quote>>()
+            val job = launch { repository.observeAll().toList(emissions) }
+
+            // ----- Act -----
+            source.emit(listOf(entity(localId = 1)))
+            source.emit(listOf(entity(localId = 1)))
+            source.emit(listOf(entity(localId = 1), entity(localId = 2)))
+            job.cancel()
+
+            // ----- Assert -----
+            emissions.map { quotes -> quotes.size } shouldBe listOf(1, 2)
         }
     }
 }

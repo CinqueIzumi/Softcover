@@ -16,6 +16,7 @@ class AddQuoteUseCase(
         privacy: PrivacySetting,
         actionAt: Instant?,
         position: QuotePosition?,
+        bookTitle: String?,
     ): Result<Long> = runCatchingLogged {
         repository.add(
             bookId = bookId,
@@ -24,6 +25,7 @@ class AddQuoteUseCase(
             privacy = privacy,
             actionAt = actionAt,
             position = position,
+            bookTitle = bookTitle,
         )
     }
 }

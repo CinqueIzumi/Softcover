@@ -48,6 +48,7 @@ class QuoteDaoTest {
         actionAt: Long = 100L,
         editionId: Int? = null,
         state: QuoteSyncState = QuoteSyncState.SYNCED,
+        bookTitle: String? = null,
     ): QuoteEntity = QuoteEntity(
         remoteId = remoteId,
         bookId = bookId,
@@ -60,6 +61,7 @@ class QuoteDaoTest {
         positionPossible = null,
         positionPercent = null,
         syncState = state,
+        bookTitle = bookTitle,
     )
 
     private suspend fun observed(bookId: Int): List<QuoteEntity> {
@@ -71,6 +73,84 @@ class QuoteDaoTest {
         }
 
         return result
+    }
+
+    private suspend fun observedAll(): List<QuoteEntity> {
+        var result: List<QuoteEntity> = emptyList()
+
+        dao.observeAll().test {
+            result = awaitItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        return result
+    }
+
+    @Nested
+    inner class ObserveAll {
+        @Test
+        fun `hides pending deletes and orders newest first across books`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            dao.insertQuote(
+                quote(
+                    bookId = 1,
+                    remoteId = 1,
+                    text = "old",
+                    actionAt = 10,
+                ),
+            )
+            dao.insertQuote(
+                quote(
+                    bookId = 2,
+                    remoteId = 2,
+                    text = "new",
+                    actionAt = 30,
+                ),
+            )
+            dao.insertQuote(
+                quote(
+                    bookId = 3,
+                    remoteId = 3,
+                    text = "gone",
+                    actionAt = 20,
+                    state = QuoteSyncState.PENDING_DELETE,
+                ),
+            )
+
+            // ----- Act -----
+            val result = observedAll()
+
+            // ----- Assert -----
+            result.map { it.text } shouldBe listOf("new", "old")
+        }
+
+        @Test
+        fun `round-trips the book title`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            dao.insertQuote(
+                quote(
+                    remoteId = 1,
+                    text = "titled",
+                    bookTitle = "Dune",
+                ),
+            )
+            dao.insertQuote(
+                quote(
+                    remoteId = 2,
+                    text = "untitled",
+                    actionAt = 50,
+                ),
+            )
+
+            // ----- Act -----
+            val result = observedAll()
+
+            // ----- Assert -----
+            result.associate { it.text to it.bookTitle } shouldBe mapOf(
+                "titled" to "Dune",
+                "untitled" to null,
+            )
+        }
     }
 
     @Nested
@@ -287,6 +367,124 @@ class QuoteDaoTest {
 
             // ----- Assert -----
             observed(bookId = 1).size shouldBe 2
+        }
+    }
+
+    @Nested
+    inner class ReplaceAllSynced {
+        @Test
+        fun `swaps the synced rows of every book for the remote rows`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            dao.insertQuote(
+                quote(
+                    bookId = 1,
+                    remoteId = 1,
+                    text = "stale one",
+                ),
+            )
+            dao.insertQuote(
+                quote(
+                    bookId = 2,
+                    remoteId = 2,
+                    text = "stale two",
+                ),
+            )
+
+            // ----- Act -----
+            dao.replaceAllSynced(
+                remote = listOf(
+                    quote(
+                        bookId = 3,
+                        remoteId = 3,
+                        text = "fresh",
+                        bookTitle = "Dune",
+                    ),
+                ),
+            )
+
+            // ----- Assert -----
+            val result = observedAll()
+            result.map { it.text } shouldBe listOf("fresh")
+            result.single().bookTitle shouldBe "Dune"
+        }
+
+        @Test
+        fun `leaves unsynced rows of every book alone`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            dao.insertQuote(
+                quote(
+                    bookId = 2,
+                    text = "local",
+                    state = QuoteSyncState.PENDING_INSERT,
+                ),
+            )
+
+            // ----- Act -----
+            dao.replaceAllSynced(remote = emptyList())
+
+            // ----- Assert -----
+            observedAll().map { it.text } shouldBe listOf("local")
+        }
+
+        @Test
+        fun `skips a remote row whose id a pending delete holds`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            dao.insertQuote(
+                quote(
+                    bookId = 2,
+                    remoteId = 5,
+                    state = QuoteSyncState.PENDING_DELETE,
+                ),
+            )
+
+            // ----- Act -----
+            dao.replaceAllSynced(
+                remote = listOf(
+                    quote(
+                        bookId = 2,
+                        remoteId = 5,
+                        text = "resurrected",
+                    ),
+                ),
+            )
+
+            // ----- Assert -----
+            observedAll().shouldBeEmpty()
+        }
+
+        @Test
+        fun `adopts a matching pending insert of any book and drops its pending write`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val localId = dao.insertWithWrite(
+                entity = quote(
+                    bookId = 4,
+                    text = "mine",
+                    actionAt = 50,
+                    editionId = 3,
+                    state = QuoteSyncState.PENDING_INSERT,
+                ),
+                enqueuedAt = "2024-01-01T00:00:00",
+            )
+
+            // ----- Act -----
+            dao.replaceAllSynced(
+                remote = listOf(
+                    quote(
+                        bookId = 4,
+                        remoteId = 8,
+                        text = "mine",
+                        actionAt = 50,
+                        editionId = 3,
+                    ),
+                ),
+            )
+
+            // ----- Assert -----
+            val adopted = dao.getById(localId).shouldNotBeNull()
+            adopted.remoteId shouldBe 8L
+            adopted.syncState shouldBe QuoteSyncState.SYNCED
+            observedAll().size shouldBe 1
+            pendingDao.getPending().shouldBeEmpty()
         }
     }
 

@@ -3,7 +3,10 @@ package nl.rhaydus.softcover.core.personal.data.datasource
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import nl.rhaydus.softcover.DeleteQuoteMutation
+import nl.rhaydus.softcover.GetAllQuotesQuery
+import nl.rhaydus.softcover.GetAllQuotesQuery.Data.Reading_journal.Companion.quoteFieldsFragment as allQuoteFieldsFragment
 import nl.rhaydus.softcover.GetBookQuotesQuery
+import nl.rhaydus.softcover.GetBookQuotesQuery.Data.Reading_journal.Companion.quoteFieldsFragment as bookQuoteFieldsFragment
 import nl.rhaydus.softcover.InsertQuoteMutation
 import nl.rhaydus.softcover.core.database.model.QuoteEntity
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
@@ -20,6 +23,8 @@ private const val QUOTE_EVENT = "quote"
 
 interface QuoteRemoteDataSource {
     suspend fun getQuotes(bookId: Int): List<QuoteEntity>
+
+    suspend fun getAllQuotes(): List<QuoteEntity>
 
     /** Returns the `reading_journals.id` Hardcover assigned. */
     suspend fun insertQuote(entity: QuoteEntity): Long
@@ -43,7 +48,21 @@ internal class QuoteRemoteDataSourceImpl(
                     offset = offset,
                 ),
             ).reading_journals
-        }.mapNotNull { it.toQuoteEntity(bookId = bookId) }
+        }.mapNotNull { it.bookQuoteFieldsFragment()?.toQuoteEntity() }
+    }
+
+    override suspend fun getAllQuotes(): List<QuoteEntity> {
+        val userId = getUserIdUseCase().getOrThrow()
+
+        return fetchAllPages { limit, offset ->
+            apolloClient.safeQuery(
+                query = GetAllQuotesQuery(
+                    userId = userId,
+                    limit = limit,
+                    offset = offset,
+                ),
+            ).reading_journals
+        }.mapNotNull { it.allQuoteFieldsFragment()?.toQuoteEntity() }
     }
 
     override suspend fun insertQuote(entity: QuoteEntity): Long {

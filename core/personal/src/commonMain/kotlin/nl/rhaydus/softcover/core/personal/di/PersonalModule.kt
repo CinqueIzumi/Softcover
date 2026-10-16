@@ -25,11 +25,13 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.AddQuoteUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteQuoteUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveActiveSessionUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveAllQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveAllSessionsUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveSessionsForBookUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.PauseReadingSessionUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshAllQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ResumeReadingSessionUseCase
@@ -104,6 +106,8 @@ val personalModule = module {
 
     factory { ObserveBookQuotesUseCase(repository = get()) }
     factory { RefreshBookQuotesUseCase(repository = get()) }
+    factory { ObserveAllQuotesUseCase(repository = get()) }
+    factory { RefreshAllQuotesUseCase(repository = get()) }
     factory { AddQuoteUseCase(repository = get()) }
     factory { DeleteQuoteUseCase(repository = get()) }
 }

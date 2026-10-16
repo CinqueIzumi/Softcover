@@ -188,7 +188,8 @@ books with more than 200 updates).
   order (e.g. chronological), make it a composite key with `id` as the tiebreaker
   (`order_by: [{ updated_at: asc }, { id: asc }]`).
 - Callers: `ProfileRemoteDataSource.fetchAllStatsBooks`, `UserTagsRemoteDataSource.fetchUserVocabulary`,
-  `ReadingJournalHistoryRemoteDataSource.getReadingJournalHistory`. A per-row lazily-cancellable
+  `ReadingJournalHistoryRemoteDataSource.getReadingJournalHistory`,
+  `QuoteRemoteDataSource.getQuotes` / `getAllQuotes`. A per-row lazily-cancellable
   `Flow` (e.g. `streamReadingDaysDescending`) stays a hand-rolled loop — it emits as it goes rather
   than accumulating into a list, so it can't use this helper.
 

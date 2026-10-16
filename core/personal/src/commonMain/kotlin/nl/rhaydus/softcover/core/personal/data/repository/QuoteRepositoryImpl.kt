@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.personal.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.database.model.QuoteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.QuoteWriteDrainer
@@ -37,6 +38,16 @@ internal class QuoteRepositoryImpl(
         )
     }
 
+    override fun observeAll(): Flow<List<Quote>> = localDataSource.observeAll()
+        .map { entities -> entities.map { it.toDomain() } }
+        .distinctUntilChanged()
+
+    override suspend fun refreshAll() {
+        drainer.drain()
+
+        localDataSource.replaceAllSynced(remote = remoteDataSource.getAllQuotes())
+    }
+
     override suspend fun add(
         bookId: Int,
         editionId: Int?,
@@ -44,6 +55,7 @@ internal class QuoteRepositoryImpl(
         privacy: PrivacySetting,
         actionAt: Instant?,
         position: QuotePosition?,
+        bookTitle: String?,
     ): Long {
         val now: Instant = clock.now()
 
@@ -55,6 +67,7 @@ internal class QuoteRepositoryImpl(
                 privacy = privacy,
                 actionAt = actionAt ?: now,
                 position = position,
+                bookTitle = bookTitle,
             ),
             enqueuedAt = now.toString(),
         )

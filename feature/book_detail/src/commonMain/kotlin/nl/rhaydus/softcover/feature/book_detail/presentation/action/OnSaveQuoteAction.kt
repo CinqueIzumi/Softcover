@@ -59,6 +59,7 @@ internal class OnSaveQuoteAction : BookDetailAction {
                 privacy = draft.privacy,
                 actionAt = draft.readAt?.toInstant(TimeZone.currentSystemDefault()),
                 position = position,
+                bookTitle = book.title,
             )
                 .onFailure { error ->
                     AppLog.e("Failed to save quote: $error")

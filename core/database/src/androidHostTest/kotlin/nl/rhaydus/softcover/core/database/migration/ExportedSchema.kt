@@ -51,10 +51,12 @@ internal class ExportedSchema private constructor(
         }
 
         views.forEach { (name, sql) ->
-            connection.execSQL(sql.replace(
+            val createViewSql = sql.replace(
                 "\${VIEW_NAME}",
                 name,
-            ),)
+            )
+
+            connection.execSQL(createViewSql)
         }
 
         setupQueries.forEach { connection.execSQL(it) }
@@ -90,6 +92,16 @@ internal class ExportedSchema private constructor(
     }
 
     companion object {
+        /** The highest version exported to `core/database/schemas`, i.e. the schema the production database declares. */
+        fun loadLatest(): ExportedSchema {
+            val latestVersion = File("schemas/nl.rhaydus.softcover.core.database.SoftcoverDatabase")
+                .listFiles { file -> file.extension == "json" }
+                .orEmpty()
+                .maxOf { it.nameWithoutExtension.toInt() }
+
+            return load(version = latestVersion)
+        }
+
         fun load(version: Int): ExportedSchema {
             val file = File(
                 "schemas/nl.rhaydus.softcover.core.database.SoftcoverDatabase/$version.json",

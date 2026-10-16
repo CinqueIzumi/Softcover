@@ -8,6 +8,8 @@ import nl.rhaydus.softcover.core.database.model.QuoteSyncState
 interface QuoteLocalDataSource {
     fun observeForBook(bookId: Int): Flow<List<QuoteEntity>>
 
+    fun observeAll(): Flow<List<QuoteEntity>>
+
     suspend fun getById(localId: Long): QuoteEntity?
 
     suspend fun insertWithWrite(
@@ -26,6 +28,8 @@ interface QuoteLocalDataSource {
         remote: List<QuoteEntity>,
     )
 
+    suspend fun replaceAllSynced(remote: List<QuoteEntity>)
+
     /** Returns false when the local row no longer exists. */
     suspend fun markSynced(
         localId: Long,
@@ -41,6 +45,8 @@ internal class QuoteLocalDataSourceImpl(
     private val dao: QuoteDao,
 ) : QuoteLocalDataSource {
     override fun observeForBook(bookId: Int): Flow<List<QuoteEntity>> = dao.observeForBook(bookId = bookId)
+
+    override fun observeAll(): Flow<List<QuoteEntity>> = dao.observeAll()
 
     override suspend fun getById(localId: Long): QuoteEntity? = dao.getById(localId = localId)
 
@@ -67,6 +73,8 @@ internal class QuoteLocalDataSourceImpl(
         bookId = bookId,
         remote = remote,
     )
+
+    override suspend fun replaceAllSynced(remote: List<QuoteEntity>) = dao.replaceAllSynced(remote = remote)
 
     override suspend fun markSynced(
         localId: Long,

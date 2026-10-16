@@ -28,6 +28,7 @@ data class QuoteEntity(
     val positionPossible: Double?,
     val positionPercent: Double?,
     val syncState: QuoteSyncState,
+    val bookTitle: String? = null,
 ) {
     /** Whether [other] is the server copy of this unsynced row: same book, text, instant and edition. */
     fun isSameQuoteAs(other: QuoteEntity): Boolean = bookId == other.bookId &&

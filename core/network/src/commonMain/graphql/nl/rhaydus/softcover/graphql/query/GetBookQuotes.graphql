@@ -15,11 +15,6 @@ query GetBookQuotes(
         limit: $limit
         offset: $offset
     ) {
-        id
-        action_at
-        entry
-        privacy_setting_id
-        edition_id
-        metadata
+        ...QuoteFieldsFragment
     }
 }

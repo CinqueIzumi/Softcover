@@ -24,6 +24,15 @@ interface QuoteDao {
     )
     fun observeForBook(bookId: Int): Flow<List<QuoteEntity>>
 
+    @Query(
+        """
+        SELECT * FROM book_quotes
+        WHERE syncState != 'PENDING_DELETE'
+        ORDER BY actionAtEpochMillis DESC, localId DESC
+        """,
+    )
+    fun observeAll(): Flow<List<QuoteEntity>>
+
     @Query("SELECT * FROM book_quotes WHERE localId = :localId")
     suspend fun getById(localId: Long): QuoteEntity?
 
@@ -54,6 +63,9 @@ interface QuoteDao {
     @Query("DELETE FROM book_quotes WHERE bookId = :bookId AND syncState = 'SYNCED'")
     suspend fun deleteSyncedForBook(bookId: Int)
 
+    @Query("DELETE FROM book_quotes WHERE syncState = 'SYNCED'")
+    suspend fun deleteAllSynced()
+
     @Query("DELETE FROM book_quotes WHERE remoteId = :remoteId AND localId != :exceptLocalId AND syncState = 'SYNCED'")
     suspend fun deleteSyncedWithRemoteId(
         remoteId: Long,
@@ -65,6 +77,9 @@ interface QuoteDao {
 
     @Query("SELECT * FROM book_quotes WHERE bookId = :bookId AND syncState = 'PENDING_INSERT'")
     suspend fun getPendingInsertsForBook(bookId: Int): List<QuoteEntity>
+
+    @Query("SELECT * FROM book_quotes WHERE syncState = 'PENDING_INSERT'")
+    suspend fun getAllPendingInserts(): List<QuoteEntity>
 
     @Query("UPDATE book_quotes SET remoteId = :remoteId, syncState = 'SYNCED' WHERE localId = :localId")
     suspend fun setSynced(
@@ -159,8 +174,27 @@ interface QuoteDao {
     ) {
         deleteSyncedForBook(bookId = bookId)
 
-        val pendingInserts: List<QuoteEntity> = getPendingInsertsForBook(bookId = bookId)
+        mergeRemote(
+            remote = remote,
+            pendingInserts = getPendingInsertsForBook(bookId = bookId),
+        )
+    }
 
+    /** Swaps every synced row for [remote], under the same rules as [replaceSyncedForBook]. */
+    @Transaction
+    suspend fun replaceAllSynced(remote: List<QuoteEntity>) {
+        deleteAllSynced()
+
+        mergeRemote(
+            remote = remote,
+            pendingInserts = getAllPendingInserts(),
+        )
+    }
+
+    private suspend fun mergeRemote(
+        remote: List<QuoteEntity>,
+        pendingInserts: List<QuoteEntity>,
+    ) {
         remote.forEach { row ->
             val remoteId: Long = row.remoteId ?: return@forEach
 

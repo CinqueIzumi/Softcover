@@ -1,12 +1,13 @@
 package nl.rhaydus.softcover.core.personal.data.mapper
 
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.GetBookQuotesQuery
 import nl.rhaydus.softcover.core.database.model.QuoteEntity
 import nl.rhaydus.softcover.core.database.model.QuoteSyncState
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.QuotePosition
+import nl.rhaydus.softcover.fragment.QuoteFieldsFragment
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.time.Instant
@@ -34,18 +35,36 @@ class QuoteMapperTest {
         syncState = syncState,
     )
 
+    private class FakeBook(override val title: String?) : QuoteFieldsFragment.Book {
+        override val __typename: String = "books"
+        override val id: Int = 1
+    }
+
+    private class FakeFragment(
+        override val entry: String?,
+        override val action_at: String,
+        override val metadata: Any,
+        override val book_id: Int?,
+        override val book: QuoteFieldsFragment.Book?,
+    ) : QuoteFieldsFragment {
+        override val __typename: String = "reading_journals"
+        override val id: Long = 9L
+        override val privacy_setting_id: Int = 3
+        override val edition_id: Int? = 3
+    }
+
     private fun journal(
         entry: String? = "A quote",
         actionAt: String = "2024-03-01T08:00:00+00:00",
         metadata: Any = emptyMap<String, Any?>(),
-    ) = GetBookQuotesQuery.Data.Reading_journal(
-        __typename = "reading_journals",
-        id = 9L,
+        bookId: Int? = 1,
+        bookTitle: String? = "Dune",
+    ): QuoteFieldsFragment = FakeFragment(
         entry = entry,
         action_at = actionAt,
-        edition_id = 3,
-        privacy_setting_id = 3,
         metadata = metadata,
+        book_id = bookId,
+        book = FakeBook(title = bookTitle),
     )
 
     @Nested
@@ -157,6 +176,7 @@ class QuoteMapperTest {
                 privacy = PrivacySetting.FOLLOWERS,
                 actionAt = Instant.fromEpochMilliseconds(5_000),
                 position = position,
+                bookTitle = "Dune",
             )
 
             // ----- Assert -----
@@ -172,6 +192,7 @@ class QuoteMapperTest {
                 positionPossible = 3600.0,
                 positionPercent = 25.0,
                 syncState = QuoteSyncState.PENDING_INSERT,
+                bookTitle = "Dune",
             )
         }
 
@@ -188,6 +209,7 @@ class QuoteMapperTest {
                 privacy = PrivacySetting.PUBLIC,
                 actionAt = Instant.fromEpochMilliseconds(5_000),
                 position = position,
+                bookTitle = null,
             )
 
             // ----- Assert -----
@@ -213,7 +235,7 @@ class QuoteMapperTest {
             )
 
             // ----- Act -----
-            val result = row.toQuoteEntity(bookId = 1)
+            val result = row.toQuoteEntity()
 
             // ----- Assert -----
             result shouldBe QuoteEntity(
@@ -228,7 +250,32 @@ class QuoteMapperTest {
                 positionPossible = 400.0,
                 positionPercent = 6.0,
                 syncState = QuoteSyncState.SYNCED,
+                bookTitle = "Dune",
             )
+        }
+
+        @Test
+        fun `keeps a row without a book title`() {
+            // ----- Arrange -----
+            val row = journal(bookTitle = null)
+
+            // ----- Act -----
+            val result = row.toQuoteEntity()
+
+            // ----- Assert -----
+            result.shouldNotBeNull().bookTitle.shouldBeNull()
+        }
+
+        @Test
+        fun `drops a row without a book id`() {
+            // ----- Arrange -----
+            val row = journal(bookId = null)
+
+            // ----- Act -----
+            val result = row.toQuoteEntity()
+
+            // ----- Assert -----
+            result.shouldBeNull()
         }
 
         @Test
@@ -237,7 +284,7 @@ class QuoteMapperTest {
             val row = journal(entry = "   ")
 
             // ----- Act -----
-            val result = row.toQuoteEntity(bookId = 1)
+            val result = row.toQuoteEntity()
 
             // ----- Assert -----
             result.shouldBeNull()
@@ -249,7 +296,7 @@ class QuoteMapperTest {
             val row = journal(actionAt = "yesterday")
 
             // ----- Act -----
-            val result = row.toQuoteEntity(bookId = 1)
+            val result = row.toQuoteEntity()
 
             // ----- Assert -----
             result.shouldBeNull()

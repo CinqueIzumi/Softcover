@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.core.personal.data.mapper
 
-import nl.rhaydus.softcover.GetBookQuotesQuery
 import nl.rhaydus.softcover.core.database.model.QuoteEntity
 import nl.rhaydus.softcover.core.database.model.QuoteSyncState
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.domain.model.QuotePosition
+import nl.rhaydus.softcover.fragment.QuoteFieldsFragment
 import kotlin.time.Instant
 
 private const val POSITION_PAGES = "pages"
@@ -23,6 +23,7 @@ internal fun QuoteEntity.toDomain(): Quote = Quote(
     actionAt = Instant.fromEpochMilliseconds(actionAtEpochMillis),
     position = toPosition(),
     isPending = syncState == QuoteSyncState.PENDING_INSERT,
+    bookTitle = bookTitle,
 )
 
 internal fun QuoteEntity.toPosition(): QuotePosition? {
@@ -54,6 +55,7 @@ internal fun newPendingQuoteEntity(
     privacy: PrivacySetting,
     actionAt: Instant,
     position: QuotePosition?,
+    bookTitle: String?,
 ): QuoteEntity = positionColumns(position = position).let { columns ->
     QuoteEntity(
         remoteId = null,
@@ -67,11 +69,13 @@ internal fun newPendingQuoteEntity(
         positionPossible = columns.possible,
         positionPercent = columns.percent,
         syncState = QuoteSyncState.PENDING_INSERT,
+        bookTitle = bookTitle,
     )
 }
 
-/** Rows with no entry text or an unparsable date are dropped: a quote without either cannot be shown. */
-internal fun GetBookQuotesQuery.Data.Reading_journal.toQuoteEntity(bookId: Int): QuoteEntity? {
+/** Rows with no entry text, an unparsable date or no book are dropped: a quote without them cannot be shown. */
+internal fun QuoteFieldsFragment.toQuoteEntity(): QuoteEntity? {
+    val bookId: Int = book_id ?: return null
     val text: String = entry?.takeIf { it.isNotBlank() } ?: return null
     val instant: Instant = runCatching { Instant.parse(action_at) }.getOrNull() ?: return null
     val columns: PositionColumns = positionColumns(position = quotePositionFromMetadata(metadata = metadata))
@@ -88,6 +92,7 @@ internal fun GetBookQuotesQuery.Data.Reading_journal.toQuoteEntity(bookId: Int):
         positionPossible = columns.possible,
         positionPercent = columns.percent,
         syncState = QuoteSyncState.SYNCED,
+        bookTitle = book?.title,
     )
 }
 

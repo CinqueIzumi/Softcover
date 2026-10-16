@@ -27,7 +27,7 @@ class RoomOpenSurvivesUpgradeTest {
     @TempDir
     lateinit var tempDir: File
 
-    private val latest = ExportedSchema.load(version = 56)
+    private val latest = ExportedSchema.loadLatest()
 
     private fun databaseFile(): File = File(
         tempDir,
@@ -139,7 +139,7 @@ class RoomOpenSurvivesUpgradeTest {
         private val schema52 = ExportedSchema.load(version = 52)
 
         @Test
-        fun `every user table keeps its rows after the production builder upgrades to 56`() {
+        fun `every user table keeps its rows after the production builder upgrades to the latest version`() {
             // ----- Arrange -----
             val file = databaseFile()
             writeOldDatabase(
@@ -211,7 +211,7 @@ class RoomOpenSurvivesUpgradeTest {
         }
 
         @Test
-        fun `the schema Room leaves behind is the exported v56 schema without reading_log_entries`() {
+        fun `the schema Room leaves behind is the exported latest schema without reading_log_entries`() {
             // ----- Arrange -----
             val file = databaseFile()
             writeOldDatabase(
@@ -227,7 +227,7 @@ class RoomOpenSurvivesUpgradeTest {
         }
 
         @Test
-        fun `a database already on 56 reopens with its rows intact`() {
+        fun `a database already on the latest version reopens with its rows intact`() {
             // ----- Arrange -----
             val file = databaseFile()
             writeOldDatabase(
@@ -256,7 +256,7 @@ class RoomOpenSurvivesUpgradeTest {
         private val schema42 = ExportedSchema.load(version = 42)
 
         @Test
-        fun `every user table keeps its rows through the whole chain to 56`() {
+        fun `every user table keeps its rows through the whole chain to the latest version`() {
             // ----- Arrange -----
             val file = databaseFile()
             writeOldDatabase(
@@ -298,7 +298,7 @@ class RoomOpenSurvivesUpgradeTest {
         }
 
         @Test
-        fun `the schema Room leaves behind is the exported v56 schema`() {
+        fun `the schema Room leaves behind is the exported latest schema`() {
             // ----- Arrange -----
             val file = databaseFile()
             writeOldDatabase(
@@ -343,7 +343,7 @@ class RoomOpenSurvivesUpgradeTest {
         }
 
         @Test
-        fun `the schema Room leaves behind is the exported v56 schema`() {
+        fun `the schema Room leaves behind is the exported latest schema`() {
             // ----- Arrange -----
             val file = databaseFile()
             writeOldDatabase(

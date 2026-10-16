@@ -11,6 +11,10 @@ interface QuoteRepository {
 
     suspend fun refreshForBook(bookId: Int)
 
+    fun observeAll(): Flow<List<Quote>>
+
+    suspend fun refreshAll()
+
     /** Saves [actionAt] as given, or the current time when `null`, so a queued quote keeps its save time. */
     suspend fun add(
         bookId: Int,
@@ -19,6 +23,7 @@ interface QuoteRepository {
         privacy: PrivacySetting,
         actionAt: Instant?,
         position: QuotePosition?,
+        bookTitle: String?,
     ): Long
 
     suspend fun delete(localId: Long)

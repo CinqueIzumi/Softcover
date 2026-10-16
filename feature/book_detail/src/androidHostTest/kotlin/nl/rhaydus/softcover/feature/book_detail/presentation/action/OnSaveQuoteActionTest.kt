@@ -72,6 +72,7 @@ class OnSaveQuoteActionTest {
                 privacy = any(),
                 actionAt = any(),
                 position = any(),
+                bookTitle = any(),
             )
         } returns Result.success(1L)
         coEvery {
@@ -171,6 +172,7 @@ class OnSaveQuoteActionTest {
                         page = 214,
                         totalPages = 437,
                     ),
+                    bookTitle = "Piranesi",
                 )
             }
         }
@@ -214,6 +216,7 @@ class OnSaveQuoteActionTest {
                         page = 214,
                         totalPages = 437,
                     ),
+                    bookTitle = "Piranesi",
                 )
             }
         }
@@ -246,6 +249,36 @@ class OnSaveQuoteActionTest {
                     privacy = any(),
                     actionAt = any(),
                     position = any(),
+                    bookTitle = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `stores the book title on the quote`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = buildQuoteBook(
+                    title = "The Ministry of Time",
+                    currentPages = 437,
+                    readPage = 180,
+                ),
+                quoteDraft = draft(),
+            )
+
+            // ----- Act -----
+            execute(this)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                addQuoteUseCase(
+                    bookId = any(),
+                    editionId = any(),
+                    text = any(),
+                    privacy = any(),
+                    actionAt = any(),
+                    position = any(),
+                    bookTitle = "The Ministry of Time",
                 )
             }
         }
@@ -270,6 +303,7 @@ class OnSaveQuoteActionTest {
                     privacy = any(),
                     actionAt = any(),
                     position = any(),
+                    bookTitle = any(),
                 )
             }
         }
@@ -295,6 +329,7 @@ class OnSaveQuoteActionTest {
                     privacy = any(),
                     actionAt = any(),
                     position = any(),
+                    bookTitle = any(),
                 )
             }
             coVerify(exactly = 0) {
@@ -351,6 +386,7 @@ class OnSaveQuoteActionTest {
                     privacy = any(),
                     actionAt = any(),
                     position = any(),
+                    bookTitle = any(),
                 )
             }
             stateFlow.value.failedMutationBookIds shouldBe setOf(7)
@@ -405,6 +441,7 @@ class OnSaveQuoteActionTest {
                     privacy = any(),
                     actionAt = any(),
                     position = any(),
+                    bookTitle = any(),
                 )
             } returns Result.failure(RuntimeException("add failed"))
             stateFlow.value = buildBookDetailUiState().copy(
