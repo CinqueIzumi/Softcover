@@ -9,4 +9,5 @@
     android:previewImage="@drawable/random_pick_widget_preview"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
-    android:widgetCategory="home_screen" />
+    android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable" />

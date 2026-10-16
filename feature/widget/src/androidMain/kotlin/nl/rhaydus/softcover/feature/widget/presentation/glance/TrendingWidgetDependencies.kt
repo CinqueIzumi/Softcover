@@ -2,16 +2,16 @@ package nl.rhaydus.softcover.feature.widget.presentation.glance
 
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
-import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
-import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
-import nl.rhaydus.softcover.feature.widget.data.datastore.TrendingStore
+import nl.rhaydus.softcover.feature.widget.domain.usecase.AdvanceTrendingPageUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetTrendingPositionUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingChangesUseCase
 
 internal class TrendingWidgetDependencies(
-    val getUserIdAsFlow: GetUserIdAsFlowUseCase,
-    val getThemeConfiguration: GetThemeConfigurationUseCase,
+    val environment: WidgetEnvironment,
+    val repainter: WidgetRepainter,
     val observeTrendingBooks: ObserveTrendingBooksUseCase,
     val refreshTrendingBooks: RefreshTrendingBooksUseCase,
-    val store: TrendingStore,
-    val appEntryPoint: AppEntryPoint,
+    val getTrendingPosition: GetTrendingPositionUseCase,
+    val advanceTrendingPage: AdvanceTrendingPageUseCase,
+    val observeTrendingChanges: ObserveTrendingChangesUseCase,
 )

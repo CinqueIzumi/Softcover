@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.action
 
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.feature.widget.presentation.event.RandomPickSettingsEvent
 import nl.rhaydus.softcover.feature.widget.presentation.mapper.cadenceChipsFor
 import nl.rhaydus.softcover.feature.widget.presentation.mapper.sourceChipsFor
@@ -17,7 +16,7 @@ internal class LoadRandomPickSettingsAction(private val appWidgetId: Int) : Rand
     ) {
         if (scope.currentLocalVariables.appWidgetId != null) return
 
-        runCatchingCancellable { dependencies.store.settings(appWidgetId = appWidgetId) }
+        dependencies.getRandomPickSettings(appWidgetId = appWidgetId)
             .onSuccess { settings ->
                 scope.setLocalVariables {
                     it.copy(

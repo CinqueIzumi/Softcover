@@ -1,17 +1,17 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
-import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
-import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
-import nl.rhaydus.softcover.feature.widget.data.datastore.RandomPickStore
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveRandomPickChangesUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ResolveRandomPickUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ShuffleRandomPickUseCase
 
 internal class RandomPickWidgetDependencies(
-    val getUserIdAsFlow: GetUserIdAsFlowUseCase,
-    val getThemeConfiguration: GetThemeConfigurationUseCase,
+    val environment: WidgetEnvironment,
+    val repainter: WidgetRepainter,
     val getWantToReadUserBooks: GetWantToReadUserBooksUseCase,
     val getAllUserLists: GetAllUserListsUseCase,
-    val store: RandomPickStore,
-    val appEntryPoint: AppEntryPoint,
+    val resolveRandomPick: ResolveRandomPickUseCase,
+    val shuffleRandomPick: ShuffleRandomPickUseCase,
+    val observeRandomPickChanges: ObserveRandomPickChangesUseCase,
 )

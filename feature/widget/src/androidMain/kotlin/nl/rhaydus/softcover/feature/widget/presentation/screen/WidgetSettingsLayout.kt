@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
@@ -53,6 +54,7 @@ internal fun WidgetSettingsLayout(
                     .padding(innerPadding)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .cappedContentWidth()
                     .padding(
                         horizontal = Spacing.gutter,
                         vertical = Spacing.lg,

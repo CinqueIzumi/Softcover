@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.widget.presentation.worker
 
 import android.content.Context
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
@@ -8,15 +9,15 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import nl.rhaydus.softcover.feature.widget.data.datastore.TrendingStore
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingRefreshPlan
 import nl.rhaydus.softcover.feature.widget.domain.model.trendingRefreshPlan
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetPlacedTrendingSettingsUseCase
+import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
 import java.util.concurrent.TimeUnit
-import kotlin.time.Duration
 
 internal class TrendingRefreshScheduler(
     private val context: Context,
-    private val store: TrendingStore,
+    private val getPlacedTrendingSettings: GetPlacedTrendingSettingsUseCase,
 ) {
     fun requestReschedule() {
         WorkManager.getInstance(context).enqueueUniqueWork(
@@ -26,12 +27,17 @@ internal class TrendingRefreshScheduler(
         )
     }
 
-    suspend fun currentPlan(): TrendingRefreshPlan? = trendingRefreshPlan(store.placedSettings())
+    suspend fun currentPlan(): TrendingRefreshPlan? {
+        val manager = GlanceAppWidgetManager(context)
 
-    suspend fun currentInterval(): Duration? = currentPlan()?.interval
+        val appWidgetIds = manager.getGlanceIds(TrendingWidget::class.java)
+            .map { glanceId -> manager.getAppWidgetId(glanceId) }
+
+        return trendingRefreshPlan(getPlacedTrendingSettings(appWidgetIds = appWidgetIds).getOrThrow())
+    }
 
     suspend fun reschedule() {
-        val interval = currentInterval()
+        val interval = currentPlan()?.interval
         val workManager = WorkManager.getInstance(context)
 
         if (interval == null) {

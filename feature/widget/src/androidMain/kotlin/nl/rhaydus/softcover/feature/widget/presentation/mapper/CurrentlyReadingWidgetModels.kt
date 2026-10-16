@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.mapLatest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.uibinding.format.percentLabel
+import nl.rhaydus.softcover.feature.widget.domain.util.resolveShownBookId
 import nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.model.ProgressBarKey
 import nl.rhaydus.softcover.feature.widget.presentation.render.BackdropArtwork
 import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressBitmaps
-import nl.rhaydus.softcover.feature.widget.presentation.util.resolveShownBookId
 
 private class CurrentlyReadingWidgetInputs(
     val isSignedIn: Boolean,
@@ -99,7 +99,12 @@ private suspend fun CurrentlyReadingWidgetInputs.toContent(
                 )
             }
         },
-        position = if (books.size > 1) "${orderedBookIds.indexOf(shownId) + 1}/${books.size}" else null,
+        eyebrow = if (books.size > 1) {
+            "READING · ${orderedBookIds.indexOf(shownId) + 1}/${books.size}"
+        } else {
+            "READING"
+        },
+        canCycle = books.size > 1,
         artwork = renderArtwork(cover),
     )
 }

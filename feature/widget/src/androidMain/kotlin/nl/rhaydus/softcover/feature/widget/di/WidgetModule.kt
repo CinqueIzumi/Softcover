@@ -1,8 +1,26 @@
 package nl.rhaydus.softcover.feature.widget.di
 
 import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgets
-import nl.rhaydus.softcover.feature.widget.data.datastore.RandomPickStore
-import nl.rhaydus.softcover.feature.widget.data.datastore.TrendingStore
+import nl.rhaydus.softcover.feature.widget.data.repository.CurrentlyReadingRepositoryImpl
+import nl.rhaydus.softcover.feature.widget.data.repository.RandomPickRepositoryImpl
+import nl.rhaydus.softcover.feature.widget.data.repository.TrendingRepositoryImpl
+import nl.rhaydus.softcover.feature.widget.domain.repository.CurrentlyReadingRepository
+import nl.rhaydus.softcover.feature.widget.domain.repository.RandomPickRepository
+import nl.rhaydus.softcover.feature.widget.domain.repository.TrendingRepository
+import nl.rhaydus.softcover.feature.widget.domain.usecase.AdvanceTrendingPageUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.CycleSelectedBookUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetPlacedTrendingSettingsUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetRandomPickSettingsUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetSelectedBookIdUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetTrendingPositionUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetTrendingSettingsUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveRandomPickChangesUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveSelectedBookChangesUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingChangesUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ResolveRandomPickUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.SaveRandomPickSettingsUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.SaveTrendingSettingsUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ShuffleRandomPickUseCase
 import nl.rhaydus.softcover.feature.widget.presentation.collector.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.widget.presentation.collector.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.widget.presentation.collector.RandomPickListsCollector
@@ -16,6 +34,8 @@ import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidgetDependencies
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidgetDependencies
+import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetEnvironment
+import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
 import nl.rhaydus.softcover.feature.widget.presentation.placed.AndroidHomeScreenWidgets
 import nl.rhaydus.softcover.feature.widget.presentation.placed.WidgetInstanceChanges
 import nl.rhaydus.softcover.feature.widget.presentation.refresh.WidgetRefresher
@@ -28,25 +48,70 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val widgetModule = module {
+    single<CurrentlyReadingRepository> { CurrentlyReadingRepositoryImpl(context = androidContext()) }
+
+    single<RandomPickRepository> { RandomPickRepositoryImpl(context = androidContext()) }
+
+    single<TrendingRepository> { TrendingRepositoryImpl(context = androidContext()) }
+
+    factory { GetSelectedBookIdUseCase(currentlyReadingRepository = get()) }
+
+    factory { CycleSelectedBookUseCase(currentlyReadingRepository = get()) }
+
+    factory { ObserveSelectedBookChangesUseCase(currentlyReadingRepository = get()) }
+
+    factory { GetRandomPickSettingsUseCase(randomPickRepository = get()) }
+
+    factory { SaveRandomPickSettingsUseCase(randomPickRepository = get()) }
+
+    factory { ResolveRandomPickUseCase(randomPickRepository = get()) }
+
+    factory { ShuffleRandomPickUseCase(randomPickRepository = get()) }
+
+    factory { ObserveRandomPickChangesUseCase(randomPickRepository = get()) }
+
+    factory { GetTrendingSettingsUseCase(trendingRepository = get()) }
+
+    factory { GetPlacedTrendingSettingsUseCase(trendingRepository = get()) }
+
+    factory { GetTrendingPositionUseCase(trendingRepository = get()) }
+
+    factory { SaveTrendingSettingsUseCase(trendingRepository = get()) }
+
+    factory { AdvanceTrendingPageUseCase(trendingRepository = get()) }
+
+    factory { ObserveTrendingChangesUseCase(trendingRepository = get()) }
+
+    single { WidgetRepainter(context = androidContext()) }
+
     single {
-        CurrentlyReadingWidgetDependencies(
+        WidgetEnvironment(
             getUserIdAsFlow = get(),
             getThemeConfiguration = get(),
-            getCurrentlyReadingUserBooks = get(),
             appEntryPoint = get(),
         )
     }
 
-    single { RandomPickStore(context = androidContext()) }
+    single {
+        CurrentlyReadingWidgetDependencies(
+            environment = get(),
+            repainter = get(),
+            getCurrentlyReadingUserBooks = get(),
+            getSelectedBookId = get(),
+            cycleSelectedBook = get(),
+            observeSelectedBookChanges = get(),
+        )
+    }
 
     single {
         RandomPickWidgetDependencies(
-            getUserIdAsFlow = get(),
-            getThemeConfiguration = get(),
+            environment = get(),
+            repainter = get(),
             getWantToReadUserBooks = get(),
             getAllUserLists = get(),
-            store = get(),
-            appEntryPoint = get(),
+            resolveRandomPick = get(),
+            shuffleRandomPick = get(),
+            observeRandomPickChanges = get(),
         )
     }
 
@@ -60,29 +125,30 @@ val widgetModule = module {
         )
     }
 
-    single { TrendingStore(context = androidContext()) }
-
     single {
         TrendingWidgetDependencies(
-            getUserIdAsFlow = get(),
-            getThemeConfiguration = get(),
+            environment = get(),
+            repainter = get(),
             observeTrendingBooks = get(),
             refreshTrendingBooks = get(),
-            store = get(),
-            appEntryPoint = get(),
+            getTrendingPosition = get(),
+            advanceTrendingPage = get(),
+            observeTrendingChanges = get(),
         )
     }
 
     single {
         TrendingRefreshScheduler(
             context = androidContext(),
-            store = get(),
+            getPlacedTrendingSettings = get(),
         )
     }
 
     factory {
         TrendingSettingsScreenModel(
-            store = get(),
+            getTrendingSettings = get(),
+            saveTrendingSettings = get(),
+            repainter = get(),
             scheduler = get(),
             getThemeConfiguration = get(),
             appDispatchers = get(),
@@ -99,7 +165,9 @@ val widgetModule = module {
 
     factory {
         RandomPickSettingsScreenModel(
-            store = get(),
+            getRandomPickSettings = get(),
+            saveRandomPickSettings = get(),
+            repainter = get(),
             getThemeConfiguration = get(),
             getAllUserLists = get(),
             appDispatchers = get(),
@@ -141,6 +209,7 @@ val widgetModule = module {
             getWantToReadUserBooks = get(),
             getAllUserLists = get(),
             observeTrendingBooks = get(),
+            trendingRefreshScheduler = get(),
         )
     }
 
@@ -150,8 +219,10 @@ val widgetModule = module {
         AndroidHomeScreenWidgets(
             context = androidContext(),
             ownedWidgets = get(),
-            randomPickStore = get(),
-            trendingStore = get(),
+            observeRandomPickChanges = get(),
+            observeTrendingChanges = get(),
+            getRandomPickSettings = get(),
+            getTrendingSettings = get(),
             getAllUserLists = get(),
             instanceChanges = get(),
             appDispatchers = get(),

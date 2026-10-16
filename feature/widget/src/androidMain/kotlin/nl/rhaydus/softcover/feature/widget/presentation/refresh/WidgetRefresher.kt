@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -27,6 +29,7 @@ import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
+import nl.rhaydus.softcover.feature.widget.presentation.worker.TrendingRefreshScheduler
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -43,6 +46,7 @@ internal class WidgetRefresher(
     private val getWantToReadUserBooks: GetWantToReadUserBooksUseCase,
     private val getAllUserLists: GetAllUserListsUseCase,
     private val observeTrendingBooks: ObserveTrendingBooksUseCase,
+    private val trendingRefreshScheduler: TrendingRefreshScheduler,
 ) {
     private val placedWidgets = MutableStateFlow<Set<String>>(emptySet())
 
@@ -56,6 +60,8 @@ internal class WidgetRefresher(
         )
             .onEach { refreshAll() }
             .launchIn(applicationScope.scope)
+
+        catchUpTrendingOnSignIn()
     }
 
     fun onEnabled(widget: GlanceAppWidget) {
@@ -64,6 +70,23 @@ internal class WidgetRefresher(
 
     fun onDisabled(widget: GlanceAppWidget) {
         placedWidgets.update { it - widget.key() }
+    }
+
+    /** Sign-out wipes trending, so after the next sign-in the periodic schedule alone would leave other periods empty. */
+    private fun catchUpTrendingOnSignIn() {
+        flow { emitAll(getUserIdAsFlow()) }
+            .map { it != NO_USER_ID }
+            .distinctUntilChanged()
+            .drop(1)
+            .filter { signedIn -> signedIn }
+            .onEach { trendingRefreshScheduler.requestReschedule() }
+            .catch { error ->
+                AppLog.e(
+                    error,
+                    "Trending catch-up on sign-in failed",
+                )
+            }
+            .launchIn(applicationScope.scope)
     }
 
     private suspend fun seedPlacedWidgets() {
@@ -108,8 +131,12 @@ internal class WidgetRefresher(
         signal { observeTrendingBooks(period = period) }
     }
 
-    /** Builds [source] inside the flow, so a use case that throws while building its flow is caught like one that fails while emitting. */
+    /**
+     * Builds [source] inside the flow, so a use case that throws while building its flow is caught like one that fails
+     * while emitting. The first emission is the current value, which the widgets already show.
+     */
     private fun signal(source: () -> Flow<*>): Flow<Unit> = flow { emitAll(source()) }
+        .drop(1)
         .map { }
         .catch { error ->
             AppLog.e(

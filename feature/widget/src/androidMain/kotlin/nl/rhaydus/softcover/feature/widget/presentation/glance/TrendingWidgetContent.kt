@@ -44,12 +44,12 @@ import androidx.glance.text.TextStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.CornerRadius
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
+import nl.rhaydus.softcover.feature.widget.domain.util.TRENDING_PAGE_SIZE
 import nl.rhaydus.softcover.feature.widget.presentation.callback.TrendingPageCallback
 import nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
 import nl.rhaydus.softcover.feature.widget.presentation.util.STACKED_MIN_HEIGHT_DP
-import nl.rhaydus.softcover.feature.widget.presentation.util.TRENDING_PAGE_SIZE
 import nl.rhaydus.softcover.feature.widget.presentation.util.trendingCoverHeightDp
 
 @Composable
@@ -177,6 +177,7 @@ private fun Ranked(
 
     val coverHeight = trendingCoverHeightDp(
         widgetHeightDp = size.height.value.toInt(),
+        widgetWidthDp = size.width.value.toInt(),
         showsPageRow = content.showsArrows,
     ).dp
 
@@ -333,7 +334,6 @@ private fun PageRow(label: String) {
             style = TextStyle(
                 color = GlanceTheme.colors.onSurfaceVariant,
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
             ),
         )
 
@@ -353,7 +353,7 @@ private fun Arrow(
 ) {
     Box(
         modifier = GlanceModifier
-            .width(32.dp)
+            .width(40.dp)
             .fillMaxHeight()
             .semantics { contentDescription = description }
             .clickable(
@@ -415,7 +415,8 @@ private fun Header(
 
         Box(
             modifier = GlanceModifier
-                .size(28.dp)
+                .width(40.dp)
+                .fillMaxHeight()
                 .semantics { contentDescription = description }
                 .clickable(openSettings),
             contentAlignment = Alignment.Center,

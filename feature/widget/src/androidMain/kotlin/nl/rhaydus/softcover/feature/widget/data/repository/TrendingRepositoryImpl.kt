@@ -1,49 +1,47 @@
-package nl.rhaydus.softcover.feature.widget.data.datastore
+package nl.rhaydus.softcover.feature.widget.data.repository
 
 import android.content.Context
-import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import nl.rhaydus.softcover.feature.widget.data.mapper.toTrendingPage
 import nl.rhaydus.softcover.feature.widget.data.mapper.toTrendingPosition
 import nl.rhaydus.softcover.feature.widget.data.mapper.toTrendingSettings
 import nl.rhaydus.softcover.feature.widget.data.mapper.write
 import nl.rhaydus.softcover.feature.widget.data.mapper.writeTrendingPage
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingPosition
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingSettings
-import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
+import nl.rhaydus.softcover.feature.widget.domain.repository.TrendingRepository
+import nl.rhaydus.softcover.feature.widget.domain.util.nextPage
 
-internal class TrendingStore(private val context: Context) {
-    /** Emits the instance whose page or settings changed; a live Glance session does not re-run `provideGlance` on `update`. */
-    val changes = MutableSharedFlow<GlanceId>(
+internal class TrendingRepositoryImpl(private val context: Context) : TrendingRepository {
+    override val changes = MutableSharedFlow<Int>(
         extraBufferCapacity = 16,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
-    suspend fun settings(appWidgetId: Int): TrendingSettings = getAppWidgetState(
+    override suspend fun getSettings(appWidgetId: Int): TrendingSettings = getAppWidgetState(
         context = context,
         definition = PreferencesGlanceStateDefinition,
         glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
     ).toTrendingSettings()
 
-    suspend fun position(glanceId: GlanceId): TrendingPosition = getAppWidgetState(
+    override suspend fun getPosition(appWidgetId: Int): TrendingPosition = getAppWidgetState(
         context = context,
         definition = PreferencesGlanceStateDefinition,
-        glanceId = glanceId,
+        glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
     ).toTrendingPosition()
 
-    suspend fun saveSettings(
+    override suspend fun saveSettings(
         appWidgetId: Int,
         settings: TrendingSettings,
     ) {
-        val glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId)
-
         updateAppWidgetState(
             context = context,
-            glanceId = glanceId,
+            glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
         ) { preferences ->
             if (preferences.toTrendingSettings() != settings) {
                 preferences.write(settings)
@@ -51,23 +49,27 @@ internal class TrendingStore(private val context: Context) {
             }
         }
 
-        changes.tryEmit(glanceId)
-
-        TrendingWidget().update(
-            context = context,
-            id = glanceId,
-        )
+        changes.tryEmit(appWidgetId)
     }
 
-    suspend fun placedSettings(): List<TrendingSettings> {
-        val manager = GlanceAppWidgetManager(context)
-
-        return manager.getGlanceIds(TrendingWidget::class.java).map { glanceId ->
-            getAppWidgetState(
-                context = context,
-                definition = PreferencesGlanceStateDefinition,
-                glanceId = glanceId,
-            ).toTrendingSettings()
+    override suspend fun advancePage(
+        appWidgetId: Int,
+        pageCount: Int,
+        step: Int,
+    ) {
+        updateAppWidgetState(
+            context = context,
+            glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
+        ) { preferences ->
+            preferences.writeTrendingPage(
+                nextPage(
+                    stored = preferences.toTrendingPage(),
+                    pageCount = pageCount,
+                    step = step,
+                ),
+            )
         }
+
+        changes.tryEmit(appWidgetId)
     }
 }

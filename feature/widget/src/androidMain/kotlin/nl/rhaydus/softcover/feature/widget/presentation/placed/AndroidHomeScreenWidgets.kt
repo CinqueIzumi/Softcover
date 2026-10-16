@@ -17,13 +17,16 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgetKind
 import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgets
 import nl.rhaydus.softcover.core.presentation.widget.PlacedHomeScreenWidget
-import nl.rhaydus.softcover.feature.widget.data.datastore.RandomPickStore
-import nl.rhaydus.softcover.feature.widget.data.datastore.TrendingStore
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetRandomPickSettingsUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetTrendingSettingsUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveRandomPickChangesUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingChangesUseCase
 import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidgetReceiver
 import nl.rhaydus.softcover.feature.widget.presentation.glance.OwnedWidgets
@@ -38,8 +41,10 @@ private const val SUMMARY_SEPARATOR = " · "
 internal class AndroidHomeScreenWidgets(
     context: Context,
     private val ownedWidgets: OwnedWidgets,
-    private val randomPickStore: RandomPickStore,
-    private val trendingStore: TrendingStore,
+    private val observeRandomPickChanges: ObserveRandomPickChangesUseCase,
+    private val observeTrendingChanges: ObserveTrendingChangesUseCase,
+    private val getRandomPickSettings: GetRandomPickSettingsUseCase,
+    private val getTrendingSettings: GetTrendingSettingsUseCase,
     private val getAllUserLists: GetAllUserListsUseCase,
     private val instanceChanges: WidgetInstanceChanges,
     private val appDispatchers: AppDispatchers,
@@ -53,22 +58,21 @@ internal class AndroidHomeScreenWidgets(
     }
 
     override fun observePlaced(): Flow<List<PlacedHomeScreenWidget>> = merge(
-        randomPickStore.changes.map { },
-        trendingStore.changes.map { },
+        observeRandomPickChanges().map { },
+        observeTrendingChanges().map { },
         instanceChanges.changes,
-        getAllUserLists().map { },
+        getAllUserLists()
+            .map { }
+            .catch { error ->
+                AppLog.e(
+                    error,
+                    "Observing lists for placed widgets failed",
+                )
+            },
     )
         .onStart { emit(Unit) }
         .conflate()
         .map { queryPlaced() }
-        .catch { error ->
-            AppLog.e(
-                error,
-                "Placed widget observation failed",
-            )
-
-            emit(emptyList())
-        }
         .distinctUntilChanged()
         .flowOn(appDispatchers.io)
 
@@ -110,20 +114,44 @@ internal class AndroidHomeScreenWidgets(
 
     private suspend fun queryPlaced(): List<PlacedHomeScreenWidget> {
         val manager = GlanceAppWidgetManager(context)
-        val lists = getAllUserLists().firstOrNull().orEmpty()
+        val lists = runCatchingCancellable { getAllUserLists().firstOrNull().orEmpty() }
+            .onFailure { error ->
+                AppLog.e(
+                    error,
+                    "Reading lists for placed widgets failed",
+                )
+            }
+            .getOrDefault(emptyList())
 
         return ownedWidgets.widgets
             .mapNotNull { widget -> widget.kind()?.let { kind -> kind to widget } }
             .flatMap { (kind, widget) ->
-                manager.getGlanceIds(widget.javaClass)
-                    .map { glanceId -> manager.getAppWidgetId(glanceId) }
-                    .sorted()
-                    .map { id ->
-                        placed(
-                            id = id,
-                            kind = kind,
-                            lists = lists,
+                runCatchingCancellable {
+                    manager.getGlanceIds(widget.javaClass).map { glanceId -> manager.getAppWidgetId(glanceId) }
+                }
+                    .onFailure { error ->
+                        AppLog.e(
+                            error,
+                            "Listing placed widgets failed",
                         )
+                    }
+                    .getOrDefault(emptyList())
+                    .sorted()
+                    .mapNotNull { id ->
+                        runCatchingCancellable {
+                            placed(
+                                id = id,
+                                kind = kind,
+                                lists = lists,
+                            )
+                        }
+                            .onFailure { error ->
+                                AppLog.e(
+                                    error,
+                                    "Placed widget query failed",
+                                )
+                            }
+                            .getOrNull()
                     }
             }
             .sortedBy { it.kind.ordinal }
@@ -137,14 +165,14 @@ internal class AndroidHomeScreenWidgets(
         val summary = when (kind) {
             HomeScreenWidgetKind.CurrentlyReading -> null
 
-            HomeScreenWidgetKind.RandomPick -> randomPickStore.settings(id).let { settings ->
+            HomeScreenWidgetKind.RandomPick -> getRandomPickSettings(appWidgetId = id).getOrThrow().let { settings ->
                 listOf(
                     settings.source.label(lists),
                     settings.cadence.label(),
                 ).joinToString(SUMMARY_SEPARATOR)
             }
 
-            HomeScreenWidgetKind.Trending -> trendingStore.settings(id).let { settings ->
+            HomeScreenWidgetKind.Trending -> getTrendingSettings(appWidgetId = id).getOrThrow().let { settings ->
                 listOf(
                     settings.period.label(),
                     settings.cadence.label(),

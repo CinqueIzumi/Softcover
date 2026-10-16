@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.widget.presentation.util
+package nl.rhaydus.softcover.feature.widget.domain.util
 
 internal const val TRENDING_PAGE_SIZE = 2
 internal const val TRENDING_MAX_ITEMS = 10

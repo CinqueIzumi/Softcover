@@ -174,45 +174,61 @@ class RandomPickSelectionTest {
         }
 
         @Test
-        fun `a list source drops read and reading books and keeps the rest`() {
+        fun `owned and list pools keep only want to read and unshelved books`() {
             // ----- Arrange -----
+            val books = listOf(
+                book(
+                    id = 1,
+                    status = BookStatus.None,
+                ),
+                book(
+                    id = 2,
+                    status = BookStatus.WantToRead,
+                ),
+                book(
+                    id = 3,
+                    status = BookStatus.Paused,
+                ),
+                book(
+                    id = 4,
+                    status = BookStatus.DidNotFinish,
+                ),
+                book(
+                    id = 5,
+                    status = BookStatus.Read,
+                ),
+                book(
+                    id = 6,
+                    status = BookStatus.Reading,
+                ),
+            )
             val lists = listOf(
                 list(
                     id = 1,
-                    books = listOf(
-                        book(
-                            id = 1,
-                            status = BookStatus.None,
-                        ),
-                        book(
-                            id = 2,
-                            status = BookStatus.WantToRead,
-                        ),
-                        book(
-                            id = 3,
-                            status = BookStatus.DidNotFinish,
-                        ),
-                        book(
-                            id = 4,
-                            status = BookStatus.Read,
-                        ),
-                        book(
-                            id = 5,
-                            status = BookStatus.Reading,
-                        ),
-                    ),
+                    slug = "owned",
+                    books = books,
+                ),
+                list(
+                    id = 2,
+                    books = books,
                 ),
             )
 
             // ----- Act -----
-            val result = buildPool(
-                source = RandomPickSource.UserList(listId = 1),
+            val owned = buildPool(
+                source = RandomPickSource.Owned,
+                wantToRead = emptyList(),
+                lists = lists,
+            )
+            val userList = buildPool(
+                source = RandomPickSource.UserList(listId = 2),
                 wantToRead = emptyList(),
                 lists = lists,
             )
 
             // ----- Assert -----
-            result.map { it.id } shouldContainExactly listOf(1, 2, 3)
+            owned.map { it.id } shouldContainExactly listOf(1, 2)
+            userList.map { it.id } shouldContainExactly listOf(1, 2)
         }
 
         @Test

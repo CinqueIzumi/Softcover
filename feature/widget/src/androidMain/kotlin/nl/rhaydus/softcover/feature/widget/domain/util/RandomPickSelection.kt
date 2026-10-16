@@ -43,7 +43,7 @@ internal fun buildPool(
 private fun BookList?.unreadBooks(): List<Book> = this?.books
     .orEmpty()
     .mapNotNull { it.book }
-    .filter { it.status != BookStatus.Read && it.status != BookStatus.Reading }
+    .filter { it.status == BookStatus.WantToRead || it.status == BookStatus.None }
 
 internal fun resolvePick(
     state: RandomPickState,

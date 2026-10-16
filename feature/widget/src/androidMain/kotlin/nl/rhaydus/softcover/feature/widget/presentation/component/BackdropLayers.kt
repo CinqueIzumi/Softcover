@@ -14,11 +14,9 @@ import nl.rhaydus.softcover.feature.widget.presentation.render.BackdropArtwork
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 
 @Composable
-internal fun Backdrop(
-    backdrop: Bitmap?,
-    artwork: BackdropArtwork,
-) {
+internal fun Backdrop(artwork: BackdropArtwork) {
     val extra = LocalWidgetExtraColors.current
+    val backdrop = artwork.backdrop
 
     if (backdrop != null) {
         Image(

@@ -28,6 +28,14 @@ internal class WidgetMaintenanceWorker(
                 }
         }
 
+        runCatchingCancellable { get<WidgetMaintenanceScheduler>().scheduleNextMidnight() }
+            .onFailure { error ->
+                AppLog.e(
+                    error,
+                    "Scheduling the midnight widget update failed",
+                )
+            }
+
         return Result.success()
     }
 }

@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.widget.presentation.mapper
 import android.graphics.Bitmap
 import app.cash.turbine.test
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
@@ -115,7 +114,7 @@ class CurrentlyReadingWidgetModelsTest {
     }
 
     @Test
-    fun `a single book shows no position indicator`() = runTest {
+    fun `a single book shows an eyebrow without a position and cannot cycle`() = runTest {
         // ----- Arrange -----
         val flow = models(shelf = flowOf(listOf(book(1))))
 
@@ -123,13 +122,14 @@ class CurrentlyReadingWidgetModelsTest {
         flow.test {
             // ----- Assert -----
             val reading = awaitItem().content.shouldBeInstanceOf<CurrentlyReadingWidgetUiModel.Content.Reading>()
-            reading.position.shouldBeNull()
+            reading.eyebrow shouldBe "READING"
+            reading.canCycle shouldBe false
             awaitComplete()
         }
     }
 
     @Test
-    fun `several books show the position of the first book by default`() = runTest {
+    fun `several books show the position of the first book by default and can cycle`() = runTest {
         // ----- Arrange -----
         val flow = models(shelf = flowOf(books))
 
@@ -138,7 +138,8 @@ class CurrentlyReadingWidgetModelsTest {
             // ----- Assert -----
             val reading = awaitItem().content.shouldBeInstanceOf<CurrentlyReadingWidgetUiModel.Content.Reading>()
             reading.title shouldBe "Title 1"
-            reading.position shouldBe "1/3"
+            reading.eyebrow shouldBe "READING · 1/3"
+            reading.canCycle shouldBe true
             awaitComplete()
         }
     }
@@ -156,7 +157,7 @@ class CurrentlyReadingWidgetModelsTest {
             // ----- Assert -----
             val reading = awaitItem().content.shouldBeInstanceOf<CurrentlyReadingWidgetUiModel.Content.Reading>()
             reading.title shouldBe "Title 3"
-            reading.position shouldBe "3/3"
+            reading.eyebrow shouldBe "READING · 3/3"
             awaitComplete()
         }
     }
@@ -259,7 +260,7 @@ class CurrentlyReadingWidgetModelsTest {
             // ----- Assert -----
             val reading = awaitItem().content.shouldBeInstanceOf<CurrentlyReadingWidgetUiModel.Content.Reading>()
             reading.title shouldBe "Title 2"
-            reading.position shouldBe "2/3"
+            reading.eyebrow shouldBe "READING · 2/3"
         }
     }
 

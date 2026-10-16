@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.widget.presentation.action
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingSettings
+import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.TrendingSettingsDependencies
 
 internal suspend fun TrendingSettingsDependencies.saveSettings(
@@ -11,10 +12,13 @@ internal suspend fun TrendingSettingsDependencies.saveSettings(
 ) {
     if (appWidgetId == null) return
 
-    runCatchingCancellable {
-        store.saveSettings(
+    saveTrendingSettings(
+        appWidgetId = appWidgetId,
+        settings = settings,
+    ).onSuccess {
+        repainter.repaint(
+            widget = TrendingWidget(),
             appWidgetId = appWidgetId,
-            settings = settings,
         )
     }.onFailure { error ->
         AppLog.e(

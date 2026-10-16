@@ -5,11 +5,10 @@
 //   ./gradlew :widget:stabilityDump
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.widget.presentation.component.Backdrop(backdrop: android.graphics.Bitmap?, artwork: nl.rhaydus.softcover.feature.widget.presentation.render.BackdropArtwork): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.widget.presentation.component.Backdrop(artwork: nl.rhaydus.softcover.feature.widget.presentation.render.BackdropArtwork): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - backdrop: UNSTABLE (has mutable properties or unstable members)
     - artwork: UNSTABLE (has mutable properties or unstable members)
 
 @Composable
@@ -22,13 +21,12 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.component.Mask(mas
     - contentScale: RUNTIME (requires runtime check)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Arrow(icon: kotlin.Int, step: kotlin.Int, description: kotlin.String): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.widget.presentation.component.ReservedLinesTitle(title: kotlin.String, reservedLines: kotlin.Int): kotlin.Unit
   skippable: true
   restartable: true
   params:
-    - icon: STABLE (primitive type)
-    - step: STABLE (primitive type)
-    - description: STABLE (String is immutable)
+    - title: STABLE (String is immutable)
+    - reservedLines: STABLE (primitive type)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Arrow(icon: kotlin.Int, step: kotlin.Int, description: kotlin.String): kotlin.Unit
@@ -51,13 +49,6 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.BookCell(ite
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.BottomRow(content: nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
-  skippable: false
-  restartable: true
-  params:
-    - content: UNSTABLE (has mutable properties or unstable members)
-
-@Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Caption(item: nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel.Item, modifier: androidx.glance.GlanceModifier): kotlin.Unit
   skippable: false
   restartable: true
@@ -66,11 +57,11 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Caption(item
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.CompactReading(content: nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Cover(cover: android.graphics.Bitmap?): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - content: UNSTABLE (has mutable properties or unstable members)
+    - cover: UNSTABLE (has mutable properties or unstable members)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Cover(cover: android.graphics.Bitmap?): kotlin.Unit
@@ -88,21 +79,28 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Cover(cover:
     - height: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.CoverArea(content: nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel.Content.Reading, coverWidth: androidx.compose.ui.unit.Dp, modifier: androidx.glance.GlanceModifier): kotlin.Unit
-  skippable: false
-  restartable: true
-  params:
-    - content: UNSTABLE (has mutable properties or unstable members)
-    - coverWidth: STABLE (marked @Stable or @Immutable)
-    - modifier: STABLE (marked @Stable or @Immutable)
-
-@Composable
 internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidgetContent(model: nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel, openReading: androidx.glance.action.Action): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - model: UNSTABLE (has mutable properties or unstable members)
     - openReading: RUNTIME (requires runtime check)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.presentation.glance.CycleArrow(icon: kotlin.Int, step: kotlin.Int, description: kotlin.String): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - icon: STABLE (primitive type)
+    - step: STABLE (primitive type)
+    - description: STABLE (String is immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Eyebrow(content: nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - content: UNSTABLE (has mutable properties or unstable members)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Eyebrow(text: kotlin.String, openSettings: androidx.glance.action.Action): kotlin.Unit
@@ -151,12 +149,6 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(eyeb
     - openSettings: RUNTIME (requires runtime check)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.NextArrow(): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-
-@Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.PageRow(label: kotlin.String): kotlin.Unit
   skippable: true
   restartable: true
@@ -164,19 +156,12 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.PageRow(labe
     - label: STABLE (String is immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.PickedBook(content: nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel.Content.Picked, isTall: kotlin.Boolean, openSettings: androidx.glance.action.Action): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.presentation.glance.PickedBook(content: nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel.Content.Picked, openSettings: androidx.glance.action.Action): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - content: UNSTABLE (has mutable properties or unstable members)
-    - isTall: STABLE (primitive type)
     - openSettings: RUNTIME (requires runtime check)
-
-@Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.PreviousArrow(): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.ProgressBar(progress: kotlin.collections.Map<kotlin.Int, nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressBitmaps>): kotlin.Unit
@@ -186,7 +171,7 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.ProgressBar(
     - progress: RUNTIME (requires runtime check)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.ProgressButton(content: nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.presentation.glance.ProgressRow(content: nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
   skippable: false
   restartable: true
   params:
@@ -220,17 +205,18 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Ranked(conte
     - openBook: STABLE (function type)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.ShuffleButton(): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-
-@Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.TallReading(content: nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Reading(content: nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - content: UNSTABLE (has mutable properties or unstable members)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.presentation.glance.ShuffleButton(height: androidx.compose.ui.unit.Dp): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - height: STABLE (marked @Stable or @Immutable)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidgetContent(model: nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel, openApp: androidx.glance.action.Action, openExplore: androidx.glance.action.Action, openSettings: androidx.glance.action.Action, openBook: kotlin.Function1<@[ParameterName(name = \): kotlin.Unit
@@ -242,13 +228,6 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWid
     - openExplore: RUNTIME (requires runtime check)
     - openSettings: RUNTIME (requires runtime check)
     - openBook: STABLE (function type)
-
-@Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.TwoLineTitle(title: kotlin.String): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - title: STABLE (String is immutable)
 
 @Composable
 public fun nl.rhaydus.softcover.feature.widget.presentation.screen.RandomPickSettingsScreen.Content(): kotlin.Unit

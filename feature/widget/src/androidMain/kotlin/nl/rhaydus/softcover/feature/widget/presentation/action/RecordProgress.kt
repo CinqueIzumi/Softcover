@@ -38,8 +38,6 @@ internal fun recordProgress(
                 scope.setLocalVariables {
                     it.copy(finishedBookId = book.id.takeIf { outcome == ShelfMutationOutcome.Applied })
                 }
-
-                dependencies.refreshWidget()
             }
             .onFailure { error ->
             scope.setLocalVariables { it.copy(writeFailed = true) }

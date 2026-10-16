@@ -27,8 +27,10 @@
 
         <activity
             android:name="nl.rhaydus.softcover.feature.widget.presentation.activity.RandomPickSettingsActivity"
+            android:excludeFromRecents="true"
             android:exported="true"
-            android:label="@string/random_pick_widget_label">
+            android:label="@string/random_pick_widget_label"
+            android:taskAffinity="">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
@@ -48,12 +50,23 @@
 
         <activity
             android:name="nl.rhaydus.softcover.feature.widget.presentation.activity.TrendingSettingsActivity"
+            android:excludeFromRecents="true"
             android:exported="true"
-            android:label="@string/trending_widget_label">
+            android:label="@string/trending_widget_label"
+            android:taskAffinity="">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+
+        <receiver
+            android:name="nl.rhaydus.softcover.feature.widget.presentation.worker.WidgetTimeChangedReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name="nl.rhaydus.softcover.feature.widget.presentation.activity.UpdateProgressActivity"

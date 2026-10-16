@@ -1,7 +1,6 @@
-package nl.rhaydus.softcover.feature.widget.data.datastore
+package nl.rhaydus.softcover.feature.widget.data.repository
 
 import android.content.Context
-import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
@@ -18,36 +17,33 @@ import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickResolution
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettings
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSource
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickState
+import nl.rhaydus.softcover.feature.widget.domain.repository.RandomPickRepository
 import nl.rhaydus.softcover.feature.widget.domain.util.buildPool
 import nl.rhaydus.softcover.feature.widget.domain.util.resolvePick
 import nl.rhaydus.softcover.feature.widget.domain.util.resolveSource
 import nl.rhaydus.softcover.feature.widget.domain.util.shufflePick
-import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidget
 import kotlin.random.Random
 import kotlin.time.Clock
 
-internal class RandomPickStore(private val context: Context) {
-    /** Emits the instance whose pick or settings changed; a live Glance session does not re-run `provideGlance` on `update`. */
-    val changes = MutableSharedFlow<GlanceId>(
+internal class RandomPickRepositoryImpl(private val context: Context) : RandomPickRepository {
+    override val changes = MutableSharedFlow<Int>(
         extraBufferCapacity = 16,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
-    suspend fun settings(appWidgetId: Int): RandomPickSettings = getAppWidgetState(
+    override suspend fun getSettings(appWidgetId: Int): RandomPickSettings = getAppWidgetState(
         context = context,
         definition = PreferencesGlanceStateDefinition,
         glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
     ).toRandomPickSettings()
 
-    suspend fun saveSettings(
+    override suspend fun saveSettings(
         appWidgetId: Int,
         settings: RandomPickSettings,
     ) {
-        val glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId)
-
         updateAppWidgetState(
             context = context,
-            glanceId = glanceId,
+            glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
         ) { preferences ->
             if (preferences.toRandomPickSettings() != settings) {
                 preferences.write(settings)
@@ -55,17 +51,38 @@ internal class RandomPickStore(private val context: Context) {
             }
         }
 
-        changes.tryEmit(glanceId)
+        changes.tryEmit(appWidgetId)
+    }
 
-        RandomPickWidget().update(
-            context = context,
-            id = glanceId,
+    override suspend fun resolve(
+        appWidgetId: Int,
+        wantToRead: List<Book>,
+        lists: List<BookList>,
+    ): RandomPickResolution = pick(
+        appWidgetId = appWidgetId,
+        wantToRead = wantToRead,
+        lists = lists,
+        shuffle = false,
+    )
+
+    override suspend fun shuffle(
+        appWidgetId: Int,
+        wantToRead: List<Book>,
+        lists: List<BookList>,
+    ) {
+        pick(
+            appWidgetId = appWidgetId,
+            wantToRead = wantToRead,
+            lists = lists,
+            shuffle = true,
         )
+
+        changes.tryEmit(appWidgetId)
     }
 
     /** Reads, re-picks and writes in one state edit, so concurrent callers cannot each pick a different book. */
-    suspend fun resolve(
-        glanceId: GlanceId,
+    private suspend fun pick(
+        appWidgetId: Int,
         wantToRead: List<Book>,
         lists: List<BookList>,
         shuffle: Boolean,
@@ -77,7 +94,7 @@ internal class RandomPickStore(private val context: Context) {
 
         updateAppWidgetState(
             context = context,
-            glanceId = glanceId,
+            glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
         ) { preferences ->
             val settings = preferences.toRandomPickSettings()
             val state = preferences.toRandomPickState()

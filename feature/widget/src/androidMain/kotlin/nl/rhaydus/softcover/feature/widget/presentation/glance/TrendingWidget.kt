@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
-import androidx.glance.action.Action
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
@@ -14,13 +13,9 @@ import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
-import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
-import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
 import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.activity.TrendingSettingsActivity
@@ -35,26 +30,7 @@ import org.koin.core.component.get
 internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
     override val stateDefinition = PreferencesGlanceStateDefinition
 
-    override val sizeMode = SizeMode.Responsive(
-        setOf(
-            DpSize(
-                width = 250.dp,
-                height = 110.dp,
-            ),
-            DpSize(
-                width = 320.dp,
-                height = 110.dp,
-            ),
-            DpSize(
-                width = 250.dp,
-                height = 180.dp,
-            ),
-            DpSize(
-                width = 320.dp,
-                height = 180.dp,
-            ),
-        ),
-    )
+    override val sizeMode = SizeMode.Responsive(TRENDING_SIZES)
 
     override suspend fun provideGlance(
         context: Context,
@@ -63,57 +39,46 @@ internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
         val dependencies = get<TrendingWidgetDependencies>()
         val density = context.resources.displayMetrics.density
 
+        val environment = dependencies.environment
+        val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
+
         val openSettings = actionStartActivity(
             widgetSettingsIntent(
                 context = context,
                 activityClass = TrendingSettingsActivity::class.java,
-                appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id),
+                appWidgetId = appWidgetId,
             ),
         )
 
-        val openExplore = actionStartActivity(
-            dependencies.appEntryPoint.intent(
-                context = context,
-                request = ExternalNavigationRequest.OpenTab(destination = TabDestination.EXPLORE),
-            ),
+        val openExplore = environment.openTab(
+            context = context,
+            destination = TabDestination.EXPLORE,
         )
 
-        val openApp = actionStartActivity(
-            dependencies.appEntryPoint.intent(
-                context = context,
-                request = ExternalNavigationRequest.OpenTab(destination = TabDestination.READING),
-            ),
+        val openApp = environment.openTab(
+            context = context,
+            destination = TabDestination.READING,
         )
 
-        val openBook: (Int) -> Action = { bookId ->
-            actionStartActivity(
-                dependencies.appEntryPoint.intent(
-                    context = context,
-                    request = ExternalNavigationRequest.OpenBook(bookId = bookId),
-                ),
-            )
-        }
+        val openBook = environment.openBook(context)
 
-        val themeConfigurations = dependencies.getThemeConfiguration()
-        val initialTheme = themeConfigurations.firstOrNull() ?: ThemeConfiguration()
+        val themeConfigurations = environment.getThemeConfiguration()
+        val initialTheme = environment.initialTheme(themeConfigurations)
 
         val covers = BookCoverLoader(
             context = context,
             density = density,
-            coverHeightDp = trendingCoverHeightDp(
-                widgetHeightDp = 180,
-                showsPageRow = false,
-            ),
+            coverHeightDp = COVER_BITMAP_HEIGHT_DP,
             capacity = COVER_CACHE_CAPACITY,
         )
 
         val models = trendingWidgetModels(
-            isSignedIn = dependencies.getUserIdAsFlow().map { it != NO_USER_ID },
+            isSignedIn = environment.isSignedIn(),
             themeConfiguration = themeConfigurations,
-            position = dependencies.store.changes
-                .onStart { emit(id) }
-                .filter { it == id }
-                .map { dependencies.store.position(id) },
+            position = dependencies.observeTrendingChanges()
+                .onStart { emit(appWidgetId) }
+                .filter { it == appWidgetId }
+                .map { dependencies.getTrendingPosition(appWidgetId = appWidgetId).getOrThrow() },
             observeTrending = { period -> dependencies.observeTrendingBooks(period = period) },
             eyebrowFor = { period -> context.getString(period.eyebrowRes()) },
             loadCover = covers::load,
@@ -136,6 +101,49 @@ internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
             )
         }
     }
+}
+
+private val TRENDING_SIZES = setOf(
+    DpSize(
+        width = 250.dp,
+        height = 110.dp,
+    ),
+    DpSize(
+        width = 320.dp,
+        height = 110.dp,
+    ),
+    DpSize(
+        width = 250.dp,
+        height = 180.dp,
+    ),
+    DpSize(
+        width = 320.dp,
+        height = 180.dp,
+    ),
+    DpSize(
+        width = 250.dp,
+        height = 250.dp,
+    ),
+    DpSize(
+        width = 250.dp,
+        height = 320.dp,
+    ),
+    DpSize(
+        width = 320.dp,
+        height = 250.dp,
+    ),
+    DpSize(
+        width = 320.dp,
+        height = 320.dp,
+    ),
+)
+
+private val COVER_BITMAP_HEIGHT_DP = TRENDING_SIZES.maxOf { size ->
+    trendingCoverHeightDp(
+        widgetHeightDp = size.height.value.toInt(),
+        widgetWidthDp = size.width.value.toInt(),
+        showsPageRow = false,
+    )
 }
 
 private const val COVER_CACHE_CAPACITY = 4

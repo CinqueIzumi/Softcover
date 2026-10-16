@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.widget.presentation.util
+package nl.rhaydus.softcover.feature.widget.domain.util
 
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested

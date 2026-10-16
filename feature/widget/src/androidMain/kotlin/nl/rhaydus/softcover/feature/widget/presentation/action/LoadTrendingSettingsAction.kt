@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.action
 
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.feature.widget.presentation.event.TrendingSettingsEvent
 import nl.rhaydus.softcover.feature.widget.presentation.mapper.trendingCadenceChipsFor
 import nl.rhaydus.softcover.feature.widget.presentation.mapper.trendingPeriodChipsFor
@@ -17,7 +16,7 @@ internal class LoadTrendingSettingsAction(private val appWidgetId: Int) : Trendi
     ) {
         if (scope.currentLocalVariables.appWidgetId != null) return
 
-        runCatchingCancellable { dependencies.store.settings(appWidgetId = appWidgetId) }
+        dependencies.getTrendingSettings(appWidgetId = appWidgetId)
             .onSuccess { settings ->
                 scope.setLocalVariables {
                     it.copy(

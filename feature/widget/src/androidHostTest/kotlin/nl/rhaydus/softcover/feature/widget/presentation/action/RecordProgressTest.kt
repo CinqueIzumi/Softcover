@@ -4,7 +4,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -94,30 +93,6 @@ class RecordProgressTest {
             firstJob.isCancelled shouldBe true
             localVariablesFlow.value.mutationJob.shouldNotBeNull().isCancelled shouldBe false
             gate.complete(Unit)
-        }
-
-        @Test
-        fun `a successful write refreshes the widget`() = runTest {
-            // ----- Arrange -----
-            stubWrite(Result.success(null))
-            val dependencies = stubDependencies(this)
-            every {
-                dependencies.recordBookProgress
-            } returns recordBookProgress
-
-            // ----- Act -----
-            recordProgress(
-                dependencies = dependencies,
-                scope = scope,
-                book = stubPagedBook(pages = 100),
-                newPage = 10,
-                newSeconds = null,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                dependencies.refreshWidget()
-            }
         }
 
         @Test
@@ -226,30 +201,6 @@ class RecordProgressTest {
             gate.complete(Unit)
         }
 
-        @Test
-        fun `a failed write skips the refresh and does not crash`() = runTest {
-            // ----- Arrange -----
-            stubWrite(Result.failure(IllegalStateException("boom")))
-            val dependencies = stubDependencies(this)
-            every {
-                dependencies.recordBookProgress
-            } returns recordBookProgress
-
-            // ----- Act -----
-            recordProgress(
-                dependencies = dependencies,
-                scope = scope,
-                book = stubPagedBook(pages = 100),
-                newPage = 10,
-                newSeconds = null,
-            )
-            localVariablesFlow.value.mutationJob.shouldNotBeNull().join()
-
-            // ----- Assert -----
-            coVerify(exactly = 0) {
-                dependencies.refreshWidget()
-            }
-        }
 
         @Test
         fun `a failed write reports the failure on dismiss, opens no verdict and still finishes`() = runTest {

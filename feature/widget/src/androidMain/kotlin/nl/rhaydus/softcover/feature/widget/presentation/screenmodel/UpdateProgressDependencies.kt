@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.widget.presentation.screenmodel
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import androidx.glance.appwidget.updateAll
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
@@ -16,7 +15,6 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressU
 import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
 import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
 import nl.rhaydus.softcover.feature.widget.R
-import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidget
 import nl.rhaydus.toad.ActionDependencies
 
 internal class UpdateProgressDependencies(
@@ -50,6 +48,4 @@ internal class UpdateProgressDependencies(
             Toast.LENGTH_SHORT,
         ).show()
     }
-
-    suspend fun refreshWidget() = CurrentlyReadingWidget().updateAll(context)
 }

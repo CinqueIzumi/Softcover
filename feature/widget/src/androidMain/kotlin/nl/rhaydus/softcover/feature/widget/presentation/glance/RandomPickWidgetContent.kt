@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.widget.presentation.glance
 import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.ColorFilter
@@ -42,9 +43,12 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.callback.ShuffleCallback
 import nl.rhaydus.softcover.feature.widget.presentation.component.Backdrop
+import nl.rhaydus.softcover.feature.widget.presentation.component.ReservedLinesTitle
 import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
+import nl.rhaydus.softcover.feature.widget.presentation.util.TALLEST_HEIGHT_DP
+import nl.rhaydus.softcover.feature.widget.presentation.util.TALL_HEIGHT_DP
 
 @Composable
 internal fun RandomPickWidgetContent(
@@ -60,7 +64,12 @@ internal fun RandomPickWidgetContent(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .appWidgetBackground()
-                .background(LocalWidgetExtraColors.current.surfaceContainerHigh)
+                .background(
+                    when (model.content) {
+                        is RandomPickWidgetUiModel.Content.Picked -> LocalWidgetExtraColors.current.surfaceContainerHigh
+                        else -> GlanceTheme.colors.background
+                    },
+                )
                 .then(widgetCornerRadius())
                 .clickable(
                     when (val content = model.content) {
@@ -89,7 +98,6 @@ internal fun RandomPickWidgetContent(
 
                 is RandomPickWidgetUiModel.Content.Picked -> PickedBook(
                     content = content,
-                    isTall = LocalSize.current.height >= 150.dp,
                     openSettings = openSettings,
                 )
             }
@@ -134,7 +142,7 @@ private fun Message(
             Text(
                 text = headline,
                 style = TextStyle(
-                    color = GlanceTheme.colors.onSurface,
+                    color = GlanceTheme.colors.onBackground,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Serif,
@@ -161,17 +169,14 @@ private fun Message(
 @Composable
 private fun PickedBook(
     content: RandomPickWidgetUiModel.Content.Picked,
-    isTall: Boolean,
     openSettings: Action,
 ) {
     val artwork = content.artwork
+    val height = LocalSize.current.height
 
     Box(modifier = GlanceModifier.fillMaxSize()) {
         if (artwork != null) {
-            Backdrop(
-                backdrop = if (isTall) artwork.tallBackdrop else artwork.compactBackdrop,
-                artwork = artwork,
-            )
+            Backdrop(artwork = artwork)
         }
 
         Column(
@@ -180,10 +185,12 @@ private fun PickedBook(
                 .padding(Spacing.xxs),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Eyebrow(
-                text = content.eyebrow,
-                openSettings = openSettings,
-            )
+            if (height >= TALL_HEIGHT_DP.dp) {
+                Eyebrow(
+                    text = content.eyebrow,
+                    openSettings = openSettings,
+                )
+            }
 
             Box(
                 modifier = GlanceModifier
@@ -194,24 +201,18 @@ private fun PickedBook(
                 Cover(cover = content.cover)
             }
 
-            if (isTall) {
+            if (height >= TALL_HEIGHT_DP.dp) {
                 Spacer(modifier = GlanceModifier.height(Spacing.xxs))
 
-                Text(
-                    text = content.title,
-                    maxLines = 2,
-                    style = TextStyle(
-                        color = GlanceTheme.colors.onSurface,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Serif,
-                        textAlign = TextAlign.Center,
-                    ),
+                ReservedLinesTitle(
+                    title = content.title,
+                    reservedLines = if (height >= TALLEST_HEIGHT_DP.dp) 2 else 1,
                 )
 
                 Text(
                     text = content.author,
                     maxLines = 1,
+                    modifier = GlanceModifier.padding(horizontal = Spacing.xs),
                     style = TextStyle(
                         color = GlanceTheme.colors.onSurfaceVariant,
                         fontSize = 12.sp,
@@ -220,7 +221,7 @@ private fun PickedBook(
                 )
             }
 
-            ShuffleButton()
+            ShuffleButton(height = if (height >= TALLEST_HEIGHT_DP.dp) 48.dp else 36.dp)
         }
     }
 }
@@ -271,14 +272,14 @@ private fun Cover(cover: Bitmap?) {
 }
 
 @Composable
-private fun ShuffleButton() {
+private fun ShuffleButton(height: Dp) {
     val description = LocalContext.current.getString(R.string.random_pick_shuffle)
 
     Box(
         modifier = GlanceModifier
             .size(
-                width = 44.dp,
-                height = 40.dp,
+                width = 48.dp,
+                height = height,
             )
             .semantics { contentDescription = description }
             .clickable(actionRunCallback<ShuffleCallback>()),

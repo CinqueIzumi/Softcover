@@ -3,10 +3,7 @@ package nl.rhaydus.softcover.feature.widget.presentation.glance
 import android.content.Context
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
-import androidx.glance.action.Action
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
@@ -14,12 +11,8 @@ import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
-import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
-import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
 import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.feature.widget.presentation.activity.RandomPickSettingsActivity
 import nl.rhaydus.softcover.feature.widget.presentation.activity.widgetSettingsIntent
@@ -27,6 +20,8 @@ import nl.rhaydus.softcover.feature.widget.presentation.mapper.randomPickWidgetM
 import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.render.BackdropArtworkRenderer
 import nl.rhaydus.softcover.feature.widget.presentation.render.BookCoverLoader
+import nl.rhaydus.softcover.feature.widget.presentation.util.WIDGET_WIDTHS_DP
+import nl.rhaydus.softcover.feature.widget.presentation.util.portraitSizes
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -34,16 +29,7 @@ internal class RandomPickWidget : GlanceAppWidget(), KoinComponent {
     override val stateDefinition = PreferencesGlanceStateDefinition
 
     override val sizeMode = SizeMode.Responsive(
-        setOf(
-            DpSize(
-                width = 110.dp,
-                height = 110.dp,
-            ),
-            DpSize(
-                width = 110.dp,
-                height = 180.dp,
-            ),
-        ),
+        portraitSizes(listOf(WIDGET_WIDTHS_DP.first())),
     )
 
     override suspend fun provideGlance(
@@ -53,32 +39,26 @@ internal class RandomPickWidget : GlanceAppWidget(), KoinComponent {
         val dependencies = get<RandomPickWidgetDependencies>()
         val density = context.resources.displayMetrics.density
 
+        val environment = dependencies.environment
+        val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
+
         val openSettings = actionStartActivity(
             widgetSettingsIntent(
                 context = context,
                 activityClass = RandomPickSettingsActivity::class.java,
-                appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id),
+                appWidgetId = appWidgetId,
             ),
         )
 
-        val openApp = actionStartActivity(
-            dependencies.appEntryPoint.intent(
-                context = context,
-                request = ExternalNavigationRequest.OpenTab(destination = TabDestination.READING),
-            ),
+        val openApp = environment.openTab(
+            context = context,
+            destination = TabDestination.READING,
         )
 
-        val openBook: (Int) -> Action = { bookId ->
-            actionStartActivity(
-                dependencies.appEntryPoint.intent(
-                    context = context,
-                    request = ExternalNavigationRequest.OpenBook(bookId = bookId),
-                ),
-            )
-        }
+        val openBook = environment.openBook(context)
 
-        val themeConfigurations = dependencies.getThemeConfiguration()
-        val initialTheme = themeConfigurations.firstOrNull() ?: ThemeConfiguration()
+        val themeConfigurations = environment.getThemeConfiguration()
+        val initialTheme = environment.initialTheme(themeConfigurations)
 
         val artwork = BackdropArtworkRenderer(density)
 
@@ -88,21 +68,20 @@ internal class RandomPickWidget : GlanceAppWidget(), KoinComponent {
         )
 
         val models = randomPickWidgetModels(
-            isSignedIn = dependencies.getUserIdAsFlow().map { it != NO_USER_ID },
+            isSignedIn = environment.isSignedIn(),
             themeConfiguration = themeConfigurations,
             wantToRead = dependencies.getWantToReadUserBooks(),
             lists = dependencies.getAllUserLists(),
-            changes = dependencies.store.changes
-                .onStart { emit(id) }
-                .filter { it == id }
+            changes = dependencies.observeRandomPickChanges()
+                .onStart { emit(appWidgetId) }
+                .filter { it == appWidgetId }
                 .map { },
             resolve = { wantToRead, lists ->
-                dependencies.store.resolve(
-                    glanceId = id,
+                dependencies.resolveRandomPick(
+                    appWidgetId = appWidgetId,
                     wantToRead = wantToRead,
                     lists = lists,
-                    shuffle = false,
-                )
+                ).getOrThrow()
             },
             loadCover = covers::load,
             renderArtwork = artwork::render,

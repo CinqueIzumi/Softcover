@@ -3,17 +3,21 @@ package nl.rhaydus.softcover.feature.widget.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
-import nl.rhaydus.softcover.feature.widget.data.datastore.TrendingStore
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetTrendingSettingsUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.SaveTrendingSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.presentation.action.TrendingSettingsAction
 import nl.rhaydus.softcover.feature.widget.presentation.collector.TrendingSettingsCollector
 import nl.rhaydus.softcover.feature.widget.presentation.event.TrendingSettingsEvent
+import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
 import nl.rhaydus.softcover.feature.widget.presentation.state.TrendingSettingsLocalVariables
 import nl.rhaydus.softcover.feature.widget.presentation.state.TrendingSettingsUiState
 import nl.rhaydus.softcover.feature.widget.presentation.worker.TrendingRefreshScheduler
 import nl.rhaydus.toad.ToadScreenModel
 
 internal class TrendingSettingsScreenModel(
-    store: TrendingStore,
+    getTrendingSettings: GetTrendingSettingsUseCase,
+    saveTrendingSettings: SaveTrendingSettingsUseCase,
+    repainter: WidgetRepainter,
     scheduler: TrendingRefreshScheduler,
     getThemeConfiguration: GetThemeConfigurationUseCase,
     appDispatchers: AppDispatchers,
@@ -30,7 +34,9 @@ internal class TrendingSettingsScreenModel(
     initializers = flows,
 ) {
     override val dependencies = TrendingSettingsDependencies(
-        store = store,
+        getTrendingSettings = getTrendingSettings,
+        saveTrendingSettings = saveTrendingSettings,
+        repainter = repainter,
         scheduler = scheduler,
         getThemeConfiguration = getThemeConfiguration,
         mainDispatcher = appDispatchers.main,

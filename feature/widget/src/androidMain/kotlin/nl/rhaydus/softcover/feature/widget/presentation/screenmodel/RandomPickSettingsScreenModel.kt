@@ -4,16 +4,20 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
-import nl.rhaydus.softcover.feature.widget.data.datastore.RandomPickStore
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetRandomPickSettingsUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.SaveRandomPickSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.presentation.action.RandomPickSettingsAction
 import nl.rhaydus.softcover.feature.widget.presentation.collector.RandomPickSettingsCollector
 import nl.rhaydus.softcover.feature.widget.presentation.event.RandomPickSettingsEvent
+import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
 import nl.rhaydus.softcover.feature.widget.presentation.state.RandomPickSettingsLocalVariables
 import nl.rhaydus.softcover.feature.widget.presentation.state.RandomPickSettingsUiState
 import nl.rhaydus.toad.ToadScreenModel
 
 internal class RandomPickSettingsScreenModel(
-    store: RandomPickStore,
+    getRandomPickSettings: GetRandomPickSettingsUseCase,
+    saveRandomPickSettings: SaveRandomPickSettingsUseCase,
+    repainter: WidgetRepainter,
     getThemeConfiguration: GetThemeConfigurationUseCase,
     getAllUserLists: GetAllUserListsUseCase,
     appDispatchers: AppDispatchers,
@@ -30,7 +34,9 @@ internal class RandomPickSettingsScreenModel(
     initializers = flows,
 ) {
     override val dependencies = RandomPickSettingsDependencies(
-        store = store,
+        getRandomPickSettings = getRandomPickSettings,
+        saveRandomPickSettings = saveRandomPickSettings,
+        repainter = repainter,
         getThemeConfiguration = getThemeConfiguration,
         getAllUserLists = getAllUserLists,
         mainDispatcher = appDispatchers.main,

@@ -9,12 +9,15 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.firstOrNull
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidgetDependencies
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.context.GlobalContext
+
+private const val MAX_RETRIES = 3
 
 internal class TrendingRefreshWorker(
     appContext: Context,
@@ -25,7 +28,7 @@ internal class TrendingRefreshWorker(
 
         val dependencies = get<TrendingWidgetDependencies>()
 
-        val userId = dependencies.getUserIdAsFlow().firstOrNull()
+        val userId = dependencies.environment.getUserIdAsFlow().firstOrNull()
 
         if (userId == null || userId == NO_USER_ID) return Result.success()
 
@@ -53,8 +56,14 @@ internal class TrendingRefreshWorker(
                 .any { it }
         }
 
-        TrendingWidget().updateAll(applicationContext)
+        runCatchingCancellable { TrendingWidget().updateAll(applicationContext) }
+            .onFailure { error ->
+                AppLog.e(
+                    error,
+                    "Repainting the trending widget failed",
+                )
+            }
 
-        return if (failed) Result.retry() else Result.success()
+        return if (failed && runAttemptCount < MAX_RETRIES) Result.retry() else Result.success()
     }
 }

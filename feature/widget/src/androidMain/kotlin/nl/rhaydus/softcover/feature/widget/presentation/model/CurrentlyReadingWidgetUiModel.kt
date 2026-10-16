@@ -16,7 +16,7 @@ internal data class CurrentlyReadingWidgetUiModel(
 
         data object Empty : Content
 
-        /** [position] is "2/4", and `null` while the shelf holds one book, which also hides the arrows. */
+        /** [eyebrow] is "READING · 2/4", or "READING" while the shelf holds one book, which also hides the arrows. */
         data class Reading(
             val title: String,
             val author: String,
@@ -25,7 +25,8 @@ internal data class CurrentlyReadingWidgetUiModel(
             val cover: Bitmap?,
             /** One render per bar width in dp, keyed by [progressBarWidthDp] of each responsive size bucket. */
             val progress: Map<Int, WavyProgressBitmaps>,
-            val position: String?,
+            val eyebrow: String,
+            val canCycle: Boolean,
             val artwork: BackdropArtwork? = null,
         ) : Content
     }

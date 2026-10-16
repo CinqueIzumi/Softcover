@@ -15,11 +15,11 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingPosition
+import nl.rhaydus.softcover.feature.widget.domain.util.TRENDING_MAX_ITEMS
+import nl.rhaydus.softcover.feature.widget.domain.util.TRENDING_PAGE_SIZE
+import nl.rhaydus.softcover.feature.widget.domain.util.pageCount
+import nl.rhaydus.softcover.feature.widget.domain.util.resolveShownPage
 import nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel
-import nl.rhaydus.softcover.feature.widget.presentation.util.TRENDING_MAX_ITEMS
-import nl.rhaydus.softcover.feature.widget.presentation.util.TRENDING_PAGE_SIZE
-import nl.rhaydus.softcover.feature.widget.presentation.util.pageCount
-import nl.rhaydus.softcover.feature.widget.presentation.util.resolveShownPage
 
 private class TrendingWidgetInputs(
     val isSignedIn: Boolean,
