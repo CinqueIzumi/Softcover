@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.lists.presentation.screen
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import cafe.adriel.voyager.navigator.Navigator
 
 /**
@@ -16,11 +17,15 @@ fun CreateListSheet(
     onDismissRequest: () -> Unit,
     onListCreated: ((listId: Int, listName: String) -> Unit)?,
 ) {
-    Navigator(
-        screen = CreateListScreen(
-            onDismissRequest = onDismissRequest,
-            onListCreated = onListCreated,
-        ),
-        onBackPressed = null,
+    val callbacks = CreateListCallbacks(
+        onDismissRequest = onDismissRequest,
+        onListCreated = onListCreated,
     )
+
+    CompositionLocalProvider(LocalCreateListCallbacks provides callbacks) {
+        Navigator(
+            screen = CreateListScreen(),
+            onBackPressed = null,
+        )
+    }
 }

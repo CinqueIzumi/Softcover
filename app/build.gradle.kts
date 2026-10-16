@@ -40,11 +40,12 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            optimization {
+                enable = true
+                keepRules {
+                    files.add(file("src/main/keepRules/app.keep"))
+                }
+            }
             // Null when no keystore is supplied (local builds) → release stays unsigned, as before.
             signingConfig = signingConfigs.findByName("release")
         }
