@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -21,6 +23,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCa
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
@@ -80,25 +83,34 @@ internal class WidgetRefresher(
         }
     }
 
-    private fun changes(): Flow<Unit> = merge(
-        getThemeConfiguration()
-            .distinctUntilChanged { old, new ->
+    private fun changes(): Flow<Unit> = (appSignals() + trendingSignals()).merge()
+
+    private fun appSignals(): List<Flow<Unit>> = listOf(
+        signal {
+            getThemeConfiguration().distinctUntilChanged { old, new ->
                 old.themeMode == new.themeMode &&
                     old.colorPalette == new.colorPalette &&
                     old.useDynamicColor == new.useDynamicColor
             }
-            .asSignal(),
-        getUserIdAsFlow()
-            .map { it != NO_USER_ID }
-            .distinctUntilChanged()
-            .asSignal(),
-        getCurrentlyReadingUserBooks().asSignal(),
-        getWantToReadUserBooks().asSignal(),
-        getAllUserLists().asSignal(),
-        observeTrendingBooks().asSignal(),
+        },
+        signal {
+            getUserIdAsFlow()
+                .map { it != NO_USER_ID }
+                .distinctUntilChanged()
+        },
+        signal { getCurrentlyReadingUserBooks() },
+        signal { getWantToReadUserBooks() },
+        signal { getAllUserLists() },
     )
 
-    private fun Flow<*>.asSignal(): Flow<Unit> = map { }
+    /** Every period, because any of them may be the one a placed widget shows. */
+    private fun trendingSignals(): List<Flow<Unit>> = TrendingPeriod.entries.map { period ->
+        signal { observeTrendingBooks(period = period) }
+    }
+
+    /** Builds [source] inside the flow, so a use case that throws while building its flow is caught like one that fails while emitting. */
+    private fun signal(source: () -> Flow<*>): Flow<Unit> = flow { emitAll(source()) }
+        .map { }
         .catch { error ->
             AppLog.e(
                 error,

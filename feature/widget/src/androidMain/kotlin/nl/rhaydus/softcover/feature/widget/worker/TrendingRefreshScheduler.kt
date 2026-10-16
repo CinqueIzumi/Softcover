@@ -10,8 +10,9 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
+import nl.rhaydus.softcover.feature.widget.trending.TrendingRefreshPlan
 import nl.rhaydus.softcover.feature.widget.trending.TrendingStore
-import nl.rhaydus.softcover.feature.widget.trending.resolveTrendingRefreshInterval
+import nl.rhaydus.softcover.feature.widget.trending.trendingRefreshPlan
 
 internal class TrendingRefreshScheduler(
     private val context: Context,
@@ -25,7 +26,9 @@ internal class TrendingRefreshScheduler(
         )
     }
 
-    suspend fun currentInterval(): Duration? = resolveTrendingRefreshInterval(store.placedCadences())
+    suspend fun currentPlan(): TrendingRefreshPlan? = trendingRefreshPlan(store.placedSettings())
+
+    suspend fun currentInterval(): Duration? = currentPlan()?.interval
 
     suspend fun reschedule() {
         val interval = currentInterval()
@@ -37,6 +40,18 @@ internal class TrendingRefreshScheduler(
             return
         }
 
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        workManager.enqueueUniqueWork(
+            CATCH_UP_WORK_NAME,
+            ExistingWorkPolicy.REPLACE,
+            OneTimeWorkRequestBuilder<TrendingRefreshWorker>()
+                .setConstraints(constraints)
+                .build(),
+        )
+
         workManager.enqueueUniquePeriodicWork(
             WORK_NAME,
             ExistingPeriodicWorkPolicy.UPDATE,
@@ -44,17 +59,14 @@ internal class TrendingRefreshScheduler(
                 interval.inWholeHours,
                 TimeUnit.HOURS,
             )
-                .setConstraints(
-                    Constraints.Builder()
-                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .build(),
-                )
+                .setConstraints(constraints)
                 .build(),
         )
     }
 
     private companion object {
         const val WORK_NAME = "trending_refresh"
+        const val CATCH_UP_WORK_NAME = "trending_refresh_catch_up"
         const val RESCHEDULE_WORK_NAME = "trending_refresh_reschedule"
     }
 }

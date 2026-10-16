@@ -8,52 +8,88 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
-
-internal const val MAX_TRENDING_ITEMS = 5
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 
 private class WidgetInputs(
     val isSignedIn: Boolean,
     val themeConfiguration: ThemeConfiguration,
+    val position: TrendingPosition,
     val books: List<Book>,
 )
 
-/** [trending] arrives ordered by rank. */
+/**
+ * [position] re-emits on every settings or page change, because a live Glance session does not re-run
+ * `provideGlance`. [observeTrending] arrives ordered by rank.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun trendingWidgetModels(
     isSignedIn: Flow<Boolean>,
     themeConfiguration: Flow<ThemeConfiguration>,
-    trending: Flow<List<Book>>,
+    position: Flow<TrendingPosition>,
+    observeTrending: (TrendingPeriod) -> Flow<List<Book>>,
+    eyebrowFor: (TrendingPeriod) -> String,
     loadCover: suspend (Book) -> Bitmap?,
-): Flow<TrendingWidgetUiModel> = combine(
-    isSignedIn,
-    themeConfiguration,
-    trending,
-    ::WidgetInputs,
-).mapLatest { inputs ->
-    TrendingWidgetUiModel(
-        themeConfiguration = inputs.themeConfiguration,
-        content = inputs.toContent(loadCover = loadCover),
-    )
+): Flow<TrendingWidgetUiModel> {
+    val positionedBooks = position.flatMapLatest { current ->
+        observeTrending(current.period).map { books -> current to books }
+    }
+
+    return combine(
+        isSignedIn,
+        themeConfiguration,
+        positionedBooks,
+    ) { signedIn, theme, (current, books) ->
+        WidgetInputs(
+            isSignedIn = signedIn,
+            themeConfiguration = theme,
+            position = current,
+            books = books,
+        )
+    }.mapLatest { inputs ->
+        TrendingWidgetUiModel(
+            themeConfiguration = inputs.themeConfiguration,
+            content = inputs.toContent(
+                eyebrowFor = eyebrowFor,
+                loadCover = loadCover,
+            ),
+        )
+    }
 }
 
 private suspend fun WidgetInputs.toContent(
+    eyebrowFor: (TrendingPeriod) -> String,
     loadCover: suspend (Book) -> Bitmap?,
 ): TrendingWidgetUiModel.Content {
     if (isSignedIn.not()) return TrendingWidgetUiModel.Content.SignedOut
 
-    if (books.isEmpty()) return TrendingWidgetUiModel.Content.Empty
+    val eyebrow = eyebrowFor(position.period)
+
+    if (books.isEmpty()) return TrendingWidgetUiModel.Content.Empty(eyebrow = eyebrow)
+
+    val top = books.take(TRENDING_MAX_ITEMS)
+    val pages = pageCount(top.size)
+
+    val page = resolveShownPage(
+        stored = position.page,
+        pageCount = pages,
+    )
+
+    val firstRank = page * TRENDING_PAGE_SIZE
 
     val items = coroutineScope {
-        books
-            .take(MAX_TRENDING_ITEMS)
+        top
+            .drop(firstRank)
+            .take(TRENDING_PAGE_SIZE)
             .mapIndexed { index, book ->
                 async {
                     TrendingWidgetUiModel.Item(
                         bookId = book.id,
-                        rank = "${index + 1}",
+                        rank = "${firstRank + index + 1}",
                         title = book.title,
                         author = book.authorString,
                         cover = loadCover(book),
@@ -63,5 +99,12 @@ private suspend fun WidgetInputs.toContent(
             .awaitAll()
     }
 
-    return TrendingWidgetUiModel.Content.Ranked(items = items.toImmutableList())
+    val hasPages = pages > 1
+
+    return TrendingWidgetUiModel.Content.Ranked(
+        eyebrow = eyebrow,
+        items = items.toImmutableList(),
+        pageLabel = if (hasPages) "${page + 1}/$pages" else null,
+        showsArrows = hasPages,
+    )
 }

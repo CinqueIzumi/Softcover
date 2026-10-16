@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.settings.trending
 
+import nl.rhaydus.softcover.feature.widget.trending.TrendingSettings
 import nl.rhaydus.toad.ActionScope
 
 internal data object OnTrendingDoneClickAction : TrendingSettingsAction {
@@ -9,9 +10,12 @@ internal data object OnTrendingDoneClickAction : TrendingSettingsAction {
     ) {
         val local = scope.currentLocalVariables
 
-        dependencies.saveCadence(
+        dependencies.saveSettings(
             appWidgetId = local.appWidgetId,
-            cadence = local.cadence,
+            settings = TrendingSettings(
+                period = local.period,
+                cadence = local.cadence,
+            ),
         )
 
         scope.sendEvent(event = TrendingSettingsEvent.Finished)

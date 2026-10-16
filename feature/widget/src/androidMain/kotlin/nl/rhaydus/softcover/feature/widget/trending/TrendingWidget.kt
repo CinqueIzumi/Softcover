@@ -13,12 +13,16 @@ import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
 import androidx.glance.state.PreferencesGlanceStateDefinition
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
 import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
+import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.backdrop.BookCoverLoader
 import nl.rhaydus.softcover.feature.widget.settings.TrendingSettingsActivity
 import nl.rhaydus.softcover.feature.widget.settings.widgetSettingsIntent
@@ -40,6 +44,10 @@ internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
             ),
             DpSize(
                 width = 250.dp,
+                height = 180.dp,
+            ),
+            DpSize(
+                width = 320.dp,
                 height = 180.dp,
             ),
         ),
@@ -89,14 +97,22 @@ internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
         val covers = BookCoverLoader(
             context = context,
             density = density,
-            coverHeightDp = 60,
-            capacity = MAX_TRENDING_ITEMS,
+            coverHeightDp = trendingCoverHeightDp(
+                widgetHeightDp = 180,
+                showsPageRow = false,
+            ),
+            capacity = COVER_CACHE_CAPACITY,
         )
 
         val models = trendingWidgetModels(
             isSignedIn = dependencies.getUserIdAsFlow().map { it != NO_USER_ID },
             themeConfiguration = themeConfigurations,
-            trending = dependencies.observeTrendingBooks(),
+            position = dependencies.store.changes
+                .onStart { emit(id) }
+                .filter { it == id }
+                .map { dependencies.store.position(id) },
+            observeTrending = { period -> dependencies.observeTrendingBooks(period = period) },
+            eyebrowFor = { period -> context.getString(period.eyebrowRes()) },
             loadCover = covers::load,
         )
 
@@ -117,4 +133,14 @@ internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
             )
         }
     }
+}
+
+private const val COVER_CACHE_CAPACITY = 4
+
+private fun TrendingPeriod.eyebrowRes(): Int = when (this) {
+    TrendingPeriod.Week -> R.string.trending_eyebrow_week
+    TrendingPeriod.Month -> R.string.trending_eyebrow_month
+    TrendingPeriod.ThreeMonths -> R.string.trending_eyebrow_three_months
+    TrendingPeriod.Year -> R.string.trending_eyebrow_year
+    TrendingPeriod.AllTime -> R.string.trending_eyebrow_all_time
 }

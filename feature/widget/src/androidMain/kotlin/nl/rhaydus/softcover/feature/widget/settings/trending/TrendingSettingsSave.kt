@@ -2,25 +2,31 @@ package nl.rhaydus.softcover.feature.widget.settings.trending
 
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingCancellable
-import nl.rhaydus.softcover.feature.widget.trending.TrendingRefreshCadence
+import nl.rhaydus.softcover.feature.widget.trending.TrendingSettings
 
-internal suspend fun TrendingSettingsDependencies.saveCadence(
+internal suspend fun TrendingSettingsDependencies.saveSettings(
     appWidgetId: Int?,
-    cadence: TrendingRefreshCadence,
+    settings: TrendingSettings,
 ) {
     if (appWidgetId == null) return
 
     runCatchingCancellable {
-        store.saveCadence(
+        store.saveSettings(
             appWidgetId = appWidgetId,
-            cadence = cadence,
+            settings = settings,
         )
-
-        scheduler.reschedule()
     }.onFailure { error ->
         AppLog.e(
             error,
             "Saving trending settings failed",
         )
     }
+
+    runCatchingCancellable { scheduler.reschedule() }
+        .onFailure { error ->
+            AppLog.e(
+                error,
+                "Rescheduling trending refresh failed",
+            )
+        }
 }

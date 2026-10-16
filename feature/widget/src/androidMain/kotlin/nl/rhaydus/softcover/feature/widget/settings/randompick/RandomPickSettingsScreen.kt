@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.settings.randompick
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,11 +18,11 @@ import nl.rhaydus.softcover.feature.widget.settings.WidgetSettingsLayout
 
 internal class RandomPickSettingsScreen(
     private val appWidgetId: Int,
-    private val onFinished: () -> Unit,
 ) : Screen {
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<RandomPickSettingsScreenModel>()
+        val activity = LocalActivity.current
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
@@ -31,7 +32,7 @@ internal class RandomPickSettingsScreen(
 
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
-                RandomPickSettingsEvent.Finished -> onFinished()
+                RandomPickSettingsEvent.Finished -> activity?.finish()
             }
         }
 

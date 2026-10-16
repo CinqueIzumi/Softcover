@@ -13,9 +13,15 @@ internal data class TrendingWidgetUiModel(
 
         data object SignedOut : Content
 
-        data object Empty : Content
+        data class Empty(val eyebrow: String) : Content
 
-        data class Ranked(val items: ImmutableList<Item>) : Content
+        /** [pageLabel] is `null` when everything fits on one page. */
+        data class Ranked(
+            val eyebrow: String,
+            val items: ImmutableList<Item>,
+            val pageLabel: String?,
+            val showsArrows: Boolean,
+        ) : Content
     }
 
     data class Item(

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.settings.trending
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,11 +18,11 @@ import nl.rhaydus.softcover.feature.widget.settings.WidgetSettingsLayout
 
 internal class TrendingSettingsScreen(
     private val appWidgetId: Int,
-    private val onFinished: () -> Unit,
 ) : Screen {
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<TrendingSettingsScreenModel>()
+        val activity = LocalActivity.current
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
@@ -31,12 +32,23 @@ internal class TrendingSettingsScreen(
 
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
-                TrendingSettingsEvent.Finished -> onFinished()
+                TrendingSettingsEvent.Finished -> activity?.finish()
             }
         }
 
         WidgetSettingsLayout(themeConfiguration = state.themeConfiguration) {
             SectionHeader(model = state.titleHeader)
+
+            ChipFlow(
+                set = state.periodChips,
+                onEvent = { event, period ->
+                    if (event is ChipEvent.Clicked) {
+                        screenModel.runAction(OnTrendingPeriodSelectedAction(period = period))
+                    }
+                },
+            )
+
+            SectionHeader(model = state.cadenceHeader)
 
             ChipFlow(
                 set = state.cadenceChips,

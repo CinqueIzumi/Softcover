@@ -7,15 +7,21 @@ import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.feature.widget.trending.TrendingRefreshCadence
 import nl.rhaydus.toad.UiState
 
 internal data class TrendingSettingsUiState(
     val themeConfiguration: ThemeConfiguration = ThemeConfiguration(),
     val titleHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "Trending this week",
+        eyebrow = "Trending",
+        headline = "Which list should it show?",
+    ),
+    val cadenceHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Refresh",
         headline = "How often should it refresh?",
     ),
+    val periodChips: ChipSet<TrendingPeriod> = ChipSet(),
     val cadenceChips: ChipSet<TrendingRefreshCadence> = ChipSet(),
     val done: PillButtonUiModel = PillButtonUiModel(
         key = "done",

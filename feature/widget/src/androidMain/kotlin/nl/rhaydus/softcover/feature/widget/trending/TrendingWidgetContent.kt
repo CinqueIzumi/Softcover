@@ -2,7 +2,9 @@ package nl.rhaydus.softcover.feature.widget.trending
 
 import android.graphics.Bitmap
 import android.os.Build
+import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.ColorFilter
@@ -13,7 +15,9 @@ import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.Action
+import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
@@ -40,6 +44,7 @@ import androidx.glance.text.TextStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.CornerRadius
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
+import nl.rhaydus.softcover.feature.widget.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.theme.SoftcoverWidgetTheme
 
 @Composable
@@ -66,23 +71,23 @@ internal fun TrendingWidgetContent(
                 TrendingWidgetUiModel.Content.Loading -> Unit
 
                 TrendingWidgetUiModel.Content.SignedOut -> Message(
+                    eyebrow = null,
                     headline = context.getString(R.string.widget_sign_in),
                     subline = null,
                     openExplore = openExplore,
                     openSettings = openSettings,
-                    showHeader = false,
                 )
 
-                TrendingWidgetUiModel.Content.Empty -> Message(
+                is TrendingWidgetUiModel.Content.Empty -> Message(
+                    eyebrow = content.eyebrow,
                     headline = context.getString(R.string.trending_empty_headline),
                     subline = context.getString(R.string.trending_empty_subline),
                     openExplore = openExplore,
                     openSettings = openSettings,
-                    showHeader = true,
                 )
 
                 is TrendingWidgetUiModel.Content.Ranked -> Ranked(
-                    items = content,
+                    content = content,
                     openExplore = openExplore,
                     openSettings = openSettings,
                     openBook = openBook,
@@ -100,11 +105,11 @@ private fun widgetCornerRadius(): GlanceModifier = if (Build.VERSION.SDK_INT >= 
 
 @Composable
 private fun Message(
+    eyebrow: String?,
     headline: String,
     subline: String?,
     openExplore: Action,
     openSettings: Action,
-    showHeader: Boolean,
 ) {
     Column(
         modifier = GlanceModifier
@@ -112,8 +117,9 @@ private fun Message(
             .padding(Spacing.xxs),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        if (showHeader) {
+        if (eyebrow != null) {
             Header(
+                eyebrow = eyebrow,
                 openExplore = openExplore,
                 openSettings = openSettings,
             )
@@ -156,12 +162,18 @@ private fun Message(
 
 @Composable
 private fun Ranked(
-    items: TrendingWidgetUiModel.Content.Ranked,
+    content: TrendingWidgetUiModel.Content.Ranked,
     openExplore: Action,
     openSettings: Action,
     openBook: (bookId: Int) -> Action,
 ) {
     val size = LocalSize.current
+    val stacked = size.height >= STACKED_MIN_HEIGHT_DP.dp
+
+    val coverHeight = trendingCoverHeightDp(
+        widgetHeightDp = size.height.value.toInt(),
+        showsPageRow = content.showsArrows,
+    ).dp
 
     Column(
         modifier = GlanceModifier
@@ -169,40 +181,203 @@ private fun Ranked(
             .padding(Spacing.xxs),
     ) {
         Header(
+            eyebrow = content.eyebrow,
             openExplore = openExplore,
             openSettings = openSettings,
         )
 
-        if (size.height >= 150.dp) {
-            items.items.forEach { item ->
-                ListRow(
+        Row(
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .defaultWeight(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            content.items.forEach { item ->
+                BookCell(
                     item = item,
+                    stacked = stacked,
+                    coverHeight = coverHeight,
                     openBook = openBook(item.bookId),
+                    modifier = GlanceModifier.defaultWeight(),
                 )
             }
-        } else {
-            val visible = items.items.take(((size.width.value - 8f) / 50f).toInt())
 
-            Row(
-                modifier = GlanceModifier
-                    .fillMaxWidth()
-                    .defaultWeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                visible.forEach { item ->
-                    CoverTile(
-                        item = item,
-                        openBook = openBook(item.bookId),
-                    )
-                }
+            if (content.items.size < TRENDING_PAGE_SIZE) Spacer(modifier = GlanceModifier.defaultWeight())
+        }
+
+        if (content.pageLabel != null) {
+            PageRow(label = content.pageLabel)
+        }
+    }
+}
+
+@Composable
+private fun BookCell(
+    item: TrendingWidgetUiModel.Item,
+    stacked: Boolean,
+    coverHeight: Dp,
+    openBook: Action,
+    modifier: GlanceModifier,
+) {
+    val cellModifier = modifier
+        .padding(horizontal = Spacing.xxs)
+        .clickable(openBook)
+
+    if (stacked) {
+        Column(
+            modifier = cellModifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Cover(
+                cover = item.cover,
+                height = coverHeight,
+            )
+
+            Spacer(modifier = GlanceModifier.height(Spacing.xxs))
+
+            Row(verticalAlignment = Alignment.Top) {
+                Rank(rank = item.rank)
+
+                Caption(
+                    item = item,
+                    modifier = GlanceModifier.defaultWeight(),
+                )
             }
+        }
+    } else {
+        Row(
+            modifier = cellModifier,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Rank(rank = item.rank)
+
+            Cover(
+                cover = item.cover,
+                height = coverHeight,
+            )
+
+            Spacer(modifier = GlanceModifier.width(Spacing.xs))
+
+            Caption(
+                item = item,
+                modifier = GlanceModifier.defaultWeight(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun Rank(rank: String) {
+    Text(
+        text = rank,
+        style = TextStyle(
+            color = GlanceTheme.colors.onBackground,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Serif,
+        ),
+        modifier = GlanceModifier.width(16.dp),
+    )
+}
+
+@Composable
+private fun Caption(
+    item: TrendingWidgetUiModel.Item,
+    modifier: GlanceModifier,
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = item.title,
+            maxLines = 2,
+            style = TextStyle(
+                color = GlanceTheme.colors.onBackground,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Serif,
+            ),
+        )
+
+        Text(
+            text = item.author,
+            maxLines = 1,
+            style = TextStyle(
+                color = GlanceTheme.colors.onSurfaceVariant,
+                fontSize = 10.sp,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun PageRow(label: String) {
+    Row(
+        modifier = GlanceModifier
+            .fillMaxWidth()
+            .height(28.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Arrow(
+            icon = R.drawable.ic_widget_chevron_left,
+            step = -1,
+            description = LocalContext.current.getString(R.string.trending_previous_page),
+        )
+
+        Text(
+            text = label,
+            style = TextStyle(
+                color = GlanceTheme.colors.onSurfaceVariant,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+        )
+
+        Arrow(
+            icon = R.drawable.ic_widget_chevron_right,
+            step = 1,
+            description = LocalContext.current.getString(R.string.trending_next_page),
+        )
+    }
+}
+
+@Composable
+private fun Arrow(
+    @DrawableRes icon: Int,
+    step: Int,
+    description: String,
+) {
+    Box(
+        modifier = GlanceModifier
+            .width(32.dp)
+            .fillMaxHeight()
+            .semantics { contentDescription = description }
+            .clickable(
+                actionRunCallback<TrendingPageCallback>(
+                    actionParametersOf(TrendingPageCallback.StepKey to step),
+                ),
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = GlanceModifier
+                .size(28.dp)
+                .cornerRadius(CornerRadius.xxl)
+                .background(LocalWidgetExtraColors.current.arrowScrim),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                provider = ImageProvider(icon),
+                contentDescription = null,
+                modifier = GlanceModifier.size(20.dp),
+                colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurface),
+            )
         }
     }
 }
 
 @Composable
 private fun Header(
+    eyebrow: String,
     openExplore: Action,
     openSettings: Action,
 ) {
@@ -223,7 +398,7 @@ private fun Header(
             contentAlignment = Alignment.CenterStart,
         ) {
             Text(
-                text = LocalContext.current.getString(R.string.trending_eyebrow),
+                text = eyebrow,
                 maxLines = 1,
                 style = TextStyle(
                     color = GlanceTheme.colors.onSurfaceVariant,
@@ -251,101 +426,14 @@ private fun Header(
 }
 
 @Composable
-private fun CoverTile(
-    item: TrendingWidgetUiModel.Item,
-    openBook: Action,
-) {
-    Row(
-        modifier = GlanceModifier
-            .width(50.dp)
-            .clickable(openBook),
-        verticalAlignment = Alignment.Bottom,
-    ) {
-        Text(
-            text = item.rank,
-            style = TextStyle(
-                color = GlanceTheme.colors.onBackground,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif,
-            ),
-            modifier = GlanceModifier.width(12.dp),
-        )
-
-        Cover(
-            cover = item.cover,
-            width = 36,
-            height = 54,
-        )
-    }
-}
-
-@Composable
-private fun ListRow(
-    item: TrendingWidgetUiModel.Item,
-    openBook: Action,
-) {
-    Row(
-        modifier = GlanceModifier
-            .fillMaxWidth()
-            .height(28.dp)
-            .padding(horizontal = Spacing.xs)
-            .clickable(openBook),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = item.rank,
-            style = TextStyle(
-                color = GlanceTheme.colors.onBackground,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif,
-            ),
-            modifier = GlanceModifier.width(16.dp),
-        )
-
-        Cover(
-            cover = item.cover,
-            width = 19,
-            height = 28,
-        )
-
-        Spacer(modifier = GlanceModifier.width(Spacing.xs))
-
-        Column {
-            Text(
-                text = item.title,
-                maxLines = 1,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onBackground,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif,
-                ),
-            )
-
-            Text(
-                text = item.author,
-                maxLines = 1,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurfaceVariant,
-                    fontSize = 10.sp,
-                ),
-            )
-        }
-    }
-}
-
-@Composable
 private fun Cover(
     cover: Bitmap?,
-    width: Int,
-    height: Int,
+    height: Dp,
 ) {
     val modifier = GlanceModifier
         .size(
-            width = width.dp,
-            height = height.dp,
+            width = height * 2 / 3,
+            height = height,
         )
         .cornerRadius(CornerRadius.xxs)
 

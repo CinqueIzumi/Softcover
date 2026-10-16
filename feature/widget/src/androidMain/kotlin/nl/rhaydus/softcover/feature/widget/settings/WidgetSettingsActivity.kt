@@ -13,10 +13,7 @@ import cafe.adriel.voyager.navigator.Navigator
 internal abstract class WidgetSettingsActivity(
     private val receiverClass: Class<*>,
 ) : ComponentActivity() {
-    protected abstract fun screen(
-        appWidgetId: Int,
-        onFinished: () -> Unit,
-    ): Screen
+    protected abstract fun screen(appWidgetId: Int): Screen
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,12 +49,7 @@ internal abstract class WidgetSettingsActivity(
         )
 
         setContent {
-            Navigator(
-                screen(
-                    appWidgetId = appWidgetId,
-                    onFinished = ::finish,
-                ),
-            )
+            Navigator(screen(appWidgetId = appWidgetId))
         }
     }
 }

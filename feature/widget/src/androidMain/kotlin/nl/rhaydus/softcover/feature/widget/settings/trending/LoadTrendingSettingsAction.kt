@@ -11,16 +11,22 @@ internal class LoadTrendingSettingsAction(private val appWidgetId: Int) : Trendi
     ) {
         if (scope.currentLocalVariables.appWidgetId != null) return
 
-        runCatchingCancellable { dependencies.store.cadence(appWidgetId = appWidgetId) }
-            .onSuccess { cadence ->
+        runCatchingCancellable { dependencies.store.settings(appWidgetId = appWidgetId) }
+            .onSuccess { settings ->
                 scope.setLocalVariables {
                     it.copy(
                         appWidgetId = appWidgetId,
-                        cadence = cadence,
+                        period = settings.period,
+                        cadence = settings.cadence,
                     )
                 }
 
-                scope.setState { it.copy(cadenceChips = trendingCadenceChipsFor(selected = cadence)) }
+                scope.setState {
+                    it.copy(
+                        periodChips = trendingPeriodChipsFor(selected = settings.period),
+                        cadenceChips = trendingCadenceChipsFor(selected = settings.cadence),
+                    )
+                }
             }
             .onFailure { error ->
                 AppLog.e(

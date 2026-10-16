@@ -129,10 +129,12 @@ none remains, skipped when signed out, `retry` on a failed refresh). `settings/`
 `WidgetSettingsActivity` and `WidgetSettingsLayout`, with per-widget screens in `settings/randompick/`
 and `settings/trending/`. No Skip button: Back keeps the stored settings (`RESULT_OK` is set up front).
 The worker refreshes with `maxAge` at half the period so an early run still fetches. 9 tests after audit.
-**Redo pending:** top 10 at two covers per page with ‹ › and "1/5"; period setting (week, month,
-three_month, one_year, all; trending persisted per period, folded into migration 54 → 55); worker
-refreshes only the periods in use; plus the crash-audit fixes (settings screens hold only ids,
-update on save, workers retry before Koin starts, refresher catch, redirect FK, blur off main).
+**Redo ✅:** top 10 at two per page with ‹ › and "1/5" (page per instance); period setting (five
+`TrendingPeriod`s, trending persisted per period in the amended 54 → 55); the worker refreshes only the
+periods in use, plus a one-time catch-up run on every reschedule. Crash-audit fixes: settings screens hold
+only ids and finish via `LocalActivity`, save repaints, workers retry before Koin starts, refresher
+sources deferred, redirect skips `user_books`/drops trending when the target book is missing, blur
+confirmed off main.
 
 ### S7b. Update progress from the Currently Reading widget (in progress)
 "xx% ✎" button opens `UpdateProgressActivity` hosting the app's `UpdateProgressBottomSheet` with a
@@ -143,6 +145,21 @@ the cover (32dp lanes), title reserves two lines, progress bar follows the widge
 Lists placed widgets with Edit (opens that instance's configuration activity) and "Add to home
 screen" buttons via `AppWidgetManager.requestPinAppWidget` (API 26+, hidden when the launcher does
 not support pinning).
+
+### S8b. Convergence pass
+A deliberately critical sweep of all widget code on the branch: `:feature:widget` and the code it added or
+changed elsewhere (trending per period in `:core:book` / `:core:database`, the external-request
+contract in `:core:presentation` / `:orchestration`, Book Detail's verdict entry). Parallel reviewers on
+disjoint lenses, each finding verified against the code before it counts:
+- crashes and lifecycle: process death, receivers and callbacks without Koin, Glance sessions, RemoteViews
+  bitmap limits, activities finishing early, WorkManager timing;
+- data correctness: stale or mismatched state between widgets, Room and per-instance prefs, sign-out,
+  deleted lists/books, offline;
+- looks: every widget at every size in light/dark/palettes, against the app's design system (from the
+  user's screenshots; no emulator driving before S11);
+- simplification: over-engineering, one-caller layers, duplicated logic across the three widgets that
+  should be shared, dead code, comments that fail the document-code rules.
+Findings go to the user as one ranked list before any fix; fix rounds by agreement, then tests and audit.
 
 ### S9. Module layout
 Reorganise `:feature:widget` into the same folder layout as the app's feature modules
