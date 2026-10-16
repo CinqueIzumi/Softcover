@@ -17,7 +17,7 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.component.CycleArro
   restartable: true
   params:
     - icon: STABLE (primitive type)
-    - action: RUNTIME (requires runtime check)
+    - action: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - description: STABLE (String is immutable)
 
 @Composable
@@ -26,8 +26,8 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.component.CycleEye
   restartable: true
   params:
     - label: STABLE (String is immutable)
-    - previous: RUNTIME (requires runtime check)
-    - next: RUNTIME (requires runtime check)
+    - previous: UNKNOWN (interface or non-final class; concrete implementation unknown)
+    - next: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - previousDescription: STABLE (String is immutable)
     - nextDescription: STABLE (String is immutable)
 
@@ -37,7 +37,7 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.component.Mask(mas
   restartable: true
   params:
     - mask: UNSTABLE (has mutable properties or unstable members)
-    - tint: RUNTIME (requires runtime check)
+    - tint: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - contentScale: RUNTIME (requires runtime check)
 
 @Composable
@@ -65,7 +65,7 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.BookCell(ite
     - item: UNSTABLE (has mutable properties or unstable members)
     - stacked: STABLE (primitive type)
     - coverHeight: STABLE (marked @Stable or @Immutable)
-    - openBook: RUNTIME (requires runtime check)
+    - openBook: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -104,7 +104,7 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyRe
   restartable: true
   params:
     - model: UNSTABLE (has mutable properties or unstable members)
-    - openReading: RUNTIME (requires runtime check)
+    - openReading: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Eyebrow(text: kotlin.String, openSettings: androidx.glance.action.Action): kotlin.Unit
@@ -112,7 +112,7 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Eyebrow(text
   restartable: true
   params:
     - text: STABLE (String is immutable)
-    - openSettings: RUNTIME (requires runtime check)
+    - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Header(eyebrow: kotlin.String, openExplore: androidx.glance.action.Action, openSettings: androidx.glance.action.Action): kotlin.Unit
@@ -120,8 +120,8 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Header(eyebr
   restartable: true
   params:
     - eyebrow: STABLE (String is immutable)
-    - openExplore: RUNTIME (requires runtime check)
-    - openSettings: RUNTIME (requires runtime check)
+    - openExplore: UNKNOWN (interface or non-final class; concrete implementation unknown)
+    - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(headline: kotlin.String, subline: kotlin.String?): kotlin.Unit
@@ -147,7 +147,7 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(eyeb
     - eyebrow: STABLE (class with no mutable properties)
     - headline: STABLE (String is immutable)
     - subline: STABLE (class with no mutable properties)
-    - openSettings: RUNTIME (requires runtime check)
+    - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(eyebrow: kotlin.String?, headline: kotlin.String, subline: kotlin.String?, openExplore: androidx.glance.action.Action, openSettings: androidx.glance.action.Action): kotlin.Unit
@@ -157,8 +157,8 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(eyeb
     - eyebrow: STABLE (class with no mutable properties)
     - headline: STABLE (String is immutable)
     - subline: STABLE (class with no mutable properties)
-    - openExplore: RUNTIME (requires runtime check)
-    - openSettings: RUNTIME (requires runtime check)
+    - openExplore: UNKNOWN (interface or non-final class; concrete implementation unknown)
+    - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.PageRow(label: kotlin.String): kotlin.Unit
@@ -173,7 +173,7 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.PickedBook(c
   restartable: true
   params:
     - content: UNSTABLE (has mutable properties or unstable members)
-    - openSettings: RUNTIME (requires runtime check)
+    - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.ProgressBar(progress: kotlin.collections.Map<kotlin.Int, nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressBitmaps>): kotlin.Unit
@@ -195,7 +195,7 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidget
   restartable: true
   params:
     - model: UNSTABLE (has mutable properties or unstable members)
-    - openApp: RUNTIME (requires runtime check)
+    - openApp: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - openBook: STABLE (function type)
 
 @Composable
@@ -204,8 +204,8 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickW
   restartable: true
   params:
     - model: UNSTABLE (has mutable properties or unstable members)
-    - openApp: RUNTIME (requires runtime check)
-    - openSettings: RUNTIME (requires runtime check)
+    - openApp: UNKNOWN (interface or non-final class; concrete implementation unknown)
+    - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - openBook: STABLE (function type)
 
 @Composable
@@ -221,8 +221,8 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Ranked(conte
   restartable: true
   params:
     - content: STABLE (class with no mutable properties)
-    - openExplore: RUNTIME (requires runtime check)
-    - openSettings: RUNTIME (requires runtime check)
+    - openExplore: UNKNOWN (interface or non-final class; concrete implementation unknown)
+    - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - openBook: STABLE (function type)
 
 @Composable
@@ -238,7 +238,7 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Shown(conten
   restartable: true
   params:
     - content: STABLE (class with no mutable properties)
-    - openBook: RUNTIME (requires runtime check)
+    - openBook: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.ShuffleButton(height: androidx.compose.ui.unit.Dp): kotlin.Unit
@@ -253,9 +253,9 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWid
   restartable: true
   params:
     - model: UNSTABLE (has mutable properties or unstable members)
-    - openApp: RUNTIME (requires runtime check)
-    - openExplore: RUNTIME (requires runtime check)
-    - openSettings: RUNTIME (requires runtime check)
+    - openApp: UNKNOWN (interface or non-final class; concrete implementation unknown)
+    - openExplore: UNKNOWN (interface or non-final class; concrete implementation unknown)
+    - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - openBook: STABLE (function type)
 
 @Composable

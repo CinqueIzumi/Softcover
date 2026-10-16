@@ -31,10 +31,8 @@ sync and caching (D3/D5/DC2), test breadth (T3/T5/T6), and a long tail of low-se
 
 ## TIER 1b — Build setup & platform seams
 
-- **B2 [LOW] AGP-9 / KSP compatibility debt.** `gradle.properties` sets `android.builtInKotlin=false`
-  (+ related flags) to work around KSP not yet supporting AGP 9's built-in Kotlin. Track it; flip back
-  and drop the explicit Kotlin-android plugin once KSP catches up. Verify the Room KSP path still works
-  after the switch. Cost: trivial (later). *(Also carried as a fast-track fix in `now.md`.)*
+- **B2 [LOW] AGP-9 / KSP compatibility debt** *(resolved)*. The `android.builtInKotlin=false` workaround
+  is gone: the build runs on AGP 9.3.3 with built-in Kotlin and Kotlin 2.4.21.
 
 ---
 

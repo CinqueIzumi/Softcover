@@ -390,7 +390,7 @@ private fun nl.rhaydus.softcover.core.component.chart.BarSegment(entry: nl.rhayd
   restartable: true
   params:
     - entry: STABLE (class with no mutable properties)
-    - sizeSpec: RUNTIME (requires runtime check)
+    - sizeSpec: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - onGone: STABLE (function type)
 
 @Composable
@@ -1069,7 +1069,7 @@ public fun nl.rhaydus.softcover.core.component.modifier.rememberPulseScale(pulse
   restartable: true
   params:
     - pulse: STABLE (marked @Stable or @Immutable)
-    - key: UNSTABLE (has mutable properties or unstable members)
+    - key: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - peakScale: STABLE (primitive type)
 
 @Composable
@@ -1998,7 +1998,7 @@ private fun nl.rhaydus.softcover.core.component.statistic.RollStatNumber(model: 
   params:
     - model: STABLE (marked @Stable or @Immutable)
     - style: STABLE (marked @Stable or @Immutable)
-    - autoSize: RUNTIME (requires runtime check)
+    - autoSize: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -2008,7 +2008,7 @@ private fun nl.rhaydus.softcover.core.component.statistic.SpringStatNumber(model
   params:
     - model: STABLE (marked @Stable or @Immutable)
     - style: STABLE (marked @Stable or @Immutable)
-    - autoSize: RUNTIME (requires runtime check)
+    - autoSize: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -2035,7 +2035,7 @@ internal fun nl.rhaydus.softcover.core.component.statistic.StatNumber(model: nl.
   params:
     - model: STABLE (marked @Stable or @Immutable)
     - style: STABLE (marked @Stable or @Immutable)
-    - autoSize: RUNTIME (requires runtime check)
+    - autoSize: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -2076,7 +2076,7 @@ public fun nl.rhaydus.softcover.core.component.text.SoftcoverText(text: kotlin.S
     - minLines: STABLE (primitive type)
     - overflow: STABLE (known stable type)
     - softWrap: STABLE (primitive type)
-    - autoSize: RUNTIME (requires runtime check)
+    - autoSize: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - onTextLayout: STABLE (function type)
 
 @Composable
@@ -2095,7 +2095,7 @@ public fun nl.rhaydus.softcover.core.component.text.SoftcoverText(text: androidx
     - minLines: STABLE (primitive type)
     - overflow: STABLE (known stable type)
     - softWrap: STABLE (primitive type)
-    - autoSize: RUNTIME (requires runtime check)
+    - autoSize: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - inlineContent: RUNTIME (requires runtime check)
     - onTextLayout: STABLE (function type)
 

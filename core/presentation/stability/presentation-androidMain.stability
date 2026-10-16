@@ -9,7 +9,7 @@ public fun nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline(
   skippable: false
   restartable: true
   params:
-    - provider: RUNTIME (requires runtime check)
+    - provider: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 public fun nl.rhaydus.softcover.core.presentation.cover.ProvideCoverImagePersister(content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
@@ -23,7 +23,7 @@ public fun nl.rhaydus.softcover.core.presentation.debug.DebugRoutesContent.Rende
   skippable: false
   restartable: true
   params:
-    - host: RUNTIME (requires runtime check)
+    - host: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 public fun nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher(): nl.rhaydus.softcover.core.presentation.prefetch.BookDetailPrefetcher
@@ -45,7 +45,7 @@ public fun nl.rhaydus.softcover.core.presentation.util.TabReselectEffect(tab: ca
   skippable: false
   restartable: true
   params:
-    - tab: RUNTIME (requires runtime check)
+    - tab: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - onReselect: STABLE (function type)
 
 @Composable
@@ -53,7 +53,7 @@ public fun nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEff
   skippable: false
   restartable: true
   params:
-    - tab: RUNTIME (requires runtime check)
+    - tab: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - scrollToTop: STABLE (function type)
 
 @Composable
@@ -61,7 +61,7 @@ public fun nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEff
   skippable: false
   restartable: true
   params:
-    - tab: RUNTIME (requires runtime check)
+    - tab: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - state: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -69,7 +69,7 @@ public fun nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEff
   skippable: false
   restartable: true
   params:
-    - tab: RUNTIME (requires runtime check)
+    - tab: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - state: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -77,6 +77,6 @@ public fun nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEff
   skippable: false
   restartable: true
   params:
-    - tab: RUNTIME (requires runtime check)
+    - tab: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - state: STABLE (marked @Stable or @Immutable)
 

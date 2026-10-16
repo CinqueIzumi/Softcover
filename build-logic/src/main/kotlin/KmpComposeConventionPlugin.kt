@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 /**
  * Layers Compose Multiplatform onto [KmpLibraryConventionPlugin] for KMP modules that own UI
- * (e.g. `:core:designsystem`, `:feature:library`) — the KMP sibling of [AndroidComposeConventionPlugin].
+ * (e.g. `:core:designsystem`, `:feature:library`).
  *
  * Applies the JetBrains Compose Gradle plugin (`org.jetbrains.compose`) plus the standalone Kotlin
  * Compose compiler plugin, and wires the **multiplatform** `compose.*` artifacts into `commonMain`

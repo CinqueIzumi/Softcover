@@ -10,7 +10,9 @@ upstream and record it here.
 
 **Process.** With `foundation.local=true` (includeBuild against `../rhaydus-foundation`), fix it at the
 source and bump the foundation. Otherwise file it against the foundation and track it here until a
-released version carries the fix, then re-run the `rhaydus-adopt` agent. The capability surface these
+released version carries the fix, then re-run the `rhaydus-adopt` agent. `../rhaydus-foundation` is still on
+AGP 9.0.0 / Gradle 9.1.0 / Kotlin 2.3.21 and must be upgraded before `foundation.local=true` builds work with
+this app again. The capability surface these
 entries refer to is indexed in [`../rhaydus/0.3.1/CAPABILITIES.md`](../rhaydus/0.3.1/CAPABILITIES.md).
 
 Each entry: **type** (bug / enhancement / gate), **home** (target foundation module), **status**, and
@@ -205,7 +207,7 @@ Filed but not yet implemented in the foundation.
 - **Type:** bug (gate silently inert)
 - **Home:** `nl.rhaydus:detekt-rules` + the detekt version in the shared catalog
 - **Status:** **Open.** detekt 1.23.8 embeds the Kotlin 2.0 compiler, which reads library metadata only up
-  to 2.1; Softcover builds on Kotlin 2.3.21. A `--debug` run logs 410 "incompatible version of Kotlin"
+  to 2.1; Softcover builds on Kotlin 2.4.21. A `--debug` run logs 410 "incompatible version of Kotlin"
   errors (stdlib, Compose, every repo module), so calls into them stay unresolved and every type-resolved
   rule skips them silently: a probe's `println` and `material3.Text` went unflagged by `ForbiddenMethodCall`
   while `!!` on a builtin `String?` was caught. `rhaydus:UnguardedFlowTerminalRead` is very likely inert too.
@@ -476,7 +478,7 @@ clone would fail to *configure* — `build-logic` is not in the foundation's `ma
   and `stabilityCheck` compares each module with its checked-in `<module>/stability/*.stability` baseline in CI.
   The foundation's convention plugins should adopt it so every consumer gets the gate.
 - **What to build:** apply the plugin from the shared Compose convention helper. The plugin version must track the
-  Kotlin version (0.7.5 for Kotlin 2.3.x; 0.8.0 pulls AGP `gradle-api` 9.1.1 and needs Gradle 9.3.1). On the AGP
+  Kotlin version (Softcover runs analyzer 0.9.0 on Kotlin 2.4.21). On the AGP
   KMP Android target the analyzer's per-variant tasks look for `compile<Variant>Kotlin` output and find none, so
   repoint their `stabilityInputFiles` at `stability/compileAndroidMain/stability-info.json` once the task graph is
   ready (see `StabilityGate.kt`), or fix it upstream in the analyzer.

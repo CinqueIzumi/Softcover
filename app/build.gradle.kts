@@ -3,7 +3,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     // The build-type debug-routes binding (app/src/debug) implements the @Composable DebugRoutesContent
     // seam, so the application shell needs the Compose compiler to transform that override correctly.
     alias(libs.plugins.kotlin.compose)

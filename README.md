@@ -8,7 +8,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 
 [![CI](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci-full.yml/badge.svg)](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci-full.yml)
 [![codecov](https://codecov.io/gh/CinqueIzumi/Softcover/branch/main/graph/badge.svg)](https://codecov.io/gh/CinqueIzumi/Softcover)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.11.0-4285F4?logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/compose-multiplatform/)
 [![Platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS%20%7C%20Desktop-3DDC84)](#running-the-apps)
 [![Min SDK](https://img.shields.io/badge/min%20SDK-26-3DDC84?logo=android&logoColor=white)](https://developer.android.com/about/versions/oreo)
@@ -115,11 +115,11 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 #### Core
 | Technology | Version | Purpose |
 |---|---|---|
-| [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) | 2.3.21 | Primary language, shared across Android/iOS/desktop |
+| [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) | 2.4.21 | Primary language, shared across Android/iOS/desktop |
 | [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) | 1.11.0 | Declarative UI shared across all platforms (resolves to Jetpack Compose on Android) |
 | [Material 3 (expressive)](https://m3.material.io/) | 1.11.0-alpha07 | Design system and theming (CMP expressive APIs) |
-| [Android Gradle Plugin](https://developer.android.com/build) | 9.0.0 | Android build tooling |
-| [Gradle (KTS)](https://gradle.org/) | 9.1.0 | Build system with version catalog |
+| [Android Gradle Plugin](https://developer.android.com/build) | 9.3.3 | Android build tooling |
+| [Gradle (KTS)](https://gradle.org/) | 9.5.1 | Build system with version catalog |
 | [KSP](https://github.com/google/ksp) | 2.3.9 | Kotlin Symbol Processing for Room (per-target) |
 | [ktlint](https://pinterest.github.io/ktlint/) | 1.7.1 | Formatting engine driving the foundation ruleset — `ktlintFormat` autofix, `ktlintCheck` gate |
 | [detekt](https://detekt.dev/) | 1.23.8 | Type-resolved static analysis, gated from zero (`styleCheck`) |

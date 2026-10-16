@@ -52,7 +52,7 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.AppUpdate
   skippable: false
   restartable: true
   params:
-    - simulator: RUNTIME (requires runtime check)
+    - simulator: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - header: STABLE (marked @Stable or @Immutable)
 
 @Composable

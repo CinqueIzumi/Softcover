@@ -228,15 +228,11 @@ Room DB.
   stops needing it, never a commit scheduled later — an empty allowance is indistinguishable from a
   forgotten one until something is written to it.
 - **Convention plugins** in `build-logic/` keep module build files uniform. Apply the smallest set:
-  - `softcover.android.library` — base for every Android-only `:core:*` / `:feature:*` /
-    `:orchestration` module (SDK/JDK, the shared coroutines/Koin runtime (logging is Kermit via `AppLog`, transitive from `:core:domain`) + JUnit5/Kotest/MockK/
-    Turbine test stack).
-  - `softcover.android.compose` — any Android-only module with Compose UI.
   - `softcover.android.room` — `:core:database` only.
   - `softcover.android.apollo` — `:core:network` only.
-  - `softcover.kmp.library` / `softcover.kmp.compose` — the multiplatform siblings (KMP base, and KMP
-    Compose UI wiring AndroidX Compose into `androidMain`) used by modules that have migrated to
-    Kotlin Multiplatform.
+  - `softcover.kmp.library` / `softcover.kmp.compose` — the base for every `:core:*` / `:feature:*` /
+    `:orchestration` library module (KMP base with SDK/JDK, the shared coroutines/Koin runtime and the
+    JUnit5/Kotest/MockK/Turbine test stack; and Compose UI wiring AndroidX Compose into `androidMain`).
   - `:app` is the lone `com.android.application` and stays Android-only (it owns build-type-conditional
     wiring). Because it is the **only** module with build types — the KMP Android library plugin
     produces a single variant — it is also where **debug-only UI** lives: `src/debug/` holds the

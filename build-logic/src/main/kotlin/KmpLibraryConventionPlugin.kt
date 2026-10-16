@@ -10,12 +10,11 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
- * Base convention for `:core:*` / `:feature:*` modules migrated to Kotlin Multiplatform — the KMP
- * sibling of [AndroidLibraryConventionPlugin]. Applies the modern single-Android-target KMP library
- * plugin (`com.android.kotlin.multiplatform.library`) plus the Kotlin Multiplatform plugin, declares
- * the Android target, two iOS targets (`iosArm64` + `iosSimulatorArm64`; `iosX64` is omitted — Compose
+ * Base convention for `:core:*` / `:feature:*` modules migrated to Kotlin Multiplatform — applies the modern
+ * single-Android-target KMP library plugin (`com.android.kotlin.multiplatform.library`) plus the Kotlin
+ * Multiplatform plugin, declares the Android target, two iOS targets (`iosArm64` + `iosSimulatorArm64`; `iosX64` is omitted — Compose
  * Multiplatform no longer publishes it, and the Intel iOS simulator is obsolete on Apple-silicon
- * Macs), and the JVM desktop target, matches the Android-only plugin's SDK/JDK levels and lint config,
+ * Macs), and the JVM desktop target, sets the SDK/JDK levels and lint config,
  * and wires the shared dependencies as their KMP (non-`-android`) variants.
  *
  * Test stack mirrors the Android plugin but split by source set: the multiplatform tools
