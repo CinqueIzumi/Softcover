@@ -104,6 +104,21 @@ class ExternalNavigationCodecTest {
     }
 
     @Nested
+    inner class NonPositiveBookIds {
+        @Test
+        fun `a book uri with id zero is rejected`() {
+            // ----- Arrange -----
+            val uri = "softcover://open/book/0"
+
+            // ----- Act -----
+            val parsed = parseExternalNavigationRequest(uri = uri)
+
+            // ----- Assert -----
+            parsed.shouldBeNull()
+        }
+    }
+
+    @Nested
     inner class Rejection {
         @TestFactory
         fun `malformed uris are rejected`(): List<DynamicTest> =

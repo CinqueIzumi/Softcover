@@ -33,7 +33,7 @@ internal fun parseExternalNavigationRequest(uri: String): ExternalNavigationRequ
 }
 
 private fun parseBook(segments: List<String>): ExternalNavigationRequest? {
-    val bookId = segments.getOrNull(1)?.toIntOrNull() ?: return null
+    val bookId = segments.getOrNull(1)?.toIntOrNull()?.takeIf { it > 0 } ?: return null
 
     return when {
         segments.size == 2 -> ExternalNavigationRequest.OpenBook(bookId = bookId)
