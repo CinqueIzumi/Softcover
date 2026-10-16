@@ -1,0 +1,25 @@
+query GetBookQuotes(
+    $bookId: Int!,
+    $userId: Int!,
+    $limit: Int!,
+    $offset: Int!,
+) {
+    reading_journals(
+        where: {
+            book_id: { _eq: $bookId }
+            user_id: { _eq: $userId }
+            event: { _eq: "quote" }
+        }
+        # id breaks action_at ties so every offset window is a fixed, non-overlapping slice.
+        order_by: [{ action_at: desc }, { id: desc }]
+        limit: $limit
+        offset: $offset
+    ) {
+        id
+        action_at
+        entry
+        privacy_setting_id
+        edition_id
+        metadata
+    }
+}

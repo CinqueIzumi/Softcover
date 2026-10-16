@@ -1,0 +1,8 @@
+mutation InsertQuote(
+    $object: ReadingJournalCreateType!
+) {
+    insert_reading_journal(object: $object) {
+        id
+        errors
+    }
+}

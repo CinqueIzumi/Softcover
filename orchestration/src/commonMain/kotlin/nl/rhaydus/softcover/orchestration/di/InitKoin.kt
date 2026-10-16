@@ -5,6 +5,7 @@ import kotlinx.coroutines.launch
 import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.platform.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.QuoteWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
@@ -40,6 +41,7 @@ fun startAppServices(koin: Koin) {
     val appScope = koin.get<ApplicationScope>().scope
     koin.get<UserBookWriteDrainer>().start(appScope)
     koin.get<ListWriteDrainer>().start(appScope)
+    koin.get<QuoteWriteDrainer>().start(appScope)
 
     appScope.launch {
         runCatchingCancellable { koin.get<GetUserIdAsFlowUseCase>().invoke().firstOrNull() }
