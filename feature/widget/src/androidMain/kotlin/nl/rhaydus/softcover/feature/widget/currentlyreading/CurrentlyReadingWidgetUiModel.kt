@@ -20,9 +20,11 @@ internal data class CurrentlyReadingWidgetUiModel(
         data class Reading(
             val title: String,
             val author: String,
+            val bookId: Int,
             val progressLabel: String,
             val cover: Bitmap?,
-            val progress: WavyProgressBitmaps,
+            /** One render per bar width in dp, keyed by [progressBarWidthDp] of each responsive size bucket. */
+            val progress: Map<Int, WavyProgressBitmaps>,
             val position: String?,
             val artwork: BackdropArtwork? = null,
         ) : Content

@@ -26,29 +26,39 @@ internal fun currentlyReadingWidgetModels(
     shelf: Flow<List<Book>>,
     selectedBookId: Flow<Int?>,
     loadCover: suspend (Book) -> Bitmap?,
-    renderProgress: (fraction: Float) -> WavyProgressBitmaps,
+    barWidthsDp: List<Int>,
+    renderProgress: (fraction: Float, widthDp: Int) -> WavyProgressBitmaps,
     renderArtwork: suspend (cover: Bitmap?) -> BackdropArtwork? = { null },
-): Flow<CurrentlyReadingWidgetUiModel> = combine(
-    isSignedIn,
-    themeConfiguration,
-    shelf,
-    selectedBookId,
-    ::WidgetInputs,
-).mapLatest { inputs ->
-    CurrentlyReadingWidgetUiModel(
-        themeConfiguration = inputs.themeConfiguration,
-        content = inputs.toContent(
-            loadCover = loadCover,
-            renderProgress = renderProgress,
-            renderArtwork = renderArtwork,
-        ),
-    )
+): Flow<CurrentlyReadingWidgetUiModel> {
+    // Only the `mapLatest` transform touches this, so it needs no synchronisation.
+    val barCache = mutableMapOf<ProgressBarKey, WavyProgressBitmaps>()
+
+    return combine(
+        isSignedIn,
+        themeConfiguration,
+        shelf,
+        selectedBookId,
+        ::WidgetInputs,
+    ).mapLatest { inputs ->
+        CurrentlyReadingWidgetUiModel(
+            themeConfiguration = inputs.themeConfiguration,
+            content = inputs.toContent(
+                loadCover = loadCover,
+                barWidthsDp = barWidthsDp,
+                renderProgress = renderProgress,
+                renderArtwork = renderArtwork,
+                barCache = barCache,
+            ),
+        )
+    }
 }
 
 private suspend fun WidgetInputs.toContent(
     loadCover: suspend (Book) -> Bitmap?,
-    renderProgress: (fraction: Float) -> WavyProgressBitmaps,
+    barWidthsDp: List<Int>,
+    renderProgress: (fraction: Float, widthDp: Int) -> WavyProgressBitmaps,
     renderArtwork: suspend (cover: Bitmap?) -> BackdropArtwork?,
+    barCache: MutableMap<ProgressBarKey, WavyProgressBitmaps>,
 ): CurrentlyReadingWidgetUiModel.Content {
     if (isSignedIn.not()) return CurrentlyReadingWidgetUiModel.Content.SignedOut
 
@@ -62,14 +72,30 @@ private suspend fun WidgetInputs.toContent(
     val book = books.first { it.id == shownId }
     val fraction = (book.currentRead?.progress ?: 0f) / 100f
 
+    barCache.keys.removeAll { it.bookId !in orderedBookIds || (it.bookId == book.id && it.fraction != fraction) }
+
     val cover = loadCover(book)
 
     return CurrentlyReadingWidgetUiModel.Content.Reading(
+        bookId = book.id,
         title = book.title,
         author = book.authorString,
         progressLabel = percentLabel(fraction = fraction),
         cover = cover,
-        progress = renderProgress(fraction),
+        progress = barWidthsDp.associateWith { widthDp ->
+            barCache.getOrPut(
+                ProgressBarKey(
+                    bookId = book.id,
+                    fraction = fraction,
+                    widthDp = widthDp,
+                ),
+            ) {
+                renderProgress(
+                    fraction,
+                    widthDp,
+                )
+            }
+        },
         position = if (books.size > 1) "${orderedBookIds.indexOf(shownId) + 1}/${books.size}" else null,
         artwork = renderArtwork(cover),
     )

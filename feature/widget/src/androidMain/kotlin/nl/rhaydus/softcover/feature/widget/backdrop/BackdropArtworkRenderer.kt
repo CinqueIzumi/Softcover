@@ -7,6 +7,9 @@ import kotlinx.coroutines.ensureActive
 
 /** Renders for one widget instance and keeps the backdrops of the last cover it was given. */
 internal class BackdropArtworkRenderer(private val density: Float) {
+    /** Backdrops are blurred, so half resolution is invisible once Crop scales them up, and a quarter of the bytes. */
+    private val renderDensity = density * RENDER_SCALE
+
     private val gradients = renderGradientMasks()
 
     private var lastBackdrops: Triple<Bitmap, Bitmap, Bitmap>? = null
@@ -49,12 +52,13 @@ internal class BackdropArtworkRenderer(private val density: Float) {
         heightDp: Int,
     ): Bitmap = renderBackdrop(
         cover = cover,
-        widthPx = (WIDTH_DP * density).roundToInt(),
-        heightPx = (heightDp * density).roundToInt(),
-        sigmaPx = SKIA_SIGMA_PER_RADIUS * BLUR_DP * density + SKIA_SIGMA_OFFSET,
+        widthPx = (WIDTH_DP * renderDensity).roundToInt(),
+        heightPx = (heightDp * renderDensity).roundToInt(),
+        sigmaPx = SKIA_SIGMA_PER_RADIUS * BLUR_DP * renderDensity + SKIA_SIGMA_OFFSET,
     )
 
     private companion object {
+        const val RENDER_SCALE = 0.5f
         const val WIDTH_DP = 110
         const val COMPACT_HEIGHT_DP = 110
         const val TALL_HEIGHT_DP = 180

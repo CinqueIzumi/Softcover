@@ -22,7 +22,6 @@ import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationReque
 import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.feature.widget.backdrop.BackdropArtworkRenderer
 import nl.rhaydus.softcover.feature.widget.backdrop.BookCoverLoader
-import nl.rhaydus.softcover.feature.widget.progress.WavyProgressBitmaps
 import nl.rhaydus.softcover.feature.widget.progress.renderWavyProgress
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -31,16 +30,14 @@ internal class CurrentlyReadingWidget : GlanceAppWidget(), KoinComponent {
     override val stateDefinition = PreferencesGlanceStateDefinition
 
     override val sizeMode = SizeMode.Responsive(
-        setOf(
-            DpSize(
-                width = 110.dp,
-                height = 110.dp,
-            ),
-            DpSize(
-                width = 110.dp,
-                height = 180.dp,
-            ),
-        ),
+        WIDGET_WIDTHS_DP
+            .flatMap { width -> listOf(110, 180).map { height ->
+                DpSize(
+                    width = width.dp,
+                    height = height.dp,
+                )
+            } }
+            .toSet(),
     )
 
     override suspend fun provideGlance(
@@ -67,8 +64,6 @@ internal class CurrentlyReadingWidget : GlanceAppWidget(), KoinComponent {
             density = density,
         )
 
-        var lastProgress: Pair<Float, WavyProgressBitmaps>? = null
-
         val models = currentlyReadingWidgetModels(
             isSignedIn = dependencies.getUserIdAsFlow().map { it != NO_USER_ID },
             themeConfiguration = themeConfigurations,
@@ -79,14 +74,14 @@ internal class CurrentlyReadingWidget : GlanceAppWidget(), KoinComponent {
                 .map { context.readSelectedBookId(id) },
             loadCover = covers::load,
             renderArtwork = artwork::render,
-            renderProgress = { fraction ->
-                lastProgress?.takeIf { it.first == fraction }?.second
-                    ?: renderWavyProgress(
-                        widthPx = (BAR_WIDTH_DP * density).roundToInt(),
-                        heightPx = (12 * density).roundToInt(),
-                        density = density,
-                        fraction = fraction,
-                    ).also { lastProgress = fraction to it }
+            barWidthsDp = progressBarWidthsDp(),
+            renderProgress = { fraction, widthDp ->
+                renderWavyProgress(
+                    widthPx = (widthDp * density).roundToInt(),
+                    heightPx = (12 * density).roundToInt(),
+                    density = density,
+                    fraction = fraction,
+                )
             },
         )
 
@@ -105,6 +100,3 @@ internal class CurrentlyReadingWidget : GlanceAppWidget(), KoinComponent {
         }
     }
 }
-
-/** The wavy bar is drawn at exactly this width, never scaled; it fits a two-cell column in both layouts. */
-internal const val BAR_WIDTH_DP = 94

@@ -10,6 +10,7 @@ import androidx.glance.unit.ColorProvider
 internal class WidgetExtraColors(
     val surfaceContainerHigh: ColorProvider,
     val daySurfaceContainerHigh: ColorProvider,
+    val arrowScrim: ColorProvider,
 )
 
 internal val LocalWidgetExtraColors = staticCompositionLocalOf<WidgetExtraColors> {

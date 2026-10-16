@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
 
-/** The data URI keeps each instance's PendingIntent distinct, since Intents differing only in extras share one. */
 internal fun widgetSettingsIntent(
     context: Context,
     activityClass: Class<*>,

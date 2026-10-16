@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.widget.currentlyreading
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.ColorFilter
@@ -16,6 +18,7 @@ import androidx.glance.action.Action
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
@@ -39,12 +42,14 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.CornerRadius
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.backdrop.Backdrop
 import nl.rhaydus.softcover.feature.widget.backdrop.Mask
 import nl.rhaydus.softcover.feature.widget.progress.WavyProgressBitmaps
+import nl.rhaydus.softcover.feature.widget.progress.updateProgressIntent
 import nl.rhaydus.softcover.feature.widget.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.theme.SoftcoverWidgetTheme
 
@@ -135,7 +140,6 @@ private fun Message(
 @Composable
 private fun CompactReading(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
     val artwork = content.artwork
-    val hasArrows = content.position != null
 
     Box(modifier = GlanceModifier.fillMaxSize()) {
         if (artwork != null) {
@@ -148,68 +152,52 @@ private fun CompactReading(content: CurrentlyReadingWidgetUiModel.Content.Readin
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .padding(Spacing.xs),
+                .padding(Spacing.xxs),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Row(
+            CoverArea(
+                content = content,
+                coverWidth = 40.dp,
                 modifier = GlanceModifier
                     .fillMaxWidth()
                     .defaultWeight(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (hasArrows) {
-                    PreviousArrow(
-                        modifier = GlanceModifier
-                            .width(30.dp)
-                            .fillMaxHeight(),
-                    )
-                }
-
-                Box(
-                    modifier = GlanceModifier
-                        .defaultWeight()
-                        .fillMaxHeight(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    if (content.cover != null) {
-                        Image(
-                            provider = ImageProvider(content.cover),
-                            contentDescription = null,
-                            modifier = GlanceModifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit,
-                        )
-                    } else {
-                        Box(
-                            modifier = GlanceModifier
-                                .fillMaxHeight()
-                                .width(40.dp)
-                                .cornerRadius(CornerRadius.xxs)
-                                .background(GlanceTheme.colors.surfaceVariant),
-                        ) {}
-                    }
-                }
-
-                if (hasArrows) {
-                    NextArrow(
-                        modifier = GlanceModifier
-                            .width(30.dp)
-                            .fillMaxHeight(),
-                    )
-                }
-            }
+            )
 
             Spacer(modifier = GlanceModifier.height(Spacing.xxs))
 
-            ProgressBar(bars = content.progress)
+            ProgressBar(progress = content.progress)
 
-            Text(
-                text = content.progressLabel,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurface,
-                    fontSize = 12.sp,
-                ),
-            )
+            BottomRow(content = content)
         }
+    }
+}
+
+@Composable
+private fun TwoLineTitle(title: String) {
+    val style = TextStyle(
+        color = GlanceTheme.colors.onSurface,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Serif,
+        textAlign = TextAlign.Center,
+    )
+
+    Box(
+        modifier = GlanceModifier.padding(horizontal = Spacing.xs),
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        // Glance has no minLines: this invisible two-line text holds the box at two lines, at any font scale.
+        Text(
+            text = " \n ",
+            maxLines = 2,
+            style = style.copy(color = ColorProvider(Color.Transparent)),
+        )
+
+        Text(
+            text = title,
+            maxLines = 2,
+            style = style,
+        )
     }
 }
 
@@ -217,10 +205,7 @@ private fun CompactReading(content: CurrentlyReadingWidgetUiModel.Content.Readin
 private fun TallReading(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
     val artwork = content.artwork
 
-    Box(
-        modifier = GlanceModifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
+    Box(modifier = GlanceModifier.fillMaxSize()) {
         if (artwork != null) {
             Backdrop(
                 backdrop = artwork.tallBackdrop,
@@ -230,55 +215,26 @@ private fun TallReading(content: CurrentlyReadingWidgetUiModel.Content.Reading) 
 
         Column(
             modifier = GlanceModifier
-                .width(110.dp)
-                .fillMaxHeight()
-                .padding(
-                    horizontal = Spacing.xxs,
-                    vertical = Spacing.xxs,
-                ),
+                .fillMaxSize()
+                .padding(Spacing.xxs),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box(
+            CoverArea(
+                content = content,
+                coverWidth = 56.dp,
                 modifier = GlanceModifier
                     .fillMaxWidth()
                     .defaultWeight(),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (content.cover != null) {
-                    Image(
-                        provider = ImageProvider(content.cover),
-                        contentDescription = null,
-                        modifier = GlanceModifier.fillMaxSize(),
-                        contentScale = ContentScale.Fit,
-                    )
-                } else {
-                    Box(
-                        modifier = GlanceModifier
-                            .fillMaxHeight()
-                            .width(56.dp)
-                            .cornerRadius(CornerRadius.xxs)
-                            .background(GlanceTheme.colors.surfaceVariant),
-                    ) {}
-                }
-            }
+            )
 
             Spacer(modifier = GlanceModifier.height(Spacing.xxs))
 
-            Text(
-                text = content.title,
-                maxLines = 2,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurface,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif,
-                    textAlign = TextAlign.Center,
-                ),
-            )
+            TwoLineTitle(title = content.title)
 
             Text(
                 text = content.author,
                 maxLines = 1,
+                modifier = GlanceModifier.padding(horizontal = Spacing.xs),
                 style = TextStyle(
                     color = GlanceTheme.colors.onSurfaceVariant,
                     fontSize = 12.sp,
@@ -288,65 +244,140 @@ private fun TallReading(content: CurrentlyReadingWidgetUiModel.Content.Reading) 
 
             Spacer(modifier = GlanceModifier.height(Spacing.xxs))
 
-            ProgressBar(bars = content.progress)
+            ProgressBar(progress = content.progress)
 
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            BottomRow(content = content)
+        }
+    }
+}
+
+@Composable
+private fun CoverArea(
+    content: CurrentlyReadingWidgetUiModel.Content.Reading,
+    coverWidth: Dp,
+    modifier: GlanceModifier,
+) {
+    val hasArrows = content.position != null
+
+    Box(modifier = modifier) {
+        Box(
+            modifier = GlanceModifier
+                .fillMaxSize()
+                .padding(horizontal = if (hasArrows) 32.dp else 0.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (content.cover != null) {
+                Image(
+                    provider = ImageProvider(content.cover),
+                    contentDescription = null,
+                    modifier = GlanceModifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit,
+                )
+            } else {
                 Box(
-                    modifier = GlanceModifier.height(36.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = content.progressLabel,
-                        style = TextStyle(
-                            color = GlanceTheme.colors.onSurface,
-                            fontSize = 12.sp,
-                        ),
-                    )
-                }
+                    modifier = GlanceModifier
+                        .fillMaxHeight()
+                        .width(coverWidth)
+                        .cornerRadius(CornerRadius.xxs)
+                        .background(GlanceTheme.colors.surfaceVariant),
+                ) {}
+            }
+        }
 
-                Spacer(modifier = GlanceModifier.defaultWeight())
+        if (hasArrows) {
+            Box(
+                modifier = GlanceModifier.fillMaxSize(),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                PreviousArrow()
+            }
 
-                if (content.position != null) {
-                    PreviousArrow(
-                        modifier = GlanceModifier.size(
-                            width = 26.dp,
-                            height = 36.dp,
-                        ),
-                    )
-
-                    Box(
-                        modifier = GlanceModifier.height(36.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = content.position,
-                            style = TextStyle(
-                                color = GlanceTheme.colors.onSurface,
-                                fontSize = 11.sp,
-                            ),
-                        )
-                    }
-
-                    NextArrow(
-                        modifier = GlanceModifier.size(
-                            width = 26.dp,
-                            height = 36.dp,
-                        ),
-                    )
-                }
+            Box(
+                modifier = GlanceModifier.fillMaxSize(),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                NextArrow()
             }
         }
     }
 }
 
 @Composable
-private fun ProgressBar(bars: WavyProgressBitmaps) {
+private fun BottomRow(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
+    Row(
+        modifier = GlanceModifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (content.position == null) {
+            Spacer(modifier = GlanceModifier.defaultWeight())
+
+            ProgressButton(content = content)
+
+            Spacer(modifier = GlanceModifier.defaultWeight())
+        } else {
+            ProgressButton(content = content)
+
+            Spacer(modifier = GlanceModifier.defaultWeight())
+
+            Text(
+                text = content.position,
+                style = TextStyle(
+                    color = GlanceTheme.colors.onSurfaceVariant,
+                    fontSize = 12.sp,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProgressButton(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
+    val context = LocalContext.current
+
+    Row(
+        modifier = GlanceModifier
+            .height(36.dp)
+            .padding(horizontal = Spacing.xs)
+            .semantics { contentDescription = context.getString(R.string.currently_reading_update_progress) }
+            .clickable(
+                actionStartActivity(
+                    updateProgressIntent(
+                        context = context,
+                        bookId = content.bookId,
+                    ),
+                ),
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = content.progressLabel,
+            style = TextStyle(
+                color = GlanceTheme.colors.onSurface,
+                fontSize = 12.sp,
+            ),
+        )
+
+        Spacer(modifier = GlanceModifier.width(Spacing.xxs))
+
+        Image(
+            provider = ImageProvider(R.drawable.ic_widget_edit),
+            contentDescription = null,
+            modifier = GlanceModifier.size(16.dp),
+            colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurfaceVariant),
+        )
+    }
+}
+
+@Composable
+private fun ProgressBar(progress: Map<Int, WavyProgressBitmaps>) {
+    val widthDp = progressBarWidthDp(LocalSize.current.width)
+    val bars = progress[widthDp] ?: return
+
     Box(
         modifier = GlanceModifier
-            .width(BAR_WIDTH_DP.dp)
+            .width(widthDp.dp)
             .height(12.dp),
     ) {
         Mask(
@@ -364,22 +395,20 @@ private fun ProgressBar(bars: WavyProgressBitmaps) {
 }
 
 @Composable
-private fun PreviousArrow(modifier: GlanceModifier) {
+private fun PreviousArrow() {
     Arrow(
         icon = R.drawable.ic_widget_chevron_left,
         step = -1,
         description = LocalContext.current.getString(R.string.currently_reading_previous_book),
-        modifier = modifier,
     )
 }
 
 @Composable
-private fun NextArrow(modifier: GlanceModifier) {
+private fun NextArrow() {
     Arrow(
         icon = R.drawable.ic_widget_chevron_right,
         step = 1,
         description = LocalContext.current.getString(R.string.currently_reading_next_book),
-        modifier = modifier,
     )
 }
 
@@ -388,10 +417,11 @@ private fun Arrow(
     @DrawableRes icon: Int,
     step: Int,
     description: String,
-    modifier: GlanceModifier,
 ) {
     Box(
-        modifier = modifier
+        modifier = GlanceModifier
+            .width(32.dp)
+            .fillMaxHeight()
             .semantics { contentDescription = description }
             .clickable(
                 actionRunCallback<CycleBookCallback>(
@@ -400,11 +430,19 @@ private fun Arrow(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        Image(
-            provider = ImageProvider(icon),
-            contentDescription = null,
-            modifier = GlanceModifier.size(20.dp),
-            colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurface),
-        )
+        Box(
+            modifier = GlanceModifier
+                .size(28.dp)
+                .cornerRadius(CornerRadius.xxl)
+                .background(LocalWidgetExtraColors.current.arrowScrim),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                provider = ImageProvider(icon),
+                contentDescription = null,
+                modifier = GlanceModifier.size(20.dp),
+                colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurface),
+            )
+        }
     }
 }

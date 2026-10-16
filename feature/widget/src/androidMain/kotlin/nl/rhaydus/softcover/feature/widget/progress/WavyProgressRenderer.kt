@@ -6,6 +6,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.ImageBitmapConfig
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.StrokeCap
@@ -51,6 +52,7 @@ private fun drawMask(
     val image = ImageBitmap(
         width = widthPx,
         height = heightPx,
+        config = ImageBitmapConfig.Alpha8,
     )
 
     CanvasDrawScope().draw(

@@ -52,6 +52,10 @@ internal fun SoftcoverWidgetTheme(
                 day = light.surfaceContainerHigh,
                 night = Color.Transparent,
             ),
+            arrowScrim = ColorProvider(
+                day = light.surface.copy(alpha = ARROW_SCRIM_ALPHA),
+                night = dark.surface.copy(alpha = ARROW_SCRIM_ALPHA),
+            ),
         )
     }
 
@@ -81,3 +85,5 @@ private fun widgetColorScheme(
         )
     }
 }
+
+private const val ARROW_SCRIM_ALPHA = 0.7f

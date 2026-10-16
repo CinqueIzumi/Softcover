@@ -129,17 +129,32 @@ none remains, skipped when signed out, `retry` on a failed refresh). `settings/`
 `WidgetSettingsActivity` and `WidgetSettingsLayout`, with per-widget screens in `settings/randompick/`
 and `settings/trending/`. No Skip button: Back keeps the stored settings (`RESULT_OK` is set up front).
 The worker refreshes with `maxAge` at half the period so an early run still fetches. 9 tests after audit.
+**Redo pending:** top 10 at two covers per page with ‹ › and "1/5"; period setting (week, month,
+three_month, one_year, all; trending persisted per period, folded into migration 54 → 55); worker
+refreshes only the periods in use; plus the crash-audit fixes (settings screens hold only ids,
+update on save, workers retry before Koin starts, refresher catch, redirect FK, blur off main).
+
+### S7b. Update progress from the Currently Reading widget (in progress)
+"xx% ✎" button opens `UpdateProgressActivity` hosting the app's `UpdateProgressBottomSheet` with a
+widget-local copy of Reading's sheet logic (shared extraction is a separate issue). Arrows overlay
+the cover (32dp lanes), title reserves two lines, progress bar follows the widget width.
 
 ### S8. Widgets section in Settings
 Lists placed widgets with Edit (opens that instance's configuration activity) and "Add to home
 screen" buttons via `AppWidgetManager.requestPinAppWidget` (API 26+, hidden when the launcher does
 not support pinning).
 
-### S9. Docs
+### S9. Module layout
+Reorganise `:feature:widget` into the same folder layout as the app's feature modules
+(`docs/reference/module-structure.md`; e.g. `presentation/` with `action/`, `collector/`, `state/`,
+`screen/`, `mapper/` per surface) instead of flat per-widget packages. Move only, no behaviour change;
+tests move with their sources; stability baseline regenerated.
+
+### S10. Docs
 `docs/reference/design-system/patterns/widgets.md` (`patterns.md` is at its 8 KB budget: link only),
 architecture deltas.
 
-### S10. Device crash sweep (last)
+### S11. Device crash sweep (last)
 Claude drives Medium_Phone (emulator-5554) with a scripted run per widget: place, resize through
 every size, tap every target, reconfigure, remove, and a cold start after process death
 (`am stop-app`). Clear the crash buffer first; `adb logcat -b crash` must stay empty after every run.

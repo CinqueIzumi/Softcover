@@ -22,14 +22,20 @@ internal fun nl.rhaydus.softcover.feature.widget.backdrop.Mask(mask: android.gra
     - contentScale: RUNTIME (requires runtime check)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.currentlyreading.Arrow(icon: kotlin.Int, step: kotlin.Int, description: kotlin.String, modifier: androidx.glance.GlanceModifier): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.Arrow(icon: kotlin.Int, step: kotlin.Int, description: kotlin.String): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - icon: STABLE (primitive type)
     - step: STABLE (primitive type)
     - description: STABLE (String is immutable)
-    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.BottomRow(content: nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - content: UNSTABLE (has mutable properties or unstable members)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.currentlyreading.CompactReading(content: nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
@@ -37,6 +43,15 @@ private fun nl.rhaydus.softcover.feature.widget.currentlyreading.CompactReading(
   restartable: true
   params:
     - content: UNSTABLE (has mutable properties or unstable members)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.CoverArea(content: nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetUiModel.Content.Reading, coverWidth: androidx.compose.ui.unit.Dp, modifier: androidx.glance.GlanceModifier): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - content: UNSTABLE (has mutable properties or unstable members)
+    - coverWidth: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetContent(model: nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetUiModel, openReading: androidx.glance.action.Action): kotlin.Unit
@@ -55,25 +70,30 @@ private fun nl.rhaydus.softcover.feature.widget.currentlyreading.Message(headlin
     - subline: STABLE (class with no mutable properties)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.currentlyreading.NextArrow(modifier: androidx.glance.GlanceModifier): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.NextArrow(): kotlin.Unit
   skippable: true
   restartable: true
   params:
-    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.currentlyreading.PreviousArrow(modifier: androidx.glance.GlanceModifier): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.PreviousArrow(): kotlin.Unit
   skippable: true
   restartable: true
   params:
-    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.currentlyreading.ProgressBar(bars: nl.rhaydus.softcover.feature.widget.progress.WavyProgressBitmaps): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.ProgressBar(progress: kotlin.collections.Map<kotlin.Int, nl.rhaydus.softcover.feature.widget.progress.WavyProgressBitmaps>): kotlin.Unit
   skippable: false
   restartable: true
   params:
-    - bars: UNSTABLE (has mutable properties or unstable members)
+    - progress: RUNTIME (requires runtime check)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.ProgressButton(content: nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - content: UNSTABLE (has mutable properties or unstable members)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.currentlyreading.TallReading(content: nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetUiModel.Content.Reading): kotlin.Unit
@@ -81,6 +101,19 @@ private fun nl.rhaydus.softcover.feature.widget.currentlyreading.TallReading(con
   restartable: true
   params:
     - content: UNSTABLE (has mutable properties or unstable members)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.widget.currentlyreading.TwoLineTitle(title: kotlin.String): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - title: STABLE (String is immutable)
+
+@Composable
+public fun nl.rhaydus.softcover.feature.widget.progress.UpdateProgressScreen.Content(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.randompick.Cover(cover: android.graphics.Bitmap?): kotlin.Unit

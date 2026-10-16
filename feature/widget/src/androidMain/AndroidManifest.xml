@@ -54,6 +54,13 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="nl.rhaydus.softcover.feature.widget.progress.UpdateProgressActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Softcover.UpdateProgress" />
     </application>
 
 </manifest>
