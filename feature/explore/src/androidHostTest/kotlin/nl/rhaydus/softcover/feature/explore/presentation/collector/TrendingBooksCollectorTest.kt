@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -49,15 +50,18 @@ class TrendingBooksCollectorTest {
         )
 
         every {
-            observeTrendingBooksUseCase()
+            observeTrendingBooksUseCase(period = TrendingPeriod.Week)
         } returns trendingFlow
 
         every {
-            observeTrendingFetchedAtUseCase()
+            observeTrendingFetchedAtUseCase(period = TrendingPeriod.Week)
         } returns fetchedAtFlow
 
         coEvery {
-            refreshTrendingBooksUseCase(any())
+            refreshTrendingBooksUseCase(
+                period = any(),
+                maxAge = any(),
+            )
         } returns Result.success(Unit)
 
         dependencies = mockk<ExploreDependencies>(relaxed = true).also { mock ->
@@ -104,7 +108,10 @@ class TrendingBooksCollectorTest {
             // ----- Arrange -----
             val pending = CompletableDeferred<Result<Unit>>()
             coEvery {
-                refreshTrendingBooksUseCase(any())
+                refreshTrendingBooksUseCase(
+                    period = any(),
+                    maxAge = any(),
+                )
             } coAnswers { pending.await() }
             val collector = TrendingBooksCollector()
 
@@ -126,7 +133,10 @@ class TrendingBooksCollectorTest {
                 // ----- Arrange -----
                 val pending = CompletableDeferred<Result<Unit>>()
                 coEvery {
-                    refreshTrendingBooksUseCase(any())
+                    refreshTrendingBooksUseCase(
+                        period = any(),
+                        maxAge = any(),
+                    )
                 } coAnswers { pending.await() }
                 val collector = TrendingBooksCollector()
                 backgroundScope.launch {
@@ -148,7 +158,10 @@ class TrendingBooksCollectorTest {
             // ----- Arrange -----
             val pending = CompletableDeferred<Result<Unit>>()
             coEvery {
-                refreshTrendingBooksUseCase(any())
+                refreshTrendingBooksUseCase(
+                    period = any(),
+                    maxAge = any(),
+                )
             } coAnswers { pending.await() }
             fetchedAtFlow.value = Instant.fromEpochSeconds(1)
             trendingFlow.value = emptyList()
@@ -170,7 +183,10 @@ class TrendingBooksCollectorTest {
         fun `stops loading when the refresh fails and nothing was ever fetched`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery {
-                refreshTrendingBooksUseCase(any())
+                refreshTrendingBooksUseCase(
+                    period = any(),
+                    maxAge = any(),
+                )
             } returns Result.failure(IllegalStateException("offline"))
             val collector = TrendingBooksCollector()
 

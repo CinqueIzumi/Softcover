@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 55,
-    "identityHash": "5bdfb585d73d2c68c9b59da5b5213fe7",
+    "identityHash": "71f50d4c89c9bbaedb3cefed8ece074c",
     "entities": [
       {
         "tableName": "books",
@@ -1383,8 +1383,14 @@
       },
       {
         "tableName": "trending_books",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `rank` INTEGER NOT NULL, PRIMARY KEY(`bookId`), FOREIGN KEY(`bookId`) REFERENCES `books`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`period` TEXT NOT NULL, `bookId` INTEGER NOT NULL, `rank` INTEGER NOT NULL, PRIMARY KEY(`period`, `bookId`), FOREIGN KEY(`bookId`) REFERENCES `books`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
+          {
+            "fieldPath": "period",
+            "columnName": "period",
+            "affinity": "TEXT",
+            "notNull": true
+          },
           {
             "fieldPath": "bookId",
             "columnName": "bookId",
@@ -1401,9 +1407,21 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
+            "period",
             "bookId"
           ]
         },
+        "indices": [
+          {
+            "name": "index_trending_books_bookId",
+            "unique": false,
+            "columnNames": [
+              "bookId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_trending_books_bookId` ON `${TABLE_NAME}` (`bookId`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "books",
@@ -1420,12 +1438,12 @@
       },
       {
         "tableName": "trending_meta",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `fetchedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`period` TEXT NOT NULL, `fetchedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`period`))",
         "fields": [
           {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
+            "fieldPath": "period",
+            "columnName": "period",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -1438,7 +1456,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "id"
+            "period"
           ]
         }
       }
@@ -1451,7 +1469,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5bdfb585d73d2c68c9b59da5b5213fe7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '71f50d4c89c9bbaedb3cefed8ece074c')"
     ]
   }
 }

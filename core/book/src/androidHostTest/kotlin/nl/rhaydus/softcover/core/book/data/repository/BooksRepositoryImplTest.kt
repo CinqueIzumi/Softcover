@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.book.data.repository
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -42,6 +43,7 @@ import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -5356,10 +5358,15 @@ class BooksRepositoryImplTest {
             } returns id
         }
 
+        private suspend fun refreshWeek(maxAge: Duration) = repository.refreshTrendingBooks(
+            period = TrendingPeriod.Week,
+            maxAge = maxAge,
+        )
+
         @BeforeEach
         fun setUpStore() {
             coEvery {
-                booksLocalDataSource.getTrendingFetchedAt()
+                booksLocalDataSource.getTrendingFetchedAt(period = TrendingPeriod.Week)
             } returns null
 
             coEvery {
@@ -5371,18 +5378,22 @@ class BooksRepositoryImplTest {
         fun `skips the fetch when the last one is younger than maxAge`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksLocalDataSource.getTrendingFetchedAt()
+                booksLocalDataSource.getTrendingFetchedAt(period = TrendingPeriod.Week)
             } returns Clock.System.now() - 1.minutes
 
             // ----- Act -----
-            repository.refreshTrendingBooks(maxAge = 1.hours)
+            repository.refreshTrendingBooks(
+                period = TrendingPeriod.Week,
+                maxAge = 1.hours,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                booksRemoteDataSource.fetchTrendingBookIds()
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             }
             coVerify(exactly = 0) {
                 booksLocalDataSource.replaceTrendingBooks(
+                    period = TrendingPeriod.Week,
                     requestedIds = any(),
                     books = any(),
                     fetchedAt = any(),
@@ -5394,19 +5405,22 @@ class BooksRepositoryImplTest {
         fun `fetches when the last fetch is older than maxAge`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksLocalDataSource.getTrendingFetchedAt()
+                booksLocalDataSource.getTrendingFetchedAt(period = TrendingPeriod.Week)
             } returns Clock.System.now() - 2.hours
 
             coEvery {
-                booksRemoteDataSource.fetchTrendingBookIds()
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             } returns emptyList()
 
             // ----- Act -----
-            repository.refreshTrendingBooks(maxAge = 1.hours)
+            repository.refreshTrendingBooks(
+                period = TrendingPeriod.Week,
+                maxAge = 1.hours,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksRemoteDataSource.fetchTrendingBookIds()
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             }
         }
 
@@ -5414,19 +5428,22 @@ class BooksRepositoryImplTest {
         fun `a zero maxAge always fetches even right after a fetch`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksLocalDataSource.getTrendingFetchedAt()
+                booksLocalDataSource.getTrendingFetchedAt(period = TrendingPeriod.Week)
             } returns Clock.System.now()
 
             coEvery {
-                booksRemoteDataSource.fetchTrendingBookIds()
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             } returns emptyList()
 
             // ----- Act -----
-            repository.refreshTrendingBooks(maxAge = Duration.ZERO)
+            repository.refreshTrendingBooks(
+                period = TrendingPeriod.Week,
+                maxAge = Duration.ZERO,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksRemoteDataSource.fetchTrendingBookIds()
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             }
         }
 
@@ -5437,15 +5454,19 @@ class BooksRepositoryImplTest {
             val fetchedAtSlot = slot<Instant>()
 
             coEvery {
-                booksRemoteDataSource.fetchTrendingBookIds()
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             } returns emptyList()
 
             // ----- Act -----
-            repository.refreshTrendingBooks(maxAge = 1.hours)
+            repository.refreshTrendingBooks(
+                period = TrendingPeriod.Week,
+                maxAge = 1.hours,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
                 booksLocalDataSource.replaceTrendingBooks(
+                    period = TrendingPeriod.Week,
                     requestedIds = emptyList(),
                     books = emptyList(),
                     fetchedAt = capture(fetchedAtSlot),
@@ -5464,7 +5485,7 @@ class BooksRepositoryImplTest {
             val second = trendingBook(2)
 
             coEvery {
-                booksRemoteDataSource.fetchTrendingBookIds()
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             } returns listOf(1, 2, 1)
 
             coEvery {
@@ -5472,7 +5493,10 @@ class BooksRepositoryImplTest {
             } returns listOf(first, second)
 
             // ----- Act -----
-            repository.refreshTrendingBooks(maxAge = Duration.ZERO)
+            repository.refreshTrendingBooks(
+                period = TrendingPeriod.Week,
+                maxAge = Duration.ZERO,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
@@ -5480,6 +5504,7 @@ class BooksRepositoryImplTest {
             }
             coVerify(exactly = 1) {
                 booksLocalDataSource.replaceTrendingBooks(
+                    period = TrendingPeriod.Week,
                     requestedIds = listOf(1, 2),
                     books = listOf(first, second),
                     fetchedAt = any(),
@@ -5497,7 +5522,7 @@ class BooksRepositoryImplTest {
             } returns listOf(1)
 
             coEvery {
-                booksRemoteDataSource.fetchTrendingBookIds()
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             } returns listOf(1, 2)
 
             coEvery {
@@ -5505,7 +5530,10 @@ class BooksRepositoryImplTest {
             } returns listOf(trendingOnly)
 
             // ----- Act -----
-            repository.refreshTrendingBooks(maxAge = Duration.ZERO)
+            repository.refreshTrendingBooks(
+                period = TrendingPeriod.Week,
+                maxAge = Duration.ZERO,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
@@ -5513,6 +5541,7 @@ class BooksRepositoryImplTest {
             }
             coVerify(exactly = 1) {
                 booksLocalDataSource.replaceTrendingBooks(
+                    period = TrendingPeriod.Week,
                     requestedIds = listOf(1, 2),
                     books = listOf(trendingOnly),
                     fetchedAt = any(),
@@ -5528,11 +5557,14 @@ class BooksRepositoryImplTest {
             } returns listOf(1, 2)
 
             coEvery {
-                booksRemoteDataSource.fetchTrendingBookIds()
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             } returns listOf(2, 1)
 
             // ----- Act -----
-            repository.refreshTrendingBooks(maxAge = Duration.ZERO)
+            repository.refreshTrendingBooks(
+                period = TrendingPeriod.Week,
+                maxAge = Duration.ZERO,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 0) {
@@ -5540,6 +5572,7 @@ class BooksRepositoryImplTest {
             }
             coVerify(exactly = 1) {
                 booksLocalDataSource.replaceTrendingBooks(
+                    period = TrendingPeriod.Week,
                     requestedIds = listOf(2, 1),
                     books = emptyList(),
                     fetchedAt = any(),
@@ -5554,31 +5587,32 @@ class BooksRepositoryImplTest {
             val gate = CompletableDeferred<Unit>()
 
             coEvery {
-                booksLocalDataSource.getTrendingFetchedAt()
+                booksLocalDataSource.getTrendingFetchedAt(period = TrendingPeriod.Week)
             } answers {
                 storedFetchedAt
             }
 
             coEvery {
                 booksLocalDataSource.replaceTrendingBooks(
+                    period = TrendingPeriod.Week,
                     requestedIds = any(),
                     books = any(),
                     fetchedAt = any(),
                 )
             } answers {
-                storedFetchedAt = thirdArg<Instant>()
+                storedFetchedAt = arg<Instant>(3)
             }
 
             coEvery {
-                booksRemoteDataSource.fetchTrendingBookIds()
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             } coAnswers {
                 gate.await()
                 emptyList()
             }
 
             // ----- Act -----
-            val first = launch { repository.refreshTrendingBooks(maxAge = 1.hours) }
-            val second = launch { repository.refreshTrendingBooks(maxAge = 1.hours) }
+            val first = launch { refreshWeek(maxAge = 1.hours) }
+            val second = launch { refreshWeek(maxAge = 1.hours) }
             runCurrent()
             gate.complete(Unit)
             joinAll(
@@ -5588,10 +5622,11 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksRemoteDataSource.fetchTrendingBookIds()
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             }
             coVerify(exactly = 1) {
                 booksLocalDataSource.replaceTrendingBooks(
+                    period = TrendingPeriod.Week,
                     requestedIds = any(),
                     books = any(),
                     fetchedAt = any(),
@@ -5600,12 +5635,89 @@ class BooksRepositoryImplTest {
         }
 
         @Test
+        fun `checks maxAge against the requested period's fetch time only`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getTrendingFetchedAt(period = TrendingPeriod.Week)
+            } returns Clock.System.now() - 1.minutes
+
+            coEvery {
+                booksLocalDataSource.getTrendingFetchedAt(period = TrendingPeriod.Month)
+            } returns Clock.System.now() - 2.hours
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Month)
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshTrendingBooks(
+                period = TrendingPeriod.Week,
+                maxAge = 1.hours,
+            )
+            repository.refreshTrendingBooks(
+                period = TrendingPeriod.Month,
+                maxAge = 1.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
+            }
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Month)
+            }
+        }
+
+        @Test
+        fun `refreshes of different periods run concurrently`() = runTest {
+            // ----- Arrange -----
+            val gate = CompletableDeferred<Unit>()
+            val started = mutableListOf<TrendingPeriod>()
+
+            coEvery {
+                booksLocalDataSource.getTrendingFetchedAt(period = any())
+            } returns null
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBookIds(period = any())
+            } coAnswers {
+                started += firstArg<TrendingPeriod>()
+                gate.await()
+                emptyList()
+            }
+
+            // ----- Act -----
+            val week = launch {
+                repository.refreshTrendingBooks(
+                    period = TrendingPeriod.Week,
+                    maxAge = Duration.ZERO,
+                )
+            }
+            val month = launch {
+                repository.refreshTrendingBooks(
+                    period = TrendingPeriod.Month,
+                    maxAge = Duration.ZERO,
+                )
+            }
+            runCurrent()
+            val startedBeforeRelease = started.toList()
+            gate.complete(Unit)
+            joinAll(
+                week,
+                month,
+            )
+
+            // ----- Assert -----
+            startedBeforeRelease shouldContainExactlyInAnyOrder listOf(TrendingPeriod.Week, TrendingPeriod.Month)
+        }
+
+        @Test
         fun `propagates a failing books fetch and writes nothing`() = runTest {
             // ----- Arrange -----
             val error = ServerUnavailableException(message = "down")
 
             coEvery {
-                booksRemoteDataSource.fetchTrendingBookIds()
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             } returns listOf(1)
 
             coEvery {
@@ -5614,13 +5726,17 @@ class BooksRepositoryImplTest {
 
             // ----- Act -----
             val thrown = shouldThrow<ServerUnavailableException> {
-                repository.refreshTrendingBooks(maxAge = Duration.ZERO)
+                repository.refreshTrendingBooks(
+                    period = TrendingPeriod.Week,
+                    maxAge = Duration.ZERO,
+                )
             }
 
             // ----- Assert -----
             thrown shouldBe error
             coVerify(exactly = 0) {
                 booksLocalDataSource.replaceTrendingBooks(
+                    period = TrendingPeriod.Week,
                     requestedIds = any(),
                     books = any(),
                     fetchedAt = any(),

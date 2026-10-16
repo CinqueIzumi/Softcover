@@ -9,6 +9,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -38,7 +39,10 @@ class OnRefreshActionTest {
         )
 
         coEvery {
-            refreshTrendingBooksUseCase(any())
+            refreshTrendingBooksUseCase(
+                period = any(),
+                maxAge = any(),
+            )
         } returns Result.success(Unit)
 
         dependencies = mockk<ExploreDependencies>(relaxed = true).also { mock ->
@@ -57,9 +61,7 @@ class OnRefreshActionTest {
         @Test
         fun `forces the trending refresh past the staleness window`() = runTest {
             // ----- Arrange -----
-            coEvery {
-                refreshTrendingBooksUseCase(any())
-            } returns Result.success(Unit)
+            // Default dependencies from setUp.
 
             // ----- Act -----
             OnRefreshAction.execute(
@@ -69,7 +71,10 @@ class OnRefreshActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                refreshTrendingBooksUseCase(Duration.ZERO)
+                refreshTrendingBooksUseCase(
+                    period = TrendingPeriod.Week,
+                    maxAge = Duration.ZERO,
+                )
             }
         }
 
@@ -92,7 +97,10 @@ class OnRefreshActionTest {
         fun `clears the refreshing flag when the trending refresh fails`() = runTest {
             // ----- Arrange -----
             coEvery {
-                refreshTrendingBooksUseCase(any())
+                refreshTrendingBooksUseCase(
+                period = any(),
+                maxAge = any(),
+            )
             } returns Result.failure(IllegalStateException("offline"))
 
             // ----- Act -----

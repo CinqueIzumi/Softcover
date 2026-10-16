@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.action
 
 import kotlinx.coroutines.flow.update
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -18,7 +19,10 @@ internal data object OnRefreshAction : ExploreAction {
 
         dependencies.continueSeriesRefreshTrigger.update { it + 1 }
 
-        dependencies.refreshTrendingBooksUseCase(maxAge = Duration.ZERO)
+        dependencies.refreshTrendingBooksUseCase(
+            period = TrendingPeriod.Week,
+            maxAge = Duration.ZERO,
+        )
             .onFailure { error ->
                 AppLog.e(
                     error,

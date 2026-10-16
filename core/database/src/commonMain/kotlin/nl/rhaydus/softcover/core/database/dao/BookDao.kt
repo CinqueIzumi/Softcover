@@ -586,6 +586,12 @@ interface BookDao {
     @Query("DELETE FROM trending_books")
     suspend fun deleteAllTrendingBooks()
 
+    @Query("DELETE FROM trending_books WHERE period = :period")
+    suspend fun deleteTrendingBooks(period: String)
+
+    @Query("DELETE FROM trending_books WHERE bookId = :bookId")
+    suspend fun deleteTrendingForBook(bookId: Int)
+
     @Query("DELETE FROM trending_meta")
     suspend fun deleteTrendingMeta()
 
@@ -595,11 +601,11 @@ interface BookDao {
     @Upsert
     suspend fun upsertTrendingMeta(meta: TrendingMetaEntity)
 
-    @Query("SELECT fetchedAtEpochMillis FROM trending_meta WHERE id = 0")
-    fun observeTrendingFetchedAt(): Flow<Long?>
+    @Query("SELECT fetchedAtEpochMillis FROM trending_meta WHERE period = :period")
+    fun observeTrendingFetchedAt(period: String): Flow<Long?>
 
-    @Query("SELECT fetchedAtEpochMillis FROM trending_meta WHERE id = 0")
-    suspend fun getTrendingFetchedAt(): Long?
+    @Query("SELECT fetchedAtEpochMillis FROM trending_meta WHERE period = :period")
+    suspend fun getTrendingFetchedAt(period: String): Long?
 
     @Transaction
     @Query(
@@ -607,13 +613,14 @@ interface BookDao {
         SELECT b.*
         FROM books b
         INNER JOIN trending_books tb ON tb.bookId = b.id
+        WHERE tb.period = :period
         ORDER BY tb.rank ASC
         """,
     )
-    fun observeTrendingBooks(): Flow<List<BookFullEntity>>
+    fun observeTrendingBooks(period: String): Flow<List<BookFullEntity>>
 
-    @Query("SELECT bookId FROM trending_books")
-    suspend fun getTrendingBookIds(): List<Int>
+    @Query("SELECT bookId FROM trending_books WHERE period = :period")
+    suspend fun getTrendingBookIds(period: String): List<Int>
 
     @Query("SELECT bookId FROM user_books WHERE bookId IN (:bookIds)")
     suspend fun getBookIdsWithUserBook(bookIds: List<Int>): List<Int>
@@ -630,16 +637,18 @@ interface BookDao {
     suspend fun getUnreferencedBookIds(bookIds: List<Int>): List<Int>
 
     /**
-     * Ranks follow [requestedIds]; books returned under an id that was not requested are appended
-     * after them in [books] order. Returns the evicted cover paths, as [cacheBooks] does.
+     * Replaces only [period]'s list; other periods keep their rows. Ranks follow [requestedIds];
+     * books returned under an id that was not requested are appended after them in [books] order.
+     * Returns the evicted cover paths, as [cacheBooks] does.
      */
     @Transaction
     suspend fun replaceTrendingBooks(
+        period: String,
         requestedIds: List<Int>,
         books: List<Book>,
         fetchedAtEpochMillis: Long,
     ): List<String> {
-        val previousIds = getTrendingBookIds()
+        val previousIds = getTrendingBookIds(period = period)
         val evictedPaths = cacheBooks(books = books)
 
         val requested = requestedIds.toSet()
@@ -649,16 +658,22 @@ interface BookDao {
         val rankedIds = candidateIds.filter { it in storedIds }
         val rankedIdSet = rankedIds.toSet()
 
-        deleteAllTrendingBooks()
+        deleteTrendingBooks(period = period)
         upsertTrending(
             rows = rankedIds.mapIndexed { rank, bookId ->
                 TrendingBookEntity(
+                    period = period,
                     bookId = bookId,
                     rank = rank,
                 )
             },
         )
-        upsertTrendingMeta(meta = TrendingMetaEntity(fetchedAtEpochMillis = fetchedAtEpochMillis))
+        upsertTrendingMeta(
+            meta = TrendingMetaEntity(
+                period = period,
+                fetchedAtEpochMillis = fetchedAtEpochMillis,
+            ),
+        )
 
         val leftTrending = previousIds.filterNot { it in rankedIdSet }
 
@@ -748,20 +763,30 @@ interface BookDao {
     ) {
         if (oldId == newId) return
 
-        redirectUserBooksBookId(
-            oldId = oldId,
-            newId = newId,
-        )
+        val newIdHasBook = getExistingBookIds(bookIds = listOf(newId)).isNotEmpty()
+
+        // user_books and trending_books reference books(id); re-pointing at a missing row violates
+        // the foreign key. A user book stays on its old id; cached trending rows are only a cache.
+        if (newIdHasBook) {
+            redirectUserBooksBookId(
+                oldId = oldId,
+                newId = newId,
+            )
+        }
 
         redirectListBooksBookId(
             oldId = oldId,
             newId = newId,
         )
 
-        redirectTrendingBooksBookId(
-            oldId = oldId,
-            newId = newId,
-        )
+        if (newIdHasBook) {
+            redirectTrendingBooksBookId(
+                oldId = oldId,
+                newId = newId,
+            )
+        } else {
+            deleteTrendingForBook(bookId = oldId)
+        }
     }
 
     @Transaction

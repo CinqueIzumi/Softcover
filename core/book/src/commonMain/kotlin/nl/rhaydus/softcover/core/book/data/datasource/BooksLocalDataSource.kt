@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.softcover.core.book.data.mapper.toStorageKey
 import nl.rhaydus.softcover.core.book.data.sort.toOrderByFragment
 import nl.rhaydus.softcover.core.book.data.storage.EditionImageStorage
 import nl.rhaydus.softcover.core.database.dao.BookDao
@@ -16,6 +17,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import kotlin.time.Instant
 
@@ -24,15 +26,16 @@ interface BooksLocalDataSource {
 
     fun observeUserBook(id: Int): Flow<Book?>
 
-    fun observeTrendingBooks(): Flow<List<Book>>
+    fun observeTrendingBooks(period: TrendingPeriod): Flow<List<Book>>
 
-    fun observeTrendingFetchedAt(): Flow<Instant?>
+    fun observeTrendingFetchedAt(period: TrendingPeriod): Flow<Instant?>
 
-    suspend fun getTrendingFetchedAt(): Instant?
+    suspend fun getTrendingFetchedAt(period: TrendingPeriod): Instant?
 
     suspend fun getExistingUserBookBookIds(ids: List<Int>): List<Int>
 
     suspend fun replaceTrendingBooks(
+        period: TrendingPeriod,
         requestedIds: List<Int>,
         books: List<Book>,
         fetchedAt: Instant,
@@ -124,18 +127,18 @@ internal class BooksLocalDataSourceImpl(
             .distinctUntilChanged()
             .toModelsReusingUnchanged()
 
-    override fun observeTrendingBooks(): Flow<List<Book>> = dao
-        .observeTrendingBooks()
+    override fun observeTrendingBooks(period: TrendingPeriod): Flow<List<Book>> = dao
+        .observeTrendingBooks(period = period.toStorageKey())
         .distinctUntilChanged()
         .toModelsReusingUnchanged()
 
-    override fun observeTrendingFetchedAt(): Flow<Instant?> = dao
-        .observeTrendingFetchedAt()
+    override fun observeTrendingFetchedAt(period: TrendingPeriod): Flow<Instant?> = dao
+        .observeTrendingFetchedAt(period = period.toStorageKey())
         .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
         .distinctUntilChanged()
 
-    override suspend fun getTrendingFetchedAt(): Instant? = dao
-        .getTrendingFetchedAt()
+    override suspend fun getTrendingFetchedAt(period: TrendingPeriod): Instant? = dao
+        .getTrendingFetchedAt(period = period.toStorageKey())
         ?.let(Instant::fromEpochMilliseconds)
 
     override suspend fun getExistingUserBookBookIds(ids: List<Int>): List<Int> {
@@ -145,12 +148,14 @@ internal class BooksLocalDataSourceImpl(
     }
 
     override suspend fun replaceTrendingBooks(
+        period: TrendingPeriod,
         requestedIds: List<Int>,
         books: List<Book>,
         fetchedAt: Instant,
     ) {
         deleteStaleCovers(
             dao.replaceTrendingBooks(
+                period = period.toStorageKey(),
                 requestedIds = requestedIds,
                 books = books,
                 fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),

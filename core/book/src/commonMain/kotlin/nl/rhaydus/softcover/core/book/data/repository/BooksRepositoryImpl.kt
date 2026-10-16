@@ -28,6 +28,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
@@ -53,7 +54,7 @@ internal class BooksRepositoryImpl(
 
     private val inflightMutex = Mutex()
 
-    private val trendingRefreshMutex = Mutex()
+    private val trendingRefreshMutexes = TrendingPeriod.entries.associateWith { Mutex() }
 
     private val stagedRemovalMutex = Mutex()
     private val stagedRemovalBookIds = mutableSetOf<Int>()
@@ -316,19 +317,24 @@ internal class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchBooksByIds(ids = ids)
     }
 
-    override fun observeTrendingBooks(): Flow<List<Book>> = booksLocalDataSource.observeTrendingBooks()
+    override fun observeTrendingBooks(period: TrendingPeriod): Flow<List<Book>> =
+        booksLocalDataSource.observeTrendingBooks(period = period)
 
-    override fun observeTrendingFetchedAt(): Flow<Instant?> = booksLocalDataSource.observeTrendingFetchedAt()
+    override fun observeTrendingFetchedAt(period: TrendingPeriod): Flow<Instant?> =
+        booksLocalDataSource.observeTrendingFetchedAt(period = period)
 
-    override suspend fun refreshTrendingBooks(maxAge: Duration) = trendingRefreshMutex.withLock {
+    override suspend fun refreshTrendingBooks(
+        period: TrendingPeriod,
+        maxAge: Duration,
+    ) = trendingRefreshMutexes.getValue(period).withLock {
         val now = Clock.System.now()
-        val lastFetchedAt = booksLocalDataSource.getTrendingFetchedAt()
+        val lastFetchedAt = booksLocalDataSource.getTrendingFetchedAt(period = period)
 
         if (lastFetchedAt != null && maxAge > Duration.ZERO && now - lastFetchedAt < maxAge) {
             return@withLock
         }
 
-        val rankedIds = booksRemoteDataSource.fetchTrendingBookIds().distinct()
+        val rankedIds = booksRemoteDataSource.fetchTrendingBookIds(period = period).distinct()
 
         // Only books with a user_books row are skipped: re-caching those would re-insert their
         // journals and could clobber pending offline state.
@@ -342,6 +348,7 @@ internal class BooksRepositoryImpl(
         }
 
         booksLocalDataSource.replaceTrendingBooks(
+            period = period,
             requestedIds = rankedIds,
             books = fetchedBooks,
             fetchedAt = now,

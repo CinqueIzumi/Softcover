@@ -42,6 +42,7 @@ import nl.rhaydus.softcover.UpdateUserBookStatusMutation
 import nl.rhaydus.softcover.UpdateUserBookStatusMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
+import nl.rhaydus.softcover.core.book.data.mapper.toTrendingDuration
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.model.UnfinishedRead
@@ -52,6 +53,7 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.util.localDateOf
@@ -78,7 +80,7 @@ interface BooksRemoteDataSource {
         forceNetwork: Boolean = false,
     ): List<Book>
 
-    suspend fun fetchTrendingBookIds(): List<Int>
+    suspend fun fetchTrendingBookIds(period: TrendingPeriod): List<Int>
 
     suspend fun markBookAsWantToRead(
         bookId: Int,
@@ -329,8 +331,8 @@ internal class BooksRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun fetchTrendingBookIds(): List<Int> = apolloClient
-        .safeQuery(query = GetTrendingBookIdsQuery())
+    override suspend fun fetchTrendingBookIds(period: TrendingPeriod): List<Int> = apolloClient
+        .safeQuery(query = GetTrendingBookIdsQuery(duration = period.toTrendingDuration()))
         .books_trending
         ?.ids
         ?.mapNotNull { it }

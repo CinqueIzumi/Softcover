@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -28,11 +29,17 @@ class RefreshTrendingBooksUseCaseTest {
             val error = RuntimeException("network error")
 
             coEvery {
-                booksRepository.refreshTrendingBooks(maxAge = any())
+                booksRepository.refreshTrendingBooks(
+                    period = any(),
+                    maxAge = any(),
+                )
             } throws error
 
             // ----- Act -----
-            val result = useCase(maxAge = 1.hours)
+            val result = useCase(
+                period = TrendingPeriod.Week,
+                maxAge = 1.hours,
+            )
 
             // ----- Assert -----
             result.isFailure shouldBe true

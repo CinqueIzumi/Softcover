@@ -5,10 +5,6 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "trending_meta")
 data class TrendingMetaEntity(
-    @PrimaryKey val id: Int = SINGLETON_ID,
+    @PrimaryKey val period: String,
     val fetchedAtEpochMillis: Long,
-) {
-    companion object {
-        const val SINGLETON_ID = 0
-    }
-}
+)

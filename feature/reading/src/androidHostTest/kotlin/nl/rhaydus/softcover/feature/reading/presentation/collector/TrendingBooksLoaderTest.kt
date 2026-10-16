@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -42,11 +43,14 @@ class TrendingBooksLoaderTest {
         )
 
         every {
-            observeTrendingBooksUseCase()
+            observeTrendingBooksUseCase(period = TrendingPeriod.Week)
         } returns trendingFlow
 
         coEvery {
-            refreshTrendingBooksUseCase(any())
+            refreshTrendingBooksUseCase(
+                period = any(),
+                maxAge = any(),
+            )
         } returns Result.success(Unit)
 
         dependencies = mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->

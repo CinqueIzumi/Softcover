@@ -7,6 +7,7 @@ import com.apollographql.cache.normalized.FetchPolicy
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
 import io.mockk.clearAllMocks
@@ -56,11 +57,13 @@ import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
+import nl.rhaydus.softcover.type.TrendingDuration
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -956,7 +959,7 @@ class BooksRemoteDataSourceImplTest {
             stubTrendingIdsQuery(trendingIdsData(ids = null))
 
             // ----- Act -----
-            val result = dataSource.fetchTrendingBookIds()
+            val result = dataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
 
             // ----- Assert -----
             result shouldBe emptyList()
@@ -968,10 +971,30 @@ class BooksRemoteDataSourceImplTest {
             stubTrendingIdsQuery(trendingIdsData(ids = listOf(30, null, 10, null, 20)))
 
             // ----- Act -----
-            val result = dataSource.fetchTrendingBookIds()
+            val result = dataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
 
             // ----- Assert -----
             result shouldBe listOf(30, 10, 20)
+        }
+
+        @Test
+        fun `sends the requested period as the query duration`() = runTest {
+            // ----- Arrange -----
+            val querySlot = slot<Query<GetTrendingBookIdsQuery.Data>>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = capture(querySlot),
+                    fetchPolicy = any(),
+                )
+            } returns trendingIdsData(ids = emptyList())
+
+            // ----- Act -----
+            dataSource.fetchTrendingBookIds(period = TrendingPeriod.ThreeMonths)
+
+            // ----- Assert -----
+            val query = querySlot.captured.shouldBeInstanceOf<GetTrendingBookIdsQuery>()
+            query.duration shouldBe TrendingDuration.three_month
         }
     }
 

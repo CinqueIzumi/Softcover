@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -22,7 +23,10 @@ internal class TrendingBooksCollector : ExploreCollector {
 
         coroutineScope {
             launch {
-                dependencies.refreshTrendingBooksUseCase(maxAge = TRENDING_MAX_AGE)
+                dependencies.refreshTrendingBooksUseCase(
+                    period = TrendingPeriod.Week,
+                    maxAge = TRENDING_MAX_AGE,
+                )
                     .onFailure { error ->
                         AppLog.e(
                             error,
@@ -34,8 +38,8 @@ internal class TrendingBooksCollector : ExploreCollector {
             }
 
             combine(
-                dependencies.observeTrendingBooksUseCase(),
-                dependencies.observeTrendingFetchedAtUseCase(),
+                dependencies.observeTrendingBooksUseCase(period = TrendingPeriod.Week),
+                dependencies.observeTrendingFetchedAtUseCase(period = TrendingPeriod.Week),
                 refreshSettled,
             ) { trendingBooks, fetchedAt, settled ->
                 trendingBooks to (fetchedAt == null && settled.not())

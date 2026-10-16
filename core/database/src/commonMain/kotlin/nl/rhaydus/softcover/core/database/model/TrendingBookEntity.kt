@@ -2,10 +2,11 @@ package nl.rhaydus.softcover.core.database.model
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import androidx.room.PrimaryKey
+import androidx.room.Index
 
 @Entity(
     tableName = "trending_books",
+    primaryKeys = ["period", "bookId"],
     foreignKeys = [
         ForeignKey(
             entity = BookEntity::class,
@@ -14,8 +15,10 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE,
         )
     ],
+    indices = [Index("bookId")],
 )
 data class TrendingBookEntity(
-    @PrimaryKey val bookId: Int,
+    val period: String,
+    val bookId: Int,
     val rank: Int,
 )

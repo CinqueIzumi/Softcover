@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.collector
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -18,10 +19,13 @@ internal class TrendingBooksLoader : ReadingCollector {
     ) {
         coroutineScope {
             launch {
-                dependencies.refreshTrendingBooksUseCase(maxAge = TRENDING_MAX_AGE).onApiFailure()
+                dependencies.refreshTrendingBooksUseCase(
+                    period = TrendingPeriod.Week,
+                    maxAge = TRENDING_MAX_AGE,
+                ).onApiFailure()
             }
 
-            dependencies.observeTrendingBooksUseCase().collect { books ->
+            dependencies.observeTrendingBooksUseCase(period = TrendingPeriod.Week).collect { books ->
                 scope.setState { it.copy(trendingBooks = books.toImmutableList()) }
             }
         }

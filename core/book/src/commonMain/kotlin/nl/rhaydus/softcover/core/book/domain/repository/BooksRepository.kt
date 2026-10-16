@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import kotlin.time.Duration
@@ -97,17 +98,21 @@ interface BooksRepository {
 
     suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
 
-    /** The books trending on Hardcover this week, in rank order. */
-    fun observeTrendingBooks(): Flow<List<Book>>
+    /** The books trending on Hardcover over [period], in rank order. */
+    fun observeTrendingBooks(period: TrendingPeriod): Flow<List<Book>>
 
-    /** When trending was last fetched, or `null` if a fetch has never completed. */
-    fun observeTrendingFetchedAt(): Flow<Instant?>
+    /** When [period]'s trending was last fetched, or `null` if a fetch has never completed. */
+    fun observeTrendingFetchedAt(period: TrendingPeriod): Flow<Instant?>
 
     /**
-     * Fetches trending only when the last completed fetch is older than [maxAge]. Only an explicit
-     * user refresh passes [Duration.ZERO]; a fetch on screen mount is not user intent.
+     * Fetches [period]'s trending only when its last completed fetch is older than [maxAge]. Only an
+     * explicit user refresh passes [Duration.ZERO]; a fetch on screen mount is not user intent.
+     * Refreshes of the same period are serialized; different periods refresh concurrently.
      */
-    suspend fun refreshTrendingBooks(maxAge: Duration)
+    suspend fun refreshTrendingBooks(
+        period: TrendingPeriod,
+        maxAge: Duration,
+    )
 
     /**
      * [forceNetwork] bypasses the Apollo cache. Pass it only on explicit user action that can have just

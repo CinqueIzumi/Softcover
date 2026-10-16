@@ -1404,19 +1404,23 @@ abstract class SoftcoverDatabase : RoomDatabase() {
                 connection.execSQL(
                     """
                         CREATE TABLE IF NOT EXISTS trending_books (
+                            period TEXT NOT NULL,
                             bookId INTEGER NOT NULL,
                             rank INTEGER NOT NULL,
-                            PRIMARY KEY(bookId),
+                            PRIMARY KEY(period, bookId),
                             FOREIGN KEY(bookId) REFERENCES books(id) ON UPDATE NO ACTION ON DELETE CASCADE
                         )
                     """.trimIndent(),
                 )
                 connection.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_trending_books_bookId ON trending_books (bookId)",
+                )
+                connection.execSQL(
                     """
                         CREATE TABLE IF NOT EXISTS trending_meta (
-                            id INTEGER NOT NULL,
+                            period TEXT NOT NULL,
                             fetchedAtEpochMillis INTEGER NOT NULL,
-                            PRIMARY KEY(id)
+                            PRIMARY KEY(period)
                         )
                     """.trimIndent(),
                 )
