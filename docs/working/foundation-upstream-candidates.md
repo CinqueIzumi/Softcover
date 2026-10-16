@@ -462,8 +462,11 @@ clone would fail to *configure* — `build-logic` is not in the foundation's `ma
   off), `dismiss` sends `onDismissRequest` from `invokeOnCompletion`, so a second call or the sheet's own
   dismiss can send it twice, and nothing tells the body a close has started. Softcover's `:core:component`
   `AdaptiveModalSheet` (same signature) owns the bottom sheet: `sheetGesturesEnabled` follows
-  `dismissOnTapOutside` and `confirmValueChange` only records the close, `onDismissRequest` is latched to once (also when `hide()` is cancelled),
-  and a closing signal reaches the scaffold so scrim, back and swipe lock its chrome. A detekt
+  `dismissOnTapOutside`, `onDismissRequest` is latched to once (also when `hide()` is cancelled), and a
+  closing signal reaches the scaffold so scrim, back and swipe lock its chrome. That signal is derived
+  (explicit close requested, dismiss sent, or the sheet moving from visible to `Hidden`), never latched
+  from `confirmValueChange`: Material3 queries `Hidden` while the sheet opens or the IME closes without
+  hiding, and a latch from that query turned the later explicit close into a no-op. A detekt
   `ForbiddenImport` bans the foundation symbol in every module.
 - **What to build:** move the fork into the foundation (swipe gate, one-shot latch, a
   `LocalModalSheetClosing` beside `LocalModalSheetDismiss`), release, swap the imports back, and delete the
