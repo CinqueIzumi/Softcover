@@ -277,6 +277,15 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.sectio
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.QuotesSection(model: nl.rhaydus.softcover.feature.book_detail.presentation.state.QuotesSectionUiModel, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - runAction: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 private fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ReadThroughRow(model: nl.rhaydus.softcover.feature.book_detail.presentation.state.ReadThroughRowUiModel): kotlin.Unit
   skippable: true
   restartable: true

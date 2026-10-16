@@ -139,3 +139,24 @@ private fun shareSheetScaffoldFor(bookTitle: String): SheetScaffoldUiModel =
         ),
         layout = SheetLayout.Pinned,
     )
+
+internal fun deleteQuoteSheetScaffold(): SheetScaffoldUiModel =
+    SheetScaffoldUiModel(
+        header = SheetHeaderUiModel(
+            section = SectionHeaderUiModel.Section(
+                eyebrow = "Delete quote",
+                headline = "Delete this quote?",
+                description = "It comes off your Hardcover account too, and you can't undo this.",
+            ),
+        ),
+        footer = SheetFooterUiModel.Stacked(
+            primary = SheetFooterButton(
+                label = "Delete",
+                dismissesSheet = true,
+            ),
+            secondary = SheetFooterButton(
+                label = "Cancel",
+                dismissesSheet = true,
+            ),
+        ),
+    )

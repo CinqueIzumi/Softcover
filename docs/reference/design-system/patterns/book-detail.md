@@ -34,6 +34,29 @@
 - The row ends with a `ChipTone.Dashed` chip, "Edit tags" (or "+ Add tags" with no tags yet), opening the
   tag editor sheet. Edits are optimistic and roll back on failure.
 
+### Your quotes section
+
+- The Yours lens, between the verdict and the your-tags section, only for a shelved book: a bar-less
+  `YOUR QUOTES` label over the reader's quotes for this book, newest first, as `QuoteCard`s spaced
+  `Spacing.sm`. Each byline reads "p. 214 · 12 Oct · Private" (page, "53%" or "1:02:03" first).
+- With none, a `bodySmall` `onSurfaceVariant` line, "Quotes you save from this book show up here.", sits
+  under the label. The section ends with a `ChipTone.Dashed` chip, "Add a quote", opening the quote sheet.
+- A card's Delete asks first: a confirm sheet (eyebrow "Delete quote", "Delete this quote?", Delete and
+  Cancel) shaped like the log-out confirm. The delete runs once the sheet has hidden.
+- The first time the Yours lens shows, the book's quotes are pulled from Hardcover once; a quote saved
+  offline shows at once.
+
+### Quote sheet
+
+- `QuoteSheet`, hosted by `QuoteSheetCollector` from `BookDetailUiState.quoteDraft`: the passage, an
+  optional position under Page / Percentage / Time tabs, privacy, and the shared when-read row, which
+  backdates the quote alone.
+- Tabs follow the edition: a paged book offers Page then Percentage, an audiobook Time then Percentage, a
+  book with no total Percentage only. A page stops at the total and a percentage at 100.
+- With a position that would move the reader forward, a toggle (on by default) offers "Update my progress to
+  page 214" or "Update my progress to 1:02:03", or "Mark as read" on the last page. Saving records the quote
+  and the progress as two separate writes, so one failing never loses the other.
+
 ### Tag editor sheet
 
 - `TagEditorBottomSheet`: `SheetScaffold`, `SheetLayout.Pinned`, dismiss label "Done". Add block: four

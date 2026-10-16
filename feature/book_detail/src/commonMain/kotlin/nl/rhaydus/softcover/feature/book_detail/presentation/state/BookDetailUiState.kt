@@ -28,6 +28,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
+import nl.rhaydus.softcover.core.component.quote.QuoteSheetUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
@@ -117,6 +118,21 @@ internal data class BookDetailUiState(
     val progressSheet: SheetSession<ProgressSheetUiModel, Nothing> = SheetSession.Closed,
 
     val progressSheetRequested: Boolean = false,
+
+    /** The Yours lens "Your quotes" section, mapped by `QuotesSectionCollector`; null unless the book is shelved. */
+    val quotesSection: QuotesSectionUiModel? = null,
+
+    /** Non-null exactly while the quote sheet is requested; its edits are the only writer of the draft. */
+    val quoteDraft: QuoteDraft? = null,
+
+    /** What the quote sheet renders, derived from [book] and [quoteDraft] by `QuoteSheetCollector`. */
+    val quoteSheet: SheetSession<QuoteSheetUiModel, Nothing> = SheetSession.Closed,
+
+    /** The local id of the quote awaiting its delete confirm; `null` when none is. */
+    val quoteDeleteRequestId: Long? = null,
+
+    /** The delete confirm; the pending id is deleted once the sheet has hidden. */
+    val quoteDeleteSheet: SheetSession<SheetScaffoldUiModel, Nothing> = SheetSession.Closed,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     val selectedLens: BookDetailLens = BookDetailLens.THE_BOOK,
 

@@ -10,6 +10,8 @@ import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
+import nl.rhaydus.softcover.core.component.quote.QuoteSheet
+import nl.rhaydus.softcover.core.component.quote.QuoteSheetEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.modelOrNull
@@ -24,6 +26,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissCho
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissQuoteSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissTagEditorAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissVerdictSheetAction
@@ -38,8 +41,19 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressMinutesSteppedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTimeChangedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteDeleteConfirmedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteDeleteSheetDismissedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuotePositionChangedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuotePositionTabSelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuotePrivacySelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteProgressAdvanceToggledAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteTextChangedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteTimeChangedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteWhenReadResetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteWhenReadShiftedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRequestCreateListAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveQuoteAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveVerdictAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareCaptureEventAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareSizeToggledAction
@@ -296,6 +310,67 @@ internal fun BookDetailOverlays(
                     ProgressSheetEvent.Dismissed -> runAction(OnDismissProgressSheetAction())
                 }
             },
+        )
+    }
+
+    state.quoteSheet.modelOrNull?.let { quoteSheet ->
+        QuoteSheet(
+            model = quoteSheet,
+            onEvent = { event ->
+                when (event) {
+                    is QuoteSheetEvent.TextChanged -> runAction(OnQuoteTextChangedAction(text = event.text))
+
+                    is QuoteSheetEvent.PositionTabSelected -> runAction(
+                        OnQuotePositionTabSelectedAction(tab = event.tab),
+                    )
+
+                    is QuoteSheetEvent.PositionChanged -> runAction(
+                        OnQuotePositionChangedAction(text = event.text),
+                    )
+
+                    is QuoteSheetEvent.TimeChanged -> runAction(
+                        OnQuoteTimeChangedAction(
+                            unit = event.unit,
+                            text = event.text,
+                        ),
+                    )
+
+                    is QuoteSheetEvent.ProgressAdvanceToggled -> runAction(
+                        OnQuoteProgressAdvanceToggledAction(enabled = event.enabled),
+                    )
+
+                    is QuoteSheetEvent.PrivacySelected -> runAction(
+                        OnQuotePrivacySelectedAction(option = event.option),
+                    )
+
+                    is QuoteSheetEvent.WhenReadShifted -> runAction(
+                        OnQuoteWhenReadShiftedAction(minutes = event.minutes),
+                    )
+
+                    QuoteSheetEvent.WhenReadReset -> runAction(OnQuoteWhenReadResetAction())
+
+                    QuoteSheetEvent.SaveRequested -> runAction(OnSaveQuoteAction())
+
+                    QuoteSheetEvent.Dismissed -> runAction(OnDismissQuoteSheetAction())
+                }
+            },
+        )
+    }
+
+    state.quoteDeleteSheet.modelOrNull?.let { scaffold ->
+        SheetScaffold(
+            model = scaffold,
+            onEvent = { event ->
+                when (event) {
+                    SheetScaffoldEvent.PrimaryClicked -> runAction(OnQuoteDeleteConfirmedAction())
+
+                    SheetScaffoldEvent.Dismissed -> runAction(OnQuoteDeleteSheetDismissedAction())
+
+                    SheetScaffoldEvent.SecondaryClicked,
+                    SheetScaffoldEvent.HeaderActionClicked -> Unit
+                }
+            },
+            content = {},
         )
     }
 }

@@ -22,7 +22,11 @@ import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.AddQuoteUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteQuoteUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
@@ -86,6 +90,10 @@ internal class BookDetailScreenScreenModel(
     private val observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase,
     private val syncUserTagVocabularyUseCase: SyncUserTagVocabularyUseCase,
     private val recordAppliedTagsUseCase: RecordAppliedTagsUseCase,
+    private val addQuoteUseCase: AddQuoteUseCase,
+    private val deleteQuoteUseCase: DeleteQuoteUseCase,
+    private val observeBookQuotesUseCase: ObserveBookQuotesUseCase,
+    private val refreshBookQuotesUseCase: RefreshBookQuotesUseCase,
     offlineCopy: OfflineCopy,
     flows: List<BookDetailCollector>,
     appDispatchers: AppDispatchers,
@@ -136,6 +144,10 @@ internal class BookDetailScreenScreenModel(
         observeUserTagVocabularyUseCase = observeUserTagVocabularyUseCase,
         syncUserTagVocabularyUseCase = syncUserTagVocabularyUseCase,
         recordAppliedTagsUseCase = recordAppliedTagsUseCase,
+        addQuoteUseCase = addQuoteUseCase,
+        deleteQuoteUseCase = deleteQuoteUseCase,
+        observeBookQuotesUseCase = observeBookQuotesUseCase,
+        refreshBookQuotesUseCase = refreshBookQuotesUseCase,
         offlineCopy = offlineCopy,
     )
 

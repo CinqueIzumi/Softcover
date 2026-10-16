@@ -22,7 +22,11 @@ import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.AddQuoteUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteQuoteUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
@@ -72,6 +76,10 @@ internal class BookDetailDependencies(
     val observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase,
     val syncUserTagVocabularyUseCase: SyncUserTagVocabularyUseCase,
     val recordAppliedTagsUseCase: RecordAppliedTagsUseCase,
+    val addQuoteUseCase: AddQuoteUseCase,
+    val deleteQuoteUseCase: DeleteQuoteUseCase,
+    val observeBookQuotesUseCase: ObserveBookQuotesUseCase,
+    val refreshBookQuotesUseCase: RefreshBookQuotesUseCase,
     val offlineCopy: OfflineCopy,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
