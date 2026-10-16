@@ -36,7 +36,20 @@ Notes on features that are leaves only for their *screens*:
   exception), but its pure `AppUpdateState` and the `AppUpdateSimulator` and `ObserveAppUpdateStateUseCase` contracts live in
   `core:domain`.
 - `widget` (the Glance home-screen widgets) is Android-only: all its code sits in `androidMain`, and it is
-  wired from `:orchestration`'s `androidMain`, the edge through which its manifest receivers reach `:app`.
+  wired from `:orchestration`'s `androidMain`, the edge through which its manifest receivers reach `:app`:
+  `PlatformOrchestrationModule.android.kt` includes `widgetModule`, and `startPlatformAppServices` starts
+  `WidgetRefresher`.
+  - **State.** Per-instance settings live in Glance preferences behind `domain/repository` and use cases; the
+    keys sit in `data/mapper` and are never renamed, so placed widgets keep their settings.
+  - **Contract.** `HomeScreenWidgets` (`:core:presentation`) is what Settings reads: placed instances,
+    `canPin`, `openSettings`, `requestPin`. The widget module implements it (`AndroidHomeScreenWidgets`);
+    iOS and desktop bind `UnsupportedHomeScreenWidgets`.
+  - **Refresh.** `WidgetRefresher` repaints every widget on debounced signals (theme, sign-in, the Reading
+    and Want-to-Read shelves, lists, every trending period), and only while one is placed. A write to
+    per-instance state reaches a live Glance session through its repository change flow, and an instance
+    with no session through `WidgetRepainter`. `WidgetMaintenanceWorker` runs hourly and at each midnight
+    (Daily picks roll over); `TrendingRefreshWorker` runs for the periods in use at the shortest placed
+    cadence, network-constrained.
 
 `deadlines`, `personal`, and `connectivity` were kernels in disguise and are now `core` modules —
 they are **not** features.

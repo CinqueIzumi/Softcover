@@ -30,7 +30,7 @@ reviewer. No commits or pushes unless asked.
   "Pick from": Want to Read (default), Owned (unread) or any user list (unread); a deleted list falls
   back to Want to Read. Re-pick cadence daily (default) / weekly / only on shuffle; re-pick if the
   book leaves the pool.
-- **Trending:** top 10 per period at two per page with ‹ › and "1/5", ranked list at 4×3+. Cover →
+- **Trending:** top 10 per period at two per page with ‹ › and "1/5". Cover →
   book detail, header → Explore. Period and refresh (daily / twice daily) settings. Explore stays
   offline-gated.
 - Focus Mode: a widget tap opens the app into Focus Mode; the request applies underneath.
@@ -89,7 +89,15 @@ out of the models, keys unchanged), `presentation/` by kind (`action`, `collecto
 gained a `RandomPick` prefix. Tests mirror their units; stability baseline regenerated (it was stale
 since the trending paging and top-bar commits).
 
-### S8b. Convergence pass
+### S8b. Convergence pass ✅
+Done: four lenses, every claim verified. Fixed: progress-sheet `refreshWidget()` crash path removed;
+an empty trending answer keeps the cache; negative cache age is stale; deep-link ids ≤ 0 rejected;
+widget state behind `domain/repository` + use cases (data no longer repaints); one store per widget;
+shared `WidgetEnvironment`, chip builder and `TwoLineTitle`; Settings › Widgets flow survives a failed
+read; no startup re-render; trending worker retry cap; trending catch-up on sign-in; pool limited to
+not-started books; time-change receiver and a midnight run for Daily picks; looks consistency (paper
+message states, insets, 40–48dp hit boxes, compact Random pick without eyebrow, content-width cap).
+Kept as decided: `RESULT_OK` up front, Random pick's eyebrow tap.
 A deliberately critical sweep of all widget code on the branch: `:feature:widget` and the code it added or
 changed elsewhere (trending per period in `:core:book` / `:core:database`, the external-request
 contract in `:core:presentation` / `:orchestration`, Book Detail's verdict entry). Parallel reviewers on
@@ -105,11 +113,22 @@ disjoint lenses, each finding verified against the code before it counts:
   reads the `data/datastore` stores directly, with no use case).
 Findings ranked, verified, then fixed; tests and audit after.
 
-### S10. Docs
-`docs/reference/design-system/patterns/widgets.md` (`patterns.md` is at its 8 KB budget: link only),
-architecture deltas.
+### S10. Docs ✅
+`docs/reference/design-system/patterns/widgets.md` (surface and theme, backdrop and shared pieces, the
+three widgets, configuration activities), a Widgets entry in `patterns.md`, the widget module's wiring,
+state, contract and refresh in `module-structure.md`, and trending-per-period plus external navigation in
+`architecture.md`.
 
-### S11. Device crash sweep (last)
+### S11. Device crash sweep ✅
+Done on emulator-5554: crash buffer and app error log empty throughout. Fixed on the way: the settings
+activities now open in their own task (Back from a widget returns to the home screen), and Trending's
+header and page row are back to 28dp tall with the wider hit boxes kept (the 40dp rows had cost the
+covers 24dp). Follow-ups from the sweep: Trending grows (buckets up to 320dp tall, covers loaded once
+at the largest drawn height); Currently Reading and Random pick share one stacked layout chosen by height
+(Currently Reading's compact layout is gone; its widths follow launcher cells to stay under Android's
+16-size cap).
+
+Plan as written:
 Claude drives Medium_Phone (emulator-5554) with a scripted run per widget: place, resize through
 every size, tap every target, reconfigure, remove, and a cold start after process death
 (`am stop-app`). Clear the crash buffer first; `adb logcat -b crash` must stay empty after every run.

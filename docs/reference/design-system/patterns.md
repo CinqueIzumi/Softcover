@@ -5,13 +5,13 @@ file under `patterns/`.
 
 ## Editorial
 
-- [Editorial section](patterns/editorial.md#editorial-section) — accent bar, eyebrow, headline, body: the default region opener.
+- [Editorial section](patterns/editorial.md#editorial-section) — the default region opener.
 - [Hero stat](patterns/editorial.md#hero-stat) — one oversize live-bound number with an editorial suffix.
 - [Editable hero stat](patterns/editorial.md#editable-hero-stat) — the hero stat for a number the reader edits.
 - [Editorial quote](patterns/editorial.md#editorial-quote) — glyph-backed pull quote, also the empty-state flourish.
 - [Standfirst](patterns/editorial.md#standfirst) — a book's one-line editorial lead above its description.
 - [Prose toggle](patterns/editorial.md#prose-toggle) — a sentence whose words are the control.
-- [Rendered markdown document](patterns/editorial.md#rendered-markdown-document) — block renderer for a markdown-shaped document.
+- [Rendered markdown document](patterns/editorial.md#rendered-markdown-document) — markdown block renderer.
 
 ## Book detail
 
@@ -66,6 +66,10 @@ file under `patterns/`.
 - [About screen body](patterns/settings.md#about-screen-body) — Credits, Source, Contact and the one version line.
 - [Library tabs reorderable row](patterns/settings.md#library-tabs-reorderable-row) — reorder and show/hide Library tabs.
 
+## Widgets
+
+- [Home-screen widgets](patterns/widgets.md) — Android Glance widgets and their settings.
+
 ## Explore & Profile
 
 - [Profile screen](patterns/explore-profile.md#profile-screen) — reading-life section order.
@@ -83,7 +87,7 @@ file under `patterns/`.
 
 - [List-detail two-pane](patterns/cross-cutting.md#list-detail-two-pane) — expanded-window list and detail panes.
 - [Section footprint reserved while loading](patterns/cross-cutting.md#section-footprint-reserved-while-loading) — reserve or reveal.
-- [Sheet host](patterns/cross-cutting.md#sheet-host) — request input, one collector, one `SheetSession` writer.
+- [Sheet host](patterns/cross-cutting.md#sheet-host) — one collector, one `SheetSession` writer.
 - [Blocking loading sheet](patterns/cross-cutting.md#blocking-loading-sheet) — a long wait as a non-dismissible sheet.
 - [App-shell navigation chrome](patterns/cross-cutting.md#app-shell-navigation-chrome) — bar, rail or sidebar by width.
 - [Barcode scanner](patterns/cross-cutting.md#barcode-scanner) — camera ISBN scan with manual fallback.
