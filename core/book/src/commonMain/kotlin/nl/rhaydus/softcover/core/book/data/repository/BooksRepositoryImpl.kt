@@ -330,11 +330,18 @@ internal class BooksRepositoryImpl(
         val now = Clock.System.now()
         val lastFetchedAt = booksLocalDataSource.getTrendingFetchedAt(period = period)
 
-        if (lastFetchedAt != null && maxAge > Duration.ZERO && now - lastFetchedAt < maxAge) {
+        val age = lastFetchedAt?.let { now - it }
+        val isFresh = age != null && age >= Duration.ZERO && age < maxAge
+
+        if (maxAge > Duration.ZERO && isFresh) {
             return@withLock
         }
 
         val rankedIds = booksRemoteDataSource.fetchTrendingBookIds(period = period).distinct()
+
+        if (rankedIds.isEmpty()) {
+            return@withLock
+        }
 
         // Only books with a user_books row are skipped: re-caching those would re-insert their
         // journals and could clobber pending offline state.

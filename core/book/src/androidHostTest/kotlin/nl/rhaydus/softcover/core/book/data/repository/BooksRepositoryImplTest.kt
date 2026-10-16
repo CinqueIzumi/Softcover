@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.core.book.data.repository
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
-import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
@@ -910,10 +910,13 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val book = stubBook(userBookId = null)
 
-            // ----- Act & Assert -----
-            shouldThrow<Exception> {
+            // ----- Act -----
+            val error = shouldThrow<Exception> {
                 repository.removeBook(book = book)
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<Exception>()
         }
     }
 
@@ -1014,10 +1017,13 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getBookById(id = bookId)
             } returns null
 
-            // ----- Act & Assert -----
-            shouldThrow<OfflineException> {
+            // ----- Act -----
+            val error = shouldThrow<OfflineException> {
                 repository.fetchBookById(id = bookId)
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<OfflineException>()
 
             coVerify(exactly = 0) {
                 booksRemoteDataSource.fetchBookById(id = any())
@@ -1119,10 +1125,13 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource.fetchBookById(id = canonicalId)
             } throws BookNotFoundException(bookId = canonicalId)
 
-            // ----- Act & Assert -----
-            shouldThrow<BookNotFoundException> {
+            // ----- Act -----
+            val error = shouldThrow<BookNotFoundException> {
                 repository.fetchBookById(id = missingId)
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<BookNotFoundException>()
 
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = any())
@@ -1251,10 +1260,13 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getBookById(id = missingId)
             } returns null
 
-            // ----- Act & Assert -----
-            shouldThrow<BookNotFoundException> {
+            // ----- Act -----
+            val error = shouldThrow<BookNotFoundException> {
                 repository.fetchBookById(id = missingId)
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<BookNotFoundException>()
 
             coVerify(exactly = 0) {
                 booksLocalDataSource.redirectBookId(
@@ -1290,10 +1302,13 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getBookById(id = missingId)
             } returns localBook
 
-            // ----- Act & Assert -----
-            shouldThrow<BookNotFoundException> {
+            // ----- Act -----
+            val error = shouldThrow<BookNotFoundException> {
                 repository.fetchBookById(id = missingId)
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<BookNotFoundException>()
         }
 
         @Test
@@ -1327,10 +1342,13 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource.fetchBookIdForEdition(editionId = editionId)
             } returns null
 
-            // ----- Act & Assert -----
-            shouldThrow<BookNotFoundException> {
+            // ----- Act -----
+            val error = shouldThrow<BookNotFoundException> {
                 repository.fetchBookById(id = missingId)
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<BookNotFoundException>()
         }
 
         @Test
@@ -1364,10 +1382,13 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource.fetchBookIdForEdition(editionId = editionId)
             } returns missingId
 
-            // ----- Act & Assert -----
-            shouldThrow<BookNotFoundException> {
+            // ----- Act -----
+            val error = shouldThrow<BookNotFoundException> {
                 repository.fetchBookById(id = missingId)
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<BookNotFoundException>()
         }
     }
 
@@ -1573,10 +1594,13 @@ class BooksRepositoryImplTest {
                 )
             } throws CancellationException("cancelled")
 
-            // ----- Act & Assert -----
-            shouldThrow<CancellationException> {
+            // ----- Act -----
+            val error = shouldThrow<CancellationException> {
                 repository.markBookAsWantToRead(book = book)
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<CancellationException>()
 
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = snapshot)
@@ -1773,10 +1797,13 @@ class BooksRepositoryImplTest {
                 )
             } throws CancellationException("cancelled")
 
-            // ----- Act & Assert -----
-            shouldThrow<CancellationException> {
+            // ----- Act -----
+            val error = shouldThrow<CancellationException> {
                 repository.markBookAsReading(book = book)
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<CancellationException>()
 
             coVerify(exactly = 1) {
                 booksLocalDataSource.cacheBook(book = any())
@@ -2012,10 +2039,13 @@ class BooksRepositoryImplTest {
                 )
             } throws CancellationException("cancelled")
 
-            // ----- Act & Assert -----
-            shouldThrow<CancellationException> {
+            // ----- Act -----
+            val error = shouldThrow<CancellationException> {
                 repository.markBookAsPaused(book = book)
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<CancellationException>()
 
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = snapshot)
@@ -2111,10 +2141,13 @@ class BooksRepositoryImplTest {
                 )
             } throws OfflineException()
 
-            // ----- Act & Assert -----
-            shouldThrow<OfflineException> {
+            // ----- Act -----
+            val error = shouldThrow<OfflineException> {
                 repository.markBookAsPaused(book = book)
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<OfflineException>()
 
             coVerify(exactly = 0) {
                 offlineSync.enqueueStatusUpdate(
@@ -2344,13 +2377,16 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val book = stubBook(userBookId = null)
 
-            // ----- Act & Assert -----
-            shouldThrow<Exception> {
+            // ----- Act -----
+            val error = shouldThrow<Exception> {
                 repository.updateBookRating(
                     book = book,
                     rating = 4.0,
                 )
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<Exception>()
         }
 
         @Test
@@ -2495,13 +2531,16 @@ class BooksRepositoryImplTest {
                 )
             } throws CancellationException("cancelled")
 
-            // ----- Act & Assert -----
-            shouldThrow<CancellationException> {
+            // ----- Act -----
+            val error = shouldThrow<CancellationException> {
                 repository.updateBookRating(
                     book = book,
                     rating = newRating,
                 )
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<CancellationException>()
 
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = snapshot)
@@ -2817,14 +2856,17 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val book = stubBook(userBookId = null)
 
-            // ----- Act & Assert -----
-            shouldThrow<Exception> {
+            // ----- Act -----
+            val error = shouldThrow<Exception> {
                 repository.updateBookReview(
                     book = book,
                     review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
                     hasSpoilers = false,
                 )
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<Exception>()
         }
 
         @Test
@@ -3732,10 +3774,13 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource.removeBookFromLibrary(book = book)
             } throws CancellationException("cancelled")
 
-            // ----- Act & Assert -----
-            shouldThrow<CancellationException> {
+            // ----- Act -----
+            val error = shouldThrow<CancellationException> {
                 repository.commitBookRemoval(staged = staged)
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<CancellationException>()
 
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = any())
@@ -5187,10 +5232,13 @@ class BooksRepositoryImplTest {
 
             val isbn = "9780451524935"
 
-            // ----- Act & Assert -----
-            shouldThrow<OfflineException> {
+            // ----- Act -----
+            val error = shouldThrow<OfflineException> {
                 repository.fetchEditionMatchesForIsbns(isbns = listOf(isbn))
             }
+
+            // ----- Assert -----
+            error.shouldBeInstanceOf<OfflineException>()
 
             coVerify(exactly = 0) {
                 booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = any())
@@ -5448,11 +5496,31 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `an empty API result still records the fetch time with no ids or books`() = runTest {
+        fun `a fetched-at in the future is stale and refreshes`() = runTest {
             // ----- Arrange -----
-            val before = Clock.System.now()
-            val fetchedAtSlot = slot<Instant>()
+            coEvery {
+                booksLocalDataSource.getTrendingFetchedAt(period = TrendingPeriod.Week)
+            } returns Clock.System.now() + 1.hours
 
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshTrendingBooks(
+                period = TrendingPeriod.Week,
+                maxAge = 2.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
+            }
+        }
+
+        @Test
+        fun `an empty API result leaves the cached rows and fetch time untouched`() = runTest {
+            // ----- Arrange -----
             coEvery {
                 booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             } returns emptyList()
@@ -5464,17 +5532,13 @@ class BooksRepositoryImplTest {
             )
 
             // ----- Assert -----
-            coVerify(exactly = 1) {
-                booksLocalDataSource.replaceTrendingBooks(
-                    period = TrendingPeriod.Week,
-                    requestedIds = emptyList(),
-                    books = emptyList(),
-                    fetchedAt = capture(fetchedAtSlot),
-                )
-            }
-            fetchedAtSlot.captured shouldBeGreaterThanOrEqualTo before
             coVerify(exactly = 0) {
-                booksRemoteDataSource.fetchBooksByIds(ids = any())
+                booksLocalDataSource.replaceTrendingBooks(
+                    period = any(),
+                    requestedIds = any(),
+                    books = any(),
+                    fetchedAt = any(),
+                )
             }
         }
 
@@ -5607,8 +5671,12 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             } coAnswers {
                 gate.await()
-                emptyList()
+                listOf(1)
             }
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = listOf(1))
+            } returns listOf(trendingBook(1))
 
             // ----- Act -----
             val first = launch { refreshWeek(maxAge = 1.hours) }
