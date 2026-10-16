@@ -28,7 +28,7 @@ book tracking platform, on Android (SDK 26+), iOS and desktop (JVM). Shared UI a
 ./gradlew assembleRelease        # Release build
 ./gradlew test                   # :app / :desktopApp unit tests only — no KMP suites
 ./gradlew testAndroidHostTest --continue   # KMP unit tests
-./gradlew connectedAndroidTest   # Instrumented tests (device/emulator)
+./gradlew :smoketest:pixelApi36MinifiedAndroidTest   # Device suite, R8-minified app (needs HARDCOVER_SMOKE_TOKEN)
 ./gradlew lint                   # Android Lint
 ./gradlew ktlintFormat           # Auto-fix layout rules
 ./gradlew styleCheck             # detekt + ktlint gates

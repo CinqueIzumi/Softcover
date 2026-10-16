@@ -70,6 +70,7 @@ the act, e.g. a Turbine `test { }` or `shouldThrow`). An existing test that brea
   the brief does not exist, confirm with `scripts/gradle-quiet.sh :<module>:tasks --all` and grep for
   `AndroidHostTest`; do not guess further variants.
 - Do not run the broader suite.
+- Device suite (minified): follow `.claude/rules/tests.md` § Device suite (minified).
 
 ## Results
 

@@ -225,7 +225,7 @@ flowchart LR
 ./gradlew test                   # Run :app / :desktopApp / :detekt-rules unit tests only
 ./gradlew testAndroidHostTest --continue   # Run the KMP module unit tests
 ./gradlew :app:test              # Run unit tests for the app module
-./gradlew connectedAndroidTest   # Run instrumented tests (device/emulator required)
+./gradlew :smoketest:pixelApi36MinifiedAndroidTest   # Device suite on the R8-minified app (managed emulator; needs HARDCOVER_SMOKE_TOKEN or hardcover.apiToken in local.properties)
 ./gradlew lint                   # Run Android Lint
 ```
 

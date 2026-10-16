@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.variant.TestAndroidComponentsExtension
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.jetbrains.compose.resources.ResourcesExtension
@@ -9,6 +10,7 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.test) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.compose.multiplatform) apply false
     alias(libs.plugins.apollo) apply false
@@ -243,6 +245,29 @@ subprojects {
                 check(variantTasks.isNotEmpty()) {
                     "No type-resolved detekt<Variant> task is registered for :app; the detekt gate would pass vacuously."
                 }
+            }
+        }
+    }
+
+    pluginManager.withPlugin("com.android.test") {
+        val detektExtension = extensions.getByType<DetektExtension>()
+        val androidComponents = extensions.getByType<TestAndroidComponentsExtension>()
+
+        tasks.register<Detekt>("detektMain") {
+            description = "Run detekt with type resolution on the minified test module."
+            group = "verification"
+            config.setFrom(detektExtension.config)
+            buildUponDefaultConfig = detektExtension.buildUponDefaultConfig
+            parallel = detektExtension.parallel
+            include("**/*.kt", "**/*.kts")
+            exclude("**/resources/**", "**/build/**")
+            classpath.setFrom(
+                tasks.named<KotlinCompile>("compileMinifiedKotlin").map { it.libraries },
+                androidComponents.sdkComponents.bootClasspath,
+            )
+            reports {
+                xml.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.xml"))
+                html.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.html"))
             }
         }
     }
@@ -529,6 +554,13 @@ dependencyAnalysis {
                     "io.kotest:kotest-assertions-core",
                     "io.mockk:mockk",
                     "app.cash.turbine:turbine",
+                    // The `:smoketest` device stack: the runner and rules are reached by the instrumentation
+                    // harness, not by a compile reference.
+                    "androidx.test:runner",
+                    "androidx.test:core",
+                    "androidx.test.ext:junit",
+                    "androidx.test.uiautomator:uiautomator",
+                    "junit:junit",
                     // Provided uniformly by the Compose / Room convention plugins (not per-module deps).
                     "androidx.activity:activity-compose",
                     "androidx.compose.ui:ui",
