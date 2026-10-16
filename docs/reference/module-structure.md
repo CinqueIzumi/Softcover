@@ -49,7 +49,8 @@ Notes on features that are leaves only for their *screens*:
     per-instance state reaches a live Glance session through its repository change flow, and an instance
     with no session through `WidgetRepainter`. `WidgetMaintenanceWorker` runs hourly and at each midnight
     (Daily picks roll over); `TrendingRefreshWorker` runs for the periods in use at the shortest placed
-    cadence, network-constrained.
+    cadence, network-constrained. `QuoteRefreshWorker` refetches the quotes daily while a Quote widget is
+    placed, and once on placement and on sign-in; the quotes also feed a repaint signal.
 
 `deadlines`, `personal`, and `connectivity` were kernels in disguise and are now `core` modules —
 they are **not** features.

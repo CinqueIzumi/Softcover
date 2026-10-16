@@ -23,6 +23,12 @@
     <string name="trending_empty_headline">Nothing is trending yet</string>
     <string name="trending_empty_subline">Check back after the next refresh.</string>
     <string name="trending_settings">Widget settings</string>
+    <string name="quote_widget_label">Quote of the day</string>
+    <string name="quote_widget_description">One of your saved quotes each day, with arrows to browse the rest.</string>
+    <string name="quote_previous">Previous quote</string>
+    <string name="quote_next">Next quote</string>
+    <string name="quote_empty_headline">No quotes yet</string>
+    <string name="quote_empty_subline">Save a quote from a book\'s Yours tab.</string>
     <string name="currently_reading_update_progress">Update progress</string>
     <string name="update_progress_save_failed">Couldn\'t save your progress. Try again from the app.</string>
 </resources>

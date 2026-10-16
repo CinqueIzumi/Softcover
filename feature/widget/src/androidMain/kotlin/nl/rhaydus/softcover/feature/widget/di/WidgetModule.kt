@@ -2,18 +2,23 @@ package nl.rhaydus.softcover.feature.widget.di
 
 import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgets
 import nl.rhaydus.softcover.feature.widget.data.repository.CurrentlyReadingRepositoryImpl
+import nl.rhaydus.softcover.feature.widget.data.repository.QuoteWidgetRepositoryImpl
 import nl.rhaydus.softcover.feature.widget.data.repository.RandomPickRepositoryImpl
 import nl.rhaydus.softcover.feature.widget.data.repository.TrendingRepositoryImpl
 import nl.rhaydus.softcover.feature.widget.domain.repository.CurrentlyReadingRepository
+import nl.rhaydus.softcover.feature.widget.domain.repository.QuoteWidgetRepository
 import nl.rhaydus.softcover.feature.widget.domain.repository.RandomPickRepository
 import nl.rhaydus.softcover.feature.widget.domain.repository.TrendingRepository
 import nl.rhaydus.softcover.feature.widget.domain.usecase.AdvanceTrendingPageUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.CycleQuoteUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.CycleSelectedBookUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.GetPlacedTrendingSettingsUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetQuoteSelectionUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.GetRandomPickSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.GetSelectedBookIdUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.GetTrendingPositionUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.GetTrendingSettingsUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveQuoteSelectionChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveRandomPickChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveSelectedBookChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingChangesUseCase
@@ -30,6 +35,8 @@ import nl.rhaydus.softcover.feature.widget.presentation.collector.UpdateProgress
 import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidgetDependencies
 import nl.rhaydus.softcover.feature.widget.presentation.glance.OwnedWidgets
+import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidget
+import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidgetDependencies
 import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidgetDependencies
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
@@ -42,6 +49,7 @@ import nl.rhaydus.softcover.feature.widget.presentation.refresh.WidgetRefresher
 import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.RandomPickSettingsScreenModel
 import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.TrendingSettingsScreenModel
 import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.UpdateProgressScreenModel
+import nl.rhaydus.softcover.feature.widget.presentation.worker.QuoteRefreshScheduler
 import nl.rhaydus.softcover.feature.widget.presentation.worker.TrendingRefreshScheduler
 import nl.rhaydus.softcover.feature.widget.presentation.worker.WidgetMaintenanceScheduler
 import org.koin.android.ext.koin.androidContext
@@ -49,6 +57,8 @@ import org.koin.dsl.module
 
 val widgetModule = module {
     single<CurrentlyReadingRepository> { CurrentlyReadingRepositoryImpl(context = androidContext()) }
+
+    single<QuoteWidgetRepository> { QuoteWidgetRepositoryImpl(context = androidContext()) }
 
     single<RandomPickRepository> { RandomPickRepositoryImpl(context = androidContext()) }
 
@@ -59,6 +69,12 @@ val widgetModule = module {
     factory { CycleSelectedBookUseCase(currentlyReadingRepository = get()) }
 
     factory { ObserveSelectedBookChangesUseCase(currentlyReadingRepository = get()) }
+
+    factory { GetQuoteSelectionUseCase(quoteWidgetRepository = get()) }
+
+    factory { CycleQuoteUseCase(quoteWidgetRepository = get()) }
+
+    factory { ObserveQuoteSelectionChangesUseCase(quoteWidgetRepository = get()) }
 
     factory { GetRandomPickSettingsUseCase(randomPickRepository = get()) }
 
@@ -121,6 +137,7 @@ val widgetModule = module {
                 CurrentlyReadingWidget(),
                 RandomPickWidget(),
                 TrendingWidget(),
+                QuoteWidget(),
             ),
         )
     }
@@ -136,6 +153,20 @@ val widgetModule = module {
             observeTrendingChanges = get(),
         )
     }
+
+    single {
+        QuoteWidgetDependencies(
+            environment = get(),
+            repainter = get(),
+            observeAllQuotes = get(),
+            refreshAllQuotes = get(),
+            getQuoteSelection = get(),
+            cycleQuote = get(),
+            observeQuoteSelectionChanges = get(),
+        )
+    }
+
+    single { QuoteRefreshScheduler(context = androidContext()) }
 
     single {
         TrendingRefreshScheduler(
@@ -210,6 +241,8 @@ val widgetModule = module {
             getAllUserLists = get(),
             observeTrendingBooks = get(),
             trendingRefreshScheduler = get(),
+            observeAllQuotes = get(),
+            quoteRefreshScheduler = get(),
         )
     }
 

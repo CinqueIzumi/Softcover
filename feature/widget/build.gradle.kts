@@ -17,6 +17,7 @@ kotlin {
             implementation(project(":core:identity"))
             implementation(project(":core:book"))
             implementation(project(":core:lists"))
+            implementation(project(":core:personal"))
             implementation(project(":core:designsystem"))
             implementation(project(":core:component"))
             implementation(project(":core:uibinding"))

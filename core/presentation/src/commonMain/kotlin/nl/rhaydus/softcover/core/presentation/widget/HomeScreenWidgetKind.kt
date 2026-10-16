@@ -4,4 +4,5 @@ enum class HomeScreenWidgetKind {
     CurrentlyReading,
     RandomPick,
     Trending,
+    Quote,
 }

@@ -60,6 +60,18 @@
         </activity>
 
         <receiver
+            android:name="nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidgetReceiver"
+            android:exported="true"
+            android:label="@string/quote_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quote_widget_info" />
+        </receiver>
+
+        <receiver
             android:name="nl.rhaydus.softcover.feature.widget.presentation.worker.WidgetTimeChangedReceiver"
             android:exported="false">
             <intent-filter>

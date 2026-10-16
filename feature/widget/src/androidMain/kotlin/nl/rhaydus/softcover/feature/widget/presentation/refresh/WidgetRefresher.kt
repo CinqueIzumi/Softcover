@@ -28,7 +28,10 @@ import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveAllQuotesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
+import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidget
+import nl.rhaydus.softcover.feature.widget.presentation.worker.QuoteRefreshScheduler
 import nl.rhaydus.softcover.feature.widget.presentation.worker.TrendingRefreshScheduler
 import kotlin.time.Duration.Companion.seconds
 
@@ -47,6 +50,8 @@ internal class WidgetRefresher(
     private val getAllUserLists: GetAllUserListsUseCase,
     private val observeTrendingBooks: ObserveTrendingBooksUseCase,
     private val trendingRefreshScheduler: TrendingRefreshScheduler,
+    private val observeAllQuotes: ObserveAllQuotesUseCase,
+    private val quoteRefreshScheduler: QuoteRefreshScheduler,
 ) {
     private val placedWidgets = MutableStateFlow<Set<String>>(emptySet())
 
@@ -62,6 +67,8 @@ internal class WidgetRefresher(
             .launchIn(applicationScope.scope)
 
         catchUpTrendingOnSignIn()
+
+        catchUpQuotesOnSignIn()
     }
 
     fun onEnabled(widget: GlanceAppWidget) {
@@ -84,6 +91,23 @@ internal class WidgetRefresher(
                 AppLog.e(
                     error,
                     "Trending catch-up on sign-in failed",
+                )
+            }
+            .launchIn(applicationScope.scope)
+    }
+
+    /** Sign-out wipes the quotes, so a placed quote widget would stay empty until the next daily fetch. */
+    private fun catchUpQuotesOnSignIn() {
+        flow { emitAll(getUserIdAsFlow()) }
+            .map { it != NO_USER_ID }
+            .distinctUntilChanged()
+            .drop(1)
+            .filter { signedIn -> signedIn && QuoteWidget::class.java.name in placedWidgets.value }
+            .onEach { quoteRefreshScheduler.refreshNow() }
+            .catch { error ->
+                AppLog.e(
+                    error,
+                    "Quote catch-up on sign-in failed",
                 )
             }
             .launchIn(applicationScope.scope)
@@ -124,6 +148,7 @@ internal class WidgetRefresher(
         signal { getCurrentlyReadingUserBooks() },
         signal { getWantToReadUserBooks() },
         signal { getAllUserLists() },
+        signal { observeAllQuotes() },
     )
 
     /** Every period, because any of them may be the one a placed widget shows. */

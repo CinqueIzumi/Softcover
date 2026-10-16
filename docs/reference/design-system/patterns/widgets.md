@@ -10,7 +10,7 @@
   an accent tint). A widget showing a book sits on `surfaceContainerHigh` under its backdrop; message states
   (loading, signed out, empty) sit on `background`.
 - `WidgetExtraColors` carries what `ColorProviders` lacks: `surfaceContainerHigh`, `daySurfaceContainerHigh`
-  (transparent at night) and the 70% `surface` `arrowScrim`.
+  (transparent at night), the 70% `surface` `arrowScrim` and the 16% `primary` `quoteGlyph`.
 - Type is the system serif (titles, headlines, `FontFamily.Serif`) and sans (everything else); Glance cannot
   load Fraunces or Inter. Spacing reads `Spacing.*`, radii `CornerRadius.*`.
 - The widget corner follows `system_app_widget_background_radius` on API 31+; below it the launcher clips.
@@ -32,7 +32,8 @@
   (`progressBarWidthDp`), tinted `secondaryContainer` and `primary`.
 - Hit boxes grow in width, not height, where height would shrink the covers: Trending's header and page
   row stay 28dp tall with 40dp-wide tune and page targets; the shuffle button is 48dp; the Random pick
-  and Currently Reading eyebrows are 28dp, with 40dp-wide cycle arrows on Currently Reading's.
+  and Currently Reading eyebrows are 28dp, with 40dp-wide cycle arrows (`CycleEyebrow`) on Currently Reading's
+  and the Quote widget's.
 
 ### Currently Reading widget
 
@@ -77,6 +78,19 @@
   next refresh."; signed out: **Sign in to Softcover**.
 - Settings: the period under "Which list should it show?" (This week by default, This month, Past 3 months, Past year, All time) and **Refresh**
   (Daily by default, Twice daily). Both screens are titled "Widget settings". The widget reads the per-period Room cache the Explore tab also reads.
+
+### Quote of the day widget
+
+- Landscape, min 250 x 110dp, resizable; buckets 250, 320 and 390dp wide by 110, 180 and 250dp tall. Paper
+  `background`, no backdrop; a low-alpha `quoteGlyph` opening mark sits behind the text.
+- Anatomy: a `CycleEyebrow` (`QUOTE OF THE DAY`, or `QUOTES · n/m` once the reader steps off the first quote), then the quote
+  in italic serif and a 12sp `primary` byline "Book title · position". Quote size and line cap follow the
+  height: 14sp by 2 lines, 16sp by 5, 18sp by 7.
+- A hash of each quote's content and the date orders the reader's quotes, so the first changes at midnight.
+  Arrows (only with more than one quote) walk that order and wrap; the pick is kept per instance with its day
+  and lapses at midnight.
+- Taps: the quote opens its book (`OpenBook`); the rest opens the Reading tab. Empty: **No quotes yet** /
+  "Save a quote from a book's Yours tab."; signed out **Sign in to Softcover**. No settings.
 
 ### Widget configuration activities
 

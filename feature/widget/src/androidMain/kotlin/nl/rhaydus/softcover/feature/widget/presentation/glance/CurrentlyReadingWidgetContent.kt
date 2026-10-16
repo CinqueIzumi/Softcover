@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.widget.presentation.glance
 
 import android.graphics.Bitmap
 import android.os.Build
-import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,6 +46,7 @@ import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.activity.updateProgressIntent
 import nl.rhaydus.softcover.feature.widget.presentation.callback.CycleBookCallback
 import nl.rhaydus.softcover.feature.widget.presentation.component.Backdrop
+import nl.rhaydus.softcover.feature.widget.presentation.component.CycleEyebrow
 import nl.rhaydus.softcover.feature.widget.presentation.component.Mask
 import nl.rhaydus.softcover.feature.widget.presentation.component.ReservedLinesTitle
 import nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel
@@ -153,6 +153,7 @@ private fun Message(
 
 @Composable
 private fun Reading(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
+    val context = LocalContext.current
     val artwork = content.artwork
     val height = LocalSize.current.height
 
@@ -167,7 +168,19 @@ private fun Reading(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
                 .padding(Spacing.xxs),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Eyebrow(content = content)
+            CycleEyebrow(
+                label = content.eyebrow,
+                previous = cycleAction(
+                    canCycle = content.canCycle,
+                    step = -1,
+                ),
+                next = cycleAction(
+                    canCycle = content.canCycle,
+                    step = 1,
+                ),
+                previousDescription = context.getString(R.string.currently_reading_previous_book),
+                nextDescription = context.getString(R.string.currently_reading_next_book),
+            )
 
             Box(
                 modifier = GlanceModifier
@@ -199,52 +212,6 @@ private fun Reading(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
             }
 
             ProgressRow(content = content)
-        }
-    }
-}
-
-@Composable
-private fun Eyebrow(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
-    val context = LocalContext.current
-
-    Row(
-        modifier = GlanceModifier
-            .fillMaxWidth()
-            .height(28.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (content.canCycle) {
-            CycleArrow(
-                icon = R.drawable.ic_widget_chevron_left,
-                step = -1,
-                description = context.getString(R.string.currently_reading_previous_book),
-            )
-        }
-
-        Box(
-            modifier = GlanceModifier
-                .defaultWeight()
-                .fillMaxHeight(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = content.eyebrow,
-                maxLines = 1,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurfaceVariant,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                ),
-            )
-        }
-
-        if (content.canCycle) {
-            CycleArrow(
-                icon = R.drawable.ic_widget_chevron_right,
-                step = 1,
-                description = context.getString(R.string.currently_reading_next_book),
-            )
         }
     }
 }
@@ -334,29 +301,13 @@ private fun ProgressBar(progress: Map<Int, WavyProgressBitmaps>) {
     }
 }
 
-@Composable
-private fun CycleArrow(
-    @DrawableRes icon: Int,
+private fun cycleAction(
+    canCycle: Boolean,
     step: Int,
-    description: String,
-) {
-    Box(
-        modifier = GlanceModifier
-            .width(40.dp)
-            .fillMaxHeight()
-            .semantics { contentDescription = description }
-            .clickable(
-                actionRunCallback<CycleBookCallback>(
-                    actionParametersOf(CycleBookCallback.StepKey to step),
-                ),
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Image(
-            provider = ImageProvider(icon),
-            contentDescription = null,
-            modifier = GlanceModifier.size(20.dp),
-            colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurfaceVariant),
-        )
-    }
+): Action? = if (canCycle) {
+    actionRunCallback<CycleBookCallback>(
+        actionParametersOf(CycleBookCallback.StepKey to step),
+    )
+} else {
+    null
 }
