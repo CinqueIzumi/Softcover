@@ -6,7 +6,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -39,6 +41,7 @@ class OfflineUserBookSyncImplTest {
     private lateinit var userBookWriteQueue: UserBookWriteQueue
     private lateinit var userBookWriteDrainer: UserBookWriteDrainer
     private lateinit var booksLocalDataSource: BooksLocalDataSource
+    private lateinit var userBookCacheGate: UserBookCacheGate
     private lateinit var networkAvailability: NetworkAvailabilityProvider
     private lateinit var isOnline: MutableStateFlow<Boolean>
     private lateinit var syncImpl: OfflineUserBookSyncImpl
@@ -48,6 +51,7 @@ class OfflineUserBookSyncImplTest {
         userBookWriteQueue = mockk(relaxed = true)
         userBookWriteDrainer = mockk(relaxed = true)
         booksLocalDataSource = mockk(relaxed = true)
+        userBookCacheGate = UserBookCacheGate(booksLocalDataSource = booksLocalDataSource)
         networkAvailability = mockk()
         isOnline = MutableStateFlow(true)
 
@@ -68,8 +72,16 @@ class OfflineUserBookSyncImplTest {
         userBookWriteQueue = userBookWriteQueue,
         userBookWriteDrainer = userBookWriteDrainer,
         booksLocalDataSource = booksLocalDataSource,
+        userBookCacheGate = userBookCacheGate,
         networkAvailability = networkAvailability,
         applicationScope = ApplicationScope(scope = scope),
+    )
+
+    private suspend fun OfflineUserBookSyncImpl.drainAndReconcile(
+        fetchFromServer: suspend () -> List<Book>,
+    ): List<Book> = drainReconcileAndCache(
+        fetchFromServer = fetchFromServer,
+        selectBooksToCache = { it },
     )
 
     private fun TestScope.advanceBy(millis: Long) {
@@ -1590,7 +1602,7 @@ class OfflineUserBookSyncImplTest {
             )
 
             // ----- Assert -----
-            result.userBook.shouldNotBeNull().reads shouldBe listOf(otherRead)
+            result.userBook.shouldNotBeNull().reads.first { it.id == 11 } shouldBe otherRead
         }
 
         @Test
@@ -2183,6 +2195,236 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             result.map { it.userBook.shouldNotBeNull().status } shouldBe listOf(BookStatus.Paused, BookStatus.Paused)
+        }
+    }
+
+    @Nested
+    inner class WritesDuringFetch {
+        private val userBookId = 77
+
+        private fun read(
+            id: Int,
+            page: Int? = null,
+            finishedAt: String? = null,
+        ): UserBookRead = UserBookRead(
+            id = id,
+            currentPage = page,
+            currentSeconds = null,
+            progress = if (finishedAt != null) 1f else 0.1f,
+            startedAt = "2026-01-01",
+            finishedAt = finishedAt,
+        )
+
+        private fun bookWith(
+            status: BookStatus,
+            reads: List<UserBookRead> = emptyList(),
+        ): Book = stubBook(
+            userBook = stubUserBook(id = userBookId).copy(
+                status = status,
+                reads = reads,
+            ),
+        )
+
+        private fun Book.withRating(rating: Double?): Book = copy(
+            userBook = userBook.shouldNotBeNull().copy(rating = rating),
+        )
+
+        private suspend fun TestScope.reconcileWithWrite(
+            local: Book,
+            kind: PendingUserBookWriteKind,
+            fetched: List<Book>,
+        ): List<Book> {
+            coEvery {
+                userBookWriteDrainer.drain()
+            } returns emptyMap()
+            every {
+                booksLocalDataSource.allUserBooks
+            } returns flowOf(listOf(local))
+
+            val fetchGate = CompletableDeferred<List<Book>>()
+            val refresh = async {
+                syncImpl.drainAndReconcile(fetchFromServer = { fetchGate.await() })
+            }
+            runCurrent()
+
+            userBookCacheGate.cacheBook(
+                book = local,
+                kind = kind,
+            )
+            fetchGate.complete(fetched)
+
+            return refresh.await()
+        }
+
+        @Test
+        fun `progress written during the fetch keeps the local page while another server change flows through`() = runTest {
+            // ----- Arrange -----
+            val local = bookWith(
+                status = BookStatus.Reading,
+                reads = listOf(
+                    read(
+                        id = 7,
+                        page = 80,
+                    ),
+                ),
+            )
+            val fetched = bookWith(
+                status = BookStatus.Reading,
+                reads = listOf(
+                    read(
+                        id = 7,
+                        page = 10,
+                    ),
+                ),
+            ).withRating(rating = 4.5)
+
+            // ----- Act -----
+            val result = reconcileWithWrite(
+                local = local,
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                fetched = listOf(fetched),
+            )
+
+            // ----- Assert -----
+            val reconciled = result.single().userBook.shouldNotBeNull()
+            reconciled.reads.single().currentPage shouldBe 80
+            reconciled.rating shouldBe 4.5
+        }
+
+        @Test
+        fun `without a recorded write the fetched page wins over the local one`() = runTest {
+            // ----- Arrange -----
+            val local = bookWith(
+                status = BookStatus.Reading,
+                reads = listOf(
+                    read(
+                        id = 7,
+                        page = 80,
+                    ),
+                ),
+            )
+            val fetched = bookWith(
+                status = BookStatus.Reading,
+                reads = listOf(
+                    read(
+                        id = 7,
+                        page = 10,
+                    ),
+                ),
+            )
+            coEvery {
+                userBookWriteDrainer.drain()
+            } returns emptyMap()
+            every {
+                booksLocalDataSource.allUserBooks
+            } returns flowOf(listOf(local))
+
+            // ----- Act -----
+            val result = syncImpl.drainAndReconcile(fetchFromServer = { listOf(fetched) })
+
+            // ----- Assert -----
+            result.single().userBook.shouldNotBeNull().reads.single().currentPage shouldBe 10
+        }
+
+        @Test
+        fun `a book removed during the fetch is dropped from the result and not cached`() = runTest {
+            // ----- Arrange -----
+            val keptBook = bookWith(status = BookStatus.Reading)
+            val removedBook = keptBook.copy(
+                id = 200,
+                userBook = keptBook.userBook.shouldNotBeNull().copy(id = 88),
+            )
+            coEvery {
+                userBookWriteDrainer.drain()
+            } returns emptyMap()
+
+            val fetchGate = CompletableDeferred<List<Book>>()
+            val refresh = async {
+                syncImpl.drainAndReconcile(fetchFromServer = { fetchGate.await() })
+            }
+            runCurrent()
+
+            // ----- Act -----
+            userBookCacheGate.removeUserBooks(ids = listOf(88))
+            fetchGate.complete(listOf(keptBook, removedBook))
+            val result = refresh.await()
+
+            // ----- Assert -----
+            result shouldBe listOf(keptBook)
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBooks(books = listOf(keptBook))
+            }
+        }
+
+        @Test
+        fun `status set to Reading during a fetch with only a finished read keeps the snapshot's unfinished read as current`() = runTest {
+            // ----- Arrange -----
+            val local = bookWith(
+                status = BookStatus.Reading,
+                reads = listOf(
+                    read(
+                        id = 10,
+                        finishedAt = "2025-05-05",
+                    ),
+                    read(id = 20),
+                ),
+            )
+            val fetched = bookWith(
+                status = BookStatus.WantToRead,
+                reads = listOf(
+                    read(
+                        id = 10,
+                        finishedAt = "2025-05-05",
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = reconcileWithWrite(
+                local = local,
+                kind = PendingUserBookWriteKind.SET_STATUS,
+                fetched = listOf(fetched),
+            )
+
+            // ----- Assert -----
+            val reconciled = result.single().userBook.shouldNotBeNull()
+            reconciled.status shouldBe BookStatus.Reading
+            reconciled.currentRead.shouldNotBeNull().id shouldBe 20
+        }
+
+        @Test
+        fun `mark as read during a fetch lacking the snapshot's current read keeps that read with its finishedAt`() = runTest {
+            // ----- Arrange -----
+            val local = bookWith(
+                status = BookStatus.Read,
+                reads = listOf(
+                    read(
+                        id = 30,
+                        finishedAt = "2026-02-02",
+                    ),
+                ),
+            )
+            val fetched = bookWith(
+                status = BookStatus.Reading,
+                reads = listOf(
+                    read(
+                        id = 10,
+                        finishedAt = "2025-05-05",
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = reconcileWithWrite(
+                local = local,
+                kind = PendingUserBookWriteKind.MARK_AS_READ,
+                fetched = listOf(fetched),
+            )
+
+            // ----- Assert -----
+            val reconciled = result.single().userBook.shouldNotBeNull()
+            reconciled.status shouldBe BookStatus.Read
+            reconciled.reads.first { it.id == 30 }.finishedAt shouldBe "2026-02-02"
         }
     }
 }

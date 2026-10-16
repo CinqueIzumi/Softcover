@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSo
 import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.repository.BooksRepositoryImpl
 import nl.rhaydus.softcover.core.book.data.sync.OfflineUserBookSyncImpl
+import nl.rhaydus.softcover.core.book.data.sync.UserBookCacheGate
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
@@ -63,11 +64,16 @@ val bookModule = module {
         )
     }
 
+    single {
+        UserBookCacheGate(booksLocalDataSource = get())
+    }
+
     single<OfflineUserBookSync> {
         OfflineUserBookSyncImpl(
             userBookWriteQueue = get(),
             userBookWriteDrainer = get(),
             booksLocalDataSource = get(),
+            userBookCacheGate = get(),
             networkAvailability = get(),
             applicationScope = get(),
         )
@@ -77,6 +83,7 @@ val bookModule = module {
         BooksRepositoryImpl(
             booksRemoteDataSource = get(),
             booksLocalDataSource = get(),
+            userBookCacheGate = get(),
             networkAvailability = get(),
             offlineSync = get(),
             applicationScope = get(),

@@ -234,7 +234,9 @@ Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core
   `isTransient` classifier. `:core:domain`'s `UserBookWriteDrainer` / `ListWriteDrainer` are **named subinterfaces**
   of the foundation's generic `OfflineWriteDrainer`, because its two instantiations erase to one class and Koin
   could not otherwise tell them apart. The drain→fetch→reconcile composition and `preserveOwnedFields` stay
-  app-side, in `OfflineUserBookSyncImpl`.
+  app-side, in `OfflineUserBookSyncImpl`. Every user-book row write goes through `UserBookCacheGate`, which
+  serialises writes against the refresh's merge and save and records each write made while a refresh is in
+  flight; the reconcile re-applies those records, so a write made mid-refresh survives the stale server snapshot.
 
 ## Local Storage
 
