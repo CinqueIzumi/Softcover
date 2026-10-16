@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.domain.model.QuoteProgressAdvance
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.progressAdvanceFor
 import nl.rhaydus.softcover.core.uibinding.progress.toWhenReadUiModel
+import nl.rhaydus.softcover.core.uibinding.quote.toQuoteClockText
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.QuoteDraft
 
 private const val SECONDS_PER_HOUR = 3600
@@ -150,7 +151,7 @@ private fun Book.positionInputFor(
             unit = ProgressTimeUnit.SECONDS,
             text = draft.seconds,
         ),
-        suffix = quoteAudioTotal?.let { "of ${it.toClockText()}" },
+        suffix = quoteAudioTotal?.let { "of ${it.toQuoteClockText()}" },
     )
 }
 
@@ -177,7 +178,7 @@ private fun QuoteProgressAdvance.title(): String {
 
     return when {
         finishesBook -> "Mark as read"
-        seconds != null -> "Update my progress to ${seconds.toClockText()}"
+        seconds != null -> "Update my progress to ${seconds.toQuoteClockText()}"
         else -> "Update my progress to page $newPage"
     }
 }
@@ -188,23 +189,9 @@ private fun QuoteProgressAdvance.gloss(
 ): String = when {
     finishesBook && isAudiobook -> "That's the end of the audiobook."
     finishesBook -> "Page $newPage is the last page."
-    isAudiobook -> "You're at ${(read?.currentSeconds ?: 0).toClockText()}."
+    isAudiobook -> "You're at ${(read?.currentSeconds ?: 0).toQuoteClockText()}."
     else -> "You're on page ${read?.currentPage ?: 0}."
 }
-
-/** "1:02:03". */
-internal fun Int.toClockText(): String {
-    val hours = this / SECONDS_PER_HOUR
-    val minutes = this % SECONDS_PER_HOUR / SECONDS_PER_MINUTE
-    val seconds = this % SECONDS_PER_MINUTE
-
-    return "$hours:${minutes.twoDigits()}:${seconds.twoDigits()}"
-}
-
-private fun Int.twoDigits(): String = toString().padStart(
-    length = 2,
-    padChar = '0',
-)
 
 /** Digits only, cut to [maxLength] and capped at [maximum]; blank stays blank so the field can be cleared. */
 internal fun sanitizedQuoteNumber(

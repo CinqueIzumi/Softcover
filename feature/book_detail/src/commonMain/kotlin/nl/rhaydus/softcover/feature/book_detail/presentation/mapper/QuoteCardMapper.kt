@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
-import kotlin.math.roundToInt
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -16,7 +15,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.quote.QuoteCardUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Quote
-import nl.rhaydus.softcover.core.domain.model.QuotePosition
+import nl.rhaydus.softcover.core.uibinding.quote.toPositionLabel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.QuotesSectionUiModel
 
 internal fun List<Quote>.toQuotesSection(
@@ -46,19 +45,13 @@ internal fun Quote.toQuoteCardUiModel(
     key = localId,
     text = text,
     byline = listOfNotNull(
-        position?.toBylineLabel(),
+        position?.toPositionLabel(),
         actionAt.toLocalDateTime(timeZone).date.toBylineLabel(today = today),
         privacy.toQuotePrivacyOption().label,
     ).joinToString(separator = " · "),
 )
 
 private const val QUOTE_ADD_CHIP_KEY = "quote-add"
-
-private fun QuotePosition.toBylineLabel(): String = when (this) {
-    is QuotePosition.Pages -> "p. $page"
-    is QuotePosition.Percent -> "${percent.roundToInt()}%"
-    is QuotePosition.Seconds -> seconds.toClockText()
-}
 
 private fun LocalDate.toBylineLabel(today: LocalDate): String {
     val formatter = LocalDate.Format {
