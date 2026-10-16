@@ -36,7 +36,11 @@ internal class RandomPickSettingsScreen(
             }
         }
 
-        WidgetSettingsLayout(themeConfiguration = state.themeConfiguration) {
+        WidgetSettingsLayout(
+            themeConfiguration = state.themeConfiguration,
+            topBar = state.topBar,
+            onBack = { screenModel.runAction(OnBackClickAction) },
+        ) {
             SectionHeader(model = state.titleHeader)
 
             SectionHeader(model = state.sourceHeader)

@@ -36,7 +36,11 @@ internal class TrendingSettingsScreen(
             }
         }
 
-        WidgetSettingsLayout(themeConfiguration = state.themeConfiguration) {
+        WidgetSettingsLayout(
+            themeConfiguration = state.themeConfiguration,
+            topBar = state.topBar,
+            onBack = { screenModel.runAction(OnTrendingBackClickAction) },
+        ) {
             SectionHeader(model = state.titleHeader)
 
             ChipFlow(
