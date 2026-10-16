@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.widget.refresh
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import nl.rhaydus.softcover.feature.widget.placed.WidgetInstanceChanges
 import nl.rhaydus.softcover.feature.widget.worker.WidgetMaintenanceScheduler
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -26,6 +27,20 @@ internal abstract class RefreshingWidgetReceiver : GlanceAppWidgetReceiver(), Ko
         )
 
         get<WidgetMaintenanceScheduler>().schedule()
+
+        get<WidgetInstanceChanges>().notifyChanged()
+    }
+
+    override fun onDeleted(
+        context: Context,
+        appWidgetIds: IntArray,
+    ) {
+        super.onDeleted(
+            context,
+            appWidgetIds,
+        )
+
+        get<WidgetInstanceChanges>().notifyChanged()
     }
 
     override fun onDisabled(context: Context) {

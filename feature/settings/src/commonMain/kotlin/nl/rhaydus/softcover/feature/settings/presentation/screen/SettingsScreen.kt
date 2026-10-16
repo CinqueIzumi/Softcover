@@ -103,6 +103,9 @@ object SettingsScreen : Screen {
             navigateToLibraryVisibility = {
                 navigator.parent?.push(LibraryVisibilitySettingsScreen())
             },
+            navigateToWidgets = {
+                navigator.parent?.push(WidgetsSettingsScreen())
+            },
             navigateToHiddenSuggestions = {
                 navigator.parent?.push(appNavigator.screen(ScreenDestination.HiddenSuggestions))
             },
@@ -168,6 +171,7 @@ internal expect fun SettingsScreenLayout(
     navigateToProfile: () -> Unit,
     navigateToAppearanceSettings: () -> Unit,
     navigateToLibraryVisibility: () -> Unit,
+    navigateToWidgets: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
     navigateToWhatsNew: () -> Unit,

@@ -1,7 +1,10 @@
 package nl.rhaydus.softcover.feature.widget.di
 
+import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgets
 import nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidget
 import nl.rhaydus.softcover.feature.widget.currentlyreading.CurrentlyReadingWidgetDependencies
+import nl.rhaydus.softcover.feature.widget.placed.AndroidHomeScreenWidgets
+import nl.rhaydus.softcover.feature.widget.placed.WidgetInstanceChanges
 import nl.rhaydus.softcover.feature.widget.progress.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.widget.progress.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.widget.progress.UpdateProgressScreenModel
@@ -138,6 +141,20 @@ val widgetModule = module {
             getWantToReadUserBooks = get(),
             getAllUserLists = get(),
             observeTrendingBooks = get(),
+        )
+    }
+
+    single { WidgetInstanceChanges() }
+
+    single<HomeScreenWidgets> {
+        AndroidHomeScreenWidgets(
+            context = androidContext(),
+            ownedWidgets = get(),
+            randomPickStore = get(),
+            trendingStore = get(),
+            getAllUserLists = get(),
+            instanceChanges = get(),
+            appDispatchers = get(),
         )
     }
 }

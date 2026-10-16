@@ -9,12 +9,12 @@ import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 
 internal fun trendingPeriodChipsFor(selected: TrendingPeriod): ChipSet<TrendingPeriod> {
     val choices = listOf(
-        "This week" to TrendingPeriod.Week,
-        "This month" to TrendingPeriod.Month,
-        "Past 3 months" to TrendingPeriod.ThreeMonths,
-        "Past year" to TrendingPeriod.Year,
-        "All time" to TrendingPeriod.AllTime,
-    )
+        TrendingPeriod.Week,
+        TrendingPeriod.Month,
+        TrendingPeriod.ThreeMonths,
+        TrendingPeriod.Year,
+        TrendingPeriod.AllTime,
+    ).map { it.label() to it }
 
     return ChipSet(
         chips = choices.mapIndexed { index, (label, period) ->
@@ -27,4 +27,12 @@ internal fun trendingPeriodChipsFor(selected: TrendingPeriod): ChipSet<TrendingP
         }.toImmutableList(),
         payloadByKey = choices.mapIndexed { index, (_, period) -> "$index" to period }.toMap().toImmutableMap(),
     )
+}
+
+internal fun TrendingPeriod.label(): String = when (this) {
+    TrendingPeriod.Week -> "This week"
+    TrendingPeriod.Month -> "This month"
+    TrendingPeriod.ThreeMonths -> "Past 3 months"
+    TrendingPeriod.Year -> "Past year"
+    TrendingPeriod.AllTime -> "All time"
 }

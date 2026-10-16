@@ -20,8 +20,8 @@ internal fun sourceChipsFor(
     )
 
     val choices = buildList {
-        add("Want to Read" to RandomPickSource.WantToRead)
-        add("Owned" to RandomPickSource.Owned)
+        add(WANT_TO_READ_LABEL to RandomPickSource.WantToRead)
+        add(OWNED_LABEL to RandomPickSource.Owned)
 
         lists
             .filterNot { it.isOwned }
@@ -33,10 +33,25 @@ internal fun sourceChipsFor(
 }
 
 internal fun cadenceChipsFor(selected: RandomPickCadence): ChipSet<RandomPickCadence> = listOf(
-    "Daily" to RandomPickCadence.Daily,
-    "Weekly" to RandomPickCadence.Weekly,
-    "Only when I shuffle" to RandomPickCadence.OnShuffleOnly,
-).toChipSet(selected = selected)
+    RandomPickCadence.Daily,
+    RandomPickCadence.Weekly,
+    RandomPickCadence.OnShuffleOnly,
+).map { it.label() to it }.toChipSet(selected = selected)
+
+internal fun RandomPickCadence.label(): String = when (this) {
+    RandomPickCadence.Daily -> "Daily"
+    RandomPickCadence.Weekly -> "Weekly"
+    RandomPickCadence.OnShuffleOnly -> "Only when I shuffle"
+}
+
+internal fun RandomPickSource.label(lists: List<BookList>): String = when (this) {
+    RandomPickSource.WantToRead -> WANT_TO_READ_LABEL
+    RandomPickSource.Owned -> OWNED_LABEL
+    is RandomPickSource.UserList -> lists.firstOrNull { it.id == listId }?.name ?: WANT_TO_READ_LABEL
+}
+
+private const val WANT_TO_READ_LABEL = "Want to Read"
+private const val OWNED_LABEL = "Owned"
 
 private fun <P : Any> List<Pair<String, P>>.toChipSet(selected: P): ChipSet<P> {
     val keyed = mapIndexed { index, (label, payload) ->

@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.setMain
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.app.AppVersionInfo
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
+import nl.rhaydus.softcover.feature.settings.presentation.FakeHomeScreenWidgets
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -68,6 +69,7 @@ class SettingsScreenScreenModelTest {
                 setUiScaleUseCase = mockk(relaxed = true),
                 observeAppUpdateStateUseCase = mockk(relaxed = true),
                 appVersionProvider = appVersionProvider,
+                homeScreenWidgets = FakeHomeScreenWidgets(),
                 appDispatchers = appDispatchers,
                 flows = emptyList(),
             )

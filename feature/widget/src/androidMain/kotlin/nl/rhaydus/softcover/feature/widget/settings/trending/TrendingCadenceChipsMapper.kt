@@ -9,9 +9,9 @@ import nl.rhaydus.softcover.feature.widget.trending.TrendingRefreshCadence
 
 internal fun trendingCadenceChipsFor(selected: TrendingRefreshCadence): ChipSet<TrendingRefreshCadence> {
     val choices = listOf(
-        "Daily" to TrendingRefreshCadence.Daily,
-        "Twice daily" to TrendingRefreshCadence.TwiceDaily,
-    )
+        TrendingRefreshCadence.Daily,
+        TrendingRefreshCadence.TwiceDaily,
+    ).map { it.label() to it }
 
     return ChipSet(
         chips = choices.mapIndexed { index, (label, cadence) ->
@@ -24,4 +24,9 @@ internal fun trendingCadenceChipsFor(selected: TrendingRefreshCadence): ChipSet<
         }.toImmutableList(),
         payloadByKey = choices.mapIndexed { index, (_, cadence) -> "$index" to cadence }.toMap().toImmutableMap(),
     )
+}
+
+internal fun TrendingRefreshCadence.label(): String = when (this) {
+    TrendingRefreshCadence.Daily -> "Daily"
+    TrendingRefreshCadence.TwiceDaily -> "Twice daily"
 }

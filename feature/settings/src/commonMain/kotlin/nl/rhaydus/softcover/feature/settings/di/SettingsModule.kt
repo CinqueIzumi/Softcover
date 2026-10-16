@@ -42,15 +42,18 @@ import nl.rhaydus.softcover.feature.settings.presentation.collector.GalleryTheme
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryTabCountsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.PersistedLibraryVisibilityCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.PlacedWidgetsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UiScaleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UserListsCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.WidgetsSettingsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.model.DocumentPage
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.ComponentGalleryScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.DocumentPageScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
+import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.WidgetsSettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.source.ChangelogPageSource
 import nl.rhaydus.softcover.feature.settings.presentation.source.DocumentPageSource
 import nl.rhaydus.softcover.feature.settings.presentation.source.RoadmapPageSource
@@ -88,6 +91,7 @@ val settingsModule = module {
             setUiScaleUseCase = get(),
             observeAppUpdateStateUseCase = get(),
             appVersionProvider = get(),
+            homeScreenWidgets = get(),
         )
     }
 
@@ -135,6 +139,16 @@ val settingsModule = module {
             getAllUserBooksUseCase = get(),
             refreshLibraryUseCase = get(),
             applicationScope = get(),
+            appDispatchers = get(),
+            flows = getAll(),
+        )
+    }
+
+    factory { PlacedWidgetsCollector() } bind WidgetsSettingsCollector::class
+
+    factory {
+        WidgetsSettingsScreenModel(
+            homeScreenWidgets = get(),
             appDispatchers = get(),
             flows = getAll(),
         )

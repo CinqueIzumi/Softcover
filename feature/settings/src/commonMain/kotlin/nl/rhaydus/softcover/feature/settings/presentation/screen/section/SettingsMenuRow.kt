@@ -70,11 +70,35 @@ internal fun SettingsMenuRow(
             trailingContentDescription = "Opens in your browser",
         )
 
+        is SettingsMenuRowTarget.Edit -> ClickableMenuRow(
+            title = title,
+            gloss = gloss,
+            leading = leading,
+            onClick = target.onClick,
+            trailingIcon = SoftcoverIcon.Edit,
+            trailingContentDescription = "Edit",
+        )
+
+        is SettingsMenuRowTarget.Add -> ClickableMenuRow(
+            title = title,
+            gloss = gloss,
+            leading = leading,
+            onClick = target.onClick,
+            trailingIcon = SoftcoverIcon.Add,
+            trailingContentDescription = "Add to home screen",
+        )
+
         SettingsMenuRowTarget.Copyable -> SettingsRow(
             title = title,
             secondary = gloss,
             leading = leading,
             selectionContainer = true,
+        )
+
+        SettingsMenuRowTarget.Static -> SettingsRow(
+            title = title,
+            secondary = gloss,
+            leading = leading,
         )
     }
 }

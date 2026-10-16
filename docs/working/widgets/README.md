@@ -141,7 +141,10 @@ confirmed off main.
 widget-local copy of Reading's sheet logic (shared extraction is a separate issue). Arrows overlay
 the cover (32dp lanes), title reserves two lines, progress bar follows the widget width.
 
-### S8. Widgets section in Settings
+### S8. Widgets section in Settings ✅
+Done as `HomeScreenWidgets` in `:core:presentation` (Android impl in `:feature:widget` `placed/`, an
+unsupported object on iOS/desktop); Settings › Personalisation › Widgets lists placed instances with
+their settings summary and Edit, plus Add rows when the launcher can pin.
 Lists placed widgets with Edit (opens that instance's configuration activity) and "Add to home
 screen" buttons via `AppWidgetManager.requestPinAppWidget` (API 26+, hidden when the launcher does
 not support pinning).

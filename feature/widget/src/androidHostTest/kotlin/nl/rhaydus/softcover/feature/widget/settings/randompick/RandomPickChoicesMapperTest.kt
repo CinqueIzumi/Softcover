@@ -111,4 +111,46 @@ class RandomPickChoicesMapperTest {
             result.chips.size shouldBe 2
         }
     }
+
+    @Nested
+    inner class SourceLabel {
+        @Test
+        fun `a user list that no longer exists reads as the want to read label`() {
+            // ----- Arrange -----
+            val lists = listOf(
+                list(
+                    id = 1,
+                    name = "Favourites",
+                ),
+            )
+
+            // ----- Act -----
+            val result = RandomPickSource.UserList(listId = 99).label(lists)
+
+            // ----- Assert -----
+            result shouldBe RandomPickSource.WantToRead.label(lists)
+        }
+
+        @Test
+        fun `a user list that exists reads as its own name`() {
+            // ----- Arrange -----
+            val favourites = list(
+                id = 2,
+                name = "Favourites",
+            )
+            val lists = listOf(
+                list(
+                    id = 1,
+                    name = "Classics",
+                ),
+                favourites,
+            )
+
+            // ----- Act -----
+            val result = RandomPickSource.UserList(listId = favourites.id).label(lists)
+
+            // ----- Assert -----
+            result shouldBe favourites.name
+        }
+    }
 }
