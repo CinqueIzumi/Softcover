@@ -40,11 +40,17 @@ interface OfflineUserBookSync {
     )
 
     /**
-     * Drains the offline write queue, then fetches fresh server data via [fetchFromServer], then
-     * reconciles the two. The drain runs **before** the fetch so the fetch has the best chance of
-     * already reflecting the just-replayed writes; the reconcile then re-applies, for each synced
-     * write, only the fields that write owns — covering read-after-write lag without clobbering any
-     * field the server changed underneath. Returns the books to cache.
+     * Drains the offline write queue, fetches fresh server data via [fetchFromServer], reconciles the
+     * two and caches what [selectBooksToCache] keeps of the result. The drain runs **before** the fetch so
+     * the fetch has the best chance of already reflecting the just-replayed writes. The reconcile then
+     * re-applies, for each replayed write and for each local write made while the fetch was in flight,
+     * only the fields that write owns, covering read-after-write lag without clobbering any field the
+     * server changed underneath; books removed locally during the fetch are dropped. Merge and save run
+     * serialised against other local user-book writes, so [selectBooksToCache] must not write user books.
+     * Returns the reconciled books.
      */
-    suspend fun drainAndReconcile(fetchFromServer: suspend () -> List<Book>): List<Book>
+    suspend fun drainReconcileAndCache(
+        fetchFromServer: suspend () -> List<Book>,
+        selectBooksToCache: suspend (List<Book>) -> List<Book>,
+    ): List<Book>
 }

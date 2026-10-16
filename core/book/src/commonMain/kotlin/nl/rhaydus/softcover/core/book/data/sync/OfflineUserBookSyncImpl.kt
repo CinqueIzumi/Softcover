@@ -41,6 +41,7 @@ internal class OfflineUserBookSyncImpl(
     private val userBookWriteQueue: UserBookWriteQueue,
     private val userBookWriteDrainer: UserBookWriteDrainer,
     private val booksLocalDataSource: BooksLocalDataSource,
+    private val userBookCacheGate: UserBookCacheGate,
     private val networkAvailability: NetworkAvailabilityProvider,
     private val applicationScope: ApplicationScope,
 ) : OfflineUserBookSync {
@@ -224,7 +225,7 @@ internal class OfflineUserBookSyncImpl(
 
     /**
      * A drain clears the drainer's reconcile hints, so the retry keeps what it synced for the next
-     * [drainAndReconcile] instead of letting a later fetch overwrite the optimistic value. Hints are
+     * [drainReconcileAndCache] instead of letting a later fetch overwrite the optimistic value. Hints are
      * taken under the mutex only after a drain returns, so a retry that races a refresh leaves its hint
      * for the following refresh: applied one refresh late, never lost or applied twice. They live in
      * memory only and are consumed by the next refresh, so they need no expiry.
@@ -251,16 +252,35 @@ internal class OfflineUserBookSyncImpl(
         merged
     }
 
-    override suspend fun drainAndReconcile(fetchFromServer: suspend () -> List<Book>): List<Book> {
+    override suspend fun drainReconcileAndCache(
+        fetchFromServer: suspend () -> List<Book>,
+        selectBooksToCache: suspend (List<Book>) -> List<Book>,
+    ): List<Book> {
         val drained: Map<Int, Set<PendingUserBookWriteKind>> = userBookWriteDrainer.drain()
         val syncedWrites: Map<Int, Set<PendingUserBookWriteKind>> = takeRetainedHints(drained = drained)
 
-        val fetchedBooks: List<Book> = fetchFromServer()
-
-        return preserveSyncedWrites(
-            fetchedBooks = fetchedBooks,
-            syncedWrites = syncedWrites,
+        return userBookCacheGate.refresh(
+            fetch = fetchFromServer,
+            reconcile = { fetchedBooks, window ->
+                preserveSyncedWrites(
+                    fetchedBooks = fetchedBooks,
+                    syncedWrites = syncedWrites.mergedWith(window.writes),
+                ).filterNot { it.userBook?.id in window.removedUserBookIds }
+            },
+            selectToCache = selectBooksToCache,
         )
+    }
+
+    private fun Map<Int, Set<PendingUserBookWriteKind>>.mergedWith(
+        other: Map<Int, Set<PendingUserBookWriteKind>>,
+    ): Map<Int, Set<PendingUserBookWriteKind>> {
+        val merged: MutableMap<Int, Set<PendingUserBookWriteKind>> = toMutableMap()
+
+        other.forEach { (userBookId, kinds) ->
+            merged[userBookId] = merged[userBookId].orEmpty() + kinds
+        }
+
+        return merged
     }
 
     /**
@@ -304,22 +324,28 @@ internal class OfflineUserBookSyncImpl(
                         snapshot = snapshot,
                     )
                 }
-                .preservePlaceholderRead(snapshot = snapshot)
+                .preserveUnfinishedRead(snapshot = snapshot)
         }
     }
 
     /**
-     * A replayed status change into Reading can outrun the bulk fetch, which then lacks the server's new
-     * unfinished read. Keeping the local placeholder stops `currentRead` falling back to an older finished read.
+     * A status change into Reading can outrun the bulk fetch, which then lacks the new unfinished read:
+     * the local placeholder after an offline write, the server's own read after an online one. Keeping
+     * the snapshot's read stops `currentRead` falling back to an older finished read.
      */
-    private fun Book.preservePlaceholderRead(snapshot: Book): Book {
-        val snapshotRead: UserBookRead = snapshot.currentRead?.takeIf { it.isPlaceholder } ?: return this
+    private fun Book.preserveUnfinishedRead(snapshot: Book): Book {
+        val snapshotRead: UserBookRead = snapshot.currentRead ?: return this
+
+        if (snapshotRead.isFinished) return this
+
         val reconciledUserBook: UserBook = userBook ?: return this
 
         val isReadingLike: Boolean = reconciledUserBook.status == BookStatus.Reading ||
             reconciledUserBook.status == BookStatus.Paused
 
         if (isReadingLike.not() || reconciledUserBook.reads.any { it.isFinished.not() }) return this
+
+        if (reconciledUserBook.reads.any { it.id == snapshotRead.id }) return this
 
         return copy(userBook = reconciledUserBook.copy(reads = reconciledUserBook.reads + snapshotRead))
     }
@@ -341,6 +367,9 @@ internal class OfflineUserBookSyncImpl(
 
     private fun Book.preserveProgress(snapshot: Book): Book {
         val snapshotRead: UserBookRead = snapshot.currentRead ?: return this
+
+        if (snapshotRead.isFinished) return this
+
         val fetchedUserBook: UserBook = userBook ?: return this
 
         val matchingRead: UserBookRead? = fetchedUserBook.reads.firstOrNull { it.id == snapshotRead.id }
@@ -387,10 +416,21 @@ internal class OfflineUserBookSyncImpl(
             }
         }
 
+        // Same lag as in preserveProgress: the fetch may not carry the read this write finished yet.
+        val isSnapshotReadMissing: Boolean = snapshotRead != null &&
+            snapshotRead.isPlaceholder.not() &&
+            fetchedUserBook.reads.none { it.id == snapshotRead.id }
+
+        val missingSnapshotRead: List<UserBookRead> = if (isSnapshotReadMissing) {
+            listOfNotNull(snapshotRead)
+        } else {
+            emptyList()
+        }
+
         return copy(
             userBook = fetchedUserBook.copy(
                 status = snapshotUserBook.status,
-                reads = updatedReads,
+                reads = updatedReads + missingSnapshotRead,
             ),
         )
     }
