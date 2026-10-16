@@ -18,6 +18,9 @@ private const val HEADER_REMAINING = "X-Ratelimit-Remaining"
 // Conservative hold used when a wait header is present but not delta-seconds; see durationOrNull.
 private val UNPARSEABLE_WAIT_FALLBACK = 5.seconds
 
+// The API's budget refills on a roughly one-minute window, so a longer hold (or an epoch-like value) is a bug, not a wait.
+private val MAX_WAIT = 60.seconds
+
 /**
  * What the API says about the caller's remaining budget, read off a response.
  *
@@ -75,7 +78,16 @@ private fun List<HttpHeader>.intOrNull(name: String): Int? = valueOrNull(name)?.
 private fun List<HttpHeader>.durationOrNull(name: String): Duration? {
     val raw: String = valueOrNull(name)?.trim() ?: return null
 
-    raw.toLongOrNull()?.let { return it.seconds }
+    val parsed: Long? = raw.toLongOrNull()
+
+    if (parsed != null) {
+        val clamped: Long = parsed.coerceIn(
+            0L,
+            MAX_WAIT.inWholeSeconds,
+        )
+
+        return clamped.seconds
+    }
 
     AppLog.w("Could not read $name header '$raw' as seconds; holding for $UNPARSEABLE_WAIT_FALLBACK")
 
