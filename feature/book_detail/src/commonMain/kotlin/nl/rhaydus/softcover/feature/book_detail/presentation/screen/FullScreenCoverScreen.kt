@@ -29,7 +29,9 @@ internal class FullScreenCoverScreen(
         val model = cover
 
         if (model == null) {
-            LaunchedEffect(Unit) { navigator.pop() }
+            LaunchedEffect(Unit) {
+                if (navigator.lastItem === this@FullScreenCoverScreen) navigator.pop()
+            }
 
             return
         }
