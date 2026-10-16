@@ -38,6 +38,18 @@ class ExternalNavigationCodecTest {
             // ----- Assert -----
             parsed shouldBe request
         }
+
+        @Test
+        fun `the book verdict request survives a round trip`() {
+            // ----- Arrange -----
+            val request = ExternalNavigationRequest.OpenBookVerdict(bookId = 42)
+
+            // ----- Act -----
+            val parsed = parseExternalNavigationRequest(uri = request.toUriString())
+
+            // ----- Assert -----
+            parsed shouldBe request
+        }
     }
 
     @Nested
@@ -67,6 +79,18 @@ class ExternalNavigationCodecTest {
         }
 
         @Test
+        fun `a book verdict request keeps its persisted uri`() {
+            // ----- Arrange -----
+            val request = ExternalNavigationRequest.OpenBookVerdict(bookId = 42)
+
+            // ----- Act -----
+            val uri = request.toUriString()
+
+            // ----- Assert -----
+            uri shouldBe "softcover://open/book/42/verdict"
+        }
+
+        @Test
         fun `a persisted book uri still parses to the same request`() {
             // ----- Arrange -----
             val uri = "softcover://open/book/42"
@@ -91,6 +115,9 @@ class ExternalNavigationCodecTest {
                 "non-integer book id" to "softcover://open/book/abc",
                 "tab with trailing segment" to "softcover://open/tab/library/extra",
                 "book with trailing segment" to "softcover://open/book/42/extra",
+                "book with an unknown sub-route" to "softcover://open/book/1/other",
+                "verdict with non-integer book id" to "softcover://open/book/x/verdict",
+                "verdict with trailing segment" to "softcover://open/book/1/verdict/x",
                 "focus with trailing segment" to "softcover://open/focus/extra",
                 "tab without name" to "softcover://open/tab",
                 "book without id" to "softcover://open/book",

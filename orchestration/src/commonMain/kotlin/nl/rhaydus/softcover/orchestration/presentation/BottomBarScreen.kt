@@ -227,6 +227,17 @@ private fun ConsumeExternalNavigationRequests(
                     externalNavigationRequests.consume(request = request)
                 }
 
+                is ExternalNavigationRequest.OpenBookVerdict -> {
+                    currentPresenter.open(
+                        ScreenDestination.BookDetail(
+                            id = request.bookId,
+                            showVerdictSheet = true,
+                        ),
+                    )
+
+                    externalNavigationRequests.consume(request = request)
+                }
+
                 ExternalNavigationRequest.OpenFocusMode, null -> Unit
             }
         }

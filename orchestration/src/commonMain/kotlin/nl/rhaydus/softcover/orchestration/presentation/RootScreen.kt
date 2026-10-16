@@ -155,10 +155,13 @@ internal object RootScreen : Screen {
                                                     }
 
                                                     // Tab and book requests are consumed by BottomBarScreen;
-                                                    // surface it first if a pushed screen covers it.
+                                                    // surface it first if a pushed screen covers it. Focus Mode
+                                                    // is never popped: the request waits until it is left.
                                                     is ExternalNavigationRequest.OpenTab,
-                                                    is ExternalNavigationRequest.OpenBook -> {
+                                                    is ExternalNavigationRequest.OpenBook,
+                                                    is ExternalNavigationRequest.OpenBookVerdict -> {
                                                         if (navigator.lastItem !is BottomBarScreen &&
+                                                            navigator.items.none { it is FocusModeScreen } &&
                                                             navigator.items.any { it is BottomBarScreen }
                                                         ) {
                                                             navigator.popUntil { it is BottomBarScreen }

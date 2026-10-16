@@ -26,6 +26,7 @@ internal class AppNavigatorImpl : AppNavigator {
             id = destination.id,
             initialCover = destination.initialCover,
             transitionSurface = destination.transitionSurface,
+            showVerdictSheet = destination.showVerdictSheet,
         )
 
         is ScreenDestination.BarcodeScanner -> BarcodeScannerScreen(

@@ -41,6 +41,7 @@ class BookDetailScreen(
     val id: Int,
     @TransientNavArg private val initialCover: BookInitialCover? = null,
     private val transitionSurface: String? = null,
+    @TransientNavArg private val showVerdictSheet: Boolean = false,
 ) : Screen {
     // The key must include the book id: Voyager's ScreenModelStore is keyed by the screen key, so a
     // class-constant key makes every book share one BookDetailScreenScreenModel. That surfaces in the
@@ -71,6 +72,7 @@ class BookDetailScreen(
                     id,
                     initialCover,
                     transitionSurface,
+                    showVerdictSheet,
                 )
             }
 

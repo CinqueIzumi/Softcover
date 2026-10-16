@@ -7,5 +7,7 @@ sealed interface ExternalNavigationRequest {
     /** [bookId] is `books.id`. */
     data class OpenBook(val bookId: Int) : ExternalNavigationRequest
 
+    data class OpenBookVerdict(val bookId: Int) : ExternalNavigationRequest
+
     data object OpenFocusMode : ExternalNavigationRequest
 }
