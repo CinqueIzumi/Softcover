@@ -19,9 +19,11 @@ A few honest caveats:
 - The book you're **Currently Reading**, with your progress.
 - A **random pick from Want-to-Read**, for when you can't decide.
 - What's **Trending this week** on Hardcover.
+- A **Quote of the Day** from the quotes you've saved, with arrows to flip through the rest.
 - Each one configurable: which book, and how often it refreshes.
 
 **And plenty more:**
+- **Quotes.** Save a line from a book with its page, who can see it, and when you read it, and move your progress there at the same time.
 - **Pick your theme.** Light, Dark, System — and **Dim**, a warm low-contrast palette for reading at night. Plus **Spine colour**: a handful of named accent palettes to make the app feel like yours.
 - **An About page**, with a **per-version changelog** so you can see what changed, and an **in-app Roadmap** — this page, live in the app.
 - **Re-reads.** Book detail starts keeping a history of every time you've read a book, not just the last one.
@@ -63,7 +65,7 @@ Everything you might want to record about a book, and every statistic that comes
 
 ## 3.4.0: Passages, logs & the calendar
 
-- A **Passages** section for the highlights you save, with quick-add while you're reading, and a **Notes & Highlights** inbox you can search across.
+- **Quick-add a quote** while you're reading, and a **Notes & Highlights** inbox you can search across every quote you've saved.
 - A **Reading Sessions** log of everything you've read and for how long.
 - **Edit or remove** the reading updates you've logged, and change when they happened.
 - A **Reading Activity Calendar**: every day you read, with the covers you touched, laid out as a month you can page through. It comes to your **home screen** too, as a calendar widget.
@@ -102,7 +104,7 @@ Opt-in reminders (deadlines, release days, weekly recaps, milestones), an in-app
 
 ## 3.12.0: Read anywhere, back it up
 
-Everything you log offline queues and syncs on reconnect, with conflicts surfacing as a gentle shake. Full **backup & restore**. More widgets (streak, Quote of the Day, Year in Books), a **Quote of the Day** screen, TalkBack polish, **Wear OS** support, and launcher long-press shortcuts.
+Everything you log offline queues and syncs on reconnect, with conflicts surfacing as a gentle shake. Full **backup & restore**. More widgets (streak, Year in Books), a **Quote of the Day** screen, TalkBack polish, **Wear OS** support, and launcher long-press shortcuts.
 
 ## 4.0.0: Friend Feed
 
