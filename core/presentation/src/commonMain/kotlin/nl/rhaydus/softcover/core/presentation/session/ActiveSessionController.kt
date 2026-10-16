@@ -18,12 +18,8 @@ import nl.rhaydus.softcover.core.domain.model.Book
 interface ActiveSessionController {
     val activeSession: StateFlow<ActiveSession?>
 
-    /**
-     * Set when a lock-screen tap asks to open Focus Mode. Held as a consumable flag (not a one-shot
-     * event) so a cold start — where the notification launches the app before the root is collecting
-     * — still routes into Focus Mode once the navigator is ready.
-     */
-    val pendingFocusMode: StateFlow<Boolean>
+    /** False until [activeSession] has its first real value, so "not loaded yet" differs from "no session". */
+    val sessionLoaded: StateFlow<Boolean>
 
     val outcomes: SharedFlow<SessionOutcome>
 
@@ -36,8 +32,4 @@ interface ActiveSessionController {
     fun stop()
 
     fun updatePage(newPage: Int)
-
-    fun requestFocusMode()
-
-    fun consumeFocusModeRequest()
 }

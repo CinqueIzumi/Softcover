@@ -4,7 +4,6 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import com.apollographql.cache.normalized.FetchPolicy
 import kotlinx.coroutines.withContext
-import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
@@ -43,6 +42,7 @@ import nl.rhaydus.softcover.UpdateUserBookStatusMutation
 import nl.rhaydus.softcover.UpdateUserBookStatusMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
+import nl.rhaydus.softcover.core.book.data.mapper.toTrendingDuration
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.model.UnfinishedRead
@@ -53,6 +53,7 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.util.localDateOf
@@ -61,6 +62,7 @@ import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
+import kotlin.time.Clock
 
 interface BooksRemoteDataSource {
     suspend fun fetchBookById(id: Int): Book
@@ -78,7 +80,7 @@ interface BooksRemoteDataSource {
         forceNetwork: Boolean = false,
     ): List<Book>
 
-    suspend fun fetchTrendingBooks(): List<Book>
+    suspend fun fetchTrendingBookIds(period: TrendingPeriod): List<Int>
 
     suspend fun markBookAsWantToRead(
         bookId: Int,
@@ -329,28 +331,12 @@ internal class BooksRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun fetchTrendingBooks(): List<Book> {
-        val trendingIds: List<Int> = apolloClient.safeQuery(query = GetTrendingBookIdsQuery())
-            .books_trending
-            ?.ids
-            ?.mapNotNull { it }
-            ?: return emptyList()
-
-        if (trendingIds.isEmpty()) return emptyList()
-
-        val idOrdered = trendingIds.withIndex().associate { it.value to it.index }
-
-        return apolloClient
-            .safeQuery(
-                query = GetBooksByIdsQuery(ids = trendingIds),
-                fetchPolicy = FetchPolicy.CacheFirst,
-            )
-            .books
-            .mapNotNull { it.booksByIdsBookDetailFragment()?.toBook() }
-            // Restore the trending rank lost by the by-ids batch fetch; a book whose id isn't in the
-            // trending set (e.g. an Apollo canonical-merge redirect) sorts last on its null rank.
-            .sortedWith(compareBy(nullsLast()) { book -> idOrdered[book.id] })
-    }
+    override suspend fun fetchTrendingBookIds(period: TrendingPeriod): List<Int> = apolloClient
+        .safeQuery(query = GetTrendingBookIdsQuery(duration = period.toTrendingDuration()))
+        .books_trending
+        ?.ids
+        ?.mapNotNull { it }
+        .orEmpty()
 
     override suspend fun getEditionsByBookId(
         bookId: Int,

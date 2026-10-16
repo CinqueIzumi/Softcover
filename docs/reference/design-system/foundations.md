@@ -52,7 +52,7 @@ Italic is reserved for display, headlines, body prose and stats; roman for page 
 
 ### 2.3 Shape & elevation
 
-- **Corners.** The `Corners` scale (`xxs` 2, `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 20, `xxl` 28 dp, plus `pill`); true circles keep `CircleShape`. Cover art uses a subtle radius.
+- **Corners.** The `Corners` scale (`xxs` 2, `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 20, `xxl` 28 dp, plus `pill`); true circles keep `CircleShape`. Cover art uses a subtle radius. `CornerRadius` holds the same steps as raw `Dp` for surfaces that take a radius instead of a shape (Glance widgets).
 - **Elevation.** The one shadow exception is book covers, which carry a slight shadow.
 - **Accent bar.** Two sizes, per [fd §4](../../rhaydus/0.3.1/design-system-foundations.md#4-shape-elevation-and-the-accent-bar):
   - **Section bar — 32×4 dp.** Sits in the page gutter before a full `eyebrow` + display/headline pair: sheet headers, settings section headers, top-level regions.

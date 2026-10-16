@@ -8,25 +8,24 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CheckForAppUpdateUseCase
+import nl.rhaydus.softcover.orchestration.navigation.parseExternalNavigationRequest
 import nl.rhaydus.softcover.orchestration.presentation.viewmodel.MainActivityViewModel
 import org.koin.android.ext.android.inject
 
 /**
  * Android entry point. Provides only the Android-specific chrome — splash screen, edge-to-edge
- * system bars, launcher-intent (Focus Mode deep link) handling, and the in-app-update check — then
+ * system bars, launcher-intent external-navigation handling, and the in-app-update check — then
  * hosts the shared [App] composable. All cross-platform root UI lives in [App].
  */
 internal class MainActivity : ComponentActivity() {
     private val viewModel: MainActivityViewModel by inject()
     private val checkForAppUpdateUseCase: CheckForAppUpdateUseCase by inject()
-    private val activeSessionController: ActiveSessionController by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        handleFocusModeIntent(intent = intent)
+        if (savedInstanceState == null) handleExternalNavigationIntent(intent = intent)
 
         // The stored theme preference hasn't loaded yet, so the bars follow the system for now;
         // `ApplyPlatformThemeAppearance` re-applies them from inside [App] once it resolves.
@@ -49,18 +48,15 @@ internal class MainActivity : ComponentActivity() {
 
         setIntent(intent)
 
-        handleFocusModeIntent(intent = intent)
+        handleExternalNavigationIntent(intent = intent)
     }
 
-    private fun handleFocusModeIntent(intent: Intent?) {
-        if (intent?.getBooleanExtra(
-            EXTRA_OPEN_FOCUS_MODE,
-            false,
-        ) != true) return
+    private fun handleExternalNavigationIntent(intent: Intent?) {
+        val request = intent?.data?.toString()?.let(::parseExternalNavigationRequest) ?: return
 
-        activeSessionController.requestFocusMode()
+        viewModel.onExternalNavigationRequest(request = request)
 
-        intent.removeExtra(EXTRA_OPEN_FOCUS_MODE)
+        intent.data = null
     }
 
     override fun onResume() {
@@ -69,9 +65,5 @@ internal class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             checkForAppUpdateUseCase()
         }
-    }
-
-    companion object {
-        const val EXTRA_OPEN_FOCUS_MODE = "nl.rhaydus.softcover.OPEN_FOCUS_MODE"
     }
 }

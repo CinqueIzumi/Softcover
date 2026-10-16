@@ -31,6 +31,7 @@ import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
+import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
@@ -51,6 +52,7 @@ internal class BookDetailScreenScreenModel(
     private val bookId: Int,
     initialCover: BookInitialCover?,
     transitionSurface: String?,
+    showVerdictSheet: Boolean,
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,
     private val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
@@ -93,6 +95,7 @@ internal class BookDetailScreenScreenModel(
         transitionSurface = transitionSurface,
         initialCover = initialCover,
         scannedEditionId = initialCover?.scannedEditionId,
+        verdictSheetContext = VerdictSheetContext.FINISHED.takeIf { showVerdictSheet },
     ).withCoverModels(),
     initialLocalVariables = BookDetailLocalVariables(),
     initializers = flows,

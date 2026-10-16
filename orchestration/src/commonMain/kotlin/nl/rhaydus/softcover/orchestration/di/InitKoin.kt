@@ -32,8 +32,7 @@ fun initKoin(platformDeclaration: KoinAppDeclaration = {}): KoinApplication =
 /**
  * Platform-neutral post-Koin startup wiring, shared by every entry point so it can't drift between
  * platforms. Installs the global connectivity signal, starts the offline write-sync queues, and
- * warms the cached user id. Android additionally runs `NotificationChannelInitializer` (channels are
- * an Android-only concept), so that stays in `SoftCoverApp`.
+ * warms the cached user id.
  */
 fun startAppServices(koin: Koin) {
     NetworkAvailability.install(koin.get())
@@ -45,4 +44,6 @@ fun startAppServices(koin: Koin) {
     appScope.launch {
         runCatchingCancellable { koin.get<GetUserIdAsFlowUseCase>().invoke().firstOrNull() }
     }
+
+    startPlatformAppServices(koin)
 }

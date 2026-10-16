@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequests
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.profile.di.profileModule
@@ -32,6 +33,7 @@ import nl.rhaydus.softcover.feature.scan.di.scanModule
 import nl.rhaydus.softcover.feature.session.di.sessionModule
 import nl.rhaydus.softcover.feature.settings.di.settingsModule
 import nl.rhaydus.softcover.orchestration.navigation.AppNavigatorImpl
+import nl.rhaydus.softcover.orchestration.navigation.ExternalNavigationRequestsImpl
 import nl.rhaydus.softcover.orchestration.presentation.collector.OfflineBannerCollector
 import nl.rhaydus.softcover.orchestration.presentation.collector.RootCollector
 import nl.rhaydus.softcover.orchestration.presentation.screenmodel.BottomBarScreenModel
@@ -90,6 +92,8 @@ internal val orchestrationModule = module {
 
     single<AppNavigator> { AppNavigatorImpl() }
 
+    single<ExternalNavigationRequests> { ExternalNavigationRequestsImpl() }
+
     single<ActiveSessionController> {
         ActiveSessionControllerImpl(
             observeActiveSessionUseCase = get(),
@@ -114,6 +118,7 @@ internal val orchestrationModule = module {
             drainPendingListWritesUseCase = get(),
             reAuthenticateUseCase = get(),
             resetUserDataUseCase = get(),
+            externalNavigationRequests = get(),
         )
     }
 

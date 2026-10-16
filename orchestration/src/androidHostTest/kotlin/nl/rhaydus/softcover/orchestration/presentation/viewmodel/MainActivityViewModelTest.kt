@@ -20,7 +20,9 @@ import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.DrainPendingListWritesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
+import nl.rhaydus.softcover.orchestration.navigation.ExternalNavigationRequestsImpl
 import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryOnStartUseCase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -36,6 +38,7 @@ class MainActivityViewModelTest {
     private lateinit var drainPendingListWritesUseCase: DrainPendingListWritesUseCase
     private lateinit var reAuthenticateUseCase: ReAuthenticateUseCase
     private lateinit var resetUserDataUseCase: ResetUserDataUseCase
+    private lateinit var externalNavigationRequests: ExternalNavigationRequestsImpl
     private lateinit var viewModel: MainActivityViewModel
 
     @BeforeEach
@@ -49,6 +52,7 @@ class MainActivityViewModelTest {
         drainPendingListWritesUseCase = mockk(relaxed = true)
         reAuthenticateUseCase = mockk(relaxed = true)
         resetUserDataUseCase = mockk(relaxed = true)
+        externalNavigationRequests = ExternalNavigationRequestsImpl()
 
         coEvery {
             getUserIdUseCase()
@@ -65,6 +69,7 @@ class MainActivityViewModelTest {
             drainPendingListWritesUseCase = drainPendingListWritesUseCase,
             reAuthenticateUseCase = reAuthenticateUseCase,
             resetUserDataUseCase = resetUserDataUseCase,
+            externalNavigationRequests = externalNavigationRequests,
         )
     }
 
@@ -81,6 +86,7 @@ class MainActivityViewModelTest {
         drainPendingListWritesUseCase = drainPendingListWritesUseCase,
         reAuthenticateUseCase = reAuthenticateUseCase,
         resetUserDataUseCase = resetUserDataUseCase,
+        externalNavigationRequests = externalNavigationRequests,
     )
 
     private fun showReAuthSheet() {
@@ -442,6 +448,83 @@ class MainActivityViewModelTest {
             coVerify(exactly = 0) { refreshLibraryOnStartUseCase() }
             coVerify(exactly = 0) { drainPendingListWritesUseCase() }
             coVerify(exactly = 0) { refreshReadingActivityUseCase() }
+        }
+    }
+
+    @Nested
+    inner class OnExternalNavigationRequest {
+        private val request = ExternalNavigationRequest.OpenBook(bookId = 7)
+
+        @Test
+        fun `is dropped when the user is signed out`() {
+            // ----- Arrange -----
+            viewModel.setUserAuthenticated(authenticated = false)
+
+            // ----- Act -----
+            viewModel.onExternalNavigationRequest(request = request)
+
+            // ----- Assert -----
+            externalNavigationRequests.pending.value.shouldBeNull()
+        }
+
+        @Test
+        fun `is pending when the user is signed in`() {
+            // ----- Arrange -----
+            viewModel.setUserAuthenticated(authenticated = true)
+
+            // ----- Act -----
+            viewModel.onExternalNavigationRequest(request = request)
+
+            // ----- Assert -----
+            externalNavigationRequests.pending.value shouldBe request
+        }
+
+        @Test
+        fun `survives a still loading sign-in state and is pending once signed in`() {
+            // ----- Arrange -----
+            val userId = CompletableDeferred<Result<Int>>()
+            coEvery {
+                getUserIdUseCase()
+            } coAnswers { userId.await() }
+            val model = createViewModel()
+
+            // ----- Act -----
+            model.onExternalNavigationRequest(request = request)
+            userId.complete(Result.success(42))
+
+            // ----- Assert -----
+            model.state.value.authenticated shouldBe true
+            externalNavigationRequests.pending.value shouldBe request
+        }
+
+        @Test
+        fun `is cleared when the sign-in state resolves to signed out`() {
+            // ----- Arrange -----
+            val userId = CompletableDeferred<Result<Int>>()
+            coEvery {
+                getUserIdUseCase()
+            } coAnswers { userId.await() }
+            val model = createViewModel()
+            model.onExternalNavigationRequest(request = request)
+
+            // ----- Act -----
+            userId.complete(Result.success(-1))
+
+            // ----- Assert -----
+            externalNavigationRequests.pending.value.shouldBeNull()
+        }
+
+        @Test
+        fun `is cleared when the user signs out`() {
+            // ----- Arrange -----
+            viewModel.setUserAuthenticated(authenticated = true)
+            viewModel.onExternalNavigationRequest(request = request)
+
+            // ----- Act -----
+            viewModel.setUserAuthenticated(authenticated = false)
+
+            // ----- Assert -----
+            externalNavigationRequests.pending.value.shouldBeNull()
         }
     }
 }

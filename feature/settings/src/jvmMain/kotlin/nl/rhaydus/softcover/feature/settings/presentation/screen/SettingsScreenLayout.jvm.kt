@@ -41,6 +41,7 @@ internal actual fun SettingsScreenLayout(
     navigateToProfile: () -> Unit,
     navigateToAppearanceSettings: () -> Unit,
     navigateToLibraryVisibility: () -> Unit,
+    navigateToWidgets: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
     navigateToWhatsNew: () -> Unit,

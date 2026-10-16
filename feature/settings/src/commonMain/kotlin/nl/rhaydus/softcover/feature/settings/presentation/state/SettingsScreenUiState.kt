@@ -69,6 +69,9 @@ internal data class SettingsScreenUiState(
 
     val appUpdateCallout: CalloutUiModel? = null,
 
+    /** Whether the platform has home-screen widgets to manage; gates the Widgets menu row. */
+    val widgetsSupported: Boolean = false,
+
     val appUpdateSimulatorHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Debug",
         headline = "App update simulator",

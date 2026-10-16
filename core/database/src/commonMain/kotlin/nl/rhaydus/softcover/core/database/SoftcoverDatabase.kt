@@ -39,6 +39,8 @@ import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
+import nl.rhaydus.softcover.core.database.model.TrendingBookEntity
+import nl.rhaydus.softcover.core.database.model.TrendingMetaEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
@@ -70,11 +72,13 @@ import kotlin.coroutines.CoroutineContext
         UserTagVocabularyEntity::class,
         PublishedDocumentEntity::class,
         ProgressHistoryEntity::class,
+        TrendingBookEntity::class,
+        TrendingMetaEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 54,
+    version = 55,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -1395,6 +1399,34 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_54_55 = object : Migration(54, 55) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS trending_books (
+                            period TEXT NOT NULL,
+                            bookId INTEGER NOT NULL,
+                            rank INTEGER NOT NULL,
+                            PRIMARY KEY(period, bookId),
+                            FOREIGN KEY(bookId) REFERENCES books(id) ON UPDATE NO ACTION ON DELETE CASCADE
+                        )
+                    """.trimIndent(),
+                )
+                connection.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_trending_books_bookId ON trending_books (bookId)",
+                )
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS trending_meta (
+                            period TEXT NOT NULL,
+                            fetchedAtEpochMillis INTEGER NOT NULL,
+                            PRIMARY KEY(period)
+                        )
+                    """.trimIndent(),
+                )
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1450,6 +1482,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_51_52,
             MIGRATION_52_53,
             MIGRATION_53_54,
+            MIGRATION_54_55,
         )
     }
 }

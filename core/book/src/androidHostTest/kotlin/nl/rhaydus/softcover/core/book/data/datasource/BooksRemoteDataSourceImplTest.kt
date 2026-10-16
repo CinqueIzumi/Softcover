@@ -7,6 +7,7 @@ import com.apollographql.cache.normalized.FetchPolicy
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
 import io.mockk.clearAllMocks
@@ -56,11 +57,13 @@ import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
+import nl.rhaydus.softcover.type.TrendingDuration
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -924,7 +927,7 @@ class BooksRemoteDataSourceImplTest {
     }
 
     @Nested
-    inner class FetchTrendingBooks {
+    inner class FetchTrendingBookIds {
         private fun trendingIdsData(ids: List<Int?>?): GetTrendingBookIdsQuery.Data {
             val trending = ids?.let { idsValue ->
                 mockk<GetTrendingBookIdsQuery.Data.Books_trending> {
@@ -950,146 +953,48 @@ class BooksRemoteDataSourceImplTest {
             } returns data
         }
 
-        private fun stubBooksByIdsEntry(book: Book): GetBooksByIdsQuery.Data.Book {
-            val entry = mockk<GetBooksByIdsQuery.Data.Book>()
-
-            every {
-                with(GetBooksByIdsQuery.Data.Book.Companion) { entry.bookDetailFragment() }
-            } returns mockk {
-                every {
-                    toBook()
-                } returns book
-            }
-
-            return entry
-        }
-
-        private fun stubBooksByIdsQuery(entries: List<GetBooksByIdsQuery.Data.Book>) {
-            val booksData = mockk<GetBooksByIdsQuery.Data> {
-                every {
-                    books
-                } returns entries
-            }
-
-            coEvery {
-                apolloClient.safeQuery(
-                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
-                    fetchPolicy = any(),
-                )
-            } returns booksData
-        }
-
         @Test
-        fun `returns an empty list without fetching books when there is no trending set`() = runTest {
+        fun `returns an empty list when there is no trending set`() = runTest {
             // ----- Arrange -----
             stubTrendingIdsQuery(trendingIdsData(ids = null))
 
             // ----- Act -----
-            val result = dataSource.fetchTrendingBooks()
+            val result = dataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
 
             // ----- Assert -----
             result shouldBe emptyList()
-            coVerify(exactly = 0) {
+        }
+
+        @Test
+        fun `drops null ids while keeping the order of the rest`() = runTest {
+            // ----- Arrange -----
+            stubTrendingIdsQuery(trendingIdsData(ids = listOf(30, null, 10, null, 20)))
+
+            // ----- Act -----
+            val result = dataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
+
+            // ----- Assert -----
+            result shouldBe listOf(30, 10, 20)
+        }
+
+        @Test
+        fun `sends the requested period as the query duration`() = runTest {
+            // ----- Arrange -----
+            val querySlot = slot<Query<GetTrendingBookIdsQuery.Data>>()
+
+            coEvery {
                 apolloClient.safeQuery(
-                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
+                    query = capture(querySlot),
                     fetchPolicy = any(),
                 )
-            }
-        }
-
-        @Test
-        fun `returns an empty list without fetching books when the trending ids are empty`() = runTest {
-            // ----- Arrange -----
-            stubTrendingIdsQuery(trendingIdsData(ids = emptyList()))
+            } returns trendingIdsData(ids = emptyList())
 
             // ----- Act -----
-            val result = dataSource.fetchTrendingBooks()
+            dataSource.fetchTrendingBookIds(period = TrendingPeriod.ThreeMonths)
 
             // ----- Assert -----
-            result shouldBe emptyList()
-            coVerify(exactly = 0) {
-                apolloClient.safeQuery(
-                    query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
-                    fetchPolicy = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `requests the non-null trending ids and restores the trending rank of the returned books`() = runTest {
-            // ----- Arrange -----
-            val first = stubBook(id = 30)
-            val second = stubBook(id = 10)
-            val third = stubBook(id = 20)
-
-            stubTrendingIdsQuery(trendingIdsData(ids = listOf(30, null, 10, 20)))
-            stubBooksByIdsQuery(
-                listOf(
-                    stubBooksByIdsEntry(third),
-                    stubBooksByIdsEntry(first),
-                    stubBooksByIdsEntry(second),
-                ),
-            )
-
-            // ----- Act -----
-            val result = dataSource.fetchTrendingBooks()
-
-            // ----- Assert -----
-            result shouldBe listOf(first, second, third)
-            coVerify(exactly = 1) {
-                apolloClient.safeQuery(
-                    query = match<Query<GetBooksByIdsQuery.Data>> {
-                        it is GetBooksByIdsQuery && it.ids == listOf(30, 10, 20)
-                    },
-                    fetchPolicy = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `sorts a returned book whose id is not in the trending set last`() = runTest {
-            // ----- Arrange -----
-            val redirected = stubBook(id = 99)
-            val ranked = stubBook(id = 10)
-
-            stubTrendingIdsQuery(trendingIdsData(ids = listOf(10, 20)))
-            stubBooksByIdsQuery(
-                listOf(
-                    stubBooksByIdsEntry(redirected),
-                    stubBooksByIdsEntry(ranked),
-                ),
-            )
-
-            // ----- Act -----
-            val result = dataSource.fetchTrendingBooks()
-
-            // ----- Assert -----
-            result shouldBe listOf(ranked, redirected)
-        }
-
-        @Test
-        fun `drops entries whose bookDetailFragment is null`() = runTest {
-            // ----- Arrange -----
-            val ranked = stubBook(id = 10)
-            val unmappable = mockk<GetBooksByIdsQuery.Data.Book>()
-
-            every {
-                with(GetBooksByIdsQuery.Data.Book.Companion) { unmappable.bookDetailFragment() }
-            } returns null
-
-            stubTrendingIdsQuery(trendingIdsData(ids = listOf(10, 20)))
-            stubBooksByIdsQuery(
-                listOf(
-                    stubBooksByIdsEntry(ranked),
-                    unmappable,
-                ),
-            )
-
-            // ----- Act -----
-            val result = dataSource.fetchTrendingBooks()
-
-            // ----- Assert -----
-            result shouldBe listOf(ranked)
+            val query = querySlot.captured.shouldBeInstanceOf<GetTrendingBookIdsQuery>()
+            query.duration shouldBe TrendingDuration.three_month
         }
     }
 

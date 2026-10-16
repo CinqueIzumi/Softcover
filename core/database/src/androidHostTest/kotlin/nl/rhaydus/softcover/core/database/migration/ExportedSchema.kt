@@ -37,6 +37,10 @@ internal class ExportedSchema private constructor(
 
     val tableNames: Set<String> get() = tables.map { it.name }.toSet()
 
+    val indexNames: Set<String> get() = tables.flatMap { it.indexNames }.toSet()
+
+    val viewNames: Set<String> get() = views.map { it.first }.toSet()
+
     fun table(name: String): Table = tables.single { it.name == name }
 
     /** Creates every table, index and view, writes the identity hash and sets `user_version`. */

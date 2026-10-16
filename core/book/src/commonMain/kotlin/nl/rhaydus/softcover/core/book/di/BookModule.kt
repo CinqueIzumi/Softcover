@@ -22,16 +22,18 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetPausedUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedBooksByStatusUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResumeIfPausedUseCase
@@ -117,11 +119,19 @@ val bookModule = module {
     }
 
     factory {
-        ObserveBooksByIdsUseCase(booksRepository = get())
+        ObserveTrendingBooksUseCase(booksRepository = get())
     }
 
     factory {
-        GetTrendingBooksUseCase(booksRepository = get())
+        ObserveTrendingFetchedAtUseCase(booksRepository = get())
+    }
+
+    factory {
+        RefreshTrendingBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        ObserveBooksByIdsUseCase(booksRepository = get())
     }
 
     factory {

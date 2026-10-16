@@ -1,16 +1,15 @@
 package nl.rhaydus.softcover.orchestration.session
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
@@ -41,8 +40,28 @@ internal class ActiveSessionControllerImpl(
     private val appDispatchers: AppDispatchers,
     private val readingSessionLauncher: ReadingSessionLauncher,
 ) : ActiveSessionController {
+    private val _activeSession = MutableStateFlow<ActiveSession?>(null)
+
+    override val activeSession: StateFlow<ActiveSession?> = _activeSession.asStateFlow()
+
+    private val _sessionLoaded = MutableStateFlow(false)
+
+    override val sessionLoaded: StateFlow<Boolean> = _sessionLoaded.asStateFlow()
+
+    init {
+        applicationScope.scope.launch {
+            observeSession().collect { session ->
+                // The session is published before the flag so a collector that sees `sessionLoaded`
+                // never reads a stale null from `activeSession`.
+                _activeSession.value = session
+
+                _sessionLoaded.value = true
+            }
+        }
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val activeSession: StateFlow<ActiveSession?> =
+    private fun observeSession(): Flow<ActiveSession?> =
         observeActiveSessionUseCase()
             .flatMapLatest { session ->
                 if (session == null) return@flatMapLatest flowOf(null)
@@ -60,15 +79,6 @@ internal class ActiveSessionControllerImpl(
                     }
                 }
             }
-            .stateIn(
-                scope = applicationScope.scope,
-                started = SharingStarted.Eagerly,
-                initialValue = null,
-            )
-
-    private val _pendingFocusMode = MutableStateFlow(false)
-
-    override val pendingFocusMode: StateFlow<Boolean> = _pendingFocusMode.asStateFlow()
 
     private val _outcomes = MutableSharedFlow<SessionOutcome>(extraBufferCapacity = 1)
 
@@ -148,13 +158,5 @@ internal class ActiveSessionControllerImpl(
                 AppLog.e("$error")
             }
         }
-    }
-
-    override fun requestFocusMode() {
-        _pendingFocusMode.value = true
-    }
-
-    override fun consumeFocusModeRequest() {
-        _pendingFocusMode.value = false
     }
 }

@@ -21,7 +21,7 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
 :orchestration        # Nav host (MainActivity, RootScreen, bottom bars), AppNavigator / AppEntryPoint
                       #   impls, cross-feature orchestration use cases, the softcoverModules aggregate
 :feature:*            # Leaf features: lists, profile, onboarding, explore, library, book_detail,
-                      #   reading, session, scan, settings, app_update
+                      #   reading, session, scan, settings, app_update, widget
 :core:*               # domain, database, network, designsystem, presentation, component, uibinding,
                       #   notification, preferences, identity, book, lists, deadlines, personal,
                       #   profile, connectivity
@@ -244,5 +244,13 @@ Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core
   migrations, and **all** persisted entities + DAOs live in `:core:database` (not in the feature whose
   data source uses them — see the vertical-slice rule in module-structure.md).
 - **DataStore**: simple key-value preferences (app settings, search history).
+- **Trending** is cached in Room per `TrendingPeriod`, with a fetched-at stamp; `ObserveTrendingBooksUseCase`
+  and `RefreshTrendingBooksUseCase` (`maxAge`) are the one source for Explore, Reading and the widget.
+- **External navigation.** A surface outside the app (a widget) opens it through
+  `ExternalNavigationRequest` (tab, book, book verdict, Focus Mode), encoded by `AppEntryPoint.intent` as a
+  `softcover://open/...` URI whose wire names are never derived from enum names. `ExternalNavigationRequests`
+  holds the one pending request as state; `BottomBarScreen` consumes tab and book requests and `RootScreen`
+  Focus Mode. A tab or book request never pops Focus Mode: it applies underneath and shows once Focus Mode
+  is left. Sign-out clears it.
 - Replacing all rows for a key (clear then insert) is one `@Transaction` DAO method, never two
   data-source calls.

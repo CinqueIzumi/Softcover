@@ -15,6 +15,7 @@ sealed interface ScreenDestination {
         val id: Int,
         val initialCover: BookInitialCover? = null,
         val transitionSurface: String? = null,
+        val showVerdictSheet: Boolean = false,
     ) : ScreenDestination
 
     /**

@@ -4,10 +4,11 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetPausedUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
@@ -44,7 +45,8 @@ internal class ReadingScreenScreenModel(
     private val dismissPlanTodayUseCase: DismissPlanTodayUseCase,
     private val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
     private val getPausedUserBooksUseCase: GetPausedUserBooksUseCase,
-    private val getTrendingBooksUseCase: GetTrendingBooksUseCase,
+    private val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
+    private val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
     private val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
     private val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
     private val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
@@ -75,7 +77,8 @@ internal class ReadingScreenScreenModel(
         dismissPlanTodayUseCase = dismissPlanTodayUseCase,
         getWantToReadUserBooksUseCase = getWantToReadUserBooksUseCase,
         getPausedUserBooksUseCase = getPausedUserBooksUseCase,
-        getTrendingBooksUseCase = getTrendingBooksUseCase,
+        observeTrendingBooksUseCase = observeTrendingBooksUseCase,
+        refreshTrendingBooksUseCase = refreshTrendingBooksUseCase,
         observeRecentReadingActivityUseCase = observeRecentReadingActivityUseCase,
         refreshReadingActivityUseCase = refreshReadingActivityUseCase,
         getReadingStreakEnabledAsFlowUseCase = getReadingStreakEnabledAsFlowUseCase,

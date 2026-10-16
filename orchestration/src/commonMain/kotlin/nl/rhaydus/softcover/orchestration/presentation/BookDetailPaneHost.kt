@@ -53,6 +53,7 @@ internal fun BookDetailPaneHost(
                     id = destination.id,
                     initialCover = destination.initialCover,
                     transitionSurface = destination.transitionSurface,
+                    showVerdictSheet = destination.showVerdictSheet,
                 ),
                 onBackPressed = null,
             )

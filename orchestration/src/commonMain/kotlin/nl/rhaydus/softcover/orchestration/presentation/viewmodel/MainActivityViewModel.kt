@@ -29,6 +29,8 @@ import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.DrainPendingListWritesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.presentation.error.onApiFailure
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequests
 import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 import nl.rhaydus.softcover.core.presentation.state.SplashState
@@ -47,6 +49,7 @@ internal class MainActivityViewModel(
     private val drainPendingListWritesUseCase: DrainPendingListWritesUseCase,
     private val reAuthenticateUseCase: ReAuthenticateUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
+    private val externalNavigationRequests: ExternalNavigationRequests,
 ) : ViewModel(), SessionAuthenticator {
     private val _state = MutableStateFlow(SplashState())
     val state = _state.asStateFlow()
@@ -111,7 +114,21 @@ internal class MainActivityViewModel(
         }
     }
 
+    /**
+     * Accepts a request while the user is signed in or the sign-in state is still loading (a cold-start
+     * request must survive until the shell composes); drops it once the user is known to be signed out.
+     */
+    fun onExternalNavigationRequest(request: ExternalNavigationRequest) {
+        val current = _state.value
+
+        if (current.isLoading || current.authenticated) {
+            externalNavigationRequests.request(request = request)
+        }
+    }
+
     override fun setUserAuthenticated(authenticated: Boolean) {
+        if (authenticated.not()) externalNavigationRequests.clear()
+
         _state.update { it.copy(authenticated = authenticated) }
     }
 
@@ -180,6 +197,8 @@ internal class MainActivityViewModel(
 
     private fun handleCollectedUserId(userId: Int) {
         if (userId == -1) {
+            externalNavigationRequests.clear()
+
             _state.update {
                 it.copy(
                     isLoading = false,

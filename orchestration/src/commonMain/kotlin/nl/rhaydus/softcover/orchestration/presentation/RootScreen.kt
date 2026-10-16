@@ -30,6 +30,8 @@ import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
 import nl.rhaydus.softcover.core.presentation.navigation.CreateListPresenter
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequests
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListSheet
@@ -46,6 +48,8 @@ internal object RootScreen : Screen {
         val state by screenModel.state.collectAsStateWithLifecycle()
 
         val activeSessionController = koinInject<ActiveSessionController>()
+
+        val externalNavigationRequests = koinInject<ExternalNavigationRequests>()
 
         val haptics = LocalHaptics.current
 
@@ -125,22 +129,47 @@ internal object RootScreen : Screen {
                                 RootStackTransition(
                                     screen = BottomBarScreen,
                                     navigatorEffect = { navigator ->
-                                        // Push Focus Mode only once a session is actually present. On a
-                                        // cold start the deep-link flag is set before the session flow has
-                                        // loaded, so we wait for both rather than consuming the request
-                                        // against a not-yet-loaded (null) session.
                                         combine(
-                                            activeSessionController.pendingFocusMode,
+                                            externalNavigationRequests.pending,
                                             activeSessionController.activeSession,
-                                        ) { pending, active -> pending && active != null }
-                                            .collect { ready ->
-                                                if (ready.not()) return@collect
+                                            activeSessionController.sessionLoaded,
+                                        ) { pending, active, loaded ->
+                                            Triple(
+                                                pending,
+                                                active,
+                                                loaded,
+                                            )
+                                        }
+                                            .collect { (pending, active, loaded) ->
+                                                when (pending) {
+                                                    ExternalNavigationRequest.OpenFocusMode -> {
+                                                        if (loaded.not()) return@collect
 
-                                                if (navigator.lastItem !is FocusModeScreen) {
-                                                    navigator.push(item = FocusModeScreen)
+                                                        if (active != null &&
+                                                            navigator.lastItem !is FocusModeScreen
+                                                        ) {
+                                                            navigator.push(item = FocusModeScreen)
+                                                        }
+
+                                                        externalNavigationRequests.consume(request = pending)
+                                                    }
+
+                                                    // Tab and book requests are consumed by BottomBarScreen;
+                                                    // surface it first if a pushed screen covers it. Focus Mode
+                                                    // is never popped: the request waits until it is left.
+                                                    is ExternalNavigationRequest.OpenTab,
+                                                    is ExternalNavigationRequest.OpenBook,
+                                                    is ExternalNavigationRequest.OpenBookVerdict -> {
+                                                        if (navigator.lastItem !is BottomBarScreen &&
+                                                            navigator.items.none { it is FocusModeScreen } &&
+                                                            navigator.items.any { it is BottomBarScreen }
+                                                        ) {
+                                                            navigator.popUntil { it is BottomBarScreen }
+                                                        }
+                                                    }
+
+                                                    null -> Unit
                                                 }
-
-                                                activeSessionController.consumeFocusModeRequest()
                                             }
                                     },
                                 ) { screen ->

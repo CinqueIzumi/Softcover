@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseC
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetShelfSwipeEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
+import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgets
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetColorPaletteUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
@@ -40,12 +41,14 @@ internal class SettingsScreenScreenModel(
     private val setUiScaleUseCase: SetUiScaleUseCase,
     private val observeAppUpdateStateUseCase: ObserveAppUpdateStateUseCase,
     appVersionProvider: AppVersionProvider,
+    homeScreenWidgets: HomeScreenWidgets,
     appDispatchers: AppDispatchers,
     flows: List<SettingsCollector>,
 ) : ToadScreenModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsCollector, SettingsLocalVariables>(
     initialState = SettingsScreenUiState(
         appVersionName = appVersionProvider.versionInfo.name,
         appVersionCode = appVersionProvider.versionInfo.code,
+        widgetsSupported = homeScreenWidgets.isSupported,
     ),
     initialLocalVariables = SettingsLocalVariables(),
     initializers = flows,

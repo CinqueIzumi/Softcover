@@ -61,6 +61,14 @@ private fun nl.rhaydus.softcover.orchestration.presentation.CompactNavShell(body
     - body: STABLE (composable function type)
 
 @Composable
+private fun nl.rhaydus.softcover.orchestration.presentation.ConsumeExternalNavigationRequests(tabNavigator: cafe.adriel.voyager.navigator.tab.TabNavigator, bookDetailPresenter: nl.rhaydus.softcover.core.presentation.navigation.BookDetailPresenter): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - tabNavigator: UNSTABLE (has mutable properties or unstable members)
+    - bookDetailPresenter: RUNTIME (requires runtime check)
+
+@Composable
 internal fun nl.rhaydus.softcover.orchestration.presentation.DockedBottomNavigationBar(): kotlin.Unit
   skippable: true
   restartable: true

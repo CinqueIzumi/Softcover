@@ -194,6 +194,7 @@ val bookDetailModule = module {
             bookId = params.get(),
             initialCover = params.getOrNull<BookInitialCover>(),
             transitionSurface = params.getOrNull<String>(),
+            showVerdictSheet = params.getOrNull<Boolean>() ?: false,
             fetchBookByIdUseCase = get(),
             getEditionsByBookIdUseCase = get(),
             updateBookEditionUseCase = get(),

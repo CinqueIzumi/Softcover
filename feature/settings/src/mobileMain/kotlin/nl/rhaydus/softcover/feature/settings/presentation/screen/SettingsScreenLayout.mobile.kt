@@ -67,6 +67,7 @@ internal actual fun SettingsScreenLayout(
     navigateToProfile: () -> Unit,
     navigateToAppearanceSettings: () -> Unit,
     navigateToLibraryVisibility: () -> Unit,
+    navigateToWidgets: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
     navigateToWhatsNew: () -> Unit,
@@ -162,6 +163,16 @@ internal actual fun SettingsScreenLayout(
                         target = SettingsMenuRowTarget.SubPage(onClick = navigateToLibraryVisibility),
                     )
                 }
+                if (state.widgetsSupported) {
+                    row {
+                        SettingsMenuRow(
+                            title = "Widgets",
+                            gloss = "Your shelves, on your home screen",
+                            icon = SoftcoverIcon.ViewLayout,
+                            target = SettingsMenuRowTarget.SubPage(onClick = navigateToWidgets),
+                        )
+                    }
+                }
                 row {
                     SettingsMenuRow(
                         title = "Hidden suggestions",
@@ -222,6 +233,7 @@ private fun SettingsScreenPreview() {
             navigateToProfile = {},
             navigateToAppearanceSettings = {},
             navigateToLibraryVisibility = {},
+            navigateToWidgets = {},
             navigateToHiddenSuggestions = {},
             navigateToAbout = {},
             navigateToWhatsNew = {},
@@ -251,6 +263,7 @@ private fun SettingsScreenUpdateAvailablePreview() {
             navigateToProfile = {},
             navigateToAppearanceSettings = {},
             navigateToLibraryVisibility = {},
+            navigateToWidgets = {},
             navigateToHiddenSuggestions = {},
             navigateToAbout = {},
             navigateToWhatsNew = {},

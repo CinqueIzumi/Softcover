@@ -272,7 +272,7 @@ public fun nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsScr
   params:
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsScreenLayout(state: nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState, settingsRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction, kotlin.Unit>, navigateToProfile: kotlin.Function0<kotlin.Unit>, navigateToAppearanceSettings: kotlin.Function0<kotlin.Unit>, navigateToLibraryVisibility: kotlin.Function0<kotlin.Unit>, navigateToHiddenSuggestions: kotlin.Function0<kotlin.Unit>, navigateToAbout: kotlin.Function0<kotlin.Unit>, navigateToWhatsNew: kotlin.Function0<kotlin.Unit>, navigateToRoadmap: kotlin.Function0<kotlin.Unit>, navigateToComponentGallery: kotlin.Function0<kotlin.Unit>, libraryVisibilityState: nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState, libraryVisibilityRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction, kotlin.Unit>, roadmapState: nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState?, roadmapRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction, kotlin.Unit>?, whatsNewState: nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState?, whatsNewRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction, kotlin.Unit>?, onCreateListClick: kotlin.Function0<kotlin.Unit>, onStartAppUpdate: kotlin.Function0<kotlin.Unit>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, debugSection: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsScreenLayout(state: nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState, settingsRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction, kotlin.Unit>, navigateToProfile: kotlin.Function0<kotlin.Unit>, navigateToAppearanceSettings: kotlin.Function0<kotlin.Unit>, navigateToLibraryVisibility: kotlin.Function0<kotlin.Unit>, navigateToWidgets: kotlin.Function0<kotlin.Unit>, navigateToHiddenSuggestions: kotlin.Function0<kotlin.Unit>, navigateToAbout: kotlin.Function0<kotlin.Unit>, navigateToWhatsNew: kotlin.Function0<kotlin.Unit>, navigateToRoadmap: kotlin.Function0<kotlin.Unit>, navigateToComponentGallery: kotlin.Function0<kotlin.Unit>, libraryVisibilityState: nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState, libraryVisibilityRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction, kotlin.Unit>, roadmapState: nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState?, roadmapRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction, kotlin.Unit>?, whatsNewState: nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState?, whatsNewRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction, kotlin.Unit>?, onCreateListClick: kotlin.Function0<kotlin.Unit>, onStartAppUpdate: kotlin.Function0<kotlin.Unit>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, debugSection: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -281,6 +281,7 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsS
     - navigateToProfile: STABLE (function type)
     - navigateToAppearanceSettings: STABLE (function type)
     - navigateToLibraryVisibility: STABLE (function type)
+    - navigateToWidgets: STABLE (function type)
     - navigateToHiddenSuggestions: STABLE (function type)
     - navigateToAbout: STABLE (function type)
     - navigateToWhatsNew: STABLE (function type)
@@ -330,6 +331,20 @@ private fun nl.rhaydus.softcover.feature.settings.presentation.screen.SourceSect
     - openUrl: STABLE (function type)
     - onWhatsNewClick: STABLE (function type)
     - onRoadmapClick: STABLE (function type)
+
+@Composable
+public fun nl.rhaydus.softcover.feature.settings.presentation.screen.WidgetsSettingsScreen.Content(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.WidgetsSettingsScreenLayout(state: nl.rhaydus.softcover.feature.settings.presentation.state.WidgetsSettingsUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.WidgetsSettingsAction, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - state: STABLE (class with no mutable properties)
+    - runAction: STABLE (function type)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.koinDocumentPageScreenModel(page: nl.rhaydus.softcover.feature.settings.presentation.model.DocumentPage): nl.rhaydus.softcover.feature.settings.presentation.screenmodel.DocumentPageScreenModel

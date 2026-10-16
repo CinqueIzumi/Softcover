@@ -3,8 +3,10 @@ package nl.rhaydus.softcover.feature.explore.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
@@ -43,7 +45,9 @@ internal class ExploreScreenScreenModel(
     private val removeAllSearchQueriesUseCase: RemoveAllSearchQueriesUseCase,
     private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     private val undoableBookRemover: UndoableBookRemover,
-    private val getTrendingBooksUseCase: GetTrendingBooksUseCase,
+    private val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
+    private val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
+    private val observeTrendingFetchedAtUseCase: ObserveTrendingFetchedAtUseCase,
     private val getContinueSeriesBooksUseCase: GetContinueSeriesBooksUseCase,
     private val dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
     private val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
@@ -76,7 +80,9 @@ internal class ExploreScreenScreenModel(
         removeAllSearchQueriesUseCase = removeAllSearchQueriesUseCase,
         markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
         undoableBookRemover = undoableBookRemover,
-        getTrendingBooksUseCase = getTrendingBooksUseCase,
+        observeTrendingBooksUseCase = observeTrendingBooksUseCase,
+        refreshTrendingBooksUseCase = refreshTrendingBooksUseCase,
+        observeTrendingFetchedAtUseCase = observeTrendingFetchedAtUseCase,
         getContinueSeriesBooksUseCase = getContinueSeriesBooksUseCase,
         dismissContinueSeriesBookUseCase = dismissContinueSeriesBookUseCase,
         dismissContinueSeriesUseCase = dismissContinueSeriesUseCase,

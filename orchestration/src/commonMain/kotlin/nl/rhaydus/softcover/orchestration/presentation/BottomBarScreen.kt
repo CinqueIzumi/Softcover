@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +46,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.BookDetailPresenter
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequests
 import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
@@ -120,6 +123,11 @@ internal object BottomBarScreen : Screen {
                 }
             }
 
+            ConsumeExternalNavigationRequests(
+                tabNavigator = tabNavigator,
+                bookDetailPresenter = bookDetailPresenter,
+            )
+
             CompositionLocalProvider(LocalBookDetailPresenter provides bookDetailPresenter) {
                 val tabBody = remember {
                     movableContentOf { TabRootHost() }
@@ -186,6 +194,51 @@ internal object BottomBarScreen : Screen {
                         },
                     )
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Acts on the tab and book requests an external surface made, then consumes them. Focus Mode
+ * requests belong to the root navigator and are left pending here.
+ */
+@Composable
+private fun ConsumeExternalNavigationRequests(
+    tabNavigator: TabNavigator,
+    bookDetailPresenter: BookDetailPresenter,
+) {
+    val externalNavigationRequests = koinInject<ExternalNavigationRequests>()
+    val appNavigator = koinInject<AppNavigator>()
+    val currentPresenter by rememberUpdatedState(bookDetailPresenter)
+
+    LaunchedEffect(externalNavigationRequests, appNavigator, tabNavigator) {
+        externalNavigationRequests.pending.collect { request ->
+            when (request) {
+                is ExternalNavigationRequest.OpenTab -> {
+                    tabNavigator.current = appNavigator.tab(request.destination)
+
+                    externalNavigationRequests.consume(request = request)
+                }
+
+                is ExternalNavigationRequest.OpenBook -> {
+                    currentPresenter.open(ScreenDestination.BookDetail(id = request.bookId))
+
+                    externalNavigationRequests.consume(request = request)
+                }
+
+                is ExternalNavigationRequest.OpenBookVerdict -> {
+                    currentPresenter.open(
+                        ScreenDestination.BookDetail(
+                            id = request.bookId,
+                            showVerdictSheet = true,
+                        ),
+                    )
+
+                    externalNavigationRequests.consume(request = request)
+                }
+
+                ExternalNavigationRequest.OpenFocusMode, null -> Unit
             }
         }
     }

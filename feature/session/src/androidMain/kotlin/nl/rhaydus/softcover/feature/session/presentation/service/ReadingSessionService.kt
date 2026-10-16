@@ -11,11 +11,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.RemoteInput
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
-import coil3.SingletonImageLoader
-import coil3.request.ImageRequest
-import coil3.request.SuccessResult
-import coil3.request.allowHardware
-import coil3.toBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,9 +25,11 @@ import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.notification.SoftcoverNotificationChannel
 import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
+import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
 import nl.rhaydus.softcover.core.uibinding.cover.resolveCoverSource
 import org.koin.android.ext.android.inject
 import kotlin.time.Duration
@@ -141,20 +138,12 @@ internal class ReadingSessionService : Service() {
             return
         }
 
-        val data = when (source) {
-            is CoverSource.Local -> source.path
-            is CoverSource.Remote -> source.url
-        }
-
         serviceScope.launch {
-            val request = ImageRequest.Builder(this@ReadingSessionService)
-                .data(data)
-                .allowHardware(false)
-                .size(COVER_SIZE_PX)
-                .build()
-
-            val result = SingletonImageLoader.get(applicationContext).execute(request)
-            val bitmap = (result as? SuccessResult)?.image?.toBitmap()
+            val bitmap = loadCoverBitmap(
+                context = applicationContext,
+                source = source,
+                sizePx = COVER_SIZE_PX,
+            )
                 ?: return@launch
 
             coverBitmap = bitmap
@@ -297,7 +286,10 @@ internal class ReadingSessionService : Service() {
     }
 
     private fun focusModePendingIntent(): PendingIntent {
-        val intent = appEntryPoint.focusModeIntent(context = this)
+        val intent = appEntryPoint.intent(
+            context = this,
+            request = ExternalNavigationRequest.OpenFocusMode,
+        )
 
         return PendingIntent.getActivity(
             this,
