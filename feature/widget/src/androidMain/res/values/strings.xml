@@ -9,6 +9,8 @@
     <string name="random_pick_widget_description">A book from your shelves, chosen for you.</string>
     <string name="random_pick_empty_headline">Nothing waiting here yet</string>
     <string name="random_pick_empty_subline">Add a few books, or pick another shelf.</string>
+    <string name="random_pick_unavailable_headline">This list isn\'t on your device</string>
+    <string name="random_pick_unavailable_subline">Tap to choose another shelf.</string>
     <string name="random_pick_shuffle">Pick another book</string>
     <string name="random_pick_widget_label">Random pick</string>
     <string name="trending_widget_label">Trending</string>

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
-import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
@@ -15,6 +14,8 @@ import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.CircularProgressIndicator
+import androidx.glance.appwidget.ImageProvider
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
@@ -42,7 +43,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.CornerRadius
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.callback.ShuffleCallback
-import nl.rhaydus.softcover.feature.widget.presentation.component.Backdrop
+import nl.rhaydus.softcover.feature.widget.presentation.component.BackdropUris
 import nl.rhaydus.softcover.feature.widget.presentation.component.ReservedLinesTitle
 import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
@@ -74,18 +75,26 @@ internal fun RandomPickWidgetContent(
                 .clickable(
                     when (val content = model.content) {
                         is RandomPickWidgetUiModel.Content.Picked -> openBook(content.bookId)
+                        RandomPickWidgetUiModel.Content.SourceUnavailable -> openSettings
                         else -> openApp
                     },
                 ),
             contentAlignment = Alignment.Center,
         ) {
             when (val content = model.content) {
-                RandomPickWidgetUiModel.Content.Loading -> Unit
+                RandomPickWidgetUiModel.Content.Loading -> CircularProgressIndicator(color = GlanceTheme.colors.primary)
 
                 RandomPickWidgetUiModel.Content.SignedOut -> Message(
                     eyebrow = null,
                     headline = context.getString(R.string.widget_sign_in),
                     subline = null,
+                    openSettings = openSettings,
+                )
+
+                RandomPickWidgetUiModel.Content.SourceUnavailable -> Message(
+                    eyebrow = null,
+                    headline = context.getString(R.string.random_pick_unavailable_headline),
+                    subline = context.getString(R.string.random_pick_unavailable_subline),
                     openSettings = openSettings,
                 )
 
@@ -176,7 +185,13 @@ private fun PickedBook(
 
     Box(modifier = GlanceModifier.fillMaxSize()) {
         if (artwork != null) {
-            Backdrop(artwork = artwork)
+            BackdropUris(
+                backdrop = artwork.backdrop,
+                veil = artwork.veil,
+                veilLift = artwork.veilLift,
+                washPrimary = artwork.washPrimary,
+                washTertiary = artwork.washTertiary,
+            )
         }
 
         Column(
@@ -252,10 +267,10 @@ private fun Eyebrow(
 }
 
 @Composable
-private fun Cover(cover: Bitmap?) {
-    if (cover != null) {
+private fun Cover(cover: RandomPickWidgetUiModel.Cover) {
+    if (cover is RandomPickWidgetUiModel.Cover.Loaded) {
         Image(
-            provider = ImageProvider(cover),
+            provider = ImageProvider(cover.uri),
             contentDescription = null,
             modifier = GlanceModifier.fillMaxSize(),
             contentScale = ContentScale.Fit,

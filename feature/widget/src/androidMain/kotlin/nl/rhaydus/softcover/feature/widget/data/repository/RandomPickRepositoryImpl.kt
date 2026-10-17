@@ -15,12 +15,11 @@ import nl.rhaydus.softcover.feature.widget.data.mapper.toRandomPickState
 import nl.rhaydus.softcover.feature.widget.data.mapper.write
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickResolution
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettings
-import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSource
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickState
 import nl.rhaydus.softcover.feature.widget.domain.repository.RandomPickRepository
 import nl.rhaydus.softcover.feature.widget.domain.util.buildPool
+import nl.rhaydus.softcover.feature.widget.domain.util.isSourceAvailable
 import nl.rhaydus.softcover.feature.widget.domain.util.resolvePick
-import nl.rhaydus.softcover.feature.widget.domain.util.resolveSource
 import nl.rhaydus.softcover.feature.widget.domain.util.shufflePick
 import kotlin.random.Random
 import kotlin.time.Clock
@@ -87,10 +86,7 @@ internal class RandomPickRepositoryImpl(private val context: Context) : RandomPi
         lists: List<BookList>,
         shuffle: Boolean,
     ): RandomPickResolution {
-        var resolution = RandomPickResolution(
-            book = null,
-            source = RandomPickSource.WantToRead,
-        )
+        var resolution: RandomPickResolution = RandomPickResolution.SourceUnavailable
 
         updateAppWidgetState(
             context = context,
@@ -99,6 +95,14 @@ internal class RandomPickRepositoryImpl(private val context: Context) : RandomPi
             val settings = preferences.toRandomPickSettings()
             val state = preferences.toRandomPickState()
             val now = Clock.System.now()
+
+            if (isSourceAvailable(
+                    source = settings.source,
+                    lists = lists,
+                ).not()) {
+                resolution = RandomPickResolution.SourceUnavailable
+                return@updateAppWidgetState
+            }
 
             val pool = buildPool(
                 source = settings.source,
@@ -126,12 +130,9 @@ internal class RandomPickRepositoryImpl(private val context: Context) : RandomPi
 
             if (next != state) preferences.write(next)
 
-            resolution = RandomPickResolution(
+            resolution = RandomPickResolution.Resolved(
                 book = pool.firstOrNull { it.id == next.pickedBookId },
-                source = resolveSource(
-                    source = settings.source,
-                    lists = lists,
-                ),
+                source = settings.source,
             )
         }
 

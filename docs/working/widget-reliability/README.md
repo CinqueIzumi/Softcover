@@ -32,6 +32,7 @@ text-first rendering, and restrict Random pick to lists the app caches locally.
 - The provider is exported, read-only, and serves only file names from its own directory.
 - Loading: a cold session shows frame + indicator; after a tap, text renders first with cover placeholders.
 - Trending prefetches the neighbouring pages' cover files.
+- Covers render at the largest slot their widget displays (no fixed 86dp), since files carry no bitmap budget.
 - Random pick hides lists not enabled for caching, Owned included.
 - A placed Random pick whose list was disabled shows an explanation and opens its settings on tap.
 - The quote widget has no bitmaps; long quotes shrink to fit the real widget size instead of truncating at fixed tiers.

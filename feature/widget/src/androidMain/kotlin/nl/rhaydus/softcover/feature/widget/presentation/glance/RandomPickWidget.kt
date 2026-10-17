@@ -18,8 +18,7 @@ import nl.rhaydus.softcover.feature.widget.presentation.activity.RandomPickSetti
 import nl.rhaydus.softcover.feature.widget.presentation.activity.widgetSettingsIntent
 import nl.rhaydus.softcover.feature.widget.presentation.mapper.randomPickWidgetModels
 import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
-import nl.rhaydus.softcover.feature.widget.presentation.render.BackdropArtworkRenderer
-import nl.rhaydus.softcover.feature.widget.presentation.render.BookCoverLoader
+import nl.rhaydus.softcover.feature.widget.presentation.render.RandomPickImages
 import nl.rhaydus.softcover.feature.widget.presentation.util.WIDGET_WIDTHS_DP
 import nl.rhaydus.softcover.feature.widget.presentation.util.portraitSizes
 import org.koin.core.component.KoinComponent
@@ -60,11 +59,10 @@ internal class RandomPickWidget : GlanceAppWidget(), KoinComponent {
         val themeConfigurations = environment.getThemeConfiguration()
         val initialTheme = environment.initialTheme(themeConfigurations)
 
-        val artwork = BackdropArtworkRenderer(density)
-
-        val covers = BookCoverLoader(
+        val images = RandomPickImages(
             context = context,
             density = density,
+            store = environment.imageStore,
         )
 
         val models = randomPickWidgetModels(
@@ -81,10 +79,10 @@ internal class RandomPickWidget : GlanceAppWidget(), KoinComponent {
                     appWidgetId = appWidgetId,
                     wantToRead = wantToRead,
                     lists = lists,
-                ).getOrThrow()
+                )
             },
-            loadCover = covers::load,
-            renderArtwork = artwork::render,
+            coverUri = images::coverUri,
+            artwork = images::artwork,
         )
 
         val loadingModel = RandomPickWidgetUiModel(
