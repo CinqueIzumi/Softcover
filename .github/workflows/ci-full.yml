@@ -57,6 +57,11 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+  r8-smoke:
+    uses: ./.github/workflows/r8-smoke.yml
+    secrets:
+      HARDCOVER_SMOKE_TOKEN: ${{ secrets.HARDCOVER_SMOKE_TOKEN }}
+
   ios-compile:
     name: iOS compile
     # The iOS compile gates in the root build are guarded to macOS hosts, so only this job runs them.

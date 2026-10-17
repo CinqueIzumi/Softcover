@@ -1,0 +1,92 @@
+name: R8 smoke
+
+on:
+  workflow_call:
+    secrets:
+      HARDCOVER_SMOKE_TOKEN:
+        required: true
+
+jobs:
+  r8-smoke:
+    name: R8 release smoke
+    runs-on: ubuntu-latest
+    env:
+      GRADLE_BUILD_ACTION_CACHE_KEY_JOB: r8-smoke
+    steps:
+      # Dependabot and fork PRs get no secrets. Fail here instead of after a 15-minute emulator run.
+      - name: Verify smoke token
+        env:
+          HARDCOVER_SMOKE_TOKEN: ${{ secrets.HARDCOVER_SMOKE_TOKEN }}
+        run: |
+          if [ -z "$HARDCOVER_SMOKE_TOKEN" ]; then
+            echo "::error::HARDCOVER_SMOKE_TOKEN is not available (Dependabot and fork PRs get no secrets) - cannot run the R8 smoke suite."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+
+      # Hosted runners give only root access to /dev/kvm, which the managed emulator needs for acceleration.
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: R8 keep contract and minified smoke
+        env:
+          HARDCOVER_SMOKE_TOKEN: ${{ secrets.HARDCOVER_SMOKE_TOKEN }}
+        run: >-
+          ./gradlew :app:checkR8KeepContract :smoketest:pixelApi36MinifiedAndroidTest --stacktrace
+          -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+
+      # The token travels as an instrumentation argument and a failed run's logcat lands in these
+      # directories, while the artifact is readable by anyone with repo access. Only a count is printed.
+      - name: Scan reports for the token
+        if: failure()
+        id: scan
+        env:
+          HARDCOVER_SMOKE_TOKEN: ${{ secrets.HARDCOVER_SMOKE_TOKEN }}
+        run: |
+          count=0
+          for dir in smoketest/build/outputs/androidTest-results smoketest/build/reports; do
+            [ -d "$dir" ] || continue
+            set +e
+            n=$(set -o pipefail; grep -rlF -f <(printf '%s\n' "$HARDCOVER_SMOKE_TOKEN") "$dir" | wc -l)
+            status=$?
+            set -e
+            if [ "$status" -gt 1 ]; then
+              echo "::error::Scanning $dir failed; the upload is skipped."
+              exit 1
+            fi
+            count=$((count + n))
+          done
+          echo "Report files containing the token: $count"
+          if [ "$count" -gt 0 ]; then
+            echo "::error::Smoke reports contain the token; the upload is skipped."
+            exit 1
+          fi
+
+      - name: Upload smoke reports
+        if: failure() && steps.scan.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: r8-smoke-reports
+          path: |
+            smoketest/build/outputs/androidTest-results
+            smoketest/build/reports
+          if-no-files-found: ignore
+          retention-days: 7
