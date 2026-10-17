@@ -61,6 +61,8 @@ the concept; do not read it whole). Do not read it for anything else.
   `docs/reference/design-system/` in the same change.
 - A manifest component, worker, widget, `Screen` argument or class reached by name follows the implementer
   checklist in `docs/reference/r8.md`.
+- Adding, removing or changing a composable's signature in `androidMain` or `commonMain`: run
+  `scripts/gradle-quiet.sh :<module>:stabilityDump` and list `<module>/stability/*.stability` under Files changed.
 - Comments and KDoc follow the `document-code` skill standard: document only what the code cannot say; no
   comment that restates the code.
 

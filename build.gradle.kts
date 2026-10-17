@@ -906,9 +906,10 @@ tasks.register("checkPresentationFileSize") {
 // than merely parsing source. That cost is the point: an inert gate is not a gate.
 tasks.register("styleCheck") {
     group = "verification"
-    description = "Runs ktlintCheck and type-resolved detekt (shared baseline + rhaydus crash-safety ruleset) across all modules."
+    description = "Runs ktlintCheck, type-resolved detekt (shared baseline + rhaydus crash-safety ruleset) and the Compose stability check across all modules."
 
     dependsOn(tasks.named("ktlintCheck"))
     dependsOn(subprojects.map { sp -> sp.tasks.matching { it.name in typeResolvedDetektTasks } })
+    dependsOn(subprojects.map { sp -> sp.tasks.matching { it.name == "androidMainStabilityCheck" } })
 }
 

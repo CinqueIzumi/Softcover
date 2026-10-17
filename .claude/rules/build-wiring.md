@@ -26,7 +26,7 @@ paths:
   recipe holds.
 - A `SpinePalette` entry added without its `ColorPalette` compiles clean and stays unselectable; only
   `SpinePaletteMapperTest`'s bijection test (`:core:uibinding`) catches it.
-- `stabilityCheck` (part of `check`, not `styleCheck`) compares every Compose module with its baseline in
+- `stabilityCheck` (part of `check` and `styleCheck`) compares every Compose module with its baseline in
   `<module>/stability/`, for the `androidMain` target only, so composables in `jvmMain` or `iosMain` are
   never checked. Any change to a composable fails it, even a new one; refresh the baselines with
   `./gradlew stabilityDump` and commit them with the change.
