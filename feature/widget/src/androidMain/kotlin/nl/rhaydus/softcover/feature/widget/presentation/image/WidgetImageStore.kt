@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.core.net.toUri
 import java.io.File
 import java.security.MessageDigest
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlinx.coroutines.CoroutineDispatcher
@@ -17,7 +18,7 @@ import nl.rhaydus.common.runCatchingCancellable
 internal class WidgetImageStore(
     private val context: Context,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val now: () -> Long = System::currentTimeMillis,
+    private val clock: Clock = Clock.System,
 ) {
     private val directory: File = WidgetImageFiles.directory(context)
 
@@ -31,7 +32,8 @@ internal class WidgetImageStore(
             fileName(key),
         )
 
-        val hit = withContext(ioDispatcher) { file.exists() && file.setLastModified(now()) }
+        val touchedAt = clock.now().toEpochMilliseconds()
+        val hit = withContext(ioDispatcher) { file.exists() && file.setLastModified(touchedAt) }
         if (hit) return uriOf(file)
 
         val bitmap = render() ?: return null
@@ -67,7 +69,7 @@ internal class WidgetImageStore(
 
     /** Deletes files not touched for [maxAge]. */
     suspend fun prune(maxAge: Duration = 7.days) {
-        val cutoff = now() - maxAge.inWholeMilliseconds
+        val cutoff = clock.now().toEpochMilliseconds() - maxAge.inWholeMilliseconds
 
         withContext(ioDispatcher) {
             directory.listFiles().orEmpty()

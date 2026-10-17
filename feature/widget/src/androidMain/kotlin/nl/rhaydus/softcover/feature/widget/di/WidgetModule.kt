@@ -112,6 +112,7 @@ val widgetModule = module {
         WidgetImageStore(
             context = androidContext(),
             ioDispatcher = get<AppDispatchers>().io,
+            clock = get(),
         )
     }
 

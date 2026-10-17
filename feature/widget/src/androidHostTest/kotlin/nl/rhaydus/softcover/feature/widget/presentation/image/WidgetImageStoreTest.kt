@@ -18,7 +18,9 @@ import java.io.File
 import java.io.IOException
 import java.io.OutputStream
 import java.nio.file.Files
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Instant
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -31,7 +33,10 @@ class WidgetImageStoreTest {
     private lateinit var filesDir: File
     private lateinit var context: Context
     private val parsedUris = mutableListOf<String>()
-    private var clock = 1_000_000_000L
+    private var nowMillis = 1_000_000_000L
+    private val clock = object : Clock {
+        override fun now(): Instant = Instant.fromEpochMilliseconds(nowMillis)
+    }
     private lateinit var store: WidgetImageStore
 
     @BeforeEach
@@ -53,7 +58,10 @@ class WidgetImageStoreTest {
             parsedUris += firstArg<String>()
             mockk<Uri>(relaxed = true)
         }
-        store = WidgetImageStore(context) { clock }
+        store = WidgetImageStore(
+            context,
+            clock = clock,
+        )
     }
 
     @AfterEach
@@ -116,7 +124,7 @@ class WidgetImageStoreTest {
             store.uriFor("cover-1") { bitmap() }
             val file = storedFiles().single()
             file.setLastModified(5_000L)
-            clock = 2_000_000_000L
+            nowMillis = 2_000_000_000L
 
             // ----- Act -----
             store.uriFor("cover-1") { error("must not render") }
@@ -225,8 +233,8 @@ class WidgetImageStoreTest {
             val old = storedFiles().single()
             store.uriFor("fresh") { bitmap() }
             val fresh = storedFiles().single { it != old }
-            old.setLastModified(clock - 8.days.inWholeMilliseconds)
-            fresh.setLastModified(clock - 1.days.inWholeMilliseconds)
+            old.setLastModified(nowMillis - 8.days.inWholeMilliseconds)
+            fresh.setLastModified(nowMillis - 1.days.inWholeMilliseconds)
 
             // ----- Act -----
             store.prune(7.days)
