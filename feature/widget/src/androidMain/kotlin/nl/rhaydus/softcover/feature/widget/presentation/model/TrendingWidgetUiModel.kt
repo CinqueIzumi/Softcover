@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.model
 
-import android.graphics.Bitmap
+import android.net.Uri
 import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 
@@ -29,6 +29,15 @@ internal data class TrendingWidgetUiModel(
         val rank: String,
         val title: String,
         val author: String,
-        val cover: Bitmap?,
+        val cover: Cover,
     )
+
+    sealed interface Cover {
+        /** The cover file is still being prepared; render the placeholder. */
+        data object Pending : Cover
+
+        data object Missing : Cover
+
+        data class Loaded(val uri: Uri) : Cover
+    }
 }
