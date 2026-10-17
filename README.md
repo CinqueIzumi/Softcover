@@ -111,7 +111,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 - **Currently Reading** — your current book over a blurred cover backdrop, cycling through the shelf, with progress updates straight from the widget.
 - **Trending** — Hardcover's trending top 10, paged per period.
 - **Random pick** — a book from your library to read next.
-- **Quote of the day** — one of your saved quotes, with its book.
+- **Quote of the day** — one of your saved quotes, sized to fit the widget, with its book.
 
 ### Onboarding
 - Connect your Hardcover account on first launch by entering your API token, after a short introductory walkthrough.
