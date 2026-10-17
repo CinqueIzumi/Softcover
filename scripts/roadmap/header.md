@@ -2,7 +2,7 @@
 
 What we're building next for [Softcover](https://github.com/CinqueIzumi/Softcover), grouped by the version it's planned to land in. This is the public view of our plan.
 
-**Current release: {{CURRENT_VERSION}}.** Softcover runs on Android, iPhone, iPad and desktop. 3.1.3 smooths two rough edges in the 3.1 redesign, which rebuilt nearly every screen with a cleaner, more editorial look: deadlines now land on the day you picked no matter where in the world you are, and the app paces its requests against Hardcover's limits so busy screens load without stalling.
+**Current release: {{CURRENT_VERSION}}.** Softcover runs on Android, iPhone, iPad and desktop. 3.2.0 puts your reading on the Android home screen with four widgets, keeps the quotes you save in sync with Hardcover, and remembers every read-through of a book, with a new Paused status and a warm Dim theme along the way.
 
 A few honest caveats:
 - **These are plans, not promises.** Versions are listed in the order we intend to ship them, but order can shift and some items may move, merge, or change shape.
