@@ -81,6 +81,11 @@ internal fun RandomPickWidgetContent(
             when (val content = model.content) {
                 RandomPickWidgetUiModel.Content.Loading -> CircularProgressIndicator(color = GlanceTheme.colors.primary)
 
+                is RandomPickWidgetUiModel.Content.Switching -> Switching(
+                    eyebrow = content.eyebrow,
+                    openSettings = openSettings,
+                )
+
                 RandomPickWidgetUiModel.Content.SignedOut -> Message(
                     eyebrow = null,
                     headline = context.getString(R.string.widget_sign_in),
@@ -115,6 +120,33 @@ private fun widgetCornerRadius(): GlanceModifier = if (Build.VERSION.SDK_INT >= 
     GlanceModifier.cornerRadius(android.R.dimen.system_app_widget_background_radius)
 } else {
     GlanceModifier
+}
+
+@Composable
+private fun Switching(
+    eyebrow: String,
+    openSettings: Action,
+) {
+    Column(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .padding(Spacing.xxs),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Eyebrow(
+            text = eyebrow,
+            openSettings = openSettings,
+        )
+
+        Box(
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .defaultWeight(),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator(color = GlanceTheme.colors.primary)
+        }
+    }
 }
 
 @Composable

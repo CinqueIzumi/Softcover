@@ -10,16 +10,21 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingPosition
+import nl.rhaydus.softcover.feature.widget.domain.model.TrendingSettings
+import nl.rhaydus.softcover.feature.widget.domain.model.TrendingSettingsChange
 import nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Duration.Companion.seconds
 
 class TrendingWidgetModelsTest {
     private val requestedBookIds = mutableListOf<Int>()
@@ -41,11 +46,13 @@ class TrendingWidgetModelsTest {
     private fun models(
         isSignedIn: Boolean = true,
         position: Flow<TrendingPosition> = flowOf(positionAt(0)),
+        settingsChanges: Flow<TrendingSettingsChange> = emptyFlow(),
         observeTrending: (TrendingPeriod) -> Flow<List<Book>>,
     ): Flow<TrendingWidgetUiModel> = trendingWidgetModels(
         isSignedIn = flowOf(isSignedIn),
         themeConfiguration = flowOf(ThemeConfiguration()),
         position = position,
+        settingsChanges = settingsChanges,
         observeTrending = observeTrending,
         eyebrowFor = { period -> "Eyebrow ${period.name}" },
         coverUri = { book ->
@@ -350,5 +357,195 @@ class TrendingWidgetModelsTest {
             yearContent.eyebrow shouldBe "Eyebrow Year"
             yearContent.items.map { it.bookId } shouldContainExactly listOf(100, 200)
         }
+    }
+
+    @Nested
+    inner class SettingsChanges {
+        private fun changeTo(period: TrendingPeriod) = TrendingSettingsChange(
+            appWidgetId = 1,
+            settings = TrendingSettings(period = period),
+        )
+
+        private fun replayed(change: TrendingSettingsChange): MutableSharedFlow<TrendingSettingsChange> =
+            MutableSharedFlow<TrendingSettingsChange>(replay = 1).also { it.tryEmit(change) }
+
+        @Test
+        fun `a settings change shows the new period as switching before the ranking`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                position = flowOf(
+                    positionAt(
+                        page = 0,
+                        period = TrendingPeriod.Year,
+                    ),
+                ),
+                settingsChanges = replayed(changeTo(TrendingPeriod.Year)),
+                observeTrending = fixedBooks(listOf(book(1), book(2))),
+            )
+
+            // ----- Act & Assert -----
+            flow.test {
+                awaitItem().content shouldBe TrendingWidgetUiModel.Content.Switching(eyebrow = "Eyebrow Year")
+
+                val ranked = awaitItem().content.shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>()
+                ranked.eyebrow shouldBe "Eyebrow Year"
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `switching stays until the position reaches the new period`() = runTest {
+            // ----- Arrange -----
+            val position = MutableStateFlow(
+                positionAt(
+                    page = 0,
+                    period = TrendingPeriod.Week,
+                ),
+            )
+
+            val flow = models(
+                position = position,
+                settingsChanges = replayed(changeTo(TrendingPeriod.Year)),
+                observeTrending = fixedBooks(listOf(book(1), book(2))),
+            )
+
+            // ----- Act -----
+            val contents = mutableListOf<TrendingWidgetUiModel.Content>()
+            flow.test {
+                contents += awaitItem().content
+                expectNoEvents()
+                position.value = positionAt(
+                    page = 0,
+                    period = TrendingPeriod.Year,
+                )
+                contents += awaitItem().content
+                expectNoEvents()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            // ----- Assert -----
+            contents[0] shouldBe TrendingWidgetUiModel.Content.Switching(eyebrow = "Eyebrow Year")
+            contents[1].shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>().eyebrow shouldBe "Eyebrow Year"
+        }
+
+        @Test
+        fun `a page turn after a settings change does not show switching again`() = runTest {
+            // ----- Arrange -----
+            val position = MutableStateFlow(
+                positionAt(
+                    page = 0,
+                    period = TrendingPeriod.Year,
+                ),
+            )
+
+            val flow = models(
+                position = position,
+                settingsChanges = replayed(changeTo(TrendingPeriod.Year)),
+                observeTrending = fixedBooks((1..6).map { book(it) }),
+            )
+
+            // ----- Act -----
+            val contents = mutableListOf<TrendingWidgetUiModel.Content>()
+            flow.test {
+                contents += awaitItem().content
+                contents += awaitItem().content
+                position.value = positionAt(
+                    page = 1,
+                    period = TrendingPeriod.Year,
+                )
+                contents += awaitItem().content
+                expectNoEvents()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            // ----- Assert -----
+            contents.map { it::class } shouldContainExactly listOf(
+                TrendingWidgetUiModel.Content.Switching::class,
+                TrendingWidgetUiModel.Content.Ranked::class,
+                TrendingWidgetUiModel.Content.Ranked::class,
+            )
+        }
+
+        @Test
+        fun `a data refresh after a settings change does not show switching again`() = runTest {
+            // ----- Arrange -----
+            val books = MutableStateFlow(listOf(book(1), book(2)))
+
+            val flow = models(
+                position = flowOf(
+                    positionAt(
+                        page = 0,
+                        period = TrendingPeriod.Year,
+                    ),
+                ),
+                settingsChanges = replayed(changeTo(TrendingPeriod.Year)),
+                observeTrending = { books },
+            )
+
+            // ----- Act -----
+            val contents = mutableListOf<TrendingWidgetUiModel.Content>()
+            flow.test {
+                contents += awaitItem().content
+                contents += awaitItem().content
+                books.value = listOf(book(3), book(4))
+                contents += awaitItem().content
+                expectNoEvents()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            // ----- Assert -----
+            contents.map { it::class } shouldContainExactly listOf(
+                TrendingWidgetUiModel.Content.Switching::class,
+                TrendingWidgetUiModel.Content.Ranked::class,
+                TrendingWidgetUiModel.Content.Ranked::class,
+            )
+        }
+
+        @Test
+        fun `a settings change while signed out shows no switching`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                isSignedIn = false,
+                settingsChanges = replayed(changeTo(TrendingPeriod.Year)),
+                observeTrending = fixedBooks(listOf(book(1))),
+            )
+
+            // ----- Act & Assert -----
+            flow.test {
+                awaitItem().content shouldBe TrendingWidgetUiModel.Content.SignedOut
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `switching gives way to the ranking for the current period when the position never catches up`() =
+            runTest {
+                // ----- Arrange -----
+                val flow = models(
+                    position = flowOf(positionAt(page = 0)),
+                    settingsChanges = replayed(changeTo(TrendingPeriod.Year)),
+                    observeTrending = fixedBooks(listOf(book(1), book(2))),
+                )
+
+                // ----- Act -----
+                val contents = mutableListOf<TrendingWidgetUiModel.Content>()
+                var quietBeforeTimeout = false
+                flow.test {
+                    contents += awaitItem().content
+                    testScheduler.advanceTimeBy(4.seconds)
+                    testScheduler.runCurrent()
+                    expectNoEvents()
+                    quietBeforeTimeout = true
+                    testScheduler.advanceTimeBy(2.seconds)
+                    testScheduler.runCurrent()
+                    contents += awaitItem().content
+                    cancelAndIgnoreRemainingEvents()
+                }
+
+                // ----- Assert -----
+                quietBeforeTimeout shouldBe true
+                contents[0] shouldBe TrendingWidgetUiModel.Content.Switching(eyebrow = "Eyebrow Year")
+                contents[1].shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>().eyebrow shouldBe "Eyebrow Week"
+            }
     }
 }

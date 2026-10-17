@@ -14,11 +14,17 @@ import nl.rhaydus.softcover.feature.widget.data.mapper.write
 import nl.rhaydus.softcover.feature.widget.data.mapper.writeTrendingPage
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingPosition
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingSettings
+import nl.rhaydus.softcover.feature.widget.domain.model.TrendingSettingsChange
 import nl.rhaydus.softcover.feature.widget.domain.repository.TrendingRepository
 import nl.rhaydus.softcover.feature.widget.domain.util.nextPage
 
 internal class TrendingRepositoryImpl(private val context: Context) : TrendingRepository {
     override val changes = MutableSharedFlow<Int>(
+        extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+
+    override val settingsChanges = MutableSharedFlow<TrendingSettingsChange>(
         extraBufferCapacity = 16,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
@@ -39,14 +45,26 @@ internal class TrendingRepositoryImpl(private val context: Context) : TrendingRe
         appWidgetId: Int,
         settings: TrendingSettings,
     ) {
+        var changed = false
+
         updateAppWidgetState(
             context = context,
             glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
         ) { preferences ->
             if (preferences.toTrendingSettings() != settings) {
+                changed = true
                 preferences.write(settings)
                 preferences.writeTrendingPage(0)
             }
+        }
+
+        if (changed) {
+            settingsChanges.tryEmit(
+                TrendingSettingsChange(
+                    appWidgetId = appWidgetId,
+                    settings = settings,
+                ),
+            )
         }
 
         changes.tryEmit(appWidgetId)

@@ -7,6 +7,11 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.withTimeoutOrNull
 import nl.rhaydus.common.AppLog
@@ -14,6 +19,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickResolution
+import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettingsChange
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSource
 import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
 import kotlin.time.Duration.Companion.milliseconds
@@ -23,12 +29,18 @@ private class RandomPickWidgetInputs(
     val themeConfiguration: ThemeConfiguration,
     val wantToRead: List<Book>,
     val lists: List<BookList>,
+    val settingsChange: RandomPickSettingsChange?,
 )
 
 /**
  * A picked book emits its text first with the cover pending, then again with its image files. Files that already
  * exist resolve within [IMAGE_HIT_WINDOW] and skip the pending step. A failed resolve is logged and the last
  * model stays.
+ *
+ * Each [settingsChanges] emission, which arrives ahead of its matching [changes] one, first shows the loading
+ * frame with the eyebrow for the new settings, then the resolved content. If that resolve fails, the model that
+ * was showing before the loader returns, or the plain loading model when there was none, so the loader never
+ * sticks. Every other input keeps the text-first behaviour and never shows the loader.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun randomPickWidgetModels(
@@ -37,26 +49,82 @@ internal fun randomPickWidgetModels(
     wantToRead: Flow<List<Book>>,
     lists: Flow<List<BookList>>,
     changes: Flow<Unit>,
+    settingsChanges: Flow<RandomPickSettingsChange> = emptyFlow(),
     resolve: suspend (wantToRead: List<Book>, lists: List<BookList>) -> Result<RandomPickResolution>,
     coverUri: suspend (Book) -> Uri?,
     artwork: suspend (Book) -> RandomPickWidgetUiModel.Artwork?,
-): Flow<RandomPickWidgetUiModel> = combine(
-    isSignedIn,
-    themeConfiguration,
-    wantToRead,
-    lists,
-    changes,
-) { signedIn, theme, books, userLists, _ ->
-    RandomPickWidgetInputs(
-        isSignedIn = signedIn,
-        themeConfiguration = theme,
-        wantToRead = books,
-        lists = userLists,
+): Flow<RandomPickWidgetUiModel> = flow {
+    var announced: RandomPickSettingsChange? = null
+    var lastSettled: RandomPickWidgetUiModel? = null
+
+    emitAll(
+        combine(
+            isSignedIn,
+            themeConfiguration,
+            wantToRead,
+            lists,
+            combine(
+                changes,
+                settingsChanges.map<RandomPickSettingsChange, RandomPickSettingsChange?> { it }.onStart { emit(null) },
+            ) { _, settingsChange -> settingsChange },
+        ) { signedIn, theme, books, userLists, settingsChange ->
+            RandomPickWidgetInputs(
+                isSignedIn = signedIn,
+                themeConfiguration = theme,
+                wantToRead = books,
+                lists = userLists,
+                settingsChange = settingsChange,
+            )
+        }.transformLatest { inputs ->
+            val change = inputs.settingsChange
+            val settled = FlowCollector<RandomPickWidgetUiModel> { model ->
+                if (model.content !is RandomPickWidgetUiModel.Content.Switching) lastSettled = model
+
+                emit(model)
+            }
+
+            var switching = false
+
+            if (inputs.isSignedIn && change != null && change !== announced) {
+                announced = change
+                switching = true
+
+                emit(
+                    inputs.model(
+                        RandomPickWidgetUiModel.Content.Switching(
+                            eyebrow = eyebrowFor(
+                                source = change.settings.source,
+                                lists = inputs.lists,
+                            ),
+                        ),
+                    ),
+                )
+            }
+
+            val resolved = settled.resolveInto(
+                inputs = inputs,
+                resolve = resolve,
+                coverUri = coverUri,
+                artwork = artwork,
+            )
+
+            if (resolved.not() && switching) {
+                emit(lastSettled ?: inputs.model(RandomPickWidgetUiModel.Content.Loading))
+            }
+        },
     )
-}.transformLatest { inputs ->
+}
+
+/** Returns false when the resolve failed and nothing was emitted. */
+private suspend fun FlowCollector<RandomPickWidgetUiModel>.resolveInto(
+    inputs: RandomPickWidgetInputs,
+    resolve: suspend (wantToRead: List<Book>, lists: List<BookList>) -> Result<RandomPickResolution>,
+    coverUri: suspend (Book) -> Uri?,
+    artwork: suspend (Book) -> RandomPickWidgetUiModel.Artwork?,
+): Boolean {
     if (inputs.isSignedIn.not()) {
         emit(inputs.model(RandomPickWidgetUiModel.Content.SignedOut))
-        return@transformLatest
+        return true
     }
 
     val resolution = resolve(
@@ -68,7 +136,7 @@ internal fun randomPickWidgetModels(
             "Resolving the random pick failed",
         )
 
-        return@transformLatest
+        return false
     }
 
     when (resolution) {
@@ -83,6 +151,8 @@ internal fun randomPickWidgetModels(
             artwork = artwork,
         )
     }
+
+    return true
 }
 
 private suspend fun FlowCollector<RandomPickWidgetUiModel>.emitResolved(

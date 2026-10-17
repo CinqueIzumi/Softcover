@@ -20,4 +20,23 @@ internal class WidgetRepainter(context: Context) {
             id = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
         )
     }
+
+    /** Repaints [appWidgetId] only if [widget] is placed on a home screen, and returns whether it did. */
+    suspend fun repaintIfPlaced(
+        widget: GlanceAppWidget,
+        appWidgetId: Int,
+    ): Boolean {
+        val manager = GlanceAppWidgetManager(context)
+
+        val glanceId = manager.getGlanceIds(widget.javaClass)
+            .firstOrNull { manager.getAppWidgetId(it) == appWidgetId }
+            ?: return false
+
+        widget.update(
+            context = context,
+            id = glanceId,
+        )
+
+        return true
+    }
 }

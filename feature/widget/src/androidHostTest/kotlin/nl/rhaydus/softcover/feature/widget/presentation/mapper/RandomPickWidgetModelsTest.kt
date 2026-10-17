@@ -10,12 +10,17 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickResolution
+import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettings
+import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettingsChange
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSource
 import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
 import org.junit.jupiter.api.Nested
@@ -60,14 +65,18 @@ class RandomPickWidgetModelsTest {
     private fun models(
         isSignedIn: Boolean = true,
         resolution: Result<RandomPickResolution>,
+        wantToRead: Flow<List<Book>> = flowOf(emptyList()),
+        changes: Flow<Unit> = flowOf(Unit),
+        settingsChanges: Flow<RandomPickSettingsChange> = emptyFlow(),
         coverUri: suspend (Book) -> Uri? = { null },
         artwork: suspend (Book) -> RandomPickWidgetUiModel.Artwork? = { null },
     ): Flow<RandomPickWidgetUiModel> = randomPickWidgetModels(
         isSignedIn = flowOf(isSignedIn),
         themeConfiguration = flowOf(ThemeConfiguration()),
-        wantToRead = flowOf(emptyList()),
+        wantToRead = wantToRead,
         lists = flowOf(emptyList()),
-        changes = flowOf(Unit),
+        changes = changes,
+        settingsChanges = settingsChanges,
         resolve = { _, _ -> resolution },
         coverUri = {
             requestedBookIds += it.id
@@ -265,6 +274,240 @@ class RandomPickWidgetModelsTest {
                 content.cover shouldBe RandomPickWidgetUiModel.Cover.Missing
                 awaitComplete()
             }
+        }
+    }
+
+    @Nested
+    inner class SettingsChanges {
+        private fun changeTo(source: RandomPickSource) = RandomPickSettingsChange(
+            appWidgetId = 1,
+            settings = RandomPickSettings(source = source),
+        )
+
+        private fun resolved(source: RandomPickSource) = Result.success(
+            RandomPickResolution.Resolved(
+                book = book(3),
+                source = source,
+            ),
+        )
+
+        @Test
+        fun `a settings change shows the new eyebrow as switching before the resolved content`() = runTest {
+            // ----- Arrange -----
+            val settingsChanges = MutableSharedFlow<RandomPickSettingsChange>(replay = 1)
+            settingsChanges.tryEmit(changeTo(RandomPickSource.Owned))
+
+            val flow = models(
+                resolution = resolved(RandomPickSource.Owned),
+                settingsChanges = settingsChanges,
+            )
+
+            // ----- Act & Assert -----
+            flow.test {
+                awaitItem().content shouldBe
+                    RandomPickWidgetUiModel.Content.Switching(eyebrow = "WHAT NEXT? · OWNED")
+
+                val picked = awaitItem().content
+                    .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+                picked.eyebrow shouldBe "WHAT NEXT? · OWNED"
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `a shuffle after a settings change does not show switching again`() = runTest {
+            // ----- Arrange -----
+            val settingsChanges = MutableSharedFlow<RandomPickSettingsChange>(replay = 1)
+            settingsChanges.tryEmit(changeTo(RandomPickSource.Owned))
+            val shuffles = MutableSharedFlow<Unit>(replay = 1)
+            shuffles.tryEmit(Unit)
+
+            val flow = models(
+                resolution = resolved(RandomPickSource.Owned),
+                changes = shuffles,
+                settingsChanges = settingsChanges,
+            )
+
+            // ----- Act -----
+            val contents = mutableListOf<RandomPickWidgetUiModel.Content>()
+            flow.test {
+                contents += awaitItem().content
+                contents += awaitItem().content
+                shuffles.emit(Unit)
+                contents += awaitItem().content
+                expectNoEvents()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            // ----- Assert -----
+            contents.map { it::class } shouldContainExactly listOf(
+                RandomPickWidgetUiModel.Content.Switching::class,
+                RandomPickWidgetUiModel.Content.Picked::class,
+                RandomPickWidgetUiModel.Content.Picked::class,
+            )
+        }
+
+        @Test
+        fun `a data refresh after a settings change does not show switching again`() = runTest {
+            // ----- Arrange -----
+            val settingsChanges = MutableSharedFlow<RandomPickSettingsChange>(replay = 1)
+            settingsChanges.tryEmit(changeTo(RandomPickSource.Owned))
+            val books = MutableStateFlow(emptyList<Book>())
+
+            val flow = models(
+                resolution = resolved(RandomPickSource.Owned),
+                wantToRead = books,
+                settingsChanges = settingsChanges,
+            )
+
+            // ----- Act -----
+            val contents = mutableListOf<RandomPickWidgetUiModel.Content>()
+            flow.test {
+                contents += awaitItem().content
+                contents += awaitItem().content
+                books.value = listOf(book(9))
+                contents += awaitItem().content
+                expectNoEvents()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            // ----- Assert -----
+            contents.map { it::class } shouldContainExactly listOf(
+                RandomPickWidgetUiModel.Content.Switching::class,
+                RandomPickWidgetUiModel.Content.Picked::class,
+                RandomPickWidgetUiModel.Content.Picked::class,
+            )
+        }
+
+        @Test
+        fun `a second settings change shows switching again with its own eyebrow`() = runTest {
+            // ----- Arrange -----
+            val settingsChanges = MutableSharedFlow<RandomPickSettingsChange>(replay = 1)
+            settingsChanges.tryEmit(changeTo(RandomPickSource.Owned))
+            val shuffles = MutableSharedFlow<Unit>(replay = 1)
+            shuffles.tryEmit(Unit)
+
+            val flow = models(
+                resolution = resolved(RandomPickSource.WantToRead),
+                changes = shuffles,
+                settingsChanges = settingsChanges,
+            )
+
+            // ----- Act -----
+            val contents = mutableListOf<RandomPickWidgetUiModel.Content>()
+            flow.test {
+                contents += awaitItem().content
+                contents += awaitItem().content
+                settingsChanges.emit(changeTo(RandomPickSource.WantToRead))
+                shuffles.emit(Unit)
+                contents += awaitItem().content
+                contents += awaitItem().content
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            // ----- Assert -----
+            contents[2] shouldBe RandomPickWidgetUiModel.Content.Switching(eyebrow = "WHAT NEXT? · WANT TO READ")
+            contents[3].shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+        }
+
+        @Test
+        fun `a settings change while signed out shows no switching`() = runTest {
+            // ----- Arrange -----
+            val settingsChanges = MutableSharedFlow<RandomPickSettingsChange>(replay = 1)
+            settingsChanges.tryEmit(changeTo(RandomPickSource.Owned))
+
+            val flow = models(
+                isSignedIn = false,
+                resolution = resolved(RandomPickSource.Owned),
+                settingsChanges = settingsChanges,
+            )
+
+            // ----- Act & Assert -----
+            flow.test {
+                awaitItem().content shouldBe RandomPickWidgetUiModel.Content.SignedOut
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        private fun failingAfter(
+            successes: Int,
+            source: RandomPickSource,
+        ): suspend (List<Book>, List<BookList>) -> Result<RandomPickResolution> {
+            var calls = 0
+
+            return { _, _ ->
+                calls++
+
+                if (calls <= successes) {
+                    resolved(source)
+                } else {
+                    Result.failure(IllegalStateException("resolve failed"))
+                }
+            }
+        }
+
+        @Test
+        fun `a failed resolve after switching restores the previous model`() = runTest {
+            // ----- Arrange -----
+            val settingsChanges = MutableSharedFlow<RandomPickSettingsChange>()
+
+            val flow = randomPickWidgetModels(
+                isSignedIn = flowOf(true),
+                themeConfiguration = flowOf(ThemeConfiguration()),
+                wantToRead = flowOf(emptyList()),
+                lists = flowOf(emptyList()),
+                changes = flowOf(Unit),
+                settingsChanges = settingsChanges,
+                resolve = failingAfter(
+                    successes = 1,
+                    source = RandomPickSource.WantToRead,
+                ),
+                coverUri = { null },
+                artwork = { null },
+            )
+
+            // ----- Act -----
+            val contents = mutableListOf<RandomPickWidgetUiModel.Content>()
+            flow.test {
+                contents += awaitItem().content
+                settingsChanges.emit(changeTo(RandomPickSource.Owned))
+                contents += awaitItem().content
+                contents += awaitItem().content
+                expectNoEvents()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            // ----- Assert -----
+            contents[0].shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+            contents[1] shouldBe RandomPickWidgetUiModel.Content.Switching(eyebrow = "WHAT NEXT? · OWNED")
+            contents[2] shouldBe contents[0]
+        }
+
+        @Test
+        fun `a failed resolve after switching with no previous model shows loading`() = runTest {
+            // ----- Arrange -----
+            val settingsChanges = MutableSharedFlow<RandomPickSettingsChange>(replay = 1)
+            settingsChanges.tryEmit(changeTo(RandomPickSource.Owned))
+
+            val flow = models(
+                resolution = Result.failure(IllegalStateException("resolve failed")),
+                settingsChanges = settingsChanges,
+            )
+
+            // ----- Act -----
+            val contents = mutableListOf<RandomPickWidgetUiModel.Content>()
+            flow.test {
+                contents += awaitItem().content
+                contents += awaitItem().content
+                expectNoEvents()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            // ----- Assert -----
+            contents shouldContainExactly listOf(
+                RandomPickWidgetUiModel.Content.Switching(eyebrow = "WHAT NEXT? · OWNED"),
+                RandomPickWidgetUiModel.Content.Loading,
+            )
         }
     }
 }

@@ -11,6 +11,9 @@ internal data class TrendingWidgetUiModel(
     sealed interface Content {
         data object Loading : Content
 
+        /** Shown while the new settings resolve, with the [eyebrow] already naming them. */
+        data class Switching(val eyebrow: String) : Content
+
         data object SignedOut : Content
 
         data class Empty(val eyebrow: String) : Content

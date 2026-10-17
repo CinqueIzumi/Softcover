@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.feature.widget.data.mapper.toRandomPickState
 import nl.rhaydus.softcover.feature.widget.data.mapper.write
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickResolution
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettings
+import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettingsChange
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickState
 import nl.rhaydus.softcover.feature.widget.domain.repository.RandomPickRepository
 import nl.rhaydus.softcover.feature.widget.domain.util.buildPool
@@ -30,6 +31,11 @@ internal class RandomPickRepositoryImpl(private val context: Context) : RandomPi
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
+    override val settingsChanges = MutableSharedFlow<RandomPickSettingsChange>(
+        extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+
     override suspend fun getSettings(appWidgetId: Int): RandomPickSettings = getAppWidgetState(
         context = context,
         definition = PreferencesGlanceStateDefinition,
@@ -40,14 +46,26 @@ internal class RandomPickRepositoryImpl(private val context: Context) : RandomPi
         appWidgetId: Int,
         settings: RandomPickSettings,
     ) {
+        var changed = false
+
         updateAppWidgetState(
             context = context,
             glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
         ) { preferences ->
             if (preferences.toRandomPickSettings() != settings) {
+                changed = true
                 preferences.write(settings)
                 preferences.write(RandomPickState())
             }
+        }
+
+        if (changed) {
+            settingsChanges.tryEmit(
+                RandomPickSettingsChange(
+                    appWidgetId = appWidgetId,
+                    settings = settings,
+                ),
+            )
         }
 
         changes.tryEmit(appWidgetId)

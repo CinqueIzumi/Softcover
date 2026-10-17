@@ -88,6 +88,8 @@ internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
                         .getOrNull()
                 }
                 .filterNotNull(),
+            settingsChanges = dependencies.observeTrendingSettingsChanges()
+                .filter { it.appWidgetId == appWidgetId },
             observeTrending = { period -> dependencies.observeTrendingBooks(period = period) },
             eyebrowFor = { period -> context.getString(period.eyebrowRes()) },
             coverUri = { book ->

@@ -74,6 +74,8 @@ internal class RandomPickWidget : GlanceAppWidget(), KoinComponent {
                 .onStart { emit(appWidgetId) }
                 .filter { it == appWidgetId }
                 .map { },
+            settingsChanges = dependencies.observeRandomPickSettingsChanges()
+                .filter { it.appWidgetId == appWidgetId },
             resolve = { wantToRead, lists ->
                 dependencies.resolveRandomPick(
                     appWidgetId = appWidgetId,

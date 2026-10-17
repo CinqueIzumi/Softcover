@@ -21,8 +21,10 @@ import nl.rhaydus.softcover.feature.widget.domain.usecase.GetTrendingPositionUse
 import nl.rhaydus.softcover.feature.widget.domain.usecase.GetTrendingSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveQuoteSelectionChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveRandomPickChangesUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveRandomPickSettingsChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveSelectedBookChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingChangesUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingSettingsChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ResolveRandomPickUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.SaveRandomPickSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.SaveTrendingSettingsUseCase
@@ -88,6 +90,8 @@ val widgetModule = module {
 
     factory { ObserveRandomPickChangesUseCase(randomPickRepository = get()) }
 
+    factory { ObserveRandomPickSettingsChangesUseCase(randomPickRepository = get()) }
+
     factory { GetTrendingSettingsUseCase(trendingRepository = get()) }
 
     factory { GetPlacedTrendingSettingsUseCase(trendingRepository = get()) }
@@ -99,6 +103,8 @@ val widgetModule = module {
     factory { AdvanceTrendingPageUseCase(trendingRepository = get()) }
 
     factory { ObserveTrendingChangesUseCase(trendingRepository = get()) }
+
+    factory { ObserveTrendingSettingsChangesUseCase(trendingRepository = get()) }
 
     single { WidgetRepainter(context = androidContext()) }
 
@@ -138,6 +144,7 @@ val widgetModule = module {
             resolveRandomPick = get(),
             shuffleRandomPick = get(),
             observeRandomPickChanges = get(),
+            observeRandomPickSettingsChanges = get(),
         )
     }
 
@@ -161,6 +168,7 @@ val widgetModule = module {
             getTrendingPosition = get(),
             advanceTrendingPage = get(),
             observeTrendingChanges = get(),
+            observeTrendingSettingsChanges = get(),
         )
     }
 
