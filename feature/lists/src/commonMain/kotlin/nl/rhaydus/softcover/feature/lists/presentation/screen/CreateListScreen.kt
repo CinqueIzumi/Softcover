@@ -28,14 +28,19 @@ import nl.rhaydus.softcover.feature.lists.presentation.screenmodel.CreateListScr
  * — the nested navigator is there only to scope [CreateListScreenModel], not to host a back-stack, and
  * is disposed the moment [CreateListSheet] leaves composition (mirroring
  * [nl.rhaydus.softcover.orchestration.presentation.BookDetailPaneHost]'s nested-navigator technique).
+ * It holds no state of its own so the back stack survives process-death restore; its callbacks arrive
+ * through [LocalCreateListCallbacks].
  * `internal` — nothing outside this module needs the `Screen` type itself, only [CreateListSheet].
  */
-internal class CreateListScreen(
-    private val onDismissRequest: () -> Unit,
-    private val onListCreated: ((listId: Int, listName: String) -> Unit)?,
-) : Screen {
+internal class CreateListScreen : Screen {
     @Composable
     override fun Content() {
+        val callbacks = LocalCreateListCallbacks.current
+
+        val onDismissRequest = callbacks.onDismissRequest
+
+        val onListCreated = callbacks.onListCreated
+
         val screenModel = koinScreenModel<CreateListScreenModel>()
 
         val state by screenModel.state.collectAsStateWithLifecycle()

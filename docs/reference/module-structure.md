@@ -228,15 +228,11 @@ Room DB.
   stops needing it, never a commit scheduled later — an empty allowance is indistinguishable from a
   forgotten one until something is written to it.
 - **Convention plugins** in `build-logic/` keep module build files uniform. Apply the smallest set:
-  - `softcover.android.library` — base for every Android-only `:core:*` / `:feature:*` /
-    `:orchestration` module (SDK/JDK, the shared coroutines/Koin runtime (logging is Kermit via `AppLog`, transitive from `:core:domain`) + JUnit5/Kotest/MockK/
-    Turbine test stack).
-  - `softcover.android.compose` — any Android-only module with Compose UI.
   - `softcover.android.room` — `:core:database` only.
   - `softcover.android.apollo` — `:core:network` only.
-  - `softcover.kmp.library` / `softcover.kmp.compose` — the multiplatform siblings (KMP base, and KMP
-    Compose UI wiring AndroidX Compose into `androidMain`) used by modules that have migrated to
-    Kotlin Multiplatform.
+  - `softcover.kmp.library` / `softcover.kmp.compose` — the base for every `:core:*` / `:feature:*` /
+    `:orchestration` library module (KMP base with SDK/JDK, the shared coroutines/Koin runtime and the
+    JUnit5/Kotest/MockK/Turbine test stack; and Compose UI wiring AndroidX Compose into `androidMain`).
   - `:app` is the lone `com.android.application` and stays Android-only (it owns build-type-conditional
     wiring). Because it is the **only** module with build types — the KMP Android library plugin
     produces a single variant — it is also where **debug-only UI** lives: `src/debug/` holds the
@@ -263,6 +259,9 @@ Room DB.
   banner and offline screen say the same thing on every surface), and `:feature:settings` bundles the
   build-time `ROADMAP.md` fallback. All three must carry `androidResources.enable = true` (see the gate
   below).
+- **Keep rules live in the owning module.** A class reached by name keeps itself through
+  `src/<sourceSet>/keepRules/*.keep` in the module that owns it, as consumer rules; `:app` holds only its
+  line-table rule. See [`r8.md`](r8.md).
 - **Koin:** each module owns one `module { }` that declares its own dependencies via `includes(...)`
   (the sibling modules whose bindings it `get()`s, plus its platform `expect`/`actual` module). The
   composition root `orchestrationModule` `includes(...)` the whole graph, so `softcoverModules` is just

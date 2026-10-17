@@ -3,10 +3,10 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     // The build-type debug-routes binding (app/src/debug) implements the @Composable DebugRoutesContent
     // seam, so the application shell needs the Compose compiler to transform that override correctly.
     alias(libs.plugins.kotlin.compose)
+    id("softcover.android.r8-keep-contract")
 }
 
 android {
@@ -19,8 +19,6 @@ android {
         targetSdk = 37
         versionCode = 37
         versionName = "3.1.3"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     // Release signing is configured only when a keystore is supplied via the environment (CI decodes
@@ -41,15 +39,32 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            optimization {
+                enable = true
+                keepRules {
+                    files.add(file("src/main/keepRules/app.keep"))
+                }
+            }
             // Null when no keystore is supplied (local builds) → release stays unsigned, as before.
             signingConfig = signingConfigs.findByName("release")
         }
+
+        create("minified") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += "release"
+        }
     }
+
+    // `src/release` holds the no-op debug-routes binding that `src/main` references; a custom build type
+    // does not inherit it, so wire it in explicitly.
+    sourceSets {
+        getByName("minified") {
+            java.directories.add("src/release/java")
+            kotlin.directories.add("src/release/java")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

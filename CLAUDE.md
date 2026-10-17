@@ -28,7 +28,8 @@ book tracking platform, on Android (SDK 26+), iOS and desktop (JVM). Shared UI a
 ./gradlew assembleRelease        # Release build
 ./gradlew test                   # :app / :desktopApp unit tests only — no KMP suites
 ./gradlew testAndroidHostTest --continue   # KMP unit tests
-./gradlew connectedAndroidTest   # Instrumented tests (device/emulator)
+./gradlew :smoketest:pixelApi36MinifiedAndroidTest   # Device suite, R8-minified app (needs HARDCOVER_SMOKE_TOKEN)
+./gradlew :app:checkR8KeepContract   # R8 keep contract on the release and minified builds
 ./gradlew lint                   # Android Lint
 ./gradlew ktlintFormat           # Auto-fix layout rules
 ./gradlew styleCheck             # detekt + ktlint gates
@@ -72,6 +73,7 @@ descriptions — never hand-edit it. The full rules are in `.claude/rules/roadma
 | Writing or changing any user-facing text | [`docs/reference/design-system/voice.md`](docs/reference/design-system/voice.md) |
 | Writing Kotlin | [`docs/rhaydus/0.3.1/code-style.md`](docs/rhaydus/0.3.1/code-style.md), then [`docs/reference/code-style.md`](docs/reference/code-style.md) |
 | Looking for an existing component, modifier or util | [`docs/rhaydus/0.3.1/CAPABILITIES.md`](docs/rhaydus/0.3.1/CAPABILITIES.md) |
+| Adding a manifest component, worker, widget, Screen argument, or anything reached by name / touching keep rules | [`docs/reference/r8.md`](docs/reference/r8.md) |
 
 ## Rhaydus foundation (local override — pending foundation FU-6; re-running rhaydus-adopt reverts this)
 

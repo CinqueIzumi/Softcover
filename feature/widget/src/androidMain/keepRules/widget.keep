@@ -1,0 +1,9 @@
+# Consumer keep rules for :feature:widget, applied to the app's R8 run.
+
+# Glance instantiates ActionCallbacks by class name through the no-arg constructor; Glance's own rule keeps
+# the class but not the constructor. Without it, widget taps fail with an InstantiationException.
+-keepclassmembers class * extends androidx.glance.appwidget.action.ActionCallback { <init>(); }
+
+# Glance persists the provider's canonical name in its DataStore and the app looks widgets up with
+# getGlanceIds(widget.javaClass). A renamed class makes placed widgets undetectable after an upgrade.
+-keepnames class * extends androidx.glance.appwidget.GlanceAppWidget

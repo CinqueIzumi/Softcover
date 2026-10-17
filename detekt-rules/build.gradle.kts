@@ -28,4 +28,7 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    // detekt-test's KtTestCompiler resolves JDK types only when JAVA_HOME is set, which a daemon-forked test
+    // JVM may not inherit; without it `java.lang.Class` and `java.io.Serializable` stay unresolved.
+    environment("JAVA_HOME", javaLauncher.get().metadata.installationPath.asFile.absolutePath)
 }

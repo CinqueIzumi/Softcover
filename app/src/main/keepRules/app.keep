@@ -1,0 +1,3 @@
+# Release crash reports need file names; line tables are retained, SourceFile is not by default.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile

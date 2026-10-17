@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Package visibility (Android 11+): lets the journey resolve and launch the app under test. -->
+    <queries>
+        <package android:name="nl.rhaydus.softcover" />
+    </queries>
+
+    <!-- Targets the test APK itself: the default target is the app under test, and `pm clear` on a target
+         package kills the instrumentation, which the journey does to start from a signed-out app. -->
+    <instrumentation
+        android:name="androidx.test.runner.AndroidJUnitRunner"
+        android:targetPackage="nl.rhaydus.softcover.smoketest"
+        tools:replace="android:targetPackage" />
+</manifest>

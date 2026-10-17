@@ -1,0 +1,6 @@
+# AGP requires shrinking on in the test project when the tested app is minified, but this module is
+# black-box test code: stripping or renaming it would hide the tests from the instrumentation runner.
+-dontshrink
+-dontobfuscate
+-dontoptimize
+-dontwarn com.google.errorprone.annotations.**

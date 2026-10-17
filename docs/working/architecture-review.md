@@ -24,17 +24,15 @@ Turbine standardization (T4), and the DC1 write-replay divergence. The keystone 
 `:core:designsystem` went from `api`-exporting **7 data modules** to `:core:book` + `:core:domain`
 only, with a gate (M4) that stops it regressing.
 
-What's left is **hardening, not structure**: release-build hygiene (R1/S1), a few correctness gaps in
+What's left is **hardening, not structure**: release-build hygiene (S1; R1 is resolved), a few correctness gaps in
 sync and caching (D3/D5/DC2), test breadth (T3/T5/T6), and a long tail of low-severity polish.
 
 ---
 
 ## TIER 1b — Build setup & platform seams
 
-- **B2 [LOW] AGP-9 / KSP compatibility debt.** `gradle.properties` sets `android.builtInKotlin=false`
-  (+ related flags) to work around KSP not yet supporting AGP 9's built-in Kotlin. Track it; flip back
-  and drop the explicit Kotlin-android plugin once KSP catches up. Verify the Room KSP path still works
-  after the switch. Cost: trivial (later). *(Also carried as a fast-track fix in `now.md`.)*
+- **B2 [LOW] AGP-9 / KSP compatibility debt** *(resolved)*. The `android.builtInKotlin=false` workaround
+  is gone: the build runs on AGP 9.3.3 with built-in Kotlin and Kotlin 2.4.21.
 
 ---
 
@@ -163,7 +161,10 @@ Keychain, desktop KSafe), no tokens/keys/PII are logged, the error wrapping does
 Authorization header, and the Apollo endpoint is hardcoded HTTPS. The findings are concentrated in
 release-build hardening:
 
-### R1 [MEDIUM] Release builds have minification DISABLED and empty ProGuard rules
+### R1 [MEDIUM] Release builds have minification DISABLED and empty ProGuard rules *(resolved)*
+✅ Resolved: R8 is on, with a keep contract, detekt rules and a minified smoke suite; see
+[`docs/reference/r8.md`](../reference/r8.md). The text below is the original finding.
+
 `app/build.gradle.kts:43` sets `isMinifyEnabled = false`, and `app/proguard-rules.pro` is still just the
 template comments. Consequences for a shipped release: larger APK, no obfuscation, class/method names
 leak in stack traces. Re-enabling R8 is the right end state but **not a one-liner** — it needs keep rules
@@ -232,7 +233,7 @@ Confirmed absent. Not a blocker; a baseline profile would cut cold-start meaning
 
 | # | Change | Severity | Cost | Why |
 |---|--------|----------|------|-----|
-| R1 | Enable R8 + keep rules (Koin/Apollo/Room/serialization/TOAD) + release smoke test | MED | Med | Shipping unobfuscated, unminified builds to Play today |
+| R1 | ✅ Resolved (see [`r8.md`](../reference/r8.md)): Enable R8 + keep rules (Koin/Apollo/Room/serialization/TOAD) + release smoke test | MED | Med | Shipping unobfuscated, unminified builds to Play today |
 | S1 | Exclude `api_key.enc` + the Room DB from `allowBackup` | MED | Trivial | Confirmed: backup can exfiltrate the encrypted key + whole DB |
 | T3 | Test the 16 untested `core:personal` mutations | MED | Med | User-data-loss paths, thin coverage |
 | P1 | Flag TOAD boilerplate upstream (don't fork the convention) | MED | Low | Name the cost; foundation's call |

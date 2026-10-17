@@ -1,0 +1,11 @@
+# Consumer keep rules for :core:presentation navigation, applied to the app's R8 run.
+
+# Voyager's default Screen.key is the class's qualifiedName; it keys SaveableStateProvider and ScreenModels,
+# so merged or renamed screens could collide or lose saved state.
+-keepnames class * implements cafe.adriel.voyager.core.screen.Screen
+
+# Android saves the Voyager back stack via java.io.Serializable for process-death restore; R8 would remove
+# serialized fields it sees as never read (see TransientNavArg).
+-keepclassmembers class * implements cafe.adriel.voyager.core.screen.Screen {
+    !static !transient <fields>;
+}

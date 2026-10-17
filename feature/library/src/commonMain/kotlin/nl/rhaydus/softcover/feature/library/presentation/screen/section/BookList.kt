@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import nl.rhaydus.designsystem.component.DesktopContextMenu
 import nl.rhaydus.designsystem.component.DesktopContextMenuItem
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
@@ -373,7 +374,7 @@ internal fun BookList(
                     BookCard(
                         model = card,
                         onEvent = onCardEvent,
-                        modifier = entryModifier,
+                        modifier = entryModifier.testTag(LibraryTestTags.BOOK_CARD),
                         content = {
                             DragHandle(
                                 visible = isRearranging,

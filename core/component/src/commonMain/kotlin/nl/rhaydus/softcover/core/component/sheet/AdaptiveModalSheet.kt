@@ -26,6 +26,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -120,20 +121,22 @@ private fun BottomSheetForm(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
-    var closing by remember { mutableStateOf(false) }
+    var closeRequested by remember { mutableStateOf(false) }
     var dismissSent by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val footerInset = remember { mutableIntStateOf(0) }
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
-        confirmValueChange = { target ->
-            if (target == SheetValue.Hidden) {
-                closing = true
-            }
-
-            true
-        },
     )
+    val closing by remember(sheetState) {
+        derivedStateOf {
+            val swipingAway = sheetState.currentValue != SheetValue.Hidden &&
+                sheetState.targetValue == SheetValue.Hidden
+
+            closeRequested || dismissSent || swipingAway
+        }
+    }
+
     val notifyDismissed: () -> Unit = remember {
         {
             if (dismissSent.not()) {
@@ -144,8 +147,8 @@ private fun BottomSheetForm(
     }
     val dismiss: () -> Unit = remember(sheetState, coroutineScope) {
         {
-            if (closing.not()) {
-                closing = true
+            if (closeRequested.not()) {
+                closeRequested = true
 
                 coroutineScope.launch { sheetState.hide() }.invokeOnCompletion { notifyDismissed() }
             }

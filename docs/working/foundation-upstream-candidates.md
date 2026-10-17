@@ -10,7 +10,9 @@ upstream and record it here.
 
 **Process.** With `foundation.local=true` (includeBuild against `../rhaydus-foundation`), fix it at the
 source and bump the foundation. Otherwise file it against the foundation and track it here until a
-released version carries the fix, then re-run the `rhaydus-adopt` agent. The capability surface these
+released version carries the fix, then re-run the `rhaydus-adopt` agent. `../rhaydus-foundation` is still on
+AGP 9.0.0 / Gradle 9.1.0 / Kotlin 2.3.21 and must be upgraded before `foundation.local=true` builds work with
+this app again. The capability surface these
 entries refer to is indexed in [`../rhaydus/0.3.1/CAPABILITIES.md`](../rhaydus/0.3.1/CAPABILITIES.md).
 
 Each entry: **type** (bug / enhancement / gate), **home** (target foundation module), **status**, and
@@ -205,7 +207,7 @@ Filed but not yet implemented in the foundation.
 - **Type:** bug (gate silently inert)
 - **Home:** `nl.rhaydus:detekt-rules` + the detekt version in the shared catalog
 - **Status:** **Open.** detekt 1.23.8 embeds the Kotlin 2.0 compiler, which reads library metadata only up
-  to 2.1; Softcover builds on Kotlin 2.3.21. A `--debug` run logs 410 "incompatible version of Kotlin"
+  to 2.1; Softcover builds on Kotlin 2.4.21. A `--debug` run logs 410 "incompatible version of Kotlin"
   errors (stdlib, Compose, every repo module), so calls into them stay unresolved and every type-resolved
   rule skips them silently: a probe's `println` and `material3.Text` went unflagged by `ForbiddenMethodCall`
   while `!!` on a builtin `String?` was caught. `rhaydus:UnguardedFlowTerminalRead` is very likely inert too.
@@ -460,8 +462,11 @@ clone would fail to *configure* — `build-logic` is not in the foundation's `ma
   off), `dismiss` sends `onDismissRequest` from `invokeOnCompletion`, so a second call or the sheet's own
   dismiss can send it twice, and nothing tells the body a close has started. Softcover's `:core:component`
   `AdaptiveModalSheet` (same signature) owns the bottom sheet: `sheetGesturesEnabled` follows
-  `dismissOnTapOutside` and `confirmValueChange` only records the close, `onDismissRequest` is latched to once (also when `hide()` is cancelled),
-  and a closing signal reaches the scaffold so scrim, back and swipe lock its chrome. A detekt
+  `dismissOnTapOutside`, `onDismissRequest` is latched to once (also when `hide()` is cancelled), and a
+  closing signal reaches the scaffold so scrim, back and swipe lock its chrome. That signal is derived
+  (explicit close requested, dismiss sent, or the sheet moving from visible to `Hidden`), never latched
+  from `confirmValueChange`: Material3 queries `Hidden` while the sheet opens or the IME closes without
+  hiding, and a latch from that query turned the later explicit close into a no-op. A detekt
   `ForbiddenImport` bans the foundation symbol in every module.
 - **What to build:** move the fork into the foundation (swipe gate, one-shot latch, a
   `LocalModalSheetClosing` beside `LocalModalSheetDismiss`), release, swap the imports back, and delete the
@@ -476,7 +481,19 @@ clone would fail to *configure* — `build-logic` is not in the foundation's `ma
   and `stabilityCheck` compares each module with its checked-in `<module>/stability/*.stability` baseline in CI.
   The foundation's convention plugins should adopt it so every consumer gets the gate.
 - **What to build:** apply the plugin from the shared Compose convention helper. The plugin version must track the
-  Kotlin version (0.7.5 for Kotlin 2.3.x; 0.8.0 pulls AGP `gradle-api` 9.1.1 and needs Gradle 9.3.1). On the AGP
+  Kotlin version (Softcover runs analyzer 0.9.0 on Kotlin 2.4.21). On the AGP
   KMP Android target the analyzer's per-variant tasks look for `compile<Variant>Kotlin` output and find none, so
   repoint their `stabilityInputFiles` at `stability/compileAndroidMain/stability-info.json` once the task graph is
   ready (see `StabilityGate.kt`), or fix it upstream in the analyzer.
+
+### F52 — R8 keep-contract plugin, reflection and Screen-argument rules, and the `keepRules/` convention
+
+- **Type:** gate
+- **Home:** `build-logic` convention plugins, `nl.rhaydus:detekt-rules`, and the module convention plugins
+- **Status:** **Open — implemented locally.** The `softcover.android.r8-keep-contract` plugin, the
+  `NoReflection` and `ScreenConstructorProperty` detekt rules, and the `keepRules/` convention are described in
+  `docs/reference/r8.md`.
+- **What to build:** move the plugin and the two rules into the foundation, with the project package prefix
+  and the supertypes to check as configuration, and ship `TransientNavArg` with the navigation contract.
+  Document `keepRules/` as the consumer-rule convention. No Softcover build file registers these directories, so the foundation's
+  convention plugins only need to keep AGP's default pickup intact.

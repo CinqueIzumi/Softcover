@@ -40,6 +40,7 @@ if (foundationLocal) {
 }
 
 include(":app")
+include(":smoketest")
 include(":desktopApp")
 include(":detekt-rules")
 include(":apollo-schema-corrections")

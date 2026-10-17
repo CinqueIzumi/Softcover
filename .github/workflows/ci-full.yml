@@ -57,6 +57,11 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+  r8-smoke:
+    uses: ./.github/workflows/r8-smoke.yml
+    secrets:
+      HARDCOVER_SMOKE_TOKEN: ${{ secrets.HARDCOVER_SMOKE_TOKEN }}
+
   ios-compile:
     name: iOS compile
     # The iOS compile gates in the root build are guarded to macOS hosts, so only this job runs them.
@@ -81,7 +86,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ~/.konan
-          key: konan-${{ runner.os }}-2.3.21
+          key: konan-${{ runner.os }}-2.4.21
 
       - name: Compile iOS
         # The 6g/12g heap ceilings in gradle.properties exceed the runner's 7 GB RAM; klib
@@ -95,4 +100,4 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ~/.konan
-          key: konan-${{ runner.os }}-2.3.21
+          key: konan-${{ runner.os }}-2.4.21

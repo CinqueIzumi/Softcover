@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -124,7 +125,7 @@ internal fun GeneralBookInfoSection(
         ) {
             Box(
                 modifier = if (isLoading.not()) {
-                    Modifier.tactileClickable(
+                    Modifier.testTag(BookDetailTestTags.COVER).tactileClickable(
                         onClick = onCoverClick,
                         hoverShape = heroCover?.variant?.shape() ?: RectangleShape,
                     )

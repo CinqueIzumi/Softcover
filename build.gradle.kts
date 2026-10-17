@@ -1,13 +1,16 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.variant.TestAndroidComponentsExtension
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.jetbrains.compose.resources.ResourcesExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.android.test) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.compose.multiplatform) apply false
     alias(libs.plugins.apollo) apply false
@@ -167,8 +170,8 @@ subprojects {
                     ),
                 )
 
-                // `:desktopApp`'s own `detektMain`, and the aggregating `detektMain` that `:app`'s
-                // per-variant tasks fan out from — the shared, variant-neutral `src/main` layout.
+                // `:desktopApp`'s own `detektMain` — the variant-neutral `src/main` layout. `:app`'s
+                // `detektMain` is a source-less lifecycle task and never reaches this branch.
                 "detektMain" -> setSource(project.files("src/main/java", "src/main/kotlin"))
 
                 // `:app`'s per-variant tasks additionally read that variant's OWN source set, which is
@@ -197,6 +200,74 @@ subprojects {
                         "src/release/kotlin",
                     ),
                 )
+            }
+        }
+    }
+
+    // detekt's own Android integration keys off the legacy `kotlin-android` plugin id and AGP's removed
+    // `BaseExtension`, so with AGP built-in Kotlin it registers no per-variant tasks. `:app` therefore gets
+    // its type-resolved `detekt<Variant>` tasks here, classpathed from the variant's Kotlin compilation.
+    // `detektMain` stays the lifecycle name the gates below fan out from.
+    pluginManager.withPlugin("com.android.application") {
+        val detektExtension = extensions.getByType<DetektExtension>()
+        val androidComponents = extensions.getByType<ApplicationAndroidComponentsExtension>()
+
+        androidComponents.onVariants { variant ->
+            val capitalizedName = variant.name.replaceFirstChar { it.uppercase() }
+
+            tasks.register<Detekt>("detekt$capitalizedName") {
+                description = "Run detekt with type resolution on the ${variant.name} variant."
+                group = "verification"
+                config.setFrom(detektExtension.config)
+                buildUponDefaultConfig = detektExtension.buildUponDefaultConfig
+                parallel = detektExtension.parallel
+                include("**/*.kt", "**/*.kts")
+                exclude("**/resources/**", "**/build/**")
+                classpath.setFrom(
+                    tasks.named<KotlinCompile>("compile${capitalizedName}Kotlin").map { it.libraries },
+                    androidComponents.sdkComponents.bootClasspath,
+                )
+                reports {
+                    xml.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.xml"))
+                    html.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.html"))
+                }
+            }
+        }
+
+        tasks.register("detektMain") {
+            group = "verification"
+            description = "Run type-resolved detekt on every :app variant."
+            dependsOn(tasks.matching { it.name == "detektDebug" || it.name == "detektRelease" })
+            // An empty fan-out would pass green with nothing scanned, so a detekt/AGP change that stops
+            // registering the variant tasks must fail here instead.
+            doFirst {
+                val variantTasks = taskDependencies.getDependencies(this).filterIsInstance<Detekt>()
+                check(variantTasks.isNotEmpty()) {
+                    "No type-resolved detekt<Variant> task is registered for :app; the detekt gate would pass vacuously."
+                }
+            }
+        }
+    }
+
+    pluginManager.withPlugin("com.android.test") {
+        val detektExtension = extensions.getByType<DetektExtension>()
+        val androidComponents = extensions.getByType<TestAndroidComponentsExtension>()
+
+        tasks.register<Detekt>("detektMain") {
+            description = "Run detekt with type resolution on the minified test module."
+            group = "verification"
+            config.setFrom(detektExtension.config)
+            buildUponDefaultConfig = detektExtension.buildUponDefaultConfig
+            parallel = detektExtension.parallel
+            include("**/*.kt", "**/*.kts")
+            exclude("**/resources/**", "**/build/**")
+            classpath.setFrom(
+                tasks.named<KotlinCompile>("compileMinifiedKotlin").map { it.libraries },
+                androidComponents.sdkComponents.bootClasspath,
+            )
+            reports {
+                xml.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.xml"))
+                html.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.html"))
             }
         }
     }
@@ -462,7 +533,7 @@ val foundationLocal = Properties().apply {
 // dependency-analysis (buildHealth) configuration. Gates on the high-value categories — genuinely
 // unused dependencies and wrong api/implementation exposure (MODULE_STRUCTURE_GUIDELINES §10) — while
 // staying out of the way of the convention-plugin design: the uniform runtime + test bundle provided
-// by AndroidLibraryConventionPlugin (coroutines, koin, JUnit5/Kotest/MockK/Turbine) is
+// by softcover.kmp.library (coroutines, koin, JUnit5/Kotest/MockK/Turbine) is
 // intentionally declared centrally, not per module, so it is excluded from the "unused" check. The
 // "declare transitive dependencies directly" advice is BOM/convention-managed completeness noise and
 // is treated as informational (ignored), not a gate.
@@ -472,7 +543,7 @@ dependencyAnalysis {
             onUnusedDependencies {
                 severity("fail")
                 exclude(
-                    // Uniform runtime + test bundle provided by AndroidLibraryConventionPlugin.
+                    // Uniform runtime + test bundle provided by softcover.kmp.library.
                     "io.insert-koin:koin-android",
                     "org.jetbrains.kotlinx:kotlinx-coroutines-android",
                     // Desktop's Main dispatcher — supplied via ServiceLoader (no compile reference), the
@@ -483,6 +554,13 @@ dependencyAnalysis {
                     "io.kotest:kotest-assertions-core",
                     "io.mockk:mockk",
                     "app.cash.turbine:turbine",
+                    // The `:smoketest` device stack: the runner and rules are reached by the instrumentation
+                    // harness, not by a compile reference.
+                    "androidx.test:runner",
+                    "androidx.test:core",
+                    "androidx.test.ext:junit",
+                    "androidx.test.uiautomator:uiautomator",
+                    "junit:junit",
                     // Provided uniformly by the Compose / Room convention plugins (not per-module deps).
                     "androidx.activity:activity-compose",
                     "androidx.compose.ui:ui",

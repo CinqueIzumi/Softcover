@@ -1,0 +1,7 @@
+# Consumer keep rules for :feature:scan, applied to the app's R8 run.
+
+# ML Kit's MlKitComponentDiscoveryService reads each registrar's class name from manifest meta-data and
+# instantiates it reflectively through the no-arg constructor. The registrars carry no @UsedBy annotation, so
+# ML Kit's shipped rule misses them and R8 strips the constructor: init fails with a NoSuchMethodException
+# and the barcode scanner never initialises.
+-keepclassmembers class * implements com.google.firebase.components.ComponentRegistrar { <init>(); }

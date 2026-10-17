@@ -1,9 +1,12 @@
 [versions]
-agp = "9.0.0"
-kotlin = "2.3.21"
-# Compose Stability Analyzer: 0.7.5 pairs with Kotlin 2.3.x. 0.8.0 pulls AGP gradle-api 9.1.1, which
-# demands Gradle 9.3.1; 0.9+ require Kotlin 2.4.
-stabilityAnalyzer = "0.7.5"
+androidxTestRunner = "1.7.0"
+androidxTestExtJunit = "1.3.0"
+androidxTestCore = "1.7.0"
+uiautomator = "2.4.0"
+agp = "9.3.3"
+kotlin = "2.4.21"
+# Compose Stability Analyzer: 0.9.0 is the first release that requires Kotlin 2.4.
+stabilityAnalyzer = "0.9.0"
 rhaydusFoundation = "0.3.1"
 ktlint = "1.7.1"
 coreKtx = "1.17.0"
@@ -18,7 +21,7 @@ apollo = "5.0.0"
 apolloCache = "1.0.5"
 dataStore = "1.2.1"
 kotlinxSerialization = "1.9.0"
-ksp = "2.3.9"
+ksp = "2.3.12"
 voyager = "1.1.0-beta02"
 coilVersion = "3.2.0"
 composeMultiplatform = "1.11.0"
@@ -57,7 +60,7 @@ coroutines = "1.10.2"
 # Apollo brings no Ktor engine to reuse). Aligned with the Ktor 3.x line Coil 3.2.0 is built against.
 ktor = "3.1.0"
 detekt = "1.23.8"
-dependencyAnalysis = "3.14.1"
+dependencyAnalysis = "3.19.2"
 # Kotlin code-coverage toolset; aggregates an XML report at the root for Codecov upload in CI.
 kover = "0.9.8"
 sqlite = "2.6.2"
@@ -104,6 +107,10 @@ kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "coroutines" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
+androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycleRuntimeKtx" }
@@ -168,7 +175,7 @@ ksafe = { module = "eu.anifantakis:ksafe", version.ref = "ksafe" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+android-test = { id = "com.android.test", version.ref = "agp" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", version.ref = "stabilityAnalyzer" }

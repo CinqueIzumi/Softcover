@@ -66,7 +66,7 @@ private fun nl.rhaydus.softcover.orchestration.presentation.ConsumeExternalNavig
   restartable: true
   params:
     - tabNavigator: UNSTABLE (has mutable properties or unstable members)
-    - bookDetailPresenter: RUNTIME (requires runtime check)
+    - bookDetailPresenter: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 internal fun nl.rhaydus.softcover.orchestration.presentation.DockedBottomNavigationBar(): kotlin.Unit
@@ -87,7 +87,7 @@ internal fun nl.rhaydus.softcover.orchestration.presentation.NavItemIcon(item: n
   restartable: true
   params:
     - item: RUNTIME (requires runtime check)
-    - painter: RUNTIME (requires runtime check)
+    - painter: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 internal fun nl.rhaydus.softcover.orchestration.presentation.NavigationRailBar(modifier: androidx.compose.ui.Modifier): kotlin.Unit
@@ -116,7 +116,7 @@ internal fun nl.rhaydus.softcover.orchestration.presentation.RootStackTransition
   skippable: false
   restartable: true
   params:
-    - screen: RUNTIME (requires runtime check)
+    - screen: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - navigatorEffect: STABLE (function type)
     - content: STABLE (composable function type)
 
@@ -126,7 +126,7 @@ private fun nl.rhaydus.softcover.orchestration.presentation.SidebarItem(item: nl
   restartable: true
   params:
     - item: RUNTIME (requires runtime check)
-    - painter: RUNTIME (requires runtime check)
+    - painter: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - onClick: STABLE (function type)
 
 @Composable
