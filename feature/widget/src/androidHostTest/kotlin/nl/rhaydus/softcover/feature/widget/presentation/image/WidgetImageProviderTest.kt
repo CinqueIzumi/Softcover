@@ -30,55 +30,69 @@ class WidgetImageProviderTest {
         @Test
         fun `rejects write modes`() {
             // ----- Act & Assert -----
-            shouldThrow<FileNotFoundException> { provider.openFile(
-                uriOf(validName),
-                "w",
-            ) }
-            shouldThrow<FileNotFoundException> { provider.openFile(
-                uriOf(validName),
-                "rw",
-            ) }
+            shouldThrow<FileNotFoundException> {
+                provider.openFile(
+                    uriOf(validName),
+                    "w",
+                )
+            }
+            shouldThrow<FileNotFoundException> {
+                provider.openFile(
+                    uriOf(validName),
+                    "rw",
+                )
+            }
         }
 
         @Test
         fun `rejects a name that does not match the pattern`() {
             // ----- Act & Assert -----
-            shouldThrow<FileNotFoundException> { provider.openFile(
-                uriOf("cover.png"),
-                "r",
-            ) }
-            shouldThrow<FileNotFoundException> { provider.openFile(
-                uriOf("A".repeat(64) + ".png"),
-                "r",
-            ) }
+            shouldThrow<FileNotFoundException> {
+                provider.openFile(
+                    uriOf("cover.png"),
+                    "r",
+                )
+            }
+            shouldThrow<FileNotFoundException> {
+                provider.openFile(
+                    uriOf("A".repeat(64) + ".png"),
+                    "r",
+                )
+            }
         }
 
         @Test
         fun `rejects a traversal segment`() {
             // ----- Act & Assert -----
-            shouldThrow<FileNotFoundException> { provider.openFile(
-                uriOf(
-                    "..",
-                    "x",
-                ),
-                "r",
-            ) }
-            shouldThrow<FileNotFoundException> { provider.openFile(
-                uriOf("../x"),
-                "r",
-            ) }
+            shouldThrow<FileNotFoundException> {
+                provider.openFile(
+                    uriOf(
+                        "..",
+                        "x",
+                    ),
+                    "r",
+                )
+            }
+            shouldThrow<FileNotFoundException> {
+                provider.openFile(
+                    uriOf("../x"),
+                    "r",
+                )
+            }
         }
 
         @Test
         fun `rejects a path with more than one segment`() {
             // ----- Act & Assert -----
-            shouldThrow<FileNotFoundException> { provider.openFile(
-                uriOf(
-                    "sub",
-                    validName,
-                ),
-                "r",
-            ) }
+            shouldThrow<FileNotFoundException> {
+                provider.openFile(
+                    uriOf(
+                        "sub",
+                        validName,
+                    ),
+                    "r",
+                )
+            }
         }
     }
 }

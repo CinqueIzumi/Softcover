@@ -1,12 +1,14 @@
 package nl.rhaydus.softcover.feature.widget.presentation.mapper
 
-import android.graphics.Bitmap
+import android.net.Uri
 import app.cash.turbine.test
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -18,9 +20,10 @@ import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSource
 import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Duration.Companion.seconds
 
 class RandomPickWidgetModelsTest {
-    private val loadedBookIds = mutableListOf<Int>()
+    private val requestedBookIds = mutableListOf<Int>()
 
     private fun book(id: Int): Book = mockk<Book> {
         every {
@@ -44,9 +47,21 @@ class RandomPickWidgetModelsTest {
         books = emptyList(),
     )
 
+    private val uri = mockk<Uri>()
+
+    private val artwork = RandomPickWidgetUiModel.Artwork(
+        backdrop = null,
+        veil = uri,
+        veilLift = uri,
+        washPrimary = uri,
+        washTertiary = uri,
+    )
+
     private fun models(
         isSignedIn: Boolean = true,
-        resolution: RandomPickResolution,
+        resolution: Result<RandomPickResolution>,
+        coverUri: suspend (Book) -> Uri? = { null },
+        artwork: suspend (Book) -> RandomPickWidgetUiModel.Artwork? = { null },
     ): Flow<RandomPickWidgetUiModel> = randomPickWidgetModels(
         isSignedIn = flowOf(isSignedIn),
         themeConfiguration = flowOf(ThemeConfiguration()),
@@ -54,11 +69,11 @@ class RandomPickWidgetModelsTest {
         lists = flowOf(emptyList()),
         changes = flowOf(Unit),
         resolve = { _, _ -> resolution },
-        loadCover = { book ->
-            loadedBookIds += book.id
-            null as Bitmap?
+        coverUri = {
+            requestedBookIds += it.id
+            coverUri(it)
         },
-        renderArtwork = { null },
+        artwork = artwork,
     )
 
     @Nested
@@ -101,9 +116,11 @@ class RandomPickWidgetModelsTest {
             // ----- Arrange -----
             val flow = models(
                 isSignedIn = false,
-                resolution = RandomPickResolution(
-                    book = book(1),
-                    source = RandomPickSource.WantToRead,
+                resolution = Result.success(
+                    RandomPickResolution.Resolved(
+                        book = book(1),
+                        source = RandomPickSource.WantToRead,
+                    ),
                 ),
             )
 
@@ -116,12 +133,27 @@ class RandomPickWidgetModelsTest {
         }
 
         @Test
+        fun `an unavailable source shows the source unavailable content`() = runTest {
+            // ----- Arrange -----
+            val flow = models(resolution = Result.success(RandomPickResolution.SourceUnavailable))
+
+            // ----- Act -----
+            flow.test {
+                // ----- Assert -----
+                awaitItem().content shouldBe RandomPickWidgetUiModel.Content.SourceUnavailable
+                awaitComplete()
+            }
+        }
+
+        @Test
         fun `an empty pool shows the empty pool content with the source eyebrow`() = runTest {
             // ----- Arrange -----
             val flow = models(
-                resolution = RandomPickResolution(
-                    book = null,
-                    source = RandomPickSource.Owned,
+                resolution = Result.success(
+                    RandomPickResolution.Resolved(
+                        book = null,
+                        source = RandomPickSource.Owned,
+                    ),
                 ),
             )
 
@@ -134,17 +166,32 @@ class RandomPickWidgetModelsTest {
                 awaitComplete()
             }
 
-            loadedBookIds shouldContainExactly emptyList()
+            requestedBookIds shouldContainExactly emptyList()
         }
 
         @Test
-        fun `a picked book shows its details and loads only its cover`() = runTest {
+        fun `a failed resolve emits nothing`() = runTest {
+            // ----- Arrange -----
+            val flow = models(resolution = Result.failure(IllegalStateException("boom")))
+
+            // ----- Act & Assert -----
+            flow.test {
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `images that resolve at once skip the pending step`() = runTest {
             // ----- Arrange -----
             val flow = models(
-                resolution = RandomPickResolution(
-                    book = book(3),
-                    source = RandomPickSource.WantToRead,
+                resolution = Result.success(
+                    RandomPickResolution.Resolved(
+                        book = book(3),
+                        source = RandomPickSource.WantToRead,
+                    ),
                 ),
+                coverUri = { uri },
+                artwork = { artwork },
             )
 
             // ----- Act -----
@@ -156,10 +203,68 @@ class RandomPickWidgetModelsTest {
                 content.title shouldBe "Title 3"
                 content.author shouldBe "Author 3"
                 content.eyebrow shouldBe "WHAT NEXT? · WANT TO READ"
+                content.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(uri = uri)
+                content.artwork shouldBe artwork
                 awaitComplete()
             }
 
-            loadedBookIds shouldContainExactly listOf(3)
+            requestedBookIds shouldContainExactly listOf(3)
+        }
+
+        @Test
+        fun `slow images emit the text first with a pending cover then the finished model`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                resolution = Result.success(
+                    RandomPickResolution.Resolved(
+                        book = book(3),
+                        source = RandomPickSource.WantToRead,
+                    ),
+                ),
+                coverUri = {
+                    delay(1.seconds)
+                    uri
+                },
+                artwork = { artwork },
+            )
+
+            // ----- Act -----
+            flow.test {
+                // ----- Assert -----
+                val first = awaitItem().content
+                    .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+                first.title shouldBe "Title 3"
+                first.cover shouldBe RandomPickWidgetUiModel.Cover.Pending
+                first.artwork.shouldBeNull()
+
+                val second = awaitItem().content
+                    .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+                second.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(uri = uri)
+                second.artwork shouldBe artwork
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `a book without a cover file shows the missing cover`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                resolution = Result.success(
+                    RandomPickResolution.Resolved(
+                        book = book(3),
+                        source = RandomPickSource.WantToRead,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            flow.test {
+                // ----- Assert -----
+                val content = awaitItem().content
+                    .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+                content.cover shouldBe RandomPickWidgetUiModel.Cover.Missing
+                awaitComplete()
+            }
         }
     }
 }

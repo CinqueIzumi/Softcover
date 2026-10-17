@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.mapper
 
-import android.graphics.Bitmap
+import android.net.Uri
 import app.cash.turbine.test
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -21,7 +22,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class TrendingWidgetModelsTest {
-    private val loadedBookIds = mutableListOf<Int>()
+    private val requestedBookIds = mutableListOf<Int>()
+    private val coverUris = mutableMapOf<Int, Uri?>()
+    private val coverDelaysMs = mutableMapOf<Int, Long>()
 
     private fun book(id: Int): Book = mockk<Book> {
         every {
@@ -45,9 +48,10 @@ class TrendingWidgetModelsTest {
         position = position,
         observeTrending = observeTrending,
         eyebrowFor = { period -> "Eyebrow ${period.name}" },
-        loadCover = { book ->
-            loadedBookIds += book.id
-            null as Bitmap?
+        coverUri = { book ->
+            requestedBookIds += book.id
+            delay(coverDelaysMs[book.id] ?: 0L)
+            coverUris[book.id]
         },
     )
 
@@ -166,11 +170,56 @@ class TrendingWidgetModelsTest {
         }
 
         @Test
-        fun `covers are loaded only for the books on the shown page`() = runTest {
+        fun `a cover that resolves within the hit window is shown in a single emission`() = runTest {
+            // ----- Arrange -----
+            val uri = mockk<Uri>()
+            coverUris[1] = uri
+            coverDelaysMs[1] = 50L
+            coverDelaysMs[2] = 50L
+            val flow = models(observeTrending = fixedBooks(listOf(book(1), book(2))))
+
+            // ----- Act -----
+            flow.test {
+                // ----- Assert -----
+                val content = awaitItem().content.shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>()
+                content.items.map { it.cover } shouldContainExactly listOf(
+                    TrendingWidgetUiModel.Cover.Loaded(uri = uri),
+                    TrendingWidgetUiModel.Cover.Missing,
+                )
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `a slow cover shows the page with pending covers first, then the resolved covers`() = runTest {
+            // ----- Arrange -----
+            val uri = mockk<Uri>()
+            coverUris[1] = uri
+            coverDelaysMs[1] = 200L
+            coverDelaysMs[2] = 200L
+            val flow = models(observeTrending = fixedBooks(listOf(book(1), book(2))))
+
+            // ----- Act -----
+            flow.test {
+                // ----- Assert -----
+                val pending = awaitItem().content.shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>()
+                pending.items.map { it.title } shouldContainExactly listOf("Title 1", "Title 2")
+                pending.items.map { it.cover } shouldContainExactly List(2) { TrendingWidgetUiModel.Cover.Pending }
+                val resolved = awaitItem().content.shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>()
+                resolved.items.map { it.cover } shouldContainExactly listOf(
+                    TrendingWidgetUiModel.Cover.Loaded(uri = uri),
+                    TrendingWidgetUiModel.Cover.Missing,
+                )
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `a middle page prefetches the covers of the previous and next page`() = runTest {
             // ----- Arrange -----
             val flow = models(
-                position = flowOf(positionAt(2)),
-                observeTrending = fixedBooks((1..8).map { book(it) }),
+                position = flowOf(positionAt(1)),
+                observeTrending = fixedBooks((1..10).map { book(it) }),
             )
 
             // ----- Act -----
@@ -180,7 +229,73 @@ class TrendingWidgetModelsTest {
             }
 
             // ----- Assert -----
-            loadedBookIds.sorted() shouldContainExactly listOf(5, 6)
+            requestedBookIds.sorted() shouldContainExactly listOf(1, 2, 3, 4, 5, 6)
+        }
+
+        @Test
+        fun `the first page prefetches the last page as its previous page`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                position = flowOf(positionAt(0)),
+                observeTrending = fixedBooks((1..10).map { book(it) }),
+            )
+
+            // ----- Act -----
+            flow.test {
+                awaitItem()
+                awaitComplete()
+            }
+
+            // ----- Assert -----
+            requestedBookIds.sorted() shouldContainExactly listOf(1, 2, 3, 4, 9, 10)
+        }
+
+        @Test
+        fun `the last page prefetches the first page as its next page`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                position = flowOf(positionAt(4)),
+                observeTrending = fixedBooks((1..10).map { book(it) }),
+            )
+
+            // ----- Act -----
+            flow.test {
+                awaitItem()
+                awaitComplete()
+            }
+
+            // ----- Assert -----
+            requestedBookIds.sorted() shouldContainExactly listOf(1, 2, 7, 8, 9, 10)
+        }
+
+        @Test
+        fun `two pages prefetch the other page once`() = runTest {
+            // ----- Arrange -----
+            val flow = models(observeTrending = fixedBooks((1..4).map { book(it) }))
+
+            // ----- Act -----
+            flow.test {
+                awaitItem()
+                awaitComplete()
+            }
+
+            // ----- Assert -----
+            requestedBookIds.sorted() shouldContainExactly listOf(1, 2, 3, 4)
+        }
+
+        @Test
+        fun `a single page prefetches nothing beyond its own covers`() = runTest {
+            // ----- Arrange -----
+            val flow = models(observeTrending = fixedBooks(listOf(book(1), book(2))))
+
+            // ----- Act -----
+            flow.test {
+                awaitItem()
+                awaitComplete()
+            }
+
+            // ----- Assert -----
+            requestedBookIds.sorted() shouldContainExactly listOf(1, 2)
         }
 
         @Test

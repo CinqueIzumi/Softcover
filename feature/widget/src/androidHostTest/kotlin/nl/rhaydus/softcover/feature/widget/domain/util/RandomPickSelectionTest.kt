@@ -72,35 +72,64 @@ class RandomPickSelectionTest {
     ).toInstant(amsterdam)
 
     @Nested
-    inner class ResolveSource {
+    inner class IsSourceAvailable {
         @Test
-        fun `a user list that no longer exists resolves to want to read`() {
+        fun `want to read is always available`() {
+            // ----- Arrange -----
+            val lists = emptyList<BookList>()
+
+            // ----- Act -----
+            val result = isSourceAvailable(
+                source = RandomPickSource.WantToRead,
+                lists = lists,
+            )
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `owned is available only when an owned list exists`() {
+            // ----- Arrange -----
+            val withOwned = listOf(list(
+                id = 1,
+                slug = "owned",
+            ),)
+            val withoutOwned = listOf(list(id = 2))
+
+            // ----- Act -----
+            val present = isSourceAvailable(
+                source = RandomPickSource.Owned,
+                lists = withOwned,
+            )
+            val absent = isSourceAvailable(
+                source = RandomPickSource.Owned,
+                lists = withoutOwned,
+            )
+
+            // ----- Assert -----
+            present shouldBe true
+            absent shouldBe false
+        }
+
+        @Test
+        fun `a user list is available only while it is stored`() {
             // ----- Arrange -----
             val lists = listOf(list(1))
 
             // ----- Act -----
-            val result = resolveSource(
+            val stored = isSourceAvailable(
+                source = RandomPickSource.UserList(listId = 1),
+                lists = lists,
+            )
+            val missing = isSourceAvailable(
                 source = RandomPickSource.UserList(listId = 99),
                 lists = lists,
             )
 
             // ----- Assert -----
-            result shouldBe RandomPickSource.WantToRead
-        }
-
-        @Test
-        fun `a user list that still exists stays selected`() {
-            // ----- Arrange -----
-            val lists = listOf(list(1))
-
-            // ----- Act -----
-            val result = resolveSource(
-                source = RandomPickSource.UserList(listId = 1),
-                lists = lists,
-            )
-
-            // ----- Assert -----
-            result shouldBe RandomPickSource.UserList(listId = 1)
+            stored shouldBe true
+            missing shouldBe false
         }
     }
 
@@ -253,7 +282,7 @@ class RandomPickSelectionTest {
         }
 
         @Test
-        fun `a missing list falls back to the want to read shelf`() {
+        fun `a missing list gives an empty pool instead of the want to read shelf`() {
             // ----- Arrange -----
             val shelf = listOf(book(7))
 
@@ -265,7 +294,26 @@ class RandomPickSelectionTest {
             )
 
             // ----- Assert -----
-            result.map { it.id } shouldContainExactly listOf(7)
+            result shouldBe emptyList()
+        }
+
+        @Test
+        fun `owned without an owned list gives an empty pool`() {
+            // ----- Arrange -----
+            val lists = listOf(list(
+                id = 1,
+                books = listOf(book(10)),
+            ),)
+
+            // ----- Act -----
+            val result = buildPool(
+                source = RandomPickSource.Owned,
+                wantToRead = listOf(book(99)),
+                lists = lists,
+            )
+
+            // ----- Assert -----
+            result shouldBe emptyList()
         }
     }
 
