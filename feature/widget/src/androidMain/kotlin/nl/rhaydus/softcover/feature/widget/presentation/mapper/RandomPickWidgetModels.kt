@@ -67,6 +67,7 @@ internal fun randomPickWidgetModels(
             error,
             "Resolving the random pick failed",
         )
+
         return@transformLatest
     }
 

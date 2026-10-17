@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.di
 
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgets
 import nl.rhaydus.softcover.feature.widget.data.repository.CurrentlyReadingRepositoryImpl
 import nl.rhaydus.softcover.feature.widget.data.repository.QuoteWidgetRepositoryImpl
@@ -101,7 +102,12 @@ val widgetModule = module {
 
     single { WidgetRepainter(context = androidContext()) }
 
-    single { WidgetImageStore(context = androidContext()) }
+    single {
+        WidgetImageStore(
+            context = androidContext(),
+            ioDispatcher = get<AppDispatchers>().io,
+        )
+    }
 
     single {
         WidgetEnvironment(

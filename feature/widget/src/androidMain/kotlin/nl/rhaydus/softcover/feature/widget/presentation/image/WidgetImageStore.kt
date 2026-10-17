@@ -8,11 +8,13 @@ import java.io.File
 import java.security.MessageDigest
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 internal class WidgetImageStore(
     private val context: Context,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
 ) {
     private val directory: File = WidgetImageFiles.directory(context)
@@ -27,12 +29,12 @@ internal class WidgetImageStore(
             fileName(key),
         )
 
-        val hit = withContext(Dispatchers.IO) { file.exists() && file.setLastModified(now()) }
+        val hit = withContext(ioDispatcher) { file.exists() && file.setLastModified(now()) }
         if (hit) return uriOf(file)
 
         val bitmap = render() ?: return null
 
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             directory.mkdirs()
             val temp = File.createTempFile(
                 "render",
@@ -40,11 +42,13 @@ internal class WidgetImageStore(
                 directory,
             )
             try {
-                temp.outputStream().use { bitmap.compress(
-                    Bitmap.CompressFormat.PNG,
-                    100,
-                    it,
-                ) }
+                temp.outputStream().use {
+                    bitmap.compress(
+                        Bitmap.CompressFormat.PNG,
+                        100,
+                        it,
+                    )
+                }
                 if (temp.renameTo(file)) uriOf(file) else null
             } finally {
                 temp.delete()
@@ -56,7 +60,7 @@ internal class WidgetImageStore(
     suspend fun prune(maxAge: Duration = 7.days) {
         val cutoff = now() - maxAge.inWholeMilliseconds
 
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             directory.listFiles().orEmpty()
                 .filter { it.lastModified() < cutoff }
                 .forEach { it.delete() }

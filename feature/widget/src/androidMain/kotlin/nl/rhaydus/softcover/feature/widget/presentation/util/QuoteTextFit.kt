@@ -11,12 +11,6 @@ import android.util.TypedValue
 internal const val QUOTE_MAX_FONT_SIZE_SP = 18
 internal const val QUOTE_MIN_FONT_SIZE_SP = 12
 
-/** The result of laying a quote out at one font size: how many lines it wraps to and how tall each line is. */
-internal class QuoteTextMeasure(
-    val lineCount: Int,
-    val lineHeightPx: Int,
-)
-
 /** Lays the quote out at [fontSizeSp] inside [widthPx]. */
 internal typealias QuoteTextMeasurer = (fontSizeSp: Int, widthPx: Int) -> QuoteTextMeasure
 

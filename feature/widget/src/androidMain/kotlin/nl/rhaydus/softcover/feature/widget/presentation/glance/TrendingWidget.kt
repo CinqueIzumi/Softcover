@@ -79,7 +79,12 @@ internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
                 .filter { it == appWidgetId }
                 .map {
                     dependencies.getTrendingPosition(appWidgetId = appWidgetId)
-                        .onFailure { error -> AppLog.e(error, "Trending position unavailable") }
+                        .onFailure { error ->
+                            AppLog.e(
+                                error,
+                                "Trending position unavailable",
+                            )
+                        }
                         .getOrNull()
                 }
                 .filterNotNull(),

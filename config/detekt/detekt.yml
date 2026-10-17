@@ -103,6 +103,15 @@ style:
       - 'nl.rhaydus.designsystem.modifier.pressScale'
       - 'nl.rhaydus.designsystem.modifier.pressScaleClickable'
       - 'nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable'
+  ForbiddenMethodCall:
+    # A bitmap handed to Glance is copied into the RemoteViews of every responsive size, so one widget update
+    # multiplies it and overflows the RemoteViews bitmap cap. Needs type resolution, which the per-target
+    # `detekt<Target>` tasks have and the plain `detekt` task does not.
+    active: true
+    includes: ['**/feature/widget/**']
+    methods:
+      - value: 'androidx.glance.ImageProvider(android.graphics.Bitmap)'
+        reason: 'A bitmap in a widget update is multiplied per responsive size. Store it with WidgetImageStore.uriFor and use ImageProvider(uri).'
   UnusedPrivateMember:
     # The shared baseline also exempts `Composable`. Softcover deliberately does not: an unused private
     # @Composable is dead UI code and should be caught. Only previews are exempt (they are entry points).

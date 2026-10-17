@@ -38,8 +38,9 @@ internal fun RandomPickCadence.label(): String = when (this) {
 internal fun RandomPickSource.label(lists: List<BookList>): String = when (this) {
     RandomPickSource.WantToRead -> WANT_TO_READ_LABEL
     RandomPickSource.Owned -> OWNED_LABEL
-    is RandomPickSource.UserList -> lists.firstOrNull { it.id == listId }?.name ?: WANT_TO_READ_LABEL
+    is RandomPickSource.UserList -> lists.firstOrNull { it.id == listId }?.name ?: UNAVAILABLE_LIST_LABEL
 }
 
 private const val WANT_TO_READ_LABEL = "Want to Read"
 private const val OWNED_LABEL = "Owned"
+private const val UNAVAILABLE_LIST_LABEL = "List not on your device"
