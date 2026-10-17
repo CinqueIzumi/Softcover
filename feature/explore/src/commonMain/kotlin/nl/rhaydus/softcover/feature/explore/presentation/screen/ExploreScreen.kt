@@ -8,18 +8,23 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberIsOnline
-import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPresenter
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDetailPrefetcher
-import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.rememberBookDetailPrefetcher
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPresenter
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
+import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreScreenScreenModel
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
+import org.koin.compose.koinInject
 
 object ExploreScreen : Screen {
     @Composable
@@ -34,6 +39,17 @@ object ExploreScreen : Screen {
         val state by screenModel.state.collectAsStateWithLifecycle()
 
         val isOnline = rememberIsOnline()
+
+        val haptics = LocalHaptics.current
+
+        ObserveAsEvents(flow = screenModel.events) { event ->
+            if (event is FeedbackEvent) haptics.play(event.feedback)
+
+            when (event) {
+                is ExploreEvent.BookAddedEvent,
+                is ExploreEvent.AddBookFailedEvent -> Unit
+            }
+        }
 
         val prefetcher = rememberBookDetailPrefetcher()
 
@@ -55,7 +71,7 @@ object ExploreScreen : Screen {
                     }
                 },
                 onScanClick = {
-                    navigator.parent?.push(item = appNavigator.screen(ScreenDestination.BarcodeScanner))
+                    navigator.parent?.push(item = appNavigator.screen(ScreenDestination.BarcodeScanner()))
                 },
                 isOnline = isOnline,
             )

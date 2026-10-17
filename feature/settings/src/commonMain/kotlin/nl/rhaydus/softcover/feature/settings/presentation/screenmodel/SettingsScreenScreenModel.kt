@@ -1,12 +1,9 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
-import kotlin.time.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
-import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.appupdate.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
@@ -15,9 +12,12 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseC
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetShelfSwipeEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
+import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgets
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetColorPaletteUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetThemeModeUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
@@ -29,6 +29,8 @@ internal class SettingsScreenScreenModel(
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val setDateStyleUseCase: SetDateStyleUseCase,
     private val setBottomBarStyleUseCase: SetBottomBarStyleUseCase,
+    private val setThemeModeUseCase: SetThemeModeUseCase,
+    private val setColorPaletteUseCase: SetColorPaletteUseCase,
     private val setDynamicColorUseCase: SetDynamicColorUseCase,
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
     private val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
@@ -37,16 +39,16 @@ internal class SettingsScreenScreenModel(
     private val setShelfSwipeEnabledUseCase: SetShelfSwipeEnabledUseCase,
     private val getUiScaleAsFlowUseCase: GetUiScaleAsFlowUseCase,
     private val setUiScaleUseCase: SetUiScaleUseCase,
+    private val observeAppUpdateStateUseCase: ObserveAppUpdateStateUseCase,
     appVersionProvider: AppVersionProvider,
+    homeScreenWidgets: HomeScreenWidgets,
     appDispatchers: AppDispatchers,
     flows: List<SettingsCollector>,
 ) : ToadScreenModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsCollector, SettingsLocalVariables>(
     initialState = SettingsScreenUiState(
         appVersionName = appVersionProvider.versionInfo.name,
         appVersionCode = appVersionProvider.versionInfo.code,
-        dateStyleExamples = DateStyle.entries.associateWith {
-            it.format(Clock.System.todayIn(TimeZone.currentSystemDefault()))
-        },
+        widgetsSupported = homeScreenWidgets.isSupported,
     ),
     initialLocalVariables = SettingsLocalVariables(),
     initializers = flows,
@@ -54,6 +56,8 @@ internal class SettingsScreenScreenModel(
     override val dependencies = SettingsScreenDependencies(
         getThemeConfigurationUseCase = getThemeConfigurationUseCase,
         setBottomBarStyleUseCase = setBottomBarStyleUseCase,
+        setThemeModeUseCase = setThemeModeUseCase,
+        setColorPaletteUseCase = setColorPaletteUseCase,
         setDynamicColorUseCase = setDynamicColorUseCase,
         setDateStyleUseCase = setDateStyleUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
@@ -63,6 +67,7 @@ internal class SettingsScreenScreenModel(
         setShelfSwipeEnabledUseCase = setShelfSwipeEnabledUseCase,
         getUiScaleAsFlowUseCase = getUiScaleAsFlowUseCase,
         setUiScaleUseCase = setUiScaleUseCase,
+        observeAppUpdateStateUseCase = observeAppUpdateStateUseCase,
         coroutineScope = screenModelScope,
         mainDispatcher = appDispatchers.main,
     )

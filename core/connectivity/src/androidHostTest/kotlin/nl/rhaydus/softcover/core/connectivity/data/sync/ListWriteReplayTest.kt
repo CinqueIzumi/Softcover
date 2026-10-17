@@ -7,9 +7,6 @@ import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.offlinesync.ReplayOutcome
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
@@ -18,6 +15,9 @@ import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ListWriteReplayTest {
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
@@ -60,38 +60,6 @@ class ListWriteReplayTest {
 
     @Nested
     inner class CreateList {
-        @Test
-        fun `creates the list remotely and caches it locally, returning SYNCED`() = runTest {
-            // ----- Arrange -----
-            val write = pendingListWrite(
-                kind = PendingListWriteKind.CREATE_LIST,
-                listName = "Science Fiction",
-            )
-            val created = BookList(
-                id = 1,
-                name = "Science Fiction",
-                slug = "science-fiction",
-                books = emptyList(),
-            )
-
-            coEvery {
-                listsRemoteDataSource.createList(name = "Science Fiction")
-            } returns created
-
-            coJustRun {
-                listsLocalDataSource.cacheUserBookLists(lists = listOf(created))
-            }
-
-            // ----- Act -----
-            val result = replay(payload = write)
-
-            // ----- Assert -----
-            result shouldBe ReplayOutcome.SYNCED
-            coVerify(exactly = 1) {
-                listsLocalDataSource.cacheUserBookLists(lists = listOf(created))
-            }
-        }
-
         @Test
         fun `throws IllegalStateException when listName is missing`() = runTest {
             // ----- Arrange -----
@@ -144,7 +112,7 @@ class ListWriteReplayTest {
         }
 
         @Test
-        fun `falls back to PUBLIC when a row queued before the privacy column existed has no privacy`() =
+        fun `caches the created list and falls back to PUBLIC when a row queued before the privacy column existed has no privacy`() =
             runTest {
                 // ----- Arrange -----
                 val write = pendingListWrite(
@@ -180,6 +148,9 @@ class ListWriteReplayTest {
                         name = "Science Fiction",
                         privacy = PrivacySetting.PUBLIC,
                     )
+                }
+                coVerify(exactly = 1) {
+                    listsLocalDataSource.cacheUserBookLists(lists = listOf(created))
                 }
             }
     }

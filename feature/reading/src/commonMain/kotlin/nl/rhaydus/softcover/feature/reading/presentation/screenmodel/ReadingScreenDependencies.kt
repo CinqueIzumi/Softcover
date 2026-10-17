@@ -3,15 +3,19 @@ package nl.rhaydus.softcover.feature.reading.presentation.screenmodel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.GetPausedUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
@@ -30,17 +34,21 @@ internal data class ReadingScreenDependencies(
     val refreshLibraryUseCase: RefreshLibraryUseCase,
     val recordBookProgressUseCase: RecordBookProgressUseCase,
     val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
+    val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val observePlanTodayDismissalsUseCase: ObservePlanTodayDismissalsUseCase,
     val dismissPlanTodayUseCase: DismissPlanTodayUseCase,
     val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
-    val getTrendingBooksUseCase: GetTrendingBooksUseCase,
+    val getPausedUserBooksUseCase: GetPausedUserBooksUseCase,
+    val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
+    val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
     val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
     val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
     val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
     val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
-    val getReadingJournalHistoryUseCase: GetReadingJournalHistoryUseCase,
+    val observeReadingJournalHistoryUseCase: ObserveReadingJournalHistoryUseCase,
+    val refreshReadingJournalHistoryUseCase: RefreshReadingJournalHistoryUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

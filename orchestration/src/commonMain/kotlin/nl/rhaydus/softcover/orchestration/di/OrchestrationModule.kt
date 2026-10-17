@@ -1,14 +1,9 @@
 package nl.rhaydus.softcover.orchestration.di
 
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.connectivity.di.connectivityModule
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
-import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
-import nl.rhaydus.softcover.core.designsystem.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
@@ -20,6 +15,11 @@ import nl.rhaydus.softcover.core.network.di.apolloModule
 import nl.rhaydus.softcover.core.notification.di.notificationModule
 import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
+import nl.rhaydus.softcover.core.presentation.di.presentationModule
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequests
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
 import nl.rhaydus.softcover.feature.book_detail.di.bookDetailModule
@@ -33,17 +33,25 @@ import nl.rhaydus.softcover.feature.scan.di.scanModule
 import nl.rhaydus.softcover.feature.session.di.sessionModule
 import nl.rhaydus.softcover.feature.settings.di.settingsModule
 import nl.rhaydus.softcover.orchestration.navigation.AppNavigatorImpl
+import nl.rhaydus.softcover.orchestration.navigation.ExternalNavigationRequestsImpl
+import nl.rhaydus.softcover.orchestration.presentation.collector.OfflineBannerCollector
+import nl.rhaydus.softcover.orchestration.presentation.collector.RootCollector
+import nl.rhaydus.softcover.orchestration.presentation.screenmodel.BottomBarScreenModel
+import nl.rhaydus.softcover.orchestration.presentation.screenmodel.RootScreenModel
 import nl.rhaydus.softcover.orchestration.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.orchestration.session.ActiveSessionControllerImpl
 import nl.rhaydus.softcover.orchestration.usecase.InitializeUserIdAndBooksUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.ReAuthenticateUseCaseImpl
+import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryOnStartUseCase
 import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.ResetUserDataUseCaseImpl
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
 internal val orchestrationModule = module {
     includes(
         platformOrchestrationModule,
-        designSystemModule,
+        presentationModule,
         dispatcherModule,
         databaseModule,
         apolloModule,
@@ -69,12 +77,27 @@ internal val orchestrationModule = module {
         appUpdateModule,
     )
 
+    factory { BottomBarScreenModel(appDispatchers = get()) }
+
+    factory { OfflineBannerCollector() } bind RootCollector::class
+
+    factory {
+        RootScreenModel(
+            networkAvailabilityProvider = get(),
+            offlineCopy = get(),
+            flows = getAll(),
+            appDispatchers = get(),
+        )
+    }
+
     single<AppNavigator> { AppNavigatorImpl() }
+
+    single<ExternalNavigationRequests> { ExternalNavigationRequestsImpl() }
 
     single<ActiveSessionController> {
         ActiveSessionControllerImpl(
             observeActiveSessionUseCase = get(),
-            getCurrentlyReadingBooksUseCase = get(),
+            observeUserBookUseCase = get(),
             startReadingSessionUseCase = get(),
             stopReadingSessionUseCase = get(),
             pauseReadingSessionUseCase = get(),
@@ -89,11 +112,13 @@ internal val orchestrationModule = module {
     single<MainActivityViewModel> {
         MainActivityViewModel(
             getUserIdUseCase = get(),
-            refreshLibraryUseCase = get(),
+            refreshLibraryOnStartUseCase = get(),
             getThemeConfigurationUseCase = get(),
             refreshReadingActivityUseCase = get(),
+            drainPendingListWritesUseCase = get(),
             reAuthenticateUseCase = get(),
             resetUserDataUseCase = get(),
+            externalNavigationRequests = get(),
         )
     }
 
@@ -121,6 +146,13 @@ internal val orchestrationModule = module {
             resetUserDataUseCase = get(),
             refreshLibraryUseCase = get(),
             refreshUserProfileDataUseCase = get(),
+        )
+    }
+
+    factory {
+        RefreshLibraryOnStartUseCase(
+            settingsRepository = get(),
+            refreshLibraryUseCase = get(),
         )
     }
 

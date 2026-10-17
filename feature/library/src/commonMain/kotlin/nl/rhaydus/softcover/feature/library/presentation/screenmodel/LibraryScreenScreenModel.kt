@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedBooksByStatusUseCa
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
@@ -27,6 +27,8 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAs
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
+import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollector
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -52,7 +54,9 @@ internal class LibraryScreenScreenModel(
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
-    private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
+    private val pauseBookUseCase: PauseBookUseCase,
+    private val activeSessionController: ActiveSessionController,
+    private val undoableBookRemover: UndoableBookRemover,
     private val reorderShelfBooksUseCase: ReorderShelfBooksUseCase,
     private val addBookToListUseCase: AddBookToListUseCase,
     private val removeBookFromListUseCase: RemoveBookFromListUseCase,
@@ -83,7 +87,9 @@ internal class LibraryScreenScreenModel(
         markBookAsReadUseCase = markBookAsReadUseCase,
         markBookAsReadingUseCase = markBookAsReadingUseCase,
         markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
-        removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
+        pauseBookUseCase = pauseBookUseCase,
+        activeSessionController = activeSessionController,
+        undoableBookRemover = undoableBookRemover,
         reorderShelfBooksUseCase = reorderShelfBooksUseCase,
         addBookToListUseCase = addBookToListUseCase,
         removeBookFromListUseCase = removeBookFromListUseCase,

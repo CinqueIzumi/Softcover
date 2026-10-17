@@ -2,39 +2,35 @@ package nl.rhaydus.softcover.core.personal.data.datasource
 
 import com.apollographql.apollo.ApolloClient
 import nl.rhaydus.softcover.GetReadingJournalHistoryQuery
+import nl.rhaydus.softcover.core.database.model.ProgressHistoryEntity
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.network.helper.fetchAllPages
 import nl.rhaydus.softcover.core.network.helper.safeQuery
-import nl.rhaydus.softcover.core.personal.data.mapper.toReadingJournalEntry
-import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
+import nl.rhaydus.softcover.core.personal.data.mapper.toProgressHistoryEntity
 
 interface ReadingJournalHistoryRemoteDataSource {
-    suspend fun getReadingJournalHistory(bookId: Int): List<ReadingJournalEntry>
+    suspend fun getReadingJournalHistory(bookId: Int): List<ProgressHistoryEntity>
 }
 
 internal class ReadingJournalHistoryRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
     private val getUserIdUseCase: GetUserIdUseCase,
 ) : ReadingJournalHistoryRemoteDataSource {
-    override suspend fun getReadingJournalHistory(bookId: Int): List<ReadingJournalEntry> {
+    override suspend fun getReadingJournalHistory(bookId: Int): List<ProgressHistoryEntity> {
         val userId = getUserIdUseCase().getOrThrow()
 
         return fetchAllJournalRows(
             bookId = bookId,
             userId = userId,
         ).mapNotNull {
-            toReadingJournalEntry(
-                updatedAt = it.updated_at,
+            toProgressHistoryEntity(
+                bookId = bookId,
+                actionAt = it.action_at,
                 metadata = it.metadata,
             )
         }
     }
 
-    // A single fetch used to cap at a client-side limit of 200, so a book with more than 200
-    // progress updates kept only the OLDEST 200 (that limit, ordered updated_at ascending) and
-    // dropped the most recent ones - exactly the data the pace forecast needs. Paging removes that
-    // ceiling. (The server's own per-request cap is far higher, in the high hundreds, so it was the
-    // client-side 200 that bit, not the server.)
     private suspend fun fetchAllJournalRows(
         bookId: Int,
         userId: Int,

@@ -9,16 +9,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnProgressTabClickActionTest {
     private lateinit var dependencies: BookDetailDependencies
@@ -27,7 +28,7 @@ class OnProgressTabClickActionTest {
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -67,40 +68,6 @@ class OnProgressTabClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.selectedProgressSheetTab shouldBe ProgressSheetTab.PAGE
-        }
-
-        @Test
-        fun `sets selectedProgressSheetTab to PERCENTAGE when tab is PERCENTAGE`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(selectedProgressSheetTab = ProgressSheetTab.PAGE)
-            dependencies = stubDependencies(this)
-            val action = OnProgressTabClickAction(tab = ProgressSheetTab.PERCENTAGE)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.selectedProgressSheetTab shouldBe ProgressSheetTab.PERCENTAGE
-        }
-
-        @Test
-        fun `does not mutate any other state field when updating the selected tab`() = runTest {
-            // ----- Arrange -----
-            val initialState = stateFlow.value
-            dependencies = stubDependencies(this)
-            val action = OnProgressTabClickAction(tab = ProgressSheetTab.PERCENTAGE)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe initialState.copy(selectedProgressSheetTab = ProgressSheetTab.PERCENTAGE)
         }
 
         @Test

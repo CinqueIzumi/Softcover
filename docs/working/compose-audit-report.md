@@ -181,7 +181,7 @@ These are the results of the three `compose-agent` focused reviews recommended a
 
 ### Focus / keyboard (`compose-agent focus on focus`) — correct and idiomatic
 
-- All **3 `requestFocus()` call sites are inside a `LaunchedEffect`**, never the composition body: `feature/lists/.../CreateListShelf.kt:52-54`, `feature/scan/.../BarcodeScannerShelf.kt:69-71`, `feature/book_detail/.../ReviewEditorBottomSheet.kt:86-88`.
+- Both **`requestFocus()` call sites are inside a `LaunchedEffect`**, never the composition body: `feature/lists/.../CreateListShelf.kt:52-54`, `feature/book_detail/.../ReviewEditorBottomSheet.kt:86-88`. The scan feature has none.
 - No `FocusRequester` stored by lazy-list index; no `onPreviewKeyEvent` / `onKeyEvent` handlers that over-consume keys (none exist); no `focusProperties` over-wiring; IME submission routes cleanly through `KeyboardActions` + `LocalFocusManager.clearFocus()`.
 - **Desktop-aware:** `orchestration/.../App.kt` uses `detectTapGestures` (not `clickable`) for the tap-to-dismiss scrim, avoiding stealing the space key from focused text fields.
 - Minor: `ReviewEditorBottomSheet` keys its focus effect to `Unit` and relies on the parent's `showReviewSheet` visibility for safety — works today, slightly fragile if the parent's conditional changes. Consider keying to the visible/loaded condition.

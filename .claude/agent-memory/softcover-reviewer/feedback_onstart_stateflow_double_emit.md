@@ -1,6 +1,6 @@
 ---
 name: feedback_onstart_stateflow_double_emit
-description: Flow.onStart{} guard combined with collecting a StateFlow double-fires on startup — a concrete bug found and empirically confirmed in rhaydus-foundation Batch H (offline-sync)
+description: Flow.onStart{} guard combined with collecting a StateFlow double-fires on startup — a concrete bug found and empirically confirmed
 metadata:
   type: feedback
 ---
@@ -15,12 +15,12 @@ code adds an `onStart {}` block that manually re-checks the current value and do
 initial value. `onStart` does not suppress or interact with the real upstream collection — it just runs
 its block *before* collection begins.
 
-**Why this matters**: found in `rhaydus-foundation` Batch H (`offline-sync` module,
-`DefaultOfflineWriteDrainer.start()`, release/0.3.0). The doc/KDoc describes the intended behavior as
-"drains on connectivity return, **and once immediately if already online**" — the fix should be to drop
-the `onStart` guard entirely and rely on the `StateFlow`'s own replay (that alone already satisfies
-"drains once immediately if already online"), OR keep the guard but skip the first `onEach` emission
-(e.g. `.drop(1)` after the onStart-driven initial drain) — not both mechanisms firing independently.
+**Why this matters**: found in a `start()`-style drain loop whose doc/KDoc described the intended
+behavior as "drains on connectivity return, **and once immediately if already online**" — the fix should
+be to drop the `onStart` guard entirely and rely on the `StateFlow`'s own replay (that alone already
+satisfies "drains once immediately if already online"), OR keep the guard but skip the first `onEach`
+emission (e.g. `.drop(1)` after the onStart-driven initial drain) — not both mechanisms firing
+independently.
 
 **How to apply / how to verify before flagging as confirmed (not just theoretical)**: don't just reason
 about it — instrument and run. Add a call counter to the fake/mocked dependency the guarded side effect
@@ -30,9 +30,3 @@ the actual vs. expected count, then **revert the instrumentation** (`git checkou
 review artifacts don't leak into the diff. This turned a plausible-sounding "double drain" theory into a
 confirmed `expected:<1> but was:<2>` failure in about two tool calls — cheap and removes any doubt before
 reporting a 🔴/🟡 finding to the user.
-
-**Gradle task name note (rhaydus-foundation, KMP `androidLibrary` target, no `assembleDebug`/app
-variant)**: the JVM host-test task for this kind of module is `:<module>:testAndroidHostTest`, not
-`:<module>:testDebugUnitTest` (that task doesn't exist here — this isn't an Android application module).
-Run `./gradlew :<module>:tasks --all | grep -i test` first if unsure of the exact task name for a KMP
-library module.

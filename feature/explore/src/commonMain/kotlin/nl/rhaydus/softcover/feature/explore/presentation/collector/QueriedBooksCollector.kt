@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -22,7 +23,7 @@ internal class QueriedBooksCollector : ExploreCollector {
                 allUserBooks.find { userBook -> userBook.id == it.id } ?: it
             }
         }.collectLatest { queriedBooks: List<Book> ->
-            scope.setState { it.copy(queriedBooks = queriedBooks) }
+            scope.setState { it.copy(queriedBooks = queriedBooks.toImmutableList()) }
         }
     }
 }

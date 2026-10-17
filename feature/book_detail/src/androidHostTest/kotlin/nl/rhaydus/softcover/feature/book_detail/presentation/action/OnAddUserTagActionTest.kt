@@ -1,42 +1,51 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagsLoad
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.tagsOrEmpty
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnAddUserTagActionTest {
     private lateinit var saveUserTagsUseCase: SaveUserTagsUseCase
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
     fun setUp() {
         saveUserTagsUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -91,36 +100,16 @@ class OnAddUserTagActionTest {
         }
 
         @Test
-        fun `does nothing when name is empty`() = runTest {
-            // ----- Arrange -----
-            val dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(book = stubBook())
-            val initialState = stateFlow.value
-            val action = OnAddUserTagAction(
-                name = "",
-                category = TagCategory.TAG,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe initialState
-        }
-
-        @Test
         fun `does nothing when tag with same name and category already present (exact case)`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+            val existing = UserTag(
+                name = "Horror",
+                category = TagCategory.GENRE,
+            )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(),
-                userTags = listOf(UserTag(
-                    name = "Horror",
-                    category = TagCategory.GENRE,
-                ),),
+                userTags = UserTagsLoad.Loaded(persistentListOf(existing)),
             )
             val initialTags = stateFlow.value.userTags
             val action = OnAddUserTagAction(
@@ -142,12 +131,13 @@ class OnAddUserTagActionTest {
         fun `does nothing when duplicate tag differs only in case`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
+            val existing = UserTag(
+                name = "horror",
+                category = TagCategory.GENRE,
+            )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(),
-                userTags = listOf(UserTag(
-                    name = "horror",
-                    category = TagCategory.GENRE,
-                ),),
+                userTags = UserTagsLoad.Loaded(persistentListOf(existing)),
             )
             val initialTags = stateFlow.value.userTags
             val action = OnAddUserTagAction(
@@ -175,12 +165,15 @@ class OnAddUserTagActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = listOf(existingTag),
+                userTags = UserTagsLoad.Loaded(persistentListOf(existingTag)),
             )
-            val savedResult = listOf(existingTag, UserTag(
-                name = "cozy",
-                category = TagCategory.MOOD,
-            ),)
+            val savedResult = listOf(
+                existingTag,
+                UserTag(
+                    name = "cozy",
+                    category = TagCategory.MOOD,
+                ),
+            )
 
             coEvery {
                 saveUserTagsUseCase(
@@ -201,25 +194,28 @@ class OnAddUserTagActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe savedResult
+            stateFlow.value.userTags.tagsOrEmpty shouldBe savedResult
         }
 
         @Test
-        fun `appends trimmed new tag optimistically`() = runTest {
+        fun `saves the trimmed tag to Hardcover`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(book = stubBook(id = 1))
-            val savedResult = listOf(UserTag(
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(id = 1),
+                userTags = UserTagsLoad.Loaded(persistentListOf()),
+            )
+            val trimmedTag = UserTag(
                 name = "epic",
                 category = TagCategory.TAG,
-            ),)
+            )
 
             coEvery {
                 saveUserTagsUseCase(
                     bookId = 1,
                     tags = any(),
                 )
-            } returns Result.success(savedResult)
+            } returns Result.success(listOf(trimmedTag))
 
             val action = OnAddUserTagAction(
                 name = "  epic  ",
@@ -233,7 +229,12 @@ class OnAddUserTagActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe savedResult
+            coVerify {
+                saveUserTagsUseCase(
+                    bookId = 1,
+                    tags = listOf(trimmedTag),
+                )
+            }
         }
 
         @Test
@@ -242,6 +243,7 @@ class OnAddUserTagActionTest {
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
+                userTags = UserTagsLoad.Loaded(persistentListOf()),
                 tagEditorInput = "epic",
             )
 
@@ -268,10 +270,44 @@ class OnAddUserTagActionTest {
         }
 
         @Test
+        fun `sets newlyAddedTagKey to the trimmed category-name pair`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(id = 1),
+                userTags = UserTagsLoad.Loaded(persistentListOf()),
+            )
+
+            coEvery {
+                saveUserTagsUseCase(
+                    bookId = 1,
+                    tags = any(),
+                )
+            } returns Result.success(emptyList())
+
+            val action = OnAddUserTagAction(
+                name = "  epic  ",
+                category = TagCategory.TAG,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.newlyAddedTagKey shouldBe "TAG:epic"
+        }
+
+        @Test
         fun `overwrites userTags with the server canonical response on success`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(book = stubBook(id = 42))
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(id = 42),
+                userTags = UserTagsLoad.Loaded(persistentListOf()),
+            )
             val serverCanonical = listOf(
                 UserTag(
                     name = "fantasy",
@@ -299,20 +335,23 @@ class OnAddUserTagActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe serverCanonical
+            stateFlow.value.userTags.tagsOrEmpty shouldBe serverCanonical
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
         fun `rolls back to previous userTags on save failure`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-            val originalTags = listOf(UserTag(
-                name = "sci-fi",
-                category = TagCategory.GENRE,
-            ),)
+            val originalTags = listOf(
+                UserTag(
+                    name = "sci-fi",
+                    category = TagCategory.GENRE,
+                ),
+            )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = originalTags,
+                userTags = UserTagsLoad.Loaded(originalTags.toImmutableList()),
             )
 
             coEvery {
@@ -334,7 +373,9 @@ class OnAddUserTagActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe originalTags
+            stateFlow.value.userTags.tagsOrEmpty shouldBe originalTags
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
 
         @Test
@@ -356,6 +397,66 @@ class OnAddUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe initialState.userTags
+        }
+
+        @Test
+        fun `does nothing while the user tags have not loaded`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(id = 1),
+                userTags = UserTagsLoad.Loading,
+            )
+            val initialState = stateFlow.value
+            val action = OnAddUserTagAction(
+                name = "epic",
+                category = TagCategory.TAG,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value shouldBe initialState
+            coVerify(exactly = 0) {
+                saveUserTagsUseCase(
+                    bookId = any(),
+                    tags = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `does nothing while the user tags failed to load`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(id = 1),
+                userTags = UserTagsLoad.Failed,
+            )
+            val initialState = stateFlow.value
+            val action = OnAddUserTagAction(
+                name = "epic",
+                category = TagCategory.TAG,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value shouldBe initialState
+            coVerify(exactly = 0) {
+                saveUserTagsUseCase(
+                    bookId = any(),
+                    tags = any(),
+                )
+            }
         }
     }
 }

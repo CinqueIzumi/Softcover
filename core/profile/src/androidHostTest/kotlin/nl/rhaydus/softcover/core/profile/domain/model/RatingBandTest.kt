@@ -9,11 +9,16 @@ class RatingBandTest {
     inner class Classify {
         @Test
         fun `fewer than 15 total ratings is NEW_READER regardless of average or shape`() {
+            // ----- Arrange -----
+            val halfStarBuckets = List(9) { 0 }
+            val average = 4.8
+            val totalRatings = 10
+
             // ----- Act & Assert -----
             RatingBand.classify(
-                halfStarBuckets = List(9) { 0 },
-                average = 4.8,
-                totalRatings = 10,
+                halfStarBuckets = halfStarBuckets,
+                average = average,
+                totalRatings = totalRatings,
             ) shouldBe RatingBand.NEW_READER
         }
 

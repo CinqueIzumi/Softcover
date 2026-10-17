@@ -1,18 +1,21 @@
 package nl.rhaydus.softcover.feature.app_update.data.release
 
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.common.AppLog
+import nl.rhaydus.common.runCatchingCancellable
+import nl.rhaydus.softcover.feature.app_update.data.install.DesktopInstallerTarget
+import nl.rhaydus.softcover.feature.app_update.data.model.AppRelease
 import java.io.File
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import nl.rhaydus.common.AppDispatchers
-import nl.rhaydus.common.AppLog
-import nl.rhaydus.softcover.feature.app_update.data.install.DesktopInstallerTarget
-import nl.rhaydus.softcover.feature.app_update.data.model.AppRelease
 
 /**
  * Provider-agnostic access to the desktop app's release feed. Named for its role, not its backing:
@@ -28,11 +31,13 @@ internal interface ReleaseSource {
 
     /**
      * Downloads [release]'s installer into [destinationDirectory], returning the downloaded file or
-     * `null` on failure (any partial file is discarded).
+     * `null` on failure (any partial file is discarded). [onProgress] receives the bytes written so
+     * far and the total size, `null` while the server has not reported one.
      */
     suspend fun downloadInstaller(
         release: AppRelease,
         destinationDirectory: String,
+        onProgress: (bytesDownloaded: Long, totalBytes: Long?) -> Unit,
     ): File?
 }
 
@@ -86,6 +91,7 @@ internal class GitHubReleaseSource(private val appDispatchers: AppDispatchers) :
     override suspend fun downloadInstaller(
         release: AppRelease,
         destinationDirectory: String,
+        onProgress: (bytesDownloaded: Long, totalBytes: Long?) -> Unit,
     ): File? {
         return withContext(appDispatchers.io) {
             val destination = File(
@@ -93,17 +99,19 @@ internal class GitHubReleaseSource(private val appDispatchers: AppDispatchers) :
                 release.installerFileName,
             )
 
-            val downloaded = downloadTo(
-                url = release.installerUrl,
-                destination = destination,
-            )
+            var downloaded = false
 
-            if (downloaded) {
-                destination
-            } else {
-                destination.delete()
-                null
+            try {
+                downloaded = downloadTo(
+                    url = release.installerUrl,
+                    destination = destination,
+                    onProgress = onProgress,
+                )
+            } finally {
+                if (downloaded.not()) destination.delete()
             }
+
+            if (downloaded) destination else null
         }
     }
 
@@ -138,11 +146,12 @@ internal class GitHubReleaseSource(private val appDispatchers: AppDispatchers) :
         }.getOrNull()
     }
 
-    private fun downloadTo(
+    private suspend fun downloadTo(
         url: String,
         destination: File,
+        onProgress: (bytesDownloaded: Long, totalBytes: Long?) -> Unit,
     ): Boolean {
-        return runCatching {
+        return runCatchingCancellable {
             val request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header(
@@ -154,10 +163,46 @@ internal class GitHubReleaseSource(private val appDispatchers: AppDispatchers) :
 
             val response = httpClient.send(
                 request,
-                HttpResponse.BodyHandlers.ofFile(destination.toPath()),
+                HttpResponse.BodyHandlers.ofInputStream(),
             )
 
-            response.statusCode() in SUCCESS_RANGE
+            response.body().use { input ->
+                if (response.statusCode() !in SUCCESS_RANGE) return@runCatchingCancellable false
+
+                val totalBytes = response.headers()
+                    .firstValueAsLong("Content-Length")
+                    .takeIf { it.isPresent }
+                    ?.asLong
+                    ?.takeIf { it > 0 }
+
+                destination.outputStream().use { output ->
+                    val buffer = ByteArray(COPY_BUFFER_BYTES)
+                    var bytesDownloaded = 0L
+
+                    while (true) {
+                        currentCoroutineContext().ensureActive()
+
+                        val read = input.read(buffer)
+
+                        if (read < 0) break
+
+                        output.write(
+                            buffer,
+                            0,
+                            read,
+                        )
+
+                        bytesDownloaded += read
+
+                        onProgress(
+                            bytesDownloaded,
+                            totalBytes,
+                        )
+                    }
+                }
+
+                true
+            }
         }.onFailure {
             AppLog.w(
                 it,
@@ -185,6 +230,7 @@ internal class GitHubReleaseSource(private val appDispatchers: AppDispatchers) :
     private companion object {
         const val REPOSITORY_PATH = "CinqueIzumi/Softcover"
         const val USER_AGENT = "Softcover-Desktop-Updater"
+        const val COPY_BUFFER_BYTES = 64 * 1024
         val SUCCESS_RANGE = 200..299
     }
 }

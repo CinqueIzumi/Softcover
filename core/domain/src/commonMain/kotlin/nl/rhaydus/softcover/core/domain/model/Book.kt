@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 data class Book(
     val id: Int,
@@ -26,10 +26,15 @@ data class Book(
     val tags: List<Tag> = emptyList(),
 
     val userBook: UserBook?,
-    val userBookRead: UserBookRead?,
 ) {
+    val currentRead: UserBookRead?
+        get() = userBook?.currentRead
+
     val status: BookStatus
         get() = userBook?.status ?: BookStatus.None
+
+    val isPaused: Boolean
+        get() = status == BookStatus.Paused
 
     val effectiveReleaseDate: LocalDate?
         get() = currentEdition?.releaseDate ?: defaultEdition?.releaseDate ?: releaseDate

@@ -1,13 +1,11 @@
 package nl.rhaydus.softcover.core.network.di
 
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.network.http.DefaultHttpEngine
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
-import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.cache.normalized.normalizedCache
-import kotlin.time.TimeSource
-import org.koin.dsl.module
 import nl.rhaydus.softcover.cache.Cache
 import nl.rhaydus.softcover.core.domain.cache.NetworkCacheCleaner
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
@@ -16,6 +14,8 @@ import nl.rhaydus.softcover.core.network.cache.SoftcoverCacheResolver
 import nl.rhaydus.softcover.core.network.interceptor.ApiRateLimitTier
 import nl.rhaydus.softcover.core.network.interceptor.AuthInterceptor
 import nl.rhaydus.softcover.core.network.interceptor.RateLimitInterceptor
+import org.koin.dsl.module
+import kotlin.time.TimeSource
 
 private const val APOLLO_MEMORY_CACHE_BYTES = 10 * 1024 * 1024
 private const val NETWORK_TIMEOUT_MILLIS = 60_000L

@@ -13,6 +13,7 @@ dependencies {
     compileOnly(libs.compose.compiler.gradlePlugin)
     compileOnly(libs.compose.multiplatform.gradlePlugin)
     compileOnly(libs.apollo.gradlePlugin)
+    compileOnly(libs.stability.analyzer.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.room.gradlePlugin)
 
@@ -30,17 +31,9 @@ tasks.test {
 
 gradlePlugin {
     plugins {
-        register("androidLibrary") {
-            id = "softcover.android.library"
-            implementationClass = "AndroidLibraryConventionPlugin"
-        }
         register("kmpLibrary") {
             id = "softcover.kmp.library"
             implementationClass = "KmpLibraryConventionPlugin"
-        }
-        register("androidCompose") {
-            id = "softcover.android.compose"
-            implementationClass = "AndroidComposeConventionPlugin"
         }
         register("kmpCompose") {
             id = "softcover.kmp.compose"
@@ -53,6 +46,10 @@ gradlePlugin {
         register("androidApollo") {
             id = "softcover.android.apollo"
             implementationClass = "AndroidApolloConventionPlugin"
+        }
+        register("androidR8KeepContract") {
+            id = "softcover.android.r8-keep-contract"
+            implementationClass = "AndroidR8KeepContractConventionPlugin"
         }
         register("docBudgets") {
             id = "softcover.doc-budgets"

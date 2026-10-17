@@ -1,16 +1,18 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -56,7 +58,10 @@ internal class AllBooksCollector : LibraryCollector {
         }.collectLatest { filtered ->
             scope.setState { state ->
                 state.copy(
-                    booksByTab = state.booksByTab + (LibraryTab.All.id to filtered),
+                    booksByTab = state.booksByTab.toPersistentMap().put(
+                        LibraryTab.All.id,
+                        filtered.toImmutableList(),
+                    ),
                     isLoading = false,
                 )
             }

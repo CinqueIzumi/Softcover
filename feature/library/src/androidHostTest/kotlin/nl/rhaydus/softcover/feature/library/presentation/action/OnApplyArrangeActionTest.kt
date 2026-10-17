@@ -8,9 +8,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
@@ -18,9 +15,13 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayout
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryArrangeDraft
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnApplyArrangeActionTest {
     private lateinit var setLibrarySortUseCase: SetLibrarySortUseCase
@@ -56,9 +57,47 @@ class OnApplyArrangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `resets isRearranging regardless of prior state`() = runTest {
+        fun `no-op when arrangeDraft is null`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isRearranging = true)
+            stateFlow.value = LibraryUiState(
+                isRearranging = true,
+                arrangeDraft = null,
+            )
+
+            // ----- Act -----
+            OnApplyArrangeAction().execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isRearranging shouldBe true
+
+            coVerify(exactly = 0) {
+                setLibrarySortUseCase(
+                    tabId = any(),
+                    mode = any(),
+                    direction = any(),
+                )
+            }
+
+            coVerify(exactly = 0) {
+                setLibraryGridLayoutUseCase(newLayout = any())
+            }
+        }
+
+        @Test
+        fun `commits the draft sort and layout and leaves rearrange mode`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                isRearranging = true,
+                arrangeDraft = LibraryArrangeDraft(
+                    tabId = tabId,
+                    sortMode = LibrarySortMode.RATING,
+                    sortDirection = SortDirection.DESCENDING,
+                    gridLayout = LibraryGridLayout.LIST_LARGE,
+                ),
+            )
 
             coEvery {
                 setLibrarySortUseCase(
@@ -72,52 +111,15 @@ class OnApplyArrangeActionTest {
                 setLibraryGridLayoutUseCase(newLayout = any())
             } returns Result.success(Unit)
 
-            val action = OnApplyArrangeAction(
-                tabId = tabId,
-                sortMode = LibrarySortMode.TITLE,
-                sortDirection = SortDirection.ASCENDING,
-                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-            )
-
             // ----- Act -----
-            action.execute(
+            OnApplyArrangeAction().execute(
                 dependencies = stubDependencies(),
                 scope = scope,
             )
 
             // ----- Assert -----
             stateFlow.value.isRearranging shouldBe false
-        }
 
-        @Test
-        fun `happy path invokes both use cases with the exact draft values`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                setLibrarySortUseCase(
-                    tabId = any(),
-                    mode = any(),
-                    direction = any(),
-                )
-            } returns Result.success(Unit)
-
-            coEvery {
-                setLibraryGridLayoutUseCase(newLayout = any())
-            } returns Result.success(Unit)
-
-            val action = OnApplyArrangeAction(
-                tabId = tabId,
-                sortMode = LibrarySortMode.RATING,
-                sortDirection = SortDirection.DESCENDING,
-                gridLayout = LibraryGridLayout.LIST_LARGE,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = stubDependencies(),
-                scope = scope,
-            )
-
-            // ----- Assert -----
             coVerify(exactly = 1) {
                 setLibrarySortUseCase(
                     tabId = tabId,
@@ -135,6 +137,15 @@ class OnApplyArrangeActionTest {
         fun `sort use case failure is swallowed and does not prevent the layout use case call`() =
             runTest {
                 // ----- Arrange -----
+                stateFlow.value = LibraryUiState(
+                    arrangeDraft = LibraryArrangeDraft(
+                        tabId = tabId,
+                        sortMode = LibrarySortMode.TITLE,
+                        sortDirection = SortDirection.ASCENDING,
+                        gridLayout = LibraryGridLayout.GRID_THREE_COLUMNS,
+                    ),
+                )
+
                 coEvery {
                     setLibrarySortUseCase(
                         tabId = any(),
@@ -147,17 +158,10 @@ class OnApplyArrangeActionTest {
                     setLibraryGridLayoutUseCase(newLayout = any())
                 } returns Result.success(Unit)
 
-                val action = OnApplyArrangeAction(
-                    tabId = tabId,
-                    sortMode = LibrarySortMode.TITLE,
-                    sortDirection = SortDirection.ASCENDING,
-                    gridLayout = LibraryGridLayout.GRID_THREE_COLUMNS,
-                )
-
                 // ----- Act -----
                 // No exception propagates out of execute() — the failure is logged, not rethrown or
                 // rolled back.
-                action.execute(
+                OnApplyArrangeAction().execute(
                     dependencies = stubDependencies(),
                     scope = scope,
                 )
@@ -174,6 +178,15 @@ class OnApplyArrangeActionTest {
         fun `layout use case failure is swallowed and does not undo the already-applied sort`() =
             runTest {
                 // ----- Arrange -----
+                stateFlow.value = LibraryUiState(
+                    arrangeDraft = LibraryArrangeDraft(
+                        tabId = tabId,
+                        sortMode = LibrarySortMode.AUTHOR,
+                        sortDirection = SortDirection.ASCENDING,
+                        gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
+                    ),
+                )
+
                 coEvery {
                     setLibrarySortUseCase(
                         tabId = any(),
@@ -186,17 +199,10 @@ class OnApplyArrangeActionTest {
                     setLibraryGridLayoutUseCase(newLayout = any())
                 } returns Result.failure(RuntimeException("layout write failed"))
 
-                val action = OnApplyArrangeAction(
-                    tabId = tabId,
-                    sortMode = LibrarySortMode.AUTHOR,
-                    sortDirection = SortDirection.ASCENDING,
-                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
-                )
-
                 // ----- Act -----
                 // No exception propagates out of execute() and no compensating call is made — a
                 // partial commit (sort applied, layout write failed) is the intended behavior.
-                action.execute(
+                OnApplyArrangeAction().execute(
                     dependencies = stubDependencies(),
                     scope = scope,
                 )

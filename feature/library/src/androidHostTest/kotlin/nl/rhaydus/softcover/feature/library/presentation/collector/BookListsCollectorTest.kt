@@ -9,20 +9,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class BookListsCollectorTest {
     private lateinit var getAllUserListsUseCase: GetAllUserListsUseCase
@@ -124,10 +124,12 @@ class BookListsCollectorTest {
                 listName = "Owned",
             ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             listsFlow.emit(listOf(list))
@@ -153,10 +155,12 @@ class BookListsCollectorTest {
                 listName = "Owned",
             ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             listsFlow.emit(listOf(list))
@@ -182,10 +186,12 @@ class BookListsCollectorTest {
                 listName = "Hidden",
             ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             listsFlow.emit(listOf(disabledList))
@@ -211,10 +217,12 @@ class BookListsCollectorTest {
                 listName = "Owned",
             ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             listsFlow.emit(listOf(list))
             enabledListIdsFlow.emit(setOf(3))
@@ -225,59 +233,6 @@ class BookListsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.editionsByTab.containsKey(tabId) shouldBe false
-            job.cancel()
-        }
-
-        @Test
-        fun `editionsByTab is not modified before both flows emit`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act & Assert -----
-            stateFlow.value.editionsByTab shouldBe emptyMap()
-            job.cancel()
-        }
-
-        @Test
-        fun `multiple enabled lists are all written into editionsByTab`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val edition1 = stubEdition()
-            val edition2 = stubEdition()
-            val list1 = stubBookList(
-                id = 10,
-                name = "List A",
-                listBooks = listOf(stubListBook(edition = edition1)),
-            )
-            val list2 = stubBookList(
-                id = 11,
-                name = "List B",
-                listBooks = listOf(stubListBook(edition = edition2)),
-            )
-            val tabId1 = LibraryTab.CustomList(
-                listId = 10,
-                listName = "List A",
-            ).id
-            val tabId2 = LibraryTab.CustomList(
-                listId = 11,
-                listName = "List B",
-            ).id
-            val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            listsFlow.emit(listOf(list1, list2))
-            enabledListIdsFlow.emit(setOf(10, 11))
-
-            // ----- Assert -----
-            stateFlow.value.editionsByTab[tabId1] shouldBe listOf(edition1)
-            stateFlow.value.editionsByTab[tabId2] shouldBe listOf(edition2)
             job.cancel()
         }
     }

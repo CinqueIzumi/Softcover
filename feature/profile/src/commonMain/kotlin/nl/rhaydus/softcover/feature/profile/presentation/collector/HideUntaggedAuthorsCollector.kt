@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.state.hideUntaggedAuthorsToggleFor
 import nl.rhaydus.toad.ActionScope
 
 internal class HideUntaggedAuthorsCollector : ProfileCollector {
@@ -13,7 +14,12 @@ internal class HideUntaggedAuthorsCollector : ProfileCollector {
         dependencies: ProfileDependencies,
     ) {
         dependencies.getHideUntaggedAuthorsAsFlowUseCase().collectLatest { hide ->
-            scope.setState { it.copy(hideUntaggedAuthors = hide) }
+            scope.setState {
+                it.copy(
+                    hideUntaggedAuthors = hide,
+                    hideUntaggedAuthorsToggle = hideUntaggedAuthorsToggleFor(hide = hide),
+                )
+            }
         }
     }
 }

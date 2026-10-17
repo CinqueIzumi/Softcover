@@ -6,6 +6,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagsLoad
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.withTagDraft
 import nl.rhaydus.toad.ActionScope
 
 /**
@@ -25,7 +27,9 @@ internal class OnAddUserTagAction(
 
         if (trimmed.isEmpty()) return
 
-        val alreadyPresent = scope.currentState.userTags.any {
+        val current = (scope.currentState.userTags as? UserTagsLoad.Loaded)?.tags ?: return
+
+        val alreadyPresent = current.any {
             it.category == category && it.name.equals(
                 trimmed,
                 ignoreCase = true,
@@ -34,12 +38,16 @@ internal class OnAddUserTagAction(
 
         if (alreadyPresent) return
 
-        val newSet = scope.currentState.userTags + UserTag(
+        val newSet = current + UserTag(
             name = trimmed,
             category = category,
         )
 
-        scope.setState { it.copy(tagEditorInput = "") }
+        scope.setState {
+            it.withTagDraft(input = "").copy(
+                newlyAddedTagKey = "${category.name}:$trimmed",
+            )
+        }
 
         scope.commitUserTags(
             newSet = newSet,

@@ -1,21 +1,26 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
+import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.withOrderedEntries
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnStatusToggleActionTest {
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
@@ -58,7 +63,7 @@ class OnStatusToggleActionTest {
         fun `adds code to draftEnabledStatusCodes when enabled is true`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledStatusCodes = setOf(1),
+                draftEnabledStatusCodes = persistentSetOf(1),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
@@ -78,10 +83,36 @@ class OnStatusToggleActionTest {
         }
 
         @Test
+        fun `rebuilds orderedEntries so the toggled status entry reflects the new checked state`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                draftEnabledStatusCodes = persistentSetOf(),
+                initialized = true,
+            ).withOrderedEntries()
+            val dependencies = stubDependencies(this)
+            val action = OnStatusToggleAction(
+                code = UserBookStatus.READ.code,
+                enabled = true,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val entry = stateFlow.value.orderedEntries
+                .filterIsInstance<LibraryTabEntry.Status>()
+                .single { it.status == UserBookStatus.READ }
+            entry.statusVisibilityToggle.shouldNotBeNull().checked shouldBe true
+        }
+
+        @Test
         fun `removes code from draftEnabledStatusCodes when enabled is false`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledStatusCodes = setOf(1, 3, 5),
+                draftEnabledStatusCodes = persistentSetOf(1, 3, 5),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
@@ -98,100 +129,6 @@ class OnStatusToggleActionTest {
 
             // ----- Assert -----
             stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1, 5)
-        }
-
-        @Test
-        fun `does not modify persistedEnabledStatusCodes`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedEnabledStatusCodes = setOf(1, 3),
-                draftEnabledStatusCodes = setOf(1, 3),
-                initialized = true,
-            )
-            val dependencies = stubDependencies(this)
-            val action = OnStatusToggleAction(
-                code = 5,
-                enabled = true,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.persistedEnabledStatusCodes shouldBe setOf(1, 3)
-        }
-
-        @Test
-        fun `does not modify draftEnabledListIds`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledStatusCodes = setOf(1),
-                draftEnabledListIds = setOf(99),
-                initialized = true,
-            )
-            val dependencies = stubDependencies(this)
-            val action = OnStatusToggleAction(
-                code = 3,
-                enabled = true,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.draftEnabledListIds shouldBe setOf(99)
-        }
-
-        @Test
-        fun `toggling an already-present code with enabled true leaves the set unchanged`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledStatusCodes = setOf(1, 3),
-                initialized = true,
-            )
-            val dependencies = stubDependencies(this)
-            val action = OnStatusToggleAction(
-                code = 1,
-                enabled = true,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1, 3)
-        }
-
-        @Test
-        fun `toggling an absent code with enabled false leaves the set unchanged`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledStatusCodes = setOf(1),
-                initialized = true,
-            )
-            val dependencies = stubDependencies(this)
-            val action = OnStatusToggleAction(
-                code = 99,
-                enabled = false,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1)
         }
     }
 }

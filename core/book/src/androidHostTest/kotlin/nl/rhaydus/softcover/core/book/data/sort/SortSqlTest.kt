@@ -1,33 +1,19 @@
 package nl.rhaydus.softcover.core.book.data.sort
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.ints.shouldBeGreaterThan
+import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.string.shouldEndWith
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class SortSqlTest {
     @Nested
     inner class DateFinished {
         @Test
-        fun `contains all four COALESCE terms`() {
-            // ----- Arrange -----
-            val mode = LibrarySortMode.DATE_FINISHED
-
-            // ----- Act -----
-            val fragment = mode.toOrderByFragment(SortDirection.ASCENDING)
-
-            // ----- Assert -----
-            fragment shouldContain "SELECT MAX(finishedAt) FROM user_book_reads"
-            fragment shouldContain "ub.lastReadDate"
-            fragment shouldContain "SELECT MAX(updatedAt) FROM reading_journals"
-            fragment shouldContain "ub.createdAt"
-        }
-
-        @Test
-        fun `COALESCE terms appear in the correct relative order`() {
+        fun `falls back through finishedAt, lastReadDate, journal update then createdAt in that order`() {
             // ----- Arrange -----
             val mode = LibrarySortMode.DATE_FINISHED
 
@@ -40,56 +26,24 @@ class SortSqlTest {
             val idxReadingJournals = fragment.indexOf("reading_journals")
             val idxCreatedAt = fragment.indexOf("ub.createdAt")
 
-            assert(idxFinishedAt < idxLastReadDate) {
-                "Expected MAX(finishedAt) before ub.lastReadDate"
-            }
-            assert(idxLastReadDate < idxReadingJournals) {
-                "Expected ub.lastReadDate before reading_journals subquery"
-            }
-            assert(idxReadingJournals < idxCreatedAt) {
-                "Expected reading_journals subquery before ub.createdAt"
-            }
+            idxFinishedAt shouldBeGreaterThan -1
+            idxFinishedAt shouldBeLessThan idxLastReadDate
+            idxLastReadDate shouldBeLessThan idxReadingJournals
+            idxReadingJournals shouldBeLessThan idxCreatedAt
         }
 
         @Test
-        fun `ASCENDING ends with ASC`() {
-            // ----- Arrange & Act -----
-            val fragment = LibrarySortMode.DATE_FINISHED.toOrderByFragment(SortDirection.ASCENDING)
+        fun `ends with the keyword of the requested direction`() {
+            // ----- Arrange -----
+            val sortMode = LibrarySortMode.DATE_FINISHED
+
+            // ----- Act -----
+            val ascending = sortMode.toOrderByFragment(SortDirection.ASCENDING)
+            val descending = sortMode.toOrderByFragment(SortDirection.DESCENDING)
 
             // ----- Assert -----
-            fragment shouldEndWith "ASC"
-        }
-
-        @Test
-        fun `DESCENDING ends with DESC`() {
-            // ----- Arrange & Act -----
-            val fragment = LibrarySortMode.DATE_FINISHED.toOrderByFragment(SortDirection.DESCENDING)
-
-            // ----- Assert -----
-            fragment shouldEndWith "DESC"
-        }
-    }
-
-    @Nested
-    inner class DateAdded {
-        @Test
-        fun `ASCENDING produces correct fragment`() {
-            // ----- Arrange & Act -----
-            val fragment = LibrarySortMode.DATE_ADDED.toOrderByFragment(SortDirection.ASCENDING)
-
-            // ----- Assert -----
-            fragment shouldEndWith "ASC"
-            fragment shouldContain "ub.dateAdded"
-        }
-
-        @Test
-        fun `DESCENDING produces correct fragment`() {
-            // ----- Arrange & Act -----
-            val fragment = LibrarySortMode.DATE_ADDED.toOrderByFragment(SortDirection.DESCENDING)
-
-            // ----- Assert -----
-            fragment shouldEndWith "DESC"
-            fragment shouldContain "ub.dateAdded"
+            ascending shouldEndWith "ASC"
+            descending shouldEndWith "DESC"
         }
     }
 
@@ -97,17 +51,23 @@ class SortSqlTest {
     inner class ErrorModes {
         @Test
         fun `MANUAL throws an error`() {
-            // ----- Assert -----
+            // ----- Arrange -----
+            val sortMode = LibrarySortMode.MANUAL
+
+            // ----- Act & Assert -----
             shouldThrow<IllegalStateException> {
-                LibrarySortMode.MANUAL.toOrderByFragment(SortDirection.ASCENDING)
+                sortMode.toOrderByFragment(SortDirection.ASCENDING)
             }
         }
 
         @Test
         fun `ORDER throws an error`() {
-            // ----- Assert -----
+            // ----- Arrange -----
+            val sortMode = LibrarySortMode.ORDER
+
+            // ----- Act & Assert -----
             shouldThrow<IllegalStateException> {
-                LibrarySortMode.ORDER.toOrderByFragment(SortDirection.ASCENDING)
+                sortMode.toOrderByFragment(SortDirection.ASCENDING)
             }
         }
     }

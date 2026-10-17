@@ -11,6 +11,6 @@ internal class OnDismissDeadlinePickerAction : BookDetailAction {
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(showDeadlinePicker = false) }
+        scope.setState { it.copy(deadlinePicker = null) }
     }
 }

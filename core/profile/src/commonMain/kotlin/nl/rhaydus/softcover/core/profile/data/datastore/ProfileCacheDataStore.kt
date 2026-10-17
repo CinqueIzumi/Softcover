@@ -3,11 +3,11 @@ package nl.rhaydus.softcover.core.profile.data.datastore
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
+import nl.rhaydus.softcover.core.profile.data.datastore.serializer.ProfileCacheSerializer
+import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
 import okio.FileSystem
 import okio.Path
 import kotlin.jvm.JvmInline
-import nl.rhaydus.softcover.core.profile.data.datastore.serializer.ProfileCacheSerializer
-import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
 
 @JvmInline
 internal value class ProfileCacheDataStore(val store: DataStore<ProfileCacheEntity>)

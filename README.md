@@ -4,9 +4,11 @@ A [Hardcover.app](https://hardcover.app/) client for **Android, iOS, and desktop
 
 A Kotlin Multiplatform app: domain, data, and UI are shared across all three platforms via Compose Multiplatform. Android targets 8.0+.
 
-[![CI](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci.yml/badge.svg)](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci.yml)
+<a href="https://play.google.com/store/apps/details?id=nl.rhaydus.softcover"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="80"></a>
+
+[![CI](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci-full.yml/badge.svg)](https://github.com/CinqueIzumi/Softcover/actions/workflows/ci-full.yml)
 [![codecov](https://codecov.io/gh/CinqueIzumi/Softcover/branch/main/graph/badge.svg)](https://codecov.io/gh/CinqueIzumi/Softcover)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.11.0-4285F4?logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/compose-multiplatform/)
 [![Platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS%20%7C%20Desktop-3DDC84)](#running-the-apps)
 [![Min SDK](https://img.shields.io/badge/min%20SDK-26-3DDC84?logo=android&logoColor=white)](https://developer.android.com/about/versions/oreo)
@@ -46,8 +48,8 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 ## Features
 
 ### Library
-- Browse books organized by status — **Want to Read**, **Currently Reading**, **Read**, **Did Not Finish**, **Owned**.
-- Add and remove books from your library.
+- Browse books organized by status — **Want to Read**, **Currently Reading**, **Paused**, **Read**, **Did Not Finish**, **Owned**.
+- Add and remove books from your library, with an undo if you remove one by mistake.
 - Mark editions as owned.
 - Optionally **swipe between shelves** on mobile, with the neighbouring shelves peeking in from either side.
 - See a book's deadline date and the pace it asks of you right on the shelf.
@@ -74,12 +76,15 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 
 ### Book Details
 - View title, author, description, ratings, release date, and page count or audiobook duration.
-- Change reading status — Want to Read, Currently Reading, Read, Did Not Finish.
+- Change reading status — Want to Read, Currently Reading, Paused, Read, Did Not Finish.
 - **Start reading in one step** — go straight to Currently Reading from the book without picking a status first.
 - Update reading or listening progress.
-- Set a reading deadline with a required pages-per-day or minutes-per-day pace, and see a **reading-pace forecast** of when you'll finish.
+- Set a reading deadline with a required pages-per-day or minutes-per-day pace, and see a **reading-pace forecast** of when you'll finish, scoped to your current read-through.
+- Look back on every read-through of a book in a **Your reads** section.
+- Save the **quotes** that stayed with you on the Yours tab, synced with Hardcover, and delete the ones you no longer want.
 - Tag your books with a **tag editor** — category-clustered suggestions from your own tag vocabulary, a *see more* that unfurls a few more rows at a time rather than the whole list at once, and a spoiler toggle for revealing tags.
-- Share a reading update as a generated card.
+- Browse a book's community tags and its other tags, revealing a couple more lines with each *Show more*.
+- Share a book as a card set over its blurred cover, choosing which tags and how much length to show.
 - Switch between book and audiobook editions.
 
 ### Lists
@@ -92,12 +97,21 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 
 ### Settings
 - Toggle between a floating and docked bottom navigation bar.
+- Pick **Light**, **Dark**, **Dim** or follow the system, and choose a palette — Vellum, Ink, Foxed or Sea — each previewed before you commit.
 - Follow the system's dynamic colour where the platform supports it.
 - Show or hide the reading streak, and turn swiping between Library shelves on or off.
 - Choose which statuses and lists appear as Library tabs, and drag them into the order you want.
 - Choose your preferred date format.
 - Adjust the display scale on desktop to size text and UI to your screen.
 - Stay current with in-app updates — Google Play prompts on Android, and a self-updater backed by GitHub releases on desktop.
+- Read **What's new** for every release, see the public **Roadmap**, and find the app's details on the **About** page.
+- See the home-screen widgets you've placed on a **Widgets** page, and tune each one from there.
+
+### Home-screen widgets (Android)
+- **Currently Reading** — your current book over a blurred cover backdrop, cycling through the shelf, with progress updates straight from the widget.
+- **Trending** — Hardcover's trending top 10, paged per period.
+- **Random pick** — a book from your library to read next.
+- **Quote of the day** — one of your saved quotes, with its book.
 
 ### Onboarding
 - Connect your Hardcover account on first launch by entering your API token, after a short introductory walkthrough.
@@ -113,15 +127,16 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 #### Core
 | Technology | Version | Purpose |
 |---|---|---|
-| [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) | 2.3.21 | Primary language, shared across Android/iOS/desktop |
+| [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) | 2.4.21 | Primary language, shared across Android/iOS/desktop |
 | [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) | 1.11.0 | Declarative UI shared across all platforms (resolves to Jetpack Compose on Android) |
 | [Material 3 (expressive)](https://m3.material.io/) | 1.11.0-alpha07 | Design system and theming (CMP expressive APIs) |
-| [Android Gradle Plugin](https://developer.android.com/build) | 9.0.0 | Android build tooling |
-| [Gradle (KTS)](https://gradle.org/) | 9.1.0 | Build system with version catalog |
-| [KSP](https://github.com/google/ksp) | 2.3.9 | Kotlin Symbol Processing for Room (per-target) |
+| [Android Gradle Plugin](https://developer.android.com/build) | 9.3.3 | Android build tooling |
+| [Gradle (KTS)](https://gradle.org/) | 9.5.1 | Build system with version catalog |
+| [KSP](https://github.com/google/ksp) | 2.3.12 | Kotlin Symbol Processing for Room (per-target) |
 | [ktlint](https://pinterest.github.io/ktlint/) | 1.7.1 | Formatting engine driving the foundation ruleset — `ktlintFormat` autofix, `ktlintCheck` gate |
 | [detekt](https://detekt.dev/) | 1.23.8 | Type-resolved static analysis, gated from zero (`styleCheck`) |
-| [Dependency Analysis](https://github.com/autonomousapps/dependency-analysis-gradle-plugin) | 3.14.1 | Flags unused and misdeclared module dependencies |
+| [Dependency Analysis](https://github.com/autonomousapps/dependency-analysis-gradle-plugin) | 3.19.2 | Flags unused and misdeclared module dependencies |
+| [Compose Stability Analyzer](https://github.com/skydoves/compose-stability-analyzer) | 0.9.0 | Per-module Compose stability baselines, gated by `stabilityCheck` |
 | [Kover](https://github.com/Kotlin/kotlinx-kover) | 0.9.8 | Code-coverage reports, aggregated at the root for Codecov |
 
 #### Foundation ([`nl.rhaydus`](https://central.sonatype.com/search?q=nl.rhaydus), 0.3.1 — first-party shared libraries, resolved from Maven Central by default, or locally via `foundation.local=true`)
@@ -137,7 +152,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | `nl.rhaydus:ktlint-rules` | Custom ktlint ruleset (the mechanizable layout rules + gate) |
 | `nl.rhaydus:detekt-rules` | Custom type-resolved detekt ruleset + the shared detekt baseline config |
 
-These replace what was previously vendored in the app — the local TOAD runtime, the local `:ktlint-rules` module, and the duplicated design-system components/seams. Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `EditionImage`) on top. See [`docs/rhaydus/0.3.1/CAPABILITIES.md`](docs/rhaydus/0.3.1/CAPABILITIES.md).
+These replace what was previously vendored in the app — the local TOAD runtime, the local `:ktlint-rules` module, and the duplicated design-system components/seams. Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `Cover`) on top. See [`docs/rhaydus/0.3.1/CAPABILITIES.md`](docs/rhaydus/0.3.1/CAPABILITIES.md).
 
 #### Data & Networking
 | Technology | Version | Purpose |
@@ -145,7 +160,7 @@ These replace what was previously vendored in the app — the local TOAD runtime
 | [Apollo](https://www.apollographql.com/docs/kotlin) | 5.0.0 | Multiplatform GraphQL API client |
 | [Apollo Normalized Cache](https://github.com/apollographql/apollo-kotlin-normalized-cache) | 1.0.5 | Normalized in-memory GraphQL cache — cache-first reads and list→detail redirects |
 | [Room](https://developer.android.com/jetpack/androidx/releases/room) | 2.7.2 | Local database for caching books (KMP, bundled SQLite driver) |
-| [DataStore](https://developer.android.com/jetpack/androidx/releases/datastore) | 1.2.0 | Key-value storage for settings and search history (okio-backed) |
+| [DataStore](https://developer.android.com/jetpack/androidx/releases/datastore) | 1.2.1 | Key-value storage for settings and search history (okio-backed) |
 | [okio](https://square.github.io/okio/) | 3.9.1 | Multiplatform file I/O |
 | [kotlinx-serialization](https://github.com/Kotlin/kotlinx.serialization) | 1.9.0 | JSON serialization |
 | [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime) | 0.7.1 | Multiplatform date/time |
@@ -157,6 +172,7 @@ These replace what was previously vendored in the app — the local TOAD runtime
 | [Navigation Event](https://developer.android.com/jetpack/androidx/releases/navigationevent) | 1.0.1 | Multiplatform back-gesture handling (`NavigationBackHandler`, supersedes the deprecated CMP `BackHandler`) |
 | [Koin](https://insert-koin.io/docs/setup/koin/) | 3.5.3 | Dependency injection |
 | [Coroutines](https://github.com/Kotlin/kotlinx.coroutines) | 1.10.2 | Asynchronous and reactive flows |
+| [kotlinx-collections-immutable](https://github.com/Kotlin/kotlinx.collections.immutable) | 0.4.0 | Immutable collections that keep Compose UI models stable |
 | [Coil](https://github.com/coil-kt/coil) | 3.2.0 | Multiplatform image loading (OkHttp fetcher on Android/desktop, Ktor on iOS) |
 | [Reorderable](https://github.com/Calvin-LL/Reorderable) | 2.4.3 | Drag-and-drop list reordering |
 | [Kermit](https://kermit.touchlab.co/) | 2.0.6 | Multiplatform logging (via the `AppLog` facade) |
@@ -167,6 +183,7 @@ These replace what was previously vendored in the app — the local TOAD runtime
 | [CameraX](https://developer.android.com/training/camerax) + [ML Kit](https://developers.google.com/ml-kit/vision/barcode-scanning) | 1.4.2 / 17.3.0 | Android | Camera preview + on-device ISBN barcode decoding |
 | [Play In-App Updates](https://developer.android.com/guide/playcore/in-app-updates) | 2.1.0 | Android | In-app update prompts |
 | [WorkManager](https://developer.android.com/jetpack/androidx/releases/work) | 2.10.1 | Android | Background work scheduling |
+| [Glance](https://developer.android.com/develop/ui/compose/glance) | 1.2.0 | Android | Home-screen widgets |
 | [Ktor](https://ktor.io/) | 3.1.0 | iOS | Coil's network engine (Darwin) |
 | [KSafe](https://github.com/ioannisa/KSafe) | 2.1.2 | Desktop | API-key storage in the OS secret store |
 | [Compose Desktop](https://www.jetbrains.com/compose-multiplatform/) | 1.11.0 | Desktop | Window + native distribution packaging |
@@ -212,7 +229,7 @@ flowchart LR
 
 ### Prerequisites
 - Android Studio (latest stable) — for Android
-- JDK 17 — for the desktop target and the build toolchain
+- Any JDK can launch Gradle; the Gradle daemon is pinned to JDK 17 (`gradle/gradle-daemon-jvm.properties`) and auto-provisioned
 - Xcode (latest stable) — for iOS (macOS only)
 - A Hardcover.app account and API token
 
@@ -220,9 +237,10 @@ flowchart LR
 ```bash
 ./gradlew assembleDebug          # Build a debug APK
 ./gradlew assembleRelease        # Build a release APK
-./gradlew test                   # Run unit tests
+./gradlew test                   # Run :app / :desktopApp / :detekt-rules unit tests only
+./gradlew testAndroidHostTest --continue   # Run the KMP module unit tests
 ./gradlew :app:test              # Run unit tests for the app module
-./gradlew connectedAndroidTest   # Run instrumented tests (device/emulator required)
+./gradlew :smoketest:pixelApi36MinifiedAndroidTest   # Device suite on the R8-minified app (managed emulator; needs HARDCOVER_SMOKE_TOKEN or hardcover.apiToken in local.properties)
 ./gradlew lint                   # Run Android Lint
 ```
 
@@ -278,6 +296,7 @@ Softcover is being actively redesigned. **What's coming, by version, lives in [R
 | [docs/reference/design-system.md](docs/reference/design-system.md) | Color roles, editorial typography, layout primitives, components, and patterns |
 | [docs/reference/code-style.md](docs/reference/code-style.md) | Naming, layout, and whitespace conventions |
 | [docs/rhaydus/0.3.1/](docs/rhaydus/0.3.1/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
+| [CHANGELOG.md](CHANGELOG.md) | Per-version release notes — the source for the in-app What's new page and each GitHub Release |
 | [ROADMAP.md](ROADMAP.md) | Public, user-facing roadmap — generated from the open GitHub milestones; never hand-edited |
 | [docs/working/](docs/working/) | Working notes — audits and reviews kept alongside the code (planned work lives in GitHub Issues) |
 | [CLAUDE.md](CLAUDE.md) | Guidance for Claude Code when working in this repo |
@@ -299,3 +318,5 @@ Softcover is being actively redesigned. **What's coming, by version, lives in [R
 ## Disclaimer
 
 This project is an independent, open-source application and is **not affiliated with, endorsed by, or sponsored by** [Hardcover.app](https://hardcover.app/).
+
+Google Play and the Google Play logo are trademarks of Google LLC.

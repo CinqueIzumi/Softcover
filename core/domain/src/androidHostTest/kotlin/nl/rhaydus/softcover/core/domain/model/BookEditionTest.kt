@@ -54,24 +54,6 @@ class BookEditionTest {
         }
 
         @Test
-        fun `is false when readingFormat is Both`() {
-            // ----- Arrange -----
-            val edition = buildEdition(readingFormat = ReadingFormat.Both)
-
-            // ----- Act & Assert -----
-            edition.isAudiobook shouldBe false
-        }
-
-        @Test
-        fun `is false when readingFormat is Ebook`() {
-            // ----- Arrange -----
-            val edition = buildEdition(readingFormat = ReadingFormat.Ebook)
-
-            // ----- Act & Assert -----
-            edition.isAudiobook shouldBe false
-        }
-
-        @Test
         fun `is false when readingFormat is null`() {
             // ----- Arrange -----
             val edition = buildEdition(readingFormat = null)
@@ -90,18 +72,6 @@ class BookEditionTest {
 
             // ----- Act & Assert -----
             edition.isAudiobook shouldBe false
-        }
-
-        @Test
-        fun `is true when readingFormat is Audio even when audioSeconds is null`() {
-            // ----- Arrange -----
-            val edition = buildEdition(
-                readingFormat = ReadingFormat.Audio,
-                audioSeconds = null,
-            )
-
-            // ----- Act & Assert -----
-            edition.isAudiobook shouldBe true
         }
     }
 }

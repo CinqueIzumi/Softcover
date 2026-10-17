@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -13,7 +14,7 @@ internal class WantToReadCollector : ReadingCollector {
         dependencies: ReadingScreenDependencies,
     ) {
         dependencies.getWantToReadUserBooksUseCase().collectLatest { books ->
-            scope.setState { it.copy(wantToReadBooks = books) }
+            scope.setState { it.copy(wantToReadBooks = books.toImmutableList()) }
         }
     }
 }

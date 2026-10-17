@@ -23,7 +23,12 @@ internal data object OnClearSearchAction : ExploreAction {
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        scope.setState { it.copy(searchFocused = false) }
+        scope.setState {
+            it.copy(
+                searchFocused = false,
+                isSortMenuExpanded = false,
+            )
+        }
 
         resetSearch(
             dependencies = dependencies,

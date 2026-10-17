@@ -1,9 +1,11 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.withOrderedEntries
 import nl.rhaydus.toad.ActionScope
 
 internal class OnStatusToggleAction(
@@ -15,8 +17,10 @@ internal class OnStatusToggleAction(
         scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>,
     ) {
         scope.setState { state ->
-            val updated = if (enabled) state.draftEnabledStatusCodes + code else state.draftEnabledStatusCodes - code
-            state.copy(draftEnabledStatusCodes = updated)
+            val updated = state.draftEnabledStatusCodes.toPersistentSet().let { current ->
+                if (enabled) current.add(code) else current.remove(code)
+            }
+            state.copy(draftEnabledStatusCodes = updated).withOrderedEntries()
         }
     }
 }

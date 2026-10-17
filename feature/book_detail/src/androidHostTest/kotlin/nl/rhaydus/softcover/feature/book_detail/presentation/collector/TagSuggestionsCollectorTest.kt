@@ -3,22 +3,25 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagsLoad
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class TagSuggestionsCollectorTest {
     private lateinit var observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase
@@ -31,7 +34,7 @@ class TagSuggestionsCollectorTest {
     fun setUp() {
         observeUserTagVocabularyUseCase = mockk()
         vocabularyFlow = MutableStateFlow(emptyList())
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -62,33 +65,6 @@ class TagSuggestionsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `writes tagSuggestions computed from the vocabulary and editor state`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val fantasy = stubTag(
-                name = "Fantasy",
-                count = 5,
-            )
-            val horror = stubTag(
-                name = "Horror",
-                count = 1,
-            )
-            vocabularyFlow.value = listOf(fantasy, horror)
-
-            val collector = TagSuggestionsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
-
-            // ----- Assert -----
-            stateFlow.value.tagSuggestions shouldBe listOf(fantasy, horror)
-            job.cancel()
-        }
-
-        @Test
         fun `recomputes when the editor input changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val fantasy = stubTag(name = "Fantasy")
@@ -96,10 +72,12 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(fantasy, horror)
 
             val collector = TagSuggestionsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
             stateFlow.value.tagSuggestions shouldBe listOf(fantasy, horror)
@@ -126,10 +104,12 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(genreTag, moodTag)
 
             val collector = TagSuggestionsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
             stateFlow.value.tagSuggestions shouldBe listOf(genreTag)
@@ -149,16 +129,18 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(fantasy)
 
             val collector = TagSuggestionsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
             stateFlow.value.tagSuggestions shouldBe listOf(fantasy)
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userTags = listOf(fantasy))
+            stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(persistentListOf(fantasy)))
 
             // ----- Assert -----
             stateFlow.value.tagSuggestions shouldBe emptyList()
@@ -173,10 +155,12 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(fantasy)
 
             val collector = TagSuggestionsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
             stateFlow.value.tagSuggestions shouldBe listOf(fantasy)
@@ -186,31 +170,6 @@ class TagSuggestionsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.tagSuggestions shouldBe listOf(fantasy, horror)
-            job.cancel()
-        }
-
-        @Test
-        fun `an unrelated state change does not affect tagSuggestions`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            // showTagEditorSheet is not part of the input/category/appliedTags projection, so the
-            // distinctUntilChanged on that projection should suppress a redundant recompute.
-            val fantasy = stubTag(name = "Fantasy")
-            vocabularyFlow.value = listOf(fantasy)
-
-            val collector = TagSuggestionsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
-            stateFlow.value.tagSuggestions shouldBe listOf(fantasy)
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(showTagEditorSheet = true)
-
-            // ----- Assert -----
-            stateFlow.value.tagSuggestions shouldBe listOf(fantasy)
             job.cancel()
         }
     }

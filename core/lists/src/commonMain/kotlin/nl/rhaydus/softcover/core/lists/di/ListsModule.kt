@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.lists.di
 
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
@@ -11,12 +10,14 @@ import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.lists.data.repository.ListsRepositoryImpl
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.DrainPendingListWritesUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.ReorderListBooksUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetListRankedUseCase
 import nl.rhaydus.softcover.core.network.di.apolloModule
+import org.koin.dsl.module
 
 val listsModule = module {
     includes(
@@ -70,5 +71,9 @@ val listsModule = module {
 
     factory {
         SetListRankedUseCase(listsRepository = get())
+    }
+
+    factory {
+        DrainPendingListWritesUseCase(listsRepository = get())
     }
 }

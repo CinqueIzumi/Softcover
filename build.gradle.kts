@@ -1,11 +1,16 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.variant.TestAndroidComponentsExtension
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import org.jetbrains.compose.resources.ResourcesExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.android.test) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.compose.multiplatform) apply false
     alias(libs.plugins.apollo) apply false
@@ -14,6 +19,7 @@ plugins {
     alias(libs.plugins.room) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.detekt) apply false
+    alias(libs.plugins.stability.analyzer) apply false
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.kover)
     id("softcover.doc-budgets")
@@ -21,10 +27,10 @@ plugins {
 
 // Code coverage. Kover is applied to every shipped module (below) and aggregated into a single XML
 // report at the root — `./gradlew koverXmlReport` → build/reports/kover/report.xml — which CI uploads
-// to Codecov. :ktlint-rules is build tooling, not shipped code, so it is excluded from the report.
+// to Codecov. :detekt-rules is build tooling, not shipped code, so it is excluded from the report.
 dependencies {
     subprojects
-        .filter { it.path != ":ktlint-rules" }
+        .filter { it.path != ":detekt-rules" }
         .forEach { kover(it) }
 }
 
@@ -84,21 +90,29 @@ subprojects {
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
     // Coverage instrumentation for every shipped module; the merged report is wired at the root above.
-    if (path != ":ktlint-rules") {
+    if (path != ":detekt-rules") {
         apply(plugin = "org.jetbrains.kotlinx.kover")
     }
 
     dependencies {
         // The custom `rhaydus` ruleset, discovered via its META-INF/services entry.
         add("detektPlugins", rhaydusDetektRules)
+
+        // Softcover's own rules; the module cannot analyse itself with the jar it produces.
+        if (path != ":detekt-rules") {
+            add("detektPlugins", project(":detekt-rules"))
+        }
     }
 
     configure<DetektExtension> {
         buildUponDefaultConfig = true
         // Layered, later wins: the shared foundation baseline, then Softcover's own deltas on top.
         config.setFrom(
-            rootProject.layout.buildDirectory.file("rhaydus-detekt/config/detekt.yml"),
-            rootProject.files("config/detekt/detekt.yml"),
+            listOfNotNull(
+                rootProject.layout.buildDirectory.file("rhaydus-detekt/config/detekt.yml"),
+                rootProject.file("config/detekt/detekt.yml"),
+                rootProject.file("config/detekt/softcover-rules.yml").takeIf { path != ":detekt-rules" },
+            ),
         )
         parallel = true
     }
@@ -156,10 +170,104 @@ subprojects {
                     ),
                 )
 
-                // `:desktopApp`'s own `detektMain`, and the per-variant tasks `:app`'s aggregating
-                // `detektMain` fans out to. All three read the same non-KMP `src/main` layout.
-                "detektMain", "detektDebug", "detektRelease" ->
-                    setSource(project.files("src/main/java", "src/main/kotlin"))
+                // `:desktopApp`'s own `detektMain` — the variant-neutral `src/main` layout. `:app`'s
+                // `detektMain` is a source-less lifecycle task and never reaches this branch.
+                "detektMain" -> setSource(project.files("src/main/java", "src/main/kotlin"))
+
+                // `:app`'s per-variant tasks additionally read that variant's OWN source set, which is
+                // where the build-type-specific code lives: the debug-routes bindings and (since the
+                // component-library migration moved them out of `:core:designsystem`) the debug screens
+                // themselves. Without this they would be silently unscanned — `:app` is the only module
+                // with build types, so it is the only place this applies.
+                //
+                // Each variant gets only its own source set, never both: `src/debug` and `src/release`
+                // each declare `nl.rhaydus.softcover.di.debugRoutesModule`, so putting them in one
+                // scope would hand type resolution two conflicting declarations of the same symbol.
+                "detektDebug" -> setSource(
+                    project.files(
+                        "src/main/java",
+                        "src/main/kotlin",
+                        "src/debug/java",
+                        "src/debug/kotlin",
+                    ),
+                )
+
+                "detektRelease" -> setSource(
+                    project.files(
+                        "src/main/java",
+                        "src/main/kotlin",
+                        "src/release/java",
+                        "src/release/kotlin",
+                    ),
+                )
+            }
+        }
+    }
+
+    // detekt's own Android integration keys off the legacy `kotlin-android` plugin id and AGP's removed
+    // `BaseExtension`, so with AGP built-in Kotlin it registers no per-variant tasks. `:app` therefore gets
+    // its type-resolved `detekt<Variant>` tasks here, classpathed from the variant's Kotlin compilation.
+    // `detektMain` stays the lifecycle name the gates below fan out from.
+    pluginManager.withPlugin("com.android.application") {
+        val detektExtension = extensions.getByType<DetektExtension>()
+        val androidComponents = extensions.getByType<ApplicationAndroidComponentsExtension>()
+
+        androidComponents.onVariants { variant ->
+            val capitalizedName = variant.name.replaceFirstChar { it.uppercase() }
+
+            tasks.register<Detekt>("detekt$capitalizedName") {
+                description = "Run detekt with type resolution on the ${variant.name} variant."
+                group = "verification"
+                config.setFrom(detektExtension.config)
+                buildUponDefaultConfig = detektExtension.buildUponDefaultConfig
+                parallel = detektExtension.parallel
+                include("**/*.kt", "**/*.kts")
+                exclude("**/resources/**", "**/build/**")
+                classpath.setFrom(
+                    tasks.named<KotlinCompile>("compile${capitalizedName}Kotlin").map { it.libraries },
+                    androidComponents.sdkComponents.bootClasspath,
+                )
+                reports {
+                    xml.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.xml"))
+                    html.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.html"))
+                }
+            }
+        }
+
+        tasks.register("detektMain") {
+            group = "verification"
+            description = "Run type-resolved detekt on every :app variant."
+            dependsOn(tasks.matching { it.name == "detektDebug" || it.name == "detektRelease" })
+            // An empty fan-out would pass green with nothing scanned, so a detekt/AGP change that stops
+            // registering the variant tasks must fail here instead.
+            doFirst {
+                val variantTasks = taskDependencies.getDependencies(this).filterIsInstance<Detekt>()
+                check(variantTasks.isNotEmpty()) {
+                    "No type-resolved detekt<Variant> task is registered for :app; the detekt gate would pass vacuously."
+                }
+            }
+        }
+    }
+
+    pluginManager.withPlugin("com.android.test") {
+        val detektExtension = extensions.getByType<DetektExtension>()
+        val androidComponents = extensions.getByType<TestAndroidComponentsExtension>()
+
+        tasks.register<Detekt>("detektMain") {
+            description = "Run detekt with type resolution on the minified test module."
+            group = "verification"
+            config.setFrom(detektExtension.config)
+            buildUponDefaultConfig = detektExtension.buildUponDefaultConfig
+            parallel = detektExtension.parallel
+            include("**/*.kt", "**/*.kts")
+            exclude("**/resources/**", "**/build/**")
+            classpath.setFrom(
+                tasks.named<KotlinCompile>("compileMinifiedKotlin").map { it.libraries },
+                androidComponents.sdkComponents.bootClasspath,
+            )
+            reports {
+                xml.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.xml"))
+                html.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.html"))
             }
         }
     }
@@ -209,6 +317,8 @@ subprojects {
     tasks.matching { it.name == "check" }.configureEach {
         dependsOn(rootProject.tasks.named("ktlintCheck"))
         dependsOn(":checkModuleGraph")
+        dependsOn(":checkResourcePackaging")
+        dependsOn(":checkPresentationFileSize")
         dependsOn(":checkDocBudgets")
     }
 }
@@ -263,12 +373,30 @@ fun tierOf(path: String): String? = when {
 }
 
 // api-visibility rule (MODULE_STRUCTURE_GUIDELINES §10). The tier check above proves an edge is
-// *allowed*; it does not constrain whether a data-area module is re-exported (`api`) or kept private
-// (`implementation`). An `api` edge to a data module transitively republishes that whole feature's
-// data/use-case layer to every downstream consumer — which is exactly how `:core:designsystem` became
-// a god-module. `implementation` is therefore the default for these; every `api(project(<data>))` edge
-// must be an explicit, reviewed entry below so a new one is a conscious decision, not a silent leak.
-val dataAreaModules = setOf(
+// *allowed*; it does not constrain whether the target is re-exported (`api`) or kept private
+// (`implementation`). An `api` edge republishes the target's whole public surface to every downstream
+// consumer — which is exactly how `:core:designsystem` became a god-module. `implementation` is
+// therefore the default for the modules below; every `api(project(<one of these>))` edge must be an
+// explicit, reviewed entry in `allowedApiDataEdges` so a new one is a conscious decision, not a
+// silent leak.
+//
+// The set is **not** just the data-area modules. It started that way, and the component-library
+// migration walked straight into the gap: `:feature:book_detail` declared
+// `api(project(":core:component"))` on a mistaken belief that it re-exported a component type, the
+// two features doing the identical integration used `implementation`, and nothing failed — because
+// `:core:component` was not in this set. The rule's own rationale applies verbatim to a library whose
+// entire surface is components, so it is in the set now.
+//
+// Deliberately NOT in the set, so the omissions are decisions rather than oversights:
+//
+//  - `:core:domain` — a pure contract module with no dependencies of its own. Re-exporting it leaks
+//    nothing a consumer could not already reach, and the migration tracker's § 3a settled that it may
+//    be `api`-exposed freely. Putting it in the set would mean allowlisting ~15 legitimate edges.
+//  - `:core:designsystem` — tokens. It has zero project dependencies, so an
+//    `api` edge to it republishes a leaf. Revisit only if it ever grows a dependency again.
+//  - `:core:network`, `:core:database` — infra, and their `api` edges are load-bearing for the
+//    Apollo/Room types that cross module boundaries by design.
+val apiSignOffModules = setOf(
     ":core:book",
     ":core:lists",
     ":core:deadlines",
@@ -276,21 +404,123 @@ val dataAreaModules = setOf(
     ":core:profile",
     ":core:identity",
     ":core:preferences",
+
+    // Added by the component-library migration — see the note above.
+    ":core:component",
+    ":core:presentation",
+    ":core:uibinding",
 )
 
 // Allowlisted (source → data module) `api` edges: each genuinely renders/returns the data module's
 // types in its own public surface. Adding a row is the deliberate sign-off the rule exists to force.
 val allowedApiDataEdges = setOf(
-    ":core:designsystem" to ":core:book",
     ":core:identity" to ":core:preferences",
     ":core:profile" to ":core:identity",
+    ":feature:book_detail" to ":core:component",
     ":feature:book_detail" to ":core:identity",
+    ":feature:book_detail" to ":core:personal",
     ":feature:explore" to ":core:book",
+    ":feature:explore" to ":core:component",
     ":feature:explore" to ":core:identity",
     ":feature:explore" to ":core:lists",
     ":feature:explore" to ":core:preferences",
     ":feature:lists" to ":core:lists",
+    ":feature:onboarding" to ":core:component",
+    ":feature:reading" to ":core:component",
     ":feature:settings" to ":core:preferences",
+
+    // `:core:uibinding` exists to map a domain model onto the UI type that renders it, so a consumer
+    // needs to see *both sides* of a mapping without re-declaring them — that is the whole point of
+    // the module, decided in the migration tracker's § 3a. `api` is the design, not a leak.
+    ":core:uibinding" to ":core:component",
+
+    // `ActiveSession` — `:core:presentation`'s cross-tier session model, consumed by `:feature:session`
+    // through `ActiveSessionController` — carries a `CoverUiModel` per surface. A consumer that
+    // sees `ActiveSession` must see the type of its own properties, so this is the same "both sides of
+    // a public type" shape as the `:core:uibinding` row above, not a leak of the whole library.
+    ":core:presentation" to ":core:component",
+
+    // `:feature:book_detail` re-exports presentation types through its own public surface (its
+    // `BookDetailScreen` is constructed by orchestration with a `BookInitialCover`), settled in § 5e.
+    // Contrast `:core:component`, which it depends on with `implementation`: nothing public in that
+    // module names a component type, and an `api` edge there republished the whole library by mistake
+    // — the mistake that widened this rule's scope in the first place.
+    ":feature:book_detail" to ":core:presentation",
+)
+
+// Layering direction inside the UI stack (docs/reference/module-structure.md § Build wiring
+// conventions). The tier rule lets any `:core:*` module depend on any other, so it has nothing to say
+// about the one direction that matters here: `:core:component` -> `:core:designsystem`,
+// `:core:uibinding` -> `:core:component`, and **never** the reverse.
+//
+// A reverse edge is a Gradle dependency cycle, so it does fail the build — but with a task-graph
+// error that says nothing about why it is wrong. This exists for the error message. It also catches
+// the non-cyclic case:
+// `:core:designsystem` -> `:core:presentation` is not a cycle, and is still forbidden — the whole
+// point of S3's split was to establish that those two sit side by side rather than stacking.
+val bannedReverseEdges = setOf(
+    ":core:designsystem" to ":core:component",
+    ":core:designsystem" to ":core:uibinding",
+    ":core:designsystem" to ":core:presentation",
+)
+
+// Token-module isolation (docs/reference/module-structure.md § The UI stack — target shape, G2).
+// `:core:designsystem` is tokens — theme, editorial typography, the icon/illustration catalogs, modifiers, shared-element
+// scopes. A token is a value the whole app may read; it has nothing to ask of the app in return, so the
+// module needs no project dependency at all, and the modules listed here must declare none.
+//
+// This is asserted rather than left to hold by accident. It held by accident once before and stopped:
+// the module accumulated an `api` edge per component that wanted a domain type, which is how a token
+// module became the god-module S3 and S4 spent six sub-commits unwinding.
+//
+// Pairs with the detekt `ForbiddenImport` rule scoped to `**/core/designsystem/**` in
+// `config/detekt/detekt.yml`. The two are NOT redundant: fully-qualified `nl.rhaydus.softcover.core.domain.model.*` references were once left in `Color.kt`
+// and `LocalDarkTheme.kt`'s KDoc, and BOTH gates were blind to them — they are neither imports nor
+// declared dependencies. A reviewer caught them. What the import rule does close is the case where a
+// stray `import` outlives a dependency removal, which stays compilable for as long as some other module
+// on the compile classpath still `api`-exposes the type.
+val zeroProjectDependencyModules = setOf(
+    ":core:designsystem",
+)
+
+// Component-library isolation (docs/reference/module-structure.md § The UI stack — target shape, G1).
+// The tier rule above lets any `:core:*` module depend on any other, which is too loose for the component library:
+// `:core:component` renders UI from UI models and must never reach a domain model, a use case, DI, or
+// navigation. That is the property that keeps it a *library* rather than a second god-module — the
+// exact failure `:core:designsystem` already lived through — so it is a build failure, not a
+// convention. A module listed here may depend on the named projects and nothing else.
+val componentLibraryAllowedProjects = mapOf(
+    ":core:component" to setOf(":core:designsystem"),
+)
+
+// External-coordinate ban for the same modules. DI, navigation, and the network client are the three
+// ways a component library stops being renderable in isolation.
+//
+// Note on Koin, and on the limit of this check: `KmpLibraryConventionPlugin` injects
+// `io.insert-koin:koin-core` into EVERY KMP module's commonMain, so a blanket group ban would fail on
+// a dependency the module never declared. The convention-provided coordinates are therefore skipped
+// (the same set dependency-analysis already treats as uniformly provided), and what remains caught
+// here is every Koin artifact a module must opt into to do DI from a composable — `koin-compose`,
+// `koin-android`, `koin-androidx-compose`.
+//
+// That leaves a REAL residual hole this check cannot close: `koin-core` on its own is enough for
+// `KoinComponent` / `GlobalContext.get()` service-locator DI, and because the coordinate is skipped,
+// declaring it explicitly passes. Verified empirically, not assumed. A declared-coordinate gate is
+// structurally blind to this — usage is the thing that matters, not the declaration — so it is closed
+// at the import instead, by the `ForbiddenImport` rule scoped to `:core:component` in
+// `config/detekt/detekt.yml`. The two gates are complementary: this one keeps the dependency graph
+// honest, that one keeps the source honest.
+val componentLibraryBannedGroups = setOf(
+    "io.insert-koin",
+    "cafe.adriel.voyager",
+    "com.apollographql.apollo",
+)
+
+// Injected uniformly by the convention plugins rather than declared per module, so they are not a
+// signal about what a module chose to depend on. Mirrors the dependency-analysis exclude list above.
+val conventionProvidedCoordinates = setOf(
+    "io.insert-koin:koin-core",
+    "org.jetbrains.kotlinx:kotlinx-coroutines-core",
 )
 
 // Mirrors settings.gradle.kts: true when developing against the local foundation checkout (the
@@ -303,7 +533,7 @@ val foundationLocal = Properties().apply {
 // dependency-analysis (buildHealth) configuration. Gates on the high-value categories — genuinely
 // unused dependencies and wrong api/implementation exposure (MODULE_STRUCTURE_GUIDELINES §10) — while
 // staying out of the way of the convention-plugin design: the uniform runtime + test bundle provided
-// by AndroidLibraryConventionPlugin (coroutines, koin, JUnit5/Kotest/MockK/Turbine) is
+// by softcover.kmp.library (coroutines, koin, JUnit5/Kotest/MockK/Turbine) is
 // intentionally declared centrally, not per module, so it is excluded from the "unused" check. The
 // "declare transitive dependencies directly" advice is BOM/convention-managed completeness noise and
 // is treated as informational (ignored), not a gate.
@@ -313,7 +543,7 @@ dependencyAnalysis {
             onUnusedDependencies {
                 severity("fail")
                 exclude(
-                    // Uniform runtime + test bundle provided by AndroidLibraryConventionPlugin.
+                    // Uniform runtime + test bundle provided by softcover.kmp.library.
                     "io.insert-koin:koin-android",
                     "org.jetbrains.kotlinx:kotlinx-coroutines-android",
                     // Desktop's Main dispatcher — supplied via ServiceLoader (no compile reference), the
@@ -324,6 +554,13 @@ dependencyAnalysis {
                     "io.kotest:kotest-assertions-core",
                     "io.mockk:mockk",
                     "app.cash.turbine:turbine",
+                    // The `:smoketest` device stack: the runner and rules are reached by the instrumentation
+                    // harness, not by a compile reference.
+                    "androidx.test:runner",
+                    "androidx.test:core",
+                    "androidx.test.ext:junit",
+                    "androidx.test.uiautomator:uiautomator",
+                    "junit:junit",
                     // Provided uniformly by the Compose / Room convention plugins (not per-module deps).
                     "androidx.activity:activity-compose",
                     "androidx.compose.ui:ui",
@@ -331,6 +568,8 @@ dependencyAnalysis {
                     "androidx.compose.ui:ui-tooling",
                     "androidx.compose.material3:material3",
                     "androidx.compose.ui:ui-graphics",
+                    // Added to every Compose module by the stability analyzer plugin.
+                    "com.github.skydoves:compose-stability-runtime",
                     // KMP Compose Multiplatform artifacts provided uniformly by KmpComposeConventionPlugin.
                     "org.jetbrains.compose.runtime:runtime",
                     "org.jetbrains.compose.foundation:foundation",
@@ -415,50 +654,119 @@ dependencyAnalysis {
     }
 }
 
+// Dependency edges are snapshotted as plain data once every project is evaluated, so the task body
+// never touches `Project`/`Configuration` state and stays safe under parallel execution.
+val moduleGraphProjectEdges = mutableListOf<List<String>>()
+val moduleGraphExternalEdges = mutableListOf<List<String>>()
+
+gradle.projectsEvaluated {
+    subprojects.forEach { module ->
+        module.configurations.forEach { configuration ->
+            configuration.dependencies.forEach { dependency ->
+                when (dependency) {
+                    is ProjectDependency ->
+                        moduleGraphProjectEdges += listOf(module.path, dependency.path, configuration.name)
+
+                    is ExternalModuleDependency ->
+                        moduleGraphExternalEdges += listOf(
+                            module.path,
+                            configuration.name,
+                            dependency.group.orEmpty(),
+                            dependency.name,
+                        )
+                }
+            }
+        }
+    }
+}
+
 tasks.register("checkModuleGraph") {
     group = "verification"
-    description = "Fails on any module dependency that breaks the tier DAG (MODULE_STRUCTURE_GUIDELINES §2)."
+    description = "Fails on any module dependency that breaks the tier DAG " +
+        "(MODULE_STRUCTURE_GUIDELINES §2), re-exports a data module (§10), or breaches " +
+        "component-library isolation."
+
+    val projectEdges = moduleGraphProjectEdges
+    val externalEdges = moduleGraphExternalEdges
 
     doLast {
         val violations = mutableListOf<String>()
         var edges = 0
 
-        subprojects.forEach { module ->
-            val fromTier = tierOf(module.path) ?: return@forEach
+        projectEdges.forEach edge@{ (fromPath, toPath, configurationName) ->
+            val fromTier = tierOf(fromPath) ?: return@edge
             val allowed = allowedTargetTiers.getValue(fromTier)
 
-            module.configurations.forEach { configuration ->
-                configuration.dependencies
-                    .filterIsInstance<ProjectDependency>()
-                    .forEach { dependency ->
-                        if (dependency.path == module.path) return@forEach
+            if (toPath == fromPath) return@edge
 
-                        val targetTier = tierOf(dependency.path) ?: return@forEach
-                        edges++
+            val targetTier = tierOf(toPath) ?: return@edge
+            edges++
 
-                        if (targetTier !in allowed) {
-                            violations += "${module.path} → ${dependency.path}  " +
-                                "($fromTier may depend only on $allowed)"
-                        }
+            if (targetTier !in allowed) {
+                violations += "$fromPath → $toPath  " +
+                    "($fromTier may depend only on $allowed)"
+            }
 
-                        // api-visibility rule: a declared `api` edge to a data-area module must be
-                        // allowlisted above. Match every declarable api bucket — plain `api`
-                        // (android-only modules) and the KMP/variant `<sourceSet>Api` configs
-                        // (`commonMainApi`, `androidMainApi`, `debugApi`, …) — but never the test ones,
-                        // where an api edge can't leak into a production consumer's graph.
-                        val isApiEdge = configuration.name.endsWith("api", ignoreCase = true) &&
-                            configuration.name.contains("test", ignoreCase = true).not()
+            // api-visibility rule: a declared `api` edge to a data-area module must be
+            // allowlisted in `allowedApiDataEdges`. Match every declarable api bucket — plain `api`
+            // (android-only modules) and the KMP/variant `<sourceSet>Api` configs
+            // (`commonMainApi`, `androidMainApi`, `debugApi`, …) — but never the test ones,
+            // where an api edge can't leak into a production consumer's graph.
+            val isApiEdge = configurationName.endsWith("api", ignoreCase = true) &&
+                configurationName.contains("test", ignoreCase = true).not()
 
-                        if (
-                            isApiEdge &&
-                            dependency.path in dataAreaModules &&
-                            (module.path to dependency.path) !in allowedApiDataEdges
-                        ) {
-                            violations += "${module.path} → api(${dependency.path})  " +
-                                "(data modules must be implementation-depended unless allowlisted — " +
-                                "MODULE_STRUCTURE_GUIDELINES §10)"
-                        }
-                    }
+            if (
+                isApiEdge &&
+                toPath in apiSignOffModules &&
+                (fromPath to toPath) !in allowedApiDataEdges
+            ) {
+                violations += "$fromPath → api($toPath)  " +
+                    "(must be implementation-depended unless allowlisted in " +
+                    "allowedApiDataEdges — MODULE_STRUCTURE_GUIDELINES §10)"
+            }
+
+            if (fromPath in zeroProjectDependencyModules) {
+                violations += "$fromPath → $toPath  " +
+                    "(tokens only — this module must declare NO project dependency at " +
+                    "all. See docs/reference/module-structure.md § The UI stack — target shape)"
+            }
+
+            if ((fromPath to toPath) in bannedReverseEdges) {
+                violations += "$fromPath → $toPath  " +
+                    "(wrong direction — the UI stack layers component → designsystem and " +
+                    "uibinding → component; a stayer may never depend on a mover. See " +
+                    "docs/reference/module-structure.md § Build wiring conventions)"
+            }
+
+            // Component-library isolation: an explicit per-module allowlist, tighter than
+            // the tier rule.
+            val allowedProjects = componentLibraryAllowedProjects[fromPath]
+
+            if (allowedProjects != null && toPath !in allowedProjects) {
+                violations += "$fromPath → $toPath  " +
+                    "(component library may depend only on $allowedProjects — " +
+                    "no domain, data, DI or navigation)"
+            }
+        }
+
+        // Deliberately NOT restricted to non-test configurations, unlike the
+        // api-visibility rule. That one skips test configs because a test-only `api`
+        // edge cannot leak into a consumer's graph, which is a statement about leakage. This
+        // one is a statement about the module itself: the component library renders from UI
+        // models and needs no DI, navigation, or network client to be exercised — in tests
+        // least of all. Do not "fix" the asymmetry by adding a test exclusion.
+        externalEdges.forEach external@{ (fromPath, _, group, name) ->
+            if (tierOf(fromPath) == null) return@external
+            if (fromPath !in componentLibraryAllowedProjects) return@external
+
+            val coordinate = "$group:$name"
+
+            if (coordinate in conventionProvidedCoordinates) return@external
+
+            if (group in componentLibraryBannedGroups) {
+                violations += "$fromPath → $coordinate  " +
+                    "(component library may not depend on " +
+                    "$group — DI, navigation and networking are banned)"
             }
         }
 
@@ -474,21 +782,133 @@ tasks.register("checkModuleGraph") {
     }
 }
 
-// The per-change style gate: type-resolved detekt across every module — the shared nl.rhaydus baseline
-// plus the custom `rhaydus` ruleset, gating from zero with no baseline file.
+// Compose Multiplatform resources must actually reach the APK. A module that declares
+// `compose.resources` gets its generated `Res` accessor and compiles perfectly whether or not the
+// resources are ever packaged — **the failure is entirely at runtime**, as a `MissingResourceException`
+// on the first read. On Android the deciding switch is `androidResources.enable`, which the KMP Android
+// library plugin leaves OFF by default (CMP resources ship as Android *assets*, which that flag gates).
+//
+// This is a gate rather than a convention because the convention already failed twice, silently, and
+// was found by accident rather than by any check:
+//
+//  - `:core:component` — the offline banner's copy. It crashed the app on launch the first time
+//    it was run on a device with no network, three commits after it landed.
+//  - `:feature:settings` — the bundled `ROADMAP.md` fallback, read only before the first live fetch, so
+//    a machine with a warm cache never touches it. It had never worked on Android.
+//
+// Both are the same one-line omission, and neither `compileDebugKotlin`, `ktlintCheck`, detekt,
+// `projectHealth` nor `checkModuleGraph` could see it — nothing in the source or the dependency graph
+// is wrong.
+tasks.register("checkResourcePackaging") {
+    group = "verification"
+    description = "Fails when a module declares Compose Multiplatform resources but does not enable " +
+        "Android resources, which silently omits them from the APK."
+
+    doLast {
+        val violations = mutableListOf<String>()
+        var checked = 0
+
+        subprojects.forEach { module ->
+            // `packageOfResClass` is the discriminator, not the presence of the Compose plugin (which
+            // every UI module applies) nor a `composeResources/` directory on disk (which the
+            // `customDirectory` case does not have). Declaring a resource package IS the act of saying
+            // "this module owns resources"; the plugin leaves it empty for everyone else.
+            val compose = module.extensions.findByName("compose") as? ExtensionAware ?: return@forEach
+            val resources = compose.extensions.findByType(ResourcesExtension::class.java) ?: return@forEach
+
+            if (resources.packageOfResClass.isEmpty()) return@forEach
+
+            val kotlin = module.extensions.findByName("kotlin") as? ExtensionAware ?: return@forEach
+            val androidLibrary = kotlin.extensions
+                .findByName("androidLibrary") as? KotlinMultiplatformAndroidLibraryExtension
+                ?: return@forEach
+
+            checked++
+
+            if (androidLibrary.androidResources.enable.not()) {
+                violations += "${module.path}  (declares Compose resources but leaves " +
+                    "`androidResources.enable` off, so nothing is packaged into the APK and the " +
+                    "first read throws MissingResourceException at runtime — add " +
+                    "`androidResources.enable = true` to its `androidLibrary` block)"
+            }
+        }
+
+        if (violations.isNotEmpty()) {
+            throw GradleException(
+                "Compose resources declared but not packaged:\n" +
+                    violations.sorted().joinToString("\n") { "  - $it" },
+            )
+        }
+
+        logger.lifecycle(
+            "checkResourcePackaging: $checked module(s) with Compose resources, all packaged.",
+        )
+    }
+}
+
+// No baseline and no exemption list: the oversized files were split before this gate landed, so any
+// offender is a regression. Rationale in docs/reference/module-structure.md § Build wiring conventions.
+val presentationFileLineLimit = 600
+
+tasks.register("checkPresentationFileSize") {
+    group = "verification"
+    description = "Fails when a presentation or :core:component main source file exceeds " +
+        "$presentationFileLineLimit lines."
+
+    doLast {
+        val violations = mutableListOf<String>()
+        var checked = 0
+
+        subprojects.forEach { module ->
+            val isComponentLibrary = module.path == ":core:component"
+            val sourceSets = module.projectDir.resolve("src")
+                .listFiles { dir -> dir.isDirectory && dir.name.endsWith("Main") }
+                .orEmpty()
+
+            sourceSets.forEach { sourceSet ->
+                sourceSet.walkTopDown()
+                    .filter { it.isFile && it.extension == "kt" }
+                    .filter { file ->
+                        isComponentLibrary ||
+                            "presentation" in file.relativeTo(sourceSet).invariantSeparatorsPath.split("/")
+                    }
+                    .forEach { file ->
+                        checked++
+                        val lines = file.useLines { it.count() }
+                        if (lines > presentationFileLineLimit) {
+                            violations += "${file.relativeTo(rootDir).invariantSeparatorsPath}  ($lines lines)"
+                        }
+                    }
+            }
+        }
+
+        if (violations.isNotEmpty()) {
+            throw GradleException(
+                "Presentation files over $presentationFileLineLimit lines (split them one section per " +
+                    "file, see docs/reference/module-structure.md § Build wiring conventions):\n" +
+                    violations.sorted().joinToString("\n") { "  - $it" },
+            )
+        }
+
+        logger.lifecycle(
+            "checkPresentationFileSize: $checked file(s) checked, all within $presentationFileLineLimit lines.",
+        )
+    }
+}
+
+// The per-change style gate: `ktlintCheck` plus type-resolved detekt across every module — the shared
+// nl.rhaydus baseline plus the custom `rhaydus` ruleset, gating from zero with no baseline file.
 //
 // detekt's own tasks are wired into the heavy `check` lifecycle, but the gate developers actually run
 // per change is `styleCheck` — so without this, findings would only surface in a rarely-run full build
 // and silently accumulate. It runs the TYPE-RESOLVED tasks, which is what makes the crash-safety rule
 // (`rhaydus:UnguardedFlowTerminalRead`) fire at all; the cost is that it compiles Android + JVM rather
 // than merely parsing source. That cost is the point: an inert gate is not a gate.
-//
-// (This task used to also shell out to `scripts/style-check.sh`. All six of that script's recipes are now
-// blocking rules — five in nl.rhaydus:ktlint-rules via `ktlintCheck`, the sixth the detekt rule above — so
-// the script was retired. See docs/working/foundation-upstream-candidates.md F1/F7/F22.)
 tasks.register("styleCheck") {
     group = "verification"
-    description = "Runs type-resolved detekt (shared baseline + rhaydus crash-safety ruleset) across all modules."
+    description = "Runs ktlintCheck and type-resolved detekt (shared baseline + rhaydus crash-safety ruleset) across all modules."
 
+    dependsOn(tasks.named("ktlintCheck"))
     dependsOn(subprojects.map { sp -> sp.tasks.matching { it.name in typeResolvedDetektTasks } })
 }
+

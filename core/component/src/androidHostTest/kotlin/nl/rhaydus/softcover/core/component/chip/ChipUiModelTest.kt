@@ -1,0 +1,123 @@
+package nl.rhaydus.softcover.core.component.chip
+
+import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class ChipUiModelTest {
+    @Nested
+    inner class Previews {
+        @Test
+        fun `every fixture has a unique key`() {
+            // ----- Arrange -----
+            val keys = ChipUiModel.previews.values.map { it.key }
+
+            // ----- Act -----
+            val uniqueKeys = keys.toSet()
+
+            // ----- Assert -----
+            uniqueKeys.size shouldBe keys.size
+        }
+
+        @Test
+        fun `every ChipTone value appears in at least one fixture`() {
+            // ----- Arrange -----
+            val expectedTones = ChipTone.entries.toSet()
+
+            // ----- Act -----
+            val coveredTones = ChipUiModel.previews.values.map { it.tone }.toSet()
+
+            // ----- Assert -----
+            coveredTones shouldBe expectedTones
+        }
+
+        @Test
+        fun `both selected states appear across the fixtures`() {
+            // ----- Arrange -----
+            val expectedSelectedStates = setOf(true, false)
+
+            // ----- Act -----
+            val coveredSelectedStates = ChipUiModel.previews.values.map { it.selected }.toSet()
+
+            // ----- Assert -----
+            coveredSelectedStates shouldBe expectedSelectedStates
+        }
+
+        @Test
+        fun `every ChipLeading subtype appears in at least one fixture`() {
+            // ----- Arrange -----
+            val expectedLeadingTypes = setOf(
+                ChipLeading.Icon::class,
+                ChipLeading.SpoilerToggle::class,
+            )
+
+            // ----- Act -----
+            val coveredLeadingTypes = ChipUiModel.previews.values
+                .mapNotNull { it.leading }
+                .map { it::class }
+                .toSet()
+
+            // ----- Assert -----
+            coveredLeadingTypes shouldBe expectedLeadingTypes
+        }
+
+        @Test
+        fun `every ChipTrailing subtype appears in at least one fixture`() {
+            // ----- Arrange -----
+            val expectedTrailingTypes = setOf(
+                ChipTrailing.Icon::class,
+                ChipTrailing.Disclosure::class,
+                ChipTrailing.Dismiss::class,
+            )
+
+            // ----- Act -----
+            val coveredTrailingTypes = ChipUiModel.previews.values
+                .mapNotNull { it.trailing }
+                .map { it::class }
+                .toSet()
+
+            // ----- Assert -----
+            coveredTrailingTypes shouldBe expectedTrailingTypes
+        }
+
+        @Test
+        fun `both Disclosure states appear across the fixtures`() {
+            // ----- Arrange -----
+            val expectedExpandedStates = setOf(true, false)
+
+            // ----- Act -----
+            val coveredExpandedStates = ChipUiModel.previews.values
+                .map { it.trailing }
+                .filterIsInstance<ChipTrailing.Disclosure>()
+                .map { it.expanded }
+                .toSet()
+
+            // ----- Assert -----
+            coveredExpandedStates shouldBe expectedExpandedStates
+        }
+
+        @Test
+        fun `every ChipInteraction value appears in at least one fixture`() {
+            // ----- Arrange -----
+            val expectedInteractions = ChipInteraction.entries.toSet()
+
+            // ----- Act -----
+            val coveredInteractions = ChipUiModel.previews.values.map { it.interaction }.toSet()
+
+            // ----- Assert -----
+            coveredInteractions shouldBe expectedInteractions
+        }
+
+        @Test
+        fun `every ChipSize value appears in at least one fixture`() {
+            // ----- Arrange -----
+            val expectedSizes = ChipSize.entries.toSet()
+
+            // ----- Act -----
+            val coveredSizes = ChipUiModel.previews.values.map { it.size }.toSet()
+
+            // ----- Assert -----
+            coveredSizes shouldBe expectedSizes
+        }
+    }
+}

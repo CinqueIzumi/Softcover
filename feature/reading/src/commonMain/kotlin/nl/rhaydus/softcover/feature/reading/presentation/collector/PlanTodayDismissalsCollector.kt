@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -13,7 +14,7 @@ internal class PlanTodayDismissalsCollector : ReadingCollector {
         dependencies: ReadingScreenDependencies,
     ) {
         dependencies.observePlanTodayDismissalsUseCase().collectLatest { dismissed ->
-            scope.setState { it.copy(dismissedPlanTodayByBook = dismissed) }
+            scope.setState { it.copy(dismissedPlanTodayByBook = dismissed.toImmutableMap()) }
         }
     }
 }

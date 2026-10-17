@@ -37,7 +37,10 @@ kotlin {
             implementation(project(":core:profile"))
             implementation(project(":core:connectivity"))
             implementation(project(":core:notification"))
+            implementation(project(":core:component"))
             implementation(project(":core:designsystem"))
+            implementation(project(":core:presentation"))
+            implementation(project(":core:uibinding"))
 
             // Feature modules (orchestration composes them all)
             implementation(project(":feature:book_detail"))
@@ -55,21 +58,25 @@ kotlin {
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.corePlatform)
             implementation(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.toad)
 
             // Owns MainActivityViewModel (the one app-level ViewModel) since M1 moved it out of
             // :core:designsystem.
             implementation(libs.androidx.lifecycle.viewmodel)
+            implementation(libs.androidx.lifecycle.runtime.compose)
 
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.voyager.navigator)
+            implementation(libs.voyager.koin)
             implementation(libs.voyager.tabNavigator)
-            implementation(libs.voyager.transitions)
         }
 
         androidMain.dependencies {
             implementation(libs.koin.android)
             implementation(libs.androidx.splash)
+
+            implementation(project(":feature:widget"))
         }
 
         androidHostTest.dependencies {

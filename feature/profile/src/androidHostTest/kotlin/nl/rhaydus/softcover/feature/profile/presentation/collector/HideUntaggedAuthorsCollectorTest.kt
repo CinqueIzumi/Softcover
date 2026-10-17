@@ -10,15 +10,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.state.hideUntaggedAuthorsToggleFor
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class HideUntaggedAuthorsCollectorTest {
     private lateinit var getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase
@@ -68,7 +69,7 @@ class HideUntaggedAuthorsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates state hideUntaggedAuthors to true when the preference emits true`() = runTest(UnconfinedTestDispatcher()) {
+        fun `rebuilds the toggle model to match the preference`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             val collector = HideUntaggedAuthorsCollector()
@@ -83,28 +84,7 @@ class HideUntaggedAuthorsCollectorTest {
             hideUntaggedAuthorsFlow.emit(true)
 
             // ----- Assert -----
-            stateFlow.value.hideUntaggedAuthors shouldBe true
-            job.cancel()
-        }
-
-        @Test
-        fun `updates state hideUntaggedAuthors to false when the preference emits false`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ProfileUiState(hideUntaggedAuthors = true)
-            val dependencies = stubDependencies(this)
-            val collector = HideUntaggedAuthorsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            hideUntaggedAuthorsFlow.emit(false)
-
-            // ----- Assert -----
-            stateFlow.value.hideUntaggedAuthors shouldBe false
+            stateFlow.value.hideUntaggedAuthorsToggle shouldBe hideUntaggedAuthorsToggleFor(hide = true)
             job.cancel()
         }
 

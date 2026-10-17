@@ -1,1 +1,11 @@
-- [Check working tree before starting](feedback_check_working_tree_before_starting.md) — git status/diff first; uncommitted prior work may already violate the current brief's scope guard; stash it recoverably, don't build on it
+- [Check working tree before starting](feedback_check_working_tree_before_starting.md) — git status/diff first; uncommitted prior work may already violate the current brief's scope guard; inspect and report, don't build on it or discard it
+- [doc-guard history-regex false positives](feedback_doc_guard_history_regex_false_positives.md) — "used to surface" trips the same rule as "used to be"; pinned-budget files need byte-diff-ordered edits
+- [File-split import verification](feedback_file_split_import_verification.md) — re-scan each new section file's body for every modifier/layout call before trusting its import list
+- [styleCheck pulls unrelated module failures](feedback_styleCheck_pulls_unrelated_module_failures.md) — a pre-existing break elsewhere in the tree can fail your Verify command; isolate before treating it as your bug
+- [Verify a "clean" claim by running the gate](feedback_verify_clean_claim_by_running_the_gate.md) — a brief's "already clean" claim for a new gate still needs the gate run over the tree, not a looser grep
+- [Kotlin block comments nest](feedback_kotlin_block_comments_nest.md) — a literal `/*` inside KDoc opens a nested comment; "Unclosed comment" errors often point far from the real cause
+- [:app lacks toad/voyager-koin by default](feedback_app_module_lacks_toad_voyager_koin.md) — add both to debugImplementation before wiring a TOAD ScreenModel into an app/src/debug screen; also detekt task is `detektDebug`, not `detektAndroidDebug`
+- [Component migration can drop more than the flagged style](project_component_migration_style_drops.md) — diff old vs new for every property (color, weight, size, spacing), not just the one named in the brief
+- [Import order is not auto-fixed](feedback_import_order_not_autofixed.md) — ktlintFormat skips project-import-order and one-type-per-file; sort imports by script
+- [detekt silently loses :app tasks under built-in Kotlin](project_detekt_builtin_kotlin_silent_loss.md) — hand-registered in root build; canary-check after toolchain bumps
+- [MatchingDeclarationName ignores sibling functions](feedback_matching_declaration_name_ignores_sibling_functions.md) — a lone enum in a composable's file fails detekt even with no second type; give it its own file

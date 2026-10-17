@@ -92,6 +92,8 @@ internal class ExploreRepositoryImpl(
         )
     }
 
+    override suspend fun peekBooksByGenre(genre: String): List<Book>? = booksByGenreCache.peek(key = genre)
+
     override suspend fun fetchMoodTags(): List<MoodTag> = moodTagsCache.getOrPut {
         searchRemoteDataSource.fetchMoodTags(limit = MOOD_TAGS_LIMIT)
     }

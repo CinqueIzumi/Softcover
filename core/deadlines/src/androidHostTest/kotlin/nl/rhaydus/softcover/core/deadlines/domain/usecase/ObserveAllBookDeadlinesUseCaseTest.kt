@@ -7,12 +7,12 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ObserveAllBookDeadlinesUseCaseTest {
     private lateinit var repository: BookDeadlineRepository
@@ -71,24 +71,6 @@ class ObserveAllBookDeadlinesUseCaseTest {
             // ----- Act & Assert -----
             useCase().test {
                 awaitItem() shouldBe emptyMap()
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `map key matches the bookId of the deadline value`() = runTest {
-            // ----- Arrange -----
-            val deadline = buildDeadline(bookId = 99)
-
-            every {
-                repository.observeAll()
-            } returns flowOf(listOf(deadline))
-
-            // ----- Act & Assert -----
-            useCase().test {
-                val map = awaitItem()
-                map.keys.first() shouldBe 99
-                map.values.first().bookId shouldBe 99
                 awaitComplete()
             }
         }

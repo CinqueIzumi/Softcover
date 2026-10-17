@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.icon
 
-import org.jetbrains.compose.resources.DrawableResource
-import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.softcover.core.designsystem.generated.resources.Res
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_account
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_add
@@ -38,6 +36,7 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_pause
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_pin
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_play
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_reading
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_remove
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_search
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_settings
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_share
@@ -50,14 +49,14 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_storefront
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_view_layout
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_visibility
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_visibility_off
+import org.jetbrains.compose.resources.DrawableResource
 
 /**
  * The design system's bundled icon catalog. Each entry maps a stable name to a Compose Multiplatform
  * [DrawableResource], so consumers reference icons through this type (`SoftcoverIcon.Search`) rather
  * than the platform resource system — the icons resolve identically on Android and iOS, and the
- * underlying CMP `Res` stays internal to this module. Wrap
- * in [nl.rhaydus.softcover.core.designsystem.presentation.model.RhaydusIconResource.Drawable] when
- * a content description is needed.
+ * underlying CMP `Res` stays internal to this module. Wrap with [drawableIconResource] when a
+ * content description is needed.
  */
 enum class SoftcoverIcon(internal val resource: DrawableResource) {
     Account(Res.drawable.ic_account),
@@ -95,6 +94,7 @@ enum class SoftcoverIcon(internal val resource: DrawableResource) {
     Pin(Res.drawable.ic_pin),
     Play(Res.drawable.ic_play),
     Reading(Res.drawable.ic_reading),
+    Remove(Res.drawable.ic_remove),
     Search(Res.drawable.ic_search),
     Settings(Res.drawable.ic_settings),
     Share(Res.drawable.ic_share),

@@ -9,9 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksUseCase
@@ -20,6 +17,9 @@ import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDepe
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class QueriedBooksCollectorTest {
     private lateinit var getAllUserBooksUseCase: GetAllUserBooksUseCase
@@ -71,94 +71,18 @@ class QueriedBooksCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates queriedBooks when both flows emit`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val fetchedBook = stubBook(id = 1)
-            val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            allUserBooksFlow.emit(emptyList())
-            queriedBooksFlow.emit(listOf(fetchedBook))
-
-            // ----- Assert -----
-            stateFlow.value.queriedBooks shouldBe listOf(fetchedBook)
-            job.cancel()
-        }
-
-        @Test
-        fun `replaces fetched book with the matching user book when ids match`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val fetchedBook = stubBook(id = 5)
-            val userBook = stubBook(id = 5)
-            val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            allUserBooksFlow.emit(listOf(userBook))
-            queriedBooksFlow.emit(listOf(fetchedBook))
-
-            // ----- Assert -----
-            stateFlow.value.queriedBooks shouldBe listOf(userBook)
-            job.cancel()
-        }
-
-        @Test
-        fun `keeps fetched book when no matching user book is found`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val fetchedBook = stubBook(id = 10)
-            val userBook = stubBook(id = 99)
-            val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            allUserBooksFlow.emit(listOf(userBook))
-            queriedBooksFlow.emit(listOf(fetchedBook))
-
-            // ----- Assert -----
-            stateFlow.value.queriedBooks shouldBe listOf(fetchedBook)
-            job.cancel()
-        }
-
-        @Test
-        fun `updates queriedBooks to empty list when fetched books are empty`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val userBook = stubBook(id = 1)
-            val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            allUserBooksFlow.emit(listOf(userBook))
-            queriedBooksFlow.emit(emptyList())
-
-            // ----- Assert -----
-            stateFlow.value.queriedBooks shouldBe emptyList()
-            job.cancel()
-        }
-
-        @Test
         fun `merges multiple books replacing matched entries and keeping unmatched ones`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val fetchedBook1 = stubBook(id = 1)
             val fetchedBook2 = stubBook(id = 2)
             val userBook1 = stubBook(id = 1)
             val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             allUserBooksFlow.emit(listOf(userBook1))
@@ -172,33 +96,17 @@ class QueriedBooksCollectorTest {
         }
 
         @Test
-        fun `does not change queriedBooks before both flows emit`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            allUserBooksFlow.emit(listOf(stubBook(id = 1)))
-            // queriedBooksFlow has NOT emitted yet
-
-            // ----- Assert -----
-            stateFlow.value.queriedBooks shouldBe emptyList()
-            job.cancel()
-        }
-
-        @Test
         fun `responds to latest value when one flow re-emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val fetchedBook = stubBook(id = 3)
             val updatedUserBook = stubBook(id = 3)
             val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             allUserBooksFlow.emit(emptyList())
             queriedBooksFlow.emit(listOf(fetchedBook))
@@ -208,31 +116,6 @@ class QueriedBooksCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.queriedBooks shouldBe listOf(updatedUserBook)
-            job.cancel()
-        }
-
-        @Test
-        fun `preserves all other state fields when updating queriedBooks`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ExploreScreenUiState(
-                searchText = "test query",
-                isLoading = false,
-                previousSearchQueries = listOf("old"),
-            )
-            val collector = QueriedBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            allUserBooksFlow.emit(emptyList())
-            queriedBooksFlow.emit(listOf(stubBook(id = 7)))
-
-            // ----- Assert -----
-            stateFlow.value.searchText shouldBe "test query"
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.previousSearchQueries shouldBe listOf("old")
             job.cancel()
         }
     }

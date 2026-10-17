@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.database.mapper
 
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromJson
-import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.database.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.core.database.model.BookEditionEntity
@@ -119,10 +117,12 @@ internal fun Author.toEntity(): AuthorEntity = AuthorEntity(
 )
 
 internal fun Book.toBookAuthorRefs(authorIdsByName: Map<String, Int>): List<BookAuthorCrossRef> =
-    authors.map { BookAuthorCrossRef(
-        bookId = id,
-        authorId = authorIdsByName.getValue(it.name),
-    ) }
+    authors.map {
+        BookAuthorCrossRef(
+            bookId = id,
+            authorId = authorIdsByName.getValue(it.name),
+        )
+    }
 
 internal fun Book.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> =
     editions.flatMap { it.toEditionAuthorRefs(authorIdsByName) }
@@ -180,7 +180,10 @@ fun UserBookReadEntity.toModel(): UserBookRead = UserBookRead(
     finishedAt = finishedAt,
 )
 
-fun UserBookEntity.toModel(journals: List<ReadingJournal>): UserBook = UserBook(
+fun UserBookEntity.toModel(
+    journals: List<ReadingJournal>,
+    reads: List<UserBookRead>,
+): UserBook = UserBook(
     id = id,
     status = BookStatus.getFromCode(statusCode),
     dateAdded = dateAdded,
@@ -195,6 +198,7 @@ fun UserBookEntity.toModel(journals: List<ReadingJournal>): UserBook = UserBook(
     reviewedAt = reviewedAt,
     updatedAt = updatedAt,
     journals = journals,
+    reads = reads,
 )
 
 fun ReadingJournalEntity.toModel(): ReadingJournal = ReadingJournal(
@@ -216,6 +220,10 @@ fun BookFullEntity.toModel(): Book {
     }
 
     val journals = userBookWithJournals?.journals?.map { it.toModel() } ?: emptyList()
+    val reads = userBookWithJournals?.userBookReads
+        ?.sortedBy { it.id }
+        ?.map { it.toModel() }
+        ?: emptyList()
 
     return Book(
         id = book.id,
@@ -231,8 +239,10 @@ fun BookFullEntity.toModel(): Book {
         authors = bookAuthors.map { it.toModel() },
         usersCount = book.usersCount,
         ratingsCount = book.ratingsCount,
-        userBook = userBookWithJournals?.userBook?.toModel(journals = journals),
-        userBookRead = userBookWithJournals?.userBookRead?.toModel(),
+        userBook = userBookWithJournals?.userBook?.toModel(
+            journals = journals,
+            reads = reads,
+        ),
         positionsInSeries = book.positionsInSeries
             .split(",")
             .filter { it.isNotBlank() }

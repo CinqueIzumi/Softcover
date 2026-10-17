@@ -1,18 +1,18 @@
 package nl.rhaydus.softcover.feature.book_detail.data.mapper
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromSlate
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReviewer
 import nl.rhaydus.softcover.fragment.BookReviewFragment
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class BookReviewMapperTest {
     private lateinit var fragment: BookReviewFragment
@@ -119,9 +119,12 @@ class BookReviewMapperTest {
         }
 
         @Test
-        fun `returns non-null BookReview when review_slate has content`() {
+        fun `maps every fragment and user field when review_slate has content`() {
             // ----- Arrange -----
-            stubFragment(reviewSlate = slateWithText("A fine read."))
+            stubFragment(
+                reviewSlate = slateWithText("A fine read."),
+                hasSpoilers = true,
+            )
             stubUser()
 
             // ----- Act -----
@@ -135,7 +138,7 @@ class BookReviewMapperTest {
                         ReviewParagraph(runs = listOf(ReviewRun(text = "A fine read."))),
                     ),
                 ),
-                hasSpoilers = false,
+                hasSpoilers = true,
                 rating = 4.5,
                 reviewedAt = "2024-01-01",
                 likesCount = 3,
@@ -146,51 +149,6 @@ class BookReviewMapperTest {
                     avatarUrl = "https://example.com/avatar.png",
                 ),
             )
-        }
-
-        @Test
-        fun `maps id from fragment`() {
-            // ----- Arrange -----
-            stubFragment(
-                id = 99,
-                reviewSlate = slateWithText("Excellent!"),
-            )
-            stubUser()
-
-            // ----- Act -----
-            val result = fragment.toBookReview()
-
-            // ----- Assert -----
-            result!!.id shouldBe 99
-        }
-
-        @Test
-        fun `maps review text from review_slate into reviewDocument plainText`() {
-            // ----- Arrange -----
-            stubFragment(reviewSlate = slateWithText("Loved every page."))
-            stubUser()
-
-            // ----- Act -----
-            val result = fragment.toBookReview()
-
-            // ----- Assert -----
-            result!!.reviewDocument shouldBe reviewDocumentFromSlate(slateWithText("Loved every page."))
-        }
-
-        @Test
-        fun `maps hasSpoilers from review_has_spoilers field`() {
-            // ----- Arrange -----
-            stubFragment(
-                reviewSlate = slateWithText("Watch out!"),
-                hasSpoilers = true,
-            )
-            stubUser()
-
-            // ----- Act -----
-            val result = fragment.toBookReview()
-
-            // ----- Assert -----
-            result!!.hasSpoilers shouldBe true
         }
 
         @Test
@@ -206,23 +164,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.rating shouldBe null
-        }
-
-        @Test
-        fun `maps rating from fragment when present`() {
-            // ----- Arrange -----
-            stubFragment(
-                reviewSlate = slateWithText("Five stars!"),
-                rating = 5.0,
-            )
-            stubUser()
-
-            // ----- Act -----
-            val result = fragment.toBookReview()
-
-            // ----- Assert -----
-            result!!.rating shouldBe 5.0
+            result.shouldNotBeNull().rating shouldBe null
         }
 
         @Test
@@ -238,49 +180,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.reviewedAt shouldBe null
-        }
-
-        @Test
-        fun `maps likesCount from fragment`() {
-            // ----- Arrange -----
-            stubFragment(
-                reviewSlate = slateWithText("Many liked this."),
-                likesCount = 42,
-            )
-            stubUser()
-
-            // ----- Act -----
-            val result = fragment.toBookReview()
-
-            // ----- Assert -----
-            result!!.likesCount shouldBe 42
-        }
-
-        @Test
-        fun `maps reviewer id from user`() {
-            // ----- Arrange -----
-            stubFragment(reviewSlate = slateWithText("Good one."))
-            stubUser(id = 77)
-
-            // ----- Act -----
-            val result = fragment.toBookReview()
-
-            // ----- Assert -----
-            result!!.reviewer.id shouldBe 77
-        }
-
-        @Test
-        fun `maps reviewer username by calling toString on user username`() {
-            // ----- Arrange -----
-            stubFragment(reviewSlate = slateWithText("Hello world."))
-            stubUser(username = "bob123")
-
-            // ----- Act -----
-            val result = fragment.toBookReview()
-
-            // ----- Assert -----
-            result!!.reviewer.username shouldBe "bob123"
+            result.shouldNotBeNull().reviewedAt shouldBe null
         }
 
         @Test
@@ -293,7 +193,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.reviewer.name shouldBe null
+            result.shouldNotBeNull().reviewer.name shouldBe null
         }
 
         @Test
@@ -306,20 +206,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.reviewer.avatarUrl shouldBe null
-        }
-
-        @Test
-        fun `maps reviewer avatarUrl from user image url when present`() {
-            // ----- Arrange -----
-            stubFragment(reviewSlate = slateWithText("Has avatar."))
-            stubUser(avatarUrl = "https://cdn.example.com/pic.jpg")
-
-            // ----- Act -----
-            val result = fragment.toBookReview()
-
-            // ----- Assert -----
-            result!!.reviewer.avatarUrl shouldBe "https://cdn.example.com/pic.jpg"
+            result.shouldNotBeNull().reviewer.avatarUrl shouldBe null
         }
     }
 }

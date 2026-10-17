@@ -10,7 +10,6 @@ import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultFieldKeyGenerator
 import com.apollographql.cache.normalized.api.ResolverContext
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldNotBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.BeforeEach

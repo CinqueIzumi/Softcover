@@ -14,8 +14,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 import nl.rhaydus.platform.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
@@ -23,6 +21,8 @@ import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 // Bounded so a genuinely unavailable server still surfaces `ServerUnavailableException` instead of
 // retrying forever; small so a startup burst does not turn one 429 into a multi-second stall. Doubles
@@ -34,8 +34,11 @@ private val BASE_RETRY_BACKOFF = 1.seconds
  * True when [statusCode] reflects the server failing to process the request rather than rejecting it:
  * any 5xx, plus 408 (request timeout) and 429 (too many requests). These are transient and worth
  * retrying; a 4xx means the server understood and refused the request, so retrying is pointless.
+ *
+ * `internal` rather than private: [nl.rhaydus.softcover.core.network.helper.safeGetText] classifies a
+ * plain-HTTP status with the same rule, so the two seams cannot drift on what counts as transient.
  */
-private fun isTransientHttpStatus(statusCode: Int): Boolean =
+internal fun isTransientHttpStatus(statusCode: Int): Boolean =
     statusCode in 500..599 || statusCode == 408 || statusCode == 429
 
 /**
@@ -44,9 +47,10 @@ private fun isTransientHttpStatus(statusCode: Int): Boolean =
  * Returns null for everything else (4xx, parse errors, …): the server processed and rejected the
  * request, so replaying it would fail identically and the caller should surface a genuine error.
  *
- * Shared by [requireData] and [safeQueryFlow] so both paths classify failures identically.
+ * Shared by [requireData], [safeQueryFlow], and [safeGetText] so every path classifies failures
+ * identically.
  */
-private fun retryableTransportFailureOrNull(exception: Throwable): RetryableSyncException? = when {
+internal fun retryableTransportFailureOrNull(exception: Throwable): RetryableSyncException? = when {
     exception is ApolloNetworkException && NetworkAvailability.isOnline().not() -> OfflineException()
 
     exception is ApolloNetworkException ->

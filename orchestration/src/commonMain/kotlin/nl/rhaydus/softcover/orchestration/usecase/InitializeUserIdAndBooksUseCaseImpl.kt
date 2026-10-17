@@ -15,5 +15,7 @@ internal class InitializeUserIdAndBooksUseCaseImpl(
         settingsRepository.updateUserId(id = userId)
 
         refreshLibraryUseCase().getOrThrow()
+
+        settingsRepository.markReadThroughsBackfilled()
     }
 }

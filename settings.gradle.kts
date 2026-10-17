@@ -14,6 +14,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -37,7 +40,10 @@ if (foundationLocal) {
 }
 
 include(":app")
+include(":smoketest")
 include(":desktopApp")
+include(":detekt-rules")
+include(":apollo-schema-corrections")
 include(":orchestration")
 include(":core:domain")
 include(":core:database")
@@ -52,6 +58,9 @@ include(":core:personal")
 include(":core:profile")
 include(":core:connectivity")
 include(":core:designsystem")
+include(":core:component")
+include(":core:uibinding")
+include(":core:presentation")
 include(":feature:lists")
 include(":feature:profile")
 include(":feature:onboarding")
@@ -63,4 +72,5 @@ include(":feature:session")
 include(":feature:scan")
 include(":feature:settings")
 include(":feature:app_update")
+include(":feature:widget")
  

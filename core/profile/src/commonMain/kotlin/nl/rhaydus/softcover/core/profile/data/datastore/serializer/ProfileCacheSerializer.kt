@@ -3,10 +3,10 @@ package nl.rhaydus.softcover.core.profile.data.datastore.serializer
 import androidx.datastore.core.okio.OkioSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import okio.BufferedSink
-import okio.BufferedSource
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
+import okio.BufferedSink
+import okio.BufferedSource
 
 internal object ProfileCacheSerializer : OkioSerializer<ProfileCacheEntity> {
     override val defaultValue: ProfileCacheEntity

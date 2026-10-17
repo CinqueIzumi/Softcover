@@ -7,9 +7,6 @@ import androidx.activity.result.IntentSenderRequest
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.module.Module
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 import nl.rhaydus.softcover.feature.app_update.data.datasource.AppUpdateDataSource
 import nl.rhaydus.softcover.feature.app_update.data.datasource.AppUpdateDataSourceImpl
@@ -17,6 +14,9 @@ import nl.rhaydus.softcover.feature.app_update.data.simulator.DebugAppUpdateSimu
 import nl.rhaydus.softcover.feature.app_update.data.simulator.NoOpAppUpdateSimulator
 import nl.rhaydus.softcover.feature.app_update.domain.launcher.AndroidAppUpdateFlowLauncher
 import nl.rhaydus.softcover.feature.app_update.domain.launcher.AppUpdateFlowLauncher
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.Module
+import org.koin.dsl.module
 
 // A KMP library produces a single Android variant, so the debug/release split is a runtime decision
 // rather than a build-type source set: debuggable builds get a FakeAppUpdateManager driven by the

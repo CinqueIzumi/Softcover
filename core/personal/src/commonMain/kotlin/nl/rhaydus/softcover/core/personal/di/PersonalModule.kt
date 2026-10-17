@@ -1,46 +1,44 @@
 package nl.rhaydus.softcover.core.personal.di
 
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
-import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSource
-import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSourceImpl
+import nl.rhaydus.softcover.core.personal.data.datasource.QuoteLocalDataSource
+import nl.rhaydus.softcover.core.personal.data.datasource.QuoteLocalDataSourceImpl
+import nl.rhaydus.softcover.core.personal.data.datasource.QuoteRemoteDataSource
+import nl.rhaydus.softcover.core.personal.data.datasource.QuoteRemoteDataSourceImpl
+import nl.rhaydus.softcover.core.personal.data.datasource.ReadingJournalHistoryLocalDataSource
+import nl.rhaydus.softcover.core.personal.data.datasource.ReadingJournalHistoryLocalDataSourceImpl
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingJournalHistoryRemoteDataSource
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingJournalHistoryRemoteDataSourceImpl
-import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSource
-import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSourceImpl
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingSessionLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingSessionLocalDataSourceImpl
-import nl.rhaydus.softcover.core.personal.data.repository.HighlightRepositoryImpl
+import nl.rhaydus.softcover.core.personal.data.repository.QuoteRepositoryImpl
 import nl.rhaydus.softcover.core.personal.data.repository.ReadingJournalHistoryRepositoryImpl
-import nl.rhaydus.softcover.core.personal.data.repository.ReadingLogRepositoryImpl
 import nl.rhaydus.softcover.core.personal.data.repository.ReadingSessionRepositoryImpl
-import nl.rhaydus.softcover.core.personal.domain.repository.HighlightRepository
+import nl.rhaydus.softcover.core.personal.domain.repository.QuoteRepository
 import nl.rhaydus.softcover.core.personal.domain.repository.ReadingJournalHistoryRepository
-import nl.rhaydus.softcover.core.personal.domain.repository.ReadingLogRepository
 import nl.rhaydus.softcover.core.personal.domain.repository.ReadingSessionRepository
-import nl.rhaydus.softcover.core.personal.domain.usecase.AddHighlightUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.AddReadingLogEntryUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteHighlightUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteReadingLogEntryUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.AddQuoteUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteQuoteUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.DeleteReadingSessionUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveActiveSessionUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveAllHighlightsUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveAllQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveAllSessionsUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveHighlightsForBookUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingLogCountUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingLogForBookUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveBookQuotesUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveSessionsForBookUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.PauseReadingSessionUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshAllQuotesUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ResumeReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StartReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.StopReadingSessionUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.UpdateHighlightUseCase
-import nl.rhaydus.softcover.core.personal.domain.usecase.UpdateReadingLogEntryUseCase
+import org.koin.dsl.module
+import kotlin.time.Clock
 
 val personalModule = module {
     includes(
@@ -50,23 +48,11 @@ val personalModule = module {
         identityModule,
     )
 
-    single { get<SoftcoverDatabase>().highlightDao() }
     single { get<SoftcoverDatabase>().readingSessionDao() }
-    single { get<SoftcoverDatabase>().readingLogDao() }
 
-    single<HighlightLocalDataSource> { HighlightLocalDataSourceImpl(dao = get()) }
     single<ReadingSessionLocalDataSource> { ReadingSessionLocalDataSourceImpl(dao = get()) }
-    single<ReadingLogLocalDataSource> { ReadingLogLocalDataSourceImpl(dao = get()) }
 
-    single<HighlightRepository> { HighlightRepositoryImpl(localDataSource = get()) }
     single<ReadingSessionRepository> { ReadingSessionRepositoryImpl(localDataSource = get()) }
-    single<ReadingLogRepository> { ReadingLogRepositoryImpl(localDataSource = get()) }
-
-    factory { ObserveHighlightsForBookUseCase(repository = get()) }
-    factory { ObserveAllHighlightsUseCase(repository = get()) }
-    factory { AddHighlightUseCase(repository = get()) }
-    factory { UpdateHighlightUseCase(repository = get()) }
-    factory { DeleteHighlightUseCase(repository = get()) }
 
     factory { ObserveSessionsForBookUseCase(repository = get()) }
     factory { ObserveAllSessionsUseCase(repository = get()) }
@@ -77,12 +63,6 @@ val personalModule = module {
     factory { ResumeReadingSessionUseCase(repository = get()) }
     factory { DeleteReadingSessionUseCase(repository = get()) }
 
-    factory { ObserveReadingLogForBookUseCase(repository = get()) }
-    factory { ObserveReadingLogCountUseCase(repository = get()) }
-    factory { AddReadingLogEntryUseCase(repository = get()) }
-    factory { UpdateReadingLogEntryUseCase(repository = get()) }
-    factory { DeleteReadingLogEntryUseCase(repository = get()) }
-
     single<ReadingJournalHistoryRemoteDataSource> {
         ReadingJournalHistoryRemoteDataSourceImpl(
             apolloClient = get(),
@@ -90,9 +70,44 @@ val personalModule = module {
         )
     }
 
-    single<ReadingJournalHistoryRepository> {
-        ReadingJournalHistoryRepositoryImpl(readingJournalHistoryRemoteDataSource = get())
+    single<ReadingJournalHistoryLocalDataSource> {
+        ReadingJournalHistoryLocalDataSourceImpl(dao = get<SoftcoverDatabase>().progressHistoryDao())
     }
 
-    factory { GetReadingJournalHistoryUseCase(readingJournalHistoryRepository = get()) }
+    single<ReadingJournalHistoryRepository> {
+        ReadingJournalHistoryRepositoryImpl(
+            readingJournalHistoryRemoteDataSource = get(),
+            readingJournalHistoryLocalDataSource = get(),
+        )
+    }
+
+    factory { ObserveReadingJournalHistoryUseCase(repository = get()) }
+    factory { RefreshReadingJournalHistoryUseCase(repository = get()) }
+
+    single<QuoteLocalDataSource> {
+        QuoteLocalDataSourceImpl(dao = get<SoftcoverDatabase>().quoteDao())
+    }
+
+    single<QuoteRemoteDataSource> {
+        QuoteRemoteDataSourceImpl(
+            apolloClient = get(),
+            getUserIdUseCase = get(),
+        )
+    }
+
+    single<QuoteRepository> {
+        QuoteRepositoryImpl(
+            localDataSource = get(),
+            remoteDataSource = get(),
+            drainer = get(),
+            clock = Clock.System,
+        )
+    }
+
+    factory { ObserveBookQuotesUseCase(repository = get()) }
+    factory { RefreshBookQuotesUseCase(repository = get()) }
+    factory { ObserveAllQuotesUseCase(repository = get()) }
+    factory { RefreshAllQuotesUseCase(repository = get()) }
+    factory { AddQuoteUseCase(repository = get()) }
+    factory { DeleteQuoteUseCase(repository = get()) }
 }

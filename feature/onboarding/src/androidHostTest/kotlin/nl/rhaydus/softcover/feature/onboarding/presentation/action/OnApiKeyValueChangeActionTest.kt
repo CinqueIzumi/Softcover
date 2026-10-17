@@ -8,14 +8,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.field.TextFieldError
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
+import nl.rhaydus.softcover.feature.onboarding.presentation.state.onboardingLoadingSheet
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnApiKeyValueChangeActionTest {
     private lateinit var dependencies: OnboardingDependencies
@@ -30,6 +33,10 @@ class OnApiKeyValueChangeActionTest {
             localVariablesFlow = MutableStateFlow(LocalOnboardingVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+    }
+
+    private fun stateWithApiKey(text: String): OnboardingUiState = OnboardingUiState().let {
+        it.copy(apiKeyField = it.apiKeyField.copy(text = text))
     }
 
     private fun stubDependencies(testScope: TestScope): OnboardingDependencies {
@@ -48,46 +55,9 @@ class OnApiKeyValueChangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `updates apiKeyValue in state to the new value`() = runTest {
+        fun `stores the typed text and clears a previous submissionError`() = runTest {
             // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            val action = OnApiKeyValueChangeAction(newValue = "new-api-key")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.apiKeyValue shouldBe "new-api-key"
-        }
-
-        @Test
-        fun `updates apiKeyValue to an empty string when newValue is empty`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "existing-key")
-            dependencies = stubDependencies(this)
-            val action = OnApiKeyValueChangeAction(newValue = "")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.apiKeyValue shouldBe ""
-        }
-
-        @Test
-        fun `preserves other state fields when updating apiKeyValue`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(
-                apiKeyValue = "old-key",
-                saveApiKeyButtonEnabled = false,
-                isLoading = true,
-            )
+            stateFlow.value = stateWithApiKey(text = "old-key").copy(submissionError = "previous error")
             dependencies = stubDependencies(this)
             val action = OnApiKeyValueChangeAction(newValue = "new-key")
 
@@ -98,48 +68,118 @@ class OnApiKeyValueChangeActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.apiKeyValue shouldBe "new-key"
-            stateFlow.value.saveApiKeyButtonEnabled shouldBe false
-            stateFlow.value.isLoading shouldBe true
-        }
-
-        @Test
-        fun `updates apiKeyValue when called multiple times sequentially`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-
-            // ----- Act -----
-            OnApiKeyValueChangeAction(newValue = "first").execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-            OnApiKeyValueChangeAction(newValue = "second").execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.apiKeyValue shouldBe "second"
-        }
-
-        @Test
-        fun `clears submissionError when apiKeyValue changes`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(
-                apiKeyValue = "old-key",
-                submissionError = "That API key wasn't accepted. Double-check it and try again.",
-            )
-            dependencies = stubDependencies(this)
-            val action = OnApiKeyValueChangeAction(newValue = "new-key")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
+            stateFlow.value.apiKeyField.text shouldBe "new-key"
             stateFlow.value.submissionError shouldBe null
+        }
+
+        @Test
+        fun `enables the save button when the typed text is not blank`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            val action = OnApiKeyValueChangeAction(newValue = "new-key")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.saveApiKeyButtonEnabled shouldBe true
+        }
+
+        @Test
+        fun `disables the save button when the typed text is blank`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWithApiKey(text = "old-key").copy(saveApiKeyButtonEnabled = true)
+            dependencies = stubDependencies(this)
+            val action = OnApiKeyValueChangeAction(newValue = "   ")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.saveApiKeyButtonEnabled shouldBe false
+        }
+
+        @Test
+        fun `keeps the save button disabled for a non-blank value while loading`() = runTest {
+            // ----- Arrange -----
+            val base = stateWithApiKey(text = "old-key")
+            stateFlow.value = base.copy(
+                loadingSheet = SheetSession.Open(model = onboardingLoadingSheet(progress = null)),
+            )
+            dependencies = stubDependencies(this)
+            val action = OnApiKeyValueChangeAction(newValue = "new-key")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.saveApiKeyButtonEnabled shouldBe false
+        }
+
+        @Test
+        fun `keeps the save button disabled while the sheet is still closing`() = runTest {
+            // ----- Arrange -----
+            val base = stateWithApiKey(text = "old-key")
+            stateFlow.value = base.copy(
+                loadingSheet = SheetSession.Open(
+                    model = onboardingLoadingSheet(progress = 0f).requestingClose(),
+                ),
+            )
+            dependencies = stubDependencies(this)
+
+            // ----- Act -----
+            OnApiKeyValueChangeAction(newValue = "new-key").execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.saveApiKeyButtonEnabled shouldBe false
+        }
+
+        @Test
+        fun `enables the save button for a non-blank value once the sheet is closed`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWithApiKey(text = "old-key").copy(loadingSheet = SheetSession.Closed)
+            dependencies = stubDependencies(this)
+
+            // ----- Act -----
+            OnApiKeyValueChangeAction(newValue = "new-key").execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.saveApiKeyButtonEnabled shouldBe true
+        }
+
+        @Test
+        fun `clears a previous field error when the text changes`() = runTest {
+            // ----- Arrange -----
+            val base = stateWithApiKey(text = "old-key")
+            stateFlow.value = base.copy(
+                apiKeyField = base.apiKeyField.copy(error = TextFieldError(message = "rejected")),
+            )
+            dependencies = stubDependencies(this)
+            val action = OnApiKeyValueChangeAction(newValue = "new-key")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.apiKeyField.error shouldBe null
         }
     }
 }

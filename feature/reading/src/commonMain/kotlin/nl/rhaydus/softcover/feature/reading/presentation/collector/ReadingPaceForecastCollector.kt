@@ -1,18 +1,21 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.common.AppLog
+import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.toPaceLine
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
@@ -41,41 +44,37 @@ internal class ReadingPaceForecastCollector : ReadingCollector {
                 ProgressSnapshot(
                     bookId = book?.id,
                     totalPages = edition?.pages,
-                    currentPage = book?.userBookRead?.currentPage ?: 0,
+                    currentPage = book?.currentRead?.currentPage ?: 0,
                     totalSeconds = edition?.audioSeconds,
-                    currentSeconds = book?.userBookRead?.currentSeconds ?: 0,
+                    currentSeconds = book?.currentRead?.currentSeconds ?: 0,
+                    startedAt = book?.currentRead?.startedAt,
                 )
             }
             .distinctUntilChanged()
 
-        // Keyed on the featured bookId *and* the committed progress snapshot (not just bookId) so a
-        // landed progress write — which changes currentPage/currentSeconds in state only once the
-        // write actually commits — refetches the journal history instead of leaving it stale.
-        val journalHistoryFlow = combine(featuredBookIdFlow, progressSnapshotFlow) { bookId, snapshot ->
-            bookId to snapshot
+        val journalHistoryFlow = featuredBookIdFlow.flatMapLatest { bookId ->
+            if (bookId == null) {
+                flowOf(emptyList())
+            } else {
+                dependencies.observeReadingJournalHistoryUseCase(bookId = bookId)
+            }
         }
-            .distinctUntilChanged()
-            .flatMapLatest { (bookId, _) ->
-                if (bookId == null) {
-                    flowOf(emptyList())
-                } else {
-                    flow {
-                        val history = dependencies.getReadingJournalHistoryUseCase(bookId = bookId)
-                            .onFailure { AppLog.e("$it") }
-                            .getOrDefault(emptyList())
 
-                        emit(history)
-                    }
+        coroutineScope {
+            launch {
+                featuredBookIdFlow.filterNotNull().collectLatest { bookId ->
+                    dependencies.refreshReadingJournalHistoryUseCase(bookId = bookId)
                 }
             }
 
-        combine(journalHistoryFlow, progressSnapshotFlow) { history, snapshot ->
-            computeForecast(
-                history = history,
-                snapshot = snapshot,
-            )
-        }.collectLatest { forecast ->
-            scope.setState { it.copy(featuredBookPace = forecast) }
+            combine(journalHistoryFlow, progressSnapshotFlow) { history, snapshot ->
+                computeForecast(
+                    history = history,
+                    snapshot = snapshot,
+                )
+            }.collectLatest { forecast ->
+                scope.setState { it.copy(featuredBookPace = forecast?.toPaceLine()) }
+            }
         }
     }
 
@@ -100,50 +99,11 @@ internal class ReadingPaceForecastCollector : ReadingCollector {
         } ?: return null
 
         return ReadingPaceForecast.compute(
-            dailyUnitsRead = dailyUnitsRead(
-                entries = history,
-                unit = unit,
-            ),
+            history = history,
+            unit = unit,
             current = current,
             total = total,
-            unit = unit,
+            since = snapshot.startedAt?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
         )
-    }
-
-    /**
-     * Journal entries carry a cumulative position, not a per-day amount, so this takes the
-     * chronologically-last position logged on each calendar date and diffs it against the previous
-     * date's position, clamping to 0 so a correction never reads as negative progress. Mirrors
-     * book_detail's `ReadingPaceForecastCollector.dailyUnitsRead`.
-     */
-    private fun dailyUnitsRead(
-        entries: List<ReadingJournalEntry>,
-        unit: DeadlineUnit,
-    ): List<Int> {
-        val positionsByDate = entries
-            .mapNotNull { entry ->
-                val position = when (unit) {
-                    DeadlineUnit.PAGES -> entry.pages
-                    DeadlineUnit.SECONDS -> entry.seconds
-                }
-
-                position?.let { entry.date to it }
-            }
-            .groupBy(
-                keySelector = { it.first },
-                valueTransform = { it.second },
-            )
-            .mapValues { (_, positions) -> positions.last() }
-            .toList()
-            .sortedBy { (date, _) -> date }
-            .map { (_, position) -> position }
-
-        var previousPosition = 0
-
-        return positionsByDate.map { position ->
-            val delta = (position - previousPosition).coerceAtLeast(0)
-            previousPosition = position
-            delta
-        }
     }
 }

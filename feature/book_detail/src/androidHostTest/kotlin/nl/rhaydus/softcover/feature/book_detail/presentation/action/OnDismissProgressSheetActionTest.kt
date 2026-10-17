@@ -1,18 +1,24 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnDismissProgressSheetActionTest {
     private lateinit var dependencies: BookDetailDependencies
@@ -21,64 +27,107 @@ class OnDismissProgressSheetActionTest {
 
     @BeforeEach
     fun setUp() {
-        dependencies = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState().copy())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+        dependencies = mockk<BookDetailDependencies>(relaxed = true)
     }
 
     @Nested
     inner class Execute {
         @Test
-        fun `sets showUpdateProgressSheet to false when it was true`() = runTest {
+        fun `closes the progress sheet session`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(showUpdateProgressSheet = true)
-            val action = OnDismissProgressSheetAction()
+            stateFlow.value = buildBookDetailUiState().copy(
+                progressSheet = SheetSession.Open(model = ProgressSheetUiModel.previews.values.first()),
+            )
 
             // ----- Act -----
-            action.execute(
+            OnDismissProgressSheetAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.showUpdateProgressSheet shouldBe false
+            stateFlow.value.progressSheet shouldBe SheetSession.Closed
         }
 
         @Test
-        fun `leaves showUpdateProgressSheet as false when it was already false`() = runTest {
+        fun `closes a session that is already closing`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(showUpdateProgressSheet = false)
-            val action = OnDismissProgressSheetAction()
+            val closingModel = ProgressSheetUiModel.previews.values.first().requestingClose()
+            stateFlow.value = buildBookDetailUiState().copy(progressSheet = SheetSession.Open(model = closingModel))
 
             // ----- Act -----
-            action.execute(
+            OnDismissProgressSheetAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.showUpdateProgressSheet shouldBe false
+            stateFlow.value.progressSheet shouldBe SheetSession.Closed
         }
 
         @Test
-        fun `does not mutate any other state field when dismissing the progress sheet`() = runTest {
+        fun `clears the request so the collector does not reopen the sheet`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(showUpdateProgressSheet = true)
-            val initialState = stateFlow.value
-            val action = OnDismissProgressSheetAction()
+            stateFlow.value = buildBookDetailUiState().copy(
+                progressSheet = SheetSession.Open(model = ProgressSheetUiModel.previews.values.first()),
+                progressSheetRequested = true,
+            )
 
             // ----- Act -----
-            action.execute(
+            OnDismissProgressSheetAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value shouldBe initialState.copy(showUpdateProgressSheet = false)
+            stateFlow.value.progressSheetRequested shouldBe false
+        }
+
+        @Test
+        fun `discards the time draft so the next open reseeds from the book`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                progressSheet = SheetSession.Open(model = ProgressSheetUiModel.previews.values.first()),
+                progressTimeDraft = ProgressTimeDraft(
+                    forSeconds = 3725,
+                    hours = "1",
+                    minutes = "2",
+                    seconds = "5",
+                ),
+            )
+
+            // ----- Act -----
+            OnDismissProgressSheetAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.progressTimeDraft.shouldBeNull()
+        }
+
+        @Test
+        fun `keeps the book in state`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = PreviewData.baseBook,
+                progressSheet = SheetSession.Open(model = ProgressSheetUiModel.previews.values.first()),
+            )
+
+            // ----- Act -----
+            OnDismissProgressSheetAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.book shouldBe PreviewData.baseBook
         }
     }
 }

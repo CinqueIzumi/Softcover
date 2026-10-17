@@ -14,7 +14,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestions
 /**
  * Lists every hidden "up next in your series" book and series (Explore's
  * `ContinueSeriesMenuSheet` dismiss path) with a per-item unblock. Reached only via
- * [nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination.HiddenSuggestions]
+ * [nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination.HiddenSuggestions]
  * from Settings - never referenced directly by another feature.
  */
 class HiddenSuggestionsScreen : Screen {

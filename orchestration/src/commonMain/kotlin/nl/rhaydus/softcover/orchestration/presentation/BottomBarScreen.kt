@@ -1,13 +1,10 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,47 +14,51 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
-import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.layout.BottomBarPlacement
 import nl.rhaydus.designsystem.layout.BottomBarScaffold
 import nl.rhaydus.designsystem.layout.TwoPaneScaffold
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.BookDetailPresenter
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPresenter
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
+import nl.rhaydus.softcover.core.component.state.EmptyState
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.BookDetailPresenter
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequests
+import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPresenter
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBar
-
-private const val TAB_ROOT_TRANSITION_DURATION_MS = 200
-private val TAB_ROOT_DRIFT = 12.dp
+import nl.rhaydus.softcover.orchestration.presentation.screenmodel.BottomBarScreenModel
+import org.koin.compose.koinInject
 
 // Expanded two-pane list-pane sizing: a fraction of the available body width, clamped so a desktop
 // list surface stays roomy while the detail pane never collapses on a smaller expanded window.
 private const val EXPANDED_LIST_PANE_FRACTION = 0.46f
-private val EXPANDED_LIST_PANE_MIN = 440.dp
-private val EXPANDED_LIST_PANE_MAX = 680.dp
 
 /**
  * The tabbed application shell. All width-adaptive navigation chrome — bottom bar, rail, sidebar,
@@ -69,6 +70,8 @@ private val EXPANDED_LIST_PANE_MAX = 680.dp
 internal object BottomBarScreen : Screen {
     @Composable
     override fun Content() {
+        val screenModel = koinScreenModel<BottomBarScreenModel>()
+        val state by screenModel.state.collectAsStateWithLifecycle()
         val rootNavigator = LocalNavigator.currentOrThrow
         val appNavigator = koinInject<AppNavigator>()
         val widthClass = rememberWindowSizeClass().widthClass
@@ -120,6 +123,11 @@ internal object BottomBarScreen : Screen {
                 }
             }
 
+            ConsumeExternalNavigationRequests(
+                tabNavigator = tabNavigator,
+                bookDetailPresenter = bookDetailPresenter,
+            )
+
             CompositionLocalProvider(LocalBookDetailPresenter provides bookDetailPresenter) {
                 val tabBody = remember {
                     movableContentOf { TabRootHost() }
@@ -149,8 +157,8 @@ internal object BottomBarScreen : Screen {
                             BoxWithConstraints {
                                 val listPaneWidth = (maxWidth * EXPANDED_LIST_PANE_FRACTION)
                                     .coerceIn(
-                                        EXPANDED_LIST_PANE_MIN,
-                                        EXPANDED_LIST_PANE_MAX,
+                                        440.dp,
+                                        680.dp,
                                     )
 
                                 TwoPaneScaffold(
@@ -167,7 +175,15 @@ internal object BottomBarScreen : Screen {
                                                     overlayNavigator = rootNavigator,
                                                 )
                                             } else {
-                                                EmptyDetailPane()
+                                                EmptyState(
+                                                    model = state.emptyDetailPane,
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .padding(
+                                                            horizontal = Spacing.gutter,
+                                                            vertical = Spacing.xl,
+                                                        ),
+                                                )
                                             }
                                         }
                                     } else {
@@ -178,6 +194,51 @@ internal object BottomBarScreen : Screen {
                         },
                     )
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Acts on the tab and book requests an external surface made, then consumes them. Focus Mode
+ * requests belong to the root navigator and are left pending here.
+ */
+@Composable
+private fun ConsumeExternalNavigationRequests(
+    tabNavigator: TabNavigator,
+    bookDetailPresenter: BookDetailPresenter,
+) {
+    val externalNavigationRequests = koinInject<ExternalNavigationRequests>()
+    val appNavigator = koinInject<AppNavigator>()
+    val currentPresenter by rememberUpdatedState(bookDetailPresenter)
+
+    LaunchedEffect(externalNavigationRequests, appNavigator, tabNavigator) {
+        externalNavigationRequests.pending.collect { request ->
+            when (request) {
+                is ExternalNavigationRequest.OpenTab -> {
+                    tabNavigator.current = appNavigator.tab(request.destination)
+
+                    externalNavigationRequests.consume(request = request)
+                }
+
+                is ExternalNavigationRequest.OpenBook -> {
+                    currentPresenter.open(ScreenDestination.BookDetail(id = request.bookId))
+
+                    externalNavigationRequests.consume(request = request)
+                }
+
+                is ExternalNavigationRequest.OpenBookVerdict -> {
+                    currentPresenter.open(
+                        ScreenDestination.BookDetail(
+                            id = request.bookId,
+                            showVerdictSheet = true,
+                        ),
+                    )
+
+                    externalNavigationRequests.consume(request = request)
+                }
+
+                ExternalNavigationRequest.OpenFocusMode, null -> Unit
             }
         }
     }
@@ -197,7 +258,11 @@ private fun CompactNavShell(body: @Composable () -> Unit) {
 
     BottomBarScaffold(
         placement = themeConfig.bottomBarStyle.toPlacement(),
-        bottomBar = { CompactBottomChrome(style = themeConfig.bottomBarStyle) },
+        bottomBar = {
+            Box(modifier = Modifier.reportBottomChromeTop()) {
+                CompactBottomChrome(style = themeConfig.bottomBarStyle)
+            }
+        },
         content = body,
     )
 }
@@ -212,7 +277,7 @@ private fun CompactNavShell(body: @Composable () -> Unit) {
 private fun CompactBottomChrome(style: BottomBarStyle) {
     when (style) {
         BottomBarStyle.DOCKED -> Column {
-            SessionPeekBar(modifier = Modifier.padding(bottom = 8.dp))
+            SessionPeekBar(modifier = Modifier.padding(bottom = Spacing.xs))
 
             DockedBottomNavigationBar()
         }
@@ -230,16 +295,16 @@ private fun CompactBottomChrome(style: BottomBarStyle) {
                     onClick = {},
                 ),
             ) {
-                SessionPeekBar(modifier = Modifier.padding(bottom = 8.dp))
+                SessionPeekBar(modifier = Modifier.padding(bottom = Spacing.xs))
 
                 BottomFloatingBar(
                     modifier = Modifier.padding(
-                        horizontal = 8.dp,
-                        vertical = 6.dp,
+                        horizontal = Spacing.xs,
+                        vertical = Spacing.xxs,
                     ),
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
             }
         }
     }
@@ -283,28 +348,27 @@ private fun BottomBarStyle.toPlacement(): BottomBarPlacement = when (this) {
     BottomBarStyle.FLOATING -> BottomBarPlacement.OVERLAY
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TabRootHost() {
     val tabNavigator = LocalTabNavigator.current
     val stateHolder = rememberSaveableStateHolder()
     val density = LocalDensity.current
-    val driftPx = remember(density) { with(density) { TAB_ROOT_DRIFT.roundToPx() } }
-
-    if (playDecorativeMotion().not()) {
-        CurrentTab()
-        return
-    }
+    val driftPx = remember(density) { with(density) { 12.dp.roundToPx() } }
+    val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
 
     AnimatedContent(
         targetState = tabNavigator.current,
         contentKey = { it.key },
         transitionSpec = {
-            (fadeIn(animationSpec = tween(TAB_ROOT_TRANSITION_DURATION_MS)) +
-                slideInVertically(
-                    animationSpec = tween(TAB_ROOT_TRANSITION_DURATION_MS),
+            navFadeThrough(
+                effectsSpec = effectsSpec,
+                enterMotion = slideInVertically(
+                    animationSpec = spatialSpec,
                     initialOffsetY = { driftPx },
-                ))
-                .togetherWith(fadeOut(animationSpec = tween(TAB_ROOT_TRANSITION_DURATION_MS)))
+                ),
+            )
         },
         label = "TabRootCrossfade",
     ) { tab ->

@@ -6,17 +6,17 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
-import kotlin.system.exitProcess
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
+import nl.rhaydus.softcover.core.domain.app.VersionComparator
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.app_update.data.install.DesktopInstallerLauncher
 import nl.rhaydus.softcover.feature.app_update.data.model.AppRelease
 import nl.rhaydus.softcover.feature.app_update.data.release.ReleaseSource
-import nl.rhaydus.softcover.feature.app_update.data.version.VersionComparator
+import java.io.File
+import kotlin.system.exitProcess
 
 /**
  * Desktop self-updater — the `AppUpdateDataSource` seam Android backs with Play. The desktop
@@ -82,14 +82,34 @@ internal class JvmAppUpdateDataSource(
     fun startDownload() {
         val release = pendingRelease ?: return
 
-        if (_updateState.value == AppUpdateState.Downloading) return
+        if (_updateState.value is AppUpdateState.Downloading) return
 
-        _updateState.value = AppUpdateState.Downloading
+        _updateState.value = AppUpdateState.Downloading(
+            bytesDownloaded = 0,
+            totalBytes = null,
+        )
+
+        var lastPercent = -1L
+        var totalKnown = false
 
         scope.launch {
             val installer = releaseSource.downloadInstaller(
                 release = release,
                 destinationDirectory = appDataDirectory,
+                onProgress = { bytesDownloaded, totalBytes ->
+                    val percent = if (totalBytes != null) bytesDownloaded * 100 / totalBytes else -1L
+                    val totalBecameKnown = totalBytes != null && totalKnown.not()
+
+                    if (percent != lastPercent || totalBecameKnown) {
+                        lastPercent = percent
+                        totalKnown = totalBytes != null
+
+                        _updateState.value = AppUpdateState.Downloading(
+                            bytesDownloaded = bytesDownloaded,
+                            totalBytes = totalBytes,
+                        )
+                    }
+                },
             )
 
             if (installer != null) {

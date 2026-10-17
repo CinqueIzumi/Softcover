@@ -1,9 +1,11 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.withSelectedBookIds
 import nl.rhaydus.toad.ActionScope
 
 internal class OnToggleBookSelectionAction(
@@ -23,16 +25,15 @@ internal class OnToggleBookSelectionAction(
             // Deselecting the last book collapses the mode rather than leaving the user
             // staring at an action bar with zero targets.
             if (next.isEmpty()) {
-                it.copy(
+                it.withSelectedBookIds(persistentSetOf()).copy(
                     selectionMode = false,
-                    selectedBookIds = emptySet(),
                     isBulkMoveMenuExpanded = false,
-                    isBulkRemoveDialogShown = false,
-                    isBulkAddToListSheetShown = false,
-                    listsBeingMutated = emptySet(),
+                    isBulkRemoveSheetRequested = false,
+                    isChooseListsSheetRequested = false,
+                    listsBeingMutated = persistentSetOf(),
                 )
             } else {
-                it.copy(selectedBookIds = next)
+                it.withSelectedBookIds(next)
             }
         }
     }

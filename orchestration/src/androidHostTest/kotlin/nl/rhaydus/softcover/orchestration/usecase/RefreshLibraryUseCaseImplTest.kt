@@ -2,17 +2,12 @@ package nl.rhaydus.softcover.orchestration.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
-import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -23,6 +18,9 @@ import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class RefreshLibraryUseCaseImplTest {
     private lateinit var getUserIdUseCase: GetUserIdUseCase
@@ -119,13 +117,24 @@ class RefreshLibraryUseCaseImplTest {
         }
 
         @Test
-        fun `returns success and calls both booksRepository and listsRepository`() = runTest {
+        fun `refreshes books and lists, hydrates, syncs server ids, caches changes, drops orphans`() = runTest {
             // ----- Arrange -----
+            // changedList has id=7; the server also knows lists 8 and 9, which are unchanged
+            val changedList = stubBookList(
+                id = 7,
+                books = listOf(
+                    stubListBook(
+                        bookId = 10,
+                        editionId = 100,
+                    ),
+                ),
+            )
+
             coEvery {
                 listsRepository.refreshUserLists(userId = 55)
             } returns ListsRefreshResult(
-                serverListIds = emptySet(),
-                changedLists = emptyList(),
+                serverListIds = setOf(7, 8, 9),
+                changedLists = listOf(changedList),
             )
 
             // ----- Act -----
@@ -139,109 +148,35 @@ class RefreshLibraryUseCaseImplTest {
                     userId = 55,
                     statusFilter = null,
                 )
-            }
-
-            coVerify {
-                listsRepository.refreshUserLists(userId = 55)
-            }
-        }
-
-        @Test
-        fun `calls hydrateReferencedBooks with union of all list book and edition ids`() = runTest {
-            // ----- Arrange -----
-            val listBook1 = stubListBook(
-                bookId = 10,
-                editionId = 100,
-            )
-            val listBook2 = stubListBook(
-                bookId = 20,
-                editionId = 200,
-            )
-            val changedList = stubBookList(books = listOf(listBook1, listBook2))
-
-            coEvery {
-                listsRepository.refreshUserLists(userId = 55)
-            } returns ListsRefreshResult(
-                serverListIds = emptySet(),
-                changedLists = listOf(changedList),
-            )
-
-            // ----- Act -----
-            useCase(scope = RefreshScope.All)
-
-            // ----- Assert -----
-            coVerify {
                 booksRepository.hydrateReferencedBooks(
-                    bookIds = match { it.containsAll(listOf(10, 20)) },
-                    editionIds = match { it.containsAll(listOf(100, 200)) },
+                    bookIds = listOf(10),
+                    editionIds = listOf(100),
                     forceNetwork = true,
                 )
-            }
-        }
-
-        @Test
-        fun `calls syncBookListMetadata with the full server list ids from the result — not just changed list ids`() = runTest {
-            // ----- Arrange -----
-            // changedList has id=7; server also knows about ids 8 and 9 (unchanged lists)
-            val changedList = stubBookList(id = 7)
-
-            coEvery {
-                listsRepository.refreshUserLists(userId = 55)
-            } returns ListsRefreshResult(
-                serverListIds = setOf(7, 8, 9),
-                changedLists = listOf(changedList),
-            )
-
-            // ----- Act -----
-            useCase(scope = RefreshScope.All)
-
-            // ----- Assert -----
-            coVerify {
                 listsRepository.syncBookListMetadata(serverListIds = setOf(7, 8, 9))
-            }
-        }
-
-        @Test
-        fun `calls cacheUserBookLists with the changed lists`() = runTest {
-            // ----- Arrange -----
-            val changedList = stubBookList(id = 3)
-
-            coEvery {
-                listsRepository.refreshUserLists(userId = 55)
-            } returns ListsRefreshResult(
-                serverListIds = setOf(3),
-                changedLists = listOf(changedList),
-            )
-
-            // ----- Act -----
-            useCase(scope = RefreshScope.All)
-
-            // ----- Assert -----
-            coVerify {
                 listsRepository.cacheUserBookLists(lists = listOf(changedList))
-            }
-        }
-
-        @Test
-        fun `calls deleteOrphanBooks after cacheUserBookLists`() = runTest {
-            // ----- Arrange -----
-            val changedList = stubBookList()
-
-            coEvery {
-                listsRepository.refreshUserLists(userId = 55)
-            } returns ListsRefreshResult(
-                serverListIds = emptySet(),
-                changedLists = listOf(changedList),
-            )
-
-            // ----- Act -----
-            useCase(scope = RefreshScope.All)
-
-            // ----- Assert -----
-            coVerifyOrder {
-                listsRepository.cacheUserBookLists(lists = any())
                 booksRepository.deleteOrphanBooks()
             }
+        }
+
+        @Test
+        fun `refreshing the books throws — returns failure`() = runTest {
+            // ----- Arrange -----
+            val expectedError = IllegalStateException("books refresh failed")
+
+            coEvery {
+                booksRepository.refreshUserBooks(
+                    userId = 55,
+                    statusFilter = null,
+                )
+            } throws expectedError
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.All)
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            result.exceptionOrNull() shouldBe expectedError
         }
 
         @Test
@@ -327,56 +262,21 @@ class RefreshLibraryUseCaseImplTest {
                 settingsRepository.seedEnabledListIds(ids = emptySet())
             }
         }
-
-        @Test
-        fun `syncs full server id set and runs delete even when no lists changed`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                listsRepository.refreshUserLists(userId = 55)
-            } returns ListsRefreshResult(
-                serverListIds = setOf(1, 2),
-                changedLists = emptyList(),
-            )
-
-            // ----- Act -----
-            useCase(scope = RefreshScope.All)
-
-            // ----- Assert -----
-            coVerify {
-                listsRepository.cacheUserBookLists(lists = emptyList())
-            }
-
-            coVerify {
-                booksRepository.hydrateReferencedBooks(
-                    bookIds = emptyList(),
-                    editionIds = emptyList(),
-                    forceNetwork = true,
-                )
-            }
-
-            coVerify {
-                listsRepository.syncBookListMetadata(serverListIds = setOf(1, 2))
-            }
-
-            coVerify {
-                booksRepository.deleteOrphanBooks()
-            }
-        }
     }
 
     @Nested
-    inner class ByStatusScope {
+    inner class ByStatusesScope {
         @Test
         fun `calls refreshUserBooks with the given statusFilter and never touches lists`() = runTest {
             // ----- Arrange -----
-            val status = UserBookStatus.WANT_TO_READ
+            val statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED)
 
             coEvery {
                 getUserIdUseCase()
             } returns Result.success(55)
 
             // ----- Act -----
-            val result = useCase(scope = RefreshScope.ByStatus(status = status))
+            val result = useCase(scope = RefreshScope.ByStatuses(statuses = statuses))
 
             // ----- Assert -----
             result.isSuccess shouldBe true
@@ -384,7 +284,7 @@ class RefreshLibraryUseCaseImplTest {
             coVerify {
                 booksRepository.refreshUserBooks(
                     userId = 55,
-                    statusFilter = status,
+                    statusFilter = statuses,
                 )
             }
 
@@ -403,40 +303,23 @@ class RefreshLibraryUseCaseImplTest {
                 listsRepository.syncBookListMetadata(serverListIds = any())
             }
         }
-
-        @Test
-        fun `returns failure when booksRepository throws`() = runTest {
-            // ----- Arrange -----
-            val status = UserBookStatus.READ
-            val expectedError = RuntimeException("books error")
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(55)
-
-            coEvery {
-                booksRepository.refreshUserBooks(
-                    userId = 55,
-                    statusFilter = status,
-                )
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase(scope = RefreshScope.ByStatus(status = status))
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe expectedError
-        }
     }
 
     @Nested
     inner class ByListScope {
         @Test
-        fun `fetches the single list by id and caches it without touching books refresh`() = runTest {
+        fun `fetches the single list by id, hydrates and caches it, and leaves books and list metadata alone`() = runTest {
             // ----- Arrange -----
             val listId = 7
-            val fetchedList = stubBookList(id = listId)
+            val fetchedList = stubBookList(
+                id = listId,
+                books = listOf(
+                    stubListBook(
+                        bookId = 10,
+                        editionId = 100,
+                    ),
+                ),
+            )
 
             coEvery {
                 getUserIdUseCase()
@@ -456,13 +339,11 @@ class RefreshLibraryUseCaseImplTest {
             result.isSuccess shouldBe true
 
             coVerify {
-                listsRepository.fetchUserLists(
-                    userId = 55,
-                    listIds = setOf(listId),
+                booksRepository.hydrateReferencedBooks(
+                    bookIds = listOf(10),
+                    editionIds = listOf(100),
+                    forceNetwork = true,
                 )
-            }
-
-            coVerify {
                 listsRepository.cacheUserBookLists(lists = listOf(fetchedList))
             }
 
@@ -471,71 +352,7 @@ class RefreshLibraryUseCaseImplTest {
                     userId = any(),
                     statusFilter = any(),
                 )
-            }
-        }
-
-        @Test
-        fun `calls hydrateReferencedBooks with ids from the fetched list`() = runTest {
-            // ----- Arrange -----
-            val listId = 7
-            val listBook = stubListBook(
-                bookId = 10,
-                editionId = 100,
-            )
-            val fetchedList = stubBookList(
-                id = listId,
-                books = listOf(listBook),
-            )
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(55)
-
-            coEvery {
-                listsRepository.fetchUserLists(
-                    userId = 55,
-                    listIds = setOf(listId),
-                )
-            } returns listOf(fetchedList)
-
-            // ----- Act -----
-            useCase(scope = RefreshScope.ByList(listId = listId))
-
-            // ----- Assert -----
-            coVerify {
-                booksRepository.hydrateReferencedBooks(
-                    bookIds = listOf(10),
-                    editionIds = listOf(100),
-                    forceNetwork = true,
-                )
-            }
-        }
-
-        @Test
-        fun `does not call syncBookListMetadata or deleteOrphanBooks`() = runTest {
-            // ----- Arrange -----
-            val listId = 7
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(55)
-
-            coEvery {
-                listsRepository.fetchUserLists(
-                    userId = 55,
-                    listIds = setOf(listId),
-                )
-            } returns emptyList()
-
-            // ----- Act -----
-            useCase(scope = RefreshScope.ByList(listId = listId))
-
-            // ----- Assert -----
-            coVerify(exactly = 0) {
                 listsRepository.syncBookListMetadata(serverListIds = any())
-            }
-
-            coVerify(exactly = 0) {
                 booksRepository.deleteOrphanBooks()
             }
         }

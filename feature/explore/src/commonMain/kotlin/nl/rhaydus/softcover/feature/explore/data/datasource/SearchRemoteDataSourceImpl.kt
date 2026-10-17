@@ -60,7 +60,6 @@ internal class SearchRemoteDataSourceImpl(
         page: Int,
     ) {
         if (page <= 1) {
-            _queriedBooks.update { emptyList() }
             _queriedBooksHasMore.update { true }
         }
 
@@ -79,6 +78,10 @@ internal class SearchRemoteDataSourceImpl(
         _queriedBooksHasMore.update { matchingIds.size >= SEARCH_RESULTS_PAGE_SIZE }
 
         if (matchingIds.isEmpty()) {
+            if (page <= 1) {
+                _queriedBooks.update { emptyList() }
+            }
+
             return
         }
 
@@ -210,7 +213,6 @@ internal class SearchRemoteDataSourceImpl(
         page: Int,
     ) {
         if (page <= 1) {
-            _queriedBooks.update { emptyList() }
             _queriedBooksHasMore.update { true }
         }
 

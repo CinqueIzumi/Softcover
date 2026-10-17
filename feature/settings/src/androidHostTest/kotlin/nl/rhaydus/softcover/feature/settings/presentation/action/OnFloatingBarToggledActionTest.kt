@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
-import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -10,9 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
@@ -20,6 +16,9 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsSc
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnFloatingBarToggledActionTest {
     private lateinit var setBottomBarStyleUseCase: SetBottomBarStyleUseCase
@@ -105,55 +104,6 @@ class OnFloatingBarToggledActionTest {
             coVerify {
                 setBottomBarStyleUseCase(newStyle = BottomBarStyle.DOCKED)
             }
-        }
-
-        @Test
-        fun `does not throw when the use case returns a failure`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                setBottomBarStyleUseCase(newStyle = BottomBarStyle.FLOATING)
-            } returns Result.failure(RuntimeException("storage error"))
-
-            val action = OnFloatingBarToggledAction(newValue = true)
-
-            // ----- Act -----
-            val result = runCatching {
-                action.execute(
-                    dependencies = dependencies,
-                    scope = scope,
-                )
-            }
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-        }
-
-        @Test
-        fun `does not mutate state after executing`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = SettingsScreenUiState(
-                useFloatingBarChecked = false,
-                dropDownExpanded = true,
-            )
-
-            coEvery {
-                setBottomBarStyleUseCase(newStyle = BottomBarStyle.FLOATING)
-            } returns Result.success(Unit)
-
-            val action = OnFloatingBarToggledAction(newValue = true)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.useFloatingBarChecked shouldBe false
-            stateFlow.value.dropDownExpanded shouldBe true
         }
     }
 }

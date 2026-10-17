@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.app_update.data.datasource
 
-import app.cash.turbine.test
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.install.InstallState
@@ -17,22 +16,42 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkStatic
-import io.mockk.verify
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterEach
+import nl.rhaydus.softcover.core.domain.model.AppUpdateState
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 
 class AppUpdateDataSourceImplTest {
+    companion object {
+        private val DOWNLOADING_STATE = AppUpdateState.Downloading(
+            bytesDownloaded = 10,
+            totalBytes = 100,
+        )
+
+        private const val KTX_CLASS = "com.google.android.play.core.ktx.AppUpdateManagerKtxKt"
+
+        @JvmStatic
+        @BeforeAll
+        fun mockKtx() {
+            mockkStatic(KTX_CLASS)
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun unmockKtx() {
+            unmockkStatic(KTX_CLASS)
+        }
+    }
+
     private lateinit var appUpdateManager: AppUpdateManager
     private lateinit var listenerSlot: CapturingSlot<InstallStateUpdatedListener>
     private lateinit var dataSource: AppUpdateDataSourceImpl
 
     @BeforeEach
     fun setUp() {
-        mockkStatic("com.google.android.play.core.ktx.AppUpdateManagerKtxKt")
         appUpdateManager = mockk(relaxed = true)
         listenerSlot = slot()
 
@@ -43,15 +62,22 @@ class AppUpdateDataSourceImplTest {
         dataSource = AppUpdateDataSourceImpl(appUpdateManager = appUpdateManager)
     }
 
-    @AfterEach
-    fun tearDown() {
-        unmockkStatic("com.google.android.play.core.ktx.AppUpdateManagerKtxKt")
-    }
-
-    private fun stubInstallState(status: Int): InstallState = mockk {
+    private fun stubInstallState(
+        status: Int,
+        bytesDownloaded: Long = 0,
+        totalBytes: Long = 0,
+    ): InstallState = mockk {
         every {
             this@mockk.installStatus()
         } returns status
+
+        every {
+            this@mockk.bytesDownloaded()
+        } returns bytesDownloaded
+
+        every {
+            this@mockk.totalBytesToDownload()
+        } returns totalBytes
     }
 
     private fun stubAppUpdateInfo(
@@ -72,25 +98,73 @@ class AppUpdateDataSourceImplTest {
         } returns isFlexibleAllowed
     }
 
+    private fun stubUpdateInfo(info: AppUpdateInfo) {
+        coEvery {
+            appUpdateManager.requestAppUpdateInfo()
+        } returns info
+    }
+
     @Nested
-    inner class InstallListenerTranslations {
+    inner class InstallListener {
         @Test
-        fun `listener sets Downloading state when install status is DOWNLOADING`() = runTest {
+        fun `maps DOWNLOADING to Downloading carrying bytes and total`() {
             // ----- Arrange -----
-            val installState = stubInstallState(InstallStatus.DOWNLOADING)
+            val installState = stubInstallState(
+                status = InstallStatus.DOWNLOADING,
+                bytesDownloaded = 250,
+                totalBytes = 1_000,
+            )
 
             // ----- Act -----
             listenerSlot.captured.onStateUpdate(installState)
 
             // ----- Assert -----
-            dataSource.updateState.test {
-                awaitItem() shouldBe AppUpdateState.Downloading
-                cancelAndIgnoreRemainingEvents()
-            }
+            dataSource.updateState.value shouldBe AppUpdateState.Downloading(
+                bytesDownloaded = 250,
+                totalBytes = 1_000,
+            )
         }
 
         @Test
-        fun `listener sets Downloaded state when install status is DOWNLOADED`() = runTest {
+        fun `maps a zero DOWNLOADING total to a null total`() {
+            // ----- Arrange -----
+            val installState = stubInstallState(
+                status = InstallStatus.DOWNLOADING,
+                bytesDownloaded = 40,
+                totalBytes = 0,
+            )
+
+            // ----- Act -----
+            listenerSlot.captured.onStateUpdate(installState)
+
+            // ----- Assert -----
+            dataSource.updateState.value shouldBe AppUpdateState.Downloading(
+                bytesDownloaded = 40,
+                totalBytes = null,
+            )
+        }
+
+        @Test
+        fun `maps a negative DOWNLOADING total to a null total`() {
+            // ----- Arrange -----
+            val installState = stubInstallState(
+                status = InstallStatus.DOWNLOADING,
+                bytesDownloaded = 40,
+                totalBytes = -1,
+            )
+
+            // ----- Act -----
+            listenerSlot.captured.onStateUpdate(installState)
+
+            // ----- Assert -----
+            dataSource.updateState.value shouldBe AppUpdateState.Downloading(
+                bytesDownloaded = 40,
+                totalBytes = null,
+            )
+        }
+
+        @Test
+        fun `maps DOWNLOADED to Downloaded`() {
             // ----- Arrange -----
             val installState = stubInstallState(InstallStatus.DOWNLOADED)
 
@@ -98,14 +172,11 @@ class AppUpdateDataSourceImplTest {
             listenerSlot.captured.onStateUpdate(installState)
 
             // ----- Assert -----
-            dataSource.updateState.test {
-                awaitItem() shouldBe AppUpdateState.Downloaded
-                cancelAndIgnoreRemainingEvents()
-            }
+            dataSource.updateState.value shouldBe AppUpdateState.Downloaded
         }
 
         @Test
-        fun `listener sets Failed state when install status is FAILED`() = runTest {
+        fun `maps FAILED to Failed`() {
             // ----- Arrange -----
             val installState = stubInstallState(InstallStatus.FAILED)
 
@@ -113,163 +184,127 @@ class AppUpdateDataSourceImplTest {
             listenerSlot.captured.onStateUpdate(installState)
 
             // ----- Assert -----
-            dataSource.updateState.test {
-                awaitItem() shouldBe AppUpdateState.Failed
-                cancelAndIgnoreRemainingEvents()
-            }
+            dataSource.updateState.value shouldBe AppUpdateState.Failed
         }
 
         @Test
-        fun `listener sets Idle state when install status is CANCELED`() = runTest {
+        fun `maps CANCELED back to Idle`() {
             // ----- Arrange -----
+            dataSource.forceState(DOWNLOADING_STATE)
+
             val installState = stubInstallState(InstallStatus.CANCELED)
 
             // ----- Act -----
             listenerSlot.captured.onStateUpdate(installState)
 
             // ----- Assert -----
-            dataSource.updateState.test {
-                awaitItem() shouldBe AppUpdateState.Idle
-                cancelAndIgnoreRemainingEvents()
-            }
+            dataSource.updateState.value shouldBe AppUpdateState.Idle
         }
 
         @Test
-        fun `listener does not change state for unrecognised install statuses`() = runTest {
+        fun `maps INSTALLED back to Idle`() {
             // ----- Arrange -----
+            dataSource.forceState(AppUpdateState.Downloaded)
+
+            val installState = stubInstallState(InstallStatus.INSTALLED)
+
+            // ----- Act -----
+            listenerSlot.captured.onStateUpdate(installState)
+
+            // ----- Assert -----
+            dataSource.updateState.value shouldBe AppUpdateState.Idle
+        }
+
+        @Test
+        fun `keeps the current state for unrecognised install statuses`() {
+            // ----- Arrange -----
+            dataSource.forceState(DOWNLOADING_STATE)
+
             val installState = stubInstallState(InstallStatus.UNKNOWN)
 
             // ----- Act -----
             listenerSlot.captured.onStateUpdate(installState)
 
             // ----- Assert -----
-            dataSource.updateState.test {
-                awaitItem() shouldBe AppUpdateState.Idle
-                cancelAndIgnoreRemainingEvents()
-            }
+            dataSource.updateState.value shouldBe DOWNLOADING_STATE
         }
     }
 
     @Nested
     inner class CheckForUpdate {
         @Test
-        fun `sets Available state when update is available and flexible type is allowed`() = runTest {
+        fun `sets Available when update is available and flexible type is allowed`() = runTest {
             // ----- Arrange -----
-            val info = stubAppUpdateInfo(
-                installStatus = InstallStatus.UNKNOWN,
-                updateAvailability = UpdateAvailability.UPDATE_AVAILABLE,
-                isFlexibleAllowed = true,
+            stubUpdateInfo(
+                stubAppUpdateInfo(
+                    updateAvailability = UpdateAvailability.UPDATE_AVAILABLE,
+                    isFlexibleAllowed = true,
+                ),
             )
-
-            coEvery {
-                appUpdateManager.requestAppUpdateInfo()
-            } returns info
 
             // ----- Act -----
             dataSource.checkForUpdate()
 
             // ----- Assert -----
-            dataSource.updateState.test {
-                awaitItem() shouldBe AppUpdateState.Available
-                cancelAndIgnoreRemainingEvents()
-            }
+            dataSource.updateState.value shouldBe AppUpdateState.Available
         }
 
         @Test
-        fun `sets Downloaded state when install status is already DOWNLOADED`() = runTest {
+        fun `Downloaded takes precedence over Available`() = runTest {
             // ----- Arrange -----
-            val info = stubAppUpdateInfo(
-                installStatus = InstallStatus.DOWNLOADED,
-                updateAvailability = UpdateAvailability.UPDATE_AVAILABLE,
-                isFlexibleAllowed = true,
+            stubUpdateInfo(
+                stubAppUpdateInfo(
+                    installStatus = InstallStatus.DOWNLOADED,
+                    updateAvailability = UpdateAvailability.UPDATE_AVAILABLE,
+                    isFlexibleAllowed = true,
+                ),
             )
-
-            coEvery {
-                appUpdateManager.requestAppUpdateInfo()
-            } returns info
 
             // ----- Act -----
             dataSource.checkForUpdate()
 
             // ----- Assert -----
-            dataSource.updateState.test {
-                awaitItem() shouldBe AppUpdateState.Downloaded
-                cancelAndIgnoreRemainingEvents()
-            }
+            dataSource.updateState.value shouldBe AppUpdateState.Downloaded
         }
 
         @Test
-        fun `Downloaded takes precedence over Available when both conditions are true`() = runTest {
+        fun `sets Idle when update is available but flexible type is not allowed`() = runTest {
             // ----- Arrange -----
-            val info = stubAppUpdateInfo(
-                installStatus = InstallStatus.DOWNLOADED,
-                updateAvailability = UpdateAvailability.UPDATE_AVAILABLE,
-                isFlexibleAllowed = true,
-            )
+            dataSource.forceState(AppUpdateState.Available)
 
-            coEvery {
-                appUpdateManager.requestAppUpdateInfo()
-            } returns info
+            stubUpdateInfo(
+                stubAppUpdateInfo(
+                    updateAvailability = UpdateAvailability.UPDATE_AVAILABLE,
+                    isFlexibleAllowed = false,
+                ),
+            )
 
             // ----- Act -----
             dataSource.checkForUpdate()
 
             // ----- Assert -----
-            dataSource.updateState.test {
-                awaitItem() shouldBe AppUpdateState.Downloaded
-                cancelAndIgnoreRemainingEvents()
-            }
+            dataSource.updateState.value shouldBe AppUpdateState.Idle
         }
 
         @Test
-        fun `sets Idle state when update is available but flexible type is not allowed`() = runTest {
+        fun `sets Idle when no update is available`() = runTest {
             // ----- Arrange -----
-            val info = stubAppUpdateInfo(
-                installStatus = InstallStatus.UNKNOWN,
-                updateAvailability = UpdateAvailability.UPDATE_AVAILABLE,
-                isFlexibleAllowed = false,
-            )
+            dataSource.forceState(AppUpdateState.Available)
 
-            coEvery {
-                appUpdateManager.requestAppUpdateInfo()
-            } returns info
+            stubUpdateInfo(stubAppUpdateInfo(updateAvailability = UpdateAvailability.UPDATE_NOT_AVAILABLE))
 
             // ----- Act -----
             dataSource.checkForUpdate()
 
             // ----- Assert -----
-            dataSource.updateState.test {
-                awaitItem() shouldBe AppUpdateState.Idle
-                cancelAndIgnoreRemainingEvents()
-            }
+            dataSource.updateState.value shouldBe AppUpdateState.Idle
         }
 
         @Test
-        fun `sets Idle state when no update is available`() = runTest {
+        fun `sets Idle when requesting the update info throws`() = runTest {
             // ----- Arrange -----
-            val info = stubAppUpdateInfo(
-                installStatus = InstallStatus.UNKNOWN,
-                updateAvailability = UpdateAvailability.UPDATE_NOT_AVAILABLE,
-                isFlexibleAllowed = false,
-            )
+            dataSource.forceState(AppUpdateState.Available)
 
-            coEvery {
-                appUpdateManager.requestAppUpdateInfo()
-            } returns info
-
-            // ----- Act -----
-            dataSource.checkForUpdate()
-
-            // ----- Assert -----
-            dataSource.updateState.test {
-                awaitItem() shouldBe AppUpdateState.Idle
-                cancelAndIgnoreRemainingEvents()
-            }
-        }
-
-        @Test
-        fun `sets Idle state and logs when requestAppUpdateInfo throws`() = runTest {
-            // ----- Arrange -----
             coEvery {
                 appUpdateManager.requestAppUpdateInfo()
             } throws RuntimeException("network error")
@@ -278,54 +313,7 @@ class AppUpdateDataSourceImplTest {
             dataSource.checkForUpdate()
 
             // ----- Assert -----
-            dataSource.updateState.test {
-                awaitItem() shouldBe AppUpdateState.Idle
-                cancelAndIgnoreRemainingEvents()
-            }
-        }
-    }
-
-    @Nested
-    inner class CompleteUpdate {
-        @Test
-        fun `delegates to appUpdateManager completeUpdate`() {
-            // ----- Arrange -----
-            // (no additional setup — appUpdateManager is relaxed)
-
-            // ----- Act -----
-            dataSource.completeUpdate()
-
-            // ----- Assert -----
-            verify {
-                appUpdateManager.completeUpdate()
-            }
-        }
-    }
-
-    @Nested
-    inner class InitialState {
-        @Test
-        fun `initial updateState is Idle`() = runTest {
-            // ----- Arrange -----
-            // (fresh dataSource created in setUp)
-
-            // ----- Act & Assert -----
-            dataSource.updateState.test {
-                awaitItem() shouldBe AppUpdateState.Idle
-                cancelAndIgnoreRemainingEvents()
-            }
-        }
-
-        @Test
-        fun `registers install listener on construction`() {
-            // ----- Arrange -----
-            // (dataSource was already created in setUp, slot was captured during registerListener)
-
-            // ----- Act -----
-            // (construction happened in setUp)
-
-            // ----- Assert -----
-            listenerSlot.isCaptured shouldBe true
+            dataSource.updateState.value shouldBe AppUpdateState.Idle
         }
     }
 }

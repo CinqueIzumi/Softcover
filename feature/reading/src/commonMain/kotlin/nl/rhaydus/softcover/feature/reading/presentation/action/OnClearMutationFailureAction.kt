@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -14,7 +15,7 @@ internal class OnClearMutationFailureAction(
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
         scope.setState {
-            it.copy(failedMutationBookIds = it.failedMutationBookIds - bookId)
+            it.copy(failedMutationBookIds = it.failedMutationBookIds.toPersistentSet().remove(bookId))
         }
     }
 }

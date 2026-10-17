@@ -1,0 +1,162 @@
+package nl.rhaydus.softcover.feature.library.presentation.collector
+
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
+import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryArrangeDraft
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class ArrangeDraftChipsCollectorTest {
+    private lateinit var dependencies: LibraryDependencies
+    private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
+    private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    private val readingTab = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING)
+
+    @BeforeEach
+    fun setUp() {
+        stateFlow = MutableStateFlow(LibraryUiState())
+        scope = ActionScope(
+            stateFlow = stateFlow,
+            localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
+            eventChannel = Channel(Channel.BUFFERED),
+        )
+        dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
+            every {
+                mock.defaultDispatcher
+            } returns testDispatcher
+        }
+    }
+
+    @Nested
+    inner class OnLaunch {
+        @Test
+        fun `switching the draft's tab recomputes the sort header's tab label`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val wantToReadTab = LibraryTab.Status.of(UserBookStatus.WANT_TO_READ)
+            val collector = ArrangeDraftChipsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab, wantToReadTab),
+                arrangeDraft = LibraryArrangeDraft(
+                    tabId = readingTab.id,
+                    sortMode = LibrarySortMode.MANUAL,
+                    sortDirection = SortDirection.ASCENDING,
+                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+                ),
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                arrangeDraft = stateFlow.value.arrangeDraft?.copy(tabId = wantToReadTab.id),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.arrangeSortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort by · Want to Read")
+            job.cancel()
+        }
+
+        @Test
+        fun `editing the draft's sort mode recomputes which sort chip is selected`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val collector = ArrangeDraftChipsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab),
+                arrangeDraft = LibraryArrangeDraft(
+                    tabId = readingTab.id,
+                    sortMode = LibrarySortMode.MANUAL,
+                    sortDirection = SortDirection.ASCENDING,
+                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+                ),
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                arrangeDraft = stateFlow.value.arrangeDraft?.copy(sortMode = LibrarySortMode.TITLE),
+            )
+
+            // ----- Assert -----
+            val manualChip = stateFlow.value.arrangeSortChips.chips.first { it.key == "sort:MANUAL" }
+            manualChip.tone shouldBe ChipTone.Choice
+            manualChip.selected shouldBe false
+            val titleChip = stateFlow.value.arrangeSortChips.chips.first { it.key == "sort:TITLE" }
+            titleChip.tone shouldBe ChipTone.Choice
+            titleChip.selected shouldBe true
+            titleChip.trailing shouldBe ChipTrailing.Icon(
+                icon = SoftcoverIcon.ArrowDropUp,
+                description = "Ascending",
+            )
+            stateFlow.value.arrangeSortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort by · Currently Reading")
+            job.cancel()
+        }
+
+        @Test
+        fun `unrelated state change that leaves the snapshot equal does not retrigger recompute`() =
+            runTest(testDispatcher) {
+                // ----- Arrange -----
+                val collector = ArrangeDraftChipsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+                stateFlow.value = LibraryUiState(
+                    visibleTabs = persistentListOf(readingTab),
+                    arrangeDraft = LibraryArrangeDraft(
+                        tabId = readingTab.id,
+                        sortMode = LibrarySortMode.MANUAL,
+                        sortDirection = SortDirection.ASCENDING,
+                        gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+                    ),
+                )
+                val layoutChipsAfterFirstEmit = stateFlow.value.arrangeLayoutChips
+                val sortChipsAfterFirstEmit = stateFlow.value.arrangeSortChips
+                val sortHeaderAfterFirstEmit = stateFlow.value.arrangeSortHeader
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
+
+                // ----- Assert -----
+                (stateFlow.value.arrangeLayoutChips === layoutChipsAfterFirstEmit) shouldBe true
+                (stateFlow.value.arrangeSortHeader === sortHeaderAfterFirstEmit) shouldBe true
+                (stateFlow.value.arrangeSortChips === sortChipsAfterFirstEmit) shouldBe true
+                job.cancel()
+            }
+    }
+}

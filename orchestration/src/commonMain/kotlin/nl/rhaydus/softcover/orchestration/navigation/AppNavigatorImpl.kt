@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.orchestration.navigation
 
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.tab.Tab
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TabDestination
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.explore.presentation.screen.HiddenSuggestionsScreen
@@ -26,9 +26,14 @@ internal class AppNavigatorImpl : AppNavigator {
             id = destination.id,
             initialCover = destination.initialCover,
             transitionSurface = destination.transitionSurface,
+            showVerdictSheet = destination.showVerdictSheet,
         )
 
-        ScreenDestination.BarcodeScanner -> BarcodeScannerScreen()
+        is ScreenDestination.BarcodeScanner -> BarcodeScannerScreen(
+            startInManualEntry = destination.startInManualEntry,
+            prefilledIsbn = destination.prefilledIsbn,
+            onResolved = destination.onResolved,
+        )
 
         ScreenDestination.LibraryVisibilitySettings -> LibraryVisibilitySettingsScreen()
 

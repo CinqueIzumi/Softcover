@@ -64,6 +64,9 @@ interface ExploreRepository {
         limit: Int,
     ): List<Book>
 
+    /** The books [fetchBooksByGenre] already cached for [genre] this session, or null when it would fetch. */
+    suspend fun peekBooksByGenre(genre: String): List<Book>?
+
     /**
      * The top Mood tags by popularity, for the "Browse by mood" grid.
      *

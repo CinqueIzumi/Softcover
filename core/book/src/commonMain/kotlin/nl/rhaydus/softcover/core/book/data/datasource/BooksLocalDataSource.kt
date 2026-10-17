@@ -3,19 +3,45 @@ package nl.rhaydus.softcover.core.book.data.datasource
 import androidx.room.RoomRawQuery
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.softcover.core.book.data.mapper.toStorageKey
 import nl.rhaydus.softcover.core.book.data.sort.toOrderByFragment
 import nl.rhaydus.softcover.core.book.data.storage.EditionImageStorage
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.mapper.toModel
+import nl.rhaydus.softcover.core.database.model.BookFullEntity
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import kotlin.time.Instant
 
 interface BooksLocalDataSource {
     val allUserBooks: Flow<List<Book>>
+
+    fun observeUserBook(id: Int): Flow<Book?>
+
+    fun observeTrendingBooks(period: TrendingPeriod): Flow<List<Book>>
+
+    fun observeTrendingFetchedAt(period: TrendingPeriod): Flow<Instant?>
+
+    suspend fun getTrendingFetchedAt(period: TrendingPeriod): Instant?
+
+    suspend fun getExistingUserBookBookIds(ids: List<Int>): List<Int>
+
+    suspend fun replaceTrendingBooks(
+        period: TrendingPeriod,
+        requestedIds: List<Int>,
+        books: List<Book>,
+        fetchedAt: Instant,
+    )
+
+    fun observeBooksByIds(ids: List<Int>): Flow<List<Book>>
 
     /**
      * Rewrite the **prefix** of the manual ordering for [status] with [prefixBookIds]
@@ -50,7 +76,7 @@ interface BooksLocalDataSource {
 
     suspend fun getAllUserBookIds(): List<Int>
 
-    suspend fun getUserBookIdsByStatus(status: UserBookStatus): List<Int>
+    suspend fun getUserBookIdsByStatuses(statuses: Set<UserBookStatus>): List<Int>
 
     suspend fun getExistingBookIds(ids: List<Int>): List<Int>
 
@@ -93,19 +119,69 @@ interface BooksLocalDataSource {
 internal class BooksLocalDataSourceImpl(
     private val dao: BookDao,
     private val editionImageStorage: EditionImageStorage,
+    private val appDispatchers: AppDispatchers,
 ) : BooksLocalDataSource {
     override val allUserBooks: Flow<List<Book>>
         get() = dao
             .observeBooks()
             .distinctUntilChanged()
-            .map { list -> list.map { it.toModel() } }
+            .toModelsReusingUnchanged()
+
+    override fun observeTrendingBooks(period: TrendingPeriod): Flow<List<Book>> = dao
+        .observeTrendingBooks(period = period.toStorageKey())
+        .distinctUntilChanged()
+        .toModelsReusingUnchanged()
+
+    override fun observeTrendingFetchedAt(period: TrendingPeriod): Flow<Instant?> = dao
+        .observeTrendingFetchedAt(period = period.toStorageKey())
+        .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
+        .distinctUntilChanged()
+
+    override suspend fun getTrendingFetchedAt(period: TrendingPeriod): Instant? = dao
+        .getTrendingFetchedAt(period = period.toStorageKey())
+        ?.let(Instant::fromEpochMilliseconds)
+
+    override suspend fun getExistingUserBookBookIds(ids: List<Int>): List<Int> {
+        if (ids.isEmpty()) return emptyList()
+
+        return dao.getBookIdsWithUserBook(bookIds = ids)
+    }
+
+    override suspend fun replaceTrendingBooks(
+        period: TrendingPeriod,
+        requestedIds: List<Int>,
+        books: List<Book>,
+        fetchedAt: Instant,
+    ) {
+        deleteStaleCovers(
+            dao.replaceTrendingBooks(
+                period = period.toStorageKey(),
+                requestedIds = requestedIds,
+                books = books,
+                fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
+            ),
+        )
+    }
+
+    override fun observeUserBook(id: Int): Flow<Book?> = dao
+        .observeBookById(id = id)
+        .distinctUntilChanged()
+        .map { entity -> entity?.toModel() }
+        .distinctUntilChanged()
+        .flowOn(appDispatchers.default)
+
+    override fun observeBooksByIds(ids: List<Int>): Flow<List<Book>> = dao
+        .observeBooksByIds(ids = ids)
+        .distinctUntilChanged()
+        .toModelsReusingUnchanged()
+        .distinctUntilChanged()
 
     override suspend fun getAllUserBookIds(): List<Int> {
         return dao.getAllUserBookIds()
     }
 
-    override suspend fun getUserBookIdsByStatus(status: UserBookStatus): List<Int> {
-        return dao.getUserBookIdsByStatus(statusCode = status.code)
+    override suspend fun getUserBookIdsByStatuses(statuses: Set<UserBookStatus>): List<Int> {
+        return dao.getUserBookIdsByStatuses(statusCodes = statuses.map { it.code })
     }
 
     override suspend fun getExistingBookIds(ids: List<Int>): List<Int> {
@@ -158,7 +234,9 @@ internal class BooksLocalDataSourceImpl(
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return when (status) {
-            UserBookStatus.CURRENTLY_READING -> dao.getBooksByStatusAndEvents(
+            UserBookStatus.CURRENTLY_READING,
+            UserBookStatus.PAUSED,
+            -> dao.getBooksByStatusAndEvents(
                 statusCode = status.code,
                 events = listOf("progress_updated", "user_book_read_started"),
             )
@@ -172,7 +250,7 @@ internal class BooksLocalDataSourceImpl(
             )
         }
             .distinctUntilChanged()
-            .map { list -> list.map { it.toModel() } }
+            .toModelsReusingUnchanged()
     }
 
     override fun getSortedAllUserBooks(
@@ -201,7 +279,7 @@ internal class BooksLocalDataSourceImpl(
 
         return dao.observeBooksRaw(query = RoomRawQuery(sql = sql))
             .distinctUntilChanged()
-            .map { list -> list.map { it.toModel() } }
+            .toModelsReusingUnchanged()
     }
 
     override fun getSortedBooksByStatus(
@@ -265,7 +343,7 @@ internal class BooksLocalDataSourceImpl(
             },
         )
             .distinctUntilChanged()
-            .map { list -> list.map { it.toModel() } }
+            .toModelsReusingUnchanged()
     }
 
     override suspend fun applyShelfManualOrderPrefix(
@@ -329,5 +407,37 @@ internal class BooksLocalDataSourceImpl(
             oldId = oldId,
             newId = newId,
         )
+    }
+
+    /**
+     * Maps each emission to models, reusing the previous [Book] instance for every row whose
+     * entity is unchanged. Downstream `distinctUntilChanged` comparisons then short-circuit on
+     * identity instead of walking every field of every book. The previous-emission state is
+     * created per collection, so subscribers never share it.
+     */
+    private fun Flow<List<BookFullEntity>>.toModelsReusingUnchanged(): Flow<List<Book>> {
+        val upstream = this
+
+        return flow {
+            var previous: Map<Int, Pair<BookFullEntity, Book>> = emptyMap()
+
+            upstream.collect { entities ->
+                val next = HashMap<Int, Pair<BookFullEntity, Book>>(entities.size)
+                val models = entities.map { entity ->
+                    val id = entity.book.id
+                    val prior = previous[id]
+                    val model = if (prior != null && prior.first == entity) {
+                        prior.second
+                    } else {
+                        entity.toModel()
+                    }
+                    next[id] = entity to model
+                    model
+                }
+
+                previous = next
+                emit(models)
+            }
+        }.flowOn(appDispatchers.default)
     }
 }

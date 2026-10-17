@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.util
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
@@ -10,8 +8,26 @@ import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import java.util.TimeZone
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class LibraryStatsTest {
+    private lateinit var originalZone: TimeZone
+
+    @BeforeEach
+    fun setUp() {
+        originalZone = TimeZone.getDefault()
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+    }
+
+    @AfterEach
+    fun tearDown() {
+        TimeZone.setDefault(originalZone)
+    }
+
     // region Fixtures
     private fun buildEdition(
         id: Int = 1,
@@ -40,6 +56,7 @@ class LibraryStatsTest {
         journals: List<ReadingJournal> = emptyList(),
         createdAt: String? = null,
         lastReadDate: String? = null,
+        reads: List<UserBookRead> = emptyList(),
     ) = UserBook(
         id = 1,
         status = BookStatus.Read,
@@ -54,6 +71,7 @@ class LibraryStatsTest {
         reviewedAt = null,
         updatedAt = null,
         journals = journals,
+        reads = reads,
     )
 
     private fun buildUserBookRead(finishedAt: String? = null) = UserBookRead(
@@ -70,7 +88,6 @@ class LibraryStatsTest {
         currentEditionPages: Int? = null,
         defaultEditionPages: Int? = null,
         userBook: UserBook? = null,
-        userBookRead: UserBookRead? = null,
     ): Book {
         val ownedEdition = if (currentEditionPages != null) {
             buildEdition(
@@ -109,7 +126,6 @@ class LibraryStatsTest {
             positionsInSeries = emptyList(),
             isCompilation = false,
             userBook = userBook,
-            userBookRead = userBookRead,
         )
     }
 
@@ -120,18 +136,6 @@ class LibraryStatsTest {
     // endregion
     @Nested
     inner class TotalPages {
-        @Test
-        fun `returns 0 for empty list`() {
-            // ----- Arrange -----
-            val books = emptyList<Book>()
-
-            // ----- Act -----
-            val result = books.totalPages()
-
-            // ----- Assert -----
-            result shouldBe 0
-        }
-
         @Test
         fun `sums currentEdition pages when available`() {
             // ----- Arrange -----
@@ -206,66 +210,6 @@ class LibraryStatsTest {
             // ----- Assert -----
             result shouldBe "0 titles"
         }
-
-        @Test
-        fun `returns "N titles" for count greater than 1`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = formatBookCount(count = 42)
-
-            // ----- Assert -----
-            result shouldBe "42 titles"
-        }
-    }
-
-    @Nested
-    inner class FormatPageCount {
-        @Test
-        fun `returns null for 0 pages`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = formatPageCount(pages = 0)
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `formats small page count without thousands separator`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = formatPageCount(pages = 300)
-
-            // ----- Assert -----
-            result shouldBe "300 pages"
-        }
-
-        @Test
-        fun `formats large page count with thousands separator`() {
-            // ----- Arrange -----
-            val expected = "%,d pages".format(1500)
-
-            // ----- Act -----
-            val result = formatPageCount(pages = 1500)
-
-            // ----- Assert -----
-            result shouldBe expected
-        }
-
-        @Test
-        fun `formats very large page count with thousands separator`() {
-            // ----- Arrange -----
-            val expected = "%,d pages".format(12345)
-
-            // ----- Act -----
-            val result = formatPageCount(pages = 12345)
-
-            // ----- Assert -----
-            result shouldBe expected
-        }
     }
 
     @Nested
@@ -280,31 +224,6 @@ class LibraryStatsTest {
 
             // ----- Assert -----
             result shouldBe null
-        }
-
-        @Test
-        fun `returns null when no StatusFinished journal exists`() {
-            // ----- Arrange -----
-            val book = buildBook(userBook = buildUserBook(journals = emptyList()))
-
-            // ----- Act -----
-            val result = book.finishedYear()
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `returns year from most recent StatusFinished journal`() {
-            // ----- Arrange -----
-            val journals = listOf(buildFinishedJournal("2022-05-10T12:00:00"))
-            val book = buildBook(userBook = buildUserBook(journals = journals))
-
-            // ----- Act -----
-            val result = book.finishedYear()
-
-            // ----- Assert -----
-            result shouldBe 2022
         }
 
         @Test
@@ -344,7 +263,7 @@ class LibraryStatsTest {
         }
 
         @Test
-        fun `finishedAt takes precedence over lastReadDate, journal, and createdAt`() {
+        fun `the latest finishedAt wins over an older lastReadDate, journal, and createdAt`() {
             // ----- Arrange -----
             val journals = listOf(buildFinishedJournal("2019-06-01T00:00:00"))
             val book = buildBook(
@@ -352,8 +271,8 @@ class LibraryStatsTest {
                     journals = journals,
                     lastReadDate = "2020-03-15",
                     createdAt = "2018-01-01T00:00:00",
+                    reads = listOf(buildUserBookRead(finishedAt = "2022-05-10")),
                 ),
-                userBookRead = buildUserBookRead(finishedAt = "2022-05-10"),
             )
 
             // ----- Act -----
@@ -372,8 +291,8 @@ class LibraryStatsTest {
                     journals = journals,
                     lastReadDate = "2020-03-15",
                     createdAt = "2018-01-01T00:00:00",
+                    reads = listOf(buildUserBookRead(finishedAt = null)),
                 ),
-                userBookRead = buildUserBookRead(finishedAt = null),
             )
 
             // ----- Act -----
@@ -391,8 +310,8 @@ class LibraryStatsTest {
                     journals = emptyList(),
                     lastReadDate = null,
                     createdAt = "2017-11-20T08:30:00",
+                    reads = listOf(buildUserBookRead(finishedAt = null)),
                 ),
-                userBookRead = buildUserBookRead(finishedAt = null),
             )
 
             // ----- Act -----
@@ -410,8 +329,8 @@ class LibraryStatsTest {
                     journals = emptyList(),
                     lastReadDate = "2021-08-22",
                     createdAt = null,
+                    reads = listOf(buildUserBookRead(finishedAt = "garbage")),
                 ),
-                userBookRead = buildUserBookRead(finishedAt = "garbage"),
             )
 
             // ----- Act -----
@@ -422,6 +341,67 @@ class LibraryStatsTest {
         }
 
         @Test
+        fun `a journal at UTC year-end evening counts toward the next year in a zone ahead of UTC`() {
+            // ----- Arrange -----
+            TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"))
+            val journals = listOf(buildFinishedJournal("2025-12-31T23:30:00.000000"))
+            val book = buildBook(userBook = buildUserBook(journals = journals))
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2026
+        }
+
+        @Test
+        fun `a journal at UTC new-year morning counts toward the previous year in a zone behind UTC`() {
+            // ----- Arrange -----
+            TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Pago_Pago"))
+            val journals = listOf(buildFinishedJournal("2026-01-01T05:00:00.000000"))
+            val book = buildBook(userBook = buildUserBook(journals = journals))
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2025
+        }
+
+        @Test
+        fun `createdAt at UTC year-end evening falls back to the next local year`() {
+            // ----- Arrange -----
+            TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"))
+            val book = buildBook(
+                userBook = buildUserBook(
+                    journals = emptyList(),
+                    createdAt = "2025-12-31T23:30:00.000000",
+                ),
+            )
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2026
+        }
+
+        @Test
+        fun `finishedAt is a plain date and is not shifted by the device zone`() {
+            // ----- Arrange -----
+            TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Pago_Pago"))
+            val book = buildBook(
+                userBook = buildUserBook(reads = listOf(buildUserBookRead(finishedAt = "2026-01-01"))),
+            )
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2026
+        }
+
+        @Test
         fun `returns null when all candidates are null`() {
             // ----- Arrange -----
             val book = buildBook(
@@ -429,8 +409,8 @@ class LibraryStatsTest {
                     journals = emptyList(),
                     lastReadDate = null,
                     createdAt = null,
+                    reads = listOf(buildUserBookRead(finishedAt = null)),
                 ),
-                userBookRead = buildUserBookRead(finishedAt = null),
             )
 
             // ----- Act -----

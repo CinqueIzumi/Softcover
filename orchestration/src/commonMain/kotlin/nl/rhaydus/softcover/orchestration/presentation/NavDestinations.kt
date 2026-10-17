@@ -5,21 +5,25 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
-import org.koin.compose.koinInject
+import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.nav.NavPulse
-import nl.rhaydus.designsystem.nav.rememberPulseScale
-import nl.rhaydus.softcover.core.designsystem.presentation.util.LibraryNavPulseKey
-import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
+import nl.rhaydus.softcover.core.component.modifier.rememberPulseScale
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
+import nl.rhaydus.softcover.core.presentation.util.LibraryNavPulseKey
+import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
+import nl.rhaydus.softcover.core.presentation.util.TabReselectRegistry
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsTab
+import org.koin.compose.koinInject
 
 /**
  * The four root destinations in display order. The single source of the tab set consumed by every
@@ -54,34 +58,81 @@ internal fun Tab.isDetailCapable(): Boolean = when (this) {
 internal expect val wideGridTabsUseDetailPane: Boolean
 
 /**
+ * The `NavPulse` key for [tab]'s icon. Library keeps the shared [LibraryNavPulseKey] that Reading
+ * pulses on mark-as-read; every other tab is keyed by its own [Tab] object.
+ */
+internal fun navPulseKeyFor(tab: Tab): Any = if (tab == LibraryTab) LibraryNavPulseKey else tab
+
+/**
  * Resolves [appNavTabs] into render-ready [NavItemUi]s: current selection (from the tab navigator),
- * the settings app-update badge, and the per-frame library pulse scale. Every chrome renderer calls
- * this so the four bars/rail/sidebar share one selection/badge/pulse implementation.
+ * the settings app-update badge, and each tab's per-frame icon pulse scale. Every chrome renderer calls
+ * this so the bars/rail/sidebar share one selection/badge/pulse implementation.
  */
 @Composable
 internal fun rememberNavItems(): List<NavItemUi> {
     val tabNavigator = LocalTabNavigator.current
     val showSettingsBadge = LocalAppUpdateState.current != AppUpdateState.Idle
     val navPulse = koinInject<NavPulse>()
-    val libraryPulseScale = rememberPulseScale(
-        pulse = navPulse,
-        key = LibraryNavPulseKey,
-    )
 
     return appNavTabs.map { tab ->
+        val pulseScale = rememberPulseScale(
+            pulse = navPulse,
+            key = navPulseKeyFor(tab),
+        )
+
         NavItemUi(
             tab = tab,
             selected = tabNavigator.current == tab,
             showBadge = tab == SettingsTab && showSettingsBadge,
-            iconScale = if (tab == LibraryTab) libraryPulseScale else 1f,
+            iconScale = pulseScale,
         )
+    }
+}
+
+internal class NavItemClickResolver(
+    private val selectTab: (Tab) -> Unit,
+    private val reselect: suspend (Tab) -> Boolean,
+    private val pulse: (Any) -> Unit,
+) {
+    fun onClick(
+        item: NavItemUi,
+        launchReselect: (suspend () -> Unit) -> Unit,
+    ) {
+        if (item.selected.not()) {
+            selectTab(item.tab)
+            return
+        }
+
+        launchReselect {
+            if (reselect(item.tab).not()) pulse(navPulseKeyFor(item.tab))
+        }
+    }
+}
+
+@Composable
+internal fun rememberNavItemClick(): (NavItemUi) -> Unit {
+    val tabNavigator = LocalTabNavigator.current
+    val navPulse = koinInject<NavPulse>()
+    val registry = koinInject<TabReselectRegistry>()
+    val scope = rememberCoroutineScope()
+
+    val resolver = remember(tabNavigator, navPulse, registry) {
+        NavItemClickResolver(
+            selectTab = { tabNavigator.current = it },
+            reselect = registry::reselect,
+            pulse = navPulse::pulse,
+        )
+    }
+
+    return { item ->
+        resolver.onClick(item) { block -> scope.launch { block() } }
     }
 }
 
 /**
  * The badged, pulse-scaled destination icon shared by the docked bar and the navigation rail (the
  * floating bar and sidebar style their own surfaces). Draws the app-update badge when
- * [NavItemUi.showBadge] is set and applies [NavItemUi.iconScale] for the library pulse.
+ * [NavItemUi.showBadge] is set and applies [NavItemUi.iconScale].
  */
 @Composable
 internal fun NavItemIcon(
@@ -97,7 +148,7 @@ internal fun NavItemIcon(
     ) {
         Icon(
             painter = painter,
-            contentDescription = "${item.tab.options.title} icon",
+            contentDescription = item.tab.options.title,
             modifier = Modifier.graphicsLayer {
                 scaleX = item.iconScale
                 scaleY = item.iconScale

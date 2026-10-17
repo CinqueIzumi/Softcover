@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.profile.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
@@ -10,6 +9,7 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
+import kotlin.time.Clock
 
 /** Number of days surfaced by the Reading-screen streak strip (and persisted for it). */
 internal const val READING_ACTIVITY_WINDOW_DAYS = 21

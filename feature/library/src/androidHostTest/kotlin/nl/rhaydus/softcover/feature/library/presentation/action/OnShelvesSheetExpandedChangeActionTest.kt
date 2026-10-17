@@ -5,83 +5,93 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.openShelvesSession
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.ManageShelves
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnShelvesSheetExpandedChangeActionTest {
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
+    private lateinit var eventChannel: Channel<LibraryEvent>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
     @Nested
     inner class Execute {
         @Test
-        fun `sets isShelvesSheetExpanded to true when expanded is true`() = runTest {
+        fun `requests the sheet without building its model or sending an event when expanded is true`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isShelvesSheetExpanded = false)
-            val action = OnShelvesSheetExpandedChangeAction(expanded = true)
+            stateFlow.value = LibraryUiState()
 
             // ----- Act -----
-            action.execute(
+            OnShelvesSheetExpandedChangeAction(expanded = true).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.isShelvesSheetExpanded shouldBe true
+            stateFlow.value.isShelvesSheetRequested shouldBe true
+            stateFlow.value.shelvesSheet shouldBe SheetSession.Closed
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
-        fun `sets isShelvesSheetExpanded to false when expanded is false`() = runTest {
+        fun `leaves a closing session for the collector to replace when expanded is true`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isShelvesSheetExpanded = true)
-            val action = OnShelvesSheetExpandedChangeAction(expanded = false)
+            val closing = openShelvesSession(
+                closing = true,
+                pending = ManageShelves,
+            )
+            stateFlow.value = LibraryUiState(shelvesSheet = closing)
 
             // ----- Act -----
-            action.execute(
+            OnShelvesSheetExpandedChangeAction(expanded = true).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.isShelvesSheetExpanded shouldBe false
+            stateFlow.value.isShelvesSheetRequested shouldBe true
+            stateFlow.value.shelvesSheet shouldBe closing
         }
 
         @Test
-        fun `preserves other state fields when updating isShelvesSheetExpanded`() = runTest {
+        fun `closes the session and withdraws the request when expanded is false`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
-                isLoading = false,
-                isShelvesSheetExpanded = false,
+                shelvesSheet = openShelvesSession(),
+                isShelvesSheetRequested = true,
             )
-            val action = OnShelvesSheetExpandedChangeAction(expanded = true)
 
             // ----- Act -----
-            action.execute(
+            OnShelvesSheetExpandedChangeAction(expanded = false).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isShelvesSheetExpanded shouldBe true
+            stateFlow.value.shelvesSheet shouldBe SheetSession.Closed
+            stateFlow.value.isShelvesSheetRequested shouldBe false
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }
 }

@@ -1,19 +1,29 @@
 package nl.rhaydus.softcover.core.book.domain.repository
 
 import kotlinx.coroutines.flow.Flow
-import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
+import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import kotlin.time.Duration
+import kotlin.time.Instant
 
 interface BooksRepository {
     val books: Flow<List<Book>>
+
+    /** Emits the cached book with [id], or null while it is not cached. Re-emits only when that book changes. */
+    fun observeUserBook(id: Int): Flow<Book?>
+
+    /** Emits the cached books among [ids], in no particular order; uncached ids are absent. */
+    fun observeBooksByIds(ids: List<Int>): Flow<List<Book>>
 
     fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>>
 
@@ -43,12 +53,13 @@ interface BooksRepository {
 
     /**
      * Re-fetches the user's books from the remote and reconciles them with the local cache.
-     * When [statusFilter] is null, refreshes every status; otherwise refreshes only that status's
-     * books. This is a books-only operation — list refresh is owned by [nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository].
+     * When [statusFilter] is null, refreshes every status; otherwise refreshes only the books under
+     * those statuses. This is a books-only operation — list refresh is owned by
+     * [nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository].
      */
     suspend fun refreshUserBooks(
         userId: Int,
-        statusFilter: UserBookStatus? = null,
+        statusFilter: Set<UserBookStatus>? = null,
     )
 
     /**
@@ -83,27 +94,34 @@ interface BooksRepository {
      * [OfflineException] when offline, mirroring
      * [fetchEditionMatchesForIsbns].
      */
-    suspend fun addBookByIsbn(isbn: String): CreatedBook
+    suspend fun addBookByIsbn(isbn: String): BookImport
 
     suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
 
-    /**
-     * Fetches the books trending on Hardcover this week - the app's single trending cadence, no
-     * monthly/other fallback. A book-discovery query (consumed by the reading and explore
-     * surfaces), so it lives with the other book queries.
-     *
-     * Served from a process-lifetime session cache: trending is editorial content that turns over at
-     * most daily, so its 2 requests (GetTrendingBookIds + GetBooksByIds) are spent once per session
-     * rather than once per mount. Both the Reading and Explore surfaces read through here, so they
-     * share the one cached result. Caching is success-only, so a failed fetch retries on the next call.
-     *
-     * [forceRefresh] bypasses that cache. Pass it only for explicit user intent (pull-to-refresh):
-     * answering one from the cache spins the indicator, changes nothing, and reports no error, which
-     * reads as a broken button. A fetch on screen mount is not user intent and must leave it `false`.
-     */
-    suspend fun fetchTrendingBooks(forceRefresh: Boolean = false): List<Book>
+    /** The books trending on Hardcover over [period], in rank order. */
+    fun observeTrendingBooks(period: TrendingPeriod): Flow<List<Book>>
 
-    suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
+    /** When [period]'s trending was last fetched, or `null` if a fetch has never completed. */
+    fun observeTrendingFetchedAt(period: TrendingPeriod): Flow<Instant?>
+
+    /**
+     * Fetches [period]'s trending only when its last completed fetch is older than [maxAge]. Only an
+     * explicit user refresh passes [Duration.ZERO]; a fetch on screen mount is not user intent.
+     * Refreshes of the same period are serialized; different periods refresh concurrently.
+     */
+    suspend fun refreshTrendingBooks(
+        period: TrendingPeriod,
+        maxAge: Duration,
+    )
+
+    /**
+     * [forceNetwork] bypasses the Apollo cache. Pass it only on explicit user action that can have just
+     * created an edition on Hardcover (the ISBN lookup returning), never on a screen mount.
+     */
+    suspend fun getEditionsByBookId(
+        bookId: Int,
+        forceNetwork: Boolean = false,
+    ): List<BookEdition>
 
     suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition>
 
@@ -131,6 +149,11 @@ interface BooksRepository {
         editionId: Int? = null,
     ): Book
 
+    suspend fun markBookAsPaused(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
+
     suspend fun updateBookRating(
         book: Book,
         rating: Double,
@@ -151,7 +174,15 @@ interface BooksRepository {
         hasSpoilers: Boolean,
     ): Book
 
-    suspend fun removeBookFromLibrary(book: Book)
+    /**
+     * Removes [books] from the local cache only. Until the removal is undone or committed, fetched
+     * copies of these books are dropped instead of cached, so a sync cannot bring them back.
+     */
+    suspend fun stageBookRemoval(books: List<Book>): StagedBookRemoval
+
+    suspend fun undoBookRemoval(staged: StagedBookRemoval)
+
+    suspend fun commitBookRemoval(staged: StagedBookRemoval): List<Book>
 
     suspend fun updateBookProgress(
         book: Book,

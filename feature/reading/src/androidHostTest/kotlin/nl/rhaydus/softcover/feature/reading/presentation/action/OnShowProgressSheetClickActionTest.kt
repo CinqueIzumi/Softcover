@@ -1,19 +1,25 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.Book
+import kotlinx.datetime.LocalDateTime
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.core.component.sheet.isClosing
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.core.uibinding.progress.toProgressSheetUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnShowProgressSheetClickActionTest {
     private lateinit var dependencies: ReadingScreenDependencies
@@ -31,14 +37,36 @@ class OnShowProgressSheetClickActionTest {
         )
     }
 
-    private fun stubBook(): Book = mockk()
-
     @Nested
     inner class Execute {
         @Test
-        fun `sets bookToUpdate to the provided book`() = runTest {
+        fun `resets a leftover backdate to just now`() = runTest {
             // ----- Arrange -----
-            val book = stubBook()
+            stateFlow.value = ReadingScreenUiState(
+                readAt = LocalDateTime(
+                    2020,
+                    1,
+                    2,
+                    9,
+                    15,
+                ),
+            )
+            val action = OnShowProgressSheetClickAction(book = PreviewData.baseBook)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.readAt.shouldBeNull()
+        }
+
+        @Test
+        fun `sets the book to update so the collector opens the sheet`() = runTest {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook
             val action = OnShowProgressSheetClickAction(book = book)
 
             // ----- Act -----
@@ -52,11 +80,9 @@ class OnShowProgressSheetClickActionTest {
         }
 
         @Test
-        fun `sets showProgressSheet to true`() = runTest {
+        fun `leaves the session to the collector`() = runTest {
             // ----- Arrange -----
-            val book = stubBook()
-            stateFlow.value = ReadingScreenUiState(showProgressSheet = false)
-            val action = OnShowProgressSheetClickAction(book = book)
+            val action = OnShowProgressSheetClickAction(book = PreviewData.baseBook)
 
             // ----- Act -----
             action.execute(
@@ -65,16 +91,14 @@ class OnShowProgressSheetClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showProgressSheet shouldBe true
+            stateFlow.value.progressSheet shouldBe SheetSession.Closed
         }
 
         @Test
-        fun `replaces previously stored bookToUpdate with the new book`() = runTest {
+        fun `keeps the stored tab`() = runTest {
             // ----- Arrange -----
-            val previousBook = stubBook()
-            val newBook = stubBook()
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = previousBook)
-            val action = OnShowProgressSheetClickAction(book = newBook)
+            stateFlow.value = ReadingScreenUiState(progressSheetTab = ProgressSheetTab.PERCENTAGE)
+            val action = OnShowProgressSheetClickAction(book = PreviewData.baseBook)
 
             // ----- Act -----
             action.execute(
@@ -83,18 +107,15 @@ class OnShowProgressSheetClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.bookToUpdate shouldBe newBook
+            stateFlow.value.progressSheetTab shouldBe ProgressSheetTab.PERCENTAGE
         }
 
         @Test
-        fun `preserves all other state fields unchanged`() = runTest {
+        fun `leaves a closing session for the collector to reopen`() = runTest {
             // ----- Arrange -----
-            val book = stubBook()
-            stateFlow.value = ReadingScreenUiState(
-                isLoading = false,
-                showProgressSheet = false,
-            )
-            val action = OnShowProgressSheetClickAction(book = book)
+            val closingModel = PreviewData.baseBook.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE).requestingClose()
+            stateFlow.value = ReadingScreenUiState(progressSheet = SheetSession.Open(model = closingModel))
+            val action = OnShowProgressSheetClickAction(book = PreviewData.baseBook)
 
             // ----- Act -----
             action.execute(
@@ -103,7 +124,8 @@ class OnShowProgressSheetClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
+            stateFlow.value.progressSheet.isClosing shouldBe true
+            stateFlow.value.bookToUpdate shouldBe PreviewData.baseBook
         }
     }
 }

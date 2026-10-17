@@ -10,34 +10,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.modifier.tactileClickable
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-
-/**
- * The rail's own height, reserved whether or not both neighbours exist. 48dp rather than the ~36dp
- * the labels need: each half of the row *is* the tap target, and a navigation control has to clear
- * the minimum touch target.
- */
-private val RAIL_HEIGHT = 48.dp
 
 /**
  * Names the shelves either side of the current one, so a swipe is never blind: with the pill tab row
  * retired, nothing else on the Library screen says what the next shelf is. Hairline-bounded, one
  * eyebrow-caps label per end, each end its own tap target that moves one shelf over.
  *
- * The row keeps [RAIL_HEIGHT] regardless of how many neighbours exist, and a missing neighbour
+ * The row keeps its height regardless of how many neighbours exist, and a missing neighbour
  * leaves its end empty rather than letting the other label drift towards the middle — so reaching
  * the first or last shelf never shifts the grid below.
  *
@@ -52,13 +45,14 @@ internal fun ShelfNeighbourRail(
     onNextClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Divider()
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(RAIL_HEIGHT)
-                .padding(horizontal = 16.dp),
+                // Not the ~36dp the labels need: each half of the row is a navigation tap target.
+                .height(48.dp)
+                .padding(horizontal = Spacing.gutter),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             NeighbourEnd(
@@ -70,7 +64,7 @@ internal fun ShelfNeighbourRail(
                 modifier = Modifier.weight(1f),
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(Spacing.sm))
 
             NeighbourEnd(
                 label = nextLabel,
@@ -82,7 +76,7 @@ internal fun ShelfNeighbourRail(
             )
         }
 
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Divider()
     }
 }
 
@@ -116,8 +110,7 @@ private fun NeighbourEnd(
     Box(
         modifier = modifier
             .fillMaxHeight()
-            .pointerHandCursor()
-            .pressScaleClickable(onClick = onClick),
+            .tactileClickable(onClick = onClick),
         contentAlignment = alignment,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -129,10 +122,10 @@ private fun NeighbourEnd(
                     modifier = Modifier.size(16.dp),
                 )
 
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(Spacing.xs))
             }
 
-            Text(
+            SoftcoverText(
                 text = label.uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -145,7 +138,7 @@ private fun NeighbourEnd(
             )
 
             if (iconLeading.not()) {
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(Spacing.xs))
 
                 Icon(
                     painter = chevron.getIconPainter(),

@@ -1,34 +1,45 @@
 package nl.rhaydus.softcover.core.book.di
 
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSourceImpl
+import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.repository.BooksRepositoryImpl
 import nl.rhaydus.softcover.core.book.data.sync.OfflineUserBookSyncImpl
+import nl.rhaydus.softcover.core.book.data.sync.UserBookCacheGate
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.CommitBookRemovalUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetDidNotFinishUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.GetPausedUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedBooksByStatusUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ResumeIfPausedUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.StageBookRemovalUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.UndoBookRemovalUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
@@ -36,9 +47,9 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.di.databaseModule
-import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
+import org.koin.dsl.module
 
 val bookModule = module {
     includes(
@@ -55,11 +66,18 @@ val bookModule = module {
         )
     }
 
+    single {
+        UserBookCacheGate(booksLocalDataSource = get())
+    }
+
     single<OfflineUserBookSync> {
         OfflineUserBookSyncImpl(
             userBookWriteQueue = get(),
             userBookWriteDrainer = get(),
             booksLocalDataSource = get(),
+            userBookCacheGate = get(),
+            networkAvailability = get(),
+            applicationScope = get(),
         )
     }
 
@@ -67,17 +85,24 @@ val bookModule = module {
         BooksRepositoryImpl(
             booksRemoteDataSource = get(),
             booksLocalDataSource = get(),
+            userBookCacheGate = get(),
             networkAvailability = get(),
             offlineSync = get(),
             applicationScope = get(),
             appDispatchers = get(),
+            progressHistoryLocalDataSource = get(),
         )
+    }
+
+    single<ProgressHistoryLocalDataSource> {
+        ProgressHistoryLocalDataSourceImpl(dao = get<SoftcoverDatabase>().progressHistoryDao())
     }
 
     single<BooksLocalDataSource> {
         BooksLocalDataSourceImpl(
             dao = get(),
             editionImageStorage = get(),
+            appDispatchers = get(),
         )
     }
 
@@ -90,7 +115,23 @@ val bookModule = module {
     }
 
     factory {
-        GetTrendingBooksUseCase(booksRepository = get())
+        ObserveUserBookUseCase(booksRepository = get())
+    }
+
+    factory {
+        ObserveTrendingBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        ObserveTrendingFetchedAtUseCase(booksRepository = get())
+    }
+
+    factory {
+        RefreshTrendingBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        ObserveBooksByIdsUseCase(booksRepository = get())
     }
 
     factory {
@@ -103,6 +144,10 @@ val bookModule = module {
 
     factory {
         GetCurrentlyReadingUserBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        GetPausedUserBooksUseCase(booksRepository = get())
     }
 
     factory {
@@ -146,6 +191,14 @@ val bookModule = module {
     }
 
     factory {
+        PauseBookUseCase(booksRepository = get())
+    }
+
+    factory {
+        ResumeIfPausedUseCase(booksRepository = get())
+    }
+
+    factory {
         UpdateBookRatingUseCase(booksRepository = get())
     }
 
@@ -165,13 +218,21 @@ val bookModule = module {
     }
 
     factory {
-        RemoveBookFromLibraryUseCase(booksRepository = get())
+        StageBookRemovalUseCase(booksRepository = get())
+    }
+
+    factory {
+        UndoBookRemovalUseCase(booksRepository = get())
+    }
+
+    factory {
+        CommitBookRemovalUseCase(booksRepository = get())
     }
 
     factory {
         MarkBookAsReadUseCase(
             repository = get(),
-            markReadingActivityTodayUseCase = get(),
+            markReadingActivityUseCase = get(),
         )
     }
 
@@ -182,13 +243,14 @@ val bookModule = module {
     factory {
         UpdateBookProgressUseCase(
             repository = get(),
-            markReadingActivityTodayUseCase = get(),
+            markReadingActivityUseCase = get(),
         )
     }
 
     factory {
         RecordBookProgressUseCase(
             markBookAsReadUseCase = get(),
+            resumeIfPausedUseCase = get(),
             updateBookProgressUseCase = get(),
         )
     }

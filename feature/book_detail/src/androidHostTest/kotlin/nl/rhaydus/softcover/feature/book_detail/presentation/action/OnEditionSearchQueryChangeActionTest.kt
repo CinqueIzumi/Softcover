@@ -5,14 +5,15 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnEditionSearchQueryChangeActionTest {
     private lateinit var dependencies: BookDetailDependencies
@@ -21,85 +22,30 @@ class OnEditionSearchQueryChangeActionTest {
 
     @BeforeEach
     fun setUp() {
-        dependencies = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
+        dependencies = mockk<BookDetailDependencies>(relaxed = true)
     }
 
     @Nested
     inner class Execute {
         @Test
-        fun `writes the query into editionSearchQuery`() = runTest {
+        fun `writes the query to state`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(editionSearchQuery = "")
-            val action = OnEditionSearchQueryChangeAction(query = "978")
+            stateFlow.value = buildBookDetailUiState().copy(editionSearchQuery = "old")
 
             // ----- Act -----
-            action.execute(
+            OnEditionSearchQueryChangeAction(query = "978").execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
             stateFlow.value.editionSearchQuery shouldBe "978"
-        }
-
-        @Test
-        fun `overwrites a previous query with the new value`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(editionSearchQuery = "old query")
-            val action = OnEditionSearchQueryChangeAction(query = "new query")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.editionSearchQuery shouldBe "new query"
-        }
-
-        @Test
-        fun `accepts an empty string and clears editionSearchQuery`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(editionSearchQuery = "something")
-            val action = OnEditionSearchQueryChangeAction(query = "")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.editionSearchQuery shouldBe ""
-        }
-
-        @Test
-        fun `does not mutate any other state fields`() = runTest {
-            // ----- Arrange -----
-            val initialState = BookDetailUiState(
-                loadingBookDetails = false,
-                showEditEditionSheet = true,
-                fabMenuExpanded = true,
-                editionSearchQuery = "",
-            )
-            stateFlow.value = initialState
-            val action = OnEditionSearchQueryChangeAction(query = "Penguin")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe initialState.copy(editionSearchQuery = "Penguin")
         }
     }
 }

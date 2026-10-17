@@ -8,12 +8,12 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 import nl.rhaydus.toad.ActionScope
 
 internal class OnTagEditorCategoryChangeAction(
-    private val category: TagCategory,
+    private val categoryKey: String,
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(tagEditorCategory = category) }
+        scope.setState { it.copy(tagEditorCategory = TagCategory.fromName(categoryKey)) }
     }
 }

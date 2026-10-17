@@ -1,10 +1,7 @@
 package nl.rhaydus.softcover.core.profile.di
 
-import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
-import org.koin.core.qualifier.named
-import org.koin.dsl.module
-import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
+import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityUseCase
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
@@ -15,13 +12,16 @@ import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
 import nl.rhaydus.softcover.core.profile.data.repository.ProfileRepositoryImpl
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
-import nl.rhaydus.softcover.core.profile.domain.usecase.MarkReadingActivityTodayUseCaseImpl
+import nl.rhaydus.softcover.core.profile.domain.usecase.MarkReadingActivityUseCaseImpl
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileStatsUseCase
+import org.koin.core.qualifier.named
+import org.koin.dsl.module
+import kotlin.time.Clock
 
 // The activity half (streak + recent reading days) and the stats half (everything the Profile tab
 // renders) refresh independently, each skipped at most once per session - see
@@ -77,8 +77,8 @@ val profileModule = module {
         )
     }
 
-    factory<MarkReadingActivityTodayUseCase> {
-        MarkReadingActivityTodayUseCaseImpl(
+    factory<MarkReadingActivityUseCase> {
+        MarkReadingActivityUseCaseImpl(
             profileRepository = get(),
             clock = get(),
             timeZone = get(),

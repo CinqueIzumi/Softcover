@@ -1,0 +1,7 @@
+mutation DeleteQuote(
+    $id: Int!
+) {
+    delete_reading_journal(id: $id) {
+        id
+    }
+}

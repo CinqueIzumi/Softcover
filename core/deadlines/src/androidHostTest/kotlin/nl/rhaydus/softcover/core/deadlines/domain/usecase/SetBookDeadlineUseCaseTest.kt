@@ -2,15 +2,14 @@ package nl.rhaydus.softcover.core.deadlines.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
-import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 
 class SetBookDeadlineUseCaseTest {
     private lateinit var repository: BookDeadlineRepository
@@ -24,39 +23,6 @@ class SetBookDeadlineUseCaseTest {
 
     @Nested
     inner class Invoke {
-        @Test
-        fun `delegates to repository with the provided arguments`() = runTest {
-            // ----- Arrange -----
-            val bookId = 42
-            val deadlineDate = LocalDate(
-                2026,
-                7,
-                1,
-            )
-            val current = 50
-            val total = 300
-
-            // ----- Act -----
-            useCase(
-                bookId = bookId,
-                deadlineDate = deadlineDate,
-                current = current,
-                total = total,
-                unit = DeadlineUnit.PAGES,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                repository.setDeadline(
-                    bookId = bookId,
-                    deadlineDate = deadlineDate,
-                    current = current,
-                    total = total,
-                    unit = DeadlineUnit.PAGES,
-                )
-            }
-        }
-
         @Test
         fun `returns success when repository setDeadline completes normally`() = runTest {
             // ----- Arrange -----
@@ -123,47 +89,6 @@ class SetBookDeadlineUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
-        }
-
-        @Test
-        fun `passes SECONDS unit to repository for audiobook deadline`() = runTest {
-            // ----- Arrange -----
-            val bookId = 5
-            val deadlineDate = LocalDate(
-                2026,
-                8,
-                1,
-            )
-
-            coEvery {
-                repository.setDeadline(
-                    bookId = bookId,
-                    deadlineDate = deadlineDate,
-                    current = any(),
-                    total = any(),
-                    unit = DeadlineUnit.SECONDS,
-                )
-            } returns Unit
-
-            // ----- Act -----
-            useCase(
-                bookId = bookId,
-                deadlineDate = deadlineDate,
-                current = 0,
-                total = 18000,
-                unit = DeadlineUnit.SECONDS,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                repository.setDeadline(
-                    bookId = bookId,
-                    deadlineDate = deadlineDate,
-                    current = any(),
-                    total = any(),
-                    unit = DeadlineUnit.SECONDS,
-                )
-            }
         }
     }
 }

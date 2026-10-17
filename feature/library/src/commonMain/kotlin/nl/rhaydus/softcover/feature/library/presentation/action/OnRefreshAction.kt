@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
-import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
-import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
+import nl.rhaydus.softcover.core.presentation.error.onApiFailure
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -30,7 +30,7 @@ internal class OnRefreshAction : LibraryAction {
         LibraryTab.All,
         -> RefreshScope.All
 
-        is LibraryTab.Status -> RefreshScope.ByStatus(status = status)
+        is LibraryTab.Status -> RefreshScope.ByStatuses(statuses = setOf(status))
 
         is LibraryTab.CustomList -> RefreshScope.ByList(listId = listId)
     }

@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.notification
 
-import kotlin.concurrent.Volatile
+import nl.rhaydus.common.AppLog
 import platform.UserNotifications.UNAuthorizationStatusAuthorized
 import platform.UserNotifications.UNAuthorizationStatusEphemeral
 import platform.UserNotifications.UNAuthorizationStatusProvisional
@@ -9,7 +9,7 @@ import platform.UserNotifications.UNNotificationRequest
 import platform.UserNotifications.UNUserNotificationCenter
 import platform.darwin.dispatch_async
 import platform.darwin.dispatch_get_main_queue
-import nl.rhaydus.common.AppLog
+import kotlin.concurrent.Volatile
 
 /**
  * iOS notifier over `UNUserNotificationCenter`. Notifications post immediately (no trigger); the

@@ -44,30 +44,39 @@ class ObserveReadingLifeUseCaseTest {
         totalPagesRead = 12000,
         averageRating = 4.2,
         readingStreak = 5,
-        booksByYear = listOf(YearCount(
-            year = 2026,
-            count = 5,
-        ),),
-        pagesByYear = listOf(YearCount(
-            year = 2026,
-            count = 1500,
-        ),),
-        pagesByMonth = listOf(MonthCount(
-            year = 2026,
-            month = 3,
-            count = 300,
-        ),),
-        genres = GenreBreakdown(
-            slices = listOf(GenreSlice(
-                name = "Fantasy",
+        booksByYear = listOf(
+            YearCount(
+                year = 2026,
                 count = 5,
-                fraction = 1.0,
-            ),),
+            ),
+        ),
+        pagesByYear = listOf(
+            YearCount(
+                year = 2026,
+                count = 1500,
+            ),
+        ),
+        pagesByMonth = listOf(
+            MonthCount(
+                year = 2026,
+                month = 3,
+                count = 300,
+            ),
+        ),
+        genres = GenreBreakdown(
+            slices = listOf(
+                GenreSlice(
+                    name = "Fantasy",
+                    count = 5,
+                    fraction = 1.0,
+                ),
+            ),
             taggedBookCount = 5,
         ),
         ratings = ratings,
         recentlyLoved = listOf(
             LovedBook(
+                bookId = 1,
                 coverUrl = "cover.jpg",
                 title = "Dune",
                 author = "Frank Herbert",
@@ -82,14 +91,32 @@ class ObserveReadingLifeUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `maps a cached profile to ReadingLife, carrying the list fields straight through`() = runTest {
+        fun `maps a cached profile to ReadingLife, carrying the list fields and author demographics straight through`() = runTest {
             // ----- Arrange -----
             val ratings = RatingsDistribution(
                 average = 4.0,
                 totalRatings = 20,
                 halfStarBuckets = List(9) { 0 },
             )
-            val data = profileData(ratings = ratings)
+            val demographics = AuthorDemographics(
+                genderSlices = listOf(
+                    GenderSlice(
+                        gender = Gender.Other,
+                        count = 2,
+                        fraction = 1.0,
+                    ),
+                ),
+                knownGenderCount = 2,
+                lgbtqBreakdown = DemographicBreakdown(
+                    yesCount = 1,
+                    noCount = 1,
+                    unknownCount = 0,
+                ),
+            )
+            val data = profileData(
+                ratings = ratings,
+                authorDemographics = demographics,
+            )
 
             every {
                 observeUserProfileDataUseCase()
@@ -105,6 +132,7 @@ class ObserveReadingLifeUseCaseTest {
             result?.genres shouldBe data.genres
             result?.recentlyLoved shouldBe data.recentlyLoved
             result?.trackedYears shouldBe data.trackedYears
+            result?.authorDemographics shouldBe demographics
         }
 
         @Test
@@ -128,42 +156,6 @@ class ObserveReadingLifeUseCaseTest {
 
             // ----- Assert -----
             result?.ratings?.band shouldBe RatingBand.EXACTING
-        }
-
-        @Test
-        fun `authorDemographics carries straight through to ReadingLife`() = runTest {
-            // ----- Arrange -----
-            val demographics = AuthorDemographics(
-                genderSlices = listOf(GenderSlice(
-                    gender = Gender.Other,
-                    count = 2,
-                    fraction = 1.0,
-                ),),
-                knownGenderCount = 2,
-                lgbtqBreakdown = DemographicBreakdown(
-                    yesCount = 1,
-                    noCount = 1,
-                    unknownCount = 0,
-                ),
-            )
-            val ratings = RatingsDistribution(
-                average = 4.0,
-                totalRatings = 20,
-                halfStarBuckets = List(9) { 0 },
-            )
-
-            every {
-                observeUserProfileDataUseCase()
-            } returns flowOf(profileData(
-                ratings = ratings,
-                authorDemographics = demographics,
-            ),)
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result?.authorDemographics shouldBe demographics
         }
 
         @Test

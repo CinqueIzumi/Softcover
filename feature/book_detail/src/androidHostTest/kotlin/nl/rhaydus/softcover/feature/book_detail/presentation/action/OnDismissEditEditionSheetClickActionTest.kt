@@ -5,121 +5,84 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.EditionSheetUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.IsbnLookup
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnDismissEditEditionSheetClickActionTest {
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
     @Nested
     inner class Execute {
         @Test
-        fun `sets showEditEditionSheet to false when it was true`() = runTest {
+        fun `sends the lookup event with the prefill and closes the session when a lookup is pending`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(showEditEditionSheet = true)
-            val action = OnDismissEditEditionSheetClickAction()
+            stateFlow.value = buildBookDetailUiState().copy(
+                editionSheetRequested = true,
+                editionSheet = SheetSession.Open(
+                    model = mockk<EditionSheetUiModel>(),
+                    pending = IsbnLookup(prefilledIsbn = "9780374710781"),
+                ),
+                editionSearchQuery = "978",
+                selectedEditionId = 5,
+            )
 
             // ----- Act -----
-            action.execute(
+            OnDismissEditEditionSheetClickAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe false
-        }
-
-        @Test
-        fun `leaves showEditEditionSheet as false when it was already false`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(showEditEditionSheet = false)
-            val action = OnDismissEditEditionSheetClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
+            eventChannel.tryReceive().getOrNull() shouldBe BookDetailEvent.OpenIsbnLookupEvent(
+                prefilledIsbn = "9780374710781",
             )
-
-            // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe false
-        }
-
-        @Test
-        fun `resets editionSearchQuery to empty string`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(editionSearchQuery = "Penguin")
-            val action = OnDismissEditEditionSheetClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
+            stateFlow.value.editionSheet shouldBe SheetSession.Closed
+            stateFlow.value.editionSheetRequested shouldBe false
             stateFlow.value.editionSearchQuery shouldBe ""
+            stateFlow.value.selectedEditionId shouldBe null
         }
 
         @Test
-        fun `resets editionSearchQuery even when it was already empty`() = runTest {
+        fun `sends no event when nothing is pending`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(editionSearchQuery = "")
-            val action = OnDismissEditEditionSheetClickAction()
+            stateFlow.value = buildBookDetailUiState().copy(
+                editionSheet = SheetSession.Open(model = mockk<EditionSheetUiModel>()),
+            )
 
             // ----- Act -----
-            action.execute(
+            OnDismissEditEditionSheetClickAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.editionSearchQuery shouldBe ""
-        }
-
-        @Test
-        fun `does not mutate any other state fields`() = runTest {
-            // ----- Arrange -----
-            val initialState = BookDetailUiState(
-                loadingBookDetails = false,
-                showEditEditionSheet = true,
-                fabMenuExpanded = true,
-                showUpdateProgressSheet = true,
-                editionSearchQuery = "isbn",
-            )
-            stateFlow.value = initialState
-            val action = OnDismissEditEditionSheetClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe initialState.copy(
-                showEditEditionSheet = false,
-                editionSearchQuery = "",
-            )
+            eventChannel.tryReceive().getOrNull() shouldBe null
+            stateFlow.value.editionSheet shouldBe SheetSession.Closed
         }
     }
 }

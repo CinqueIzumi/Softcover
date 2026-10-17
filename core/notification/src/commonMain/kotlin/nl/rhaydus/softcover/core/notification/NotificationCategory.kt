@@ -9,7 +9,7 @@ enum class NotificationCategory {
     /** Deadlines, daily nudges, and release-day alerts for books you're following. */
     Reading,
 
-    /** Celebrations when you finish a series, hit a streak, or complete a yearly goal. */
+    /** Finishing a series, keeping a streak going, or reaching the yearly goal. */
     Milestones,
 
     /** The live timer and controls for your current reading session. */

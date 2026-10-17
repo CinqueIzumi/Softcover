@@ -5,12 +5,12 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class SearchForNameUseCaseTest {
     private lateinit var searchRepository: ExploreRepository
@@ -30,77 +30,62 @@ class SearchForNameUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `delegates searchForName to repository with retrieved userId`() = runTest {
+        fun `searches with the retrieved userId and records the query on page 1`() = runTest {
             // ----- Arrange -----
-            val name = "dune"
-            val userId = 7
-
             coEvery {
                 getUserIdUseCase()
-            } returns Result.success(userId)
+            } returns Result.success(7)
+
+            // ----- Act -----
+            val result = useCase(
+                name = "dune",
+                sortMode = ExploreSortMode.POPULARITY,
+            )
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify {
+                searchRepository.searchForName(
+                    name = "dune",
+                    userId = 7,
+                    sortMode = ExploreSortMode.POPULARITY,
+                    page = 1,
+                )
+                searchRepository.saveSearchQuery(name = "dune")
+            }
+        }
+
+        @Test
+        fun `does not record the query again on a later page`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(7)
 
             // ----- Act -----
             useCase(
-                name = name,
+                name = "dune",
                 sortMode = ExploreSortMode.RELEVANCE,
+                page = 2,
             )
 
             // ----- Assert -----
             coVerify {
                 searchRepository.searchForName(
-                    name = name,
-                    userId = userId,
+                    name = "dune",
+                    userId = 7,
                     sortMode = ExploreSortMode.RELEVANCE,
+                    page = 2,
                 )
             }
-        }
-
-        @Test
-        fun `saves search query after searching`() = runTest {
-            // ----- Arrange -----
-            val name = "foundation"
-            val userId = 3
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            // ----- Act -----
-            useCase(
-                name = name,
-                sortMode = ExploreSortMode.RELEVANCE,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                searchRepository.saveSearchQuery(name = name)
+            coVerify(exactly = 0) {
+                searchRepository.saveSearchQuery(name = any())
             }
         }
 
         @Test
-        fun `returns success when both search and save succeed`() = runTest {
+        fun `returns failure without searching or recording when getUserIdUseCase fails`() = runTest {
             // ----- Arrange -----
-            val name = "1984"
-            val userId = 1
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            // ----- Act -----
-            val result = useCase(
-                name = name,
-                sortMode = ExploreSortMode.RELEVANCE,
-            )
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-        }
-
-        @Test
-        fun `returns failure when getUserIdUseCase fails`() = runTest {
-            // ----- Arrange -----
-            val name = "brave new world"
             val expectedError = RuntimeException("no user id")
 
             coEvery {
@@ -109,91 +94,49 @@ class SearchForNameUseCaseTest {
 
             // ----- Act -----
             val result = useCase(
-                name = name,
+                name = "brave new world",
                 sortMode = ExploreSortMode.RELEVANCE,
             )
 
             // ----- Assert -----
-            result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
-        }
-
-        @Test
-        fun `returns failure when searchForName throws`() = runTest {
-            // ----- Arrange -----
-            val name = "the road"
-            val userId = 2
-            val expectedError = RuntimeException("network error")
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            coEvery {
-                searchRepository.searchForName(
-                    name = name,
-                    userId = userId,
-                    sortMode = ExploreSortMode.RELEVANCE,
-                )
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase(
-                name = name,
-                sortMode = ExploreSortMode.RELEVANCE,
-            )
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe expectedError
-        }
-
-        @Test
-        fun `does not save search query when getUserIdUseCase fails`() = runTest {
-            // ----- Arrange -----
-            val name = "americanah"
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.failure(RuntimeException("no id"))
-
-            // ----- Act -----
-            useCase(
-                name = name,
-                sortMode = ExploreSortMode.RELEVANCE,
-            )
-
-            // ----- Assert -----
             coVerify(exactly = 0) {
+                searchRepository.searchForName(
+                    name = any(),
+                    userId = any(),
+                    sortMode = any(),
+                    page = any(),
+                )
                 searchRepository.saveSearchQuery(name = any())
             }
         }
 
         @Test
-        fun `does not save search query when searchForName throws`() = runTest {
+        fun `returns failure and does not record the query when searchForName throws`() = runTest {
             // ----- Arrange -----
-            val name = "the hitchhiker"
-            val userId = 5
+            val expectedError = RuntimeException("network error")
 
             coEvery {
                 getUserIdUseCase()
-            } returns Result.success(userId)
+            } returns Result.success(2)
 
             coEvery {
                 searchRepository.searchForName(
-                    name = name,
-                    userId = userId,
-                    sortMode = ExploreSortMode.RELEVANCE,
+                    name = any(),
+                    userId = any(),
+                    sortMode = any(),
+                    page = any(),
                 )
-            } throws RuntimeException("apollo error")
+            } throws expectedError
 
             // ----- Act -----
-            useCase(
-                name = name,
+            val result = useCase(
+                name = "the road",
                 sortMode = ExploreSortMode.RELEVANCE,
             )
 
             // ----- Assert -----
+            result.exceptionOrNull() shouldBe expectedError
             coVerify(exactly = 0) {
                 searchRepository.saveSearchQuery(name = any())
             }

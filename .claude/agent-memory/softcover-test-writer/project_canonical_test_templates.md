@@ -1,7 +1,8 @@
 ---
 name: project_canonical_test_templates
 description: One canonical test file per layer (action, use case, repository, local/remote data source, mapper) — clone these instead of exploring broadly
-type: project
+metadata:
+  type: project
 ---
 
 When writing a new test, first identify which layer the target belongs to, then read **only** the matching canonical test file below and clone its structure. Do not search across unrelated layers — the setup, mocking, and assertion style differs enough between layers that cross-referencing wastes tokens and often leads astray.
@@ -9,7 +10,8 @@ When writing a new test, first identify which layer the target belongs to, then 
 | Target type | Canonical test file |
 |---|---|
 | `*Action` (TOAD presentation action) | `feature/book_detail/src/androidHostTest/kotlin/nl/rhaydus/softcover/feature/book_detail/presentation/action/InitializeBookWithIdActionTest.kt` |
-| `*Collector` (TOAD flow collector) | `feature/settings/src/androidHostTest/kotlin/nl/rhaydus/softcover/feature/settings/presentation/collector/DateStyleCollectorTest.kt` |
+| `*Collector` (TOAD flow collector, external flow source, e.g. a use case) | `feature/settings/src/androidHostTest/kotlin/nl/rhaydus/softcover/feature/settings/presentation/collector/DateStyleCollectorTest.kt` |
+| `*Collector` (TOAD flow collector, source is `scope.state` itself — derives one field from others) | `feature/book_detail/src/androidHostTest/kotlin/nl/rhaydus/softcover/feature/book_detail/presentation/collector/UnreleasedBadgeCollectorTest.kt` |
 | `*UseCase` | `core/book/src/androidHostTest/kotlin/nl/rhaydus/softcover/core/book/domain/usecase/FetchBookByIdUseCaseTest.kt` |
 | `*RepositoryImpl` | `core/book/src/androidHostTest/kotlin/nl/rhaydus/softcover/core/book/data/repository/BooksRepositoryImplTest.kt` |
 | `*LocalDataSourceImpl` (Room-backed) | `core/book/src/androidHostTest/kotlin/nl/rhaydus/softcover/core/book/data/datasource/BooksLocalDataSourceImplTest.kt` |

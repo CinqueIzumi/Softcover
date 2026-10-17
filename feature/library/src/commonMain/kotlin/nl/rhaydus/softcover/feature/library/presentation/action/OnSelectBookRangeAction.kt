@@ -1,9 +1,11 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.withSelectedBookIds
 import nl.rhaydus.toad.ActionScope
 
 /**
@@ -22,9 +24,10 @@ internal class OnSelectBookRangeAction(
         if (bookIds.isEmpty()) return
 
         scope.setState {
-            it.copy(
+            val selectedBookIds = it.selectedBookIds.toPersistentSet().addAll(bookIds)
+
+            it.withSelectedBookIds(selectedBookIds).copy(
                 selectionMode = true,
-                selectedBookIds = it.selectedBookIds + bookIds,
                 isRearranging = false,
             )
         }

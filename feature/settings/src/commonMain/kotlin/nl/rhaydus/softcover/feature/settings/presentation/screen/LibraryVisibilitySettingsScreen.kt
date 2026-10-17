@@ -7,8 +7,14 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalCreateListPresenter
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
+import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
+import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilitySaveBar
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 
@@ -23,10 +29,21 @@ class LibraryVisibilitySettingsScreen : Screen {
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
+        val haptics = LocalHaptics.current
+
+        ObserveAsEvents(flow = screenModel.events) {
+            if (it is FeedbackEvent) haptics.play(it.feedback)
+
+            when (it) {
+                is LibraryVisibilitySettingsEvent.NavigateBack -> navigator.pop()
+
+                is LibraryVisibilitySettingsEvent.SaveFailed -> Unit
+            }
+        }
+
         LibraryVisibilitySettingsScreenLayout(
             state = state,
             runAction = screenModel::runAction,
-            onNavigateBack = navigator::pop,
             onCreateListClick = { createListPresenter?.open(onListCreated = null) },
         )
     }
@@ -43,6 +60,5 @@ class LibraryVisibilitySettingsScreen : Screen {
 internal expect fun LibraryVisibilitySettingsScreenLayout(
     state: LibraryVisibilitySettingsUiState,
     runAction: (LibraryVisibilityAction) -> Unit,
-    onNavigateBack: () -> Unit,
     onCreateListClick: () -> Unit,
 )

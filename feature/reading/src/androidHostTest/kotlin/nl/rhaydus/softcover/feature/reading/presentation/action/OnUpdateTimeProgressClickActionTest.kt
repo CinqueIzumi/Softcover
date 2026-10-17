@@ -1,6 +1,10 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -11,21 +15,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
+import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnUpdateTimeProgressClickActionTest {
+    private val openProgressSheet: SheetSession<ProgressSheetUiModel, Nothing> = SheetSession.Open(
+        model = ProgressSheetUiModel.previews.values.first(),
+    )
+
     private lateinit var updateBookProgress: RecordBookProgressUseCase
+    private val eventChannel = Channel<ReadingScreenEvent>(Channel.BUFFERED)
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<ReadingLocalVariables>
     private lateinit var scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>
@@ -45,7 +59,7 @@ class OnUpdateTimeProgressClickActionTest {
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -88,23 +102,32 @@ class OnUpdateTimeProgressClickActionTest {
             every {
                 book.currentEdition
             } returns edition
+            every {
+                book.userBook
+            } returns null
         }
 
     @Nested
     inner class Execute {
         @Test
-        fun `sets showProgressSheet to false after execute`() = runTest {
+        fun `leaves the sheet and time draft for the host to dismiss once the entered time is submitted`() = runTest {
             // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
             stateFlow.value = ReadingScreenUiState(
-                bookToUpdate = book,
-                showProgressSheet = true,
+                bookToUpdate = stubBookWithAudioSeconds(audioSeconds = 7200),
+                progressSheet = openProgressSheet,
+                progressTimeDraft = ProgressTimeDraft(
+                    forSeconds = 3725,
+                    hours = "1",
+                    minutes = "2",
+                    seconds = "5",
+                ),
             )
             val dependencies = stubDependencies(this)
+
             val action = OnUpdateTimeProgressClickAction(
                 hours = "1",
-                minutes = "0",
-                seconds = "0",
+                minutes = "2",
+                seconds = "5",
             )
 
             // ----- Act -----
@@ -114,35 +137,18 @@ class OnUpdateTimeProgressClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showProgressSheet shouldBe false
+            stateFlow.value.progressTimeDraft.shouldNotBeNull()
+            stateFlow.value.progressSheet shouldBe openProgressSheet
+            stateFlow.value.bookToUpdate.shouldNotBeNull()
         }
 
         @Test
-        fun `sets bookToUpdate to null after execute`() = runTest {
+        fun `records nothing and leaves the state alone when there is no bookToUpdate`() = runTest {
             // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "0",
-                minutes = "30",
-                seconds = "0",
+            stateFlow.value = ReadingScreenUiState(
+                bookToUpdate = null,
+                progressSheet = openProgressSheet,
             )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.bookToUpdate shouldBe null
-        }
-
-        @Test
-        fun `does not invoke updateBookProgress when bookToUpdate is null`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = null)
             val dependencies = stubDependencies(this)
             val action = OnUpdateTimeProgressClickAction(
                 hours = "1",
@@ -164,31 +170,7 @@ class OnUpdateTimeProgressClickActionTest {
                     any(),
                 )
             }
-        }
-
-        @Test
-        fun `does not change state when bookToUpdate is null`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(
-                bookToUpdate = null,
-                showProgressSheet = true,
-            )
-            val dependencies = stubDependencies(this)
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "1",
-                minutes = "0",
-                seconds = "0",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.showProgressSheet shouldBe true
-            stateFlow.value.bookToUpdate shouldBe null
+            stateFlow.value.progressSheet shouldBe openProgressSheet
         }
 
         @Test
@@ -223,15 +205,25 @@ class OnUpdateTimeProgressClickActionTest {
         @Test
         fun `passes actionAt through to updateBookProgress when provided`() = runTest {
             // ----- Arrange -----
+            val readAt = LocalDateTime(
+                2026,
+                7,
+                21,
+                21,
+                0,
+            )
             val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            stateFlow.value = ReadingScreenUiState(
+                bookToUpdate = book,
+                readAt = readAt,
+            )
             val dependencies = stubDependencies(this)
 
             coEvery {
                 updateBookProgress(
                     book = book,
                     newSeconds = any(),
-                    actionAt = "2026-07-21T21:00:00Z",
+                    actionAt = readAt.toActionAt(),
                 )
             } returns Result.success(null)
 
@@ -239,7 +231,6 @@ class OnUpdateTimeProgressClickActionTest {
                 hours = "1",
                 minutes = "0",
                 seconds = "0",
-                actionAt = "2026-07-21T21:00:00Z",
             )
 
             // ----- Act -----
@@ -253,7 +244,7 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 3600,
-                    actionAt = "2026-07-21T21:00:00Z",
+                    actionAt = readAt.toActionAt(),
                 )
             }
         }
@@ -287,151 +278,11 @@ class OnUpdateTimeProgressClickActionTest {
         }
 
         @Test
-        fun `treats non-numeric minutes as 0`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            // 1*3600 + 0*60 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "1",
-                minutes = "abc",
-                seconds = "0",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 3600,
-                )
-            }
-        }
-
-        @Test
-        fun `treats non-numeric seconds as 0`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            // 1*3600 + 0*60 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "1",
-                minutes = "0",
-                seconds = "abc",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 3600,
-                )
-            }
-        }
-
-        @Test
-        fun `treats empty string fields as 0`() = runTest {
+        fun `clamps a negative entered time to zero`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithAudioSeconds(audioSeconds = 3600)
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
             val dependencies = stubDependencies(this)
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "",
-                minutes = "",
-                seconds = "",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 0,
-                )
-            }
-        }
-
-        @Test
-        fun `coerces minutes greater than 59 to 59`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            // 0*3600 + 59*60 + 0 = 3540
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "0",
-                minutes = "90",
-                seconds = "0",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 3540,
-                )
-            }
-        }
-
-        @Test
-        fun `coerces seconds greater than 59 to 59`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            // 0*3600 + 0*60 + 59 = 59
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "0",
-                minutes = "0",
-                seconds = "90",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 59,
-                )
-            }
-        }
-
-        @Test
-        fun `treats negative hours as 0 via coerceAtLeast`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 3600)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            // 0*3600 + 30*60 + 0 = 1800
             val action = OnUpdateTimeProgressClickAction(
                 hours = "-2",
                 minutes = "30",
@@ -448,7 +299,7 @@ class OnUpdateTimeProgressClickActionTest {
             coVerify {
                 updateBookProgress(
                     book = book,
-                    newSeconds = 1800,
+                    newSeconds = 0,
                 )
             }
         }
@@ -511,91 +362,7 @@ class OnUpdateTimeProgressClickActionTest {
         }
 
         @Test
-        fun `records entered seconds unclamped when audioSeconds is null with 2 hours`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = null)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            // total = 0 (null), so entered.coerceAtLeast(0) = 7200
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "2",
-                minutes = "0",
-                seconds = "0",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 7200,
-                )
-            }
-        }
-
-        @Test
-        fun `coerces minutes below 0 to 0 via coerceIn`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 3600)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            // 1*3600 + 0*60 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "1",
-                minutes = "-10",
-                seconds = "0",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 3600,
-                )
-            }
-        }
-
-        @Test
-        fun `coerces seconds below 0 to 0 via coerceIn`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 3600)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-            // 1*3600 + 0 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "1",
-                minutes = "0",
-                seconds = "-30",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 3600,
-                )
-            }
-        }
-
-        @Test
-        fun `adds book id to failedMutationBookIds when updateBookProgress fails`() = runTest {
+        fun `flags the book as failed when updateBookProgress fails`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithAudioSeconds(
                 audioSeconds = 7200,
@@ -628,40 +395,7 @@ class OnUpdateTimeProgressClickActionTest {
         }
 
         @Test
-        fun `does not add book id to failedMutationBookIds when updateBookProgress succeeds`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(
-                audioSeconds = 7200,
-                id = 5,
-            )
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = any(),
-                )
-            } returns Result.success(null)
-
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "1",
-                minutes = "0",
-                seconds = "0",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.failedMutationBookIds.contains(5) shouldBe false
-        }
-
-        @Test
-        fun `sets verdictPromptBook to bookToUpdate when updateBookProgress outcome is Applied`() = runTest {
+        fun `prompts for a verdict when the outcome is Applied`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithAudioSeconds(
                 audioSeconds = 7200,
@@ -694,7 +428,7 @@ class OnUpdateTimeProgressClickActionTest {
         }
 
         @Test
-        fun `stores job in bookMutationJobs after execute returns`() = runTest {
+        fun `sends ProgressUpdatedEvent when the update succeeds without finishing the book`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithAudioSeconds(
                 audioSeconds = 7200,
@@ -708,7 +442,7 @@ class OnUpdateTimeProgressClickActionTest {
                     book = book,
                     newSeconds = any(),
                 )
-            } returns Result.success(null)
+            } returns Result.success(ShelfMutationOutcome.NoChange)
 
             val action = OnUpdateTimeProgressClickAction(
                 hours = "1",
@@ -723,11 +457,78 @@ class OnUpdateTimeProgressClickActionTest {
             )
 
             // ----- Assert -----
-            localVariablesFlow.value.bookMutationJobs.containsKey(5) shouldBe true
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<ReadingScreenEvent.ProgressUpdatedEvent>()
         }
 
         @Test
-        fun `cancels prior job for same book id and replaces it with a new one`() = runTest {
+        fun `sends no ProgressUpdatedEvent when the update finishes the book`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(
+                audioSeconds = 7200,
+                id = 5,
+            )
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = any(),
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `sends no event when updateBookProgress fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(
+                audioSeconds = 7200,
+                id = 5,
+            )
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = any(),
+                )
+            } returns Result.failure(RuntimeException("network error"))
+
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
+        }
+
+        @Test
+        fun `cancels the prior job for the same book id and stores a new one`() = runTest {
             // ----- Arrange -----
             val bookId = 5
             val book = stubBookWithAudioSeconds(
@@ -740,22 +541,9 @@ class OnUpdateTimeProgressClickActionTest {
                 bookMutationJobs = mapOf(bookId to priorJob),
             )
 
-            scope = ActionScope(
-                stateFlow = stateFlow,
-                localVariablesFlow = localVariablesFlow,
-                eventChannel = Channel(Channel.BUFFERED),
-            )
-
             stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
 
             val dependencies = stubDependencies(this)
-
-            coEvery {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = any(),
-                )
-            } returns Result.success(null)
 
             val action = OnUpdateTimeProgressClickAction(
                 hours = "1",
@@ -771,8 +559,7 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             priorJob.isCancelled shouldBe true
-
-            localVariablesFlow.value.bookMutationJobs.containsKey(bookId) shouldBe true
+            localVariablesFlow.value.bookMutationJobs[bookId] shouldNotBe priorJob
         }
     }
 }

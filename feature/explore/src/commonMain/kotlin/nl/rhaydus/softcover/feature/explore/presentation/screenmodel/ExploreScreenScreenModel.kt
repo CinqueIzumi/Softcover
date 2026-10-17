@@ -3,10 +3,13 @@ package nl.rhaydus.softcover.feature.explore.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
+import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
+import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.feature.explore.domain.usecase.ClearSearchResultsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
@@ -41,8 +44,10 @@ internal class ExploreScreenScreenModel(
     private val removeSearchQueryUseCase: RemoveSearchQueryUseCase,
     private val removeAllSearchQueriesUseCase: RemoveAllSearchQueriesUseCase,
     private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
-    private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
-    private val getTrendingBooksUseCase: GetTrendingBooksUseCase,
+    private val undoableBookRemover: UndoableBookRemover,
+    private val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
+    private val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
+    private val observeTrendingFetchedAtUseCase: ObserveTrendingFetchedAtUseCase,
     private val getContinueSeriesBooksUseCase: GetContinueSeriesBooksUseCase,
     private val dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
     private val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
@@ -54,6 +59,7 @@ internal class ExploreScreenScreenModel(
     private val getMoodTagsUseCase: GetMoodTagsUseCase,
     private val searchByMoodUseCase: SearchByMoodUseCase,
     private val setBecauseYouReadGenreUseCase: SetBecauseYouReadGenreUseCase,
+    offlineCopy: OfflineCopy,
     flows: List<ExploreCollector>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<ExploreScreenUiState, ExploreEvent, ExploreDependencies, ExploreCollector, ExploreLocalVariables>(
@@ -73,8 +79,10 @@ internal class ExploreScreenScreenModel(
         getAllUserBooksUseCase = getAllUserBooksUseCase,
         removeAllSearchQueriesUseCase = removeAllSearchQueriesUseCase,
         markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
-        removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
-        getTrendingBooksUseCase = getTrendingBooksUseCase,
+        undoableBookRemover = undoableBookRemover,
+        observeTrendingBooksUseCase = observeTrendingBooksUseCase,
+        refreshTrendingBooksUseCase = refreshTrendingBooksUseCase,
+        observeTrendingFetchedAtUseCase = observeTrendingFetchedAtUseCase,
         getContinueSeriesBooksUseCase = getContinueSeriesBooksUseCase,
         dismissContinueSeriesBookUseCase = dismissContinueSeriesBookUseCase,
         dismissContinueSeriesUseCase = dismissContinueSeriesUseCase,
@@ -86,6 +94,7 @@ internal class ExploreScreenScreenModel(
         getMoodTagsUseCase = getMoodTagsUseCase,
         searchByMoodUseCase = searchByMoodUseCase,
         setBecauseYouReadGenreUseCase = setBecauseYouReadGenreUseCase,
+        offlineCopy = offlineCopy,
     )
 
     init {

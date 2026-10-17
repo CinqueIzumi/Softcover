@@ -5,10 +5,10 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 class UpdateApiKeyUseCaseTest {
     private lateinit var settingsRepository: SettingsRepository
@@ -23,41 +23,18 @@ class UpdateApiKeyUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `returns success when repository call succeeds`() = runTest {
-            // ----- Arrange -----
-            // (repository is relaxed)
-
-            // ----- Act -----
-            val result = useCase(key = "my-api-key")
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-        }
-
-        @Test
-        fun `delegates to the repository with the given key`() = runTest {
+        fun `stores the given key and returns success`() = runTest {
             // ----- Arrange -----
             val key = "abc-123"
 
             // ----- Act -----
-            useCase(key = key)
-
-            // ----- Assert -----
-            coVerify {
-                settingsRepository.updateApiKey(key = key)
-            }
-        }
-
-        @Test
-        fun `returns success when key is empty string`() = runTest {
-            // ----- Arrange -----
-            // (repository is relaxed)
-
-            // ----- Act -----
-            val result = useCase(key = "")
+            val result = useCase(key = key)
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            coVerify {
+                settingsRepository.updateApiKey(key = key)
+            }
         }
 
         @Test

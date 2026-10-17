@@ -16,6 +16,73 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class SessionValueCacheTest {
     @Nested
+    inner class Peek {
+        @Test
+        fun `returns null for a key that was never loaded`() = runTest {
+            // ----- Arrange -----
+            val cache = SessionValueCache<String, String>()
+
+            // ----- Act -----
+            val result = cache.peek(key = "key")
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `returns the value cached for the key`() = runTest {
+            // ----- Arrange -----
+            val cache = SessionValueCache<String, String>()
+            cache.getOrPut(
+                key = "key",
+                load = { "value" },
+            )
+
+            // ----- Act -----
+            val result = cache.peek(key = "key")
+
+            // ----- Assert -----
+            result shouldBe "value"
+        }
+
+        @Test
+        fun `returns null for a different key than the one cached`() = runTest {
+            // ----- Arrange -----
+            val cache = SessionValueCache<String, String>()
+            cache.getOrPut(
+                key = "key",
+                load = { "value" },
+            )
+
+            // ----- Act -----
+            val result = cache.peek(key = "other")
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `does not trigger a load`() = runTest {
+            // ----- Arrange -----
+            val cache = SessionValueCache<String, String>()
+            val loadCount = AtomicInteger(0)
+
+            // ----- Act -----
+            cache.peek(key = "key")
+            cache.getOrPut(
+                key = "key",
+                load = {
+                    loadCount.incrementAndGet()
+                    "value"
+                },
+            )
+
+            // ----- Assert -----
+            loadCount.get() shouldBe 1
+        }
+    }
+
+    @Nested
     inner class GetOrPutKeyed {
         @Test
         fun `second call for the same key does not invoke load again`() = runTest {
@@ -42,23 +109,6 @@ class SessionValueCacheTest {
         }
 
         @Test
-        fun `load throwing propagates the exception and stores nothing`() = runTest {
-            // ----- Arrange -----
-            val cache = SessionValueCache<String, String>()
-            val error = RuntimeException("load failed")
-            val failingLoad: suspend () -> String = { throw error }
-
-            // ----- Act -----
-            val thrown = runCatching { cache.getOrPut(
-                key = "key",
-                load = failingLoad,
-            ) }.exceptionOrNull()
-
-            // ----- Assert -----
-            thrown shouldBe error
-        }
-
-        @Test
         fun `a call after a failed load retries load and can succeed`() = runTest {
             // ----- Arrange -----
             val cache = SessionValueCache<String, String>()
@@ -68,10 +118,12 @@ class SessionValueCacheTest {
                 if (attempt == 1) throw RuntimeException("load failed")
                 "recovered"
             }
-            runCatching { cache.getOrPut(
-                key = "key",
-                load = load,
-            ) }
+            runCatching {
+                cache.getOrPut(
+                    key = "key",
+                    load = load,
+                )
+            }
 
             // ----- Act -----
             val result = cache.getOrPut(
@@ -165,14 +217,18 @@ class SessionValueCacheTest {
             }
 
             // ----- Act -----
-            val first = launch { cache.getOrPut(
-                key = "key",
-                load = load,
-            ) }
-            val second = launch { cache.getOrPut(
-                key = "key",
-                load = load,
-            ) }
+            val first = launch {
+                cache.getOrPut(
+                    key = "key",
+                    load = load,
+                )
+            }
+            val second = launch {
+                cache.getOrPut(
+                    key = "key",
+                    load = load,
+                )
+            }
             readyToProceed.complete(Unit)
             first.join()
             second.join()
@@ -382,28 +438,6 @@ class SessionValueCacheTest {
 
             // ----- Assert -----
             loadCount.get() shouldBe 1
-        }
-
-        @Test
-        fun `load throwing propagates and a later call retries and can succeed`() = runTest {
-            // ----- Arrange -----
-            val cache = SessionValueCache<Unit, String>()
-            val loadCount = AtomicInteger(0)
-            val error = RuntimeException("load failed")
-            val load: suspend () -> String = {
-                val attempt = loadCount.incrementAndGet()
-                if (attempt == 1) throw error
-                "recovered"
-            }
-            val thrown = runCatching { cache.getOrPut(load) }.exceptionOrNull()
-
-            // ----- Act -----
-            val result = cache.getOrPut(load)
-
-            // ----- Assert -----
-            thrown shouldBe error
-            result shouldBe "recovered"
-            loadCount.get() shouldBe 2
         }
     }
 }

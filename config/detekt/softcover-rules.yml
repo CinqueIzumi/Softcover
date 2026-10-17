@@ -1,0 +1,19 @@
+# Kept apart from detekt.yml because `:detekt-rules` cannot load its own plugin, so detekt's config
+# validation would reject the `softcover` key there.
+softcover:
+  RawSpacingDp:
+    active: true
+  RawCornerDp:
+    active: true
+  RememberHapticsOutsideTheme:
+    active: true
+    excludes: ['**/core/designsystem/presentation/theme/Theme.kt']
+  UiModelBuiltInRender:
+    active: true
+    excludes: ['**/*Previews.kt', '**/gallery/**', '**/src/debug/**', '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**']
+  NoReflection:
+    active: true
+    excludes: ['**/smoketest/**', '**/src/debug/**', '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**']
+  ScreenConstructorProperty:
+    active: true
+    excludes: ['**/smoketest/**', '**/src/debug/**', '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**']

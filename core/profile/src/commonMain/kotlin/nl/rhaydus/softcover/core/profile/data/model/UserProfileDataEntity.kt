@@ -48,7 +48,7 @@ internal fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
     pagesByMonth = pagesByMonth.map { it.toModel() },
     genres = decodeGenreBreakdown(),
     ratings = ratings.toModel(),
-    recentlyLoved = recentlyLoved.map { it.toModel() },
+    recentlyLoved = recentlyLoved.mapNotNull { it.toModel() },
     trackedYears = trackedYears,
     authorDemographics = authorDemographics.toModel(),
 )

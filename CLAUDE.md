@@ -26,12 +26,16 @@ book tracking platform, on Android (SDK 26+), iOS and desktop (JVM). Shared UI a
 ```bash
 ./gradlew assembleDebug          # Debug build
 ./gradlew assembleRelease        # Release build
-./gradlew test                   # Unit tests (:app:test for one module)
-./gradlew connectedAndroidTest   # Instrumented tests (device/emulator)
+./gradlew test                   # :app / :desktopApp unit tests only — no KMP suites
+./gradlew testAndroidHostTest --continue   # KMP unit tests
+./gradlew :smoketest:pixelApi36MinifiedAndroidTest   # Device suite, R8-minified app (needs HARDCOVER_SMOKE_TOKEN)
+./gradlew :app:checkR8KeepContract   # R8 keep contract on the release and minified builds
 ./gradlew lint                   # Android Lint
 ./gradlew ktlintFormat           # Auto-fix layout rules
 ./gradlew styleCheck             # detekt + ktlint gates
-./gradlew check                  # Everything
+./gradlew check koverXmlReport -x lint  # PR gate: what CI runs on PRs into release/*
+./gradlew check                  # Everything except buildHealth; iOS compiles on macOS only
+./gradlew check buildHealth      # Full gate: CI on release merges and PRs into main
 ```
 
 ## Tests
@@ -39,7 +43,9 @@ book tracking platform, on Android (SDK 26+), iOS and desktop (JVM). Shared UI a
 - **Always delegate test writing to `softcover-test-writer`**, however small the change — never write or modify
   unit tests in the main conversation. No exceptions. The agent runs the tests it writes.
 - Relaying its report: if all pass, say the suite was executed and passed. If any fail, give the failing test
-  names and the agent's diagnosis verbatim, then **stop** and wait for the user to approve a fix round.
+  names and the agent's diagnosis verbatim. When the diagnosis points at production behaviour, **stop** and
+  wait for the user to approve a fix round. When it is test-side fallout from an intended change (setup the
+  change now correctly rejects, a style gate on the test file), send the fix round straight away.
 
 ## Commit messages
 
@@ -63,9 +69,11 @@ descriptions — never hand-edit it. The full rules are in `.claude/rules/roadma
 | Adding a module, feature, ScreenModel / Action / Collector, or changing data flow | [`docs/rhaydus/0.3.1/architecture.md`](docs/rhaydus/0.3.1/architecture.md), [`toad-architecture.md`](docs/rhaydus/0.3.1/toad-architecture.md), then [`docs/reference/architecture.md`](docs/reference/architecture.md) |
 | Deciding where a module / type belongs, or wiring a cross-feature dependency | [`docs/reference/module-structure.md`](docs/reference/module-structure.md) |
 | Designing or changing any UI surface | [`docs/rhaydus/0.3.1/design-system-foundations.md`](docs/rhaydus/0.3.1/design-system-foundations.md), then the one section you need behind [`docs/reference/design-system.md`](docs/reference/design-system.md) |
-| Building a component under `:core:component` | `docs/reference/design-system/component-contract.md` (where that file exists) |
+| Building a component under `:core:component` | [`docs/reference/design-system/component-contract.md`](docs/reference/design-system/component-contract.md) |
+| Writing or changing any user-facing text | [`docs/reference/design-system/voice.md`](docs/reference/design-system/voice.md) |
 | Writing Kotlin | [`docs/rhaydus/0.3.1/code-style.md`](docs/rhaydus/0.3.1/code-style.md), then [`docs/reference/code-style.md`](docs/reference/code-style.md) |
 | Looking for an existing component, modifier or util | [`docs/rhaydus/0.3.1/CAPABILITIES.md`](docs/rhaydus/0.3.1/CAPABILITIES.md) |
+| Adding a manifest component, worker, widget, Screen argument, or anything reached by name / touching keep rules | [`docs/reference/r8.md`](docs/reference/r8.md) |
 
 ## Rhaydus foundation (local override — pending foundation FU-6; re-running rhaydus-adopt reverts this)
 

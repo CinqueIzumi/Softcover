@@ -1,8 +1,10 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -11,7 +13,6 @@ import nl.rhaydus.toad.ActionScope
 
 internal data class OnUpdatePercentageProgressClickAction(
     val newPercentage: String,
-    val actionAt: String? = null,
 ) : ReadingAction {
     override suspend fun execute(
         dependencies: ReadingScreenDependencies,
@@ -19,21 +20,15 @@ internal data class OnUpdatePercentageProgressClickAction(
     ) {
         val bookToUpdate: Book = scope.currentState.bookToUpdate ?: return
 
+        val actionAt = scope.currentState.readAt.toActionAt()
+
         val newPercentageValue: Double = newPercentage.toDoubleOrNull() ?: 0.0
         val fraction = (newPercentageValue / 100.0).coerceIn(
             0.0,
             1.0,
         )
 
-        val edition = bookToUpdate.currentEdition ?: run {
-            scope.setState {
-                it.copy(
-                    showProgressSheet = false,
-                    bookToUpdate = null,
-                )
-            }
-            return
-        }
+        val edition = bookToUpdate.currentEdition ?: return
         val isAudiobook = edition.isAudiobook
 
         val newPage: Int? = if (isAudiobook) {
@@ -63,27 +58,26 @@ internal data class OnUpdatePercentageProgressClickAction(
                     // Only a genuine finish transition raises the verdict prompt — re-recording the
                     // last position on an already-read book returns NoChange and must stay silent.
                     if (outcome == ShelfMutationOutcome.Applied) {
-                        scope.setState { it.copy(verdictPromptBook = bookToUpdate) }
+                        scope.setState {
+                            it.copy(
+                                verdictPromptBook = bookToUpdate,
+                            )
+                        }
+                    } else {
+                        scope.sendEvent(ReadingScreenEvent.ProgressUpdatedEvent())
                     }
                 }
                 .onFailure { error ->
                     AppLog.e("$error")
 
                     scope.setState {
-                        it.copy(failedMutationBookIds = it.failedMutationBookIds + bookToUpdate.id)
+                        it.copy(failedMutationBookIds = it.failedMutationBookIds.toPersistentSet().add(bookToUpdate.id))
                     }
                 }
         }
 
         scope.setLocalVariables {
             it.copy(bookMutationJobs = it.bookMutationJobs + (bookToUpdate.id to job))
-        }
-
-        scope.setState {
-            it.copy(
-                showProgressSheet = false,
-                bookToUpdate = null,
-            )
         }
     }
 }

@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
@@ -12,6 +13,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.domain.model.UiScale
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
@@ -52,6 +54,10 @@ interface SettingsLocalDataSource {
 
     suspend fun setBottomBarStyle(style: BottomBarStyle)
 
+    suspend fun setThemeMode(mode: ThemeMode)
+
+    suspend fun setColorPalette(palette: ColorPalette)
+
     suspend fun setDynamicColorEnabled(enabled: Boolean)
 
     val enabledStatusCodes: Flow<Set<Int>>
@@ -59,6 +65,10 @@ interface SettingsLocalDataSource {
     val enabledListIds: Flow<Set<Int>>
 
     val listDefaultsSeeded: Flow<Boolean>
+
+    val readThroughsBackfilled: Flow<Boolean>
+
+    suspend fun markReadThroughsBackfilled()
 
     suspend fun seedEnabledListIds(ids: Set<Int>)
 
@@ -199,6 +209,18 @@ internal class SettingsLocalDataSourceImpl(
         }
     }
 
+    override suspend fun setThemeMode(mode: ThemeMode) {
+        appSettingsDataStore.store.updateData { appSettingsEntity: AppSettingsEntity ->
+            appSettingsEntity.copy(themeConfig = appSettingsEntity.themeConfig.copy(themeMode = mode))
+        }
+    }
+
+    override suspend fun setColorPalette(palette: ColorPalette) {
+        appSettingsDataStore.store.updateData { appSettingsEntity: AppSettingsEntity ->
+            appSettingsEntity.copy(themeConfig = appSettingsEntity.themeConfig.copy(colorPalette = palette))
+        }
+    }
+
     override suspend fun setDynamicColorEnabled(enabled: Boolean) {
         appSettingsDataStore.store.updateData { appSettingsEntity: AppSettingsEntity ->
             appSettingsEntity.copy(themeConfig = appSettingsEntity.themeConfig.copy(useDynamicColor = enabled))
@@ -216,6 +238,16 @@ internal class SettingsLocalDataSourceImpl(
     override val listDefaultsSeeded: Flow<Boolean> = appSettingsDataStore.store.data
         .map { it.listDefaultsSeeded }
         .distinctUntilChanged()
+
+    override val readThroughsBackfilled: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.readThroughsBackfilled }
+        .distinctUntilChanged()
+
+    override suspend fun markReadThroughsBackfilled() {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(readThroughsBackfilled = true)
+        }
+    }
 
     override suspend fun seedEnabledListIds(ids: Set<Int>) {
         appSettingsDataStore.store.updateData { entity ->
@@ -252,7 +284,7 @@ internal class SettingsLocalDataSourceImpl(
     }
 
     override suspend fun resetAllSettings() {
-        appSettingsDataStore.store.updateData { AppSettingsEntity() }
+        appSettingsDataStore.store.updateData { AppSettingsEntity(pausedShelfSeeded = true) }
     }
 
     override val libraryTabOrder: Flow<List<String>> = appSettingsDataStore.store.data

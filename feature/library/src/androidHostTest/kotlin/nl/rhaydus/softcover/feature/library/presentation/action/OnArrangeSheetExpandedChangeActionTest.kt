@@ -1,18 +1,25 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryArrangeDraft
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnArrangeSheetExpandedChangeActionTest {
     private lateinit var dependencies: LibraryDependencies
@@ -33,9 +40,16 @@ class OnArrangeSheetExpandedChangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets isArrangeSheetExpanded to true when expanded is true`() = runTest {
+        fun `opening seeds arrangeDraft from the selected tab's committed sort and layout`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isArrangeSheetExpanded = false)
+            val selectedTabId = LibraryTab.CustomList.idFor(listId = 42)
+            stateFlow.value = LibraryUiState(
+                selectedTabId = selectedTabId,
+                sortModeByTab = persistentMapOf(selectedTabId to LibrarySortMode.TITLE),
+                sortDirectionByTab = persistentMapOf(selectedTabId to SortDirection.ASCENDING),
+                gridLayout = LibraryGridLayout.GRID_THREE_COLUMNS,
+                arrangeDraft = null,
+            )
             val action = OnArrangeSheetExpandedChangeAction(expanded = true)
 
             // ----- Act -----
@@ -46,12 +60,26 @@ class OnArrangeSheetExpandedChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value.isArrangeSheetExpanded shouldBe true
+            stateFlow.value.arrangeDraft shouldBe LibraryArrangeDraft(
+                tabId = selectedTabId,
+                sortMode = LibrarySortMode.TITLE,
+                sortDirection = SortDirection.ASCENDING,
+                gridLayout = LibraryGridLayout.GRID_THREE_COLUMNS,
+            )
         }
 
         @Test
-        fun `sets isArrangeSheetExpanded to false when expanded is false`() = runTest {
+        fun `closing clears arrangeDraft, discarding any in-sheet edits`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isArrangeSheetExpanded = true)
+            stateFlow.value = LibraryUiState(
+                isArrangeSheetExpanded = true,
+                arrangeDraft = LibraryArrangeDraft(
+                    tabId = LibraryTab.CustomList.idFor(listId = 42),
+                    sortMode = LibrarySortMode.RATING,
+                    sortDirection = SortDirection.DESCENDING,
+                    gridLayout = LibraryGridLayout.LIST_LARGE,
+                ),
+            )
             val action = OnArrangeSheetExpandedChangeAction(expanded = false)
 
             // ----- Act -----
@@ -62,26 +90,7 @@ class OnArrangeSheetExpandedChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value.isArrangeSheetExpanded shouldBe false
-        }
-
-        @Test
-        fun `preserves other state fields when updating isArrangeSheetExpanded`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isLoading = false,
-                isArrangeSheetExpanded = false,
-            )
-            val action = OnArrangeSheetExpandedChangeAction(expanded = true)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isArrangeSheetExpanded shouldBe true
+            stateFlow.value.arrangeDraft.shouldBeNull()
         }
     }
 }

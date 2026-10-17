@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.orchestration.presentation
 
 import com.apollographql.apollo.ApolloClient
 import kotlinx.coroutines.cancel
-import org.koin.core.context.stopKoin
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
+import org.koin.core.context.stopKoin
 
 /**
  * Tears down every process-lifetime resource the desktop app owns, then releases the DI graph — the

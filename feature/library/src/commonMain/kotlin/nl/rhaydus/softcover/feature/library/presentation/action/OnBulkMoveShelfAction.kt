@@ -1,17 +1,22 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableSet
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.withSelectedBookIds
 import nl.rhaydus.toad.ActionScope
 
 internal class OnBulkMoveShelfAction(
     private val status: UserBookStatus,
     private val explicitBookIds: Set<Int>? = null,
+    private val sessionPauseConfirmed: Boolean = false,
 ) : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
@@ -22,6 +27,19 @@ internal class OnBulkMoveShelfAction(
 
         if (books.isEmpty()) {
             scope.setState { it.copy(isBulkMoveMenuExpanded = false) }
+
+            return
+        }
+
+        val sessionBookId = state.activeSessionBookId
+
+        if (status == UserBookStatus.PAUSED && sessionPauseConfirmed.not() && books.any { it.id == sessionBookId }) {
+            scope.setState {
+                it.copy(
+                    isBulkMoveMenuExpanded = false,
+                    endSessionPauseBookIds = books.map { book -> book.id }.toImmutableSet(),
+                )
+            }
 
             return
         }
@@ -40,6 +58,7 @@ internal class OnBulkMoveShelfAction(
                 UserBookStatus.READ -> dependencies.markBookAsReadUseCase(book = book)
                 UserBookStatus.CURRENTLY_READING -> dependencies.markBookAsReadingUseCase(book = book)
                 UserBookStatus.WANT_TO_READ -> dependencies.markBookAsWantToReadUseCase(book = book)
+                UserBookStatus.PAUSED -> dependencies.pauseBookUseCase(book = book)
                 UserBookStatus.DID_NOT_FINISH -> error(
                     "Bulk move-shelf does not support DID_NOT_FINISH",
                 )
@@ -58,18 +77,23 @@ internal class OnBulkMoveShelfAction(
         if (failureCount > 0) {
             val noun = if (failureCount == 1) "book" else "books"
 
-            SnackBarManager.showSnackbar(title = "Couldn't move $failureCount $noun — try again.")
+            SnackBarManager.showSnackbar(title = "Couldn't move $failureCount $noun. Try again.")
+
+            scope.sendEvent(LibraryEvent.BulkMoveFailedEvent())
+        } else {
+            val feedback = if (status == UserBookStatus.READ) Feedback.Milestone else Feedback.Routine
+
+            scope.sendEvent(LibraryEvent.BulkMoveAppliedEvent(feedback = feedback))
         }
 
         scope.setState {
-            it.copy(
+            it.withSelectedBookIds(persistentSetOf()).copy(
                 selectionMode = false,
-                selectedBookIds = emptySet(),
                 bulkActionInProgress = false,
                 isBulkMoveMenuExpanded = false,
-                isBulkRemoveDialogShown = false,
-                isBulkAddToListSheetShown = false,
-                listsBeingMutated = emptySet(),
+                isBulkRemoveSheetRequested = false,
+                isChooseListsSheetRequested = false,
+                listsBeingMutated = persistentSetOf(),
             )
         }
     }

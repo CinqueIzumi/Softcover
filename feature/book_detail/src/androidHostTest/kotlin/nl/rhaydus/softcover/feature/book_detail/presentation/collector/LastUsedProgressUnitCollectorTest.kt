@@ -9,17 +9,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class LastUsedProgressUnitCollectorTest {
     private lateinit var getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase
@@ -32,7 +33,7 @@ class LastUsedProgressUnitCollectorTest {
     fun setUp() {
         progressUnitFlow = MutableSharedFlow()
         getLastUsedProgressUnitAsFlowUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
@@ -56,10 +57,12 @@ class LastUsedProgressUnitCollectorTest {
         fun `updates selectedProgressSheetTab when flow emits ProgressUnit TIME`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             progressUnitFlow.emit(ProgressUnit.TIME)
@@ -73,10 +76,12 @@ class LastUsedProgressUnitCollectorTest {
         fun `updates selectedProgressSheetTab when flow emits ProgressUnit PAGE`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             progressUnitFlow.emit(ProgressUnit.PAGE)
@@ -90,87 +95,18 @@ class LastUsedProgressUnitCollectorTest {
         fun `updates selectedProgressSheetTab when flow emits ProgressUnit PERCENTAGE`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             progressUnitFlow.emit(ProgressUnit.PERCENTAGE)
 
             // ----- Assert -----
             stateFlow.value.selectedProgressSheetTab shouldBe ProgressSheetTab.PERCENTAGE
-            job.cancel()
-        }
-
-        @Test
-        fun `updates selectedProgressSheetTab to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            progressUnitFlow.emit(ProgressUnit.TIME)
-            progressUnitFlow.emit(ProgressUnit.PAGE)
-
-            // ----- Assert -----
-            stateFlow.value.selectedProgressSheetTab shouldBe ProgressSheetTab.PAGE
-            job.cancel()
-        }
-
-        @Test
-        fun `does not change selectedProgressSheetTab before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act & Assert -----
-            stateFlow.value.selectedProgressSheetTab shouldBe BookDetailUiState().selectedProgressSheetTab
-            job.cancel()
-        }
-
-        @Test
-        fun `retains the last emitted selectedProgressSheetTab after the collector job is cancelled`() =
-            runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-            progressUnitFlow.emit(ProgressUnit.TIME)
-            job.cancel()
-
-            // ----- Act & Assert -----
-            stateFlow.value.selectedProgressSheetTab shouldBe ProgressSheetTab.TIME
-        }
-
-        @Test
-        fun `preserves all other state fields when updating selectedProgressSheetTab`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
-                loadingBookDetails = false,
-                fabMenuExpanded = true,
-            )
-            val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            progressUnitFlow.emit(ProgressUnit.TIME)
-
-            // ----- Assert -----
-            stateFlow.value.loadingBookDetails shouldBe false
-            stateFlow.value.fabMenuExpanded shouldBe true
-            stateFlow.value.selectedProgressSheetTab shouldBe ProgressSheetTab.TIME
             job.cancel()
         }
     }

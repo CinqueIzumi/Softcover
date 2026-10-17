@@ -2,25 +2,32 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagsLoad
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.tagsOrEmpty
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnToggleUserTagSpoilerActionTest {
     private lateinit var saveUserTagsUseCase: SaveUserTagsUseCase
@@ -31,7 +38,7 @@ class OnToggleUserTagSpoilerActionTest {
     @BeforeEach
     fun setUp() {
         saveUserTagsUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -80,7 +87,7 @@ class OnToggleUserTagSpoilerActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = listOf(tag),
+                userTags = UserTagsLoad.Loaded(persistentListOf(tag)),
             )
             val toggled = tag.copy(spoiler = true)
 
@@ -91,41 +98,13 @@ class OnToggleUserTagSpoilerActionTest {
                 )
             } returns Result.success(listOf(toggled))
 
-            val action = OnToggleUserTagSpoilerAction(tag = tag)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.userTags.first().spoiler shouldBe true
-        }
-
-        @Test
-        fun `flips spoiler from true to false on the matching tag`() = runTest {
-            // ----- Arrange -----
-            val dependencies = stubDependencies(this)
-            val tag = UserTag(
-                name = "death",
-                category = TagCategory.CONTENT_WARNING,
-                spoiler = true,
-            )
             stateFlow.value = stateFlow.value.copy(
-                book = stubBook(id = 1),
-                userTags = listOf(tag),
+
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
+
             )
-            val toggled = tag.copy(spoiler = false)
 
-            coEvery {
-                saveUserTagsUseCase(
-                    bookId = 1,
-                    tags = listOf(toggled),
-                )
-            } returns Result.success(listOf(toggled))
-
-            val action = OnToggleUserTagSpoilerAction(tag = tag)
+            val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -134,7 +113,7 @@ class OnToggleUserTagSpoilerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.userTags.first().spoiler shouldBe false
+            stateFlow.value.userTags.tagsOrEmpty.first().spoiler shouldBe true
         }
 
         @Test
@@ -153,7 +132,7 @@ class OnToggleUserTagSpoilerActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = listOf(targetTag, otherTag),
+                userTags = UserTagsLoad.Loaded(persistentListOf(targetTag, otherTag)),
             )
             val serverResponse = listOf(targetTag.copy(spoiler = true), otherTag)
 
@@ -164,7 +143,13 @@ class OnToggleUserTagSpoilerActionTest {
                 )
             } returns Result.success(serverResponse)
 
-            val action = OnToggleUserTagSpoilerAction(tag = targetTag)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = persistentMapOf("chip" to targetTag),
+
+            )
+
+            val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -173,7 +158,7 @@ class OnToggleUserTagSpoilerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.userTags.find { it.name == "horror" }?.spoiler shouldBe false
+            stateFlow.value.userTags.tagsOrEmpty.find { it.name == "horror" }?.spoiler shouldBe false
         }
 
         @Test
@@ -187,12 +172,13 @@ class OnToggleUserTagSpoilerActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 7),
-                userTags = listOf(tag),
+                userTags = UserTagsLoad.Loaded(persistentListOf(tag)),
             )
-            val serverCanonical = listOf(tag.copy(
+            val canonicalTag = tag.copy(
                 spoiler = true,
                 count = 3,
-            ),)
+            )
+            val serverCanonical = listOf(canonicalTag)
 
             coEvery {
                 saveUserTagsUseCase(
@@ -201,7 +187,13 @@ class OnToggleUserTagSpoilerActionTest {
                 )
             } returns Result.success(serverCanonical)
 
-            val action = OnToggleUserTagSpoilerAction(tag = tag)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
+
+            )
+
+            val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -210,7 +202,7 @@ class OnToggleUserTagSpoilerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe serverCanonical
+            stateFlow.value.userTags.tagsOrEmpty shouldBe serverCanonical
         }
 
         @Test
@@ -225,7 +217,7 @@ class OnToggleUserTagSpoilerActionTest {
             val originalTags = listOf(tag)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
-                userTags = originalTags,
+                userTags = UserTagsLoad.Loaded(originalTags.toImmutableList()),
             )
 
             coEvery {
@@ -235,7 +227,13 @@ class OnToggleUserTagSpoilerActionTest {
                 )
             } returns Result.failure(RuntimeException("network error"))
 
-            val action = OnToggleUserTagSpoilerAction(tag = tag)
+            stateFlow.value = stateFlow.value.copy(
+
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
+
+            )
+
+            val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -244,7 +242,7 @@ class OnToggleUserTagSpoilerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe originalTags
+            stateFlow.value.userTags.tagsOrEmpty shouldBe originalTags
         }
 
         @Test
@@ -258,10 +256,13 @@ class OnToggleUserTagSpoilerActionTest {
             )
             stateFlow.value = stateFlow.value.copy(
                 book = null,
-                userTags = listOf(tag),
+                userTags = UserTagsLoad.Loaded(persistentListOf(tag)),
             )
             val initialTags = stateFlow.value.userTags
-            val action = OnToggleUserTagSpoilerAction(tag = tag)
+            stateFlow.value = stateFlow.value.copy(
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
+            )
+            val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
 
             // ----- Act -----
             action.execute(
@@ -271,6 +272,101 @@ class OnToggleUserTagSpoilerActionTest {
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe initialTags
+        }
+
+        @Test
+        fun `does nothing when the chip key matches no user tag`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            val tag = UserTag(
+                name = "fantasy",
+                category = TagCategory.GENRE,
+            )
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(id = 1),
+                userTags = UserTagsLoad.Loaded(persistentListOf(tag)),
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
+            )
+            val action = OnToggleUserTagSpoilerAction(chipKey = "unknown")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.userTags.tagsOrEmpty shouldBe listOf(tag)
+            coVerify(exactly = 0) {
+                saveUserTagsUseCase(
+                    any(),
+                    any(),
+                )
+            }
+        }
+
+        @Test
+        fun `does nothing while the user tags have not loaded`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            val tag = UserTag(
+                name = "fantasy",
+                category = TagCategory.GENRE,
+            )
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(id = 1),
+                userTags = UserTagsLoad.Loading,
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
+            )
+            val initialState = stateFlow.value
+            val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value shouldBe initialState
+            coVerify(exactly = 0) {
+                saveUserTagsUseCase(
+                    bookId = any(),
+                    tags = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `does nothing while the user tags failed to load`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            val tag = UserTag(
+                name = "fantasy",
+                category = TagCategory.GENRE,
+            )
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(id = 1),
+                userTags = UserTagsLoad.Failed,
+                userTagByEditorChipKey = persistentMapOf("chip" to tag),
+            )
+            val initialState = stateFlow.value
+            val action = OnToggleUserTagSpoilerAction(chipKey = "chip")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value shouldBe initialState
+            coVerify(exactly = 0) {
+                saveUserTagsUseCase(
+                    bookId = any(),
+                    tags = any(),
+                )
+            }
         }
     }
 }

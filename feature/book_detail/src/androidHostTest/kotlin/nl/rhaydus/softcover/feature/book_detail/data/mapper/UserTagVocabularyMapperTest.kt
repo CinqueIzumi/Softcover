@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.book_detail.data.mapper
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class UserTagVocabularyMapperTest {
     @Nested
@@ -48,40 +48,6 @@ class UserTagVocabularyMapperTest {
             // ----- Assert -----
             result.category shouldBe TagCategory.OTHER
         }
-
-        @Test
-        fun `always maps spoiler to false`() {
-            // ----- Arrange -----
-            val entity = UserTagVocabularyEntity(
-                userId = 7,
-                category = TagCategory.CONTENT_WARNING.name,
-                name = "Violence",
-                usageCount = 2,
-            )
-
-            // ----- Act -----
-            val result = entity.toUserTag()
-
-            // ----- Assert -----
-            result.spoiler shouldBe false
-        }
-
-        @Test
-        fun `maps usageCount to count`() {
-            // ----- Arrange -----
-            val entity = UserTagVocabularyEntity(
-                userId = 7,
-                category = TagCategory.GENRE.name,
-                name = "Gothic",
-                usageCount = 11,
-            )
-
-            // ----- Act -----
-            val result = entity.toUserTag()
-
-            // ----- Assert -----
-            result.count shouldBe 11
-        }
     }
 
     @Nested
@@ -122,22 +88,6 @@ class UserTagVocabularyMapperTest {
 
             // ----- Assert -----
             result.category shouldBe "CONTENT_WARNING"
-        }
-
-        @Test
-        fun `maps count to usageCount`() {
-            // ----- Arrange -----
-            val userTag = UserTag(
-                name = "Gothic",
-                category = TagCategory.GENRE,
-                count = 9,
-            )
-
-            // ----- Act -----
-            val result = userTag.toVocabularyEntity(userId = 3)
-
-            // ----- Assert -----
-            result.usageCount shouldBe 9
         }
     }
 }

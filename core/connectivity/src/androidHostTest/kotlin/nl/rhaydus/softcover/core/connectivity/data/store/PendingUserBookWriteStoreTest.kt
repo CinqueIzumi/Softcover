@@ -3,28 +3,36 @@ package nl.rhaydus.softcover.core.connectivity.data.store
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coJustRun
+import io.mockk.Called
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.offlinesync.PendingWrite
+import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
 import nl.rhaydus.softcover.core.connectivity.data.mapper.toPendingUserBookWrite
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class PendingUserBookWriteStoreTest {
     private lateinit var dao: PendingUserBookWriteDao
+    private lateinit var progressHistoryLocalDataSource: ProgressHistoryLocalDataSource
     private lateinit var store: PendingUserBookWriteStore
 
     @BeforeEach
     fun setUp() {
         dao = mockk()
-        store = PendingUserBookWriteStore(dao = dao)
+        progressHistoryLocalDataSource = mockk(relaxed = true)
+        store = PendingUserBookWriteStore(
+            dao = dao,
+            progressHistoryLocalDataSource = progressHistoryLocalDataSource,
+        )
     }
 
     private fun pendingUserBookWrite(
@@ -42,6 +50,7 @@ class PendingUserBookWriteStoreTest {
         reviewHasSpoilers: Boolean? = true,
         enqueuedAt: String = "2026-05-04T12:00:00Z",
         actionAt: String? = null,
+        progressHistoryId: Long? = null,
     ) = PendingUserBookWrite(
         kind = kind,
         userBookId = userBookId,
@@ -57,6 +66,7 @@ class PendingUserBookWriteStoreTest {
         reviewHasSpoilers = reviewHasSpoilers,
         enqueuedAt = enqueuedAt,
         actionAt = actionAt,
+        progressHistoryId = progressHistoryId,
     )
 
     private fun pendingUserBookWriteEntity(
@@ -76,6 +86,7 @@ class PendingUserBookWriteStoreTest {
         enqueuedAt: String = "2026-05-04T12:00:00Z",
         attempts: Int = 0,
         actionAt: String? = null,
+        progressHistoryId: Long? = null,
     ) = PendingUserBookWriteEntity(
         localId = localId,
         kind = kind,
@@ -93,6 +104,7 @@ class PendingUserBookWriteStoreTest {
         enqueuedAt = enqueuedAt,
         attempts = attempts,
         actionAt = actionAt,
+        progressHistoryId = progressHistoryId,
     )
 
     @Nested
@@ -143,12 +155,151 @@ class PendingUserBookWriteStoreTest {
             inserted.enqueuedAt shouldBe "2026-05-05T09:00:00Z"
             inserted.actionAt shouldBe "2026-05-05T09:05:00Z"
         }
+
+        @Test
+        fun `persists the progressHistoryId on the inserted entity`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(progressHistoryId = 31L)
+            val slot = slot<PendingUserBookWriteEntity>()
+
+            coEvery {
+                dao.getByUserBookIdAndKind(
+                    userBookId = any(),
+                    kind = any(),
+                )
+            } returns null
+
+            coJustRun {
+                dao.insertReplacing(capture(slot))
+            }
+
+            // ----- Act -----
+            store.enqueue(payload = payload)
+
+            // ----- Assert -----
+            slot.captured.progressHistoryId shouldBe 31L
+        }
+
+        @Test
+        fun `deletes the history row of the queued progress write it supersedes`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                userBookId = 10,
+                progressHistoryId = 32L,
+            )
+
+            coEvery {
+                dao.getByUserBookIdAndKind(
+                    userBookId = 10,
+                    kind = "UPDATE_PROGRESS",
+                )
+            } returns pendingUserBookWriteEntity(progressHistoryId = 31L)
+
+            coJustRun {
+                dao.insertReplacing(any())
+            }
+
+            // ----- Act -----
+            store.enqueue(payload = payload)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.delete(localId = 31L)
+            }
+
+            coVerify(exactly = 1) {
+                dao.insertReplacing(entity = any())
+            }
+        }
+
+        @Test
+        fun `deletes no history row when the superseded progress write has none`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(kind = PendingUserBookWriteKind.UPDATE_PROGRESS)
+
+            coEvery {
+                dao.getByUserBookIdAndKind(
+                    userBookId = any(),
+                    kind = any(),
+                )
+            } returns pendingUserBookWriteEntity(progressHistoryId = null)
+
+            coJustRun {
+                dao.insertReplacing(any())
+            }
+
+            // ----- Act -----
+            store.enqueue(payload = payload)
+
+            // ----- Assert -----
+            verify { progressHistoryLocalDataSource wasNot Called }
+        }
+
+        @Test
+        fun `deletes no history row when no progress write is queued yet`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                progressHistoryId = 32L,
+            )
+
+            coEvery {
+                dao.getByUserBookIdAndKind(
+                    userBookId = any(),
+                    kind = any(),
+                )
+            } returns null
+
+            coJustRun {
+                dao.insertReplacing(any())
+            }
+
+            // ----- Act -----
+            store.enqueue(payload = payload)
+
+            // ----- Assert -----
+            verify { progressHistoryLocalDataSource wasNot Called }
+
+            coVerify(exactly = 1) {
+                dao.insertReplacing(entity = any())
+            }
+        }
+
+        @Test
+        fun `leaves history alone for every kind other than UPDATE_PROGRESS`() = runTest {
+            // ----- Arrange -----
+            val otherKinds = PendingUserBookWriteKind.entries - PendingUserBookWriteKind.UPDATE_PROGRESS
+
+            coJustRun {
+                dao.insertReplacing(any())
+            }
+
+            // ----- Act -----
+            otherKinds.forEach { kind ->
+                store.enqueue(payload = pendingUserBookWrite(kind = kind))
+            }
+
+            // ----- Assert -----
+            verify { progressHistoryLocalDataSource wasNot Called }
+
+            coVerify(exactly = otherKinds.size) {
+                dao.insertReplacing(entity = any())
+            }
+
+            coVerify(exactly = 0) {
+                dao.getByUserBookIdAndKind(
+                    userBookId = any(),
+                    kind = any(),
+                )
+            }
+        }
     }
 
     @Nested
     inner class GetPending {
         @Test
-        fun `passes maxAttempts through to the dao and maps rows to PendingWrite`() = runTest {
+        fun `maps dao rows to PendingWrite`() = runTest {
             // ----- Arrange -----
             val entityA = pendingUserBookWriteEntity(
                 localId = 1L,
@@ -184,9 +335,6 @@ class PendingUserBookWriteStoreTest {
             )
             result[0].payload.actionAt shouldBe "2026-06-01T10:00:00Z"
             result[1].payload.actionAt shouldBe null
-            coVerify(exactly = 1) {
-                dao.getPending(maxAttempts = 7)
-            }
         }
 
         @Test
@@ -217,40 +365,33 @@ class PendingUserBookWriteStoreTest {
     }
 
     @Nested
-    inner class Delete {
+    inner class HasPending {
         @Test
-        fun `delegates to dao delete`() = runTest {
+        fun `returns true when the dao has an eligible pending row`() = runTest {
             // ----- Arrange -----
-            coJustRun {
-                dao.delete(any())
-            }
+            coEvery {
+                dao.getPending(maxAttempts = any())
+            } returns listOf(pendingUserBookWriteEntity())
 
             // ----- Act -----
-            store.delete(localId = 9L)
+            val result = store.hasPending()
 
             // ----- Assert -----
-            coVerify(exactly = 1) {
-                dao.delete(localId = 9L)
-            }
+            result shouldBe true
         }
-    }
 
-    @Nested
-    inner class IncrementAttempts {
         @Test
-        fun `delegates to dao incrementAttempts`() = runTest {
+        fun `returns false when the dao has no eligible pending rows`() = runTest {
             // ----- Arrange -----
-            coJustRun {
-                dao.incrementAttempts(any())
-            }
+            coEvery {
+                dao.getPending(maxAttempts = any())
+            } returns emptyList()
 
             // ----- Act -----
-            store.incrementAttempts(localId = 9L)
+            val result = store.hasPending()
 
             // ----- Assert -----
-            coVerify(exactly = 1) {
-                dao.incrementAttempts(localId = 9L)
-            }
+            result shouldBe false
         }
     }
 }

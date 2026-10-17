@@ -21,14 +21,14 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import nl.rhaydus.softcover.core.network.helper.HTTP_TOO_MANY_REQUESTS
+import nl.rhaydus.softcover.core.network.helper.RateLimitSnapshot
+import nl.rhaydus.softcover.core.network.helper.rateLimitSnapshot
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
-import nl.rhaydus.softcover.core.network.helper.HTTP_TOO_MANY_REQUESTS
-import nl.rhaydus.softcover.core.network.helper.RateLimitSnapshot
-import nl.rhaydus.softcover.core.network.helper.rateLimitSnapshot
 
 // The GraphQL meta field, which the API does not bill as a top-level query.
 private const val TYPE_NAME_FIELD = "__typename"

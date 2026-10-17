@@ -2,48 +2,53 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberIsOnline
-import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.core.designsystem.presentation.model.VerdictSheetContext
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailOverlayNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPaneCloseHandler
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalCreateListPresenter
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TransientNavArg
+import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.component.haptics.play
+import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailOverlayNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPaneCloseHandler
+import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.presentation.navigation.TransientNavArg
+import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnCelebrateMarkedAsReadAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenVerdictSheetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnScannedEditionReturnedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.OpenExternalLinkEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 class BookDetailScreen(
     val id: Int,
     @TransientNavArg private val initialCover: BookInitialCover? = null,
     private val transitionSurface: String? = null,
+    @TransientNavArg private val showVerdictSheet: Boolean = false,
 ) : Screen {
     // The key must include the book id: Voyager's ScreenModelStore is keyed by the screen key, so a
     // class-constant key makes every book share one BookDetailScreenScreenModel. That surfaces in the
     // two-pane (each book is a fresh nested navigator) as "every selection shows the first book."
-    override val key: ScreenKey = "book-detail-$id"
+    // The unique suffix ends the id: Voyager disposes by `key.startsWith(screen.key)`, so a bare
+    // "book-detail-1" would also dispose "book-detail-12".
+    override val key: ScreenKey = "book-detail-$id-$uniqueScreenKey"
 
     @Composable
     override fun Content() {
@@ -62,22 +67,28 @@ class BookDetailScreen(
         val overlayNavigator = LocalBookDetailOverlayNavigator.current ?: navigator
 
         val screenModel: BookDetailScreenScreenModel =
-            koinScreenModel<BookDetailScreenScreenModel> { parametersOf(
-                id,
-                initialCover,
-            ) }
+            koinScreenModel<BookDetailScreenScreenModel> {
+                parametersOf(
+                    id,
+                    initialCover,
+                    transitionSurface,
+                    showVerdictSheet,
+                )
+            }
 
         val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 
-        val haptics = rememberHaptics()
+        val haptics = LocalHaptics.current
 
         val uriHandler = LocalUriHandler.current
 
-        var celebrationKey by remember { mutableIntStateOf(0) }
+        val appNavigator = koinInject<AppNavigator>()
 
         ObserveAsEvents(flow = screenModel.events) {
+            if (it is FeedbackEvent) haptics.play(it.feedback)
+
             when (it) {
-                is RefreshDetailBookEvent -> {
+                is BookDetailEvent.RefreshDetailBookEvent -> {
                     screenModel.runAction(
                         action = InitializeBookWithIdAction(id = id),
                     )
@@ -87,18 +98,70 @@ class BookDetailScreen(
                     )
                 }
 
-                is BookMarkedAsReadEvent -> {
-                    haptics.commit()
-                    celebrationKey++
+                is BookDetailEvent.BookMarkedAsReadEvent -> {
+                    screenModel.runAction(action = OnCelebrateMarkedAsReadAction())
 
                     screenModel.runAction(
                         action = OnOpenVerdictSheetAction(context = VerdictSheetContext.FINISHED),
                     )
                 }
 
-                is OpenExternalLinkEvent -> {
+                is BookDetailEvent.OpenExternalLinkEvent -> {
                     uriHandler.openUri(uri = it.url)
                 }
+
+                is BookDetailEvent.CreateListRequestedEvent -> {
+                    // Same detour-and-return as Library's bulk path: the reader reached for a new list
+                    // *while* choosing lists for this book, so creating it puts the book on the new list
+                    // and brings the chooser back with it ticked. Unlike the bulk path this can reuse the
+                    // ordinary toggle action, which works off the book and the id alone and so doesn't
+                    // care that the new list has yet to surface in screen state.
+                    createListPresenter?.open(
+                        onListCreated = { listId, _ ->
+                            screenModel.runAction(
+                                OnToggleListMembershipAction(
+                                    listId = listId,
+                                    isMember = false,
+                                ),
+                            )
+
+                            screenModel.runAction(OnShowChooseListsSheetAction())
+                        },
+                    )
+                }
+
+                is BookDetailEvent.OpenIsbnLookupEvent -> {
+                    overlayNavigator.push(
+                        item = appNavigator.screen(
+                            ScreenDestination.BarcodeScanner(
+                                startInManualEntry = true,
+                                prefilledIsbn = it.prefilledIsbn,
+                                onResolved = { book, editionId ->
+                                    if (book.id == id) {
+                                        screenModel.runAction(OnScannedEditionReturnedAction(editionId = editionId))
+                                    } else {
+                                        overlayNavigator.push(
+                                            item = appNavigator.screen(
+                                                ScreenDestination.BookDetail(
+                                                    id = book.id,
+                                                    initialCover = BookInitialCover.forScannedEdition(
+                                                        book = book,
+                                                        editionId = editionId,
+                                                    ),
+                                                ),
+                                            ),
+                                        )
+                                    }
+                                },
+                            ),
+                        ),
+                    )
+                }
+
+                is BookDetailEvent.ShelfChangedEvent,
+                is BookDetailEvent.ProgressUpdatedEvent,
+                is BookDetailEvent.MutationSucceededEvent,
+                is BookDetailEvent.MutationFailedEvent -> Unit
             }
         }
 
@@ -109,41 +172,11 @@ class BookDetailScreen(
             runAction = screenModel::runAction,
             onNavigateBack = onNavigateBack,
             onCoverClick = {
-                val book = state.book ?: return@BookDetailScreenLayout
+                val cover = state.fullScreenCover ?: return@BookDetailScreenLayout
 
-                overlayNavigator.push(
-                    FullScreenCoverScreen(
-                        edition = state.displayedEdition,
-                        defaultEdition = book.defaultEdition,
-                        fallbackCoverUrl = book.coverUrl,
-                    ),
-                )
-            },
-            onCreateNewListClick = {
-                // Same detour-and-return as Library's bulk path: the reader reached for a new list
-                // *while* choosing lists for this book, so creating it puts the book on the new list
-                // and brings the chooser back with it ticked. Unlike the bulk path this can reuse the
-                // ordinary toggle action, which works off the book and the id alone and so doesn't
-                // care that the new list has yet to surface in screen state.
-                createListPresenter?.open(
-                    onListCreated = { listId, _ ->
-                        screenModel.runAction(
-                            OnToggleListMembershipAction(
-                                listId = listId,
-                                isMember = false,
-                            ),
-                        )
-
-                        screenModel.runAction(OnShowChooseListsSheetAction())
-                    },
-                )
-
-                screenModel.runAction(OnDismissChooseListsSheetAction())
+                overlayNavigator.push(FullScreenCoverScreen(cover = cover))
             },
             isOnline = isOnline,
-            bookId = id,
-            transitionSurface = transitionSurface,
-            celebrationKey = celebrationKey,
         )
     }
 }
@@ -153,9 +186,8 @@ class BookDetailScreen(
  * `actual`: the shared `ScreenModel` / state / actions / overlays wire up identically in
  * [BookDetailScreen.Content], and only the rendered layout branches — mobile is a single scrolling
  * column, desktop is a fixed identity sidebar beside a scrolling content column. `expect` cannot carry
- * default argument values, so every parameter is supplied explicitly at the single call site above.
- * [bookId] and [transitionSurface] flow through from the screen's constructor (the cover's shared-
- * element key needs them before the book itself has loaded).
+ * default argument values, so every parameter is supplied explicitly at the single call site in
+ * [BookDetailScreen.Content].
  */
 @Composable
 internal expect fun BookDetailScreenLayout(
@@ -163,9 +195,5 @@ internal expect fun BookDetailScreenLayout(
     runAction: (BookDetailAction) -> Unit,
     onNavigateBack: () -> Unit,
     onCoverClick: () -> Unit,
-    onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
-    bookId: Int,
-    transitionSurface: String?,
-    celebrationKey: Int,
 )

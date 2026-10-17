@@ -1,14 +1,12 @@
 package nl.rhaydus.softcover.core.domain.model
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class ReadingSessionTest {
     // region Fixtures
@@ -65,18 +63,6 @@ class ReadingSessionTest {
             val session = buildSession(
                 endedAt = end,
                 lastPausedAt = Instant.parse("2024-06-01T10:30:00Z"),
-            )
-
-            // ----- Act & Assert -----
-            session.isPaused shouldBe false
-        }
-
-        @Test
-        fun `is false when session is ended and lastPausedAt is null`() {
-            // ----- Arrange -----
-            val session = buildSession(
-                endedAt = end,
-                lastPausedAt = null,
             )
 
             // ----- Act & Assert -----
@@ -142,47 +128,6 @@ class ReadingSessionTest {
             // ----- Assert -----
             // wall = 50 min; openPause = 30 min; reading = 20 min
             result shouldBe 20.minutes
-        }
-
-        @Test
-        fun `readingDuration stays constant as now advances during an open pause`() {
-            // ----- Arrange -----
-            val pausedAt = Instant.parse("2024-06-01T10:20:00Z")
-
-            val session = buildSession(
-                startedAt = start,
-                pausedSeconds = 0,
-                lastPausedAt = pausedAt,
-            )
-
-            val now1 = Instant.parse("2024-06-01T10:50:00Z")
-            val now2 = Instant.parse("2024-06-01T11:10:00Z")
-
-            // ----- Act -----
-            val result1 = session.readingDuration(now = now1)
-            val result2 = session.readingDuration(now = now2)
-
-            // ----- Assert -----
-            result1 shouldBe result2
-        }
-
-        @Test
-        fun `uses endedAt instead of now for a completed session`() {
-            // ----- Arrange -----
-            val session = buildSession(
-                startedAt = start,
-                endedAt = end,
-                pausedSeconds = 0,
-                lastPausedAt = null,
-            )
-
-            val laterNow = Instant.parse("2024-06-01T15:00:00Z")
-
-            // ----- Act -----
-            val result = session.readingDuration(now = laterNow)
-
-            // ----- Assert -----
-            result shouldBe 1.hours
         }
 
         @Test

@@ -1,7 +1,9 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -15,18 +17,30 @@ internal class OnMarkBookAsWantToReadClickAction(private val book: Book) : BookD
     ) {
         scope.currentLocalVariables.bookMutationJobs[book.id]?.cancel()
 
-        // A previewed or scanned edition (off-shelf) becomes the created user book's edition.
-        val editionId = scope.currentState.previewEdition?.id ?: scope.currentState.scannedEditionId
+        val editionId = scope.currentState.displayedEdition?.id
+
+        if (book.userBook == null) {
+            scope.setState { it.copy(pendingShelfStatus = BookStatus.WantToRead) }
+        }
 
         val job = dependencies.launch {
             dependencies.markBookAsWantToReadUseCase(
                 book = book,
                 editionId = editionId,
-            ).onFailure { error ->
-                AppLog.e("$error")
+            )
+                .onSuccess {
+                    scope.sendEvent(BookDetailEvent.ShelfChangedEvent())
+                }
+                .onFailure { error ->
+                    AppLog.e("$error")
 
-                scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
-            }
+                    scope.setState {
+                        it.copy(
+                            pendingShelfStatus = it.pendingShelfStatus.takeUnless { pending -> pending == BookStatus.WantToRead },
+                            failedMutationBookIds = it.failedMutationBookIds.toPersistentSet().add(book.id),
+                        )
+                    }
+                }
         }
 
         scope.setLocalVariables {

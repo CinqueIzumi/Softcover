@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.feature.library.presentation.sort
 
-import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 /**
@@ -48,7 +48,7 @@ internal fun librarySortOptions(
     }
 
     val books = state.booksByTab[tab.id].orEmpty()
-    val hasInProgress = books.any { it.status == BookStatus.Reading }
+    val hasInProgress = books.any { it.status == BookStatus.Reading || it.status == BookStatus.Paused }
     val hasFinished = books.any { it.status == BookStatus.Read }
     val hasDeadlines = books.any { it.id in state.deadlines }
 

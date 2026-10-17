@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.core.notification
 
+import nl.rhaydus.common.AppLog
 import java.awt.SystemTray
 import java.awt.TrayIcon
 import java.awt.TrayIcon.MessageType
 import java.awt.image.BufferedImage
-import nl.rhaydus.common.AppLog
 
 /**
  * Desktop notifier over AWT's [SystemTray]: posts native balloon notifications via
@@ -31,7 +31,7 @@ internal class JvmSoftcoverNotifier : SoftcoverNotifier, AutoCloseable {
             return
         }
 
-        val caption = content.eyebrow?.let { "$it — ${content.title}" } ?: content.title
+        val caption = content.eyebrow?.let { "$it: ${content.title}" } ?: content.title
 
         icon.displayMessage(
             caption,

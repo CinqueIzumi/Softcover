@@ -5,11 +5,11 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 
 class Migration45To46Test {
     private lateinit var connection: SQLiteConnection
@@ -80,16 +80,22 @@ class Migration45To46Test {
 
     @Test
     fun `migration runs cleanly from a real v45 database`() {
-        // ----- Act / Assert -----
-        migration.migrate(connection)
+        // ----- Arrange -----
+        val db = connection
+
+        // ----- Act & Assert -----
+        migration.migrate(db)
     }
 
     @Nested
     inner class BookListsColumns {
         @Test
         fun `privacySettingId column exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             val columns = columnNames("book_lists")
@@ -126,8 +132,11 @@ class Migration45To46Test {
     inner class PendingListWritesColumns {
         @Test
         fun `privacySettingId column exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             val columns = columnNames("pending_list_writes")

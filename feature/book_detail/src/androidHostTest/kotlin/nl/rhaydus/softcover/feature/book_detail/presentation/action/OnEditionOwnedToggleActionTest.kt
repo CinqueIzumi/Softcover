@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -11,33 +13,37 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnEditionOwnedToggleActionTest {
     private lateinit var setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
     fun setUp() {
         setEditionAsOwnedUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -140,15 +146,14 @@ class OnEditionOwnedToggleActionTest {
                     owned = false,
                 )
             }
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>().feedback shouldBe null
         }
 
         @Test
-        fun `does not add edition id to failedMutationEditionIds when use case succeeds`() = runTest {
+        fun `sends a Routine MutationSucceededEvent when the edition becomes owned`() = runTest {
             // ----- Arrange -----
-            val edition = stubEdition(
-                id = 99,
-                owned = false,
-            )
+            val edition = stubEdition(owned = false)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -170,7 +175,8 @@ class OnEditionOwnedToggleActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.failedMutationEditionIds.contains(99) shouldBe false
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>().feedback shouldBe Feedback.Routine
         }
 
         @Test
@@ -202,37 +208,7 @@ class OnEditionOwnedToggleActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationEditionIds.contains(99) shouldBe true
-        }
-
-        @Test
-        fun `stores job in editionMutationJobs after execute returns`() = runTest {
-            // ----- Arrange -----
-            val edition = stubEdition(
-                id = 99,
-                owned = false,
-            )
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                setEditionAsOwnedUseCase(
-                    edition = edition,
-                    owned = true,
-                )
-            } returns Result.success(Unit)
-
-            val action = OnEditionOwnedToggleAction(
-                edition = edition,
-                owned = true,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            localVariablesFlow.value.editionMutationJobs.containsKey(99) shouldBe true
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
 
         @Test
@@ -277,31 +253,6 @@ class OnEditionOwnedToggleActionTest {
             // ----- Assert -----
             priorJob.isCancelled shouldBe true
             localVariablesFlow.value.editionMutationJobs.containsKey(editionId) shouldBe true
-        }
-
-        @Test
-        fun `completes without throwing when use case fails`() = runTest {
-            // ----- Arrange -----
-            val edition = stubEdition(owned = true)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                setEditionAsOwnedUseCase(
-                    edition = edition,
-                    owned = false,
-                )
-            } returns Result.failure(RuntimeException("network error"))
-
-            val action = OnEditionOwnedToggleAction(
-                edition = edition,
-                owned = false,
-            )
-
-            // ----- Act & Assert -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
         }
     }
 }

@@ -1,16 +1,14 @@
 package nl.rhaydus.softcover.feature.explore.di
 
-import org.koin.dsl.bind
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
-import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
+import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSeriesLocalDataSource
 import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSeriesLocalDataSourceImpl
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchLocalDataSource
@@ -39,22 +37,35 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesBookDismissalUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesDismissalUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.collector.BecauseYouReadCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.BecauseYouReadGenreSheetCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.BookCardModelsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ContinueSeriesBooksCollector
-import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedBooksCollector
-import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedSeriesCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.ContinueSeriesMenuCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.CoverModelsCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedSuggestionsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichDismissedMetadataCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichMetadataCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ExploreCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.FeaturedCardCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.FeaturedUpcomingReleaseCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.HiddenSuggestionsCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.MastheadCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodChipsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodTagsCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodTilesCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.OfflineStateCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.PreviousQueriesCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksHasMoreCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.RecentSearchChipsCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.SearchTopBarCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.SortPillCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.TrendingBooksCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.UnreleasedCoverOverlaysCollector
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreScreenScreenModel
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSuggestionsScreenModel
-
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
 val exploreModule = module {
     includes(
@@ -64,7 +75,7 @@ val exploreModule = module {
         identityModule,
         databaseModule,
         apolloModule,
-        designSystemModule,
+        presentationModule,
         preferencesModule,
         listsModule,
     )
@@ -80,8 +91,10 @@ val exploreModule = module {
             removeSearchQueryUseCase = get(),
             removeAllSearchQueriesUseCase = get(),
             markBookAsWantToReadUseCase = get(),
-            removeBookFromLibraryUseCase = get(),
-            getTrendingBooksUseCase = get(),
+            undoableBookRemover = get(),
+            observeTrendingBooksUseCase = get(),
+            refreshTrendingBooksUseCase = get(),
+            observeTrendingFetchedAtUseCase = get(),
             getContinueSeriesBooksUseCase = get(),
             dismissContinueSeriesBookUseCase = get(),
             dismissContinueSeriesUseCase = get(),
@@ -94,19 +107,28 @@ val exploreModule = module {
             searchByMoodUseCase = get(),
             setBecauseYouReadGenreUseCase = get(),
             flows = getAll(),
+            offlineCopy = get(),
             appDispatchers = get(),
         )
     }
 
     factory { PreviousQueriesCollector() } bind ExploreCollector::class
 
+    factory { SearchTopBarCollector() } bind ExploreCollector::class
+    factory { SortPillCollector() } bind ExploreCollector::class
+
     factory { QueriedBooksCollector() } bind ExploreCollector::class
 
     factory { QueriedBooksHasMoreCollector() } bind ExploreCollector::class
 
+    factory { MastheadCollector() } bind ExploreCollector::class
+
+    factory { OfflineStateCollector() } bind ExploreCollector::class
+
     factory { TrendingBooksCollector() } bind ExploreCollector::class
 
     factory { ContinueSeriesBooksCollector() } bind ExploreCollector::class
+    factory { ContinueSeriesMenuCollector() } bind ExploreCollector::class
 
     factory { EnrichDismissedMetadataCollector() } bind ExploreCollector::class
 
@@ -114,7 +136,23 @@ val exploreModule = module {
 
     factory { BecauseYouReadCollector() } bind ExploreCollector::class
 
+    factory { BecauseYouReadGenreSheetCollector() } bind ExploreCollector::class
+
     factory { MoodTagsCollector() } bind ExploreCollector::class
+
+    factory { RecentSearchChipsCollector() } bind ExploreCollector::class
+
+    factory { MoodChipsCollector() } bind ExploreCollector::class
+
+    factory { CoverModelsCollector() } bind ExploreCollector::class
+
+    factory { UnreleasedCoverOverlaysCollector() } bind ExploreCollector::class
+
+    factory { BookCardModelsCollector() } bind ExploreCollector::class
+
+    factory { MoodTilesCollector() } bind ExploreCollector::class
+
+    factory { FeaturedCardCollector() } bind ExploreCollector::class
 
     factory {
         HiddenSuggestionsScreenModel(
@@ -130,9 +168,7 @@ val exploreModule = module {
         )
     }
 
-    factory { DismissedBooksCollector() } bind HiddenSuggestionsCollector::class
-
-    factory { DismissedSeriesCollector() } bind HiddenSuggestionsCollector::class
+    factory { DismissedSuggestionsCollector() } bind HiddenSuggestionsCollector::class
 
     factory { EnrichMetadataCollector() } bind HiddenSuggestionsCollector::class
 

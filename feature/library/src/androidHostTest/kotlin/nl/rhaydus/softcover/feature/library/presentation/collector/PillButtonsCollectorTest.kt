@@ -1,0 +1,195 @@
+package nl.rhaydus.softcover.feature.library.presentation.collector
+
+import io.kotest.matchers.shouldBe
+import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
+import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
+import nl.rhaydus.softcover.feature.library.presentation.state.LibrarySelectionPills
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.filterPillButton
+import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class PillButtonsCollectorTest {
+    private lateinit var dependencies: LibraryDependencies
+    private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
+    private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
+
+    private val readingTab = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING)
+    private val readTab = LibraryTab.Status.of(UserBookStatus.READ)
+
+    @BeforeEach
+    fun setUp() {
+        stateFlow = MutableStateFlow(LibraryUiState())
+        scope = ActionScope(
+            stateFlow = stateFlow,
+            localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
+            eventChannel = Channel(Channel.BUFFERED),
+        )
+        dependencies = mockk(relaxed = true)
+    }
+
+    @Nested
+    inner class OnLaunch {
+        @Test
+        fun `each visible tab is judged by its own filters`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = PillButtonsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab, readTab),
+                filtersByTab = persistentMapOf(readTab.id to LibraryFilters(formats = persistentSetOf("Ebook"))),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.filterPillByTab shouldBe mapOf(
+                readingTab.id to filterPillButton(active = false),
+                readTab.id to filterPillButton(active = true),
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `selectionPills follow bulkActionInProgress`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = PillButtonsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(bulkActionInProgress = true)
+
+            // ----- Assert -----
+            stateFlow.value.selectionPills shouldBe LibrarySelectionPills.of(
+                bulkActionInProgress = true,
+                currentShelf = UserBookStatus.CURRENTLY_READING,
+            )
+            job.cancel()
+        }
+
+
+        @Test
+        fun `a status tab leaves its own shelf out of the move targets`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = PillButtonsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab, readTab),
+                selectedTabId = readTab.id,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectionPills shouldBe LibrarySelectionPills.of(
+                bulkActionInProgress = false,
+                currentShelf = UserBookStatus.READ,
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `switching to another status tab moves the omitted shelf`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = PillButtonsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab, readTab),
+                selectedTabId = readTab.id,
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(selectedTabId = readingTab.id)
+
+            // ----- Assert -----
+            stateFlow.value.selectionPills.moveTargets.map { it.status } shouldBe listOf(
+                UserBookStatus.WANT_TO_READ,
+                UserBookStatus.PAUSED,
+                UserBookStatus.READ,
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `a non-status tab offers every shelf`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = PillButtonsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab, LibraryTab.All),
+                selectedTabId = LibraryTab.All.id,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectionPills shouldBe LibrarySelectionPills.of(
+                bulkActionInProgress = false,
+                currentShelf = null,
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `a selected tab id missing from the visible tabs offers every shelf`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = PillButtonsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(readingTab),
+                selectedTabId = readTab.id,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectionPills.moveTargets.size shouldBe 4
+            job.cancel()
+        }
+    }
+}

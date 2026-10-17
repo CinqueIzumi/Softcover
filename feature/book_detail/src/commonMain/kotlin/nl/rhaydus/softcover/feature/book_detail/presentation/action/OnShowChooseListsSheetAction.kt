@@ -11,6 +11,11 @@ internal class OnShowChooseListsSheetAction : BookDetailAction {
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(showChooseListsSheet = true) }
+        scope.setState {
+            it.copy(
+                showChooseListsSheet = true,
+                createListPending = false,
+            )
+        }
     }
 }

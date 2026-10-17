@@ -1,17 +1,12 @@
 package nl.rhaydus.softcover.core.book.data.repository
 
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlin.time.Clock
-import kotlin.time.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
@@ -19,47 +14,54 @@ import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
-import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
+import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
+import nl.rhaydus.softcover.core.book.data.sync.UserBookCacheGate
+import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
+import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookStatus
-import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
-import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBook
-import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
-import nl.rhaydus.softcover.core.domain.util.SessionValueCache
-import nl.rhaydus.softcover.core.domain.util.getOrPut
-import nl.rhaydus.softcover.core.domain.util.refresh
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.Instant
 
 internal class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
     private val booksLocalDataSource: BooksLocalDataSource,
+    private val userBookCacheGate: UserBookCacheGate,
     private val networkAvailability: NetworkAvailabilityProvider,
     private val offlineSync: OfflineUserBookSync,
     private val applicationScope: ApplicationScope,
     private val appDispatchers: AppDispatchers,
+    private val progressHistoryLocalDataSource: ProgressHistoryLocalDataSource,
 ) : BooksRepository {
     override val books: Flow<List<Book>> = booksLocalDataSource.allUserBooks
 
-    private val inflightMutex = Mutex()
-    private val inflightRefreshes = mutableMapOf<UserBookStatus?, Deferred<Unit>>()
+    override fun observeUserBook(id: Int): Flow<Book?> = booksLocalDataSource.observeUserBook(id = id)
 
-    // Owned here rather than injected, for the same reason as inflightRefreshes above: which source
-    // answers a read, and how fresh that answer has to be, is this class's decision. Constructed
-    // directly because the primitive has no dependencies of its own - a Koin binding plus a qualifier
-    // would only route a singleton into the singleton that already owns it.
-    private val trendingBooksCache = SessionValueCache<Unit, List<Book>>()
+    override fun observeBooksByIds(ids: List<Int>): Flow<List<Book>> = booksLocalDataSource.observeBooksByIds(ids = ids)
+
+    private val inflightMutex = Mutex()
+
+    private val trendingRefreshMutexes = TrendingPeriod.entries.associateWith { Mutex() }
+
+    private val stagedRemovalMutex = Mutex()
+    private val stagedRemovalBookIds = mutableSetOf<Int>()
+    private val inflightRefreshes = mutableMapOf<Set<UserBookStatus>?, Deferred<Unit>>()
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return booksLocalDataSource.getBooksFlowByStatus(status = status)
@@ -95,7 +97,7 @@ internal class BooksRepositoryImpl(
 
     override suspend fun refreshUserBooks(
         userId: Int,
-        statusFilter: UserBookStatus?,
+        statusFilter: Set<UserBookStatus>?,
     ) {
         runOrJoin(statusFilter = statusFilter) {
             withContext(appDispatchers.io) {
@@ -108,7 +110,7 @@ internal class BooksRepositoryImpl(
     }
 
     private suspend fun runOrJoin(
-        statusFilter: UserBookStatus?,
+        statusFilter: Set<UserBookStatus>?,
         work: suspend () -> Unit,
     ) {
         val deferred: Deferred<Unit> = inflightMutex.withLock {
@@ -132,35 +134,42 @@ internal class BooksRepositoryImpl(
 
     private suspend fun refreshUserBooksInternal(
         userId: Int,
-        statusFilter: UserBookStatus?,
+        statusFilter: Set<UserBookStatus>?,
     ) {
         val statusIds: Set<Int> = statusFilter
-            ?.let { setOf(it.code) }
+            ?.map { it.code }
+            ?.toSet()
             ?: UserBookStatus.entries.map { it.code }.toSet()
 
-        // Drain the offline write queue, fetch fresh server data, and reconcile owned fields in one
-        // step; the reconcile never changes the set of userBook ids, so orphan removal below can key
-        // off the cached result.
-        val booksToCache: List<Book> = offlineSync.drainAndReconcile {
-            booksRemoteDataSource.initializeBooks(
-                userId = userId,
-                statusIds = statusIds,
-            )
-        }
+        // Taken before the fetch, for the scoped and the full refresh alike: a user book created while the
+        // fetch is in flight is missing from the response and must not be pruned as an orphan. A
+        // status-scoped query also omits books that moved to another status on the server, whose local rows
+        // still hold one of these statuses; ask for them by id so the diff below picks up the new status
+        // instead of deleting them.
+        val locallyStoredUserBookIds: List<Int> = statusFilter?.let {
+            booksLocalDataSource.getUserBookIdsByStatuses(statuses = it)
+        } ?: booksLocalDataSource.getAllUserBookIds()
 
-        booksLocalDataSource.cacheBooks(books = booksToCache)
+        // Drain the offline write queue, fetch fresh server data, reconcile owned fields and cache the
+        // result in one step; the reconcile only drops books removed during the fetch, so orphan removal
+        // below can key off the reconciled result.
+        val booksToCache: List<Book> = offlineSync.drainReconcileAndCache(
+            fetchFromServer = {
+                booksRemoteDataSource.initializeBooks(
+                    userId = userId,
+                    statusIds = statusIds,
+                    userBookIds = statusFilter?.let { locallyStoredUserBookIds.toSet() }.orEmpty(),
+                )
+            },
+            selectBooksToCache = { it.withoutStagedRemovals() },
+        )
 
         val fetchedBookUserBookIds: Set<Int> = booksToCache.mapNotNull { it.userBook?.id }.toSet()
-        val locallyStoredUserBookIds: List<Int> = if (statusFilter == null) {
-            booksLocalDataSource.getAllUserBookIds()
-        } else {
-            booksLocalDataSource.getUserBookIdsByStatus(status = statusFilter)
-        }
 
         val userBookIdsToRemove: List<Int> = locallyStoredUserBookIds
             .filterNot { it in fetchedBookUserBookIds }
 
-        booksLocalDataSource.removeUserBooksById(ids = userBookIdsToRemove)
+        userBookCacheGate.removeUserBooks(ids = userBookIdsToRemove)
     }
 
     override suspend fun deleteOrphanBooks() {
@@ -190,7 +199,7 @@ internal class BooksRepositoryImpl(
             )
 
             if (fetchedBooks.isNotEmpty()) {
-                booksLocalDataSource.cacheBooks(books = fetchedBooks)
+                booksLocalDataSource.cacheBooks(books = fetchedBooks.withoutStagedRemovals())
             }
         }
 
@@ -216,13 +225,15 @@ internal class BooksRepositoryImpl(
     }
 
     override suspend fun cacheBook(book: Book) {
-        booksLocalDataSource.cacheBook(book = book)
+        if (book.isStagedForRemoval()) return
+
+        userBookCacheGate.cacheBook(book = book)
     }
 
     override suspend fun removeBook(book: Book) {
         val userId: Int = book.userBook?.id ?: throw Exception("Book has no user book id")
 
-        booksLocalDataSource.removeUserBooksById(ids = listOf(userId))
+        userBookCacheGate.removeUserBooks(ids = listOf(userId))
     }
 
     override suspend fun removeAllBooks() {
@@ -280,7 +291,9 @@ internal class BooksRepositoryImpl(
         oldId: Int,
         canonical: Book,
     ) {
-        booksLocalDataSource.cacheBook(book = canonical)
+        if (canonical.isStagedForRemoval().not()) {
+            userBookCacheGate.cacheBook(book = canonical)
+        }
 
         booksLocalDataSource.redirectBookId(
             oldId = oldId,
@@ -298,7 +311,7 @@ internal class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = isbns)
     }
 
-    override suspend fun addBookByIsbn(isbn: String): CreatedBook {
+    override suspend fun addBookByIsbn(isbn: String): BookImport {
         if (networkAvailability.isOnline.value.not()) throw OfflineException()
 
         return booksRemoteDataSource.addBookByIsbn(isbn = isbn)
@@ -308,18 +321,63 @@ internal class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchBooksByIds(ids = ids)
     }
 
-    override suspend fun fetchTrendingBooks(forceRefresh: Boolean): List<Book> = if (forceRefresh) {
-        trendingBooksCache.refresh { booksRemoteDataSource.fetchTrendingBooks() }
-    } else {
-        trendingBooksCache.getOrPut { booksRemoteDataSource.fetchTrendingBooks() }
+    override fun observeTrendingBooks(period: TrendingPeriod): Flow<List<Book>> =
+        booksLocalDataSource.observeTrendingBooks(period = period)
+
+    override fun observeTrendingFetchedAt(period: TrendingPeriod): Flow<Instant?> =
+        booksLocalDataSource.observeTrendingFetchedAt(period = period)
+
+    override suspend fun refreshTrendingBooks(
+        period: TrendingPeriod,
+        maxAge: Duration,
+    ) = trendingRefreshMutexes.getValue(period).withLock {
+        val now = Clock.System.now()
+        val lastFetchedAt = booksLocalDataSource.getTrendingFetchedAt(period = period)
+
+        val age = lastFetchedAt?.let { now - it }
+        val isFresh = age != null && age >= Duration.ZERO && age < maxAge
+
+        if (maxAge > Duration.ZERO && isFresh) {
+            return@withLock
+        }
+
+        val rankedIds = booksRemoteDataSource.fetchTrendingBookIds(period = period).distinct()
+
+        if (rankedIds.isEmpty()) {
+            return@withLock
+        }
+
+        // Only books with a user_books row are skipped: re-caching those would re-insert their
+        // journals and could clobber pending offline state.
+        val userBookIds = booksLocalDataSource.getExistingUserBookBookIds(ids = rankedIds).toSet()
+        val idsToFetch = rankedIds.filterNot { it in userBookIds }
+
+        val fetchedBooks = if (idsToFetch.isEmpty()) {
+            emptyList()
+        } else {
+            booksRemoteDataSource.fetchBooksByIds(ids = idsToFetch).withoutStagedRemovals()
+        }
+
+        booksLocalDataSource.replaceTrendingBooks(
+            period = period,
+            requestedIds = rankedIds,
+            books = fetchedBooks,
+            fetchedAt = now,
+        )
     }
 
-    override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
+    override suspend fun getEditionsByBookId(
+        bookId: Int,
+        forceNetwork: Boolean,
+    ): List<BookEdition> {
         if (networkAvailability.isOnline.value.not()) {
             return booksLocalDataSource.getBookById(id = bookId)?.editions.orEmpty()
         }
 
-        return booksRemoteDataSource.getEditionsByBookId(bookId = bookId)
+        return booksRemoteDataSource.getEditionsByBookId(
+            bookId = bookId,
+            forceNetwork = forceNetwork,
+        )
     }
 
     override suspend fun fetchEditionsByIds(ids: List<Int>): List<BookEdition> {
@@ -334,21 +392,24 @@ internal class BooksRepositoryImpl(
         val optimistic = book.withMarkedAsWantToRead()
 
         if (optimistic !== book) {
-            booksLocalDataSource.cacheBook(book = optimistic)
+            userBookCacheGate.cacheBook(
+                book = optimistic,
+                kind = PendingUserBookWriteKind.SET_STATUS,
+            )
         }
 
-        return runCatching {
+        return writeStatus(
+            book = book,
+            optimistic = optimistic,
+            snapshot = snapshot,
+            status = UserBookStatus.WANT_TO_READ,
+        ) {
             booksRemoteDataSource.markBookAsWantToRead(
                 bookId = book.id,
                 editionId = editionId,
             )
-        }.getOrElse { error ->
-            if (error is CancellationException) throw error
-
-            restoreOptimisticWrite(snapshot = snapshot)
-            throw error
         }.also { updated ->
-            booksLocalDataSource.cacheBook(book = updated)
+            cacheBook(book = updated)
         }
     }
 
@@ -358,18 +419,106 @@ internal class BooksRepositoryImpl(
     ): Book {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsReading()
-        booksLocalDataSource.cacheBook(book = optimistic)
 
-        return runCatching {
+        if (optimistic !== book) {
+            userBookCacheGate.cacheBook(
+                book = optimistic,
+                kind = PendingUserBookWriteKind.SET_STATUS,
+            )
+        }
+
+        return writeStatus(
+            book = book,
+            optimistic = optimistic,
+            snapshot = snapshot,
+            status = UserBookStatus.CURRENTLY_READING,
+        ) {
             booksRemoteDataSource.markBookAsReading(
                 book = book,
                 editionId = editionId,
             )
-        }.getOrElse { error ->
-            if (error is CancellationException) throw error
+        }
+    }
 
-            restoreOptimisticWrite(snapshot = snapshot)
-            throw error
+    override suspend fun markBookAsPaused(
+        book: Book,
+        editionId: Int?,
+    ): Book {
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+        val optimistic = book.withMarkedAsPaused()
+
+        if (optimistic !== book) {
+            userBookCacheGate.cacheBook(
+                book = optimistic,
+                kind = PendingUserBookWriteKind.SET_STATUS,
+            )
+        }
+
+        return writeStatus(
+            book = book,
+            optimistic = optimistic,
+            snapshot = snapshot,
+            status = UserBookStatus.PAUSED,
+        ) {
+            booksRemoteDataSource.markBookAsPaused(
+                book = book,
+                editionId = editionId,
+            )
+        }
+    }
+
+    /**
+     * A book that already has a user book queues the change on offline or a transient failure; one without
+     * has no server id to queue against, so any failure rolls the optimistic write back.
+     *
+     * Replay order relies on a queued status being unique per `(userBookId, kind)` (a newer write
+     * REPLACEs the older) and on replay reading the queue `ORDER BY enqueuedAt`.
+     */
+    private suspend fun writeStatus(
+        book: Book,
+        optimistic: Book,
+        snapshot: Book?,
+        status: UserBookStatus,
+        remoteWrite: suspend () -> Book,
+    ): Book {
+        val isQueueable: Boolean = book.userBook != null
+
+        if (isQueueable && networkAvailability.isOnline.value.not()) {
+            offlineSync.enqueueStatusUpdate(
+                book = optimistic,
+                status = status,
+            )
+
+            return optimistic
+        }
+
+        return runCatching { remoteWrite() }.onSuccess { confirmed ->
+            userBookCacheGate.recordWrite(
+                book = confirmed,
+                kind = PendingUserBookWriteKind.SET_STATUS,
+            )
+        }.getOrElse { error ->
+            when {
+                error is CancellationException -> throw error
+
+                isQueueable && error is RetryableSyncException -> {
+                    AppLog.w(
+                        error,
+                        "Status change hit a transient error; queued for retry",
+                    )
+
+                    offlineSync.enqueueStatusUpdate(
+                        book = optimistic,
+                        status = status,
+                    )
+                    optimistic
+                }
+
+                else -> {
+                    restoreOptimisticWrite(snapshot = snapshot)
+                    throw error
+                }
+            }
         }
     }
 
@@ -385,13 +534,21 @@ internal class BooksRepositoryImpl(
         // currently-reading list until the next refresh. Falling back to [book] only when uncached.
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = (snapshot ?: book).withRating(rating = rating)
-        booksLocalDataSource.cacheBook(book = optimistic)
+        userBookCacheGate.cacheBook(
+            book = optimistic,
+            kind = PendingUserBookWriteKind.UPDATE_RATING,
+        )
 
         if (networkAvailability.isOnline.value) {
             return runCatching {
                 booksRemoteDataSource.updateBookRating(
                     userBook = userBook,
                     rating = rating,
+                )
+            }.onSuccess {
+                userBookCacheGate.recordWrite(
+                    book = optimistic,
+                    kind = PendingUserBookWriteKind.UPDATE_RATING,
                 )
             }.getOrElse { error ->
                 when (error) {
@@ -444,7 +601,10 @@ internal class BooksRepositoryImpl(
             review = review,
             hasSpoilers = hasSpoilers,
         )
-        booksLocalDataSource.cacheBook(book = optimistic)
+        userBookCacheGate.cacheBook(
+            book = optimistic,
+            kind = PendingUserBookWriteKind.UPDATE_REVIEW,
+        )
 
         if (networkAvailability.isOnline.value) {
             return runCatching {
@@ -453,6 +613,11 @@ internal class BooksRepositoryImpl(
                     review = review,
                     hasSpoilers = hasSpoilers,
                     reviewedAt = reviewedAt,
+                )
+            }.onSuccess {
+                userBookCacheGate.recordWrite(
+                    book = optimistic,
+                    kind = PendingUserBookWriteKind.UPDATE_REVIEW,
                 )
             }.getOrElse { error ->
                 when (error) {
@@ -489,22 +654,99 @@ internal class BooksRepositoryImpl(
         return optimistic
     }
 
-    override suspend fun removeBookFromLibrary(book: Book) {
-        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val userBookId: Int? = book.userBook?.id
-
-        if (userBookId != null) {
-            booksLocalDataSource.removeUserBooksById(ids = listOf(userBookId))
+    override suspend fun stageBookRemoval(books: List<Book>): StagedBookRemoval {
+        val stageable: List<Book> = stagedRemovalMutex.withLock {
+            books.filter { stagedRemovalBookIds.add(it.id) }
         }
 
-        runCatching {
-            booksRemoteDataSource.removeBookFromLibrary(book = book)
+        val snapshots: List<Book> = runCatching {
+            stageable.map { booksLocalDataSource.getBookById(id = it.id) ?: it }
         }.getOrElse { error ->
-            if (error is CancellationException) throw error
-
-            restoreOptimisticWrite(snapshot = snapshot)
+            unstage(books = stageable)
             throw error
         }
+
+        val staged = StagedBookRemoval(
+            books = stageable,
+            snapshots = snapshots,
+        )
+
+        val userBookIds: List<Int> = stageable.mapNotNull { it.userBook?.id }
+
+        if (userBookIds.isNotEmpty()) {
+            runCatching {
+                userBookCacheGate.removeUserBooks(ids = userBookIds)
+            }.onFailure { error ->
+                unstage(books = stageable)
+                throw error
+            }
+        }
+
+        return staged
+    }
+
+    override suspend fun undoBookRemoval(staged: StagedBookRemoval) {
+        try {
+            staged.snapshots.forEach { restoreIfNotReAdded(snapshot = it) }
+        } finally {
+            unstage(books = staged.books)
+        }
+    }
+
+    override suspend fun commitBookRemoval(staged: StagedBookRemoval): List<Book> {
+        val failed = mutableListOf<Book>()
+
+        try {
+            for (book in staged.books) {
+                if (book.isBackInCacheUnderSameUserBook()) continue
+
+                runCatching {
+                    booksRemoteDataSource.removeBookFromLibrary(book = book)
+                }.onSuccess {
+                    book.userBook?.id?.let { userBookCacheGate.removeUserBooks(ids = listOf(it)) }
+                }.onFailure { error ->
+                    if (error is CancellationException) throw error
+
+                    AppLog.e(
+                        error,
+                        "Remote removal failed for book ${book.id}",
+                    )
+
+                    staged.snapshots.firstOrNull { it.id == book.id }?.let { restoreIfNotReAdded(snapshot = it) }
+                    failed += book
+                }
+            }
+        } finally {
+            unstage(books = staged.books)
+        }
+
+        return failed
+    }
+
+    private suspend fun Book.isBackInCacheUnderSameUserBook(): Boolean {
+        val stagedUserBookId: Int = userBook?.id ?: return false
+
+        return booksLocalDataSource.getBookById(id = id)?.userBook?.id == stagedUserBookId
+    }
+
+    private suspend fun restoreIfNotReAdded(snapshot: Book) {
+        if (booksLocalDataSource.getBookById(id = snapshot.id)?.userBook != null) return
+
+        userBookCacheGate.cacheBook(book = snapshot)
+    }
+
+    private suspend fun unstage(books: List<Book>) {
+        stagedRemovalMutex.withLock {
+            stagedRemovalBookIds.removeAll(books.map { it.id }.toSet())
+        }
+    }
+
+    private suspend fun Book.isStagedForRemoval(): Boolean = stagedRemovalMutex.withLock {
+        id in stagedRemovalBookIds
+    }
+
+    private suspend fun List<Book>.withoutStagedRemovals(): List<Book> = stagedRemovalMutex.withLock {
+        filterNot { it.id in stagedRemovalBookIds }
     }
 
     override suspend fun updateBookProgress(
@@ -513,12 +755,42 @@ internal class BooksRepositoryImpl(
         newSeconds: Int?,
         actionAt: String?,
     ): Book {
+        if (book.userBook == null || book.currentRead == null) {
+            throw Exception("Book did not contain a user book read")
+        }
+
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withProgress(
             newPage = newPage,
             newSeconds = newSeconds,
         )
-        booksLocalDataSource.cacheBook(book = optimistic)
+        userBookCacheGate.cacheBook(
+            book = optimistic,
+            kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+        )
+
+        val readAt: Instant = actionAt?.let { Instant.parse(it) } ?: Clock.System.now()
+        val readAtIso = readAt.toString()
+
+        val historyId = progressHistoryLocalDataSource.insertPending(
+            bookId = book.id,
+            actionAtEpochMillis = readAt.toEpochMilliseconds(),
+            pages = newPage,
+            seconds = newSeconds,
+        )
+
+        // A placeholder read has no server id yet, so the write can only wait for replay to resolve one.
+        if (book.currentRead?.isPlaceholder == true) {
+            offlineSync.enqueueProgressUpdate(
+                book = optimistic,
+                newPage = newPage,
+                newSeconds = newSeconds,
+                actionAt = readAtIso,
+                progressHistoryId = historyId,
+            )
+
+            return optimistic
+        }
 
         if (networkAvailability.isOnline.value) {
             return runCatching {
@@ -526,8 +798,14 @@ internal class BooksRepositoryImpl(
                     book = book,
                     newPage = newPage,
                     newSeconds = newSeconds,
-                    actionAt = actionAt,
+                    actionAt = readAtIso,
                 )
+            }.onSuccess {
+                userBookCacheGate.recordWrite(
+                    book = optimistic,
+                    kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                )
+                progressHistoryLocalDataSource.markSynced(localId = historyId)
             }.getOrElse { error ->
                 when (error) {
                     is CancellationException -> throw error
@@ -542,13 +820,15 @@ internal class BooksRepositoryImpl(
                             book = optimistic,
                             newPage = newPage,
                             newSeconds = newSeconds,
-                            actionAt = actionAt,
+                            actionAt = readAtIso,
+                            progressHistoryId = historyId,
                         )
                         optimistic
                     }
 
                     else -> {
                         restoreOptimisticWrite(snapshot = snapshot)
+                        progressHistoryLocalDataSource.delete(localId = historyId)
                         throw error
                     }
                 }
@@ -559,7 +839,8 @@ internal class BooksRepositoryImpl(
             book = optimistic,
             newPage = newPage,
             newSeconds = newSeconds,
-            actionAt = actionAt,
+            actionAt = readAtIso,
+            progressHistoryId = historyId,
         )
         return optimistic
     }
@@ -571,7 +852,13 @@ internal class BooksRepositoryImpl(
     ): Book {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsRead(actionAt = actionAt)
-        booksLocalDataSource.cacheBook(book = optimistic)
+
+        if (optimistic !== book) {
+            userBookCacheGate.cacheBook(
+                book = optimistic,
+                kind = PendingUserBookWriteKind.MARK_AS_READ,
+            )
+        }
 
         if (networkAvailability.isOnline.value) {
             return runCatching {
@@ -579,6 +866,11 @@ internal class BooksRepositoryImpl(
                     book = book,
                     editionId = editionId,
                     actionAt = actionAt,
+                )
+            }.onSuccess {
+                userBookCacheGate.recordWrite(
+                    book = optimistic,
+                    kind = PendingUserBookWriteKind.MARK_AS_READ,
                 )
             }.getOrElse { error ->
                 when (error) {
@@ -618,139 +910,8 @@ internal class BooksRepositoryImpl(
             return
         }
 
-        booksLocalDataSource.cacheBook(book = snapshot)
+        userBookCacheGate.cacheBook(book = snapshot)
     }
-
-    private fun Book.withProgress(
-        newPage: Int?,
-        newSeconds: Int?,
-    ): Book {
-        val existingRead = userBookRead ?: return this
-        val edition = currentEdition
-
-        val totalPages = edition?.pages
-        val totalSeconds = edition?.audioSeconds
-
-        val progress: Float = when {
-            newSeconds != null && totalSeconds != null && totalSeconds > 0 ->
-                (newSeconds.toFloat() / totalSeconds.toFloat() * 100f).coerceIn(
-                    0f,
-                    100f,
-                )
-
-            newPage != null && totalPages != null && totalPages > 0 ->
-                (newPage.toFloat() / totalPages.toFloat() * 100f).coerceIn(
-                    0f,
-                    100f,
-                )
-
-            else -> existingRead.progress
-        }
-
-        val updatedUserBook: UserBook? = userBook?.withAppendedJournal(
-            event = JournalEventType.ProgressUpdated,
-        )
-
-        return copy(
-            userBook = updatedUserBook,
-            userBookRead = existingRead.copy(
-                currentPage = newPage ?: existingRead.currentPage,
-                currentSeconds = newSeconds ?: existingRead.currentSeconds,
-                progress = progress,
-            ),
-        )
-    }
-
-    private fun Book.withMarkedAsWantToRead(): Book {
-        val existingUserBook = userBook ?: return this
-
-        if (existingUserBook.status == BookStatus.WantToRead) return this
-
-        val updatedUserBook: UserBook = existingUserBook.copy(status = BookStatus.WantToRead)
-
-        return copy(userBook = updatedUserBook)
-    }
-
-    private fun Book.withMarkedAsReading(): Book {
-        val existingUserBook = userBook ?: return this
-
-        val updatedUserBook: UserBook = existingUserBook
-            .copy(status = BookStatus.Reading)
-            .withAppendedJournal(event = JournalEventType.UserBookReadStarted)
-
-        return copy(userBook = updatedUserBook)
-    }
-
-    private fun Book.withRating(rating: Double): Book {
-        val existingUserBook = userBook ?: return this
-
-        if (existingUserBook.rating == rating) return this
-
-        val updatedUserBook: UserBook = existingUserBook.copy(rating = rating)
-
-        return copy(userBook = updatedUserBook)
-    }
-
-    private fun Book.withReview(
-        review: ReviewDocument,
-        hasSpoilers: Boolean,
-    ): Book {
-        val existingUserBook = userBook ?: return this
-
-        // A blank document clears the review; the optimistic copy stores what the user wrote, which the
-        // next server refresh overwrites with Hardcover's canonical `review_slate`.
-        val normalizedReview: ReviewDocument? = review.takeUnless { it.isBlank() }
-
-        val updatedUserBook: UserBook = existingUserBook.copy(
-            reviewDocument = normalizedReview,
-            reviewHasSpoilers = hasSpoilers,
-        )
-
-        return copy(userBook = updatedUserBook)
-    }
-
-    private fun Book.withMarkedAsRead(actionAt: String?): Book {
-        val existingUserBook = userBook ?: return this
-        val existingRead = userBookRead
-
-        val finishedDate = actionAt
-            ?.let { localDateTimeOf(actionAt = it).date.toString() }
-            ?: Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
-
-        val updatedUserBook: UserBook = existingUserBook
-            .copy(status = BookStatus.Read)
-            .withAppendedJournal(
-                event = JournalEventType.StatusFinished,
-                actionAt = actionAt,
-            )
-
-        return copy(
-            userBook = updatedUserBook,
-            userBookRead = existingRead?.copy(
-                finishedAt = finishedDate,
-                progress = 100f,
-            ) ?: existingRead,
-        )
-    }
-
-    private fun UserBook.withAppendedJournal(
-        event: JournalEventType,
-        actionAt: String? = null,
-    ): UserBook {
-        val updatedAt = actionAt
-            ?.let { localDateTimeOf(actionAt = it).toString() }
-            ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString()
-
-        val entry = ReadingJournal(
-            updatedAt = updatedAt,
-            event = event.eventName,
-        )
-
-        return copy(journals = journals + entry)
-    }
-
-    private fun localDateTimeOf(actionAt: String): LocalDateTime =
-        Instant.parse(actionAt).toLocalDateTime(TimeZone.currentSystemDefault())
 
     override suspend fun updateBookEdition(
         userBook: UserBook,

@@ -37,6 +37,7 @@ Open only the one you need, and only the section named:
 | Layering, DI, navigation, dispatchers | `docs/reference/architecture.md`, then the foundation `architecture.md` section it points to |
 | A component under `:core:component` | `docs/reference/design-system/component-contract.md` § 7.2 (only where that file exists) |
 | Brand, typography, layout, patterns | `docs/reference/design-system.md` (the index), then one section file |
+| User-facing text | `docs/reference/design-system/voice.md` |
 | Style | enforced by ktlint / detekt; the review-only rules are in `docs/reference/code-style.md` § Review-only rules |
 
 Path-scoped rules under `.claude/rules/` load on their own when you read a matching file; do not go looking
@@ -58,6 +59,8 @@ the concept; do not read it whole). Do not read it for anything else.
   top.
 - A new or changed shared component, pattern or role updates its section file under
   `docs/reference/design-system/` in the same change.
+- A manifest component, worker, widget, `Screen` argument or class reached by name follows the implementer
+  checklist in `docs/reference/r8.md`.
 - Comments and KDoc follow the `document-code` skill standard: document only what the code cannot say; no
   comment that restates the code.
 

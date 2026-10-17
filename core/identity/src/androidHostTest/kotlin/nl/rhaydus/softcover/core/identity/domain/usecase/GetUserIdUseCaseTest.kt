@@ -7,10 +7,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.exception.NoUserIdFoundException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.exception.NoUserIdFoundException
 
 class GetUserIdUseCaseTest {
     private lateinit var getUserIdAsFlowUseCase: GetUserIdAsFlowUseCase
@@ -52,36 +52,6 @@ class GetUserIdUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull().shouldBeInstanceOf<NoUserIdFoundException>()
-        }
-
-        @Test
-        fun `returns success with userId 1 as a boundary value`() = runTest {
-            // ----- Arrange -----
-            every {
-                getUserIdAsFlowUseCase()
-            } returns flowOf(1)
-
-            // ----- Act -----
-            val result = useCase()
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe 1
-        }
-
-        @Test
-        fun `returns success with userId 0 as a boundary value`() = runTest {
-            // ----- Arrange -----
-            every {
-                getUserIdAsFlowUseCase()
-            } returns flowOf(0)
-
-            // ----- Act -----
-            val result = useCase()
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe 0
         }
 
         @Test

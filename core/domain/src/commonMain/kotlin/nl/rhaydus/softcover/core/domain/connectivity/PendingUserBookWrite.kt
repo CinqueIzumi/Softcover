@@ -15,4 +15,6 @@ data class PendingUserBookWrite(
     val reviewHasSpoilers: Boolean? = null,
     val enqueuedAt: String,
     val actionAt: String? = null,
+    val progressHistoryId: Long? = null,
+    val statusCode: Int? = null,
 )

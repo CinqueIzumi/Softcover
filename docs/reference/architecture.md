@@ -21,9 +21,10 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
 :orchestration        # Nav host (MainActivity, RootScreen, bottom bars), AppNavigator / AppEntryPoint
                       #   impls, cross-feature orchestration use cases, the softcoverModules aggregate
 :feature:*            # Leaf features: lists, profile, onboarding, explore, library, book_detail,
-                      #   reading, session, scan, settings, app_update
-:core:*               # domain, database, network, designsystem, notification, preferences, identity,
-                      #   book, lists, deadlines, personal, profile, connectivity
+                      #   reading, session, scan, settings, app_update, widget
+:core:*               # domain, database, network, designsystem, presentation, component, uibinding,
+                      #   notification, preferences, identity, book, lists, deadlines, personal,
+                      #   profile, connectivity
 ```
 
 ## TOAD — Softcover-specific notes
@@ -34,7 +35,7 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
 - **TOAD is per-Voyager-screen only.** `MainActivityViewModel` is a plain `ViewModel`, not a TOAD
   `ScreenModel`. It is the one app-level view model and lives in `:orchestration`
   (`presentation/viewmodel/`); features that only need to flip the authenticated flag depend on the
-  `SessionAuthenticator` contract in `:core:designsystem`, which the view model implements (mirroring
+  `SessionAuthenticator` contract in `:core:presentation`, which the view model implements (mirroring
   the `AppNavigator` / `ActiveSessionController` seams).
 - The Koin aggregate is named `softcoverModules`; `:app`'s `SoftCoverApp` starts Koin with
   `modules(softcoverModules + appModule)`. Each module self-declares its DI dependencies via
@@ -45,6 +46,27 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   vendored in the app. Softcover's per-feature flow-collector interfaces are named `XxxCollector`
   (e.g. `BookDetailCollector`, in each feature's `presentation/collector/`) and implement the foundation
   `nl.rhaydus.toad.Collector` role.
+- **UI models are mapped off the composition.** A `UiState` exposes presentation-ready values; the
+  domain -> UI mapping that produced them runs in the ScreenModel, an `Action`, a `Collector`, or a
+  dependency injected into one of those — never in a `@Composable`. A render forwards
+  `state.verdictBlock`; it does not call `state.book?.userBook?.reviewDocument?.toRichTextUiModel()`.
+  The reverse direction follows the same rule: an editor's output travels out through the `Action`,
+  which maps it back to the domain type before the use case sees it, so the mapping lives in one place
+  rather than at every call site. Shared mappings live in `:core:uibinding` (promoted on their second
+  consumer); a feature's own live in its `presentation/mapper/`. This is **R9** in
+  [`design-system/component-contract.md`](design-system/component-contract.md), where the reasoning and
+  the one carve-out (reading a *platform* signal in composition — `isSystemInDarkTheme()`, a window
+  size class, a `CompositionLocal` — is not mapping) are written out. **R10** there goes one step
+  further — a composable does not *construct* a UI model either, even from literals; it arrives on the
+  `UiState`. That rule is normative for new work and has a scheduled retrofit for the call sites that
+  predate it.
+- **Collectors deriving a model off `scope.state` dedupe with a `*Snapshot`.** Map the state into a
+  private `*Snapshot` data class first, then `distinctUntilChanged()` on that snapshot before mapping to
+  the UI model — the snapshot's structural equality decides whether the derived work re-runs, not the
+  raw state. A `coerceIn`/`clamp` inside that mapping is a decision about which states the domain can
+  represent, not defensive hygiene: clamping a count to a minimum of one to avoid a "zero" case can
+  erase the exact state a component needs to render its own empty variant. Narrow a range only when the
+  render genuinely cannot tell the narrowed states apart.
 - **Error-slot convention.** A screen that can fail a load/submit follows the foundation TOAD error-slot
   convention ([`../rhaydus/0.3.1/toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md) §Conventions):
   a nullable `String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,
@@ -55,6 +77,17 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   presentation via `Throwable.toUserMessage()` plus a screen-specific fallback, and the renderer is the
   foundation `nl.rhaydus.designsystem.component.InlineErrorState` (call sites pass the editorial `bodySmall`
   as `textStyle`).
+- **`init` calls only `startInitializers()`.** One-shot startup work runs in a `Collector.onLaunch` or a
+  dispatched Action, never a raw `dependencies.launch {}`.
+- **A load-more / pagination Action shares the fresh-query cancellation Job.** It launches its fetch
+  through `dependencies.launch` and stores the Job in the same `LocalVariables` field the fresh-query
+  Actions cancel.
+- **A loading flag driven by a `distinctUntilChanged` flow needs a same-value guard.** An Action that
+  sets the flag and relies on that flow to clear it returns early when the chosen value equals the
+  current one — an unchanged value never re-emits, so the flag would stick.
+- **A once-per-session gate holds a `Mutex` across its check-then-act.** A shared singleton gate (e.g.
+  `ProfileRefreshGate`) runs its check, the guarded work and the mark inside `mutex.withLock`; a bare
+  boolean lets two screens that mount together both pass the check.
 
 ## Network Layer
 
@@ -69,6 +102,14 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   `CacheFirst` for instant revisits. Lists that should refresh on screen entry stay on `NetworkOnly`.
   Mutations write through the cache automatically — Room remains the source of truth for user-book
   state, so Apollo cache writes on `user_books` rows are currently inert observers.
+- **Plain HTTP** (a raw file rather than a GraphQL operation — today the Roadmap and What's new
+  screens' `ROADMAP.md` and `CHANGELOG.md`) goes through `HttpEngine.safeGetText(url)`, the sibling of `safeQuery` in the same
+  `helper/` package. It rides Apollo's multiplatform `HttpEngine` (`apollo-runtime` already ships one
+  on every target, so the app carries no second HTTP stack) and raises the *same* sealed
+  `ApiException` kinds as the GraphQL seam, sharing its `isTransientHttpStatus` /
+  `retryableTransportFailureOrNull` classifiers so the two cannot drift. The engine is bound by
+  `httpModule`, separate from the `ApolloClient`'s own. There is no 401/403 re-auth path: the seam
+  sends no credentials.
 - Network interceptors handle authentication headers.
 - **Session caching is the repository's job, not a use case's.** Editorial reads that turn over at most
   daily (trending, featured upcoming release, mood tags, books-by-genre) are served from a
@@ -147,7 +188,8 @@ books with more than 200 updates).
   order (e.g. chronological), make it a composite key with `id` as the tiebreaker
   (`order_by: [{ updated_at: asc }, { id: asc }]`).
 - Callers: `ProfileRemoteDataSource.fetchAllStatsBooks`, `UserTagsRemoteDataSource.fetchUserVocabulary`,
-  `ReadingJournalHistoryRemoteDataSource.getReadingJournalHistory`. A per-row lazily-cancellable
+  `ReadingJournalHistoryRemoteDataSource.getReadingJournalHistory`,
+  `QuoteRemoteDataSource.getQuotes` / `getAllQuotes`. A per-row lazily-cancellable
   `Flow` (e.g. `streamReadingDaysDescending`) stays a hand-rolled loop — it emits as it goes rather
   than accumulating into a list, so it can't use this helper.
 
@@ -193,7 +235,9 @@ Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core
   `isTransient` classifier. `:core:domain`'s `UserBookWriteDrainer` / `ListWriteDrainer` are **named subinterfaces**
   of the foundation's generic `OfflineWriteDrainer`, because its two instantiations erase to one class and Koin
   could not otherwise tell them apart. The drain→fetch→reconcile composition and `preserveOwnedFields` stay
-  app-side, in `OfflineUserBookSyncImpl`.
+  app-side, in `OfflineUserBookSyncImpl`. Every user-book row write goes through `UserBookCacheGate`, which
+  serialises writes against the refresh's merge and save and records each write made while a refresh is in
+  flight; the reconcile re-applies those records, so a write made mid-refresh survives the stale server snapshot.
 
 ## Local Storage
 
@@ -201,3 +245,13 @@ Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core
   migrations, and **all** persisted entities + DAOs live in `:core:database` (not in the feature whose
   data source uses them — see the vertical-slice rule in module-structure.md).
 - **DataStore**: simple key-value preferences (app settings, search history).
+- **Trending** is cached in Room per `TrendingPeriod`, with a fetched-at stamp; `ObserveTrendingBooksUseCase`
+  and `RefreshTrendingBooksUseCase` (`maxAge`) are the one source for Explore, Reading and the widget.
+- **External navigation.** A surface outside the app (a widget) opens it through
+  `ExternalNavigationRequest` (tab, book, book verdict, Focus Mode), encoded by `AppEntryPoint.intent` as a
+  `softcover://open/...` URI whose wire names are never derived from enum names. `ExternalNavigationRequests`
+  holds the one pending request as state; `BottomBarScreen` consumes tab and book requests and `RootScreen`
+  Focus Mode. A tab or book request never pops Focus Mode: it applies underneath and shows once Focus Mode
+  is left. Sign-out clears it.
+- Replacing all rows for a key (clear then insert) is one `@Transaction` DAO method, never two
+  data-source calls.

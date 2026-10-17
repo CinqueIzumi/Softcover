@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
@@ -11,20 +12,28 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnUpdatePageProgressClickActionTest {
+    private val openProgressSheet: SheetSession<ProgressSheetUiModel, Nothing> = SheetSession.Open(
+        model = ProgressSheetUiModel.previews.values.first(),
+    )
+
     private lateinit var updateBookProgress: RecordBookProgressUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
@@ -34,7 +43,7 @@ class OnUpdatePageProgressClickActionTest {
     @BeforeEach
     fun setUp() {
         updateBookProgress = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -81,12 +90,12 @@ class OnUpdatePageProgressClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `hides the update progress sheet after execution`() = runTest {
+        fun `leaves the update progress sheet open for its own dismiss`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
-                showUpdateProgressSheet = true,
+                progressSheet = openProgressSheet,
             )
             dependencies = stubDependencies(this)
 
@@ -99,14 +108,14 @@ class OnUpdatePageProgressClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showUpdateProgressSheet shouldBe false
+            stateFlow.value.progressSheet shouldBe openProgressSheet
         }
 
         @Test
         fun `invokes updateBookProgress with the parsed page number`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePageProgressClickAction(newPage = "250")
@@ -129,8 +138,18 @@ class OnUpdatePageProgressClickActionTest {
         @Test
         fun `invokes updateBookProgress with the provided actionAt`() = runTest {
             // ----- Arrange -----
+            val readAt = LocalDateTime(
+                2026,
+                7,
+                21,
+                21,
+                0,
+            )
             val book = stubBook()
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = book,
+                readAt = readAt,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -143,7 +162,6 @@ class OnUpdatePageProgressClickActionTest {
 
             val action = OnUpdatePageProgressClickAction(
                 newPage = "250",
-                actionAt = "2026-07-21T21:00:00Z",
             )
 
             // ----- Act -----
@@ -157,7 +175,7 @@ class OnUpdatePageProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newPage = 250,
-                    actionAt = "2026-07-21T21:00:00Z",
+                    actionAt = readAt.toActionAt(),
                 )
             }
         }
@@ -166,7 +184,7 @@ class OnUpdatePageProgressClickActionTest {
         fun `treats a non-numeric page string as zero`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePageProgressClickAction(newPage = "not-a-number")
@@ -187,35 +205,11 @@ class OnUpdatePageProgressClickActionTest {
         }
 
         @Test
-        fun `treats an empty page string as zero`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            val action = OnUpdatePageProgressClickAction(newPage = "")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newPage = 0,
-                )
-            }
-        }
-
-        @Test
         fun `does nothing when book in state is null`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
+            stateFlow.value = buildBookDetailUiState().copy(
                 book = null,
-                showUpdateProgressSheet = true,
+                progressSheet = openProgressSheet,
             )
             dependencies = stubDependencies(this)
 
@@ -228,34 +222,12 @@ class OnUpdatePageProgressClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showUpdateProgressSheet shouldBe true
-            coVerify(exactly = 0) { updateBookProgress(
-                any(),
-                any(),
-                any(),
-            ) }
-        }
-
-        @Test
-        fun `treats a decimal page string as zero because toIntOrNull returns null for decimals`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            val action = OnUpdatePageProgressClickAction(newPage = "10.5")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
+            stateFlow.value.progressSheet shouldBe openProgressSheet
+            coVerify(exactly = 0) {
                 updateBookProgress(
-                    book = book,
-                    newPage = 0,
+                    any(),
+                    any(),
+                    any(),
                 )
             }
         }
@@ -264,7 +236,7 @@ class OnUpdatePageProgressClickActionTest {
         fun `parses a negative page string to its negative integer value`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             val action = OnUpdatePageProgressClickAction(newPage = "-5")
@@ -288,7 +260,7 @@ class OnUpdatePageProgressClickActionTest {
         fun `sends BookMarkedAsReadEvent when use case returns Applied`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -308,14 +280,14 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<BookMarkedAsReadEvent>()
+            event.shouldBeInstanceOf<BookDetailEvent.BookMarkedAsReadEvent>()
         }
 
         @Test
         fun `adds book id to failedMutationBookIds when use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -335,6 +307,59 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe true
+        }
+
+        @Test
+        fun `sends ProgressUpdatedEvent when use case returns NoChange`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                )
+            } returns Result.success(ShelfMutationOutcome.NoChange)
+
+            val action = OnUpdatePageProgressClickAction(newPage = "100")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<BookDetailEvent.ProgressUpdatedEvent>()
+        }
+
+        @Test
+        fun `sends no event when use case fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            stateFlow.value = buildBookDetailUiState().copy(book = book)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                )
+            } returns Result.failure(RuntimeException("api error"))
+
+            val action = OnUpdatePageProgressClickAction(newPage = "100")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
     }
 }

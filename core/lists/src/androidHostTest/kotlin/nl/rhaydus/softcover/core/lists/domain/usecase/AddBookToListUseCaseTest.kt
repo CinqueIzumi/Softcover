@@ -7,11 +7,11 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 
 class AddBookToListUseCaseTest {
     private lateinit var listsRepository: ListsRepository
@@ -32,7 +32,7 @@ class AddBookToListUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `returns success when repository call completes without error`() = runTest {
+        fun `returns success and forwards the list, book and edition to the repository`() = runTest {
             // ----- Arrange -----
             val listId = 42
             val bookId = 7
@@ -55,31 +55,7 @@ class AddBookToListUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-        }
 
-        @Test
-        fun `delegates to repository with correct arguments`() = runTest {
-            // ----- Arrange -----
-            val listId = 42
-            val bookId = 7
-            val edition = stubEdition(id = 10)
-
-            coJustRun {
-                listsRepository.addBookToList(
-                    listId = listId,
-                    bookId = bookId,
-                    edition = edition,
-                )
-            }
-
-            // ----- Act -----
-            useCase(
-                listId = listId,
-                bookId = bookId,
-                edition = edition,
-            )
-
-            // ----- Assert -----
             coVerify(exactly = 1) {
                 listsRepository.addBookToList(
                     listId = listId,

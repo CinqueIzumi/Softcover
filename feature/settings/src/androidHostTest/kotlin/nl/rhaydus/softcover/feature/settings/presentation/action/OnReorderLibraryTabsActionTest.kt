@@ -3,20 +3,24 @@ package nl.rhaydus.softcover.feature.settings.presentation.action
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.withOrderedEntries
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnReorderLibraryTabsActionTest {
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
@@ -57,15 +61,18 @@ class OnReorderLibraryTabsActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `updates draftTabOrder to the supplied list`() = runTest {
+        fun `rebuilds orderedEntries following the supplied order`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftTabOrder = emptyList(),
-                initialized = true,
-            )
+            stateFlow.value = LibraryVisibilitySettingsUiState(initialized = true).withOrderedEntries()
             val dependencies = stubDependencies(this)
-            val newOrder = listOf("list-2", "status-3", "list-1")
-            val action = OnReorderLibraryTabsAction(newOrderedIds = newOrder)
+            val readId = LibraryTab.Status.idFor(status = UserBookStatus.READ)
+            val wantToReadId = LibraryTab.Status.idFor(status = UserBookStatus.WANT_TO_READ)
+            val action = OnReorderLibraryTabsAction(
+                newOrderedIds = listOf(
+                    readId,
+                    wantToReadId,
+                ),
+            )
 
             // ----- Act -----
             action.execute(
@@ -74,116 +81,18 @@ class OnReorderLibraryTabsActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.draftTabOrder shouldBe newOrder
-        }
-
-        @Test
-        fun `replaces an existing non-empty draftTabOrder`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftTabOrder = listOf("status-1", "list-5"),
-                initialized = true,
+            stateFlow.value.orderedEntries.take(3).map { it.id } shouldBe listOf(
+                LibraryTabEntry.ALL_ID,
+                readId,
+                wantToReadId,
             )
-            val dependencies = stubDependencies(this)
-            val newOrder = listOf("list-5", "status-1")
-            val action = OnReorderLibraryTabsAction(newOrderedIds = newOrder)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.draftTabOrder shouldBe newOrder
-        }
-
-        @Test
-        fun `does not modify draftEnabledStatusCodes`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledStatusCodes = setOf(1, 3),
-                initialized = true,
-            )
-            val dependencies = stubDependencies(this)
-            val action = OnReorderLibraryTabsAction(newOrderedIds = listOf("list-1"))
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1, 3)
-        }
-
-        @Test
-        fun `does not modify draftEnabledListIds`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledListIds = setOf(10, 20),
-                initialized = true,
-            )
-            val dependencies = stubDependencies(this)
-            val action = OnReorderLibraryTabsAction(newOrderedIds = listOf("status-2"))
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.draftEnabledListIds shouldBe setOf(10, 20)
-        }
-
-        @Test
-        fun `does not modify persistedTabOrder`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryVisibilitySettingsUiState(
-                persistedTabOrder = listOf("status-1", "list-5"),
-                draftTabOrder = emptyList(),
-                initialized = true,
-            )
-            val dependencies = stubDependencies(this)
-            val action = OnReorderLibraryTabsAction(newOrderedIds = listOf("list-5", "status-1"))
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.persistedTabOrder shouldBe listOf("status-1", "list-5")
-        }
-
-        @Test
-        fun `accepts an empty list clearing the draft order`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftTabOrder = listOf("list-1", "status-2"),
-                initialized = true,
-            )
-            val dependencies = stubDependencies(this)
-            val action = OnReorderLibraryTabsAction(newOrderedIds = emptyList())
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.draftTabOrder shouldBe emptyList()
         }
 
         @Test
         fun `strips the All entry id from the supplied order`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftTabOrder = emptyList(),
+                draftTabOrder = persistentListOf(),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)

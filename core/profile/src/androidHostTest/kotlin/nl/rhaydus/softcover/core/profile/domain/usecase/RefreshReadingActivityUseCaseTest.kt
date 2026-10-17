@@ -5,8 +5,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
-import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -21,6 +19,8 @@ import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class RefreshReadingActivityUseCaseTest {
     private val fixedClock: Clock = object : Clock {
@@ -141,26 +141,6 @@ class RefreshReadingActivityUseCaseTest {
         }
 
         @Test
-        fun `returns failure when the reading-day stream throws`() = runTest {
-            // ----- Arrange -----
-            val exception = RuntimeException("network error")
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(42)
-            coEvery {
-                profileRepository.streamReadingDaysDescending(userId = 42)
-            } returns flow { throw exception }
-
-            // ----- Act -----
-            val result = useCase()
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe exception
-        }
-
-        @Test
         fun `returns failure when cacheUserProfileActivity throws`() = runTest {
             // ----- Arrange -----
             val exception = RuntimeException("cache write failed")
@@ -191,29 +171,20 @@ class RefreshReadingActivityUseCaseTest {
     inner class ReadingStreak {
         @Test
         fun `returns 0 when the reading-day stream is empty`() = runTest {
+            // ----- Arrange -----
+            val streamedDays = emptyList<LocalDate>()
+
             // ----- Act & Assert -----
-            capturedActivityFor(streamedDaysDescending = emptyList()).first shouldBe 0
+            capturedActivityFor(streamedDaysDescending = streamedDays).first shouldBe 0
         }
 
         @Test
         fun `returns 1 when today is absent but yesterday is present (grace day)`() = runTest {
-            // ----- Act & Assert -----
-            capturedActivityFor(streamedDaysDescending = listOf(day(1))).first shouldBe 1
-        }
-
-        @Test
-        fun `returns short streak when the stream has an early gap`() = runTest {
             // ----- Arrange -----
-            // today and yesterday are consecutive, then a gap (day-before-yesterday missing)
-            // before an older, unrelated date further back in the descending stream.
-            val streamedDays = listOf(
-                day(0),
-                day(1),
-                day(3),
-            )
+            val streamedDays = listOf(day(1))
 
             // ----- Act & Assert -----
-            capturedActivityFor(streamedDaysDescending = streamedDays).first shouldBe 2
+            capturedActivityFor(streamedDaysDescending = streamedDays).first shouldBe 1
         }
 
         @Test

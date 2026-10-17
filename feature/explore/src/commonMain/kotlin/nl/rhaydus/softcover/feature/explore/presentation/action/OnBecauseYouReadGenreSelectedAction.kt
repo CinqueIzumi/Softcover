@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -50,7 +51,7 @@ internal data class OnBecauseYouReadGenreSelectedAction(val genre: String?) : Ex
         scope.setState {
             it.copy(
                 becauseYouReadGenre = target ?: it.becauseYouReadGenre,
-                becauseYouReadBooks = emptyList(),
+                becauseYouReadBooks = persistentListOf(),
                 loadingBecauseYouReadBooks = true,
             )
         }

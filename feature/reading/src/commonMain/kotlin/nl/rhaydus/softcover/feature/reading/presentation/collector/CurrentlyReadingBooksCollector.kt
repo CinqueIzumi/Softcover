@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -14,10 +16,16 @@ internal class CurrentlyReadingBooksCollector : ReadingCollector {
         dependencies: ReadingScreenDependencies,
     ) {
         dependencies.getCurrentlyReadingBooksUseCase().collectLatest { books: List<Book> ->
+            val restCount = books.drop(1).size
+
             scope.setState {
                 it.copy(
-                    books = books,
-                    isLoading = false,
+                    books = books.toImmutableList(),
+                    hasLoadedBooks = true,
+                    alsoReadingHeader = SectionHeaderUiModel.Section(
+                        eyebrow = if (restCount == 1) "One more book" else "$restCount more books",
+                        headline = "Also on your nightstand",
+                    ),
                 )
             }
         }

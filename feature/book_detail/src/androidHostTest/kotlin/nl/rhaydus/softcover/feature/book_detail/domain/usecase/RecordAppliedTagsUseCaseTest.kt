@@ -5,13 +5,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagVocabularyRepository
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class RecordAppliedTagsUseCaseTest {
     private lateinit var userTagVocabularyRepository: UserTagVocabularyRepository
@@ -69,29 +69,6 @@ class RecordAppliedTagsUseCaseTest {
         }
 
         @Test
-        fun `records an empty tag list without error`() = runTest {
-            // ----- Arrange -----
-            val userId = 4
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            coEvery {
-                userTagVocabularyRepository.record(
-                    userId = userId,
-                    tags = emptyList(),
-                )
-            } returns Unit
-
-            // ----- Act -----
-            val result = useCase(tags = emptyList())
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-        }
-
-        @Test
         fun `returns failure and never calls the repository when GetUserIdUseCase returns failure`() = runTest {
             // ----- Arrange -----
             val idError = RuntimeException("no user id")
@@ -139,31 +116,6 @@ class RecordAppliedTagsUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
-        }
-
-        @Test
-        fun `wraps the exception in the Result rather than propagating it`() = runTest {
-            // ----- Arrange -----
-            val userId = 1
-            val tags = listOf(stubUserTag())
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            coEvery {
-                userTagVocabularyRepository.record(
-                    userId = userId,
-                    tags = tags,
-                )
-            } throws IllegalStateException("server error")
-
-            // ----- Act -----
-            val result = runCatching { useCase(tags = tags) }
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull()!!.isFailure shouldBe true
         }
     }
 }

@@ -1,8 +1,8 @@
 # Softcover roadmap
 
-What we're building next for [Softcover](https://hardcover.app/), grouped by the version it's planned to land in. This is the public view of our plan.
+What we're building next for [Softcover](https://github.com/CinqueIzumi/Softcover), grouped by the version it's planned to land in. This is the public view of our plan.
 
-**Current release: 3.1.3.** Softcover runs on Android, iPhone, iPad and desktop. 3.1.3 smooths two rough edges in the 3.1 redesign, which rebuilt nearly every screen with a cleaner, more editorial look: deadlines now land on the day you picked no matter where in the world you are, and the app paces its requests against Hardcover's limits so busy screens load without stalling.
+**Current release: 3.2.0.** Softcover runs on Android, iPhone, iPad and desktop. 3.2.0 puts your reading on the Android home screen with four widgets, keeps the quotes you save in sync with Hardcover, and remembers every read-through of a book, with a new Paused status and a warm Dim theme along the way.
 
 A few honest caveats:
 - **These are plans, not promises.** Versions are listed in the order we intend to ship them, but order can shift and some items may move, merge, or change shape.
@@ -12,35 +12,6 @@ A few honest caveats:
 > Reading this inside the app? It's the same file, fetched live, so it's always current.
 
 ---
-
-## 3.2.0: Widgets, themes, re-reads, and a lot of small things
-
-**Home-screen widgets** (Android first). Your books, without opening the app:
-- The book you're **Currently Reading**, with your progress.
-- A **random pick from Want-to-Read**, for when you can't decide.
-- What's **Trending this week** on Hardcover.
-- A **Quote of the Day** from the quotes you've saved, with arrows to flip through the rest.
-- Each one configurable: which book, and how often it refreshes.
-
-**And plenty more:**
-- **Quotes.** Save a line from a book with its page, who can see it, and when you read it, and move your progress there at the same time.
-- **Pick your theme.** Light, Dark, System — and **Dim**, a warm low-contrast palette for reading at night. Plus **Spine colour**: a handful of named accent palettes to make the app feel like yours.
-- **An About page**, with a **per-version changelog** so you can see what changed, and an **in-app Roadmap** — this page, live in the app.
-- **Re-reads.** Book detail starts keeping a history of every time you've read a book, not just the last one.
-- **Paused** joins your reading statuses, for books you've put down but not given up on.
-- Your **tags** show up on book detail.
-- See each edition's **format** (ebook / physical / audiobook) when you pick one, and **add a book straight from the edition picker**.
-- Choose which **tab the app opens on**, and which **unit progress defaults to**.
-- A redesigned **share image** for book detail, with the cover as its backdrop.
-
-**And fixes:**
-- Adding a book by **ISBN** opens the edition you scanned, and tells you clearly when it can't.
-- **Your pace** and the **currently reading bar** keep up with progress as you log it, backdated updates included.
-- The **share card** shows your rating on the scale you rated it on.
-- **Last few that landed** shows the covers you picked.
-- **Anticipated** only shows books out in the next 30 days.
-- Moving several books at once shows **their covers stacked**.
-- Buttons no longer hide behind the **navigation bar**.
 
 ## 3.3.0: The reading record
 

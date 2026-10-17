@@ -2,17 +2,21 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnRevealReviewSpoilerActionTest {
     private lateinit var dependencies: BookDetailDependencies
@@ -23,7 +27,7 @@ class OnRevealReviewSpoilerActionTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -32,14 +36,29 @@ class OnRevealReviewSpoilerActionTest {
         )
     }
 
+    private fun review(
+        id: Int,
+        isSpoilerGated: Boolean = true,
+    ) = BookReviewUiModel(
+        id = id,
+        body = RichTextUiModel.EMPTY,
+        isSpoilerGated = isSpoilerGated,
+        rating = null,
+        reviewedMonthYear = null,
+        reviewerName = "Alice",
+        reviewerAvatarUrl = null,
+        isLoading = false,
+    )
+
     @Nested
     inner class Execute {
         @Test
-        fun `adds the reviewId to revealedSpoilerReviewIds when the set was empty`() = runTest {
+        fun `reveals only the review with the matching id`() = runTest {
             // ----- Arrange -----
-            val reviewId = 5
-            stateFlow.value = BookDetailUiState(revealedSpoilerReviewIds = emptySet())
-            val action = OnRevealReviewSpoilerAction(reviewId = reviewId)
+            stateFlow.value = buildBookDetailUiState().copy(
+                reviews = persistentListOf(review(id = 1), review(id = 2), review(id = 3)),
+            )
+            val action = OnRevealReviewSpoilerAction(reviewId = 2)
 
             // ----- Act -----
             action.execute(
@@ -48,16 +67,15 @@ class OnRevealReviewSpoilerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.revealedSpoilerReviewIds shouldBe setOf(5)
+            stateFlow.value.reviews.map { it.isSpoilerGated } shouldBe listOf(true, false, true)
         }
 
         @Test
-        fun `adds the reviewId to revealedSpoilerReviewIds without removing existing ids`() = runTest {
+        fun `leaves the reviews untouched when no id matches`() = runTest {
             // ----- Arrange -----
-            val existingId = 3
-            val newId = 7
-            stateFlow.value = BookDetailUiState(revealedSpoilerReviewIds = setOf(existingId))
-            val action = OnRevealReviewSpoilerAction(reviewId = newId)
+            val reviews = persistentListOf(review(id = 1), review(id = 2))
+            stateFlow.value = buildBookDetailUiState().copy(reviews = reviews)
+            val action = OnRevealReviewSpoilerAction(reviewId = 99)
 
             // ----- Act -----
             action.execute(
@@ -66,62 +84,7 @@ class OnRevealReviewSpoilerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.revealedSpoilerReviewIds shouldBe setOf(existingId, newId)
-        }
-
-        @Test
-        fun `does not duplicate a reviewId already present in the set`() = runTest {
-            // ----- Arrange -----
-            val reviewId = 11
-            stateFlow.value = BookDetailUiState(revealedSpoilerReviewIds = setOf(reviewId))
-            val action = OnRevealReviewSpoilerAction(reviewId = reviewId)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.revealedSpoilerReviewIds shouldBe setOf(reviewId)
-        }
-
-        @Test
-        fun `preserves all previously revealed ids when adding a new one`() = runTest {
-            // ----- Arrange -----
-            val existing = setOf(1, 2, 3)
-            val newId = 4
-            stateFlow.value = BookDetailUiState(revealedSpoilerReviewIds = existing)
-            val action = OnRevealReviewSpoilerAction(reviewId = newId)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.revealedSpoilerReviewIds shouldBe setOf(1, 2, 3, 4)
-        }
-
-        @Test
-        fun `does not alter any other fields in the state`() = runTest {
-            // ----- Arrange -----
-            val initialState = BookDetailUiState(
-                loadingReviews = true,
-                revealedSpoilerReviewIds = emptySet(),
-            )
-            stateFlow.value = initialState
-            val action = OnRevealReviewSpoilerAction(reviewId = 9)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.loadingReviews shouldBe true
+            stateFlow.value.reviews shouldBe reviews
         }
     }
 }

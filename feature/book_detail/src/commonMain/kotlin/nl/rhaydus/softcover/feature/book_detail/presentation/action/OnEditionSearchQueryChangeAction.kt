@@ -6,8 +6,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLoc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
 
-internal class OnEditionSearchQueryChangeAction(
-    val query: String,
+internal data class OnEditionSearchQueryChangeAction(
+    private val query: String,
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,

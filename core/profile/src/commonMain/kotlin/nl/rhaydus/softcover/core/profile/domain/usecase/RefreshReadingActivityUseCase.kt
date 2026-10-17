@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.profile.domain.usecase
 
-import kotlin.time.Clock
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.datetime.DateTimeUnit
@@ -12,6 +11,7 @@ import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
+import kotlin.time.Clock
 
 class RefreshReadingActivityUseCase(
     private val profileRepository: ProfileRepository,

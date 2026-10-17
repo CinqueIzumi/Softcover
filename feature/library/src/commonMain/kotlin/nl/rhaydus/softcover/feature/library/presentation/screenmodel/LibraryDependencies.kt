@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedBooksByStatusUseCa
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
@@ -25,6 +25,8 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAs
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
+import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.toad.ActionDependencies
 
 internal class LibraryDependencies(
@@ -45,7 +47,9 @@ internal class LibraryDependencies(
     val markBookAsReadUseCase: MarkBookAsReadUseCase,
     val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
-    val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
+    val pauseBookUseCase: PauseBookUseCase,
+    val activeSessionController: ActiveSessionController,
+    val undoableBookRemover: UndoableBookRemover,
     val reorderShelfBooksUseCase: ReorderShelfBooksUseCase,
     val addBookToListUseCase: AddBookToListUseCase,
     val removeBookFromListUseCase: RemoveBookFromListUseCase,

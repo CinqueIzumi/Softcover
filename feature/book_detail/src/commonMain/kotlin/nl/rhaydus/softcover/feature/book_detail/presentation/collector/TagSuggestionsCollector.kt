@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -9,6 +10,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.computeTagSuggestions
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.tagsOrEmpty
 import nl.rhaydus.toad.ActionScope
 
 /**
@@ -27,7 +29,7 @@ internal class TagSuggestionsCollector : BookDetailCollector {
                 TagEditorQuery(
                     input = state.tagEditorInput,
                     category = state.tagEditorCategory,
-                    applied = state.userTags,
+                    applied = state.userTags.tagsOrEmpty,
                 )
             }
             .distinctUntilChanged()
@@ -40,7 +42,7 @@ internal class TagSuggestionsCollector : BookDetailCollector {
                 appliedTags = query.applied,
             )
         }.collectLatest { suggestions ->
-            scope.setState { it.copy(tagSuggestions = suggestions) }
+            scope.setState { it.copy(tagSuggestions = suggestions.toImmutableList()) }
         }
     }
 }

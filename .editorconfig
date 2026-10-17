@@ -6,8 +6,9 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 
 [*.{kt,kts}]
-# Style is enforced by the custom ktlint ruleset in :ktlint-rules (run via ./gradlew ktlintFormat /
-# ktlintCheck), NOT by ktlint's standard rules — those would reformat against this project's
-# idiosyncratic CODE_STYLE_GUIDE.md. Disabling the standard ruleset here also stops any IDE ktlint
+# Style is enforced by the nl.rhaydus:ktlint-rules ruleset (run via ./gradlew ktlintFormat /
+# ktlintCheck), NOT by ktlint's standard rules — those would reformat against
+# docs/rhaydus/0.3.1/code-style.md. Disabling the standard ruleset here also stops any IDE ktlint
 # plugin from reformatting on save.
 ktlint_standard = disabled
+ij_kotlin_imports_layout = *,java.**,javax.**,kotlin.**,^

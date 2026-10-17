@@ -5,11 +5,11 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 
 class Migration43To44Test {
     private lateinit var connection: SQLiteConnection
@@ -60,8 +60,11 @@ class Migration43To44Test {
     inner class DismissedContinueSeriesBooksColumns {
         @Test
         fun `bookTitle, coverUrl, authorText and seriesName columns exist after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             val columns = columnNames("dismissed_continue_series_books")
@@ -102,8 +105,11 @@ class Migration43To44Test {
     inner class DismissedContinueSeriesColumns {
         @Test
         fun `seriesName and coverUrl columns exist after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             val columns = columnNames("dismissed_continue_series")

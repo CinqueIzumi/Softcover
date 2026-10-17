@@ -1,11 +1,15 @@
 package nl.rhaydus.softcover.core.connectivity.data.sync
 
+import kotlinx.coroutines.CancellationException
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.offlinesync.ReplayOutcome
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
 import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromJson
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
+import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
+import nl.rhaydus.softcover.core.domain.util.localDateOf
 
 /**
  * Replays a single queued user-book mutation. [ReplayOutcome.SYNCED] means the mutation reached the server
@@ -18,26 +22,16 @@ import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
  */
 internal class UserBookWriteReplay(
     private val booksRemoteDataSource: BooksRemoteDataSource,
+    private val progressHistoryLocalDataSource: ProgressHistoryLocalDataSource,
 ) {
     suspend operator fun invoke(payload: PendingUserBookWrite): ReplayOutcome = when (payload.kind) {
-        PendingUserBookWriteKind.UPDATE_PROGRESS -> {
-            booksRemoteDataSource.replayUpdateBookProgress(
-                userBookReadId = payload.userBookReadId,
-                editionId = payload.editionId,
-                progressPages = payload.progressPages,
-                progressSeconds = payload.progressSeconds,
-                startedAt = payload.startedAt,
-                finishedAt = payload.finishedAt,
-                actionAt = payload.actionAt,
-            )
-
-            ReplayOutcome.SYNCED
-        }
+        PendingUserBookWriteKind.UPDATE_PROGRESS -> replayProgress(payload = payload)
 
         PendingUserBookWriteKind.MARK_AS_READ -> {
             booksRemoteDataSource.replayMarkBookAsRead(
                 bookId = payload.bookId,
-                userDate = payload.enqueuedAt.substringBefore('T'),
+                editionId = payload.editionId,
+                userDate = localDateOf(actionAt = payload.enqueuedAt),
                 actionAt = payload.actionAt,
             )
 
@@ -47,6 +41,53 @@ internal class UserBookWriteReplay(
         PendingUserBookWriteKind.UPDATE_RATING -> replayRating(payload = payload)
 
         PendingUserBookWriteKind.UPDATE_REVIEW -> replayReview(payload = payload)
+
+        PendingUserBookWriteKind.SET_STATUS -> replayStatus(payload = payload)
+    }
+
+    // A rejected write is dropped by the drainer, so its history row must go too or it would stay pending forever.
+    private suspend fun replayProgress(payload: PendingUserBookWrite): ReplayOutcome {
+        val replayed: Boolean = runCatching {
+            val isPlaceholderRead = payload.userBookReadId < 0
+
+            // A negative read id is a local placeholder; the server read it stands for only exists by now.
+            val unfinishedRead = if (isPlaceholderRead) {
+                booksRemoteDataSource.fetchLatestUnfinishedRead(userBookId = payload.userBookId)
+                    ?: return@runCatching false
+            } else {
+                null
+            }
+
+            booksRemoteDataSource.replayUpdateBookProgress(
+                userBookReadId = unfinishedRead?.id ?: payload.userBookReadId,
+                editionId = payload.editionId,
+                progressPages = payload.progressPages,
+                progressSeconds = payload.progressSeconds,
+                startedAt = if (unfinishedRead != null) unfinishedRead.startedAt else payload.startedAt,
+                finishedAt = if (unfinishedRead != null) null else payload.finishedAt,
+                actionAt = payload.actionAt,
+            )
+
+            true
+        }.onFailure { error ->
+            val isRejection = error !is CancellationException && error !is RetryableSyncException
+
+            if (isRejection) {
+                payload.progressHistoryId?.let { progressHistoryLocalDataSource.delete(localId = it) }
+            }
+        }.getOrThrow()
+
+        if (replayed.not()) {
+            AppLog.w("Pending progress for user-book ${payload.userBookId} has no unfinished read to land on; discarding")
+
+            payload.progressHistoryId?.let { progressHistoryLocalDataSource.delete(localId = it) }
+
+            return ReplayOutcome.DISCARDED
+        }
+
+        payload.progressHistoryId?.let { progressHistoryLocalDataSource.markSynced(localId = it) }
+
+        return ReplayOutcome.SYNCED
     }
 
     private suspend fun replayRating(payload: PendingUserBookWrite): ReplayOutcome {
@@ -64,6 +105,22 @@ internal class UserBookWriteReplay(
         return ReplayOutcome.SYNCED
     }
 
+    private suspend fun replayStatus(payload: PendingUserBookWrite): ReplayOutcome {
+        val statusCode: Int = payload.statusCode ?: run {
+            AppLog.w("Pending status update for user-book ${payload.userBookId} has no status; discarding")
+
+            return ReplayOutcome.DISCARDED
+        }
+
+        booksRemoteDataSource.replayUpdateUserBookStatus(
+            userBookId = payload.userBookId,
+            statusCode = statusCode,
+            userDate = localDateOf(actionAt = payload.enqueuedAt),
+        )
+
+        return ReplayOutcome.SYNCED
+    }
+
     private suspend fun replayReview(payload: PendingUserBookWrite): ReplayOutcome {
         val document = reviewDocumentFromJson(json = payload.reviewSlateJson) ?: run {
             AppLog.w("Pending review update for user-book ${payload.userBookId} has no body; discarding")
@@ -75,7 +132,7 @@ internal class UserBookWriteReplay(
             userBookId = payload.userBookId,
             review = document,
             hasSpoilers = payload.reviewHasSpoilers ?: false,
-            reviewedAt = payload.enqueuedAt.substringBefore('T'),
+            reviewedAt = localDateOf(actionAt = payload.enqueuedAt),
         )
 
         return ReplayOutcome.SYNCED

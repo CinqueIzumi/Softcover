@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.lists.presentation.action
 
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.field.TextFieldError
+import nl.rhaydus.softcover.core.component.sheet.requestClose
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
+import nl.rhaydus.softcover.core.presentation.error.toUserMessage
 import nl.rhaydus.softcover.feature.lists.presentation.event.CreateListEvent
-import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreatedEvent
-import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreationFailedEvent
-import nl.rhaydus.softcover.feature.lists.presentation.event.ListNameTakenEvent
 import nl.rhaydus.softcover.feature.lists.presentation.screenmodel.CreateListDependencies
 import nl.rhaydus.softcover.feature.lists.presentation.state.CreateListUiState
 import nl.rhaydus.softcover.feature.lists.presentation.state.LocalCreateListVariables
@@ -22,7 +22,7 @@ internal class OnSubmitAction : CreateListAction {
 
         val privacy = scope.currentState.privacy
 
-        scope.setState { it.copy(isSubmitting = true) }
+        scope.setState { it.withSubmitting(submitting = true) }
 
         runCatching {
             dependencies.createListUseCase(
@@ -30,10 +30,14 @@ internal class OnSubmitAction : CreateListAction {
                 privacy = privacy,
             )
         }.onSuccess { created ->
-            scope.setState { it.copy(isSubmitting = false) }
+            scope.setState {
+                val idle = it.withSubmitting(submitting = false)
+
+                idle.copy(sheet = idle.sheet.requestClose())
+            }
 
             scope.sendEvent(
-                event = ListCreatedEvent(
+                event = CreateListEvent.ListCreatedEvent(
                     listId = created.id,
                     name = created.name,
                 ),
@@ -44,14 +48,23 @@ internal class OnSubmitAction : CreateListAction {
                 "Failed to create list $error",
             )
 
-            scope.setState { it.copy(isSubmitting = false) }
+            scope.setState { it.withSubmitting(submitting = false) }
 
-            val event: CreateListEvent = when (error) {
-                is ListNameTakenException -> ListNameTakenEvent(name = error.name)
-                else -> ListCreationFailedEvent()
+            if (error is ListNameTakenException) {
+                scope.setState {
+                    it.copy(
+                        nameField = it.nameField.copy(
+                            error = TextFieldError(
+                                message = "You already have a list called “${error.name}”. Pick another name.",
+                            ),
+                        ),
+                    )
+                }
+            } else {
+                scope.sendEvent(
+                    event = CreateListEvent.ListCreationFailedEvent(message = error.toUserMessage()),
+                )
             }
-
-            scope.sendEvent(event = event)
         }
     }
 }

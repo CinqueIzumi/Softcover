@@ -60,6 +60,9 @@ class SessionValueCache<K, V> {
         }
     }
 
+    /** The value cached for [key], or null when none is. A cached null is indistinguishable from absent. */
+    suspend fun peek(key: K): V? = registryMutex.withLock { values[key] }
+
     /**
      * Loads unconditionally and replaces any cached value for [key], for the case where a *person* has
      * asked for fresh data — a pull-to-refresh must not be answered from a session cache, or it looks

@@ -10,6 +10,16 @@ plugins {
     alias(libs.plugins.compose.multiplatform)
 }
 
+// Pin the JDK this module compiles and runs against instead of inheriting whatever JDK happens to run
+// Gradle. Every other module gets its Java/Kotlin target from a convention plugin; this one is a plain
+// Kotlin/JVM module, so without a toolchain `compileJava` follows the local JDK while `compileKotlin`
+// falls back to the newest JVM target Kotlin supports — on a local JDK newer than that (e.g. 26) the two
+// disagree and the build fails on a JVM-target mismatch. 17 is what CI builds and packages with, and is
+// the minimum jpackage needs for the native distributions below.
+kotlin {
+    jvmToolchain(17)
+}
+
 dependencies {
     // Orchestration tier (composes every feature + core module and hosts DesktopApp()).
     implementation(project(":orchestration"))
@@ -39,7 +49,7 @@ compose.desktop {
             // Desktop release version — the marketing version (mirrors Android versionName /
             // iOS MARKETING_VERSION). Kept in sync by the set-version-name / release skills. Desktop
             // has no separate build-number field, so versionCode has no desktop counterpart.
-            packageVersion = "3.1.3"
+            packageVersion = "3.2.0"
             description = "Softcover — a Hardcover.app book tracking client"
             // Maintainer/vendor for the package metadata (jpackage Deb/Msi); without it the Linux
             // package falls back to "Unknown". This is package metadata, not the runtime window name

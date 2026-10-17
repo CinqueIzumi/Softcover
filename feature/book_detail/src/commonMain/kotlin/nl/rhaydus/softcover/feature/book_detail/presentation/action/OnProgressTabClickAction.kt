@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
-import nl.rhaydus.softcover.core.designsystem.presentation.model.toProgressUnit
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
+import nl.rhaydus.softcover.core.uibinding.progress.toProgressUnit
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables

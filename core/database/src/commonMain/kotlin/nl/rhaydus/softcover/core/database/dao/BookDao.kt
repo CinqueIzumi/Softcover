@@ -26,10 +26,13 @@ import nl.rhaydus.softcover.core.database.model.EditionAuthorCrossRef
 import nl.rhaydus.softcover.core.database.model.EditionImageRef
 import nl.rhaydus.softcover.core.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.database.model.ListBookFull
+import nl.rhaydus.softcover.core.database.model.ListBookPositionRow
 import nl.rhaydus.softcover.core.database.model.ListSignatureRow
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
+import nl.rhaydus.softcover.core.database.model.TrendingBookEntity
+import nl.rhaydus.softcover.core.database.model.TrendingMetaEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -39,8 +42,7 @@ import nl.rhaydus.softcover.core.domain.model.ListBook
 
 // Room aggregates every book/edition/list/journal query onto one DAO, so the function count is
 // inherently high and keeps growing. Suppressed rather than gated — but this is a signal the DAO
-// should eventually be split into smaller, area-scoped DAOs (see docs/working/architecture-review.md,
-// DB2).
+// should eventually be split into smaller, area-scoped DAOs.
 @Suppress("TooManyFunctions")
 @Dao
 interface BookDao {
@@ -56,6 +58,7 @@ interface BookDao {
                 FROM reading_journals
                 GROUP BY userBookId
             ) rj ON ub.id = rj.userBookId
+            WHERE ub.id IS NOT NULL OR b.id IN (SELECT bookId FROM list_books)
             ORDER BY
                 (rj.latestActivity IS NULL) ASC,
                 rj.latestActivity DESC,
@@ -65,6 +68,14 @@ interface BookDao {
             """,
     )
     fun observeBooks(): Flow<List<BookFullEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM books WHERE id = :id LIMIT 1")
+    fun observeBookById(id: Int): Flow<BookFullEntity?>
+
+    @Transaction
+    @Query("SELECT * FROM books WHERE id IN (:ids)")
+    fun observeBooksByIds(ids: List<Int>): Flow<List<BookFullEntity>>
 
     /**
      * Dynamic-sort variant used by the library screen. The caller composes a SELECT against
@@ -89,6 +100,7 @@ interface BookDao {
             TagEntity::class,
             BookTagCrossRef::class,
             ShelfManualOrderEntity::class,
+            ListBookEntity::class,
         ],
     )
     fun observeBooksRaw(query: RoomRawQuery): Flow<List<BookFullEntity>>
@@ -201,8 +213,8 @@ interface BookDao {
     @Query("SELECT id FROM user_books")
     suspend fun getAllUserBookIds(): List<Int>
 
-    @Query("SELECT id FROM user_books WHERE statusCode = :statusCode")
-    suspend fun getUserBookIdsByStatus(statusCode: Int): List<Int>
+    @Query("SELECT id FROM user_books WHERE statusCode IN (:statusCodes)")
+    suspend fun getUserBookIdsByStatuses(statusCodes: List<Int>): List<Int>
 
     @Query("SELECT id FROM books WHERE id IN (:bookIds)")
     suspend fun getExistingBookIds(bookIds: List<Int>): List<Int>
@@ -301,9 +313,10 @@ interface BookDao {
 
             insertJournals(journals = userBook.journals.map { it.toEntity(userBookId = userBookId) })
 
-            book.userBookRead?.let { userBookRead ->
-                insertUserBookRead(userBookRead.toEntity(userBookId = userBookId))
-            }
+            // Replace-all rather than upsert: `userBook.reads` must be the complete set, since any read missing from it is deleted.
+            deleteUserBookRead(userBookId = userBookId)
+
+            insertUserBookReads(userBookReads = userBook.reads.map { it.toEntity(userBookId = userBookId) })
         }
 
         // Insert editions, evicting locally-cached covers whose URL changed
@@ -465,6 +478,9 @@ interface BookDao {
     suspend fun insertUserBookRead(userBookRead: UserBookReadEntity)
 
     @Upsert
+    suspend fun insertUserBookReads(userBookReads: List<UserBookReadEntity>)
+
+    @Upsert
     suspend fun insertEditions(editions: List<BookEditionEntity>)
 
     @Upsert
@@ -537,14 +553,17 @@ interface BookDao {
     @Query("DELETE FROM dismissed_continue_series")
     suspend fun deleteAllDismissedContinueSeries()
 
-    @Query("DELETE FROM book_highlights")
-    suspend fun deleteAllHighlights()
+    @Query("DELETE FROM book_quotes")
+    suspend fun deleteAllQuotes()
+
+    @Query("DELETE FROM pending_quote_writes")
+    suspend fun deleteAllPendingQuoteWrites()
 
     @Query("DELETE FROM reading_sessions")
     suspend fun deleteAllReadingSessions()
 
-    @Query("DELETE FROM reading_log_entries")
-    suspend fun deleteAllReadingLogEntries()
+    @Query("DELETE FROM progress_history")
+    suspend fun deleteAllProgressHistory()
 
     @Query("DELETE FROM book_editions WHERE bookId = :bookId")
     suspend fun deleteEditions(bookId: Int)
@@ -563,6 +582,110 @@ interface BookDao {
 
     @Query("SELECT COUNT(*) FROM list_books WHERE bookId = :bookId")
     suspend fun countListBooksForBook(bookId: Int): Int
+
+    @Query("SELECT COUNT(*) FROM trending_books WHERE bookId = :bookId")
+    suspend fun countTrendingForBook(bookId: Int): Int
+
+    @Query("DELETE FROM trending_books")
+    suspend fun deleteAllTrendingBooks()
+
+    @Query("DELETE FROM trending_books WHERE period = :period")
+    suspend fun deleteTrendingBooks(period: String)
+
+    @Query("DELETE FROM trending_books WHERE bookId = :bookId")
+    suspend fun deleteTrendingForBook(bookId: Int)
+
+    @Query("DELETE FROM trending_meta")
+    suspend fun deleteTrendingMeta()
+
+    @Upsert
+    suspend fun upsertTrending(rows: List<TrendingBookEntity>)
+
+    @Upsert
+    suspend fun upsertTrendingMeta(meta: TrendingMetaEntity)
+
+    @Query("SELECT fetchedAtEpochMillis FROM trending_meta WHERE period = :period")
+    fun observeTrendingFetchedAt(period: String): Flow<Long?>
+
+    @Query("SELECT fetchedAtEpochMillis FROM trending_meta WHERE period = :period")
+    suspend fun getTrendingFetchedAt(period: String): Long?
+
+    @Transaction
+    @Query(
+        """
+        SELECT b.*
+        FROM books b
+        INNER JOIN trending_books tb ON tb.bookId = b.id
+        WHERE tb.period = :period
+        ORDER BY tb.rank ASC
+        """,
+    )
+    fun observeTrendingBooks(period: String): Flow<List<BookFullEntity>>
+
+    @Query("SELECT bookId FROM trending_books WHERE period = :period")
+    suspend fun getTrendingBookIds(period: String): List<Int>
+
+    @Query("SELECT bookId FROM user_books WHERE bookId IN (:bookIds)")
+    suspend fun getBookIdsWithUserBook(bookIds: List<Int>): List<Int>
+
+    @Query(
+        """
+        SELECT b.id FROM books b
+        WHERE b.id IN (:bookIds)
+          AND b.id NOT IN (SELECT bookId FROM user_books)
+          AND b.id NOT IN (SELECT bookId FROM list_books)
+          AND b.id NOT IN (SELECT bookId FROM trending_books)
+        """,
+    )
+    suspend fun getUnreferencedBookIds(bookIds: List<Int>): List<Int>
+
+    /**
+     * Replaces only [period]'s list; other periods keep their rows. Ranks follow [requestedIds];
+     * books returned under an id that was not requested are appended after them in [books] order.
+     * Returns the evicted cover paths, as [cacheBooks] does.
+     */
+    @Transaction
+    suspend fun replaceTrendingBooks(
+        period: String,
+        requestedIds: List<Int>,
+        books: List<Book>,
+        fetchedAtEpochMillis: Long,
+    ): List<String> {
+        val previousIds = getTrendingBookIds(period = period)
+        val evictedPaths = cacheBooks(books = books)
+
+        val requested = requestedIds.toSet()
+        val redirectedIds = books.map { it.id }.filterNot { it in requested }.distinct()
+        val candidateIds = requestedIds + redirectedIds
+        val storedIds = getExistingBookIds(bookIds = candidateIds).toSet()
+        val rankedIds = candidateIds.filter { it in storedIds }
+        val rankedIdSet = rankedIds.toSet()
+
+        deleteTrendingBooks(period = period)
+        upsertTrending(
+            rows = rankedIds.mapIndexed { rank, bookId ->
+                TrendingBookEntity(
+                    period = period,
+                    bookId = bookId,
+                    rank = rank,
+                )
+            },
+        )
+        upsertTrendingMeta(
+            meta = TrendingMetaEntity(
+                period = period,
+                fetchedAtEpochMillis = fetchedAtEpochMillis,
+            ),
+        )
+
+        val leftTrending = previousIds.filterNot { it in rankedIdSet }
+
+        if (leftTrending.isNotEmpty()) {
+            deleteBooksWithChildren(bookIds = getUnreferencedBookIds(bookIds = leftTrending))
+        }
+
+        return evictedPaths
+    }
 
     @Query("SELECT id FROM book_lists")
     suspend fun getAllBookListIds(): List<Int>
@@ -602,6 +725,7 @@ interface BookDao {
         SELECT b.id FROM books b
         WHERE b.id NOT IN (SELECT bookId FROM user_books)
           AND b.id NOT IN (SELECT bookId FROM list_books)
+          AND b.id NOT IN (SELECT bookId FROM trending_books)
         """,
     )
     suspend fun getOrphanBookIds(): List<Int>
@@ -629,6 +753,12 @@ interface BookDao {
         newId: Int,
     )
 
+    @Query("UPDATE OR REPLACE trending_books SET bookId = :newId WHERE bookId = :oldId")
+    suspend fun redirectTrendingBooksBookId(
+        oldId: Int,
+        newId: Int,
+    )
+
     @Transaction
     suspend fun redirectBookId(
         oldId: Int,
@@ -636,22 +766,40 @@ interface BookDao {
     ) {
         if (oldId == newId) return
 
-        redirectUserBooksBookId(
-            oldId = oldId,
-            newId = newId,
-        )
+        val newIdHasBook = getExistingBookIds(bookIds = listOf(newId)).isNotEmpty()
+
+        // user_books and trending_books reference books(id); re-pointing at a missing row violates
+        // the foreign key. A user book stays on its old id; cached trending rows are only a cache.
+        if (newIdHasBook) {
+            redirectUserBooksBookId(
+                oldId = oldId,
+                newId = newId,
+            )
+        }
 
         redirectListBooksBookId(
             oldId = oldId,
             newId = newId,
         )
+
+        if (newIdHasBook) {
+            redirectTrendingBooksBookId(
+                oldId = oldId,
+                newId = newId,
+            )
+        } else {
+            deleteTrendingForBook(bookId = oldId)
+        }
     }
 
     @Transaction
     suspend fun deleteOrphanBooks() {
-        val orphanIds = getOrphanBookIds()
+        deleteBooksWithChildren(bookIds = getOrphanBookIds())
+    }
 
-        orphanIds.forEach { bookId ->
+    @Transaction
+    suspend fun deleteBooksWithChildren(bookIds: List<Int>) {
+        bookIds.forEach { bookId ->
             clearBookAuthors(bookId)
             clearEditionAuthors(bookId)
             clearBookTags(bookId = bookId)
@@ -682,6 +830,7 @@ interface BookDao {
         deleteUserBookByUserBookId(userBookId)
 
         if (countListBooksForBook(bookId = bookId) > 0) return
+        if (countTrendingForBook(bookId = bookId) > 0) return
 
         clearBookAuthors(bookId)
         clearEditionAuthors(bookId)
@@ -709,9 +858,12 @@ interface BookDao {
         deleteAllBookDeadlines()
         deleteAllPendingUserBookWrites()
         deleteAllPendingListWrites()
-        deleteAllHighlights()
+        deleteAllQuotes()
+        deleteAllPendingQuoteWrites()
         deleteAllReadingSessions()
-        deleteAllReadingLogEntries()
+        deleteAllProgressHistory()
+        deleteAllTrendingBooks()
+        deleteTrendingMeta()
 
         deleteAllUserBooks()
         deleteAllBookEditions()
@@ -804,6 +956,37 @@ interface BookDao {
             setListBookPosition(
                 listBookId = listBookId,
                 position = startPosition + index,
+            )
+        }
+    }
+
+    @Query(
+        """
+        SELECT listBookId, position
+        FROM list_books
+        WHERE listId = :listId
+          AND (listBookId IN (:listBookIds) OR position IN (:positions))
+        """,
+    )
+    suspend fun getListBookPositions(
+        listId: Int,
+        listBookIds: List<Int>,
+        positions: List<Int>,
+    ): List<ListBookPositionRow>
+
+    @Query("UPDATE list_books SET position = :position WHERE listBookId = :listBookId")
+    suspend fun setListBookPositionOrNull(
+        listBookId: Int,
+        position: Int?,
+    )
+
+    /** Writes each snapshotted row's position back, including rows that had none. */
+    @Transaction
+    suspend fun restoreListBookPositions(rows: List<ListBookPositionRow>) {
+        rows.forEach { row ->
+            setListBookPositionOrNull(
+                listBookId = row.listBookId,
+                position = row.position,
             )
         }
     }

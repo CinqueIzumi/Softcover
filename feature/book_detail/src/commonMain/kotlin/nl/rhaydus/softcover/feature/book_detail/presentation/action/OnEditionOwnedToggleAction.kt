@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.collections.immutable.toPersistentSet
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -27,13 +29,19 @@ internal class OnEditionOwnedToggleAction(
             dependencies.setEditionAsOwnedUseCase(
                 edition = edition,
                 owned = owned,
-            ).onFailure { error ->
-                AppLog.e("$error")
+            )
+                .onSuccess {
+                    val feedback = if (owned) Feedback.Routine else null
 
-                scope.setState {
-                    it.copy(failedMutationEditionIds = it.failedMutationEditionIds + edition.id)
+                    scope.sendEvent(BookDetailEvent.MutationSucceededEvent(feedback = feedback))
                 }
-            }
+                .onFailure { error ->
+                    AppLog.e("$error")
+
+                    scope.setState {
+                        it.copy(failedMutationEditionIds = it.failedMutationEditionIds.toPersistentSet().add(edition.id))
+                    }
+                }
         }
 
         scope.setLocalVariables {

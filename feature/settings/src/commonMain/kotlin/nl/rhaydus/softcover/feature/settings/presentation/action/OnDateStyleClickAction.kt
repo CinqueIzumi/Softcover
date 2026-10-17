@@ -18,9 +18,5 @@ internal class OnDateStyleClickAction(
         dependencies.setDateStyleUseCase(newStyle = style).onFailure {
             AppLog.e("$it")
         }
-
-        scope.setState {
-            it.copy(dropDownExpanded = false)
-        }
     }
 }

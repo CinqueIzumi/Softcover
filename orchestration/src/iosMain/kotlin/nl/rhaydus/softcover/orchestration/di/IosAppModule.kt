@@ -1,13 +1,14 @@
 package nl.rhaydus.softcover.orchestration.di
 
 import androidx.compose.runtime.Composable
-import org.koin.dsl.module
-import nl.rhaydus.softcover.core.designsystem.presentation.debug.DebugRoutesContent
+import cafe.adriel.voyager.core.screen.Screen
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.notification.NotificationAccentColor
 import nl.rhaydus.softcover.core.notification.NotificationAppearance
 import nl.rhaydus.softcover.core.notification.NotificationIcon
+import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesContent
 import nl.rhaydus.softcover.orchestration.IosAppVersionProvider
+import org.koin.dsl.module
 
 /**
  * iOS counterpart of `:app`'s `appModule` + `debugRoutesModule` — the app-supplied bindings the
@@ -33,7 +34,7 @@ internal val iosAppModule = module {
     single<DebugRoutesContent> {
         object : DebugRoutesContent {
             @Composable
-            override fun Render() = Unit
+            override fun Render(host: Screen) = Unit
         }
     }
 }

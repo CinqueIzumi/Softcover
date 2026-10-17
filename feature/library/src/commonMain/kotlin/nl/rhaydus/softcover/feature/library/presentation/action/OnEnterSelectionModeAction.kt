@@ -1,9 +1,11 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.withSelectedBookIds
 import nl.rhaydus.toad.ActionScope
 
 /**
@@ -21,9 +23,8 @@ internal class OnEnterSelectionModeAction(
     ) {
         // Selection and rearrange are mutually exclusive editing modes — entering one clears the other.
         scope.setState {
-            it.copy(
+            it.withSelectedBookIds(bookId?.let { id -> persistentSetOf(id) } ?: persistentSetOf()).copy(
                 selectionMode = true,
-                selectedBookIds = bookId?.let { id -> setOf(id) } ?: emptySet(),
                 isRearranging = false,
             )
         }

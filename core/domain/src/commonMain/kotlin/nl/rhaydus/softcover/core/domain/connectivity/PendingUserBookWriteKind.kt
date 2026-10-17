@@ -5,4 +5,5 @@ enum class PendingUserBookWriteKind {
     MARK_AS_READ,
     UPDATE_RATING,
     UPDATE_REVIEW,
+    SET_STATUS,
 }

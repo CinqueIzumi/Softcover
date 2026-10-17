@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -10,9 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -21,8 +19,12 @@ import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDepe
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnAddBookToLibraryClickActionTest {
+    private val eventChannel = Channel<ExploreEvent>(Channel.BUFFERED)
     private lateinit var markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase
     private lateinit var dependencies: ExploreDependencies
     private lateinit var stateFlow: MutableStateFlow<ExploreScreenUiState>
@@ -35,7 +37,7 @@ class OnAddBookToLibraryClickActionTest {
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ExploreLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -69,7 +71,7 @@ class OnAddBookToLibraryClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `invokes markBookAsWantToReadUseCase with the book`() = runTest {
+        fun `invokes markBookAsWantToReadUseCase with the book and sends BookAddedEvent`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
             dependencies = stubDependencies(this)
@@ -90,33 +92,11 @@ class OnAddBookToLibraryClickActionTest {
             coVerify {
                 markBookAsWantToReadUseCase(book = book)
             }
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ExploreEvent.BookAddedEvent>()
         }
 
         @Test
-        fun `does not change state when use case succeeds`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 7)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsWantToReadUseCase(book = book)
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            val action = OnAddBookToLibraryClickAction(book = book)
-            val stateBefore = stateFlow.value
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe stateBefore
-        }
-
-        @Test
-        fun `does not change state when use case fails`() = runTest {
+        fun `does not change state and sends AddBookFailedEvent when use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 3)
             dependencies = stubDependencies(this)
@@ -136,6 +116,7 @@ class OnAddBookToLibraryClickActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe stateBefore
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ExploreEvent.AddBookFailedEvent>()
         }
     }
 }

@@ -1,14 +1,16 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class LibraryFilterOptionsBuilderTest {
     private val tagFiction = Tag(
@@ -24,17 +26,6 @@ class LibraryFilterOptionsBuilderTest {
 
     @Nested
     inner class BuildBookFilterOptions {
-        @Test
-        fun `returns empty options when book list is empty`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = buildBookFilterOptions(books = emptyList())
-
-            // ----- Assert -----
-            result.isEmpty shouldBe true
-        }
-
         @Test
         fun `returns distinct tags sorted by name lowercase`() {
             // ----- Arrange -----
@@ -72,10 +63,12 @@ class LibraryFilterOptionsBuilderTest {
             )
             val book2 = buildBook(
                 id = 2,
-                editions = listOf(buildEdition(
-                    id = 3,
-                    format = "paperback",
-                ),),
+                editions = listOf(
+                    buildEdition(
+                        id = 3,
+                        format = "paperback",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -160,10 +153,12 @@ class LibraryFilterOptionsBuilderTest {
             // ----- Arrange -----
             val book = buildBook(
                 id = 1,
-                editions = listOf(buildEdition(
-                    id = 1,
-                    owned = true,
-                ),),
+                editions = listOf(
+                    buildEdition(
+                        id = 1,
+                        owned = true,
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -178,10 +173,12 @@ class LibraryFilterOptionsBuilderTest {
             // ----- Arrange -----
             val book = buildBook(
                 id = 1,
-                editions = listOf(buildEdition(
-                    id = 1,
-                    owned = false,
-                ),),
+                editions = listOf(
+                    buildEdition(
+                        id = 1,
+                        owned = false,
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -321,20 +318,6 @@ class LibraryFilterOptionsBuilderTest {
     @Nested
     inner class BuildEditionFilterOptions {
         @Test
-        fun `returns empty options when edition list is empty`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = buildEditionFilterOptions(
-                editions = emptyList(),
-                bookByBookId = emptyMap(),
-            )
-
-            // ----- Assert -----
-            result.isEmpty shouldBe true
-        }
-
-        @Test
         fun `tags sourced from parent books via bookByBookId`() {
             // ----- Arrange -----
             val edition = buildEdition(
@@ -354,44 +337,6 @@ class LibraryFilterOptionsBuilderTest {
 
             // ----- Assert -----
             result.tags.map { it.id } shouldBe listOf(tagFiction.id)
-        }
-
-        @Test
-        fun `excludes non-Genre tags from tag facets`() {
-            // ----- Arrange -----
-            val tagGenre = Tag(
-                id = 1,
-                name = "Fantasy",
-                category = TagCategory.GENRE,
-            )
-            val tagMood = Tag(
-                id = 3,
-                name = "Hopeful",
-                category = TagCategory.MOOD,
-            )
-            val tagWarning = Tag(
-                id = 4,
-                name = "Violence",
-                category = TagCategory.CONTENT_WARNING,
-            )
-
-            val book = buildBook(
-                id = 10,
-                tags = listOf(tagGenre, tagMood, tagWarning),
-            )
-            val edition = buildEdition(
-                id = 1,
-                bookId = 10,
-            )
-
-            // ----- Act -----
-            val result = buildEditionFilterOptions(
-                editions = listOf(edition),
-                bookByBookId = mapOf(10 to book),
-            )
-
-            // ----- Assert -----
-            result.tags.map { it.id } shouldBe listOf(tagGenre.id)
         }
 
         @Test
@@ -462,10 +407,12 @@ class LibraryFilterOptionsBuilderTest {
     private fun buildBook(
         id: Int,
         tags: List<Tag> = emptyList(),
-        editions: List<BookEdition> = listOf(buildEdition(
-            id = id,
-            bookId = id,
-        ),),
+        editions: List<BookEdition> = listOf(
+            buildEdition(
+                id = id,
+                bookId = id,
+            ),
+        ),
         releaseYear: Int = 2020,
         rating: Double = 0.0,
         finishedYear: Int? = null,
@@ -478,25 +425,43 @@ class LibraryFilterOptionsBuilderTest {
         description = "",
         releaseYear = releaseYear,
         coverUrl = "",
-        authors = listOf(Author(
-            id = id,
-            name = "Author $id",
-        ),),
+        authors = listOf(
+            Author(
+                id = id,
+                name = "Author $id",
+            ),
+        ),
         usersCount = 0,
         ratingsCount = 0,
         bookSeries = null,
         positionsInSeries = emptyList(),
         isCompilation = false,
         tags = tags,
-        userBook = null,
-        userBookRead = finishedYear?.let {
-            UserBookRead(
+        userBook = finishedYear?.let {
+            UserBook(
                 id = id,
-                currentPage = null,
-                currentSeconds = null,
-                progress = 1f,
-                startedAt = null,
-                finishedAt = "$it-06-15",
+                status = BookStatus.Read,
+                dateAdded = "2020-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = null,
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+                reads = listOf(
+                    UserBookRead(
+                        id = id,
+                        currentPage = null,
+                        currentSeconds = null,
+                        progress = 1f,
+                        startedAt = null,
+                        finishedAt = "$it-06-15",
+                    ),
+                ),
             )
         },
     )

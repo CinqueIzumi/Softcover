@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -7,10 +9,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -25,33 +27,23 @@ internal class BooksByStatusCollector : LibraryCollector {
     ) {
         // Each status tab has its own persisted sort. The DAO emits an already-sorted list per
         // status; flatMapLatest re-subscribes whenever the user changes that tab's sort settings.
+        val statuses = UserBookStatus.entries
+        val perStatusFlows = statuses.map { status ->
+            booksForStatus(
+                dependencies = dependencies,
+                status = status,
+            )
+        }
+
+        val booksPerStatusFlow = combine(perStatusFlows) { it.toList() }
+
         combine(
             dependencies.getEnabledStatusCodesAsFlowUseCase(),
-            booksForStatus(
-                dependencies = dependencies,
-                status = UserBookStatus.CURRENTLY_READING,
-            ),
-            booksForStatus(
-                dependencies = dependencies,
-                status = UserBookStatus.WANT_TO_READ,
-            ),
-            booksForStatus(
-                dependencies = dependencies,
-                status = UserBookStatus.READ,
-            ),
-            booksForStatus(
-                dependencies = dependencies,
-                status = UserBookStatus.DID_NOT_FINISH,
-            ),
-        ) { enabledStatuses: Set<Int>, currentlyReading: List<Book>, wantToRead: List<Book>, read: List<Book>, didNotFinish: List<Book> ->
+            booksPerStatusFlow,
+        ) { enabledStatuses, booksPerStatus ->
             val activeCodes = UserBookStatus.activeLibraryCodes(enabledCodes = enabledStatuses)
 
-            val booksByStatus: Map<UserBookStatus, List<Book>> = mapOf(
-                UserBookStatus.CURRENTLY_READING to currentlyReading,
-                UserBookStatus.WANT_TO_READ to wantToRead,
-                UserBookStatus.READ to read,
-                UserBookStatus.DID_NOT_FINISH to didNotFinish,
-            )
+            val booksByStatus: Map<UserBookStatus, List<Book>> = statuses.zip(booksPerStatus).toMap()
 
             booksByStatus
                 .filterKeys { it.code in activeCodes }
@@ -62,7 +54,9 @@ internal class BooksByStatusCollector : LibraryCollector {
                 val stripped = state.booksByTab.filterKeys { key ->
                     key.startsWith("status-").not() || key in retainedStatusKeys
                 }
-                state.copy(booksByTab = stripped + grouped)
+                state.copy(
+                    booksByTab = stripped.toPersistentMap().putAll(grouped.mapValues { (_, books) -> books.toImmutableList() }),
+                )
             }
         }
     }

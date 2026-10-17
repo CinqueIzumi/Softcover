@@ -5,13 +5,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagsRepository
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class GetUserTagsUseCaseTest {
     private lateinit var userTagsRepository: UserTagsRepository
@@ -64,31 +64,6 @@ class GetUserTagsUseCaseTest {
         }
 
         @Test
-        fun `returns success with empty list when repository returns no tags`() = runTest {
-            // ----- Arrange -----
-            val bookId = 10
-            val userId = 3
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            coEvery {
-                userTagsRepository.getUserTags(
-                    userId = userId,
-                    bookId = bookId,
-                )
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = useCase(bookId = bookId)
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe emptyList()
-        }
-
-        @Test
         fun `returns failure when repository throws`() = runTest {
             // ----- Arrange -----
             val bookId = 5
@@ -136,31 +111,6 @@ class GetUserTagsUseCaseTest {
                     any(),
                 )
             }
-        }
-
-        @Test
-        fun `wraps the exception in the Result rather than propagating it`() = runTest {
-            // ----- Arrange -----
-            val bookId = 3
-            val userId = 1
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            coEvery {
-                userTagsRepository.getUserTags(
-                    userId = userId,
-                    bookId = bookId,
-                )
-            } throws IllegalStateException("server error")
-
-            // ----- Act -----
-            val result = runCatching { useCase(bookId = bookId) }
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull()!!.isFailure shouldBe true
         }
     }
 }

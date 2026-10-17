@@ -3,10 +3,12 @@ package nl.rhaydus.softcover.core.connectivity.data.store
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.offlinesync.PendingWrite
 import nl.rhaydus.offlinesync.PendingWriteStore
+import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
 import nl.rhaydus.softcover.core.connectivity.data.mapper.toEntity
 import nl.rhaydus.softcover.core.connectivity.data.mapper.toPendingUserBookWrite
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
+import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 
 /**
@@ -14,14 +16,25 @@ import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
  * ([UserBookWriteQueue]) — `PendingWriteStore<P>` extends `WriteQueue<P>`, so one type owns the table.
  *
  * The unique `(userBookId, kind)` index plus `insertReplacing` is what coalesces repeated writes of the
- * same kind for the same book into one queued row.
+ * same kind for the same book into one queued row. A superseded progress write never reaches the server, so
+ * its history row is deleted to keep local history mirroring the server.
  */
 internal class PendingUserBookWriteStore(
     private val dao: PendingUserBookWriteDao,
+    private val progressHistoryLocalDataSource: ProgressHistoryLocalDataSource,
 ) : PendingWriteStore<PendingUserBookWrite>, UserBookWriteQueue {
     override suspend fun enqueue(payload: PendingUserBookWrite) {
+        if (payload.kind == PendingUserBookWriteKind.UPDATE_PROGRESS) {
+            dao.getByUserBookIdAndKind(
+                userBookId = payload.userBookId,
+                kind = payload.kind.name,
+            )?.progressHistoryId?.let { progressHistoryLocalDataSource.delete(localId = it) }
+        }
+
         dao.insertReplacing(entity = payload.toEntity())
     }
+
+    override suspend fun hasPending(): Boolean = dao.getPending().isNotEmpty()
 
     override suspend fun getPending(maxAttempts: Int): List<PendingWrite<PendingUserBookWrite>> =
         dao.getPending(maxAttempts = maxAttempts).mapNotNull { entity ->

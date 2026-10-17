@@ -11,12 +11,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.RemoteInput
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
-import coil3.SingletonImageLoader
-import coil3.request.ImageRequest
-import coil3.request.SuccessResult
-import coil3.request.allowHardware
-import coil3.toBitmap
-import kotlin.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -26,15 +20,19 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.designsystem.R
-import nl.rhaydus.softcover.core.designsystem.presentation.component.resolveEditionImageSource
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppEntryPoint
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
-import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.notification.SoftcoverNotificationChannel
+import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
+import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
+import nl.rhaydus.softcover.core.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
+import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
+import nl.rhaydus.softcover.core.uibinding.cover.resolveCoverSource
+import org.koin.android.ext.android.inject
+import kotlin.time.Duration
 
 /**
  * Foreground service that surfaces the active reading session as a persistent, ongoing notification:
@@ -56,7 +54,7 @@ internal class ReadingSessionService : Service() {
 
     private var coverBitmap: Bitmap? = null
 
-    private var coverSource: Any? = null
+    private var coverSource: CoverSource? = null
 
     override fun onBind(intent: Intent): IBinder? = null
 
@@ -124,7 +122,7 @@ internal class ReadingSessionService : Service() {
     }
 
     private fun ensureCover(active: ActiveSession) {
-        val source = resolveEditionImageSource(
+        val source = resolveCoverSource(
             edition = active.book.currentEdition,
             defaultEdition = active.book.defaultEdition,
             fallbackCoverUrl = active.book.coverUrl.takeIf { it.isNotBlank() },
@@ -141,14 +139,11 @@ internal class ReadingSessionService : Service() {
         }
 
         serviceScope.launch {
-            val request = ImageRequest.Builder(this@ReadingSessionService)
-                .data(source)
-                .allowHardware(false)
-                .size(COVER_SIZE_PX)
-                .build()
-
-            val result = SingletonImageLoader.get(applicationContext).execute(request)
-            val bitmap = (result as? SuccessResult)?.image?.toBitmap()
+            val bitmap = loadCoverBitmap(
+                context = applicationContext,
+                source = source,
+                sizePx = COVER_SIZE_PX,
+            )
                 ?: return@launch
 
             coverBitmap = bitmap
@@ -291,7 +286,10 @@ internal class ReadingSessionService : Service() {
     }
 
     private fun focusModePendingIntent(): PendingIntent {
-        val intent = appEntryPoint.focusModeIntent(context = this)
+        val intent = appEntryPoint.intent(
+            context = this,
+            request = ExternalNavigationRequest.OpenFocusMode,
+        )
 
         return PendingIntent.getActivity(
             this,
@@ -345,8 +343,8 @@ private fun ActiveSession.progressSubtitle(): String? {
 
     if (edition?.isAudiobook == true) return null
 
-    val currentPage = book.userBookRead?.currentPage ?: return null
-    val percent = book.userBookRead?.progress?.let { "${it.toInt()}%" }
+    val currentPage = book.currentRead?.currentPage ?: return null
+    val percent = book.currentRead?.progress?.let { "${it.toInt()}%" }
 
     return if (percent != null) "Page $currentPage · $percent" else "Page $currentPage"
 }

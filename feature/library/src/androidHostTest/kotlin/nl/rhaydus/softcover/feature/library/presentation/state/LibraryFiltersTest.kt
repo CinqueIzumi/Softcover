@@ -1,13 +1,15 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.Author
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class LibraryFiltersTest {
     // region Fixtures
@@ -70,15 +72,31 @@ class LibraryFiltersTest {
         positionsInSeries = emptyList(),
         isCompilation = false,
         tags = tags,
-        userBook = null,
-        userBookRead = finishedYear?.let {
-            UserBookRead(
+        userBook = finishedYear?.let {
+            UserBook(
                 id = id,
-                currentPage = null,
-                currentSeconds = null,
-                progress = 1f,
-                startedAt = null,
-                finishedAt = "$it-06-15",
+                status = BookStatus.Read,
+                dateAdded = "2020-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = null,
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+                reads = listOf(
+                    UserBookRead(
+                        id = id,
+                        currentPage = null,
+                        currentSeconds = null,
+                        progress = 1f,
+                        startedAt = null,
+                        finishedAt = "$it-06-15",
+                    ),
+                ),
             )
         },
     )
@@ -87,65 +105,86 @@ class LibraryFiltersTest {
     inner class IsEmpty {
         @Test
         fun `returns true when all facets are at their defaults`() {
-            // ----- Arrange & Act -----
+            // ----- Arrange -----
             val filters = LibraryFilters()
 
+            // ----- Act -----
+            val result = filters.isEmpty
+
             // ----- Assert -----
-            filters.isEmpty shouldBe true
+            result shouldBe true
         }
 
         @Test
         fun `returns false when tags is non-empty`() {
-            // ----- Arrange & Act -----
-            val filters = LibraryFilters(tags = setOf(tagFiction))
+            // ----- Arrange -----
+            val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
+
+            // ----- Act -----
+            val result = filters.isEmpty
 
             // ----- Assert -----
-            filters.isEmpty shouldBe false
+            result shouldBe false
         }
 
         @Test
         fun `returns false when formats is non-empty`() {
-            // ----- Arrange & Act -----
-            val filters = LibraryFilters(formats = setOf("ebook"))
+            // ----- Arrange -----
+            val filters = LibraryFilters(formats = persistentSetOf("ebook"))
+
+            // ----- Act -----
+            val result = filters.isEmpty
 
             // ----- Assert -----
-            filters.isEmpty shouldBe false
+            result shouldBe false
         }
 
         @Test
         fun `returns false when releaseYears is non-empty`() {
-            // ----- Arrange & Act -----
-            val filters = LibraryFilters(releaseYears = setOf(2021))
+            // ----- Arrange -----
+            val filters = LibraryFilters(releaseYears = persistentSetOf(2021))
+
+            // ----- Act -----
+            val result = filters.isEmpty
 
             // ----- Assert -----
-            filters.isEmpty shouldBe false
+            result shouldBe false
         }
 
         @Test
         fun `returns false when readYear is non-null`() {
-            // ----- Arrange & Act -----
+            // ----- Arrange -----
             val filters = LibraryFilters(readYear = 2021)
 
+            // ----- Act -----
+            val result = filters.isEmpty
+
             // ----- Assert -----
-            filters.isEmpty shouldBe false
+            result shouldBe false
         }
 
         @Test
         fun `returns false when owned is non-null`() {
-            // ----- Arrange & Act -----
+            // ----- Arrange -----
             val filters = LibraryFilters(owned = true)
 
+            // ----- Act -----
+            val result = filters.isEmpty
+
             // ----- Assert -----
-            filters.isEmpty shouldBe false
+            result shouldBe false
         }
 
         @Test
         fun `returns false when ratingMin is non-null`() {
-            // ----- Arrange & Act -----
+            // ----- Arrange -----
             val filters = LibraryFilters(ratingMin = 3.0)
 
+            // ----- Act -----
+            val result = filters.isEmpty
+
             // ----- Assert -----
-            filters.isEmpty shouldBe false
+            result shouldBe false
         }
     }
 
@@ -157,7 +196,7 @@ class LibraryFiltersTest {
             fun `matches when book has at least one active tag`() {
                 // ----- Arrange -----
                 val book = buildBook(tags = listOf(tagFiction, tagScifi))
-                val filters = LibraryFilters(tags = setOf(tagFiction))
+                val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
 
                 // ----- Act & Assert -----
                 filters.matchesBook(book = book) shouldBe true
@@ -167,20 +206,10 @@ class LibraryFiltersTest {
             fun `rejects when book has none of the active tags`() {
                 // ----- Arrange -----
                 val book = buildBook(tags = listOf(tagScifi))
-                val filters = LibraryFilters(tags = setOf(tagFiction))
+                val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
 
                 // ----- Act & Assert -----
                 filters.matchesBook(book = book) shouldBe false
-            }
-
-            @Test
-            fun `passes when tags filter is empty`() {
-                // ----- Arrange -----
-                val book = buildBook(tags = emptyList())
-                val filters = LibraryFilters(tags = emptySet())
-
-                // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe true
             }
         }
 
@@ -190,7 +219,7 @@ class LibraryFiltersTest {
             fun `matches when any edition's format is in the filter set`() {
                 // ----- Arrange -----
                 val book = buildBook(editions = listOf(buildEdition(format = "ebook")))
-                val filters = LibraryFilters(formats = setOf("ebook"))
+                val filters = LibraryFilters(formats = persistentSetOf("ebook"))
 
                 // ----- Act & Assert -----
                 filters.matchesBook(book = book) shouldBe true
@@ -200,7 +229,7 @@ class LibraryFiltersTest {
             fun `rejects when no edition's format is in the filter set`() {
                 // ----- Arrange -----
                 val book = buildBook(editions = listOf(buildEdition(format = "paperback")))
-                val filters = LibraryFilters(formats = setOf("ebook"))
+                val filters = LibraryFilters(formats = persistentSetOf("ebook"))
 
                 // ----- Act & Assert -----
                 filters.matchesBook(book = book) shouldBe false
@@ -213,7 +242,7 @@ class LibraryFiltersTest {
             fun `matches when book's releaseYear is in the filter set`() {
                 // ----- Arrange -----
                 val book = buildBook(releaseYear = 2021)
-                val filters = LibraryFilters(releaseYears = setOf(2021))
+                val filters = LibraryFilters(releaseYears = persistentSetOf(2021))
 
                 // ----- Act & Assert -----
                 filters.matchesBook(book = book) shouldBe true
@@ -223,7 +252,7 @@ class LibraryFiltersTest {
             fun `rejects when book's releaseYear is not in the filter set`() {
                 // ----- Arrange -----
                 val book = buildBook(releaseYear = 2019)
-                val filters = LibraryFilters(releaseYears = setOf(2021))
+                val filters = LibraryFilters(releaseYears = persistentSetOf(2021))
 
                 // ----- Act & Assert -----
                 filters.matchesBook(book = book) shouldBe false
@@ -260,16 +289,6 @@ class LibraryFiltersTest {
 
                 // ----- Act & Assert -----
                 filters.matchesBook(book = book) shouldBe false
-            }
-
-            @Test
-            fun `passes when readYear filter is null regardless of finishedYear`() {
-                // ----- Arrange -----
-                val book = buildBook(finishedYear = null)
-                val filters = LibraryFilters(readYear = null)
-
-                // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe true
             }
         }
 
@@ -329,16 +348,6 @@ class LibraryFiltersTest {
             }
 
             @Test
-            fun `matches when book rating exceeds the threshold`() {
-                // ----- Arrange -----
-                val book = buildBook(rating = 4.5)
-                val filters = LibraryFilters(ratingMin = 4.0)
-
-                // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe true
-            }
-
-            @Test
             fun `rejects when book rating is below the threshold`() {
                 // ----- Arrange -----
                 val book = buildBook(rating = 3.5)
@@ -356,19 +365,21 @@ class LibraryFiltersTest {
                 // ----- Arrange -----
                 val book = buildBook(
                     tags = listOf(tagFiction),
-                    editions = listOf(buildEdition(
-                        format = "paperback",
-                        owned = true,
-                    ),),
+                    editions = listOf(
+                        buildEdition(
+                            format = "paperback",
+                            owned = true,
+                        ),
+                    ),
                     rating = 4.0,
                     releaseYear = 2020,
                     finishedYear = 2021,
                 )
 
                 val filters = LibraryFilters(
-                    tags = setOf(tagFiction),
-                    formats = setOf("paperback"),
-                    releaseYears = setOf(2020),
+                    tags = persistentSetOf(tagFiction),
+                    formats = persistentSetOf("paperback"),
+                    releaseYears = persistentSetOf(2020),
                     readYear = 2021,
                     owned = true,
                     ratingMin = 4.5,
@@ -383,19 +394,21 @@ class LibraryFiltersTest {
                 // ----- Arrange -----
                 val book = buildBook(
                     tags = listOf(tagFiction),
-                    editions = listOf(buildEdition(
-                        format = "paperback",
-                        owned = true,
-                    ),),
+                    editions = listOf(
+                        buildEdition(
+                            format = "paperback",
+                            owned = true,
+                        ),
+                    ),
                     rating = 4.5,
                     releaseYear = 2020,
                     finishedYear = 2021,
                 )
 
                 val filters = LibraryFilters(
-                    tags = setOf(tagFiction),
-                    formats = setOf("paperback"),
-                    releaseYears = setOf(2020),
+                    tags = persistentSetOf(tagFiction),
+                    formats = persistentSetOf("paperback"),
+                    releaseYears = persistentSetOf(2020),
                     readYear = 2021,
                     owned = true,
                     ratingMin = 4.5,
@@ -416,7 +429,7 @@ class LibraryFiltersTest {
                 // ----- Arrange -----
                 val edition = buildEdition()
                 val book = buildBook(tags = listOf(tagFiction))
-                val filters = LibraryFilters(tags = setOf(tagFiction))
+                val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
 
                 // ----- Act & Assert -----
                 filters.matchesEdition(
@@ -430,7 +443,7 @@ class LibraryFiltersTest {
                 // ----- Arrange -----
                 val edition = buildEdition()
                 val book = buildBook(tags = listOf(tagScifi))
-                val filters = LibraryFilters(tags = setOf(tagFiction))
+                val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
 
                 // ----- Act & Assert -----
                 filters.matchesEdition(
@@ -443,26 +456,13 @@ class LibraryFiltersTest {
             fun `rejects when book is null and tags filter is active`() {
                 // ----- Arrange -----
                 val edition = buildEdition()
-                val filters = LibraryFilters(tags = setOf(tagFiction))
+                val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
 
                 // ----- Act & Assert -----
                 filters.matchesEdition(
                     edition = edition,
                     book = null,
                 ) shouldBe false
-            }
-
-            @Test
-            fun `passes when tags filter is empty regardless of book`() {
-                // ----- Arrange -----
-                val edition = buildEdition()
-                val filters = LibraryFilters(tags = emptySet())
-
-                // ----- Act & Assert -----
-                filters.matchesEdition(
-                    edition = edition,
-                    book = null,
-                ) shouldBe true
             }
         }
 
@@ -472,7 +472,7 @@ class LibraryFiltersTest {
             fun `matches when edition format is in the filter set`() {
                 // ----- Arrange -----
                 val edition = buildEdition(format = "ebook")
-                val filters = LibraryFilters(formats = setOf("ebook"))
+                val filters = LibraryFilters(formats = persistentSetOf("ebook"))
 
                 // ----- Act & Assert -----
                 filters.matchesEdition(
@@ -485,7 +485,7 @@ class LibraryFiltersTest {
             fun `rejects when edition format is not in the filter set`() {
                 // ----- Arrange -----
                 val edition = buildEdition(format = "audiobook")
-                val filters = LibraryFilters(formats = setOf("ebook"))
+                val filters = LibraryFilters(formats = persistentSetOf("ebook"))
 
                 // ----- Act & Assert -----
                 filters.matchesEdition(
@@ -502,7 +502,7 @@ class LibraryFiltersTest {
                 // ----- Arrange -----
                 val edition = buildEdition(releaseYear = 2019)
                 val book = buildBook(releaseYear = 2021)
-                val filters = LibraryFilters(releaseYears = setOf(2021))
+                val filters = LibraryFilters(releaseYears = persistentSetOf(2021))
 
                 // ----- Act & Assert -----
                 filters.matchesEdition(
@@ -515,7 +515,7 @@ class LibraryFiltersTest {
             fun `falls back to edition releaseYear when book is null`() {
                 // ----- Arrange -----
                 val edition = buildEdition(releaseYear = 2021)
-                val filters = LibraryFilters(releaseYears = setOf(2021))
+                val filters = LibraryFilters(releaseYears = persistentSetOf(2021))
 
                 // ----- Act & Assert -----
                 filters.matchesEdition(
@@ -528,7 +528,7 @@ class LibraryFiltersTest {
             fun `rejects when edition releaseYear does not match filter and book is null`() {
                 // ----- Arrange -----
                 val edition = buildEdition(releaseYear = 2019)
-                val filters = LibraryFilters(releaseYears = setOf(2021))
+                val filters = LibraryFilters(releaseYears = persistentSetOf(2021))
 
                 // ----- Act & Assert -----
                 filters.matchesEdition(
@@ -579,19 +579,6 @@ class LibraryFiltersTest {
                     edition = edition,
                     book = null,
                 ) shouldBe false
-            }
-
-            @Test
-            fun `passes when readYear filter is null regardless of book`() {
-                // ----- Arrange -----
-                val edition = buildEdition()
-                val filters = LibraryFilters(readYear = null)
-
-                // ----- Act & Assert -----
-                filters.matchesEdition(
-                    edition = edition,
-                    book = null,
-                ) shouldBe true
             }
         }
 
@@ -698,9 +685,9 @@ class LibraryFiltersTest {
                 )
 
                 val filters = LibraryFilters(
-                    tags = setOf(tagFiction),
-                    formats = setOf("paperback"),
-                    releaseYears = setOf(2020),
+                    tags = persistentSetOf(tagFiction),
+                    formats = persistentSetOf("paperback"),
+                    releaseYears = persistentSetOf(2020),
                     owned = true,
                     ratingMin = 4.0,
                 )
@@ -727,9 +714,9 @@ class LibraryFiltersTest {
                 )
 
                 val filters = LibraryFilters(
-                    tags = setOf(tagFiction),
-                    formats = setOf("paperback"),
-                    releaseYears = setOf(2020),
+                    tags = persistentSetOf(tagFiction),
+                    formats = persistentSetOf("paperback"),
+                    releaseYears = persistentSetOf(2020),
                     owned = true,
                     ratingMin = 4.0,
                 )

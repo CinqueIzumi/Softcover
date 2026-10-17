@@ -1,0 +1,17 @@
+query GetAllQuotes(
+    $userId: Int!,
+    $limit: Int!,
+    $offset: Int!,
+) {
+    reading_journals(
+        where: {
+            user_id: { _eq: $userId }
+            event: { _eq: "quote" }
+        }
+        order_by: [{ id: asc }]
+        limit: $limit
+        offset: $offset
+    ) {
+        ...QuoteFieldsFragment
+    }
+}

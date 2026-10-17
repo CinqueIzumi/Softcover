@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -11,22 +13,26 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnMarkBookAsWantToReadClickActionTest {
     private lateinit var markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase
     private lateinit var dependencies: BookDetailDependencies
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
@@ -34,12 +40,13 @@ class OnMarkBookAsWantToReadClickActionTest {
     @BeforeEach
     fun setUp() {
         markBookAsWantToReadUseCase = mockk()
-        stateFlow = MutableStateFlow(BookDetailUiState())
+        eventChannel = Channel(Channel.BUFFERED)
+        stateFlow = MutableStateFlow(buildBookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -64,10 +71,17 @@ class OnMarkBookAsWantToReadClickActionTest {
         }
     }
 
-    private fun stubBook(id: Int = 42): Book = mockk<Book>().also { mock ->
+    private fun stubBook(
+        id: Int = 42,
+        userBook: UserBook? = null,
+    ): Book = mockk<Book>().also { mock ->
         every {
             mock.id
         } returns id
+
+        every {
+            mock.userBook
+        } returns userBook
     }
 
     private fun stubEdition(id: Int = 55): BookEdition = mockk<BookEdition>().also { mock ->
@@ -76,12 +90,32 @@ class OnMarkBookAsWantToReadClickActionTest {
         } returns id
     }
 
+    private fun stubStateBook(
+        editions: List<BookEdition>,
+        currentEdition: BookEdition?,
+    ): Book = mockk<Book>().also { mock ->
+        every {
+            mock.userBook
+        } returns null
+
+        every {
+            mock.editions
+        } returns editions
+
+        every {
+            mock.currentEdition
+        } returns currentEdition
+    }
+
     @Nested
     inner class Execute {
         @Test
-        fun `invokes use case with the book provided to the action constructor`() = runTest {
+        fun `sets pendingShelfStatus to WantToRead when the book is not on a shelf`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(id = 42)
+            val book = stubBook(
+                id = 42,
+                userBook = null,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -100,18 +134,16 @@ class OnMarkBookAsWantToReadClickActionTest {
             )
 
             // ----- Assert -----
-            coVerify {
-                markBookAsWantToReadUseCase(
-                    book = book,
-                    editionId = any(),
-                )
-            }
+            stateFlow.value.pendingShelfStatus shouldBe BookStatus.WantToRead
         }
 
         @Test
-        fun `does not add book id to failedMutationBookIds when use case succeeds`() = runTest {
+        fun `leaves pendingShelfStatus null when the book already has a user book`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(id = 42)
+            val book = stubBook(
+                id = 42,
+                userBook = mockk<UserBook>(),
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -130,7 +162,66 @@ class OnMarkBookAsWantToReadClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
+            stateFlow.value.pendingShelfStatus.shouldBeNull()
+        }
+
+        @Test
+        fun `clears pendingShelfStatus when the use case fails for an unshelved book`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(
+                id = 42,
+                userBook = null,
+            )
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsWantToReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
+            } returns Result.failure(RuntimeException("api error"))
+
+            val action = OnMarkBookAsWantToReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.pendingShelfStatus.shouldBeNull()
+        }
+
+        @Test
+        fun `leaves a newer tap's pendingShelfStatus untouched when the use case fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(
+                id = 42,
+                userBook = null,
+            )
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsWantToReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
+            } coAnswers {
+                stateFlow.value = stateFlow.value.copy(pendingShelfStatus = BookStatus.Read)
+                Result.failure(RuntimeException("api error"))
+            }
+
+            val action = OnMarkBookAsWantToReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.pendingShelfStatus shouldBe BookStatus.Read
         }
 
         @Test
@@ -156,31 +247,6 @@ class OnMarkBookAsWantToReadClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe true
-        }
-
-        @Test
-        fun `stores job in bookMutationJobs after execute returns`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 42)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsWantToReadUseCase(
-                    book = book,
-                    editionId = any(),
-                )
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            val action = OnMarkBookAsWantToReadClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            localVariablesFlow.value.bookMutationJobs.containsKey(42) shouldBe true
         }
 
         @Test
@@ -222,33 +288,11 @@ class OnMarkBookAsWantToReadClickActionTest {
         }
 
         @Test
-        fun `completes without throwing when use case fails`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsWantToReadUseCase(
-                    book = book,
-                    editionId = any(),
-                )
-            } returns Result.failure(RuntimeException("network failure"))
-
-            val action = OnMarkBookAsWantToReadClickAction(book = book)
-
-            // ----- Act & Assert -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-        }
-
-        @Test
         fun `forwards previewEdition id as editionId when preview is set`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
             val preview = stubEdition(id = 55)
-            stateFlow.value = BookDetailUiState(previewEdition = preview)
+            stateFlow.value = buildBookDetailUiState().copy(previewEdition = preview)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -276,11 +320,17 @@ class OnMarkBookAsWantToReadClickActionTest {
         }
 
         @Test
-        fun `uses scannedEditionId as editionId when previewEdition is null`() = runTest {
+        fun `sends the scanned edition id even when a preview is set`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
-            stateFlow.value = BookDetailUiState(
-                previewEdition = null,
+            val scanned = stubEdition(id = 555)
+            val stateBook = stubStateBook(
+                editions = listOf(scanned),
+                currentEdition = stubEdition(id = 77),
+            )
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stateBook,
+                previewEdition = stubEdition(id = 55),
                 scannedEditionId = 555,
             )
             dependencies = stubDependencies(this)
@@ -310,10 +360,48 @@ class OnMarkBookAsWantToReadClickActionTest {
         }
 
         @Test
-        fun `forwards null as editionId when no preview is set`() = runTest {
+        fun `falls back to the book's current edition id when off-shelf without preview or scan`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
-            stateFlow.value = BookDetailUiState(previewEdition = null)
+            val stateBook = stubStateBook(
+                editions = emptyList(),
+                currentEdition = stubEdition(id = 77),
+            )
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = stateBook,
+                previewEdition = null,
+            )
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsWantToReadUseCase(
+                    book = book,
+                    editionId = 77,
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnMarkBookAsWantToReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                markBookAsWantToReadUseCase(
+                    book = book,
+                    editionId = 77,
+                )
+            }
+        }
+
+        @Test
+        fun `forwards null as editionId when nothing resolves an edition`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(id = 42)
+            stateFlow.value = buildBookDetailUiState().copy(previewEdition = null)
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -338,6 +426,57 @@ class OnMarkBookAsWantToReadClickActionTest {
                     editionId = null,
                 )
             }
+        }
+
+        @Test
+        fun `sends ShelfChangedEvent when use case succeeds`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(id = 42)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsWantToReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnMarkBookAsWantToReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<BookDetailEvent.ShelfChangedEvent>()
+        }
+
+        @Test
+        fun `sends no event when use case fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(id = 42)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsWantToReadUseCase(
+                    book = book,
+                    editionId = any(),
+                )
+            } returns Result.failure(RuntimeException("api error"))
+
+            val action = OnMarkBookAsWantToReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
     }
 }

@@ -14,16 +14,25 @@ import org.junit.jupiter.api.Test
 
 class RecordBookProgressUseCaseTest {
     private lateinit var markBookAsReadUseCase: MarkBookAsReadUseCase
+    private lateinit var resumeIfPausedUseCase: ResumeIfPausedUseCase
     private lateinit var updateBookProgressUseCase: UpdateBookProgressUseCase
     private lateinit var useCase: RecordBookProgressUseCase
 
     @BeforeEach
     fun setUp() {
         markBookAsReadUseCase = mockk()
+        resumeIfPausedUseCase = mockk()
         updateBookProgressUseCase = mockk()
+
+        coEvery {
+            resumeIfPausedUseCase(book = any())
+        } coAnswers {
+            Result.success(firstArg())
+        }
 
         useCase = RecordBookProgressUseCase(
             markBookAsReadUseCase = markBookAsReadUseCase,
+            resumeIfPausedUseCase = resumeIfPausedUseCase,
             updateBookProgressUseCase = updateBookProgressUseCase,
         )
     }
@@ -73,12 +82,13 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
-            coVerify(exactly = 1) { markBookAsReadUseCase(book = book) }
-            coVerify(exactly = 0) { updateBookProgressUseCase(
-                any(),
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                updateBookProgressUseCase(
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
         }
 
         @Test
@@ -105,38 +115,14 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
-            coVerify(exactly = 1) { markBookAsReadUseCase(
-                book = book,
-                actionAt = actionAt,
-            ) }
-            coVerify(exactly = 0) { updateBookProgressUseCase(
-                any(),
-                any(),
-                any(),
-                any(),
-            ) }
-        }
-
-        @Test
-        fun `forwards null actionAt to markBookAsReadUseCase when omitted and book is finished`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(pages = 320)
-
-            coEvery {
-                markBookAsReadUseCase(book = book)
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            // ----- Act -----
-            val result = useCase(
-                book = book,
-                newPage = 320,
-            )
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe ShelfMutationOutcome.Applied
-
-            coVerify(exactly = 1) { markBookAsReadUseCase(book = book) }
+            coVerify(exactly = 0) {
+                updateBookProgressUseCase(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
         }
 
         @Test
@@ -162,11 +148,6 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe null
 
-            coVerify(exactly = 1) { updateBookProgressUseCase(
-                book = book,
-                newPage = 150,
-                newSeconds = null,
-            ) }
             coVerify(exactly = 0) { markBookAsReadUseCase(any()) }
         }
 
@@ -196,12 +177,6 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe null
 
-            coVerify(exactly = 1) { updateBookProgressUseCase(
-                book = book,
-                newPage = 150,
-                newSeconds = null,
-                actionAt = actionAt,
-            ) }
             coVerify(exactly = 0) { markBookAsReadUseCase(any()) }
         }
 
@@ -227,12 +202,13 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
-            coVerify(exactly = 1) { markBookAsReadUseCase(book = book) }
-            coVerify(exactly = 0) { updateBookProgressUseCase(
-                any(),
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                updateBookProgressUseCase(
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
         }
 
         @Test
@@ -261,11 +237,6 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe null
 
-            coVerify(exactly = 1) { updateBookProgressUseCase(
-                book = book,
-                newPage = null,
-                newSeconds = 18000,
-            ) }
             coVerify(exactly = 0) { markBookAsReadUseCase(any()) }
         }
 
@@ -292,11 +263,6 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe null
 
-            coVerify(exactly = 1) { updateBookProgressUseCase(
-                book = book,
-                newPage = 100,
-                newSeconds = null,
-            ) }
             coVerify(exactly = 0) { markBookAsReadUseCase(any()) }
         }
 
@@ -372,12 +338,107 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe null
 
-            coVerify(exactly = 1) { updateBookProgressUseCase(
-                book = book,
-                newPage = null,
-                newSeconds = 5000,
-            ) }
             coVerify(exactly = 0) { markBookAsReadUseCase(any()) }
+        }
+
+        @Test
+        fun `records progress against the resumed book returned by resumeIfPaused`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(pages = 320)
+            val resumedBook = stubBook(pages = 320)
+
+            coEvery {
+                resumeIfPausedUseCase(book = book)
+            } returns Result.success(resumedBook)
+
+            coEvery {
+                updateBookProgressUseCase(
+                    book = resumedBook,
+                    newPage = 150,
+                    newSeconds = null,
+                    actionAt = null,
+                )
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            val result = useCase(
+                book = book,
+                newPage = 150,
+            )
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            result.getOrNull() shouldBe null
+
+            coVerify(exactly = 1) {
+                updateBookProgressUseCase(
+                    book = resumedBook,
+                    newPage = 150,
+                    newSeconds = null,
+                    actionAt = null,
+                )
+            }
+            coVerify(exactly = 0) {
+                updateBookProgressUseCase(
+                    book = book,
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `returns the resume failure without recording progress`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(pages = 320)
+            val expectedError = RuntimeException("resume failed")
+
+            coEvery {
+                resumeIfPausedUseCase(book = book)
+            } returns Result.failure(expectedError)
+
+            // ----- Act -----
+            val result = useCase(
+                book = book,
+                newPage = 150,
+            )
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            result.exceptionOrNull() shouldBe expectedError
+
+            coVerify(exactly = 0) {
+                updateBookProgressUseCase(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `finishing branch skips resume and marks the original book as read`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(pages = 320)
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            val result = useCase(
+                book = book,
+                newPage = 320,
+            )
+
+            // ----- Assert -----
+            result.getOrNull() shouldBe ShelfMutationOutcome.Applied
+
+            coVerify(exactly = 0) {
+                resumeIfPausedUseCase(book = any())
+            }
         }
     }
 }

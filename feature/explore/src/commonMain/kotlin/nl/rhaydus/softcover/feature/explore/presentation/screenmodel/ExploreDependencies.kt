@@ -4,10 +4,13 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
+import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
+import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.feature.explore.domain.usecase.ClearSearchResultsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
@@ -37,8 +40,10 @@ internal data class ExploreDependencies(
     val removeAllSearchQueriesUseCase: RemoveAllSearchQueriesUseCase,
     val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
-    val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
-    val getTrendingBooksUseCase: GetTrendingBooksUseCase,
+    val undoableBookRemover: UndoableBookRemover,
+    val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
+    val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
+    val observeTrendingFetchedAtUseCase: ObserveTrendingFetchedAtUseCase,
     val getContinueSeriesBooksUseCase: GetContinueSeriesBooksUseCase,
     val dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
     val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
@@ -50,6 +55,7 @@ internal data class ExploreDependencies(
     val getMoodTagsUseCase: GetMoodTagsUseCase,
     val searchByMoodUseCase: SearchByMoodUseCase,
     val setBecauseYouReadGenreUseCase: SetBecauseYouReadGenreUseCase,
+    val offlineCopy: OfflineCopy,
     // Bumping this re-subscribes the continue-series flow in its collector, forcing
     // the `fetchNextInSeries` network calls to run again on user-triggered refresh.
     val continueSeriesRefreshTrigger: MutableStateFlow<Long> = MutableStateFlow(0L),

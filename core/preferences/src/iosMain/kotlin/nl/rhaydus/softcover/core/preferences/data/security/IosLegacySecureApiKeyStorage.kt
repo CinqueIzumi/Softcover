@@ -12,6 +12,7 @@ import kotlinx.cinterop.ptr
 import kotlinx.cinterop.reinterpret
 import kotlinx.cinterop.value
 import kotlinx.coroutines.withContext
+import nl.rhaydus.common.AppDispatchers
 import platform.CoreFoundation.CFDictionaryCreate
 import platform.CoreFoundation.CFDictionaryRef
 import platform.CoreFoundation.CFRelease
@@ -36,7 +37,6 @@ import platform.Security.kSecClassGenericPassword
 import platform.Security.kSecMatchLimit
 import platform.Security.kSecMatchLimitOne
 import platform.Security.kSecReturnData
-import nl.rhaydus.common.AppDispatchers
 
 /**
  * Reads the API key from Softcover's **pre-foundation** iOS location: the generic-password Keychain item

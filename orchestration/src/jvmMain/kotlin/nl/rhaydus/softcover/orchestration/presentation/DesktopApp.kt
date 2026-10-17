@@ -14,11 +14,11 @@ import coil3.SingletonImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
-import org.koin.compose.koinInject
 import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.core.domain.model.UiScale
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CheckForAppUpdateUseCase
+import org.koin.compose.koinInject
 
 /**
  * Installs the singleton Coil [ImageLoader] with a network fetcher (the default loader ships none) so

@@ -22,14 +22,11 @@ import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
-
-// Keeps the reading panel at a comfortable column measure rather than stretching the hero across a
-// maximized window.
-private val PANEL_MAX_WIDTH = 440.dp
-
-// A larger cover than the phone hero — the desktop window has the room for it.
-private val DESKTOP_COVER_WIDTH = 180.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionUiModel
+import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
+import nl.rhaydus.softcover.feature.session.presentation.screen.section.FocusReadingPanel
+import nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState
 
 /**
  * Desktop focus mode. The same distraction-free reading hero ([FocusReadingPanel]) as mobile, centred
@@ -40,10 +37,11 @@ private val DESKTOP_COVER_WIDTH = 180.dp
  */
 @Composable
 internal actual fun FocusModeScreenLayout(
-    active: ActiveSession,
+    active: ActiveSessionUiModel,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
-    onUpdatePage: (Int) -> Unit,
+    state: FocusModeUiState,
+    runAction: (FocusModeAction) -> Unit,
     onClose: () -> Unit,
 ) {
     Surface(
@@ -62,13 +60,14 @@ internal actual fun FocusModeScreenLayout(
                 active = active,
                 onPauseResume = onPauseResume,
                 onStop = onStop,
-                onUpdatePage = onUpdatePage,
-                coverWidth = DESKTOP_COVER_WIDTH,
+                state = state,
+                runAction = runAction,
+                coverWidth = 180.dp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .widthIn(max = PANEL_MAX_WIDTH)
+                    .widthIn(max = 440.dp)
                     .verticalScroll(scrollState)
-                    .padding(horizontal = 24.dp, vertical = 32.dp),
+                    .padding(horizontal = Spacing.gutter, vertical = Spacing.xxxl),
             )
 
             DesktopVerticalScrollbar(
@@ -76,7 +75,7 @@ internal actual fun FocusModeScreenLayout(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .fillMaxHeight()
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = Spacing.xxs),
             )
 
             val closeIcon = drawableIconResource(
@@ -89,7 +88,7 @@ internal actual fun FocusModeScreenLayout(
                     IconButton(
                         onClick = onClose,
                         modifier = Modifier
-                            .padding(8.dp)
+                            .padding(Spacing.xs)
                             .pointerHandCursor(),
                     ) {
                         Icon(

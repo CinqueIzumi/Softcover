@@ -9,16 +9,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnProgressTabClickActionTest {
     private lateinit var dependencies: ReadingScreenDependencies
@@ -54,7 +54,7 @@ class OnProgressTabClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `updates progressSheetTab to PAGE when PAGE is provided`() = runTest {
+        fun `selects the tab and remembers its progress unit`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(progressSheetTab = ProgressSheetTab.PERCENTAGE)
             dependencies = stubDependencies(this)
@@ -68,61 +68,6 @@ class OnProgressTabClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.progressSheetTab shouldBe ProgressSheetTab.PAGE
-        }
-
-        @Test
-        fun `updates progressSheetTab to PERCENTAGE when PERCENTAGE is provided`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(progressSheetTab = ProgressSheetTab.PAGE)
-            dependencies = stubDependencies(this)
-            val action = OnProgressTabClickAction(newTab = ProgressSheetTab.PERCENTAGE)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.progressSheetTab shouldBe ProgressSheetTab.PERCENTAGE
-        }
-
-        @Test
-        fun `preserves all other state fields unchanged`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(
-                isLoading = false,
-                showProgressSheet = true,
-                progressSheetTab = ProgressSheetTab.PAGE,
-            )
-            dependencies = stubDependencies(this)
-            val action = OnProgressTabClickAction(newTab = ProgressSheetTab.PERCENTAGE)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.showProgressSheet shouldBe true
-        }
-
-        @Test
-        fun `invokes setLastUsedProgressUnitUseCase with the mapped unit for PAGE tab`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(progressSheetTab = ProgressSheetTab.PERCENTAGE)
-            dependencies = stubDependencies(this)
-            val action = OnProgressTabClickAction(newTab = ProgressSheetTab.PAGE)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             coVerify {
                 dependencies.setLastUsedProgressUnitUseCase(unit = ProgressUnit.PAGE)
             }

@@ -17,6 +17,8 @@ docs/reference/**/*.md              20B
 fixture/tiny.md                     20B
 fixture/unicode.md                  10B
 .claude/rules/*.md                  40L
+.claude/agent-memory/*/MEMORY.md    40L
+.claude/agent-memory/*/*.md         40L
 ## Now                              40L
 '
 

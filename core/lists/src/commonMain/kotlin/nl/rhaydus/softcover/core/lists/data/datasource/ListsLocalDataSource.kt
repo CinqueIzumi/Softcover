@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.mapper.toModel
+import nl.rhaydus.softcover.core.database.model.ListBookPositionRow
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 
@@ -51,6 +52,19 @@ interface ListsLocalDataSource {
         startPosition: Int,
         orderedListBookIds: List<Int>,
     )
+
+    /**
+     * The manual-order position (`null` when unset) of every row [applyListBookPositions] would
+     * rewrite for the same arguments, keyed by `listBookId`. Pass it to [restoreListBookPositions]
+     * to undo the reorder.
+     */
+    suspend fun getAffectedListBookPositions(
+        listId: Int,
+        startPosition: Int,
+        orderedListBookIds: List<Int>,
+    ): Map<Int, Int?>
+
+    suspend fun restoreListBookPositions(positions: Map<Int, Int?>)
 
     suspend fun setListRanked(
         listId: Int,
@@ -132,6 +146,29 @@ internal class ListsLocalDataSourceImpl(
             listId = listId,
             startPosition = startPosition,
             listBookIds = orderedListBookIds,
+        )
+    }
+
+    override suspend fun getAffectedListBookPositions(
+        listId: Int,
+        startPosition: Int,
+        orderedListBookIds: List<Int>,
+    ): Map<Int, Int?> = dao
+        .getListBookPositions(
+            listId = listId,
+            listBookIds = orderedListBookIds,
+            positions = (startPosition until startPosition + orderedListBookIds.size).toList(),
+        )
+        .associate { it.listBookId to it.position }
+
+    override suspend fun restoreListBookPositions(positions: Map<Int, Int?>) {
+        dao.restoreListBookPositions(
+            rows = positions.map { (listBookId, position) ->
+                ListBookPositionRow(
+                    listBookId = listBookId,
+                    position = position,
+                )
+            },
         )
     }
 

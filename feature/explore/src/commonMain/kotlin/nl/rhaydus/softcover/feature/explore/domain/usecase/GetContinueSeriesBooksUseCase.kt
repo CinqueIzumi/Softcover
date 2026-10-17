@@ -13,44 +13,45 @@ import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.model.SeriesContinuationSeed
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 
-// Seeds are deliberately uncapped: the shelf shows every series the reader is mid-stream on.
-//
-// This was briefly trimmed to the 8 most recently read while the API's rate limit had no
-// client-side handling, because `fetchNextBooks` used to issue one `GetNextBookInSeries` request
-// per seed concurrently, and a series reader would spend the whole burst bucket - and roughly one
-// second of loading per seed under `RateLimitInterceptor`'s pacing - on this one shelf. See
-// the Network Layer section of `docs/reference/architecture.md` for what a request costs.
-//
-// `fetchNextBooks` now resolves every seed through `ExploreRepository.fetchNextBooksInSeries` in
-// a single batched request (`GetNextBooksInSeries` + one `GetBooksByIdsQuery`), regardless of seed
-// count, so neither the burst-bucket cost nor the per-seed latency applies any more. The trade is
-// error isolation: the old fan-out wrapped each seed in its own `runCatchingLogged`, so one failing
-// series never affected the rest; a single batched request now succeeds or fails as a whole, so a
-// failure costs the entire shelf rather than one card. That is an acceptable trade for 2 requests
-// instead of N - the rate limiter and the read retry both sit underneath it - but it is a real
-// behavior change, not an oversight.
+// Seeds are deliberately uncapped: every seed resolves in one batched request, so a failure empties
+// the whole shelf rather than one card.
 
 class GetContinueSeriesBooksUseCase(
     private val booksRepository: BooksRepository,
     private val exploreRepository: ExploreRepository,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    operator fun invoke(): Flow<List<Book>> = combine(
-        booksRepository.books,
-        exploreRepository.dismissedContinueSeriesBooks,
-        exploreRepository.dismissedContinueSeriesIds,
-    ) { books, dismissedBooks, dismissedSeriesIds ->
-        deriveSeeds(
-            books = books,
-            dismissedBooks = dismissedBooks,
-            dismissedSeriesIds = dismissedSeriesIds.toSet(),
-        ) to dismissedBooks.map { it.bookId }.toSet()
-    }
-        .distinctUntilChanged()
-        .mapLatest { (seeds, dismissedBookIds) ->
-            fetchNextBooks(seeds = seeds)
-                .filter { it.id !in dismissedBookIds }
+    operator fun invoke(): Flow<List<Book>> {
+        val dismissedBooks = exploreRepository.dismissedContinueSeriesBooks
+        val dismissedSeriesIds = exploreRepository.dismissedContinueSeriesIds
+
+        val nextBooks = combine(
+            booksRepository.books,
+            dismissedBooks,
+            dismissedSeriesIds,
+        ) { books, dismissed, dismissedSeries ->
+            deriveSeeds(
+                books = books,
+                dismissedBooks = dismissed,
+                dismissedSeriesIds = dismissedSeries.toSet(),
+            )
         }
+            .distinctUntilChanged()
+            .mapLatest { seeds -> fetchNextBooks(seeds = seeds) }
+
+        return combine(
+            nextBooks,
+            dismissedBooks,
+            dismissedSeriesIds,
+        ) { books, dismissed, dismissedSeries ->
+            val dismissedBookIds = dismissed.map { it.bookId }.toSet()
+            val dismissedSeriesIdSet = dismissedSeries.toSet()
+
+            books.filter { book ->
+                book.id !in dismissedBookIds && book.bookSeries?.id !in dismissedSeriesIdSet
+            }
+        }
+    }
 
     private fun deriveSeeds(
         books: List<Book>,
@@ -67,17 +68,19 @@ class GetContinueSeriesBooksUseCase(
 
         return books
             .asSequence()
-            .filter { it.bookSeries != null && it.positionsInSeries.isNotEmpty() }
+            .filter { it.positionsInSeries.isNotEmpty() }
             .filter {
                 it.userBook?.status == BookStatus.Reading ||
+                    it.userBook?.status == BookStatus.Paused ||
                     it.userBook?.status == BookStatus.Read
             }
-            .filter { it.bookSeries!!.id !in seriesIdsWithDnf }
-            .filter { it.bookSeries!!.id !in dismissedSeriesIds }
-            .groupBy { it.bookSeries!!.id }
+            .mapNotNull { book -> book.bookSeries?.let { series -> book to series } }
+            .filter { (_, series) -> series.id !in seriesIdsWithDnf }
+            .filter { (_, series) -> series.id !in dismissedSeriesIds }
+            .groupBy { (_, series) -> series.id }
             .mapNotNull { (seriesId, group) ->
-                val maxRead = group.maxOf { it.positionsInSeries.last() }
-                val series = group.first().bookSeries!!
+                val maxRead = group.maxOf { (book, _) -> book.positionsInSeries.last() }
+                val (_, series) = group.first()
 
                 // The cursor is the furthest point in the series the user has settled: read through,
                 // or explicitly hidden. Hiding a suggestion has to move it, otherwise the next-in-
@@ -90,12 +93,10 @@ class GetContinueSeriesBooksUseCase(
 
                 if (cursor >= series.amountOfBooks) return@mapNotNull null
 
-                // `lastReadDate` (set on finish/progress) is the most defensible recency signal the
-                // domain model exposes for "which series is this user mid-stream on right now" -
-                // it is what LibraryStats/SortSql already use for the same purpose. A series with no
-                // read book yet (Reading-only, never finished) sorts last via the empty fallback.
+                // A series with no read book yet (Reading-only, never finished) sorts last via the
+                // empty fallback.
                 val mostRecentReadDate = group
-                    .mapNotNull { it.userBook?.lastReadDate }
+                    .mapNotNull { (book, _) -> book.userBook?.lastReadDate }
                     .maxOrNull()
                     .orEmpty()
 

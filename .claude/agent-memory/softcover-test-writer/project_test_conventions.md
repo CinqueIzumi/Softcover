@@ -22,6 +22,11 @@ Tests live in each module's `src/androidHostTest/kotlin/...`, mirroring the sour
   inside that class. This is the one sanctioned exception to "no inline FQN"; no import alias is used.
 - **`UserBook.status` is `BookStatus`, not `UserBookStatus`:** stub with
   `every { status } returns BookStatus.getFromCode(userBookStatus.code)` (codes match).
+- **Long backticked test names exceeding detekt's 140-char MaxLineLength:** wrap as `fun \`...\`() =` on
+  its own line, then `runTest(UnconfinedTestDispatcher()) {` indented one level deeper on the next line, with
+  the whole body indented one extra level under that (matches existing precedent, e.g.
+  `ReadingPaceForecastCollectorTest.kt`, `VisibleTabsCollectorTest.kt`). Don't shorten the test name to dodge
+  the limit — wrap instead.
 
 See [[project_canonical_test_templates]] for the per-layer file to clone and
 [[feedback_mockk_kotest_gotchas]] for MockK traps.

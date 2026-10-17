@@ -1,13 +1,13 @@
 package nl.rhaydus.softcover.core.database.di
 
 import androidx.room.Room
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
-import nl.rhaydus.common.AppDispatchers
-import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 
 actual val platformDatabaseModule: Module = module {
     single<SoftcoverDatabase> {

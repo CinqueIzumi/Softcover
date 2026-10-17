@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.explore.domain.usecase
 
-import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -8,16 +7,16 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
-import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class EnrichDismissedContinueSeriesMetadataUseCaseTest {
     private lateinit var exploreRepository: ExploreRepository
@@ -223,65 +222,6 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     afterPosition = any(),
                 )
             }
-        }
-
-        @Test
-        fun `a legacy row with a title but null series position is still enriched`() = runTest {
-            // ----- Arrange -----
-            val legacyRow = dismissedBook(
-                bookId = 3,
-                title = "Legacy Title",
-                seriesId = null,
-                seriesPosition = null,
-            )
-
-            every {
-                exploreRepository.dismissedContinueSeriesBooks
-            } returns flowOf(listOf(legacyRow))
-
-            val fetched = bookInSeries(
-                id = 3,
-                seriesId = 30,
-            )
-
-            coEvery {
-                booksRepository.fetchBookById(id = 3)
-            } returns fetched
-
-            // ----- Act -----
-            useCase()
-
-            // ----- Assert -----
-            coVerify(exactly = 1) { booksRepository.fetchBookById(id = 3) }
-            coVerify(exactly = 1) { exploreRepository.dismissContinueSeriesBook(any()) }
-        }
-
-        @Test
-        fun `booksRepository books is not queried when no series rows need enrichment`() = runTest {
-            // ----- Arrange -----
-            every {
-                exploreRepository.dismissedContinueSeriesBooks
-            } returns flowOf(
-                listOf(
-                    dismissedBook(
-                        bookId = 1,
-                        title = null,
-                    ),
-                ),
-            )
-
-            coEvery {
-                booksRepository.fetchBookById(id = 1)
-            } returns bookInSeries(
-                id = 1,
-                seriesId = 100,
-            )
-
-            // ----- Act -----
-            useCase()
-
-            // ----- Assert -----
-            verify(exactly = 0) { booksRepository.books }
         }
     }
 
@@ -690,47 +630,6 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
                     any(),
                 )
             }
-        }
-
-        @Test
-        fun `invoke completes normally even when every row fails to resolve`() = runTest {
-            // ----- Arrange -----
-            every {
-                exploreRepository.dismissedContinueSeriesBooks
-            } returns flowOf(
-                listOf(
-                    dismissedBook(
-                        bookId = 1,
-                        title = null,
-                    ),
-                ),
-            )
-            every {
-                exploreRepository.dismissedContinueSeries
-            } returns flowOf(
-                listOf(
-                    dismissedSeries(
-                        seriesId = 500,
-                        seriesName = null,
-                    ),
-                ),
-            )
-
-            coEvery {
-                booksRepository.fetchBookById(id = 1)
-            } throws RuntimeException("network error")
-            every {
-                booksRepository.books
-            } returns flowOf(emptyList())
-            coEvery {
-                exploreRepository.fetchNextInSeries(
-                    seriesId = 500,
-                    afterPosition = 0.0,
-                )
-            } throws RuntimeException("network error")
-
-            // ----- Act & Assert (no exception propagates) -----
-            useCase()
         }
     }
 

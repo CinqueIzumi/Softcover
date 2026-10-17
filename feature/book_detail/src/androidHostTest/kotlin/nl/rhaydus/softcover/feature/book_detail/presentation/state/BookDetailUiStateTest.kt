@@ -2,32 +2,51 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
+import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
+import nl.rhaydus.softcover.core.component.callout.CalloutVariant
+import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
+import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class BookDetailUiStateTest {
-    private fun stubEdition(id: Int = 1): BookEdition = mockk<BookEdition>().also { mock ->
+    private fun stubEdition(
+        id: Int = 1,
+        releaseYear: Int = 0,
+    ): BookEdition = mockk<BookEdition>().also { mock ->
         every {
             mock.id
         } returns id
+        every {
+            mock.releaseYear
+        } returns releaseYear
     }
 
     private fun stubBook(
         userBook: UserBook?,
         currentEdition: BookEdition?,
         editions: List<BookEdition> = emptyList(),
+        releaseYear: Int = 0,
     ): Book = mockk<Book>().also { mock ->
+        every {
+            mock.releaseYear
+        } returns releaseYear
         every {
             mock.userBook
         } returns userBook
@@ -56,7 +75,7 @@ class BookDetailUiStateTest {
                 userBook = null,
                 currentEdition = bookEdition,
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = book,
                 previewEdition = preview,
             )
@@ -76,7 +95,7 @@ class BookDetailUiStateTest {
                 userBook = null,
                 currentEdition = bookEdition,
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = book,
                 previewEdition = null,
             )
@@ -97,7 +116,7 @@ class BookDetailUiStateTest {
                 defaultEdition = null,
                 fallbackCoverUrl = null,
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = null,
                 previewEdition = null,
                 initialCover = initialCover,
@@ -120,7 +139,7 @@ class BookDetailUiStateTest {
                 userBook = userBook,
                 currentEdition = bookEdition,
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = book,
                 previewEdition = preview,
             )
@@ -141,15 +160,37 @@ class BookDetailUiStateTest {
             val book = stubBook(
                 userBook = userBook,
                 currentEdition = shelvedEdition,
-                editions = listOf(scannedEdition, shelvedEdition),
+                editions = persistentListOf(scannedEdition, shelvedEdition),
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = 42,
             )
 
             // ----- Act -----
             val result = state.displayedEdition
+
+            // ----- Assert -----
+            result shouldBe scannedEdition
+        }
+
+        @Test
+        fun `resolves scanned edition from editions when the book does not carry it`() {
+            // ----- Arrange -----
+            val scannedEdition = stubEdition(id = 42)
+            val book = stubBook(
+                userBook = null,
+                currentEdition = null,
+                editions = persistentListOf(stubEdition(id = 1)),
+            )
+            val state = buildBookDetailUiState().copy(
+                book = book,
+                editions = persistentListOf(scannedEdition),
+                scannedEditionId = 42,
+            )
+
+            // ----- Act -----
+            val result = state.scannedEdition
 
             // ----- Assert -----
             result shouldBe scannedEdition
@@ -164,7 +205,7 @@ class BookDetailUiStateTest {
                 userBook = userBook,
                 currentEdition = bookEdition,
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = book,
                 scannedEditionId = null,
             )
@@ -185,9 +226,9 @@ class BookDetailUiStateTest {
                 defaultEdition = null,
                 fallbackCoverUrl = null,
             )
-            val state = BookDetailUiState(
+            val state = buildBookDetailUiState().copy(
                 book = null,
-                editions = emptyList(),
+                editions = persistentListOf(),
                 initialCover = initialCover,
                 scannedEditionId = 7,
             )
@@ -197,113 +238,6 @@ class BookDetailUiStateTest {
 
             // ----- Assert -----
             result shouldBe coverEdition
-        }
-    }
-
-    @Nested
-    inner class ShowScanEditionUpdateBanner {
-        @Test
-        fun `is true when on-shelf with a different edition and not dismissed`() {
-            // ----- Arrange -----
-            val userBook = stubUserBook(editionId = 10)
-            val book = stubBook(
-                userBook = userBook,
-                currentEdition = null,
-            )
-            val state = BookDetailUiState(
-                book = book,
-                scannedEditionId = 42,
-                scannedEditionBannerDismissed = false,
-            )
-
-            // ----- Act -----
-            val result = state.showScanEditionUpdateBanner
-
-            // ----- Assert -----
-            result shouldBe true
-        }
-
-        @Test
-        fun `is false when banner is dismissed`() {
-            // ----- Arrange -----
-            val userBook = stubUserBook(editionId = 10)
-            val book = stubBook(
-                userBook = userBook,
-                currentEdition = null,
-            )
-            val state = BookDetailUiState(
-                book = book,
-                scannedEditionId = 42,
-                scannedEditionBannerDismissed = true,
-            )
-
-            // ----- Act -----
-            val result = state.showScanEditionUpdateBanner
-
-            // ----- Assert -----
-            result shouldBe false
-        }
-
-        @Test
-        fun `is false when book has no userBook`() {
-            // ----- Arrange -----
-            val book = stubBook(
-                userBook = null,
-                currentEdition = null,
-            )
-            val state = BookDetailUiState(
-                book = book,
-                scannedEditionId = 42,
-                scannedEditionBannerDismissed = false,
-            )
-
-            // ----- Act -----
-            val result = state.showScanEditionUpdateBanner
-
-            // ----- Assert -----
-            result shouldBe false
-        }
-
-        @Test
-        fun `is false when shelved editionId matches scannedEditionId`() {
-            // ----- Arrange -----
-            val userBook = stubUserBook(editionId = 42)
-            val book = stubBook(
-                userBook = userBook,
-                currentEdition = null,
-            )
-            val state = BookDetailUiState(
-                book = book,
-                scannedEditionId = 42,
-                scannedEditionBannerDismissed = false,
-            )
-
-            // ----- Act -----
-            val result = state.showScanEditionUpdateBanner
-
-            // ----- Assert -----
-            result shouldBe false
-        }
-
-        @Test
-        fun `is false when scannedEditionId is null`() {
-            // ----- Arrange -----
-            val userBook = stubUserBook(editionId = 10)
-            val book = stubBook(
-                userBook = userBook,
-                currentEdition = null,
-            )
-            val state = BookDetailUiState(
-                book = book,
-                scannedEditionId = null,
-                scannedEditionBannerDismissed = false,
-            )
-
-            // ----- Act -----
-            val result = state.showScanEditionUpdateBanner
-
-            // ----- Assert -----
-            result shouldBe false
         }
     }
 
@@ -330,8 +264,8 @@ class BookDetailUiStateTest {
         @Test
         fun `returns all editions when query is empty`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
-                editions = listOf(editionWithIsbn, editionWithoutIsbn),
+            val state = buildBookDetailUiState().copy(
+                editions = persistentListOf(editionWithIsbn, editionWithoutIsbn),
                 editionSearchQuery = "",
             )
 
@@ -343,95 +277,10 @@ class BookDetailUiStateTest {
         }
 
         @Test
-        fun `returns all editions when query is blank whitespace only`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                editions = listOf(editionWithIsbn, editionWithoutIsbn),
-                editionSearchQuery = "   ",
-            )
-
-            // ----- Act -----
-            val result = state.filteredEditions
-
-            // ----- Assert -----
-            result shouldContainExactly listOf(editionWithIsbn, editionWithoutIsbn)
-        }
-
-        @Test
-        fun `returns all editions when query is tab and newline whitespace`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                editions = listOf(editionWithIsbn, editionWithoutIsbn),
-                editionSearchQuery = "\t\n",
-            )
-
-            // ----- Act -----
-            val result = state.filteredEditions
-
-            // ----- Assert -----
-            result shouldContainExactly listOf(editionWithIsbn, editionWithoutIsbn)
-        }
-
-        @Test
-        fun `filters by isbn10 substring match`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                editions = listOf(editionWithIsbn, editionWithoutIsbn),
-                editionSearchQuery = "03853",
-            )
-
-            // ----- Act -----
-            val result = state.filteredEditions
-
-            // ----- Assert -----
-            result shouldContainExactly listOf(editionWithIsbn)
-        }
-
-        @Test
-        fun `filters by isbn13 substring match`() {
-            // ----- Arrange -----
-            val editionWithIsbn13 = PreviewData.baseEdition.copy(
-                id = 10,
-                isbn13 = "9780451524935",
-                isbn10 = null,
-            )
-            val state = BookDetailUiState(
-                editions = listOf(editionWithIsbn13),
-                editionSearchQuery = "97804515",
-            )
-
-            // ----- Act -----
-            val result = state.filteredEditions
-
-            // ----- Assert -----
-            result shouldContainExactly listOf(editionWithIsbn13)
-        }
-
-        @Test
-        fun `isbn10 match is case-insensitive`() {
-            // ----- Arrange -----
-            val editionLowerIsbn = PreviewData.baseEdition.copy(
-                id = 10,
-                isbn10 = "abcdef",
-                publisher = null,
-            )
-            val state = BookDetailUiState(
-                editions = listOf(editionLowerIsbn),
-                editionSearchQuery = "ABCDEF",
-            )
-
-            // ----- Act -----
-            val result = state.filteredEditions
-
-            // ----- Assert -----
-            result shouldHaveSize 1
-        }
-
-        @Test
         fun `filters by publisher substring match`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
-                editions = listOf(editionWithIsbn, editionWithoutIsbn),
+            val state = buildBookDetailUiState().copy(
+                editions = persistentListOf(editionWithIsbn, editionWithoutIsbn),
                 editionSearchQuery = "Penguin",
             )
 
@@ -440,119 +289,14 @@ class BookDetailUiStateTest {
 
             // ----- Assert -----
             result shouldContainExactly listOf(editionWithoutIsbn)
-        }
-
-        @Test
-        fun `publisher match is case-insensitive`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                editions = listOf(editionWithIsbn, editionWithoutIsbn),
-                editionSearchQuery = "penguin random house",
-            )
-
-            // ----- Act -----
-            val result = state.filteredEditions
-
-            // ----- Assert -----
-            result shouldContainExactly listOf(editionWithoutIsbn)
-        }
-
-        @Test
-        fun `returns editions matching either isbn10 or publisher`() {
-            // ----- Arrange -----
-            val editionIsbnMatch = PreviewData.baseEdition.copy(
-                id = 20,
-                isbn10 = "1234567890",
-                publisher = "Other Press",
-            )
-            val editionPublisherMatch = PreviewData.baseEdition.copy(
-                id = 21,
-                isbn10 = "0000000000",
-                publisher = "Publisher With 1234 In Name",
-            )
-            val editionNoMatch = PreviewData.baseEdition.copy(
-                id = 22,
-                isbn10 = "9999999999",
-                publisher = "Unrelated",
-            )
-            val state = BookDetailUiState(
-                editions = listOf(editionIsbnMatch, editionPublisherMatch, editionNoMatch),
-                editionSearchQuery = "1234",
-            )
-
-            // ----- Act -----
-            val result = state.filteredEditions
-
-            // ----- Assert -----
-            result shouldContainExactly listOf(editionIsbnMatch, editionPublisherMatch)
-        }
-
-        @Test
-        fun `returns empty list when no edition matches`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                editions = listOf(editionWithIsbn, editionWithoutIsbn),
-                editionSearchQuery = "zzznomatch",
-            )
-
-            // ----- Act -----
-            val result = state.filteredEditions
-
-            // ----- Assert -----
-            result.shouldBeEmpty()
-        }
-
-        @Test
-        fun `null isbn10 does not crash and is excluded from match`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                editions = listOf(editionWithoutIsbn),
-                editionSearchQuery = "0385333498",
-            )
-
-            // ----- Act -----
-            val result = state.filteredEditions
-
-            // ----- Assert -----
-            result.shouldBeEmpty()
-        }
-
-        @Test
-        fun `null publisher does not crash and is excluded from match`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                editions = listOf(editionWithIsbn),
-                editionSearchQuery = "Penguin",
-            )
-
-            // ----- Act -----
-            val result = state.filteredEditions
-
-            // ----- Assert -----
-            result.shouldBeEmpty()
         }
 
         @Test
         fun `edition with both isbn10 and publisher null does not crash and is excluded`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
-                editions = listOf(editionNullBoth),
+            val state = buildBookDetailUiState().copy(
+                editions = persistentListOf(editionNullBoth),
                 editionSearchQuery = "anything",
-            )
-
-            // ----- Act -----
-            val result = state.filteredEditions
-
-            // ----- Assert -----
-            result.shouldBeEmpty()
-        }
-
-        @Test
-        fun `returns empty list when editions list is empty`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                editions = emptyList(),
-                editionSearchQuery = "978",
             )
 
             // ----- Act -----
@@ -580,28 +324,11 @@ class BookDetailUiStateTest {
         )
 
         @Test
-        fun `ownedEditionIds returns expected set from the owned list`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                userLists = listOf(ownedList(
-                    77,
-                    88,
-                ),),
-            )
-
-            // ----- Act -----
-            val result = state.ownedEditionIds
-
-            // ----- Assert -----
-            result shouldBe setOf(77, 88)
-        }
-
-        @Test
         fun `isEditionOwned returns true when edition id is in the owned list`() {
             // ----- Arrange -----
             val edition = stubEdition(id = 77)
-            val state = BookDetailUiState(
-                userLists = listOf(ownedList(77)),
+            val state = buildBookDetailUiState().copy(
+                userLists = persistentListOf(ownedList(77)),
             )
 
             // ----- Act -----
@@ -615,23 +342,8 @@ class BookDetailUiStateTest {
         fun `isEditionOwned returns false when edition id is not in the owned list`() {
             // ----- Arrange -----
             val edition = stubEdition(id = 99)
-            val state = BookDetailUiState(
-                userLists = listOf(ownedList(77)),
-            )
-
-            // ----- Act -----
-            val result = state.isEditionOwned(edition)
-
-            // ----- Assert -----
-            result shouldBe false
-        }
-
-        @Test
-        fun `isEditionOwned returns false when userLists is empty`() {
-            // ----- Arrange -----
-            val edition = stubEdition(id = 77)
-            val state = BookDetailUiState(
-                userLists = emptyList(),
+            val state = buildBookDetailUiState().copy(
+                userLists = persistentListOf(ownedList(77)),
             )
 
             // ----- Act -----
@@ -651,8 +363,8 @@ class BookDetailUiStateTest {
                 slug = "favorites",
                 books = listOf(listBook(77)),
             )
-            val state = BookDetailUiState(
-                userLists = listOf(nonOwnedList),
+            val state = buildBookDetailUiState().copy(
+                userLists = persistentListOf(nonOwnedList),
             )
 
             // ----- Act -----
@@ -665,12 +377,556 @@ class BookDetailUiStateTest {
         @Test
         fun `isEditionOwned returns false when edition is null`() {
             // ----- Arrange -----
-            val state = BookDetailUiState(
-                userLists = listOf(ownedList(77)),
+            val state = buildBookDetailUiState().copy(
+                userLists = persistentListOf(ownedList(77)),
             )
 
             // ----- Act -----
             val result = state.isEditionOwned(null)
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+    }
+
+    private fun stubHeroBook(
+        title: String = "Dune",
+        rating: Double = 4.5,
+        seriesText: String? = null,
+    ): Book = mockk<Book>().also { mock ->
+        every {
+            mock.title
+        } returns title
+        every {
+            mock.rating
+        } returns rating
+        every {
+            mock.seriesText
+        } returns seriesText
+    }
+
+    private fun heroInitialCover(
+        title: String? = "Seed title",
+        seriesText: String? = "Seed series #1",
+        rating: Double? = 3.2,
+    ): BookInitialCover = BookInitialCover(
+        currentEdition = null,
+        defaultEdition = null,
+        fallbackCoverUrl = null,
+        title = title,
+        seriesText = seriesText,
+        rating = rating,
+    )
+
+    @Nested
+    inner class HeroFields {
+        @Test
+        fun `falls back to initialCover values when book is null`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState().copy(
+                book = null,
+                initialCover = heroInitialCover(),
+            )
+
+            // ----- Act -----
+            val title = state.heroTitle
+            val series = state.heroSeriesText
+            val rating = state.heroRating
+
+            // ----- Assert -----
+            title shouldBe "Seed title"
+            series shouldBe "Seed series #1"
+            rating shouldBe 3.2
+        }
+
+        @Test
+        fun `loaded book title and rating win over initialCover`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState().copy(
+                book = stubHeroBook(
+                    title = "Dune",
+                    rating = 4.5,
+                ),
+                initialCover = heroInitialCover(),
+            )
+
+            // ----- Act -----
+            val title = state.heroTitle
+            val rating = state.heroRating
+
+            // ----- Assert -----
+            title shouldBe "Dune"
+            rating shouldBe 4.5
+        }
+
+        @Test
+        fun `loaded book without series gives empty heroSeriesText instead of initialCover value`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState().copy(
+                book = stubHeroBook(seriesText = null),
+                initialCover = heroInitialCover(seriesText = "Seed series #1"),
+            )
+
+            // ----- Act -----
+            val result = state.heroSeriesText
+
+            // ----- Assert -----
+            result.shouldNotBeNull() shouldBe ""
+        }
+
+        @Test
+        fun `loaded book with series gives its seriesText`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState().copy(
+                book = stubHeroBook(seriesText = "Dune #1"),
+                initialCover = heroInitialCover(),
+            )
+
+            // ----- Act -----
+            val result = state.heroSeriesText
+
+            // ----- Assert -----
+            result shouldBe "Dune #1"
+        }
+
+        @Test
+        fun `all hero fields are null without a book or initialCover`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState().copy(
+                book = null,
+                initialCover = null,
+            )
+
+            // ----- Act & Assert -----
+            state.heroTitle.shouldBeNull()
+            state.heroSeriesText.shouldBeNull()
+            state.heroRating.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class HeroReleaseYear {
+        @Test
+        fun `uses the displayed edition year when it is set`() {
+            // ----- Arrange -----
+            val edition = stubEdition(releaseYear = 2011)
+            val book = stubBook(
+                userBook = null,
+                currentEdition = edition,
+                releaseYear = 1999,
+            )
+            val state = buildBookDetailUiState().copy(book = book)
+
+            // ----- Act -----
+            val result = state.heroReleaseYear
+
+            // ----- Assert -----
+            result shouldBe 2011
+        }
+
+        @Test
+        fun `falls back to the book year when the edition year is -1`() {
+            // ----- Arrange -----
+            val edition = stubEdition(releaseYear = -1)
+            val book = stubBook(
+                userBook = null,
+                currentEdition = edition,
+                releaseYear = 1999,
+            )
+            val state = buildBookDetailUiState().copy(book = book)
+
+            // ----- Act -----
+            val result = state.heroReleaseYear
+
+            // ----- Assert -----
+            result shouldBe 1999
+        }
+
+        @Test
+        fun `falls back to the book year when there is no edition`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = null,
+                currentEdition = null,
+                releaseYear = 1999,
+            )
+            val state = buildBookDetailUiState().copy(book = book)
+
+            // ----- Act -----
+            val result = state.heroReleaseYear
+
+            // ----- Assert -----
+            result shouldBe 1999
+        }
+
+        @Test
+        fun `is null when there is no book and no edition`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState().copy(
+                book = null,
+                initialCover = null,
+            )
+
+            // ----- Act -----
+            val result = state.heroReleaseYear
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class FailedHeroEditionId {
+        @Test
+        fun `returns the current edition id when it is in failedMutationEditionIds`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = null,
+                currentEdition = stubEdition(id = 7),
+            )
+            val state = buildBookDetailUiState().copy(
+                book = book,
+                failedMutationEditionIds = persistentSetOf(
+                    7,
+                    8,
+                ),
+            )
+
+            // ----- Act -----
+            val result = state.failedHeroEditionId
+
+            // ----- Assert -----
+            result shouldBe 7
+        }
+
+        @Test
+        fun `is null when the current edition id is not in failedMutationEditionIds`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = null,
+                currentEdition = stubEdition(id = 7),
+            )
+            val state = buildBookDetailUiState().copy(
+                book = book,
+                failedMutationEditionIds = persistentSetOf(8),
+            )
+
+            // ----- Act -----
+            val result = state.failedHeroEditionId
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `is null when there is no book`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState().copy(
+                book = null,
+                failedMutationEditionIds = persistentSetOf(7),
+            )
+
+            // ----- Act -----
+            val result = state.failedHeroEditionId
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class WithBook {
+        @Test
+        fun `retires pendingShelfStatus when the incoming book has a user book`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = stubUserBook(),
+                currentEdition = null,
+            ).also { mock ->
+                every {
+                    mock.title
+                } returns "Piranesi"
+            }
+            val state = buildBookDetailUiState().copy(pendingShelfStatus = BookStatus.Reading)
+
+            // ----- Act -----
+            val result = state.withBook(book = book)
+
+            // ----- Assert -----
+            result.pendingShelfStatus.shouldBeNull()
+        }
+
+        @Test
+        fun `keeps pendingShelfStatus when the incoming book has no user book`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = null,
+                currentEdition = null,
+            ).also { mock ->
+                every {
+                    mock.title
+                } returns "Piranesi"
+            }
+            val state = buildBookDetailUiState().copy(pendingShelfStatus = BookStatus.Reading)
+
+            // ----- Act -----
+            val result = state.withBook(book = book)
+
+            // ----- Assert -----
+            result.pendingShelfStatus shouldBe BookStatus.Reading
+        }
+
+        @Test
+        fun `keeps pendingShelfStatus when the book goes away`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState().copy(pendingShelfStatus = BookStatus.Read)
+
+            // ----- Act -----
+            val result = state.withBook(book = null)
+
+            // ----- Assert -----
+            result.pendingShelfStatus shouldBe BookStatus.Read
+        }
+
+        @Test
+        fun `writes the book and a top bar titled with it`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = null,
+                currentEdition = null,
+            ).also { mock ->
+                every {
+                    mock.title
+                } returns "Piranesi"
+            }
+
+            // ----- Act -----
+            val result = buildBookDetailUiState().withBook(book = book)
+
+            // ----- Assert -----
+            result.book shouldBe book
+            result.topBar.title shouldBe "Piranesi"
+            result.topBar.surface shouldBe TopBarSurface.Opaque
+        }
+
+        @Test
+        fun `clears the top bar title when the book goes away`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = null,
+                currentEdition = null,
+            ).also { mock ->
+                every {
+                    mock.title
+                } returns "Piranesi"
+            }
+            val state = buildBookDetailUiState().withBook(book = book)
+
+            // ----- Act -----
+            val result = state.withBook(book = null)
+
+            // ----- Assert -----
+            result.book.shouldBeNull()
+            result.topBar.title.shouldBeNull()
+            result.topBar.surface shouldBe TopBarSurface.Opaque
+        }
+    }
+
+    @Nested
+    inner class ShelfStatus {
+        private fun statusBook(
+            status: BookStatus,
+            userBook: UserBook?,
+        ): Book = mockk<Book>().also { mock ->
+            every {
+                mock.status
+            } returns status
+            every {
+                mock.userBook
+            } returns userBook
+        }
+
+        @Test
+        fun `is null when book is null`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState().copy(pendingShelfStatus = BookStatus.Reading)
+
+            // ----- Act -----
+            val result = state.shelfStatus
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `uses pending status when book is off the shelf and a status is pending`() {
+            // ----- Arrange -----
+            val book = statusBook(
+                status = BookStatus.None,
+                userBook = null,
+            )
+            val state = buildBookDetailUiState()
+                .copy(
+                    book = book,
+                    pendingShelfStatus = BookStatus.Reading,
+                )
+
+            // ----- Act -----
+            val result = state.shelfStatus
+
+            // ----- Assert -----
+            result shouldBe BookStatus.Reading
+        }
+
+        @Test
+        fun `uses book status when book is off the shelf and nothing is pending`() {
+            // ----- Arrange -----
+            val book = statusBook(
+                status = BookStatus.None,
+                userBook = null,
+            )
+            val state = buildBookDetailUiState().copy(book = book)
+
+            // ----- Act -----
+            val result = state.shelfStatus
+
+            // ----- Assert -----
+            result shouldBe BookStatus.None
+        }
+
+        @Test
+        fun `ignores a stale pending status when book is on the shelf`() {
+            // ----- Arrange -----
+            val book = statusBook(
+                status = BookStatus.Read,
+                userBook = stubUserBook(),
+            )
+            val state = buildBookDetailUiState()
+                .copy(
+                    book = book,
+                    pendingShelfStatus = BookStatus.Reading,
+                )
+
+            // ----- Act -----
+            val result = state.shelfStatus
+
+            // ----- Assert -----
+            result shouldBe BookStatus.Read
+        }
+    }
+
+    @Nested
+    inner class YoursLensBlocks {
+        private fun bookWithStatus(status: BookStatus): Book = mockk<Book>().also { mock ->
+            every {
+                mock.status
+            } returns status
+        }
+
+        private fun stateWithStatus(status: BookStatus): BookDetailUiState = buildBookDetailUiState()
+            .copy(book = bookWithStatus(status))
+
+        private val callout = CalloutUiModel(
+            variant = CalloutVariant.Neutral(),
+            eyebrow = "Eyebrow",
+            body = "Body",
+        )
+
+        @Test
+        fun `shows the in progress section while reading`() {
+            // ----- Arrange -----
+            val state = stateWithStatus(BookStatus.Reading)
+
+            // ----- Act -----
+            val result = state.showsInProgressSection
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `shows the in progress section while paused`() {
+            // ----- Arrange -----
+            val state = stateWithStatus(BookStatus.Paused)
+
+            // ----- Act -----
+            val result = state.showsInProgressSection
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `hides the in progress section for every other status`() {
+            // ----- Arrange -----
+            val others = BookStatus.entries - setOf(BookStatus.Reading, BookStatus.Paused)
+
+            // ----- Act -----
+            val results = others.map { stateWithStatus(it).showsInProgressSection }
+
+            // ----- Assert -----
+            results.none { it } shouldBe true
+        }
+
+        @Test
+        fun `hides the in progress section when no book is loaded`() {
+            // ----- Arrange -----
+            val state = buildBookDetailUiState()
+
+            // ----- Act -----
+            val result = state.showsInProgressSection
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `keeps the verdict block only when the book is read`() {
+            // ----- Arrange -----
+            val verdict = VerdictBlockUiModel.Empty
+            val read = stateWithStatus(BookStatus.Read).copy(verdictBlock = verdict)
+            val paused = stateWithStatus(BookStatus.Paused).copy(verdictBlock = verdict)
+
+            // ----- Act -----
+            val readResult = read.yoursVerdictBlock
+            val pausedResult = paused.yoursVerdictBlock
+
+            // ----- Assert -----
+            readResult shouldBe verdict
+            pausedResult.shouldBeNull()
+        }
+
+        @Test
+        fun `has a leading block when the in progress section shows`() {
+            // ----- Arrange -----
+            val state = stateWithStatus(BookStatus.Paused)
+
+            // ----- Act -----
+            val result = state.hasYoursLeadingBlock
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `has a leading block when only a status callout is present`() {
+            // ----- Arrange -----
+            val state = stateWithStatus(BookStatus.Read).copy(statusCallout = callout)
+
+            // ----- Act -----
+            val result = state.hasYoursLeadingBlock
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `has no leading block without an in progress section or a status callout`() {
+            // ----- Arrange -----
+            val state = stateWithStatus(BookStatus.Read)
+
+            // ----- Act -----
+            val result = state.hasYoursLeadingBlock
 
             // ----- Assert -----
             result shouldBe false

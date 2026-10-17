@@ -1,7 +1,6 @@
 - [Softcover test conventions](project_test_conventions.md) — stack, mockk domain models, TOAD action `launch` callOriginal workaround, @Nested name-clash FQN exception, UserBook.status is BookStatus
 - [Canonical test templates by layer](project_canonical_test_templates.md) — one template file per layer; clone the matching one, skip broad exploration
-- [Host-test task name](project_host_test_task_name.md) — KMP modules use testAndroidHostTest; jvmTest is a false-green NO-SOURCE, testDebugUnitTest is app-only
-- [MockK only — no mock servers](feedback_no_mock_servers.md) — never MockServer/WireMock; mock only the public surface actually consumed
+- [Host-test task name](project_host_test_task_name.md) — KMP modules use testAndroidHostTest; jvmTest is a false-green NO-SOURCE
 - [MockK / kotest gotchas](feedback_mockk_kotest_gotchas.md) — default-param stubs pin the default, erased generic matchers, relaxed lambdas never run, stateful keyed stores, capture import, `===` parens, test-name chars
 - [Coroutine test scheduling](feedback_coroutine_test_scheduling.md) — one shared TestDispatcher everywhere; runCurrent for backgroundScope + explicit StandardTestDispatcher; flowOf DAO stubs need none
 - [Flow emission assertions](feedback_flow_emission_assertions.md) — StateFlow conflation needs three distinct values; loop past loading placeholders before coVerify
@@ -15,3 +14,9 @@
 - [Room migration test pattern](project_migration_test_pattern.md) — BundledSQLiteDriver in-memory per test; needs sqlite-bundled-jvm runtimeOnly; PRAGMA + sqlite_master helpers
 - [Bash hook and Gradle task testing](project_bash_hook_and_gradle_task_testing.md) — base64 TSV harness for PreToolUse hooks; ProjectBuilder for DefaultTask actions; single-branch merge-base gotcha; concurrent-edit handling
 - [ktlintFormat nested-call trailing comma](feedback_ktlintformat_nested_call_trailing_comma.md) — grep for `),)` after ktlintFormat; wrap the outer call too
+- [Composable style resolution is untestable at unit level](feedback_composable_style_resolution_untestable.md) — no compose-ui-test dep in core:component; proxy "style resolution" coverage via enum/sealed-slot fixture coverage instead
+- [`:app` has no testDebug source set by default](feedback_app_module_testdebug_source_set.md) — add JUnit5/MockK/Kotest/coroutines-test + useJUnitPlatform() by hand; static-state ScreenModel test pattern
+- [Change-detector prune judgment](feedback_change_detector_prune_judgment.md) — filename patterns are examples not literal matches; judge each @Nested block by the rule, not the file name
+- [Room @Upsert conflict on host](feedback_room_upsert_conflict_host.md) — second upsert on same key throws SQLException in host tests; seed via other methods
+- [Hoist mockkStatic/mockkObject](feedback_mockk_static_hoisting.md) — @BeforeAll + clearAllMocks per test cut a datasource class 2.4s to 0.7s
+- [Room upsert conflict untestable on host](feedback_room_upsert_conflict_untestable.md) — second @Upsert of an existing row throws bare SQLException; test delete+insert steps directly

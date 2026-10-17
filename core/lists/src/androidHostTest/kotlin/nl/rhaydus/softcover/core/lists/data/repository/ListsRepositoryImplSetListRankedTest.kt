@@ -4,15 +4,11 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
-import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
@@ -20,6 +16,9 @@ import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ListsRepositoryImplSetListRankedTest {
     private lateinit var listsRemoteDataSource: ListsRemoteDataSource
@@ -55,7 +54,7 @@ class ListsRepositoryImplSetListRankedTest {
     @Nested
     inner class SetListRanked {
         @Test
-        fun `calls local then remote then caches the refreshed list on success`() = runTest {
+        fun `sets ranked locally, sends it to Hardcover and caches the refreshed list on success`() = runTest {
             // ----- Arrange -----
             val listId = 5
             val ranked = true
@@ -86,17 +85,21 @@ class ListsRepositoryImplSetListRankedTest {
             )
 
             // ----- Assert -----
-            coVerifyOrder {
+            coVerify(exactly = 1) {
                 listsLocalDataSource.setListRanked(
                     listId = listId,
                     ranked = ranked,
                 )
+            }
 
+            coVerify(exactly = 1) {
                 listsRemoteDataSource.setListRanked(
                     listId = listId,
                     ranked = ranked,
                 )
+            }
 
+            coVerify(exactly = 1) {
                 listsLocalDataSource.cacheUserBookLists(lists = listOf(refreshed))
             }
         }
@@ -130,12 +133,14 @@ class ListsRepositoryImplSetListRankedTest {
                 )
             }
 
-            coVerifyOrder {
+            coVerify(exactly = 1) {
                 listsLocalDataSource.setListRanked(
                     listId = listId,
                     ranked = ranked,
                 )
+            }
 
+            coVerify(exactly = 1) {
                 listsLocalDataSource.setListRanked(
                     listId = listId,
                     ranked = ranked.not(),

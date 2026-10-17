@@ -3,14 +3,14 @@ package nl.rhaydus.softcover.core.personal.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlin.time.Clock
-import kotlin.time.Instant
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingSessionLocalDataSource
 import nl.rhaydus.softcover.core.personal.data.mapper.toDomain
 import nl.rhaydus.softcover.core.personal.data.mapper.toEntity
 import nl.rhaydus.softcover.core.personal.domain.repository.ReadingSessionRepository
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 internal class ReadingSessionRepositoryImpl(
     private val localDataSource: ReadingSessionLocalDataSource,

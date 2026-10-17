@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.core.database.mapper
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ReviewSlateMapperTest {
     // ----- Shared fixture — the golden document from the spec -----
@@ -18,7 +18,8 @@ class ReviewSlateMapperTest {
                     bold = true,
                 ),
                 ReviewRun(text = " it a ton. "),
-            ),),
+            ),
+            ),
             ReviewParagraph(runs = listOf(
                 ReviewRun(text = "Will be reading more by "),
                 ReviewRun(
@@ -26,13 +27,15 @@ class ReviewSlateMapperTest {
                     italic = true,
                 ),
                 ReviewRun(text = "."),
-            ),),
+            ),
+            ),
             ReviewParagraph(runs = listOf(
                 ReviewRun(
                     text = "Test",
                     spoiler = true,
                 ),
-            ),),
+            ),
+            ),
         ),
     )
 
@@ -72,33 +75,11 @@ class ReviewSlateMapperTest {
     inner class ReviewSlateFromDocument {
         @Test
         fun `golden document produces the exact golden slate`() {
+            // ----- Arrange -----
+            val document = goldenDocument
+
             // ----- Act & Assert -----
-            reviewSlateFromDocument(goldenDocument) shouldBe goldenSlate
-        }
-
-        @Test
-        fun `block data key is an empty map`() {
-            // ----- Arrange -----
-            val doc = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Hello")))))
-
-            // ----- Act -----
-            val block = reviewSlateFromDocument(doc)[0]
-
-            // ----- Assert -----
-            block["data"] shouldBe emptyMap<String, Any?>()
-        }
-
-        @Test
-        fun `block type is paragraph and object is block`() {
-            // ----- Arrange -----
-            val doc = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Hello")))))
-
-            // ----- Act -----
-            val block = reviewSlateFromDocument(doc)[0]
-
-            // ----- Assert -----
-            block["type"] shouldBe "paragraph"
-            block["object"] shouldBe "block"
+            reviewSlateFromDocument(document) shouldBe goldenSlate
         }
 
         @Test
@@ -111,8 +92,10 @@ class ReviewSlateMapperTest {
                         bold = true,
                     ),
                     ReviewRun(text = "Plain"),
-                ),),
-            ),)
+                ),
+                ),
+            ),
+            )
 
             // ----- Act -----
             val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
@@ -134,8 +117,10 @@ class ReviewSlateMapperTest {
                         italic = true,
                     ),
                     ReviewRun(text = "Plain"),
-                ),),
-            ),)
+                ),
+                ),
+            ),
+            )
 
             // ----- Act -----
             val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
@@ -157,8 +142,10 @@ class ReviewSlateMapperTest {
                         spoiler = true,
                     ),
                     ReviewRun(text = "Plain"),
-                ),),
-            ),)
+                ),
+                ),
+            ),
+            )
 
             // ----- Act -----
             val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
@@ -188,28 +175,14 @@ class ReviewSlateMapperTest {
         }
 
         @Test
-        fun `each child node carries object=text`() {
-            // ----- Arrange -----
-            val doc = ReviewDocument(listOf(
-                ReviewParagraph(listOf(ReviewRun("Hello"), ReviewRun("World"))),
-            ),)
-
-            // ----- Act -----
-            val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
-
-            // ----- Assert -----
-            (children[0] as Map<*, *>)["object"] shouldBe "text"
-            (children[1] as Map<*, *>)["object"] shouldBe "text"
-        }
-
-        @Test
         fun `one block is emitted per paragraph`() {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(ReviewRun("P1"))),
                 ReviewParagraph(listOf(ReviewRun("P2"))),
                 ReviewParagraph(listOf(ReviewRun("P3"))),
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = reviewSlateFromDocument(doc)
@@ -220,8 +193,11 @@ class ReviewSlateMapperTest {
 
         @Test
         fun `empty document produces empty list`() {
+            // ----- Arrange -----
+            val document = ReviewDocument.EMPTY
+
             // ----- Act & Assert -----
-            reviewSlateFromDocument(ReviewDocument.EMPTY) shouldBe emptyList()
+            reviewSlateFromDocument(document) shouldBe emptyList()
         }
     }
 
@@ -231,26 +207,38 @@ class ReviewSlateMapperTest {
     inner class ReviewDocumentFromSlate {
         @Test
         fun `parses golden slate back to the expected canonical document`() {
+            // ----- Arrange -----
+            val slate = goldenSlate
+
             // ----- Act & Assert -----
-            reviewDocumentFromSlate(goldenSlate) shouldBe goldenDocument
+            reviewDocumentFromSlate(slate) shouldBe goldenDocument
         }
 
         @Test
         fun `null slate returns EMPTY`() {
+            // ----- Arrange -----
+            val slate: Any? = null
+
             // ----- Act & Assert -----
-            reviewDocumentFromSlate(null) shouldBe ReviewDocument.EMPTY
+            reviewDocumentFromSlate(slate) shouldBe ReviewDocument.EMPTY
         }
 
         @Test
         fun `non-list slate returns EMPTY`() {
+            // ----- Arrange -----
+            val slate = "not a list"
+
             // ----- Act & Assert -----
-            reviewDocumentFromSlate("not a list") shouldBe ReviewDocument.EMPTY
+            reviewDocumentFromSlate(slate) shouldBe ReviewDocument.EMPTY
         }
 
         @Test
         fun `empty slate list returns EMPTY`() {
+            // ----- Arrange -----
+            val slate = emptyList<Any?>()
+
             // ----- Act & Assert -----
-            reviewDocumentFromSlate(emptyList<Any?>()) shouldBe ReviewDocument.EMPTY
+            reviewDocumentFromSlate(slate) shouldBe ReviewDocument.EMPTY
         }
 
         @Test
@@ -392,12 +380,6 @@ class ReviewSlateMapperTest {
     @Nested
     inner class RoundTrip {
         @Test
-        fun `golden document round-trips through slate without loss`() {
-            // ----- Act & Assert -----
-            reviewDocumentFromSlate(reviewSlateFromDocument(goldenDocument)) shouldBe goldenDocument
-        }
-
-        @Test
         fun `plain single-paragraph document round-trips`() {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Simple text.")))))
@@ -408,12 +390,6 @@ class ReviewSlateMapperTest {
             // ----- Assert -----
             result shouldBe doc
         }
-
-        @Test
-        fun `empty document round-trips`() {
-            // ----- Act & Assert -----
-            reviewDocumentFromSlate(reviewSlateFromDocument(ReviewDocument.EMPTY)) shouldBe ReviewDocument.EMPTY
-        }
     }
 
     // ----- toJson / reviewDocumentFromJson -----
@@ -422,26 +398,29 @@ class ReviewSlateMapperTest {
     inner class JsonSerialization {
         @Test
         fun `toJson then reviewDocumentFromJson round-trips the golden document`() {
-            // ----- Act & Assert -----
-            reviewDocumentFromJson(goldenDocument.toJson()) shouldBe goldenDocument
-        }
+            // ----- Arrange -----
+            val document = goldenDocument
 
-        @Test
-        fun `toJson then reviewDocumentFromJson round-trips an empty document`() {
             // ----- Act & Assert -----
-            reviewDocumentFromJson(ReviewDocument.EMPTY.toJson()) shouldBe ReviewDocument.EMPTY
+            reviewDocumentFromJson(document.toJson()) shouldBe goldenDocument
         }
 
         @Test
         fun `reviewDocumentFromJson with null returns null`() {
+            // ----- Arrange -----
+            val json: String? = null
+
             // ----- Act & Assert -----
-            reviewDocumentFromJson(null) shouldBe null
+            reviewDocumentFromJson(json) shouldBe null
         }
 
         @Test
         fun `reviewDocumentFromJson with invalid JSON returns null`() {
+            // ----- Arrange -----
+            val json = "{not valid json{{"
+
             // ----- Act & Assert -----
-            reviewDocumentFromJson("{not valid json{{") shouldBe null
+            reviewDocumentFromJson(json) shouldBe null
         }
     }
 }

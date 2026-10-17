@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.app_update.di
 
-import org.koin.core.module.Module
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 import nl.rhaydus.softcover.feature.app_update.data.datasource.AppUpdateDataSource
 import nl.rhaydus.softcover.feature.app_update.data.datasource.IosAppUpdateDataSource
 import nl.rhaydus.softcover.feature.app_update.data.simulator.NoOpAppUpdateSimulator
+import org.koin.core.module.Module
+import org.koin.dsl.module
 
 // iOS has no in-app update flow, so the data source and simulator are both no-ops. There is no
 // AppUpdateFlowLauncher binding — nothing on iOS starts an update flow. The simulator is bound (not

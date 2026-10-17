@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -7,13 +9,10 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.lists.domain.usecase.ReorderListBooksUseCase
@@ -22,20 +21,26 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnReorderListBooksActionTest {
     private lateinit var reorderListBooksUseCase: ReorderListBooksUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
+    private lateinit var eventChannel: Channel<LibraryEvent>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     @BeforeEach
     fun setUp() {
         reorderListBooksUseCase = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
 
         mockkObject(SnackBarManager)
@@ -91,6 +96,8 @@ class OnReorderListBooksActionTest {
             }
 
             verify(exactly = 0) { SnackBarManager.showSnackbar(title = any()) }
+
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
@@ -130,7 +137,7 @@ class OnReorderListBooksActionTest {
             )
 
             stateFlow.value = LibraryUiState(
-                customLists = listOf(
+                customLists = persistentListOf(
                     BookList(
                         id = listId,
                         name = listName,
@@ -162,6 +169,10 @@ class OnReorderListBooksActionTest {
             verify {
                 SnackBarManager.showSnackbar(title = match { it.contains(listName) })
             }
+
+            val sentEvent = eventChannel.tryReceive().getOrNull()
+            sentEvent.shouldBeInstanceOf<LibraryEvent.ListReorderFailedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test

@@ -1,0 +1,151 @@
+package nl.rhaydus.softcover.feature.library.presentation.collector
+
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterOptions
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class FilterChipModelsCollectorTest {
+    private lateinit var dependencies: LibraryDependencies
+    private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
+    private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    private val tagFiction = Tag(
+        id = 1,
+        name = "Fiction",
+        category = TagCategory.GENRE,
+    )
+
+    @BeforeEach
+    fun setUp() {
+        stateFlow = MutableStateFlow(LibraryUiState())
+        scope = ActionScope(
+            stateFlow = stateFlow,
+            localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
+            eventChannel = Channel(Channel.BUFFERED),
+        )
+        dependencies = mockk<LibraryDependencies>(relaxed = true).also { mock ->
+            every {
+                mock.defaultDispatcher
+            } returns testDispatcher
+        }
+    }
+
+    @Nested
+    inner class OnLaunch {
+        @Test
+        fun `filterChipsByTab is keyed per tab and filterChipsFor returns the matching entry`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val allOptions = LibraryFilterOptions(formats = persistentListOf("ebook"))
+            val readOptions = LibraryFilterOptions(readYears = persistentListOf(2021))
+            val collector = FilterChipModelsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                filterOptionsByTab = persistentMapOf(
+                    "all" to allOptions,
+                    "read" to readOptions,
+                ),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.filterChipsFor("all").formatChips.chips.map { it.key } shouldBe
+                listOf("format:ebook")
+            stateFlow.value.filterChipsFor("read").readYearChips.chips.map { it.key } shouldBe
+                listOf("readYear:2021")
+            stateFlow.value.filterChipsFor("missing").isEmpty shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `each facet's ChipSet round-trips every chip key to the value that built it`() =
+            runTest(testDispatcher) {
+                // ----- Arrange -----
+                val options = LibraryFilterOptions(
+                    supportsOwnedFilter = true,
+                    formats = persistentListOf("ebook"),
+                    releaseYears = persistentListOf(2020),
+                    readYears = persistentListOf(2019),
+                    tags = persistentListOf(tagFiction),
+                    ratingBuckets = persistentListOf(4.0),
+                )
+                val collector = FilterChipModelsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = LibraryUiState(filterOptionsByTab = persistentMapOf("all" to options))
+
+                // ----- Assert -----
+                val chips = stateFlow.value.filterChipsFor("all")
+                val allChips = chips.ownershipChips.chips + chips.formatChips.chips +
+                    chips.releaseYearChips.chips + chips.readYearChips.chips + chips.tagChips.chips +
+                    chips.ratingChips.chips
+
+                allChips.forEach { chip -> (chips[chip.key] != null) shouldBe true }
+                chips["owned:true"] shouldBe LibraryFilterValue.Owned(owned = true)
+                chips["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
+                chips["releaseYear:2020"] shouldBe LibraryFilterValue.ReleaseYear(year = 2020)
+                chips["readYear:2019"] shouldBe LibraryFilterValue.ReadYear(year = 2019)
+                chips["tag:1"] shouldBe LibraryFilterValue.Tag(tag = tagFiction)
+                chips["rating:4.0"] shouldBe LibraryFilterValue.RatingMin(threshold = 4.0)
+                job.cancel()
+            }
+
+        @Test
+        fun `unrelated state change that leaves filterOptionsByTab equal does not retrigger recompute`() =
+            runTest(testDispatcher) {
+                // ----- Arrange -----
+                val options = LibraryFilterOptions(formats = persistentListOf("ebook"))
+                val collector = FilterChipModelsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                stateFlow.value = LibraryUiState(filterOptionsByTab = persistentMapOf("all" to options))
+                val chipsByTabAfterFirstEmit = stateFlow.value.filterChipsByTab
+
+                // ----- Act -----
+                // isArrangeSheetExpanded is not part of FilterChipModelsSnapshot, so this must not
+                // retrigger the collector's compute — the map must stay the same instance.
+                stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
+
+                // ----- Assert -----
+                (stateFlow.value.filterChipsByTab === chipsByTabAfterFirstEmit) shouldBe true
+                job.cancel()
+            }
+    }
+}
