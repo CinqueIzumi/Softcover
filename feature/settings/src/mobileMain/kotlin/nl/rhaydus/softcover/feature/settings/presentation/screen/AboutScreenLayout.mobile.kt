@@ -8,6 +8,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -33,6 +34,7 @@ internal actual fun AboutScreenLayout(
     onComponentGalleryUnlocked: () -> Unit,
 ) {
     Scaffold(
+        modifier = Modifier.testTag(SettingsTestTags.ABOUT_PAGE),
         topBar = {
             TopBar(
                 model = topBar,

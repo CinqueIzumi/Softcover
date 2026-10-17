@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -36,6 +37,7 @@ internal fun WidgetsSettingsScreenLayout(
     runAction: (WidgetsSettingsAction) -> Unit,
 ) {
     Scaffold(
+        modifier = Modifier.testTag(SettingsTestTags.WIDGETS_PAGE),
         topBar = {
             TopBar(
                 model = state.topBar,

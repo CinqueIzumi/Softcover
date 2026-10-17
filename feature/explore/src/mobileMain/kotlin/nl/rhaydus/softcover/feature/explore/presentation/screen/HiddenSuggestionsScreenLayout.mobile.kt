@@ -12,6 +12,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -39,6 +40,7 @@ internal actual fun HiddenSuggestionsScreenLayout(
     onNavigateBack: () -> Unit,
 ) {
     Scaffold(
+        modifier = Modifier.testTag(ExploreTestTags.HIDDEN_SUGGESTIONS_PAGE),
         topBar = {
             TopBar(
                 model = state.topBar,

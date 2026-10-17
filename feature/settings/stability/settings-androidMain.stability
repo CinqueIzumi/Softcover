@@ -165,7 +165,7 @@ public fun nl.rhaydus.softcover.feature.settings.presentation.screen.DocumentPag
   params:
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.DocumentPageScreenLayout(state: nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction, kotlin.Unit>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, onNavigateBack: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.DocumentPageScreenLayout(state: nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction, kotlin.Unit>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, onNavigateBack: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -173,6 +173,7 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.DocumentP
     - runAction: STABLE (function type)
     - openUrl: STABLE (function type)
     - onNavigateBack: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.settings.presentation.screen.DocumentPageScreenPreview(): kotlin.Unit

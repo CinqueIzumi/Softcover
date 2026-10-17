@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
@@ -34,6 +35,7 @@ internal actual fun LibraryVisibilitySettingsScreenLayout(
     )
 
     Scaffold(
+        modifier = Modifier.testTag(SettingsTestTags.LIBRARY_TABS_PAGE),
         topBar = {
             TopBar(
                 model = state.topBar,
