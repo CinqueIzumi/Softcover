@@ -13,16 +13,30 @@ A few honest caveats:
 
 ---
 
+## 3.2.1: Widgets you can rely on
+
+A fix-up release for the home-screen widgets, plus one small change on the book page.
+
+- **No more "Can't show content".** Widgets no longer break when you page, shuffle or come back from another app, and the arrows always respond.
+- **Sharper covers** on Currently Reading and Random Pick, drawn at the size they're shown.
+- **Long quotes fit.** The Quote widget shrinks the text to fill whatever size you give it.
+- **You can see it working.** Widgets show a loader while they start or switch shelves, put the title up first, and keep the cover's shape while it loads.
+- **Share is one tap away** on the book page, no longer tucked under the edit menu.
+
 ## 3.3.0: The reading record
 
-Everything you might want to record about a book, and every statistic that comes out of it. Your private notes never leave your device.
+Everything you might want to record about a book, and every statistic that comes out of it. What you keep private never leaves your device.
 
 **Make a book yours:**
 - Log personal **moods**, overall or chapter-by-chapter, with how strongly you felt them.
 - Grade each book on **how it read**: pace, plot- or character-driven, its characters, its writing style.
 - Note **where you got it** — library, bought, borrowed, gifted, a subscription credit.
-- Keep private **notes** against a book or its characters, and tag the **representation** that matters to you.
+- Keep **notes** on a book, synced with Hardcover, and tag the **representation** that matters to you.
 - **Export and import all of it** as a file you keep, from day one — so nothing you record is ever one lost phone away from gone.
+
+**Find it, and find it again:**
+- **Filter by your own tags**, and combine them: *mystery* and *dark*, but not *romance*.
+- A **Kobo** link next to Bookshop and Amazon.
 
 **And the payoff — a long editorial Stats Atlas:**
 - **Pick your own window.** Read every stat below for the last 30 days, 6 months, 12 months, a single year, or all time.
@@ -46,7 +60,6 @@ Everything you might want to record about a book, and every statistic that comes
 - A full **Author** page — their works, accolades and series — reached from any byline.
 - A full **Series** page: a reading-order checklist and your progress through it. Finish the last book and it says so.
 - **Lists** as a first-class surface: rename, delete, reorder, share, and discover curated lists.
-- **Find your own tags.** Tag a book "lent to mum" and actually be able to filter your library by it.
 - Create lists straight from your library, and track who you've lent books to.
 
 ## 3.6.0: Discover more
