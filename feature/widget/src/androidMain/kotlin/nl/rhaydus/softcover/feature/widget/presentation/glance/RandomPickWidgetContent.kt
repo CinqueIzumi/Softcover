@@ -25,13 +25,11 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
-import androidx.glance.layout.width
 import androidx.glance.semantics.contentDescription
 import androidx.glance.semantics.semantics
 import androidx.glance.text.FontFamily
@@ -39,7 +37,6 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.CornerRadius
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.callback.ShuffleCallback
@@ -276,13 +273,13 @@ private fun Cover(cover: RandomPickWidgetUiModel.Cover) {
             contentScale = ContentScale.Fit,
         )
     } else {
-        Box(
-            modifier = GlanceModifier
-                .fillMaxHeight()
-                .width(56.dp)
-                .cornerRadius(CornerRadius.xxs)
-                .background(GlanceTheme.colors.surfaceVariant),
-        ) {}
+        Image(
+            provider = ImageProvider(R.drawable.widget_cover_placeholder),
+            contentDescription = null,
+            modifier = GlanceModifier.fillMaxSize(),
+            contentScale = ContentScale.Fit,
+            colorFilter = ColorFilter.tint(GlanceTheme.colors.surfaceVariant),
+        )
     }
 }
 
