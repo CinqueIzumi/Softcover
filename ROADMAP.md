@@ -1,8 +1,8 @@
 # Softcover roadmap
 
-What we're building next for [Softcover](https://hardcover.app/), grouped by the version it's planned to land in. This is the public view of our plan.
+What we're building next for [Softcover](https://github.com/CinqueIzumi/Softcover), grouped by the version it's planned to land in. This is the public view of our plan.
 
-**Current release: 3.1.3.** Softcover runs on Android, iPhone, iPad and desktop. 3.1.3 smooths two rough edges in the 3.1 redesign, which rebuilt nearly every screen with a cleaner, more editorial look: deadlines now land on the day you picked no matter where in the world you are, and the app paces its requests against Hardcover's limits so busy screens load without stalling.
+**Current release: 3.2.0.** Softcover runs on Android, iPhone, iPad and desktop. 3.2.0 puts your reading on the Android home screen with four widgets, keeps the quotes you save in sync with Hardcover, and remembers every read-through of a book, with a new Paused status and a warm Dim theme along the way.
 
 A few honest caveats:
 - **These are plans, not promises.** Versions are listed in the order we intend to ship them, but order can shift and some items may move, merge, or change shape.
@@ -12,18 +12,6 @@ A few honest caveats:
 > Reading this inside the app? It's the same file, fetched live, so it's always current.
 
 ---
-
-## 3.2.0: Widgets, and a lot of small things
-
-**Home-screen widgets** (Android first): the book you're **Currently Reading**, a **random pick from Want-to-Read** for when you can't decide, **Trending this week**, and a **reading-activity calendar**. Each one configurable — which book, which stat, how often it refreshes.
-
-Alongside them, a batch of smaller things:
-
-- **Pick your theme.** Light, Dark, System — and **Dim**, a warm low-contrast palette for reading at night. Plus **Spine colour**: a handful of named accent palettes to make the app feel like yours.
-- **An About page**, with a **per-version changelog** so you can see what changed, and an **in-app Roadmap** — this page, live in the app.
-- **Re-reads.** Book detail starts keeping a history of every time you've read a book, not just the last one.
-- See each edition's **format** (ebook / physical / audiobook) when you pick one.
-- Choose which **tab the app opens on**, and which **unit progress defaults to**.
 
 ## 3.3.0: The reading record
 
@@ -44,12 +32,14 @@ Everything you might want to record about a book, and every statistic that comes
 - **How you read**: whether your year leaned plot- or character-driven, your pace and style mix, and the moods you reach for most.
 - **Diversity & publication**: your reading by author background and country, language and how much you read in translation, publication years, and where your books came from.
 
+**Sign in with Hardcover.** No more copying an API key: sign in through Hardcover itself, and stay signed in.
+
 ## 3.4.0: Passages, logs & the calendar
 
-- A **Passages** section for the highlights you save, with quick-add while you're reading, and a **Notes & Highlights** inbox you can search across.
+- **Quick-add a quote** while you're reading, and a **Notes & Highlights** inbox you can search across every quote you've saved.
 - A **Reading Sessions** log of everything you've read and for how long.
 - **Edit or remove** the reading updates you've logged, and change when they happened.
-- A **Reading Activity Calendar**: every day you read, with the covers you touched, laid out as a month you can page through.
+- A **Reading Activity Calendar**: every day you read, with the covers you touched, laid out as a month you can page through. It comes to your **home screen** too, as a calendar widget.
 
 ## 3.5.0: Author pages, Series & Lists
 
@@ -85,7 +75,7 @@ Opt-in reminders (deadlines, release days, weekly recaps, milestones), an in-app
 
 ## 3.12.0: Read anywhere, back it up
 
-Everything you log offline queues and syncs on reconnect, with conflicts surfacing as a gentle shake. Full **backup & restore**. More widgets (streak, Quote of the Day, Year in Books), a **Quote of the Day** screen, TalkBack polish, **Wear OS** support, and launcher long-press shortcuts.
+Everything you log offline queues and syncs on reconnect, with conflicts surfacing as a gentle shake. Full **backup & restore**. More widgets (streak, Year in Books), a **Quote of the Day** screen, TalkBack polish, **Wear OS** support, and launcher long-press shortcuts.
 
 ## 4.0.0: Friend Feed
 

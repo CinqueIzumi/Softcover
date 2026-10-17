@@ -2,6 +2,26 @@
 
 What changed in each release of Softcover, newest first.
 
+## 3.2.0: On your home screen
+
+*2026-10-17*
+
+Your reading now sits on your home screen too, with four widgets on Android and a place to keep the lines worth remembering.
+
+- Four new widgets on Android: Currently Reading (log progress without opening the app), Trending, Random pick and Quote of the day, all gathered on a new Widgets page in Settings
+- Save quotes from a book on its Yours tab; they sync with Hardcover
+- Book detail now keeps every read-through under Your reads, and your pace and finish forecast follow the current one
+- A new Paused status for the books you mean to come back to
+- A Dim theme joins Light and Dark, alongside four new palettes: Vellum, Ink, Foxed and Sea
+- Read What's new for each release, follow the Roadmap and find the About page, all inside Settings
+- A redesigned share card set over the book's blurred cover, with a choice of tags and length
+- Removed a book by mistake? Undo it straight from the snackbar
+- Book detail shows a book's other tags too, a couple more lines with each Show more
+- Shelving a book keeps the edition you were looking at
+- The scanner opens straight to the camera, and you can type an ISBN from the edition sheet
+- Smoother motion throughout, with covers and titles that carry into book detail and support for Android's predictive back
+- List changes made offline wait for the connection instead of failing
+
 ## 3.1.3: Steadier under load
 *2026-08-24*
 
