@@ -13,16 +13,6 @@ A few honest caveats:
 
 ---
 
-## 3.2.1: Widgets you can rely on
-
-A fix-up release for the home-screen widgets, plus one small change on the book page.
-
-- **No more "Can't show content".** Widgets no longer break when you page, shuffle or come back from another app, and the arrows always respond.
-- **Sharper covers** on Currently Reading and Random Pick, drawn at the size they're shown.
-- **Long quotes fit.** The Quote widget shrinks the text to fill whatever size you give it.
-- **You can see it working.** Widgets show a loader while they start or switch shelves, put the title up first, and keep the cover's shape while it loads.
-- **Share is one tap away** on the book page, no longer tucked under the edit menu.
-
 ## 3.3.0: The reading record
 
 Everything you might want to record about a book, and every statistic that comes out of it. What you keep private never leaves your device.
