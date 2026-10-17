@@ -47,6 +47,10 @@ gradlePlugin {
             id = "softcover.android.apollo"
             implementationClass = "AndroidApolloConventionPlugin"
         }
+        register("androidR8KeepContract") {
+            id = "softcover.android.r8-keep-contract"
+            implementationClass = "AndroidR8KeepContractConventionPlugin"
+        }
         register("docBudgets") {
             id = "softcover.doc-budgets"
             implementationClass = "DocBudgetsConventionPlugin"

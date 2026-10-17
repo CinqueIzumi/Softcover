@@ -6,6 +6,7 @@ plugins {
     // The build-type debug-routes binding (app/src/debug) implements the @Composable DebugRoutesContent
     // seam, so the application shell needs the Compose compiler to transform that override correctly.
     alias(libs.plugins.kotlin.compose)
+    id("softcover.android.r8-keep-contract")
 }
 
 android {
