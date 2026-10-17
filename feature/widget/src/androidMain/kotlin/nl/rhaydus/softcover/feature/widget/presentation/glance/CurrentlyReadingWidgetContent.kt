@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
-import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
@@ -17,6 +17,8 @@ import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
+import androidx.glance.appwidget.CircularProgressIndicator
+import androidx.glance.appwidget.ImageProvider
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
@@ -45,12 +47,12 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.activity.updateProgressIntent
 import nl.rhaydus.softcover.feature.widget.presentation.callback.CycleBookCallback
-import nl.rhaydus.softcover.feature.widget.presentation.component.Backdrop
+import nl.rhaydus.softcover.feature.widget.presentation.component.BackdropUris
 import nl.rhaydus.softcover.feature.widget.presentation.component.CycleEyebrow
-import nl.rhaydus.softcover.feature.widget.presentation.component.Mask
 import nl.rhaydus.softcover.feature.widget.presentation.component.ReservedLinesTitle
+import nl.rhaydus.softcover.feature.widget.presentation.component.UriMask
 import nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel
-import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressBitmaps
+import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressUris
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
 import nl.rhaydus.softcover.feature.widget.presentation.util.PROGRESS_BAR_HEIGHT_DP
@@ -81,7 +83,7 @@ internal fun CurrentlyReadingWidgetContent(
             contentAlignment = Alignment.Center,
         ) {
             when (val content = model.content) {
-                CurrentlyReadingWidgetUiModel.Content.Loading -> Unit
+                CurrentlyReadingWidgetUiModel.Content.Loading -> CircularProgressIndicator(color = GlanceTheme.colors.primary)
 
                 CurrentlyReadingWidgetUiModel.Content.SignedOut -> Message(
                     headline = context.getString(R.string.widget_sign_in),
@@ -159,7 +161,13 @@ private fun Reading(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
 
     Box(modifier = GlanceModifier.fillMaxSize()) {
         if (artwork != null) {
-            Backdrop(artwork = artwork)
+            BackdropUris(
+                backdrop = artwork.backdrop,
+                veil = artwork.veil,
+                veilLift = artwork.veilLift,
+                washPrimary = artwork.washPrimary,
+                washTertiary = artwork.washTertiary,
+            )
         }
 
         Column(
@@ -217,7 +225,7 @@ private fun Reading(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
 }
 
 @Composable
-private fun Cover(cover: Bitmap?) {
+private fun Cover(cover: Uri?) {
     if (cover != null) {
         Image(
             provider = ImageProvider(cover),
@@ -278,7 +286,7 @@ private fun ProgressRow(content: CurrentlyReadingWidgetUiModel.Content.Reading) 
 }
 
 @Composable
-private fun ProgressBar(progress: Map<Int, WavyProgressBitmaps>) {
+private fun ProgressBar(progress: Map<Int, WavyProgressUris>) {
     val widthDp = progressBarWidthDp(LocalSize.current.width)
     val bars = progress[widthDp] ?: return
 
@@ -287,13 +295,13 @@ private fun ProgressBar(progress: Map<Int, WavyProgressBitmaps>) {
             .width(widthDp.dp)
             .height(PROGRESS_BAR_HEIGHT_DP.dp),
     ) {
-        Mask(
+        UriMask(
             mask = bars.track,
             tint = GlanceTheme.colors.secondaryContainer,
             contentScale = ContentScale.Fit,
         )
 
-        Mask(
+        UriMask(
             mask = bars.indicator,
             tint = GlanceTheme.colors.primary,
             contentScale = ContentScale.Fit,
