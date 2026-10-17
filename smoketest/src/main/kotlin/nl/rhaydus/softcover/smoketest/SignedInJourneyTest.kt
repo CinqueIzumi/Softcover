@@ -131,7 +131,17 @@ class SignedInJourneyTest {
     }
 
     private fun enabledSaveButton(): UiObject2? =
-        labelled("^Save API key$")()?.takeIf { button -> button.isEnabled }
+        clickableAncestor(labelled("^Save API key$")())?.takeIf { button -> button.isEnabled }
+
+    private fun clickableAncestor(label: UiObject2?): UiObject2? {
+        var node = label
+
+        while (node != null && node.isClickable.not()) {
+            node = node.parent
+        }
+
+        return node
+    }
 
     private fun visitEveryTab() {
         for (tab in TABS) {
@@ -294,8 +304,6 @@ class SignedInJourneyTest {
             what = "the API-key field",
         )
 
-        field.click()
-
         // Neither UiObject2.text nor UiDevice.executeShellCommand: both log the value to logcat, which lands in
         // test output. UiAutomation runs the command without logging it, and without a shell, so no quoting.
         val argument = token
@@ -304,11 +312,35 @@ class SignedInJourneyTest {
                 "%s",
             )
 
-        instrumentation.uiAutomation.executeShellCommand("input text $argument").use { descriptor ->
-            ParcelFileDescriptor.AutoCloseInputStream(descriptor).readBytes()
+        repeat(MAX_TYPE_ATTEMPTS) {
+            field.click()
+
+            val focused = pollFor(
+                { device.findObject(By.clazz(EDIT_TEXT_CLASS).focused(true)) },
+                FOCUS_SETTLE_MILLIS,
+            )
+
+            if (focused.not()) return@repeat
+
+            instrumentation.uiAutomation.executeShellCommand("input text $argument").use { descriptor ->
+                ParcelFileDescriptor.AutoCloseInputStream(descriptor).readBytes()
+            }
+
+            device.waitForIdle()
+
+            val saveEnabled = pollFor(
+                { enabledSaveButton() },
+                TYPE_SETTLE_MILLIS,
+            )
+
+            if (saveEnabled) return
+
+            field.clear()
         }
 
-        device.waitForIdle()
+        throw AssertionError(
+            "The token never reached the API-key field (Save API key stayed disabled). Screen:\n${hierarchySummary()}",
+        )
     }
 
     private fun launchApp() {
@@ -493,6 +525,9 @@ class SignedInJourneyTest {
         const val CLEAR_OF_BOTTOM_BAR_SHARE = 0.8
         const val MAX_SCROLLS = 6
         const val MAX_BACK_PRESSES = 5
+        const val MAX_TYPE_ATTEMPTS = 3
+        const val FOCUS_SETTLE_MILLIS = 3_000L
+        const val TYPE_SETTLE_MILLIS = 5_000L
         const val BACK_SETTLE_MILLIS = 1_500L
         const val SWIPE_STEPS = 20
         const val HIERARCHY_DUMP_LIMIT = 6_000
