@@ -2,7 +2,7 @@
 
 What we're building next for [Softcover](https://github.com/CinqueIzumi/Softcover), grouped by the version it's planned to land in. This is the public view of our plan.
 
-**Current release: 3.2.0.** Softcover runs on Android, iPhone, iPad and desktop. 3.2.0 puts your reading on the Android home screen with four widgets, keeps the quotes you save in sync with Hardcover, and remembers every read-through of a book, with a new Paused status and a warm Dim theme along the way.
+**Current release: 3.2.1.** Softcover runs on Android, iPhone, iPad and desktop. 3.2.1 makes the Android home-screen widgets dependable, with sharper covers, quotes that fit and a loader while they work, on top of 3.2.0's widgets, synced quotes and a record of every read-through.
 
 A few honest caveats:
 - **These are plans, not promises.** Versions are listed in the order we intend to ship them, but order can shift and some items may move, merge, or change shape.
@@ -12,16 +12,6 @@ A few honest caveats:
 > Reading this inside the app? It's the same file, fetched live, so it's always current.
 
 ---
-
-## 3.2.1: Widgets you can rely on
-
-A fix-up release for the home-screen widgets, plus one small change on the book page.
-
-- **No more "Can't show content".** Widgets no longer break when you page, shuffle or come back from another app, and the arrows always respond.
-- **Sharper covers** on Currently Reading and Random Pick, drawn at the size they're shown.
-- **Long quotes fit.** The Quote widget shrinks the text to fill whatever size you give it.
-- **You can see it working.** Widgets show a loader while they start or switch shelves, put the title up first, and keep the cover's shape while it loads.
-- **Share is one tap away** on the book page, no longer tucked under the edit menu.
 
 ## 3.3.0: The reading record
 

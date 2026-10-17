@@ -2,6 +2,19 @@
 
 What changed in each release of Softcover, newest first.
 
+## 3.2.1: Widgets you can rely on
+
+*2026-10-17*
+
+A fix-up release for the new widgets, so they keep up with you instead of getting in the way.
+
+- Widgets no longer break into "Can't show content" when you page, shuffle or come back from another app, and the arrows always respond
+- Covers on Currently Reading and Random pick are drawn at the size they're shown, so they stay sharp
+- Long quotes shrink to fit the Quote of the day widget instead of being cut off
+- Widgets show a loader while they start or switch to a new shelf, put the title up first, and keep the cover's shape while it loads
+- A Random pick set to a list that's no longer on your device says so, and a tap takes you to its settings
+- Share sits right in the book page's top bar, no longer tucked under the edit menu
+
 ## 3.2.0: On your home screen
 
 *2026-10-17*
