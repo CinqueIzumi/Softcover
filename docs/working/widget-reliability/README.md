@@ -6,12 +6,12 @@ text-first rendering, and restrict Random pick to lists the app caches locally.
 
 ## Now
 
-- **State:** written 2026-10-17; nothing built. Cause reproduced on the minified build (Medium_Phone): rapid
-  Trending paging → `IllegalArgumentException: RemoteViews for widget update exceeds maximum bitmap memory
-  usage (used: 17667232, max: 15552000)`.
-- **Next:** step A1, stop for approval of the store / provider shape.
-- **Verification:** none yet.
-- **Uncommitted:** this README.
+- **State:** A1–A5, B1–B3, C1, D1 built and committed on `hotfix/3.2.1`; V passed on Medium_Phone (minified).
+- **Next:** the user checks the Xiaomi 15T (Trending paging) and the Bigme HiBreak Pro Color (cover quality).
+- **Verification:** `styleCheck`, `:feature:widget:testAndroidHostTest`, `:app:checkR8KeepContract` passed;
+  rapid Trending paging, Random pick shuffling and app switching gave no `GlanceAppWidget` error.
+- **Open:** C1's premise was wrong: every list is stored; an empty Random pick means no unread books on the shelf.
+- **Uncommitted:** none.
 
 ## Why
 
@@ -42,17 +42,17 @@ text-first rendering, and restrict Random pick to lists the app caches locally.
 
 | Step | Scope | Status |
 |---|---|---|
-| A1 | `WidgetImageStore` (bitmap → file → `Uri`, touch, prune from the maintenance worker) and `WidgetImageProvider` + manifest entry + keep contract; design first, stop for approval | [ ] |
-| A2 | Trending: covers by `Uri`; cover rendered at its displayed size | [ ] |
-| A3 | Random pick: cover, backdrop and gradient masks by `Uri` (masks keep their tint) | [ ] |
-| A4 | Currently reading: cover, backdrop, wave track / indicator and masks by `Uri` | [ ] |
-| A5 | detekt `ForbiddenMethodCall` on `ImageProvider(Bitmap)` in `:feature:widget`, so a bitmap never returns | [ ] |
-| B1 | Loading state for all four widgets: frame, header, Glance `CircularProgressIndicator` | [ ] |
-| B2 | Text-first models in each mapper (`transformLatest`: text with placeholders, then images); a failed read logs and keeps the last model instead of throwing into the session | [ ] |
-| B3 | Trending: prefetch the previous / next page's cover files after the shown page renders | [ ] |
-| C1 | Random pick: enabled-list filter in the pool, the source chips and the settings screen; `SourceUnavailable` content with explanation copy; refresh on enabled-ids change | [ ] |
-| D1 | Quote: `SizeMode.Exact`; font size and line count fitted to the real size by `StaticLayout` measurement (18sp down to a floor), replacing the three height tiers | [ ] |
-| V | Minified build on Medium_Phone: rapid paging / shuffling / app switching, logcat free of `GlanceAppWidget` errors; then the user checks the Xiaomi 15T | [ ] |
+| A1 | `WidgetImageStore` (bitmap → file → `Uri`, touch, prune from the maintenance worker) and `WidgetImageProvider` + manifest entry + keep contract; design first, stop for approval | [x] |
+| A2 | Trending: covers by `Uri`; cover rendered at its displayed size | [x] |
+| A3 | Random pick: cover, backdrop and gradient masks by `Uri` (masks keep their tint) | [x] |
+| A4 | Currently reading: cover, backdrop, wave track / indicator and masks by `Uri` | [x] |
+| A5 | detekt `ForbiddenMethodCall` on `ImageProvider(Bitmap)` in `:feature:widget`, so a bitmap never returns | [x] |
+| B1 | Loading state for all four widgets: frame, header, Glance `CircularProgressIndicator` | [x] |
+| B2 | Text-first models in each mapper (`transformLatest`: text with placeholders, then images); a failed read logs and keeps the last model instead of throwing into the session | [x] |
+| B3 | Trending: prefetch the previous / next page's cover files after the shown page renders | [x] |
+| C1 | Random pick: enabled-list filter in the pool, the source chips and the settings screen; `SourceUnavailable` content with explanation copy; refresh on enabled-ids change | [x] |
+| D1 | Quote: `SizeMode.Exact`; font size and line count fitted to the real size by `StaticLayout` measurement (18sp down to a floor), replacing the three height tiers | [x] |
+| V | Minified build on Medium_Phone: rapid paging / shuffling / app switching, logcat free of `GlanceAppWidget` errors; then the user checks the Xiaomi 15T | [x] |
 
 A2, A3 and A4 touch disjoint widget files and run as parallel implementers after A1. B1–B3 follow A, since
 they rework the same mappers and models. C1 is independent and can run beside A2–A4.
