@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
-import android.graphics.Bitmap
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
@@ -18,6 +17,8 @@ import androidx.glance.action.Action
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.CircularProgressIndicator
+import androidx.glance.appwidget.ImageProvider
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
@@ -73,7 +74,13 @@ internal fun TrendingWidgetContent(
             contentAlignment = Alignment.Center,
         ) {
             when (val content = model.content) {
-                TrendingWidgetUiModel.Content.Loading -> Unit
+                TrendingWidgetUiModel.Content.Loading -> CircularProgressIndicator(color = GlanceTheme.colors.primary)
+
+                is TrendingWidgetUiModel.Content.Switching -> Switching(
+                    eyebrow = content.eyebrow,
+                    openExplore = openExplore,
+                    openSettings = openSettings,
+                )
 
                 TrendingWidgetUiModel.Content.SignedOut -> Message(
                     eyebrow = null,
@@ -106,6 +113,35 @@ private fun widgetCornerRadius(): GlanceModifier = if (Build.VERSION.SDK_INT >= 
     GlanceModifier.cornerRadius(android.R.dimen.system_app_widget_background_radius)
 } else {
     GlanceModifier
+}
+
+@Composable
+private fun Switching(
+    eyebrow: String,
+    openExplore: Action,
+    openSettings: Action,
+) {
+    Column(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .padding(Spacing.xxs),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Header(
+            eyebrow = eyebrow,
+            openExplore = openExplore,
+            openSettings = openSettings,
+        )
+
+        Box(
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .defaultWeight(),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator(color = GlanceTheme.colors.primary)
+        }
+    }
 }
 
 @Composable
@@ -433,7 +469,7 @@ private fun Header(
 
 @Composable
 private fun Cover(
-    cover: Bitmap?,
+    cover: TrendingWidgetUiModel.Cover,
     height: Dp,
 ) {
     val modifier = GlanceModifier
@@ -443,9 +479,9 @@ private fun Cover(
         )
         .cornerRadius(CornerRadius.xxs)
 
-    if (cover != null) {
+    if (cover is TrendingWidgetUiModel.Cover.Loaded) {
         Image(
-            provider = ImageProvider(cover),
+            provider = ImageProvider(cover.uri),
             contentDescription = null,
             modifier = modifier,
             contentScale = ContentScale.Crop,

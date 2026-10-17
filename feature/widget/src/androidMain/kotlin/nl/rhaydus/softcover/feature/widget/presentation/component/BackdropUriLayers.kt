@@ -1,22 +1,27 @@
 package nl.rhaydus.softcover.feature.widget.presentation.component
 
-import android.graphics.Bitmap
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
-import androidx.glance.ImageProvider
+import androidx.glance.appwidget.ImageProvider
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.unit.ColorProvider
-import nl.rhaydus.softcover.feature.widget.presentation.render.BackdropArtwork
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 
+/** [backdrop] is `null` while the book has no cover, which swaps the artwork for the two colour washes. */
 @Composable
-internal fun Backdrop(artwork: BackdropArtwork) {
+internal fun BackdropUris(
+    backdrop: Uri?,
+    veil: Uri,
+    veilLift: Uri,
+    washPrimary: Uri,
+    washTertiary: Uri,
+) {
     val extra = LocalWidgetExtraColors.current
-    val backdrop = artwork.backdrop
 
     if (backdrop != null) {
         Image(
@@ -26,31 +31,31 @@ internal fun Backdrop(artwork: BackdropArtwork) {
             contentScale = ContentScale.Crop,
         )
     } else {
-        Mask(
-            mask = artwork.gradients.washPrimary,
+        UriMask(
+            mask = washPrimary,
             tint = GlanceTheme.colors.primary,
         )
 
-        Mask(
-            mask = artwork.gradients.washTertiary,
+        UriMask(
+            mask = washTertiary,
             tint = GlanceTheme.colors.tertiary,
         )
     }
 
-    Mask(
-        mask = artwork.gradients.veil,
+    UriMask(
+        mask = veil,
         tint = extra.surfaceContainerHigh,
     )
 
-    Mask(
-        mask = artwork.gradients.veilLift,
+    UriMask(
+        mask = veilLift,
         tint = extra.daySurfaceContainerHigh,
     )
 }
 
 @Composable
-internal fun Mask(
-    mask: Bitmap,
+internal fun UriMask(
+    mask: Uri,
     tint: ColorProvider,
     contentScale: ContentScale = ContentScale.FillBounds,
 ) {

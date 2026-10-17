@@ -52,6 +52,26 @@ class RandomPickChoicesMapperTest {
         }
 
         @Test
+        fun `the owned chip is left out when there is no owned list`() {
+            // ----- Arrange -----
+            val lists = listOf(
+                list(
+                    id = 2,
+                    name = "Favourites",
+                ),
+            )
+
+            // ----- Act -----
+            val result = sourceChipsFor(
+                selected = RandomPickSource.WantToRead,
+                lists = lists,
+            )
+
+            // ----- Assert -----
+            result.chips.map { it.label } shouldContainExactly listOf("Want to Read", "Favourites")
+        }
+
+        @Test
         fun `user lists are ordered by name ignoring case`() {
             // ----- Arrange -----
             val lists = listOf(
@@ -72,7 +92,7 @@ class RandomPickChoicesMapperTest {
             )
 
             // ----- Assert -----
-            result.chips.map { it.label } shouldContainExactly listOf("Want to Read", "Owned", "Apple", "banana")
+            result.chips.map { it.label } shouldContainExactly listOf("Want to Read", "Apple", "banana")
         }
 
         @Test
@@ -96,7 +116,7 @@ class RandomPickChoicesMapperTest {
         }
 
         @Test
-        fun `a selected list that no longer exists marks want to read`() {
+        fun `a selected list that no longer exists marks no chip`() {
             // ----- Arrange -----
             val lists = emptyList<BookList>()
 
@@ -107,15 +127,15 @@ class RandomPickChoicesMapperTest {
             )
 
             // ----- Assert -----
-            result.chips.filter { it.selected }.map { it.label } shouldContainExactly listOf("Want to Read")
-            result.chips.size shouldBe 2
+            result.chips.filter { it.selected } shouldBe emptyList()
+            result.chips.size shouldBe 1
         }
     }
 
     @Nested
     inner class SourceLabel {
         @Test
-        fun `a user list that no longer exists reads as the want to read label`() {
+        fun `a user list that no longer exists reads as not on the device`() {
             // ----- Arrange -----
             val lists = listOf(
                 list(
@@ -128,7 +148,7 @@ class RandomPickChoicesMapperTest {
             val result = RandomPickSource.UserList(listId = 99).label(lists)
 
             // ----- Assert -----
-            result shouldBe RandomPickSource.WantToRead.label(lists)
+            result shouldBe "List not on your device"
         }
 
         @Test

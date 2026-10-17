@@ -7,6 +7,7 @@ import androidx.work.WorkerParameters
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.feature.widget.presentation.glance.OwnedWidgets
+import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.context.GlobalContext
@@ -27,6 +28,14 @@ internal class WidgetMaintenanceWorker(
                     )
                 }
         }
+
+        runCatchingCancellable { get<WidgetImageStore>().prune() }
+            .onFailure { error ->
+                AppLog.e(
+                    error,
+                    "Pruning the widget images failed",
+                )
+            }
 
         runCatchingCancellable { get<WidgetMaintenanceScheduler>().scheduleNextMidnight() }
             .onFailure { error ->

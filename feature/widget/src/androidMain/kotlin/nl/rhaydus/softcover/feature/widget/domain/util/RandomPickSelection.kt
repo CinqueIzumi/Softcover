@@ -12,29 +12,25 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Instant
 
-internal fun resolveSource(
+internal fun isSourceAvailable(
     source: RandomPickSource,
     lists: List<BookList>,
-): RandomPickSource = if (source is RandomPickSource.UserList && lists.none { it.id == source.listId }) {
-    RandomPickSource.WantToRead
-} else {
-    source
+): Boolean = when (source) {
+    RandomPickSource.WantToRead -> true
+    RandomPickSource.Owned -> lists.any { it.isOwned }
+    is RandomPickSource.UserList -> lists.any { it.id == source.listId }
 }
 
+/** Empty when [source] is not [isSourceAvailable]. */
 internal fun buildPool(
     source: RandomPickSource,
     wantToRead: List<Book>,
     lists: List<BookList>,
 ): List<Book> {
-    val resolved = resolveSource(
-        source = source,
-        lists = lists,
-    )
-
-    val books = when (resolved) {
+    val books = when (source) {
         RandomPickSource.WantToRead -> wantToRead
         RandomPickSource.Owned -> lists.firstOrNull { it.isOwned }.unreadBooks()
-        is RandomPickSource.UserList -> lists.firstOrNull { it.id == resolved.listId }.unreadBooks()
+        is RandomPickSource.UserList -> lists.firstOrNull { it.id == source.listId }.unreadBooks()
     }
 
     return books.distinctBy { it.id }

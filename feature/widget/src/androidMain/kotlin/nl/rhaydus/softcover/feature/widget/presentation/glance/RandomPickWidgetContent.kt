@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
-import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
@@ -15,6 +14,8 @@ import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.CircularProgressIndicator
+import androidx.glance.appwidget.ImageProvider
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
@@ -24,13 +25,11 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
-import androidx.glance.layout.width
 import androidx.glance.semantics.contentDescription
 import androidx.glance.semantics.semantics
 import androidx.glance.text.FontFamily
@@ -38,11 +37,10 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.CornerRadius
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.callback.ShuffleCallback
-import nl.rhaydus.softcover.feature.widget.presentation.component.Backdrop
+import nl.rhaydus.softcover.feature.widget.presentation.component.BackdropUris
 import nl.rhaydus.softcover.feature.widget.presentation.component.ReservedLinesTitle
 import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
@@ -74,18 +72,31 @@ internal fun RandomPickWidgetContent(
                 .clickable(
                     when (val content = model.content) {
                         is RandomPickWidgetUiModel.Content.Picked -> openBook(content.bookId)
+                        RandomPickWidgetUiModel.Content.SourceUnavailable -> openSettings
                         else -> openApp
                     },
                 ),
             contentAlignment = Alignment.Center,
         ) {
             when (val content = model.content) {
-                RandomPickWidgetUiModel.Content.Loading -> Unit
+                RandomPickWidgetUiModel.Content.Loading -> CircularProgressIndicator(color = GlanceTheme.colors.primary)
+
+                is RandomPickWidgetUiModel.Content.Switching -> Switching(
+                    eyebrow = content.eyebrow,
+                    openSettings = openSettings,
+                )
 
                 RandomPickWidgetUiModel.Content.SignedOut -> Message(
                     eyebrow = null,
                     headline = context.getString(R.string.widget_sign_in),
                     subline = null,
+                    openSettings = openSettings,
+                )
+
+                RandomPickWidgetUiModel.Content.SourceUnavailable -> Message(
+                    eyebrow = null,
+                    headline = context.getString(R.string.random_pick_unavailable_headline),
+                    subline = context.getString(R.string.random_pick_unavailable_subline),
                     openSettings = openSettings,
                 )
 
@@ -109,6 +120,33 @@ private fun widgetCornerRadius(): GlanceModifier = if (Build.VERSION.SDK_INT >= 
     GlanceModifier.cornerRadius(android.R.dimen.system_app_widget_background_radius)
 } else {
     GlanceModifier
+}
+
+@Composable
+private fun Switching(
+    eyebrow: String,
+    openSettings: Action,
+) {
+    Column(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .padding(Spacing.xxs),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Eyebrow(
+            text = eyebrow,
+            openSettings = openSettings,
+        )
+
+        Box(
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .defaultWeight(),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator(color = GlanceTheme.colors.primary)
+        }
+    }
 }
 
 @Composable
@@ -176,7 +214,13 @@ private fun PickedBook(
 
     Box(modifier = GlanceModifier.fillMaxSize()) {
         if (artwork != null) {
-            Backdrop(artwork = artwork)
+            BackdropUris(
+                backdrop = artwork.backdrop,
+                veil = artwork.veil,
+                veilLift = artwork.veilLift,
+                washPrimary = artwork.washPrimary,
+                washTertiary = artwork.washTertiary,
+            )
         }
 
         Column(
@@ -252,22 +296,22 @@ private fun Eyebrow(
 }
 
 @Composable
-private fun Cover(cover: Bitmap?) {
-    if (cover != null) {
+private fun Cover(cover: RandomPickWidgetUiModel.Cover) {
+    if (cover is RandomPickWidgetUiModel.Cover.Loaded) {
         Image(
-            provider = ImageProvider(cover),
+            provider = ImageProvider(cover.uri),
             contentDescription = null,
             modifier = GlanceModifier.fillMaxSize(),
             contentScale = ContentScale.Fit,
         )
     } else {
-        Box(
-            modifier = GlanceModifier
-                .fillMaxHeight()
-                .width(56.dp)
-                .cornerRadius(CornerRadius.xxs)
-                .background(GlanceTheme.colors.surfaceVariant),
-        ) {}
+        Image(
+            provider = ImageProvider(R.drawable.widget_cover_placeholder),
+            contentDescription = null,
+            modifier = GlanceModifier.fillMaxSize(),
+            contentScale = ContentScale.Fit,
+            colorFilter = ColorFilter.tint(GlanceTheme.colors.surfaceVariant),
+        )
     }
 }
 

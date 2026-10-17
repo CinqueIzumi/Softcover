@@ -224,6 +224,15 @@ private fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
     - dismiss: STABLE (function type)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookShareButton(state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>, iconColors: androidx.compose.material3.IconButtonColors): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - state: UNSTABLE (has mutable properties or unstable members)
+    - runAction: STABLE (function type)
+    - iconColors: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ExternalLinksSection(state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true

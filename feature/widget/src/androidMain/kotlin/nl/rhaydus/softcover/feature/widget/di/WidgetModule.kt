@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.di
 
+import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgets
 import nl.rhaydus.softcover.feature.widget.data.repository.CurrentlyReadingRepositoryImpl
 import nl.rhaydus.softcover.feature.widget.data.repository.QuoteWidgetRepositoryImpl
@@ -20,8 +21,10 @@ import nl.rhaydus.softcover.feature.widget.domain.usecase.GetTrendingPositionUse
 import nl.rhaydus.softcover.feature.widget.domain.usecase.GetTrendingSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveQuoteSelectionChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveRandomPickChangesUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveRandomPickSettingsChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveSelectedBookChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingChangesUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingSettingsChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ResolveRandomPickUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.SaveRandomPickSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.SaveTrendingSettingsUseCase
@@ -43,6 +46,7 @@ import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidgetDependencies
 import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetEnvironment
 import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
+import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import nl.rhaydus.softcover.feature.widget.presentation.placed.AndroidHomeScreenWidgets
 import nl.rhaydus.softcover.feature.widget.presentation.placed.WidgetInstanceChanges
 import nl.rhaydus.softcover.feature.widget.presentation.refresh.WidgetRefresher
@@ -86,6 +90,8 @@ val widgetModule = module {
 
     factory { ObserveRandomPickChangesUseCase(randomPickRepository = get()) }
 
+    factory { ObserveRandomPickSettingsChangesUseCase(randomPickRepository = get()) }
+
     factory { GetTrendingSettingsUseCase(trendingRepository = get()) }
 
     factory { GetPlacedTrendingSettingsUseCase(trendingRepository = get()) }
@@ -98,13 +104,24 @@ val widgetModule = module {
 
     factory { ObserveTrendingChangesUseCase(trendingRepository = get()) }
 
+    factory { ObserveTrendingSettingsChangesUseCase(trendingRepository = get()) }
+
     single { WidgetRepainter(context = androidContext()) }
+
+    single {
+        WidgetImageStore(
+            context = androidContext(),
+            ioDispatcher = get<AppDispatchers>().io,
+            clock = get(),
+        )
+    }
 
     single {
         WidgetEnvironment(
             getUserIdAsFlow = get(),
             getThemeConfiguration = get(),
             appEntryPoint = get(),
+            imageStore = get(),
         )
     }
 
@@ -128,6 +145,7 @@ val widgetModule = module {
             resolveRandomPick = get(),
             shuffleRandomPick = get(),
             observeRandomPickChanges = get(),
+            observeRandomPickSettingsChanges = get(),
         )
     }
 
@@ -151,6 +169,7 @@ val widgetModule = module {
             getTrendingPosition = get(),
             advanceTrendingPage = get(),
             observeTrendingChanges = get(),
+            observeTrendingSettingsChanges = get(),
         )
     }
 

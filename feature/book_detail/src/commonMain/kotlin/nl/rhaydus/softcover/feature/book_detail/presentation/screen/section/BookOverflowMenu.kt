@@ -22,7 +22,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadl
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionOwnedToggleAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveBookClickAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareBookClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowEditEditionSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -90,25 +89,6 @@ private fun BookOverflowMenuItems(
     isOnline: Boolean,
     dismiss: () -> Unit,
 ) {
-    DropdownMenuItem(
-        text = { SoftcoverText(text = "Share") },
-        leadingIcon = {
-            val shareIcon = drawableIconResource(
-                icon = SoftcoverIcon.Share,
-                contentDescription = "",
-            )
-
-            Icon(
-                painter = shareIcon.getIconPainter(),
-                contentDescription = shareIcon.contentDescription,
-            )
-        },
-        onClick = {
-            dismiss()
-            runAction(OnShareBookClickAction())
-        },
-    )
-
     if (isOnline) {
         DropdownMenuItem(
             text = { SoftcoverText(text = "Choose lists") },

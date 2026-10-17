@@ -39,4 +39,5 @@ internal fun renderGradientMasks(): GradientMasks = GradientMasks(
     ),
 )
 
-private const val GRADIENT_ROWS = 128
+/** The row count every mask is rendered with; also keys the stored mask files. */
+internal const val GRADIENT_ROWS = 128

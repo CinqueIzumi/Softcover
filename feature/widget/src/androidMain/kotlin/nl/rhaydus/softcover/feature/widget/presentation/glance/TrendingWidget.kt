@@ -13,19 +13,23 @@ import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
+import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
+import nl.rhaydus.softcover.core.uibinding.cover.resolveCoverSource
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.activity.TrendingSettingsActivity
 import nl.rhaydus.softcover.feature.widget.presentation.activity.widgetSettingsIntent
 import nl.rhaydus.softcover.feature.widget.presentation.mapper.trendingWidgetModels
 import nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel
-import nl.rhaydus.softcover.feature.widget.presentation.render.BookCoverLoader
 import nl.rhaydus.softcover.feature.widget.presentation.util.trendingCoverHeightDp
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import kotlin.math.roundToInt
 
 internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -65,12 +69,7 @@ internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
         val themeConfigurations = environment.getThemeConfiguration()
         val initialTheme = environment.initialTheme(themeConfigurations)
 
-        val covers = BookCoverLoader(
-            context = context,
-            density = density,
-            coverHeightDp = COVER_BITMAP_HEIGHT_DP,
-            capacity = COVER_CACHE_CAPACITY,
-        )
+        val coverHeightPx = (COVER_BITMAP_HEIGHT_DP * density).roundToInt()
 
         val models = trendingWidgetModels(
             isSignedIn = environment.isSignedIn(),
@@ -78,10 +77,38 @@ internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
             position = dependencies.observeTrendingChanges()
                 .onStart { emit(appWidgetId) }
                 .filter { it == appWidgetId }
-                .map { dependencies.getTrendingPosition(appWidgetId = appWidgetId).getOrThrow() },
+                .map {
+                    dependencies.getTrendingPosition(appWidgetId = appWidgetId)
+                        .onFailure { error ->
+                            AppLog.e(
+                                error,
+                                "Trending position unavailable",
+                            )
+                        }
+                        .getOrNull()
+                }
+                .filterNotNull(),
+            settingsChanges = dependencies.observeTrendingSettingsChanges()
+                .filter { it.appWidgetId == appWidgetId },
             observeTrending = { period -> dependencies.observeTrendingBooks(period = period) },
             eyebrowFor = { period -> context.getString(period.eyebrowRes()) },
-            loadCover = covers::load,
+            coverUri = { book ->
+                val source = resolveCoverSource(
+                    edition = book.currentEdition,
+                    defaultEdition = book.defaultEdition,
+                    fallbackCoverUrl = book.coverUrl,
+                )
+
+                source?.let {
+                    environment.imageStore.uriFor("trending-cover:$it:$coverHeightPx") {
+                        loadCoverBitmap(
+                            context = context,
+                            source = it,
+                            sizePx = coverHeightPx,
+                        )
+                    }
+                }
+            },
         )
 
         val loadingModel = TrendingWidgetUiModel(
@@ -145,8 +172,6 @@ private val COVER_BITMAP_HEIGHT_DP = TRENDING_SIZES.maxOf { size ->
         showsPageRow = false,
     )
 }
-
-private const val COVER_CACHE_CAPACITY = 4
 
 private fun TrendingPeriod.eyebrowRes(): Int = when (this) {
     TrendingPeriod.Week -> R.string.trending_eyebrow_week

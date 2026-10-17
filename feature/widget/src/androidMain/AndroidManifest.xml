@@ -86,6 +86,12 @@
             android:exported="false"
             android:taskAffinity=""
             android:theme="@style/Theme.Softcover.UpdateProgress" />
+
+        <provider
+            android:name="nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageProvider"
+            android:authorities="${applicationId}.widgetimages"
+            android:exported="true"
+            android:grantUriPermissions="false" />
     </application>
 
 </manifest>
