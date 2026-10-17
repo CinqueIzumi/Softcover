@@ -27,6 +27,9 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import nl.rhaydus.softcover.feature.widget.R
 
+/** Height of the [CycleEyebrow] row. */
+internal const val CYCLE_EYEBROW_HEIGHT_DP = 28
+
 /** A 28dp label row with a 40dp-wide ‹ at its start and › at its end; a `null` action leaves that arrow out. */
 @Composable
 internal fun CycleEyebrow(
@@ -39,7 +42,7 @@ internal fun CycleEyebrow(
     Row(
         modifier = GlanceModifier
             .fillMaxWidth()
-            .height(28.dp),
+            .height(CYCLE_EYEBROW_HEIGHT_DP.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (previous != null) {

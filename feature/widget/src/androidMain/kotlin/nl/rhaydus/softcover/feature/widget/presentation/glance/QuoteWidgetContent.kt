@@ -2,8 +2,7 @@ package nl.rhaydus.softcover.feature.widget.presentation.glance
 
 import android.os.Build
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
@@ -34,35 +33,16 @@ import androidx.glance.text.TextStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.callback.CycleQuoteCallback
+import nl.rhaydus.softcover.feature.widget.presentation.component.CYCLE_EYEBROW_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.component.CycleEyebrow
 import nl.rhaydus.softcover.feature.widget.presentation.model.QuoteWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
+import nl.rhaydus.softcover.feature.widget.presentation.util.androidQuoteTextMeasurer
+import nl.rhaydus.softcover.feature.widget.presentation.util.fitQuoteText
+import nl.rhaydus.softcover.feature.widget.presentation.util.singleLineHeightPx
 
-private const val TALL_QUOTE_HEIGHT_DP = 250
-private const val MEDIUM_QUOTE_HEIGHT_DP = 180
-
-private class QuoteTextSize(
-    val fontSize: TextUnit,
-    val maxLines: Int,
-)
-
-private fun quoteTextSize(height: Dp): QuoteTextSize = when {
-    height >= TALL_QUOTE_HEIGHT_DP.dp -> QuoteTextSize(
-        fontSize = 18.sp,
-        maxLines = 7,
-    )
-
-    height >= MEDIUM_QUOTE_HEIGHT_DP.dp -> QuoteTextSize(
-        fontSize = 16.sp,
-        maxLines = 5,
-    )
-
-    else -> QuoteTextSize(
-        fontSize = 14.sp,
-        maxLines = 2,
-    )
-}
+private const val BYLINE_FONT_SIZE_SP = 12
 
 @Composable
 internal fun QuoteWidgetContent(
@@ -154,7 +134,27 @@ private fun Shown(
     openBook: Action,
 ) {
     val context = LocalContext.current
-    val textSize = quoteTextSize(LocalSize.current.height)
+    val size = LocalSize.current
+    val density = context.resources.displayMetrics.density
+
+    val bylineHeightPx = if (content.byline != null) {
+        singleLineHeightPx(
+            context = context,
+            fontSizeSp = BYLINE_FONT_SIZE_SP,
+        ) + (Spacing.xxs.value * density).toInt()
+    } else {
+        0
+    }
+
+    val textFit = fitQuoteText(
+        availableWidthPx = ((size.width - Spacing.xxs * 2 - Spacing.sm * 2).value * density).toInt(),
+        availableHeightPx = ((size.height - Spacing.xxs * 2 - CYCLE_EYEBROW_HEIGHT_DP.dp).value * density)
+            .toInt() - bylineHeightPx,
+        measure = androidQuoteTextMeasurer(
+            context = context,
+            text = content.quoteText,
+        ),
+    )
 
     Box(modifier = GlanceModifier.fillMaxSize()) {
         Text(
@@ -199,10 +199,10 @@ private fun Shown(
             ) {
                 Text(
                     text = content.quoteText,
-                    maxLines = textSize.maxLines,
+                    maxLines = textFit.maxLines,
                     style = TextStyle(
                         color = GlanceTheme.colors.onBackground,
-                        fontSize = textSize.fontSize,
+                        fontSize = textFit.fontSizeSp.sp,
                         fontStyle = FontStyle.Italic,
                         fontFamily = FontFamily.Serif,
                     ),
@@ -216,7 +216,7 @@ private fun Shown(
                         maxLines = 1,
                         style = TextStyle(
                             color = GlanceTheme.colors.primary,
-                            fontSize = 12.sp,
+                            fontSize = BYLINE_FONT_SIZE_SP.sp,
                         ),
                     )
                 }
