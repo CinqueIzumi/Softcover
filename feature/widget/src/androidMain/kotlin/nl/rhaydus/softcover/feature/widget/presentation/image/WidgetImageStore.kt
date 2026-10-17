@@ -11,6 +11,8 @@ import kotlin.time.Duration.Companion.days
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import nl.rhaydus.common.AppLog
+import nl.rhaydus.common.runCatchingCancellable
 
 internal class WidgetImageStore(
     private val context: Context,
@@ -35,24 +37,31 @@ internal class WidgetImageStore(
         val bitmap = render() ?: return null
 
         return withContext(ioDispatcher) {
-            directory.mkdirs()
-            val temp = File.createTempFile(
-                "render",
-                ".tmp",
-                directory,
-            )
-            try {
-                temp.outputStream().use {
+            var temp: File? = null
+            runCatchingCancellable {
+                directory.mkdirs()
+                val created = File.createTempFile(
+                    "render",
+                    ".tmp",
+                    directory,
+                )
+                temp = created
+                created.outputStream().use {
                     bitmap.compress(
                         Bitmap.CompressFormat.PNG,
                         100,
                         it,
                     )
                 }
-                if (temp.renameTo(file)) uriOf(file) else null
-            } finally {
-                temp.delete()
-            }
+                if (created.renameTo(file)) uriOf(file) else null
+            }.onFailure { error ->
+                AppLog.e(
+                    error,
+                    "Writing a widget image failed",
+                )
+            }.also {
+                temp?.delete()
+            }.getOrNull()
         }
     }
 

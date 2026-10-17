@@ -61,14 +61,15 @@ internal class BackdropImages(
         coverHeightDp: Int,
     ): Uri? {
         val source = book.coverSource() ?: return null
+        val coverPx = (coverHeightDp * density).roundToInt()
 
         return store.uriFor(
-            key = "backdrop:${source.keyPart()}:${backdropWidthPx}x$backdropHeightPx",
+            key = "backdrop:v$BACKDROP_RENDER_VERSION:${source.keyPart()}:${backdropWidthPx}x$backdropHeightPx:cover$coverPx",
             render = {
                 loadCoverBitmap(
                     context = context,
                     source = source,
-                    sizePx = (coverHeightDp * density).roundToInt(),
+                    sizePx = coverPx,
                 )?.let { cover ->
                     renderBackdrop(
                         cover = cover,
@@ -85,11 +86,17 @@ internal class BackdropImages(
         name: String,
         render: () -> Bitmap,
     ): Uri? = store.uriFor(
-        key = "mask:$name:$GRADIENT_ROWS",
+        key = "mask:v$MASK_RENDER_VERSION:$name:$GRADIENT_ROWS",
         render = render,
     )
 
     private companion object {
+        /** Bump whenever `GradientMasksRenderer`'s stops change, or stored masks keep the old look. */
+        const val MASK_RENDER_VERSION = 1
+
+        /** Bump whenever the blur constants or `renderBackdrop` change, or stored backdrops keep the old look. */
+        const val BACKDROP_RENDER_VERSION = 1
+
         const val BACKDROP_SCALE = 0.5f
         const val BACKDROP_WIDTH_DP = 110
         const val BACKDROP_HEIGHT_DP = 180

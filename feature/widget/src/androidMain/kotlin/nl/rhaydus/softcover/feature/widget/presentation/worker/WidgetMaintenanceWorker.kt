@@ -19,14 +19,6 @@ internal class WidgetMaintenanceWorker(
     override suspend fun doWork(): Result {
         if (GlobalContext.getOrNull() == null) return Result.retry()
 
-        runCatchingCancellable { get<WidgetImageStore>().prune() }
-            .onFailure { error ->
-                AppLog.e(
-                    error,
-                    "Pruning the widget images failed",
-                )
-            }
-
         get<OwnedWidgets>().widgets.forEach { widget ->
             runCatchingCancellable { widget.updateAll(applicationContext) }
                 .onFailure { error ->
@@ -36,6 +28,14 @@ internal class WidgetMaintenanceWorker(
                     )
                 }
         }
+
+        runCatchingCancellable { get<WidgetImageStore>().prune() }
+            .onFailure { error ->
+                AppLog.e(
+                    error,
+                    "Pruning the widget images failed",
+                )
+            }
 
         runCatchingCancellable { get<WidgetMaintenanceScheduler>().scheduleNextMidnight() }
             .onFailure { error ->
