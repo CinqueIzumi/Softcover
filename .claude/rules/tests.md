@@ -37,4 +37,4 @@ paths:
 Only `:smoketest`, a self-instrumenting APK in its own process; the runner hits R8-stripped classes in-app. Contract
 tests load app classes via a `PathClassLoader` over the app's APK; the journey is read-only UI Automator (`By.res`),
 signed in by the `hardcoverToken` argument. Allowed deps: androidx.test runner / ext-junit / core and UI Automator.
-Real `wait` / `Until` timeouts are allowed here (exception to "Fast"). Run `scripts/gradle-quiet.sh :smoketest:pixelApi36MinifiedAndroidTest`.
+Real `wait` / `Until` timeouts are allowed here (exception to "Fast"). Run `scripts/gradle-quiet.sh :smoketest:pixelApi36MinifiedAndroidTest`; a re-run with unchanged inputs is UP-TO-DATE and tests nothing, so add `--rerun`.

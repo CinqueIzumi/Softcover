@@ -41,7 +41,9 @@ Steps:
 
    **This is mandatory, not optional.** `ROADMAP.md` is a generated file, and the Roadmap workflow runs `--check` on any pull request touching `ROADMAP.md` or `scripts/roadmap/**`. Editing `header.md` in step 7 without regenerating leaves the file stale and **fails CI on the release PR**. Verify with `--check` before reporting.
 
-9. Report a consolidated summary: README changes, the check result, the version transition (e.g. `versionName / MARKETING_VERSION / packageVersion: 2.4.0 → 2.5.0, versionCode / CURRENT_PROJECT_VERSION: 29 → 30`), which milestone was closed, the new `CHANGELOG.md` entry (headline and bullets), and the new "what shipped" sentence.
+9. **Remind the user to verify R8 after the tag is pushed.** On the tag run, the `R8 release smoke` job must have passed, the `Softcover-<tag>-mapping.txt` file must be attached to the GitHub release, and the mapping must be visible under the release in Play Console. Details in `docs/reference/r8.md`.
+
+10. Report a consolidated summary: README changes, the check result, the version transition (e.g. `versionName / MARKETING_VERSION / packageVersion: 2.4.0 → 2.5.0, versionCode / CURRENT_PROJECT_VERSION: 29 → 30`), which milestone was closed, the new `CHANGELOG.md` entry (headline and bullets), and the new "what shipped" sentence.
 
 Do not create a commit or tag. Do not write Google Play release notes. Never hand-edit
 `ROADMAP.md` — it is generated; change `header.md` or a milestone description and regenerate.

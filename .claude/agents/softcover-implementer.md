@@ -59,6 +59,8 @@ the concept; do not read it whole). Do not read it for anything else.
   top.
 - A new or changed shared component, pattern or role updates its section file under
   `docs/reference/design-system/` in the same change.
+- A manifest component, worker, widget, `Screen` argument or class reached by name follows the implementer
+  checklist in `docs/reference/r8.md`.
 - Comments and KDoc follow the `document-code` skill standard: document only what the code cannot say; no
   comment that restates the code.
 

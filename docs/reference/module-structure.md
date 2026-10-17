@@ -259,6 +259,9 @@ Room DB.
   banner and offline screen say the same thing on every surface), and `:feature:settings` bundles the
   build-time `ROADMAP.md` fallback. All three must carry `androidResources.enable = true` (see the gate
   below).
+- **Keep rules live in the owning module.** A class reached by name keeps itself through
+  `src/<sourceSet>/keepRules/*.keep` in the module that owns it, as consumer rules; `:app` holds only its
+  line-table rule. See [`r8.md`](r8.md).
 - **Koin:** each module owns one `module { }` that declares its own dependencies via `includes(...)`
   (the sibling modules whose bindings it `get()`s, plus its platform `expect`/`actual` module). The
   composition root `orchestrationModule` `includes(...)` the whole graph, so `softcoverModules` is just

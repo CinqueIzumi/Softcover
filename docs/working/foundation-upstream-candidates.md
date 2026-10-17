@@ -485,3 +485,15 @@ clone would fail to *configure* — `build-logic` is not in the foundation's `ma
   KMP Android target the analyzer's per-variant tasks look for `compile<Variant>Kotlin` output and find none, so
   repoint their `stabilityInputFiles` at `stability/compileAndroidMain/stability-info.json` once the task graph is
   ready (see `StabilityGate.kt`), or fix it upstream in the analyzer.
+
+### F52 — R8 keep-contract plugin, reflection and Screen-argument rules, and the `keepRules/` convention
+
+- **Type:** gate
+- **Home:** `build-logic` convention plugins, `nl.rhaydus:detekt-rules`, and the module convention plugins
+- **Status:** **Open — implemented locally.** The `softcover.android.r8-keep-contract` plugin, the
+  `NoReflection` and `ScreenConstructorProperty` detekt rules, and the `keepRules/` convention are described in
+  `docs/reference/r8.md`.
+- **What to build:** move the plugin and the two rules into the foundation, with the project package prefix
+  and the supertypes to check as configuration, and ship `TransientNavArg` with the navigation contract.
+  Document `keepRules/` as the consumer-rule convention. No Softcover build file registers these directories, so the foundation's
+  convention plugins only need to keep AGP's default pickup intact.
