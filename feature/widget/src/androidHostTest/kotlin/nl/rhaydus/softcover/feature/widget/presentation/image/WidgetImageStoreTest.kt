@@ -15,6 +15,7 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import java.io.File
+import java.io.IOException
 import java.io.OutputStream
 import java.nio.file.Files
 import kotlin.time.Duration.Companion.days
@@ -147,6 +148,54 @@ class WidgetImageStoreTest {
 
             // ----- Assert -----
             storedFiles().all { WidgetImageFiles.NAME_PATTERN.matches(it.name) } shouldBe true
+        }
+
+        @Test
+        fun `returns null and leaves no target or temp file when the write throws`() = runTest {
+            // ----- Arrange -----
+            val failing: Bitmap = mockk {
+                every {
+                    compress(
+                        any(),
+                        any(),
+                        any(),
+                    )
+                } throws IOException("disk full")
+            }
+
+            // ----- Act -----
+            val result = store.uriFor("cover-1") { failing }
+
+            // ----- Assert -----
+            result.shouldBeNull()
+            storedFiles().shouldBeEmpty()
+        }
+
+        @Test
+        fun `renders again for the same key after a failed write`() = runTest {
+            // ----- Arrange -----
+            val failing: Bitmap = mockk {
+                every {
+                    compress(
+                        any(),
+                        any(),
+                        any(),
+                    )
+                } throws IOException("disk full")
+            }
+            store.uriFor("cover-1") { failing }
+            var renders = 0
+
+            // ----- Act -----
+            val result = store.uriFor("cover-1") {
+                renders++
+                bitmap()
+            }
+
+            // ----- Assert -----
+            result.shouldNotBeNull()
+            renders shouldBe 1
+            storedFiles() shouldHaveSize 1
         }
 
         @Test
