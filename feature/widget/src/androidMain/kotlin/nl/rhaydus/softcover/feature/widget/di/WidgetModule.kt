@@ -43,6 +43,7 @@ import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidgetDependencies
 import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetEnvironment
 import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
+import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import nl.rhaydus.softcover.feature.widget.presentation.placed.AndroidHomeScreenWidgets
 import nl.rhaydus.softcover.feature.widget.presentation.placed.WidgetInstanceChanges
 import nl.rhaydus.softcover.feature.widget.presentation.refresh.WidgetRefresher
@@ -100,11 +101,14 @@ val widgetModule = module {
 
     single { WidgetRepainter(context = androidContext()) }
 
+    single { WidgetImageStore(context = androidContext()) }
+
     single {
         WidgetEnvironment(
             getUserIdAsFlow = get(),
             getThemeConfiguration = get(),
             appEntryPoint = get(),
+            imageStore = get(),
         )
     }
 

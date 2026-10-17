@@ -65,16 +65,29 @@ internal fun androidQuoteTextMeasurer(
     text: String,
 ): QuoteTextMeasurer {
     val metrics = context.resources.displayMetrics
-    val typeface = Typeface.create(Typeface.SERIF, Typeface.ITALIC)
+    val typeface = Typeface.create(
+        Typeface.SERIF,
+        Typeface.ITALIC,
+    )
 
     return { fontSizeSp, widthPx ->
         val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             this.typeface = typeface
-            textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, fontSizeSp.toFloat(), metrics)
+            textSize = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP,
+                fontSizeSp.toFloat(),
+                metrics,
+            )
         }
 
         val layout = StaticLayout.Builder
-            .obtain(text, 0, text.length, paint, widthPx.coerceAtLeast(1))
+            .obtain(
+                text,
+                0,
+                text.length,
+                paint,
+                widthPx.coerceAtLeast(1),
+            )
             .setAlignment(Layout.Alignment.ALIGN_NORMAL)
             .setIncludePad(true)
             .build()

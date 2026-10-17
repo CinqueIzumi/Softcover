@@ -13,11 +13,13 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfiguratio
 import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
 import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
 import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
+import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 
 internal class WidgetEnvironment(
     val getUserIdAsFlow: GetUserIdAsFlowUseCase,
     val getThemeConfiguration: GetThemeConfigurationUseCase,
     private val appEntryPoint: AppEntryPoint,
+    val imageStore: WidgetImageStore,
 ) {
     fun isSignedIn(): Flow<Boolean> = getUserIdAsFlow().map { it != NO_USER_ID }
 
