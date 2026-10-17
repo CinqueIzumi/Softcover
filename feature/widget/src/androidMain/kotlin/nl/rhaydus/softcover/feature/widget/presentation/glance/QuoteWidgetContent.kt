@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.widget.presentation.glance
 import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -13,6 +12,7 @@ import androidx.glance.action.Action
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
@@ -63,7 +63,7 @@ internal fun QuoteWidgetContent(
             contentAlignment = Alignment.Center,
         ) {
             when (val content = model.content) {
-                QuoteWidgetUiModel.Content.Loading -> Unit
+                QuoteWidgetUiModel.Content.Loading -> CircularProgressIndicator(color = GlanceTheme.colors.primary)
 
                 QuoteWidgetUiModel.Content.SignedOut -> Message(
                     headline = context.getString(R.string.widget_sign_in),

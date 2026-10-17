@@ -9,9 +9,11 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.provideContent
 import androidx.glance.state.PreferencesGlanceStateDefinition
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.feature.widget.presentation.mapper.quoteWidgetModels
 import nl.rhaydus.softcover.feature.widget.presentation.model.QuoteWidgetUiModel
@@ -50,7 +52,12 @@ internal class QuoteWidget : GlanceAppWidget(), KoinComponent {
                 .onStart { emit(appWidgetId) }
                 .filter { it == appWidgetId }
                 .map { dependencies.getQuoteSelection(appWidgetId = appWidgetId).getOrNull() },
-        )
+        ).catch { error ->
+            AppLog.e(
+                error,
+                "Quote widget model flow failed",
+            )
+        }
 
         val loadingModel = QuoteWidgetUiModel(
             themeConfiguration = initialTheme,
