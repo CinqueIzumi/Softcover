@@ -2,7 +2,9 @@ package nl.rhaydus.softcover.feature.settings.presentation.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -29,6 +31,12 @@ class DocumentPageScreen(
             runAction = screenModel::runAction,
             openUrl = uriHandler::openUri,
             onNavigateBack = navigator::pop,
+            modifier = Modifier.testTag(
+                when (page) {
+                    DocumentPage.ROADMAP -> SettingsTestTags.ROADMAP_PAGE
+                    DocumentPage.WHATS_NEW -> SettingsTestTags.WHATS_NEW_PAGE
+                },
+            ),
         )
     }
 }
@@ -46,4 +54,5 @@ internal expect fun DocumentPageScreenLayout(
     runAction: (DocumentPageAction) -> Unit,
     openUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    modifier: Modifier,
 )

@@ -73,8 +73,8 @@ class SignedInJourneyTest {
         device.waitForIdle()
 
         val bottomBar = labelled("^Reading$")
-        val rejection = labelled(REJECTED_KEY_PATTERN)
-        val setupFailure = labelled(SETUP_FAILED_PATTERN)
+        val rejection = tagged(KEY_REJECTED_TAG)
+        val setupFailure = tagged(SETUP_FAILED_TAG)
 
         waitFor(
             finder = {
@@ -94,14 +94,14 @@ class SignedInJourneyTest {
         openBookFromLibrary()
         openFullScreenCover()
         backgroundKillAndRestore(
-            expected = "More actions",
+            expected = labelled("More actions"),
             what = "book detail after the restored cover viewer popped itself",
         )
         returnToTabs()
 
         openCreateListSheet()
         backgroundKillAndRestore(
-            expected = "Arrange your shelves",
+            expected = tagged(LIBRARY_TABS_PAGE_TAG),
             what = "the Library tabs page after the restore",
         )
         returnToTabs()
@@ -157,7 +157,7 @@ class SignedInJourneyTest {
         clickLabel("^Settings$")
 
         waitFor(
-            labelled("About Softcover"),
+            tagged(SETTINGS_SCREEN_TAG),
             what = "the Settings menu rows",
         )
     }
@@ -197,7 +197,7 @@ class SignedInJourneyTest {
         scrollToAndClick("Library tabs")
 
         waitFor(
-            labelled("Arrange your shelves"),
+            tagged(LIBRARY_TABS_PAGE_TAG),
             what = "the Library tabs page",
         )
         scrollToAndClick("Create a new list")
@@ -230,8 +230,12 @@ class SignedInJourneyTest {
         for (page in SETTINGS_SUB_PAGES) {
             scrollToAndClick(page.row)
 
+            waitUntilGone(
+                tagged(SETTINGS_SCREEN_TAG),
+                what = "Settings to make way for the ${page.row} page",
+            )
             waitFor(
-                labelled(page.marker),
+                tagged(page.tag),
                 what = "the ${page.row} page",
             )
             assertAppAlive("opening ${page.row}")
@@ -239,7 +243,7 @@ class SignedInJourneyTest {
             device.pressBack()
 
             waitFor(
-                labelled("^Settings$"),
+                tagged(SETTINGS_SCREEN_TAG),
                 what = "Settings after leaving ${page.row}",
             )
         }
@@ -267,7 +271,7 @@ class SignedInJourneyTest {
     }
 
     private fun backgroundKillAndRestore(
-        expected: String,
+        expected: Finder,
         what: String,
     ) {
         device.pressHome()
@@ -280,7 +284,7 @@ class SignedInJourneyTest {
 
         assertAppAlive("restoring after the process was killed")
         waitFor(
-            labelled(expected),
+            expected,
             what = what,
         )
     }
@@ -392,6 +396,8 @@ class SignedInJourneyTest {
         device.findObject(By.text(pattern)) ?: device.findObject(By.desc(pattern))
     }
 
+    private fun tagged(tag: String): Finder = { device.findObject(By.res(tag)) }
+
     private fun waitFor(
         finder: Finder,
         timeoutMillis: Long = DEFAULT_TIMEOUT_MILLIS,
@@ -410,6 +416,30 @@ class SignedInJourneyTest {
             }
 
             found?.let { return it }
+
+            Thread.sleep(POLL_MILLIS)
+        }
+
+        throw AssertionError("Timed out after $timeoutMillis ms waiting for $what. Screen:\n${hierarchySummary()}")
+    }
+
+    private fun waitUntilGone(
+        finder: Finder,
+        timeoutMillis: Long = DEFAULT_TIMEOUT_MILLIS,
+        what: String,
+    ) {
+        val deadline = System.currentTimeMillis() + timeoutMillis
+
+        while (System.currentTimeMillis() < deadline) {
+            dismissPermissionPrompt()
+
+            val gone = try {
+                finder() == null
+            } catch (_: StaleObjectException) {
+                false
+            }
+
+            if (gone) return
 
             Thread.sleep(POLL_MILLIS)
         }
@@ -499,7 +529,7 @@ class SignedInJourneyTest {
 
     private data class SettingsSubPage(
         val row: String,
-        val marker: String,
+        val tag: String,
     )
 
     private companion object {
@@ -516,8 +546,6 @@ class SignedInJourneyTest {
         const val DEFAULT_TIMEOUT_MILLIS = 15_000L
         const val LAUNCH_TIMEOUT_MILLIS = 30_000L
         const val SYNC_TIMEOUT_MILLIS = 180_000L
-        const val REJECTED_KEY_PATTERN = "wasn.t accepted. Double-check"
-        const val SETUP_FAILED_PATTERN = "Something went wrong setting up your account"
         const val REJECTED_TOKEN_MESSAGE = "Hardcover rejected the token (HARDCOVER_SMOKE_TOKEN) — rotate/update it"
         const val SETUP_FAILED_MESSAGE = "Sign-in setup failed (network or server), not a token rejection"
         const val POLL_MILLIS = 250L
@@ -534,41 +562,45 @@ class SignedInJourneyTest {
 
         const val BOOK_CARD_TAG = "library_book_card"
         const val COVER_TAG = "book_detail_cover"
+        const val SETTINGS_SCREEN_TAG = "settings_screen"
+        const val LIBRARY_TABS_PAGE_TAG = "settings_library_tabs_page"
+        const val KEY_REJECTED_TAG = "onboarding_key_rejected"
+        const val SETUP_FAILED_TAG = "onboarding_setup_failed"
 
         val TABS = listOf("Reading", "Library", "Explore")
 
         val SETTINGS_SUB_PAGES = listOf(
             SettingsSubPage(
                 row = "Your profile",
-                marker = "By the numbers|Share your profile",
+                tag = "profile_screen",
             ),
             SettingsSubPage(
                 row = "Appearance",
-                marker = "How Softcover looks",
+                tag = "settings_appearance_page",
             ),
             SettingsSubPage(
                 row = "Library tabs",
-                marker = "Arrange your shelves",
+                tag = "settings_library_tabs_page",
             ),
             SettingsSubPage(
                 row = "Widgets",
-                marker = "On your home screen|Add a widget",
+                tag = "settings_widgets_page",
             ),
             SettingsSubPage(
                 row = "Hidden suggestions",
-                marker = "Nothing hidden|Hidden suggestions",
+                tag = "hidden_suggestions_page",
             ),
             SettingsSubPage(
                 row = "About Softcover",
-                marker = "independent, open-source",
+                tag = "settings_about_page",
             ),
             SettingsSubPage(
                 row = "What.s new",
-                marker = "What changed in each version",
+                tag = "settings_whats_new_page",
             ),
             SettingsSubPage(
                 row = "Roadmap",
-                marker = "What we.re building next",
+                tag = "settings_roadmap_page",
             ),
         )
     }

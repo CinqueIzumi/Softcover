@@ -15,6 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
@@ -93,6 +94,7 @@ internal actual fun SettingsScreenLayout(
     )
 
     Scaffold(
+        modifier = Modifier.testTag(SettingsTestTags.SETTINGS_SCREEN),
         contentWindowInsets = WindowInsets.statusBars,
     ) { padding ->
         Column(

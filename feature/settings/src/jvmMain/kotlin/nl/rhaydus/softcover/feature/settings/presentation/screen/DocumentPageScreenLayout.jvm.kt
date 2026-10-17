@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.layout.DesktopScrollPage
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
@@ -18,8 +19,10 @@ internal actual fun DocumentPageScreenLayout(
     runAction: (DocumentPageAction) -> Unit,
     openUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    modifier: Modifier,
 ) {
     DesktopScrollPage(
+        modifier = modifier,
         topBar = {
             EditorialTopBar(
                 model = state.topBar,

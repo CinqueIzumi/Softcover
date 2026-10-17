@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -124,6 +125,7 @@ internal fun ApiKeyEntryContent(
 
         TextField(
             model = state.apiKeyField,
+            modifier = if (state.apiKeyField.error != null) Modifier.testTag(OnboardingTestTags.KEY_REJECTED) else Modifier,
             onEvent = { event ->
                 when (event) {
                     is TextFieldEvent.ValueChanged -> runAction(OnApiKeyValueChangeAction(newValue = event.text))
@@ -174,6 +176,7 @@ internal fun ApiKeyEntryFooter(
 
             InlineErrorState(
                 message = error,
+                modifier = Modifier.testTag(OnboardingTestTags.SETUP_FAILED),
                 onRetry = { runAction(OnApiKeySaveClickAction) },
                 textStyle = MaterialTheme.editorialTypography.bodySmall,
             )

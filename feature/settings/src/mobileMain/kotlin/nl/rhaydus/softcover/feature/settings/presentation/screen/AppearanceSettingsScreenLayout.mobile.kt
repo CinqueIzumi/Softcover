@@ -8,6 +8,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.topbar.TopBar
@@ -25,6 +26,7 @@ internal actual fun AppearanceSettingsScreenLayout(
     onNavigateBack: () -> Unit,
 ) {
     Scaffold(
+        modifier = Modifier.testTag(SettingsTestTags.APPEARANCE_PAGE),
         topBar = {
             TopBar(
                 model = state.appearanceTopBar,

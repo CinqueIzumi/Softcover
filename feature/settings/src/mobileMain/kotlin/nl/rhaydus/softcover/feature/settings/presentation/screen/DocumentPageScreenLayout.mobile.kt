@@ -34,10 +34,12 @@ internal actual fun DocumentPageScreenLayout(
     runAction: (DocumentPageAction) -> Unit,
     openUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    modifier: Modifier,
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopBar(
                 model = state.topBar,
@@ -96,6 +98,7 @@ private fun DocumentPageScreenPreview() {
             runAction = {},
             openUrl = {},
             onNavigateBack = {},
+            modifier = Modifier,
         )
     }
 }
