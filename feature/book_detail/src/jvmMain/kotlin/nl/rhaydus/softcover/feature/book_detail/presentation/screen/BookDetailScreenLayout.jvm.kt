@@ -35,6 +35,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAc
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookHero
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookShareButton
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ScanEditionCallout
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ShelveControlCard
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.bookDetailItems
@@ -77,6 +78,11 @@ internal actual fun BookDetailScreenLayout(
                     }
                 },
                 actions = {
+                    BookShareButton(
+                        state = state,
+                        runAction = runAction,
+                    )
+
                     BookOverflowMenu(
                         state = state,
                         runAction = runAction,

@@ -32,6 +32,7 @@ import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookShareButton
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.bookDetailItems
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.topBarFor
@@ -106,6 +107,12 @@ internal actual fun BookDetailScreenLayout(
             },
             scrollBehavior = topAppBarScrollBehavior,
         ) { controlColors ->
+            BookShareButton(
+                state = state,
+                runAction = runAction,
+                iconColors = controlColors,
+            )
+
             BookOverflowMenu(
                 state = state,
                 runAction = runAction,
