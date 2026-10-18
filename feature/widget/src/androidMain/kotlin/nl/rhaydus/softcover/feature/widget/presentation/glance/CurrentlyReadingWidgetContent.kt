@@ -286,13 +286,15 @@ private fun ProgressRow(content: CurrentlyReadingWidgetUiModel.Content.Reading) 
 @Composable
 private fun ProgressBar(progress: Map<Int, WavyProgressUris>) {
     val widthDp = progressBarWidthDp(LocalSize.current.width)
-    val bars = progress[widthDp] ?: return
+    val bars = progress[widthDp]
 
     Box(
         modifier = GlanceModifier
             .width(widthDp.dp)
             .height(PROGRESS_BAR_HEIGHT_DP.dp),
     ) {
+        if (bars == null) return@Box
+
         UriMask(
             mask = bars.track,
             tint = GlanceTheme.colors.secondaryContainer,

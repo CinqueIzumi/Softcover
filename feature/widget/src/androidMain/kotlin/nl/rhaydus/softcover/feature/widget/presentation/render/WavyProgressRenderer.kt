@@ -52,7 +52,7 @@ private fun drawMask(
     val image = ImageBitmap(
         width = widthPx,
         height = heightPx,
-        config = ImageBitmapConfig.Alpha8,
+        config = ImageBitmapConfig.Argb8888,
     )
 
     CanvasDrawScope().draw(

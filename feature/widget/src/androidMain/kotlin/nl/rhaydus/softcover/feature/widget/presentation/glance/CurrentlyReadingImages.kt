@@ -65,8 +65,8 @@ internal class CurrentlyReadingImages(
         }
 
         return WavyProgressUris(
-            track = store.uriFor(key = "cr-wave:track:$inputs") { bitmaps.value.track } ?: return null,
-            indicator = store.uriFor(key = "cr-wave:indicator:$inputs") { bitmaps.value.indicator } ?: return null,
+            track = store.uriFor(key = "cr-wave-argb:track:$inputs") { bitmaps.value.track } ?: return null,
+            indicator = store.uriFor(key = "cr-wave-argb:indicator:$inputs") { bitmaps.value.indicator } ?: return null,
         )
     }
 }
