@@ -16,6 +16,12 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.component.Backdrop
     - washTertiary: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.widget.presentation.component.CoverPlaceholder(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.component.CycleArrow(icon: kotlin.Int, action: androidx.glance.action.Action, description: kotlin.String): kotlin.Unit
   skippable: false
   restartable: true
@@ -34,6 +40,13 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.component.CycleEye
     - next: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - previousDescription: STABLE (String is immutable)
     - nextDescription: STABLE (String is immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.widget.presentation.component.RefreshButton(onClick: androidx.glance.action.Action): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - onClick: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.widget.presentation.component.ReservedLinesTitle(title: kotlin.String, reservedLines: kotlin.Int): kotlin.Unit
@@ -62,15 +75,15 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Arrow(icon: 
     - description: STABLE (String is immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.BookCell(item: nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel.Item, stacked: kotlin.Boolean, coverHeight: androidx.compose.ui.unit.Dp, openBook: androidx.glance.action.Action, modifier: androidx.glance.GlanceModifier): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.presentation.glance.BookCell(item: nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel.Item, stacked: kotlin.Boolean, cellWidth: androidx.compose.ui.unit.Dp, coverHeight: androidx.compose.ui.unit.Dp, openBook: androidx.glance.action.Action): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - item: STABLE (class with no mutable properties)
     - stacked: STABLE (primitive type)
+    - cellWidth: STABLE (marked @Stable or @Immutable)
     - coverHeight: STABLE (marked @Stable or @Immutable)
     - openBook: UNKNOWN (interface or non-final class; concrete implementation unknown)
-    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Caption(item: nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel.Item, modifier: androidx.glance.GlanceModifier): kotlin.Unit
@@ -136,12 +149,13 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(head
     - subline: STABLE (class with no mutable properties)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(headline: kotlin.String, subline: kotlin.String?): kotlin.Unit
-  skippable: true
+private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(headline: kotlin.String, subline: kotlin.String?, onRefresh: androidx.glance.action.Action?): kotlin.Unit
+  skippable: false
   restartable: true
   params:
     - headline: STABLE (String is immutable)
     - subline: STABLE (class with no mutable properties)
+    - onRefresh: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(eyebrow: kotlin.String?, headline: kotlin.String, subline: kotlin.String?, openSettings: androidx.glance.action.Action): kotlin.Unit
@@ -154,7 +168,7 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(eyeb
     - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(eyebrow: kotlin.String?, headline: kotlin.String, subline: kotlin.String?, openExplore: androidx.glance.action.Action, openSettings: androidx.glance.action.Action): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(eyebrow: kotlin.String?, headline: kotlin.String, subline: kotlin.String?, openExplore: androidx.glance.action.Action, openSettings: androidx.glance.action.Action, onRefresh: androidx.glance.action.Action?): kotlin.Unit
   skippable: false
   restartable: true
   params:
@@ -163,6 +177,7 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Message(eyeb
     - subline: STABLE (class with no mutable properties)
     - openExplore: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
+    - onRefresh: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.PageRow(label: kotlin.String): kotlin.Unit
@@ -213,11 +228,12 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickW
     - openBook: STABLE (function type)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Rank(rank: kotlin.String): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Rank(rank: kotlin.String, width: androidx.compose.ui.unit.Dp): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - rank: STABLE (String is immutable)
+    - width: STABLE (marked @Stable or @Immutable)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Ranked(content: nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel.Content.Ranked, openExplore: androidx.glance.action.Action, openSettings: androidx.glance.action.Action, openBook: kotlin.Function1<@[ParameterName(name = \): kotlin.Unit

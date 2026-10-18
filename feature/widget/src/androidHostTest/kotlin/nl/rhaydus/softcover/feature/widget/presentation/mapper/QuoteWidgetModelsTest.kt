@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.domain.model.QuotePosition
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.feature.widget.domain.model.QuoteFetchTracker
 import nl.rhaydus.softcover.feature.widget.domain.model.QuoteSelection
 import nl.rhaydus.softcover.feature.widget.domain.util.quoteId
 import nl.rhaydus.softcover.feature.widget.domain.util.rankForDay
@@ -26,12 +27,14 @@ class QuoteWidgetModelsTest {
         isSignedIn: Boolean = true,
         quotes: List<Quote>,
         selection: QuoteSelection? = null,
+        fetchState: Flow<QuoteFetchTracker.State?> = flowOf(null),
         epochDays: Flow<Long> = flowOf(today),
     ): Flow<QuoteWidgetUiModel> = quoteWidgetModels(
         isSignedIn = flowOf(isSignedIn),
         themeConfiguration = flowOf(ThemeConfiguration()),
         quotes = flowOf(quotes),
         selection = flowOf(selection),
+        fetchState = fetchState,
         today = epochDays,
     )
 
@@ -75,15 +78,65 @@ class QuoteWidgetModelsTest {
         }
 
         @Test
-        fun `is empty when signed in with no quotes`() = runTest {
+        fun `an empty list shows the loader while a fetch is running`() = runTest {
             // ----- Arrange -----
-            val flow = models(quotes = emptyList())
+            val flow = models(
+                quotes = emptyList(),
+                fetchState = flowOf(QuoteFetchTracker.State.Running),
+            )
+
+            // ----- Act -----
+            val content = flow.content()
+
+            // ----- Assert -----
+            content shouldBe QuoteWidgetUiModel.Content.Loading
+        }
+
+        @Test
+        fun `an empty list with no fetch running or failed is empty`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                quotes = emptyList(),
+                fetchState = flowOf(null),
+            )
 
             // ----- Act -----
             val content = flow.content()
 
             // ----- Assert -----
             content shouldBe QuoteWidgetUiModel.Content.Empty
+        }
+
+        @Test
+        fun `an empty list after a failed fetch shows the fetch failed content`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                quotes = emptyList(),
+                fetchState = flowOf(QuoteFetchTracker.State.Failed),
+            )
+
+            // ----- Act -----
+            val content = flow.content()
+
+            // ----- Assert -----
+            content shouldBe QuoteWidgetUiModel.Content.FetchFailed
+        }
+
+        @Test
+        fun `quotes are shown in every fetch state`() = runTest {
+            // ----- Arrange -----
+            val quotes = testQuotes(count = 2)
+
+            // ----- Act -----
+            val contents = listOf(null, QuoteFetchTracker.State.Running, QuoteFetchTracker.State.Failed).map { state ->
+                models(
+                    quotes = quotes,
+                    fetchState = flowOf(state),
+                ).content()
+            }
+
+            // ----- Assert -----
+            contents.forEach { it.shouldBeInstanceOf<QuoteWidgetUiModel.Content.Shown>() }
         }
 
         @Test

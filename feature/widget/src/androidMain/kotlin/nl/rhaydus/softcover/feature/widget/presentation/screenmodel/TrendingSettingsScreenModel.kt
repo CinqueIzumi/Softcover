@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.feature.widget.presentation.action.TrendingSettingsA
 import nl.rhaydus.softcover.feature.widget.presentation.collector.TrendingSettingsCollector
 import nl.rhaydus.softcover.feature.widget.presentation.event.TrendingSettingsEvent
 import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
+import nl.rhaydus.softcover.feature.widget.presentation.refresh.TrendingFeedFetcher
 import nl.rhaydus.softcover.feature.widget.presentation.state.TrendingSettingsLocalVariables
 import nl.rhaydus.softcover.feature.widget.presentation.state.TrendingSettingsUiState
 import nl.rhaydus.softcover.feature.widget.presentation.worker.TrendingRefreshScheduler
@@ -19,6 +20,7 @@ internal class TrendingSettingsScreenModel(
     saveTrendingSettings: SaveTrendingSettingsUseCase,
     repainter: WidgetRepainter,
     scheduler: TrendingRefreshScheduler,
+    fetcher: TrendingFeedFetcher,
     getThemeConfiguration: GetThemeConfigurationUseCase,
     appDispatchers: AppDispatchers,
     flows: List<TrendingSettingsCollector>,
@@ -38,6 +40,7 @@ internal class TrendingSettingsScreenModel(
         saveTrendingSettings = saveTrendingSettings,
         repainter = repainter,
         scheduler = scheduler,
+        fetcher = fetcher,
         getThemeConfiguration = getThemeConfiguration,
         mainDispatcher = appDispatchers.main,
         coroutineScope = screenModelScope,

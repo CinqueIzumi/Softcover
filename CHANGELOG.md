@@ -2,6 +2,20 @@
 
 What changed in each release of Softcover, newest first.
 
+## 3.2.2: What's coming next
+
+*2026-10-18*
+
+The Trending widget now looks ahead, and every widget is ready the moment you place it.
+
+- Trending can show what's coming instead: the 10 most-wanted books releasing in the next month, 3 months, 6 months or year
+- New widgets fill in within a second of placing them, and their arrows respond straight away
+- The Currently Reading progress bar no longer goes missing, and the percentage stays put
+- When Hardcover can't be reached, Trending and Quote of the day say so and offer a refresh button
+- Widget covers take far less space on your phone, and are cleared when you remove your last widget or sign out
+- Trending's rankings line up, with 10 on a single line, Random pick's cover fills its space, and long quotes stay clear of the quotation mark
+- Author names with stray spaces now read cleanly
+
 ## 3.2.1: Widgets you can rely on
 
 *2026-10-17*

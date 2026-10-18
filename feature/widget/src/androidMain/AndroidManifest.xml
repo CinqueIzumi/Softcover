@@ -4,7 +4,8 @@
     <application>
         <receiver
             android:name="nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidgetReceiver"
-            android:exported="true">
+            android:exported="true"
+            android:label="@string/currently_reading_widget_label">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

@@ -46,6 +46,7 @@ import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.activity.updateProgressIntent
 import nl.rhaydus.softcover.feature.widget.presentation.callback.CycleBookCallback
 import nl.rhaydus.softcover.feature.widget.presentation.component.BackdropUris
+import nl.rhaydus.softcover.feature.widget.presentation.component.CoverPlaceholder
 import nl.rhaydus.softcover.feature.widget.presentation.component.CycleEyebrow
 import nl.rhaydus.softcover.feature.widget.presentation.component.ReservedLinesTitle
 import nl.rhaydus.softcover.feature.widget.presentation.component.UriMask
@@ -54,6 +55,7 @@ import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressUris
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
 import nl.rhaydus.softcover.feature.widget.presentation.util.PROGRESS_BAR_HEIGHT_DP
+import nl.rhaydus.softcover.feature.widget.presentation.util.PROGRESS_LABEL_WIDTH_DP
 import nl.rhaydus.softcover.feature.widget.presentation.util.TALLEST_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.util.TALL_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.util.progressBarWidthDp
@@ -156,6 +158,7 @@ private fun Reading(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
     val context = LocalContext.current
     val artwork = content.artwork
     val height = LocalSize.current.height
+    val width = LocalSize.current.width
 
     Box(modifier = GlanceModifier.fillMaxSize()) {
         if (artwork != null) {
@@ -194,7 +197,9 @@ private fun Reading(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
                     .defaultWeight(),
                 contentAlignment = Alignment.Center,
             ) {
-                Cover(cover = content.cover)
+                Cover(
+                    cover = content.cover,
+                )
             }
 
             if (height >= TALL_HEIGHT_DP.dp) {
@@ -223,7 +228,9 @@ private fun Reading(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
 }
 
 @Composable
-private fun Cover(cover: Uri?) {
+private fun Cover(
+    cover: Uri?,
+) {
     if (cover != null) {
         Image(
             provider = ImageProvider(cover),
@@ -232,13 +239,7 @@ private fun Cover(cover: Uri?) {
             contentScale = ContentScale.Fit,
         )
     } else {
-        Image(
-            provider = ImageProvider(R.drawable.widget_cover_placeholder),
-            contentDescription = null,
-            modifier = GlanceModifier.fillMaxSize(),
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(GlanceTheme.colors.surfaceVariant),
-        )
+        CoverPlaceholder()
     }
 }
 
@@ -266,10 +267,12 @@ private fun ProgressRow(content: CurrentlyReadingWidgetUiModel.Content.Reading) 
 
         Text(
             text = content.progressLabel,
+            maxLines = 1,
             style = TextStyle(
                 color = GlanceTheme.colors.onSurface,
                 fontSize = 12.sp,
             ),
+            modifier = GlanceModifier.width(PROGRESS_LABEL_WIDTH_DP),
         )
 
         Spacer(modifier = GlanceModifier.width(Spacing.xxs))
@@ -286,13 +289,16 @@ private fun ProgressRow(content: CurrentlyReadingWidgetUiModel.Content.Reading) 
 @Composable
 private fun ProgressBar(progress: Map<Int, WavyProgressUris>) {
     val widthDp = progressBarWidthDp(LocalSize.current.width)
-    val bars = progress[widthDp] ?: return
+
+    val bars = progress[widthDp]
 
     Box(
         modifier = GlanceModifier
             .width(widthDp.dp)
             .height(PROGRESS_BAR_HEIGHT_DP.dp),
     ) {
+        if (bars == null) return@Box
+
         UriMask(
             mask = bars.track,
             tint = GlanceTheme.colors.secondaryContainer,

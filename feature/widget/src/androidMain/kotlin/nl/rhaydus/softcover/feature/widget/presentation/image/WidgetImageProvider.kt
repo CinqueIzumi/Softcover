@@ -32,7 +32,7 @@ internal class WidgetImageProvider : ContentProvider() {
         )
     }
 
-    override fun getType(uri: Uri): String = "image/png"
+    override fun getType(uri: Uri): String? = uri.lastPathSegment?.let { WidgetImageFormat.forFileName(it)?.mimeType }
 
     override fun query(
         uri: Uri,

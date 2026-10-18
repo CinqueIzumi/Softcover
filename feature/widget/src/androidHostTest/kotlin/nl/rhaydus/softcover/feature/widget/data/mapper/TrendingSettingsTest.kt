@@ -4,6 +4,8 @@ import androidx.datastore.preferences.core.mutablePreferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
+import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
+import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingPosition
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingRefreshCadence
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingSettings
@@ -18,7 +20,7 @@ class TrendingSettingsTest {
             // ----- Arrange -----
             val preferences = mutablePreferencesOf()
             val settings = TrendingSettings(
-                period = TrendingPeriod.ThreeMonths,
+                feed = TrendingFeed.Trending(period = TrendingPeriod.ThreeMonths),
                 cadence = TrendingRefreshCadence.TwiceDaily,
             )
 
@@ -43,7 +45,7 @@ class TrendingSettingsTest {
 
             // ----- Assert -----
             result shouldBe TrendingSettings(
-                period = TrendingPeriod.Week,
+                feed = TrendingFeed.Trending(period = TrendingPeriod.Week),
                 cadence = TrendingRefreshCadence.Daily,
             )
         }
@@ -59,11 +61,11 @@ class TrendingSettingsTest {
 
             // ----- Assert -----
             position shouldBe TrendingPosition(
-                period = TrendingPeriod.Week,
+                feed = TrendingFeed.Trending(period = TrendingPeriod.Week),
                 page = 0,
             )
             settings shouldBe TrendingSettings(
-                period = TrendingPeriod.Week,
+                feed = TrendingFeed.Trending(period = TrendingPeriod.Week),
                 cadence = TrendingRefreshCadence.Daily,
             )
         }
@@ -74,15 +76,76 @@ class TrendingSettingsTest {
             val preferences = mutablePreferencesOf()
 
             // ----- Act -----
-            preferences.write(TrendingPeriod.Year)
+            preferences.write(TrendingFeed.Trending(period = TrendingPeriod.Year))
             preferences.writeTrendingPage(3)
             val result = preferences.toTrendingPosition()
 
             // ----- Assert -----
             result shouldBe TrendingPosition(
-                period = TrendingPeriod.Year,
+                feed = TrendingFeed.Trending(period = TrendingPeriod.Year),
                 page = 3,
             )
+        }
+
+        @Test
+        fun `a widget stored with only the legacy period key reads as the trending feed`() {
+            // ----- Arrange -----
+            val preferences = mutablePreferencesOf(
+                stringPreferencesKey("trending_period") to "three_months",
+            )
+
+            // ----- Act -----
+            val result = preferences.toTrendingFeed()
+
+            // ----- Assert -----
+            result shouldBe TrendingFeed.Trending(period = TrendingPeriod.ThreeMonths)
+        }
+
+        @Test
+        fun `an upcoming feed reads back with its window and page`() {
+            // ----- Arrange -----
+            val preferences = mutablePreferencesOf()
+            val feed = TrendingFeed.Upcoming(window = UpcomingWindow.SixMonths)
+
+            // ----- Act -----
+            preferences.write(feed)
+            preferences.writeTrendingPage(2)
+            val result = preferences.toTrendingPosition()
+
+            // ----- Assert -----
+            result shouldBe TrendingPosition(
+                feed = feed,
+                page = 2,
+            )
+        }
+
+        @Test
+        fun `writing a trending feed over an upcoming one reads back as trending`() {
+            // ----- Arrange -----
+            val preferences = mutablePreferencesOf()
+            preferences.write(TrendingFeed.Upcoming(window = UpcomingWindow.Year))
+
+            // ----- Act -----
+            preferences.write(TrendingFeed.Trending(period = TrendingPeriod.Month))
+            val result = preferences.toTrendingFeed()
+
+            // ----- Assert -----
+            result shouldBe TrendingFeed.Trending(period = TrendingPeriod.Month)
+        }
+
+        @Test
+        fun `an unknown upcoming window falls back to the stored trending period`() {
+            // ----- Arrange -----
+            val preferences = mutablePreferencesOf(
+                stringPreferencesKey("trending_upcoming_window") to "decade",
+                stringPreferencesKey("trending_period") to "year",
+            )
+
+            // ----- Act -----
+            val result = preferences.toTrendingFeed()
+
+            // ----- Assert -----
+            result shouldBe TrendingFeed.Trending(period = TrendingPeriod.Year)
         }
     }
 }

@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
+import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import kotlin.time.Instant
 
@@ -31,6 +32,21 @@ interface BooksLocalDataSource {
     fun observeTrendingFetchedAt(period: TrendingPeriod): Flow<Instant?>
 
     suspend fun getTrendingFetchedAt(period: TrendingPeriod): Instant?
+
+    fun observeUpcomingBooks(window: UpcomingWindow): Flow<List<Book>>
+
+    suspend fun getUpcomingBooks(window: UpcomingWindow): List<Book>
+
+    fun observeUpcomingFetchedAt(window: UpcomingWindow): Flow<Instant?>
+
+    suspend fun getUpcomingFetchedAt(window: UpcomingWindow): Instant?
+
+    suspend fun replaceUpcomingBooks(
+        window: UpcomingWindow,
+        requestedIds: List<Int>,
+        books: List<Book>,
+        fetchedAt: Instant,
+    )
 
     suspend fun getExistingUserBookBookIds(ids: List<Int>): List<Int>
 
@@ -140,6 +156,40 @@ internal class BooksLocalDataSourceImpl(
     override suspend fun getTrendingFetchedAt(period: TrendingPeriod): Instant? = dao
         .getTrendingFetchedAt(period = period.toStorageKey())
         ?.let(Instant::fromEpochMilliseconds)
+
+    override fun observeUpcomingBooks(window: UpcomingWindow): Flow<List<Book>> = dao
+        .observeTrendingBooks(period = window.toStorageKey())
+        .distinctUntilChanged()
+        .toModelsReusingUnchanged()
+
+    override suspend fun getUpcomingBooks(window: UpcomingWindow): List<Book> = dao
+        .getTrendingBooks(period = window.toStorageKey())
+        .map { entity -> entity.toModel() }
+
+    override fun observeUpcomingFetchedAt(window: UpcomingWindow): Flow<Instant?> = dao
+        .observeTrendingFetchedAt(period = window.toStorageKey())
+        .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
+        .distinctUntilChanged()
+
+    override suspend fun getUpcomingFetchedAt(window: UpcomingWindow): Instant? = dao
+        .getTrendingFetchedAt(period = window.toStorageKey())
+        ?.let(Instant::fromEpochMilliseconds)
+
+    override suspend fun replaceUpcomingBooks(
+        window: UpcomingWindow,
+        requestedIds: List<Int>,
+        books: List<Book>,
+        fetchedAt: Instant,
+    ) {
+        deleteStaleCovers(
+            dao.replaceTrendingBooks(
+                period = window.toStorageKey(),
+                requestedIds = requestedIds,
+                books = books,
+                fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
+            ),
+        )
+    }
 
     override suspend fun getExistingUserBookBookIds(ids: List<Int>): List<Int> {
         if (ids.isEmpty()) return emptyList()

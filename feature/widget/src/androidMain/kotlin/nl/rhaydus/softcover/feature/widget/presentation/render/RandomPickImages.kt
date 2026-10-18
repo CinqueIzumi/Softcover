@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
+import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageFormat
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.util.maxRandomPickCoverHeightDp
@@ -27,7 +28,8 @@ internal class RandomPickImages(
         val source = book.coverSource() ?: return null
 
         return store.uriFor(
-            key = "rp-cover:${source.keyPart()}:$coverPx",
+            format = WidgetImageFormat.Photo,
+            key = "rp-cover:v2:${source.keyPart()}:$coverPx",
             render = {
                 loadCoverBitmap(
                     context = context,

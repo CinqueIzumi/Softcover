@@ -1,0 +1,17 @@
+# Ids of the most-shelved books whose own release_date falls within the upcoming window
+# (today, maxDate], most-wanted first.
+query GetUpcomingReleaseIds(
+    $today: date!,
+    $maxDate: date!,
+    $limit: Int!,
+) {
+    books(
+        where: {
+            release_date: { _gt: $today, _lte: $maxDate }
+        }
+        order_by: [{ users_count: desc }]
+        limit: $limit
+    ) {
+        id
+    }
+}

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.widget.presentation.screen
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream
@@ -51,6 +52,16 @@ class WidgetScreenSerializationTest {
             // ----- Assert -----
             restored.field("appWidgetId") shouldBe 12
         }
+
+        @Test
+        fun `two widgets get different screen keys so they do not share a screen model`() {
+            // ----- Arrange -----
+            val first = TrendingSettingsScreen(appWidgetId = 1)
+            val second = TrendingSettingsScreen(appWidgetId = 2)
+
+            // ----- Act & Assert -----
+            first.key shouldNotBe second.key
+        }
     }
 
     @Nested
@@ -65,6 +76,16 @@ class WidgetScreenSerializationTest {
 
             // ----- Assert -----
             restored.field("appWidgetId") shouldBe 34
+        }
+
+        @Test
+        fun `two widgets get different screen keys so they do not share a screen model`() {
+            // ----- Arrange -----
+            val first = RandomPickSettingsScreen(appWidgetId = 1)
+            val second = RandomPickSettingsScreen(appWidgetId = 2)
+
+            // ----- Act & Assert -----
+            first.key shouldNotBe second.key
         }
     }
 }

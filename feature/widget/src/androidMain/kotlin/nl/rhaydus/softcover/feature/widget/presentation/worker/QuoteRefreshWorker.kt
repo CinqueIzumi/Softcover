@@ -25,7 +25,7 @@ internal class QuoteRefreshWorker(
 
         if (userId == null || userId == NO_USER_ID) return Result.success()
 
-        val failed = dependencies.refreshAllQuotes().isFailure
+        val failed = dependencies.fetchTracker.track { dependencies.refreshAllQuotes() }.isFailure
 
         return if (failed && runAttemptCount < MAX_RETRIES) Result.retry() else Result.success()
     }

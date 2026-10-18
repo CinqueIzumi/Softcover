@@ -1,14 +1,11 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
 import android.content.Context
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
-import androidx.glance.appwidget.provideContent
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -92,9 +89,10 @@ internal class RandomPickWidget : GlanceAppWidget(), KoinComponent {
             content = RandomPickWidgetUiModel.Content.Loading,
         )
 
-        provideContent {
-            val model by models.collectAsState(initial = loadingModel)
-
+        provideSharedContent(
+            models = models,
+            initial = loadingModel,
+        ) { model ->
             RandomPickWidgetContent(
                 model = model,
                 openApp = openApp,

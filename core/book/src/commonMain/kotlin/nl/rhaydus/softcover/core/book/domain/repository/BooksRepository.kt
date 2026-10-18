@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
+import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import kotlin.time.Duration
@@ -111,6 +112,21 @@ interface BooksRepository {
      */
     suspend fun refreshTrendingBooks(
         period: TrendingPeriod,
+        maxAge: Duration,
+    )
+
+    /** The most-shelved books releasing within [window], in rank order. */
+    fun observeUpcomingBooks(window: UpcomingWindow): Flow<List<Book>>
+
+    /** When [window]'s upcoming releases were last fetched, or `null` if a fetch has never completed. */
+    fun observeUpcomingFetchedAt(window: UpcomingWindow): Flow<Instant?>
+
+    /**
+     * Fetches [window]'s upcoming releases only when its last completed fetch is older than
+     * [maxAge]. Refreshes of the same window are serialized; different windows refresh concurrently.
+     */
+    suspend fun refreshUpcomingBooks(
+        window: UpcomingWindow,
         maxAge: Duration,
     )
 

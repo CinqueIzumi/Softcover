@@ -11,12 +11,18 @@ internal data class TrendingWidgetUiModel(
     sealed interface Content {
         data object Loading : Content
 
-        /** Shown while the new settings resolve, with the [eyebrow] already naming them. */
+        /** Shown while the new settings resolve or the feed's fetch runs, with the [eyebrow] already naming the feed. */
         data class Switching(val eyebrow: String) : Content
 
         data object SignedOut : Content
 
-        data class Empty(val eyebrow: String) : Content
+        data class Empty(
+            val eyebrow: String,
+            val headline: String,
+        ) : Content
+
+        /** The feed has nothing cached and the fetch for it failed, as opposed to [Empty]. */
+        data class FetchFailed(val eyebrow: String) : Content
 
         /** [pageLabel] is `null` when everything fits on one page. */
         data class Ranked(

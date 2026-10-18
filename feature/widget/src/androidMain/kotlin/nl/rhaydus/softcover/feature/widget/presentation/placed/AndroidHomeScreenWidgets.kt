@@ -179,7 +179,7 @@ internal class AndroidHomeScreenWidgets(
 
             HomeScreenWidgetKind.Trending -> getTrendingSettings(appWidgetId = id).getOrThrow().let { settings ->
                 listOf(
-                    settings.period.label(),
+                    settings.feed.label(),
                     settings.cadence.label(),
                 ).joinToString(SUMMARY_SEPARATOR)
             }

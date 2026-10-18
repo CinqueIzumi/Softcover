@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.presentation.worker
 
 import android.content.Context
-import androidx.glance.appwidget.updateAll
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.async
@@ -35,14 +34,14 @@ internal class TrendingRefreshWorker(
         val plan = get<TrendingRefreshScheduler>().currentPlan() ?: return Result.success()
 
         val failed = coroutineScope {
-            plan.periods
-                .map { period ->
+            plan.feeds
+                .map { feed ->
                     async {
-                        // Half the period: WorkManager runs a periodic job a little early at times, and a maxAge
-                        // equal to the period would then skip the fetch and leave the list stale for a whole
-                        // extra period.
-                        dependencies.refreshTrendingBooks(
-                            period = period,
+                        // Half the interval: WorkManager runs a periodic job a little early at times, and a maxAge
+                        // equal to the interval would then skip the fetch and leave the list stale for a whole
+                        // extra interval.
+                        dependencies.refreshTrendingFeed(
+                            feed = feed,
                             maxAge = plan.interval / 2,
                         ).onFailure { error ->
                             AppLog.e(
@@ -56,7 +55,7 @@ internal class TrendingRefreshWorker(
                 .any { it }
         }
 
-        runCatchingCancellable { TrendingWidget().updateAll(applicationContext) }
+        runCatchingCancellable { dependencies.repainter.repaintAll(TrendingWidget()) }
             .onFailure { error ->
                 AppLog.e(
                     error,

@@ -22,21 +22,27 @@ import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
-import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveAllQuotesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
+import nl.rhaydus.softcover.feature.widget.domain.model.QuoteFetchTracker
+import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
+import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFetchTracker
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingFeedUseCase
+import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidget
+import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidget
+import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
+import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import nl.rhaydus.softcover.feature.widget.presentation.worker.QuoteRefreshScheduler
 import nl.rhaydus.softcover.feature.widget.presentation.worker.TrendingRefreshScheduler
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * Repaints every owned widget when something they render from changes. Placement is a set of widget
+ * Repaints each owned widget when something it renders from changes. Placement is a set of widget
  * classes because `onDisabled` fires per receiver, when the last instance of that one widget goes.
  */
 internal class WidgetRefresher(
@@ -48,25 +54,52 @@ internal class WidgetRefresher(
     private val getCurrentlyReadingUserBooks: GetCurrentlyReadingUserBooksUseCase,
     private val getWantToReadUserBooks: GetWantToReadUserBooksUseCase,
     private val getAllUserLists: GetAllUserListsUseCase,
-    private val observeTrendingBooks: ObserveTrendingBooksUseCase,
+    private val observeTrendingFeed: ObserveTrendingFeedUseCase,
     private val trendingRefreshScheduler: TrendingRefreshScheduler,
     private val observeAllQuotes: ObserveAllQuotesUseCase,
     private val quoteRefreshScheduler: QuoteRefreshScheduler,
+    private val imageStore: WidgetImageStore,
+    private val trendingFetchTracker: TrendingFetchTracker,
+    private val quoteFetchTracker: QuoteFetchTracker,
 ) {
     private val placedWidgets = MutableStateFlow<Set<String>>(emptySet())
 
     fun start() {
         applicationScope.scope.launch { seedPlacedWidgets() }
 
-        refreshSignals(
-            placedWidgets = placedWidgets,
-            changes = ::changes,
-            debounce = DEBOUNCE,
+        repaintOnChange(
+            targets = null,
+            changes = ::sharedSignals,
         )
-            .onEach { refreshAll() }
-            .launchIn(applicationScope.scope)
+
+        repaintOnChange(
+            targets = setOf(CurrentlyReadingWidget::class.java),
+            changes = { listOf(signal { getCurrentlyReadingUserBooks() }) },
+        )
+
+        repaintOnChange(
+            targets = setOf(RandomPickWidget::class.java),
+            changes = {
+                listOf(
+                    signal { getWantToReadUserBooks() },
+                    signal { getAllUserLists() },
+                )
+            },
+        )
+
+        repaintOnChange(
+            targets = setOf(TrendingWidget::class.java),
+            changes = ::trendingSignals,
+        )
+
+        repaintOnChange(
+            targets = setOf(QuoteWidget::class.java),
+            changes = { listOf(signal { observeAllQuotes() }) },
+        )
 
         catchUpTrendingOnSignIn()
+
+        clearImagesOnSignOut()
 
         catchUpQuotesOnSignIn()
     }
@@ -77,6 +110,37 @@ internal class WidgetRefresher(
 
     fun onDisabled(widget: GlanceAppWidget) {
         placedWidgets.update { it - widget.key() }
+    }
+
+    /** Cached widget images belong to the signed-in user's library, so sign-out removes them. */
+    private fun clearImagesOnSignOut() {
+        flow { emitAll(getUserIdAsFlow()) }
+            .map { it != NO_USER_ID }
+            .distinctUntilChanged()
+            .drop(1)
+            .filter { signedIn -> signedIn.not() }
+            .onEach {
+                // Repaint first: a launcher reload while the files are gone would read missing images.
+                refresh(widgets)
+
+                trendingFetchTracker.clearFailures()
+                quoteFetchTracker.clearFailure()
+
+                runCatchingCancellable { imageStore.clear() }
+                    .onFailure { error ->
+                        AppLog.e(
+                            error,
+                            "Clearing widget images failed",
+                        )
+                    }
+            }
+            .catch { error ->
+                AppLog.e(
+                    error,
+                    "Clearing widget images on sign-out failed",
+                )
+            }
+            .launchIn(applicationScope.scope)
     }
 
     /** Sign-out wipes trending, so after the next sign-in the periodic schedule alone would leave other periods empty. */
@@ -130,9 +194,24 @@ internal class WidgetRefresher(
         }
     }
 
-    private fun changes(): Flow<Unit> = (appSignals() + trendingSignals()).merge()
+    /**
+     * Repaints only the [targets] classes (every widget when `null`) when [changes] emits, so a write to one
+     * widget's data does not open Glance sessions for the others.
+     */
+    private fun repaintOnChange(
+        targets: Set<Class<out GlanceAppWidget>>?,
+        changes: () -> List<Flow<Unit>>,
+    ) {
+        refreshSignals(
+            placedWidgets = placedWidgets,
+            changes = { changes().merge() },
+            debounce = DEBOUNCE,
+        )
+            .onEach { refresh(widgets.filter { targets == null || it.javaClass in targets }) }
+            .launchIn(applicationScope.scope)
+    }
 
-    private fun appSignals(): List<Flow<Unit>> = listOf(
+    private fun sharedSignals(): List<Flow<Unit>> = listOf(
         signal {
             getThemeConfiguration().distinctUntilChanged { old, new ->
                 old.themeMode == new.themeMode &&
@@ -145,15 +224,11 @@ internal class WidgetRefresher(
                 .map { it != NO_USER_ID }
                 .distinctUntilChanged()
         },
-        signal { getCurrentlyReadingUserBooks() },
-        signal { getWantToReadUserBooks() },
-        signal { getAllUserLists() },
-        signal { observeAllQuotes() },
     )
 
-    /** Every period, because any of them may be the one a placed widget shows. */
-    private fun trendingSignals(): List<Flow<Unit>> = TrendingPeriod.entries.map { period ->
-        signal { observeTrendingBooks(period = period) }
+    /** Every feed, because any of them may be the one a placed widget shows. */
+    private fun trendingSignals(): List<Flow<Unit>> = TrendingFeed.All.map { feed ->
+        signal { observeTrendingFeed(feed = feed) }
     }
 
     /**
@@ -170,8 +245,8 @@ internal class WidgetRefresher(
             )
         }
 
-    private suspend fun refreshAll() {
-        widgets.forEach { widget ->
+    private suspend fun refresh(targets: List<GlanceAppWidget>) {
+        targets.forEach { widget ->
             runCatchingCancellable { widget.updateAll(context) }
                 .onFailure { error ->
                     AppLog.e(

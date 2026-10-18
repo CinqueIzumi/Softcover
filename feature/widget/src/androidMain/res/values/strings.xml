@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="widget_refresh">Refresh</string>
+    <string name="currently_reading_widget_label">Currently reading</string>
     <string name="currently_reading_widget_description">The book you are reading now, with your progress and a way back to your place.</string>
     <string name="currently_reading_between_books">Between books</string>
     <string name="currently_reading_between_books_subline">The next one is waiting on your shelf.</string>
@@ -14,16 +16,23 @@
     <string name="random_pick_shuffle">Pick another book</string>
     <string name="random_pick_widget_label">Random pick</string>
     <string name="trending_widget_label">Trending</string>
-    <string name="trending_widget_description">What readers are picking up, ranked, two books at a time.</string>
+    <string name="trending_widget_description">What readers are picking up and what is about to release, ranked, two books at a time.</string>
     <string name="trending_eyebrow_week">TRENDING THIS WEEK</string>
     <string name="trending_eyebrow_month">TRENDING THIS MONTH</string>
     <string name="trending_eyebrow_three_months">TRENDING · PAST 3 MONTHS</string>
     <string name="trending_eyebrow_year">TRENDING · PAST YEAR</string>
     <string name="trending_eyebrow_all_time">TRENDING · ALL TIME</string>
+    <string name="upcoming_eyebrow_month">UPCOMING · NEXT MONTH</string>
+    <string name="upcoming_eyebrow_three_months">UPCOMING · NEXT 3 MONTHS</string>
+    <string name="upcoming_eyebrow_six_months">UPCOMING · NEXT 6 MONTHS</string>
+    <string name="upcoming_eyebrow_year">UPCOMING · NEXT YEAR</string>
     <string name="trending_previous_page">Previous books</string>
     <string name="trending_next_page">Next books</string>
     <string name="trending_empty_headline">Nothing is trending yet</string>
+    <string name="upcoming_empty_headline">Nothing is due yet</string>
     <string name="trending_empty_subline">Check back after the next refresh.</string>
+    <string name="trending_failed_headline">Couldn\'t reach Hardcover</string>
+    <string name="trending_failed_subline">Check your connection, then refresh.</string>
     <string name="trending_settings">Widget settings</string>
     <string name="quote_widget_label">Quote of the day</string>
     <string name="quote_widget_description">One of your saved quotes each day, with arrows to browse the rest.</string>
@@ -31,6 +40,8 @@
     <string name="quote_next">Next quote</string>
     <string name="quote_empty_headline">No quotes yet</string>
     <string name="quote_empty_subline">Save a quote from a book\'s Yours tab.</string>
+    <string name="quote_failed_headline">Couldn\'t reach Hardcover</string>
+    <string name="quote_failed_subline">Check your connection, then refresh.</string>
     <string name="currently_reading_update_progress">Update progress</string>
     <string name="update_progress_save_failed">Couldn\'t save your progress. Try again from the app.</string>
 </resources>
