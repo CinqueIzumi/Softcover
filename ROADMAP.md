@@ -13,6 +13,16 @@ A few honest caveats:
 
 ---
 
+## 3.2.2: What's coming next
+
+The Trending widget looks ahead, and every widget is ready the moment you place it.
+
+- **What's coming.** Trending can show the 10 most-wanted books releasing in the next month, 3 months, 6 months or year.
+- **Ready straight away.** New widgets fill in within a second of placing them, and their arrows respond at once.
+- **A progress bar that stays.** Currently Reading keeps its bar and its percentage in place.
+- **Honest when offline.** Trending and Quote of the day say when Hardcover can't be reached, with a refresh button.
+- **Lighter on storage.** Widget covers take far less space and are cleared when you remove your last widget or sign out.
+
 ## 3.3.0: The reading record
 
 Everything you might want to record about a book, and every statistic that comes out of it. What you keep private never leaves your device.
