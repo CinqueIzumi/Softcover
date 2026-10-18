@@ -42,7 +42,7 @@ internal class RandomPickImages(
 
     /** `null` when a gradient file could not be written, since the backdrop is not worth drawing without them. */
     suspend fun artwork(book: Book): RandomPickWidgetUiModel.Artwork? = backdrops.artwork(
-        book = book,
+        source = book.coverSource(),
         coverHeightDp = maxRandomPickCoverHeightDp(),
     ) { backdrop, veil, veilLift, washPrimary, washTertiary ->
         RandomPickWidgetUiModel.Artwork(

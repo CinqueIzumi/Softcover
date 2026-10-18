@@ -49,6 +49,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.callback.CycleQuoteCallback
 import nl.rhaydus.softcover.feature.widget.presentation.callback.QuoteRetryCallback
+import nl.rhaydus.softcover.feature.widget.presentation.component.BackdropUris
 import nl.rhaydus.softcover.feature.widget.presentation.component.CYCLE_EYEBROW_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.component.CycleEyebrow
 import nl.rhaydus.softcover.feature.widget.presentation.component.RefreshButton
@@ -174,7 +175,7 @@ private fun Shown(
     val quoteView = quoteRemoteViews(
         context = context,
         text = content.quoteText,
-        color = GlanceTheme.colors.onBackground,
+        color = GlanceTheme.colors.onSurface,
         maxLines = quoteMaxLines(
             context = context,
             heightPx = (quoteHeight.value * context.resources.displayMetrics.density).toInt(),
@@ -182,6 +183,18 @@ private fun Shown(
     )
 
     Box(modifier = GlanceModifier.fillMaxSize()) {
+        val artwork = content.artwork
+
+        if (artwork != null) {
+            BackdropUris(
+                backdrop = artwork.backdrop,
+                veil = artwork.veil,
+                veilLift = artwork.veilLift,
+                washPrimary = artwork.washPrimary,
+                washTertiary = artwork.washTertiary,
+            )
+        }
+
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
@@ -243,7 +256,7 @@ private fun Shown(
                             text = content.byline,
                             maxLines = 1,
                             style = TextStyle(
-                                color = GlanceTheme.colors.primary,
+                                color = GlanceTheme.colors.onSurfaceVariant,
                                 fontSize = BYLINE_FONT_SIZE_SP.sp,
                             ),
                         )

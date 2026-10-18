@@ -20,11 +20,19 @@ internal fun buildQuoteBook(
     readSeconds: Int? = null,
     shelved: Boolean = true,
     privacySettingId: Int = 1,
+    editionTitle: String? = null,
+    editionUrl: String? = null,
 ): Book {
     val currentEdition = mockk<BookEdition>().also {
         every {
             it.id
         } returns 70
+        every {
+            it.title
+        } returns editionTitle
+        every {
+            it.url
+        } returns editionUrl
         every {
             it.pages
         } returns currentPages

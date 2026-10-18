@@ -46,6 +46,9 @@ data class Book(
             return release > Clock.System.todayIn(TimeZone.currentSystemDefault())
         }
 
+    val displayTitle: String
+        get() = editions.firstOrNull { it.id == userBook?.editionId }?.title?.takeIf { it.isNotBlank() } ?: title
+
     val currentEdition: BookEdition?
         get() {
             val userEditionId = userBook?.editionId

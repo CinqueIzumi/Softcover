@@ -17,6 +17,8 @@ class AddQuoteUseCase(
         actionAt: Instant?,
         position: QuotePosition?,
         bookTitle: String?,
+        editionTitle: String?,
+        editionCoverUrl: String?,
     ): Result<Long> = runCatchingLogged {
         repository.add(
             bookId = bookId,
@@ -26,6 +28,8 @@ class AddQuoteUseCase(
             actionAt = actionAt,
             position = position,
             bookTitle = bookTitle,
+            editionTitle = editionTitle,
+            editionCoverUrl = editionCoverUrl,
         )
     }
 }

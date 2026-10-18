@@ -257,7 +257,7 @@ private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Shown(conten
   skippable: false
   restartable: true
   params:
-    - content: STABLE (class with no mutable properties)
+    - content: RUNTIME (requires runtime check)
     - openBook: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable

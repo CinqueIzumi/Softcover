@@ -19,12 +19,13 @@ class BookTest {
         id: Int,
         owned: Boolean = false,
         releaseDate: LocalDate? = null,
+        title: String? = null,
     ): BookEdition = BookEdition(
         id = id,
         canonicalId = null,
         bookId = 1,
         publisher = null,
-        title = null,
+        title = title,
         url = null,
         localImagePath = null,
         isbn10 = null,
@@ -70,6 +71,95 @@ class BookTest {
         every {
             it.editionId
         } returns editionId
+    }
+
+    // ----- displayTitle -----
+
+    @Nested
+    inner class DisplayTitle {
+        @Test
+        fun `uses the title of the user's own edition`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(
+                    buildEdition(
+                        id = 1,
+                        title = "Other Title",
+                    ),
+                    buildEdition(
+                        id = 2,
+                        title = "My Edition",
+                    ),
+                ),
+                userBook = buildUserBook(editionId = 2),
+            )
+
+            // ----- Act -----
+            val result = book.displayTitle
+
+            // ----- Assert -----
+            result shouldBe "My Edition"
+        }
+
+        @Test
+        fun `falls back to the book title when the user's edition title is blank`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(buildEdition(
+                    id = 2,
+                    title = "   ",
+                ),),
+                userBook = buildUserBook(editionId = 2),
+            )
+
+            // ----- Act -----
+            val result = book.displayTitle
+
+            // ----- Assert -----
+            result shouldBe "Test Book"
+        }
+
+        @Test
+        fun `falls back to the book title when the user's edition has no title`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(buildEdition(
+                    id = 2,
+                    title = null,
+                ),),
+                userBook = buildUserBook(editionId = 2),
+            )
+
+            // ----- Act -----
+            val result = book.displayTitle
+
+            // ----- Assert -----
+            result shouldBe "Test Book"
+        }
+
+        @Test
+        fun `ignores owned and default editions when there is no user book`() {
+            // ----- Arrange -----
+            val owned = buildEdition(
+                id = 1,
+                owned = true,
+                title = "Owned Title",
+            )
+            val default = buildEdition(
+                id = 2,
+                title = "Default Title",
+            )
+            val book = buildBook(
+                editions = listOf(owned, default),
+                defaultEdition = default,
+            )
+
+            // ----- Act -----
+            val result = book.displayTitle
+
+            // ----- Assert -----
+            result shouldBe "Test Book"
+        }
     }
 
     // ----- currentEdition -----

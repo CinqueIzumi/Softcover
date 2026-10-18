@@ -220,7 +220,7 @@ private fun picked(
 ) = RandomPickWidgetUiModel.Content.Picked(
     eyebrow = eyebrow,
     bookId = book.id,
-    title = book.title,
+    title = book.displayTitle,
     author = book.authorString,
     cover = cover,
     artwork = artwork,

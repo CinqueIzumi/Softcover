@@ -24,6 +24,8 @@ interface QuoteRepository {
         actionAt: Instant?,
         position: QuotePosition?,
         bookTitle: String?,
+        editionTitle: String?,
+        editionCoverUrl: String?,
     ): Long
 
     suspend fun delete(localId: Long)

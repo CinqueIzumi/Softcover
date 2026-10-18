@@ -12,6 +12,7 @@ internal fun testQuote(
     localId: Long = 1L,
     remoteId: Long? = null,
     bookTitle: String? = null,
+    editionTitle: String? = null,
     position: QuotePosition? = null,
 ): Quote = Quote(
     localId = localId,
@@ -24,6 +25,7 @@ internal fun testQuote(
     position = position,
     isPending = false,
     bookTitle = bookTitle,
+    editionTitle = editionTitle,
 )
 
 internal fun testQuotes(count: Int): List<Quote> = (1..count).map { index ->

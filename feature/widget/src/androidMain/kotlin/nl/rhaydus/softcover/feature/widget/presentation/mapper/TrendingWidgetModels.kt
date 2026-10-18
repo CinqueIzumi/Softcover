@@ -245,7 +245,7 @@ private fun ranked(
         TrendingWidgetUiModel.Item(
             bookId = book.id,
             rank = "${firstRank + index + 1}",
-            title = book.title,
+            title = book.displayTitle,
             author = book.authorString,
             cover = covers[index],
         )

@@ -39,7 +39,7 @@ internal class CurrentlyReadingImages(
     }
 
     suspend fun artworkUris(book: Book): CurrentlyReadingWidgetUiModel.Artwork? = backdrops.artwork(
-        book = book,
+        source = book.coverSource(),
         coverHeightDp = COVER_HEIGHT_DP,
     ) { backdrop, veil, veilLift, washPrimary, washTertiary ->
         CurrentlyReadingWidgetUiModel.Artwork(

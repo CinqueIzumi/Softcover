@@ -24,6 +24,8 @@ internal fun QuoteEntity.toDomain(): Quote = Quote(
     position = toPosition(),
     isPending = syncState == QuoteSyncState.PENDING_INSERT,
     bookTitle = bookTitle,
+    editionTitle = editionTitle,
+    editionCoverUrl = editionCoverUrl,
 )
 
 internal fun QuoteEntity.toPosition(): QuotePosition? {
@@ -56,6 +58,8 @@ internal fun newPendingQuoteEntity(
     actionAt: Instant,
     position: QuotePosition?,
     bookTitle: String?,
+    editionTitle: String?,
+    editionCoverUrl: String?,
 ): QuoteEntity = positionColumns(position = position).let { columns ->
     QuoteEntity(
         remoteId = null,
@@ -70,6 +74,8 @@ internal fun newPendingQuoteEntity(
         positionPercent = columns.percent,
         syncState = QuoteSyncState.PENDING_INSERT,
         bookTitle = bookTitle,
+        editionTitle = editionTitle,
+        editionCoverUrl = editionCoverUrl,
     )
 }
 
@@ -93,6 +99,8 @@ internal fun QuoteFieldsFragment.toQuoteEntity(): QuoteEntity? {
         positionPercent = columns.percent,
         syncState = QuoteSyncState.SYNCED,
         bookTitle = book?.title,
+        editionTitle = edition?.title,
+        editionCoverUrl = edition?.image?.url,
     )
 }
 

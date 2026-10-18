@@ -40,7 +40,7 @@ class TrendingWidgetModelsTest {
             this@mockk.id
         } returns id
         every {
-            title
+            displayTitle
         } returns "Title $id"
         every {
             authorString

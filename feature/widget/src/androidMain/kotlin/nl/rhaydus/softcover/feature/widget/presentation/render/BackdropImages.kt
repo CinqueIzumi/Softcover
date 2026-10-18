@@ -29,17 +29,17 @@ internal class BackdropImages(
 
     /**
      * Hands the five stored images to [build], or returns `null` when a gradient file could not be written,
-     * since the backdrop is not worth drawing without them. The backdrop is `null` while the book has no
-     * cover; [coverHeightDp] is the size the cover is decoded at before it is blurred.
+     * since the backdrop is not worth drawing without them. The backdrop is `null` while [source] is
+     * `null`; [coverHeightDp] is the size the cover is decoded at before it is blurred.
      */
     suspend fun <T> artwork(
-        book: Book,
+        source: CoverSource?,
         coverHeightDp: Int,
         build: (backdrop: Uri?, veil: Uri, veilLift: Uri, washPrimary: Uri, washTertiary: Uri) -> T,
     ): T? = coroutineScope {
         val backdrop = async {
             backdropUri(
-                book,
+                source,
                 coverHeightDp,
             )
         }
@@ -58,10 +58,11 @@ internal class BackdropImages(
     }
 
     private suspend fun backdropUri(
-        book: Book,
+        source: CoverSource?,
         coverHeightDp: Int,
     ): Uri? {
-        val source = book.coverSource() ?: return null
+        if (source == null) return null
+
         val coverPx = (coverHeightDp * density).roundToInt()
 
         return store.uriFor(

@@ -21,6 +21,7 @@
   by 180dp, Crop-scaled to every size) or, with no cover, a `primary` and `tertiary` gradient wash; then the
   `veil` and, in light only, the `veilLift`, both tinted `surfaceContainerHigh`. Gradients are white alpha
   masks tinted at draw time, so a palette or day/night switch needs no re-render.
+- Widgets title a book with `Book.displayTitle`: the reader's own edition title, else the book title.
 - `ReservedLinesTitle`: bold 14sp serif centred, up to two lines, holding the height of `reservedLines`
   lines (an invisible text holds it, Glance has no `minLines`).
 - Portrait stacked layout, shared by Currently Reading and Random pick, chosen by the available height
@@ -82,10 +83,14 @@
 ### Quote of the day widget
 
 - Landscape, min 250 x 110dp, resizable; buckets 250, 320 and 390dp wide by 110, 180 and 250dp tall. Paper
-  `background`, no backdrop; a low-alpha `quoteGlyph` opening mark, a vector drawable, sits left of the quote, top-aligned with it.
-- Anatomy: a `CycleEyebrow` (`QUOTE OF THE DAY`, or `QUOTES · n/m` once the reader steps off the first quote), then the quote
-  in italic serif and a 12sp `primary` byline "Book title · position". The quote autosizes from 18sp down to
-  12sp to fit the space above the byline.
+  `background` under the shared `Backdrop`, blurred from the quote's own edition cover (stored on the quote,
+  so a book outside the library still has one) or the washes without it; a low-alpha `quoteGlyph` opening
+  mark, a vector drawable, sits left of the quote, top-aligned with it.
+- Anatomy: a `CycleEyebrow` (`QUOTE OF THE DAY`, or `QUOTES · n/m` once the reader steps off the first
+  quote), then the quote in italic serif `onSurface` and a 12sp `onSurfaceVariant` byline "Edition title ·
+  position" (book title
+  when the quote has no edition title). The quote autosizes from 18sp down to 12sp to fit the space above the
+  byline.
 - A hash of each quote's content and the date orders the reader's quotes, so the first changes at midnight.
   Arrows (only with more than one quote) walk that order and wrap; the pick is kept per instance with its day
   and lapses at midnight.

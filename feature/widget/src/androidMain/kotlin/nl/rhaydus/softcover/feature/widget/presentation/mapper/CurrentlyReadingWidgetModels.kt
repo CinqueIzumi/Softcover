@@ -84,7 +84,7 @@ private fun CurrentlyReadingWidgetInputs.toTextContent(): CurrentlyReadingWidget
 
     return CurrentlyReadingWidgetUiModel.Content.Reading(
         bookId = book.id,
-        title = book.title,
+        title = book.displayTitle,
         author = book.authorString,
         progressLabel = percentLabel(fraction = book.progressFraction()),
         cover = null,

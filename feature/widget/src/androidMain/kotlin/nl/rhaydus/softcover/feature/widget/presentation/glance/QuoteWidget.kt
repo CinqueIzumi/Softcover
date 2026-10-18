@@ -14,6 +14,7 @@ import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.feature.widget.presentation.mapper.quoteWidgetModels
 import nl.rhaydus.softcover.feature.widget.presentation.model.QuoteWidgetUiModel
+import nl.rhaydus.softcover.feature.widget.presentation.render.BackdropImages
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -41,6 +42,14 @@ internal class QuoteWidget : GlanceAppWidget(), KoinComponent {
         val themeConfigurations = environment.getThemeConfiguration()
         val initialTheme = environment.initialTheme(themeConfigurations)
 
+        val images = QuoteImages(
+            backdrops = BackdropImages(
+                context = context,
+                density = context.resources.displayMetrics.density,
+                store = environment.imageStore,
+            ),
+        )
+
         val models = quoteWidgetModels(
             isSignedIn = environment.isSignedIn(),
             themeConfiguration = themeConfigurations,
@@ -50,6 +59,7 @@ internal class QuoteWidget : GlanceAppWidget(), KoinComponent {
                 .filter { it == appWidgetId }
                 .map { dependencies.getQuoteSelection(appWidgetId = appWidgetId).getOrNull() },
             fetchState = dependencies.fetchTracker.state,
+            artworkUris = images::artworkUris,
         ).catch { error ->
             AppLog.e(
                 error,

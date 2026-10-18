@@ -73,6 +73,8 @@ class OnSaveQuoteActionTest {
                 actionAt = any(),
                 position = any(),
                 bookTitle = any(),
+                editionTitle = any(),
+                editionCoverUrl = any(),
             )
         } returns Result.success(1L)
         coEvery {
@@ -173,6 +175,8 @@ class OnSaveQuoteActionTest {
                         totalPages = 437,
                     ),
                     bookTitle = "Piranesi",
+                    editionTitle = any(),
+                    editionCoverUrl = any(),
                 )
             }
         }
@@ -217,6 +221,8 @@ class OnSaveQuoteActionTest {
                         totalPages = 437,
                     ),
                     bookTitle = "Piranesi",
+                    editionTitle = any(),
+                    editionCoverUrl = any(),
                 )
             }
         }
@@ -250,6 +256,8 @@ class OnSaveQuoteActionTest {
                     actionAt = any(),
                     position = any(),
                     bookTitle = any(),
+                    editionTitle = any(),
+                    editionCoverUrl = any(),
                 )
             }
         }
@@ -279,6 +287,40 @@ class OnSaveQuoteActionTest {
                     actionAt = any(),
                     position = any(),
                     bookTitle = "The Ministry of Time",
+                    editionTitle = any(),
+                    editionCoverUrl = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `passes the current edition's title and cover url to the use case`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                book = buildQuoteBook(
+                    currentPages = 437,
+                    readPage = 180,
+                    editionTitle = "Piranesi (Illustrated)",
+                    editionUrl = "https://example.com/cover.jpg",
+                ),
+                quoteDraft = draft(),
+            )
+
+            // ----- Act -----
+            execute(this)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                addQuoteUseCase(
+                    bookId = any(),
+                    editionId = any(),
+                    text = any(),
+                    privacy = any(),
+                    actionAt = any(),
+                    position = any(),
+                    bookTitle = any(),
+                    editionTitle = "Piranesi (Illustrated)",
+                    editionCoverUrl = "https://example.com/cover.jpg",
                 )
             }
         }
@@ -304,6 +346,8 @@ class OnSaveQuoteActionTest {
                     actionAt = any(),
                     position = any(),
                     bookTitle = any(),
+                    editionTitle = any(),
+                    editionCoverUrl = any(),
                 )
             }
         }
@@ -330,6 +374,8 @@ class OnSaveQuoteActionTest {
                     actionAt = any(),
                     position = any(),
                     bookTitle = any(),
+                    editionTitle = any(),
+                    editionCoverUrl = any(),
                 )
             }
             coVerify(exactly = 0) {
@@ -387,6 +433,8 @@ class OnSaveQuoteActionTest {
                     actionAt = any(),
                     position = any(),
                     bookTitle = any(),
+                    editionTitle = any(),
+                    editionCoverUrl = any(),
                 )
             }
             stateFlow.value.failedMutationBookIds shouldBe setOf(7)
@@ -442,6 +490,8 @@ class OnSaveQuoteActionTest {
                     actionAt = any(),
                     position = any(),
                     bookTitle = any(),
+                    editionTitle = any(),
+                    editionCoverUrl = any(),
                 )
             } returns Result.failure(RuntimeException("add failed"))
             stateFlow.value = buildBookDetailUiState().copy(

@@ -20,6 +20,8 @@ class QuoteMapperTest {
         positionValue: Double? = null,
         positionPossible: Double? = null,
         positionPercent: Double? = null,
+        editionTitle: String? = null,
+        editionCoverUrl: String? = null,
     ) = QuoteEntity(
         localId = 5,
         remoteId = 77,
@@ -33,11 +35,25 @@ class QuoteMapperTest {
         positionPossible = positionPossible,
         positionPercent = positionPercent,
         syncState = syncState,
+        editionTitle = editionTitle,
+        editionCoverUrl = editionCoverUrl,
     )
 
     private class FakeBook(override val title: String?) : QuoteFieldsFragment.Book {
         override val __typename: String = "books"
         override val id: Int = 1
+    }
+
+    private class FakeImage(override val url: String?) : QuoteFieldsFragment.Edition.Image {
+        override val __typename: String = "images"
+    }
+
+    private class FakeEdition(
+        override val title: String?,
+        override val image: QuoteFieldsFragment.Edition.Image?,
+    ) : QuoteFieldsFragment.Edition {
+        override val __typename: String = "editions"
+        override val id: Int = 3
     }
 
     private class FakeFragment(
@@ -46,6 +62,7 @@ class QuoteMapperTest {
         override val metadata: Any,
         override val book_id: Int?,
         override val book: QuoteFieldsFragment.Book?,
+        override val edition: QuoteFieldsFragment.Edition?,
     ) : QuoteFieldsFragment {
         override val __typename: String = "reading_journals"
         override val id: Long = 9L
@@ -59,12 +76,14 @@ class QuoteMapperTest {
         metadata: Any = emptyMap<String, Any?>(),
         bookId: Int? = 1,
         bookTitle: String? = "Dune",
+        edition: QuoteFieldsFragment.Edition? = null,
     ): QuoteFieldsFragment = FakeFragment(
         entry = entry,
         action_at = actionAt,
         metadata = metadata,
         book_id = bookId,
         book = FakeBook(title = bookTitle),
+        edition = edition,
     )
 
     @Nested
@@ -159,6 +178,25 @@ class QuoteMapperTest {
     }
 
     @Nested
+    inner class EditionRoundTrip {
+        @Test
+        fun `carries the edition title and cover url from the entity to the domain quote`() {
+            // ----- Arrange -----
+            val entity = entity(
+                editionTitle = "Dune (Illustrated)",
+                editionCoverUrl = "https://example.com/cover.jpg",
+            )
+
+            // ----- Act -----
+            val result = entity.toDomain()
+
+            // ----- Assert -----
+            result.editionTitle shouldBe "Dune (Illustrated)"
+            result.editionCoverUrl shouldBe "https://example.com/cover.jpg"
+        }
+    }
+
+    @Nested
     inner class NewPendingQuoteEntity {
         @Test
         fun `builds an unsynced row carrying the position columns`() {
@@ -177,6 +215,8 @@ class QuoteMapperTest {
                 actionAt = Instant.fromEpochMilliseconds(5_000),
                 position = position,
                 bookTitle = "Dune",
+                editionTitle = "Dune (Illustrated)",
+                editionCoverUrl = "https://example.com/cover.jpg",
             )
 
             // ----- Assert -----
@@ -193,6 +233,8 @@ class QuoteMapperTest {
                 positionPercent = 25.0,
                 syncState = QuoteSyncState.PENDING_INSERT,
                 bookTitle = "Dune",
+                editionTitle = "Dune (Illustrated)",
+                editionCoverUrl = "https://example.com/cover.jpg",
             )
         }
 
@@ -210,6 +252,8 @@ class QuoteMapperTest {
                 actionAt = Instant.fromEpochMilliseconds(5_000),
                 position = position,
                 bookTitle = null,
+                editionTitle = null,
+                editionCoverUrl = null,
             )
 
             // ----- Assert -----
@@ -252,6 +296,39 @@ class QuoteMapperTest {
                 syncState = QuoteSyncState.SYNCED,
                 bookTitle = "Dune",
             )
+        }
+
+        @Test
+        fun `maps the edition title and image url`() {
+            // ----- Arrange -----
+            val row = journal(
+                edition = FakeEdition(
+                    title = "Dune (Illustrated)",
+                    image = FakeImage(url = "https://example.com/cover.jpg"),
+                ),
+            )
+
+            // ----- Act -----
+            val result = row.toQuoteEntity()
+
+            // ----- Assert -----
+            val entity = result.shouldNotBeNull()
+            entity.editionTitle shouldBe "Dune (Illustrated)"
+            entity.editionCoverUrl shouldBe "https://example.com/cover.jpg"
+        }
+
+        @Test
+        fun `leaves the edition fields empty without an edition`() {
+            // ----- Arrange -----
+            val row = journal(edition = null)
+
+            // ----- Act -----
+            val result = row.toQuoteEntity()
+
+            // ----- Assert -----
+            val entity = result.shouldNotBeNull()
+            entity.editionTitle.shouldBeNull()
+            entity.editionCoverUrl.shouldBeNull()
         }
 
         @Test

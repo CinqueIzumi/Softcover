@@ -1,11 +1,15 @@
 package nl.rhaydus.softcover.feature.widget.presentation.mapper
 
+import android.net.Uri
 import app.cash.turbine.test
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.mockk
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Quote
 import nl.rhaydus.softcover.core.domain.model.QuotePosition
@@ -29,36 +33,22 @@ class QuoteWidgetModelsTest {
         selection: QuoteSelection? = null,
         fetchState: Flow<QuoteFetchTracker.State?> = flowOf(null),
         epochDays: Flow<Long> = flowOf(today),
+        artworkUris: suspend (Quote) -> QuoteWidgetUiModel.Artwork? = { null },
     ): Flow<QuoteWidgetUiModel> = quoteWidgetModels(
         isSignedIn = flowOf(isSignedIn),
         themeConfiguration = flowOf(ThemeConfiguration()),
         quotes = flowOf(quotes),
         selection = flowOf(selection),
         fetchState = fetchState,
+        artworkUris = artworkUris,
         today = epochDays,
     )
 
-    private suspend fun Flow<QuoteWidgetUiModel>.shown(): QuoteWidgetUiModel.Content.Shown {
-        var content: QuoteWidgetUiModel.Content = QuoteWidgetUiModel.Content.Loading
+    private suspend fun Flow<QuoteWidgetUiModel>.shown(): QuoteWidgetUiModel.Content.Shown =
+        toList().last().content.shouldBeInstanceOf<QuoteWidgetUiModel.Content.Shown>()
 
-        test {
-            content = awaitItem().content
-            awaitComplete()
-        }
-
-        return content.shouldBeInstanceOf<QuoteWidgetUiModel.Content.Shown>()
-    }
-
-    private suspend fun Flow<QuoteWidgetUiModel>.content(): QuoteWidgetUiModel.Content {
-        var content: QuoteWidgetUiModel.Content = QuoteWidgetUiModel.Content.Loading
-
-        test {
-            content = awaitItem().content
-            awaitComplete()
-        }
-
-        return content
-    }
+    private suspend fun Flow<QuoteWidgetUiModel>.content(): QuoteWidgetUiModel.Content =
+        toList().first().content
 
     @Nested
     inner class Content {
@@ -248,10 +238,12 @@ class QuoteWidgetModelsTest {
             // ----- Act & Assert -----
             flow.test {
                 epochDays.emit(today)
+                awaitItem()
                 val before = awaitItem().content.shouldBeInstanceOf<QuoteWidgetUiModel.Content.Shown>()
                 before.eyebrow shouldBe "QUOTES · 3/4"
 
                 epochDays.emit(today + 1)
+                awaitItem()
                 val after = awaitItem().content.shouldBeInstanceOf<QuoteWidgetUiModel.Content.Shown>()
                 after.eyebrow shouldBe "QUOTE OF THE DAY"
                 after.quoteText shouldBe nextRanking.first().text
@@ -311,6 +303,44 @@ class QuoteWidgetModelsTest {
         }
 
         @Test
+        fun `prefers the edition title over the book title`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                quotes = listOf(
+                    testQuote(
+                        bookTitle = "Piranesi",
+                        editionTitle = "Piranesi (Illustrated)",
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val shown = flow.shown()
+
+            // ----- Assert -----
+            shown.byline shouldBe "Piranesi (Illustrated)"
+        }
+
+        @Test
+        fun `falls back to the book title when the edition title is blank`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                quotes = listOf(
+                    testQuote(
+                        bookTitle = "Piranesi",
+                        editionTitle = "  ",
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val shown = flow.shown()
+
+            // ----- Assert -----
+            shown.byline shouldBe "Piranesi"
+        }
+
+        @Test
         fun `shows only the title when the quote has no position`() = runTest {
             // ----- Arrange -----
             val flow = models(quotes = listOf(testQuote(bookTitle = "Piranesi")))
@@ -367,6 +397,36 @@ class QuoteWidgetModelsTest {
 
             // ----- Assert -----
             shown.byline shouldBe null
+        }
+    }
+
+    @Nested
+    inner class Artwork {
+        @Test
+        fun `emits the shown quote without artwork first and with the resolved artwork second`() = runTest {
+            // ----- Arrange -----
+            val resolved = QuoteWidgetUiModel.Artwork(
+                backdrop = null,
+                veil = mockk<Uri>(),
+                veilLift = mockk<Uri>(),
+                washPrimary = mockk<Uri>(),
+                washTertiary = mockk<Uri>(),
+            )
+            val flow = models(
+                quotes = testQuotes(count = 2),
+                artworkUris = { resolved },
+            )
+
+            // ----- Act -----
+            val emissions = flow.toList()
+
+            // ----- Assert -----
+            emissions.size shouldBe 2
+            val first = emissions[0].content.shouldBeInstanceOf<QuoteWidgetUiModel.Content.Shown>()
+            val second = emissions[1].content.shouldBeInstanceOf<QuoteWidgetUiModel.Content.Shown>()
+            first.artwork.shouldBeNull()
+            second.artwork shouldBe resolved
+            second.copy(artwork = null) shouldBe first
         }
     }
 }
