@@ -16,11 +16,17 @@ internal val PORTRAIT_HEIGHTS_DP = listOf(COMPACT_HEIGHT_DP, TALL_HEIGHT_DP, TAL
 
 internal const val PROGRESS_BAR_HEIGHT_DP = 12
 
-private const val PROGRESS_LABEL_RESERVE_DP = 64
+/** Room for "100%", so the bar and the edit glyph keep their place as the digits change. */
+internal val PROGRESS_LABEL_WIDTH_DP = 34.dp
 
-/** The foot row's bar width: the widget minus the column padding and the room the percent and edit glyph take. */
+private const val PROGRESS_FIXED_RESERVE_DP = 30
+
+/** The foot row's bar width: the widget minus the column padding, the percent label and the edit glyph. */
 internal fun progressBarWidthDp(widgetWidth: Dp): Int =
-    (widgetWidth - Spacing.xxs * 2 - PROGRESS_LABEL_RESERVE_DP.dp).value.roundToInt()
+    (widgetWidth - Spacing.xxs * 2 - PROGRESS_LABEL_WIDTH_DP - PROGRESS_FIXED_RESERVE_DP.dp)
+        .value
+        .roundToInt()
+        .coerceAtLeast(PROGRESS_BAR_HEIGHT_DP)
 
 internal fun progressBarWidthsDp(): List<Int> = WIDGET_WIDTHS_DP.map { progressBarWidthDp(it.dp) }
 

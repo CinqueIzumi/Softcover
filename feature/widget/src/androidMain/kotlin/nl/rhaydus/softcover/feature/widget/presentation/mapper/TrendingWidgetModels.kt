@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -21,7 +22,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
-import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
+import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
+import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeedFetchStatus
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingPosition
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingSettingsChange
 import nl.rhaydus.softcover.feature.widget.domain.util.TRENDING_MAX_ITEMS
@@ -38,6 +40,7 @@ private class TrendingWidgetInputs(
     val themeConfiguration: ThemeConfiguration,
     val position: TrendingPosition,
     val books: List<Book>,
+    val fetchStatus: TrendingFeedFetchStatus,
     val settingsChange: TrendingSettingsChange?,
 )
 
@@ -49,7 +52,11 @@ private class TrendingWidgetInputs(
  * within [COVER_HIT_WINDOW] skip the pending step. Once the page is shown, the neighbouring pages' covers are
  * resolved in the background so a page turn finds them ready.
  *
- * A [settingsChanges] emission first shows the loading frame with the eyebrow for the new period, then the
+ * An empty ranking shows the loader, with the eyebrow of the feed, until [fetchStatus] says the feed has had data,
+ * so [TrendingWidgetUiModel.Content.Empty] means a fetch finished with nothing, and
+ * [TrendingWidgetUiModel.Content.FetchFailed] one failed with nothing cached.
+ *
+ * A [settingsChanges] emission first shows the loading frame with the eyebrow for the new feed, then the
  * ranking once [position] has caught up. If it has not caught up within [SWITCH_TIMEOUT], the ranking for the
  * current position is shown instead, so the loader never sticks. Page turns and data refreshes never show the
  * loader.
@@ -60,12 +67,23 @@ internal fun trendingWidgetModels(
     themeConfiguration: Flow<ThemeConfiguration>,
     position: Flow<TrendingPosition>,
     settingsChanges: Flow<TrendingSettingsChange> = emptyFlow(),
-    observeTrending: (TrendingPeriod) -> Flow<List<Book>>,
-    eyebrowFor: (TrendingPeriod) -> String,
+    observeTrending: (TrendingFeed) -> Flow<List<Book>>,
+    fetchStatus: (TrendingFeed) -> Flow<TrendingFeedFetchStatus>,
+    eyebrowFor: (TrendingFeed) -> String,
+    emptyHeadlineFor: (TrendingFeed) -> String,
     coverUri: suspend (Book) -> Uri?,
 ): Flow<TrendingWidgetUiModel> {
     val positionedBooks = position.flatMapLatest { current ->
-        observeTrending(current.period).map { books -> current to books }
+        combine(
+            observeTrending(current.feed),
+            fetchStatus(current.feed),
+        ) { books, status ->
+            FeedBooks(
+                position = current,
+                books = books,
+                fetchStatus = if (books.isEmpty()) status else TrendingFeedFetchStatus.Settled,
+            )
+        }.distinctUntilChanged()
     }
 
     return flow {
@@ -77,12 +95,13 @@ internal fun trendingWidgetModels(
                 themeConfiguration,
                 positionedBooks,
                 settingsChanges.map<TrendingSettingsChange, TrendingSettingsChange?> { it }.onStart { emit(null) },
-            ) { signedIn, theme, (current, books), settingsChange ->
+            ) { signedIn, theme, feedBooks, settingsChange ->
                 TrendingWidgetInputs(
                     isSignedIn = signedIn,
                     themeConfiguration = theme,
-                    position = current,
-                    books = books,
+                    position = feedBooks.position,
+                    books = feedBooks.books,
+                    fetchStatus = feedBooks.fetchStatus,
                     settingsChange = settingsChange,
                 )
             }.transformLatest { inputs ->
@@ -94,18 +113,19 @@ internal fun trendingWidgetModels(
                     emit(
                         inputs.model(
                             TrendingWidgetUiModel.Content.Switching(
-                                eyebrow = eyebrowFor(change.settings.period),
+                                eyebrow = eyebrowFor(change.settings.feed),
                             ),
                         ),
                     )
 
-                    // Fresh inputs for the new period cancel this wait; if none arrive the current ranking stands.
-                    if (inputs.position.period != change.settings.period) delay(SWITCH_TIMEOUT)
+                    // Fresh inputs for the new feed cancel this wait; if none arrive the current ranking stands.
+                    if (inputs.position.feed != change.settings.feed) delay(SWITCH_TIMEOUT)
                 }
 
                 emitRanking(
                     inputs = inputs,
                     eyebrowFor = eyebrowFor,
+                    emptyHeadlineFor = emptyHeadlineFor,
                     coverUri = coverUri,
                 )
             },
@@ -115,7 +135,8 @@ internal fun trendingWidgetModels(
 
 private suspend fun FlowCollector<TrendingWidgetUiModel>.emitRanking(
     inputs: TrendingWidgetInputs,
-    eyebrowFor: (TrendingPeriod) -> String,
+    eyebrowFor: (TrendingFeed) -> String,
+    emptyHeadlineFor: (TrendingFeed) -> String,
     coverUri: suspend (Book) -> Uri?,
 ) {
     if (inputs.isSignedIn.not()) {
@@ -123,10 +144,21 @@ private suspend fun FlowCollector<TrendingWidgetUiModel>.emitRanking(
         return
     }
 
-    val eyebrow = eyebrowFor(inputs.position.period)
+    val eyebrow = eyebrowFor(inputs.position.feed)
 
     if (inputs.books.isEmpty()) {
-        emit(inputs.model(TrendingWidgetUiModel.Content.Empty(eyebrow = eyebrow)))
+        val content = when (inputs.fetchStatus) {
+            TrendingFeedFetchStatus.Loading -> TrendingWidgetUiModel.Content.Switching(eyebrow = eyebrow)
+
+            TrendingFeedFetchStatus.Failed -> TrendingWidgetUiModel.Content.FetchFailed(eyebrow = eyebrow)
+
+            TrendingFeedFetchStatus.Settled -> TrendingWidgetUiModel.Content.Empty(
+                eyebrow = eyebrow,
+                headline = emptyHeadlineFor(inputs.position.feed),
+            )
+        }
+
+        emit(inputs.model(content))
         return
     }
 

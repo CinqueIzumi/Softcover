@@ -622,6 +622,18 @@ interface BookDao {
     )
     fun observeTrendingBooks(period: String): Flow<List<BookFullEntity>>
 
+    @Transaction
+    @Query(
+        """
+        SELECT b.*
+        FROM books b
+        INNER JOIN trending_books tb ON tb.bookId = b.id
+        WHERE tb.period = :period
+        ORDER BY tb.rank ASC
+        """,
+    )
+    suspend fun getTrendingBooks(period: String): List<BookFullEntity>
+
     @Query("SELECT bookId FROM trending_books WHERE period = :period")
     suspend fun getTrendingBookIds(period: String): List<Int>
 

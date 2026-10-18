@@ -20,6 +20,7 @@ import java.io.OutputStream
 import java.nio.file.Files
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterEach
@@ -88,6 +89,24 @@ class WidgetImageStoreTest {
         WidgetImageFiles.DIRECTORY_NAME,
     ).listFiles().orEmpty().toList()
 
+    private fun storedFile(
+        name: String,
+        ageMillis: Long,
+    ): File {
+        val directory = File(
+            filesDir,
+            WidgetImageFiles.DIRECTORY_NAME,
+        ).also { it.mkdirs() }
+
+        return File(
+            directory,
+            name,
+        ).also {
+            it.writeBytes(byteArrayOf(1, 2, 3))
+            it.setLastModified(nowMillis - ageMillis)
+        }
+    }
+
     @Nested
     inner class UriFor {
         @Test
@@ -102,11 +121,11 @@ class WidgetImageStoreTest {
             // ----- Act -----
             val first = store.uriFor(
                 "cover-1",
-                render,
+                render = render,
             )
             val second = store.uriFor(
                 "cover-1",
-                render,
+                render = render,
             )
 
             // ----- Assert -----
@@ -222,6 +241,46 @@ class WidgetImageStoreTest {
             parsedUris.all { it.startsWith("content://$packageName.widgetimages/") } shouldBe true
             storedFiles() shouldHaveSize 2
         }
+
+        @Test
+        fun `treats a zero-byte file as a miss and renders it again`() = runTest {
+            // ----- Arrange -----
+            store.uriFor("cover-1") { bitmap() }
+            storedFiles().single().writeBytes(ByteArray(0))
+            var renders = 0
+
+            // ----- Act -----
+            val result = store.uriFor("cover-1") {
+                renders++
+                bitmap()
+            }
+
+            // ----- Assert -----
+            result.shouldNotBeNull()
+            renders shouldBe 1
+            storedFiles().single().length() shouldBeExactly 3L
+        }
+
+        @Test
+        fun `returns null and leaves no file when compress reports failure`() = runTest {
+            // ----- Arrange -----
+            val failing: Bitmap = mockk {
+                every {
+                    compress(
+                        any(),
+                        any(),
+                        any(),
+                    )
+                } returns false
+            }
+
+            // ----- Act -----
+            val result = store.uriFor("cover-1") { failing }
+
+            // ----- Assert -----
+            result.shouldBeNull()
+            storedFiles().shouldBeEmpty()
+        }
     }
 
     @Nested
@@ -254,6 +313,54 @@ class WidgetImageStoreTest {
 
             // ----- Assert -----
             storedFiles().shouldBeEmpty()
+        }
+    }
+
+    @Nested
+    inner class Clear {
+        @Test
+        fun `deletes every stored image`() = runTest {
+            // ----- Arrange -----
+            store.uriFor("a") { bitmap() }
+            store.uriFor("b") { bitmap() }
+
+            // ----- Act -----
+            store.clear()
+
+            // ----- Assert -----
+            storedFiles().shouldBeEmpty()
+        }
+
+        @Test
+        fun `does nothing when the directory does not exist`() = runTest {
+            // ----- Arrange -----
+            // (nothing to set up)
+
+            // ----- Act -----
+            store.clear()
+
+            // ----- Assert -----
+            storedFiles().shouldBeEmpty()
+        }
+
+        @Test
+        fun `leaves a fresh temp file and a file that is not a stored image alone`() = runTest {
+            // ----- Arrange -----
+            val temp = storedFile(
+                name = "render1.tmp",
+                ageMillis = 1.minutes.inWholeMilliseconds,
+            )
+            val foreign = storedFile(
+                name = "notes.txt",
+                ageMillis = 1.minutes.inWholeMilliseconds,
+            )
+            store.uriFor("a") { bitmap() }
+
+            // ----- Act -----
+            store.clear()
+
+            // ----- Assert -----
+            storedFiles().toSet() shouldBe setOf(temp, foreign)
         }
     }
 }

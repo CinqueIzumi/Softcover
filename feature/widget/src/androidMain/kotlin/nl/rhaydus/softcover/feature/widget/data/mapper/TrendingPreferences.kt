@@ -5,12 +5,15 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
+import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
+import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingPosition
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingRefreshCadence
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingSettings
 
 private val CadenceKey = stringPreferencesKey("trending_refresh_cadence")
 private val PeriodKey = stringPreferencesKey("trending_period")
+private val UpcomingWindowKey = stringPreferencesKey("trending_upcoming_window")
 private val PageKey = intPreferencesKey("trending_page")
 
 internal fun Preferences.toTrendingRefreshCadence(): TrendingRefreshCadence =
@@ -20,11 +23,26 @@ internal fun MutablePreferences.write(cadence: TrendingRefreshCadence) {
     this[CadenceKey] = cadence.name
 }
 
-internal fun Preferences.toTrendingPeriod(): TrendingPeriod =
-    TrendingPeriod.entries.firstOrNull { it.storedName() == this[PeriodKey] } ?: TrendingPeriod.Week
+/** An instance saved before upcoming existed has no window key, so it reads as the trending feed it always was. */
+internal fun Preferences.toTrendingFeed(): TrendingFeed {
+    val window = UpcomingWindow.entries.firstOrNull { it.storedName() == this[UpcomingWindowKey] }
 
-internal fun MutablePreferences.write(period: TrendingPeriod) {
-    this[PeriodKey] = period.storedName()
+    if (window != null) return TrendingFeed.Upcoming(window = window)
+
+    return TrendingFeed.Trending(
+        period = TrendingPeriod.entries.firstOrNull { it.storedName() == this[PeriodKey] } ?: TrendingPeriod.Week,
+    )
+}
+
+internal fun MutablePreferences.write(feed: TrendingFeed) {
+    when (feed) {
+        is TrendingFeed.Trending -> {
+            this[PeriodKey] = feed.period.storedName()
+            remove(UpcomingWindowKey)
+        }
+
+        is TrendingFeed.Upcoming -> this[UpcomingWindowKey] = feed.window.storedName()
+    }
 }
 
 internal fun Preferences.toTrendingPage(): Int = this[PageKey] ?: 0
@@ -34,17 +52,17 @@ internal fun MutablePreferences.writeTrendingPage(page: Int) {
 }
 
 internal fun Preferences.toTrendingSettings(): TrendingSettings = TrendingSettings(
-    period = toTrendingPeriod(),
+    feed = toTrendingFeed(),
     cadence = toTrendingRefreshCadence(),
 )
 
 internal fun MutablePreferences.write(settings: TrendingSettings) {
-    write(settings.period)
+    write(settings.feed)
     write(settings.cadence)
 }
 
 internal fun Preferences.toTrendingPosition(): TrendingPosition = TrendingPosition(
-    period = toTrendingPeriod(),
+    feed = toTrendingFeed(),
     page = toTrendingPage(),
 )
 
@@ -55,4 +73,11 @@ private fun TrendingPeriod.storedName(): String = when (this) {
     TrendingPeriod.ThreeMonths -> "three_months"
     TrendingPeriod.Year -> "year"
     TrendingPeriod.AllTime -> "all_time"
+}
+
+private fun UpcomingWindow.storedName(): String = when (this) {
+    UpcomingWindow.Month -> "month"
+    UpcomingWindow.ThreeMonths -> "three_months"
+    UpcomingWindow.SixMonths -> "six_months"
+    UpcomingWindow.Year -> "year"
 }

@@ -86,9 +86,12 @@ internal fun androidQuoteTextMeasurer(
             .setIncludePad(true)
             .build()
 
+        // The first and last lines carry the font padding; a middle line is the true line pitch.
+        val pitchLine = if (layout.lineCount > 2) 1 else 0
+
         QuoteTextMeasure(
             lineCount = layout.lineCount,
-            lineHeightPx = layout.getLineBottom(0) - layout.getLineTop(0),
+            lineHeightPx = layout.getLineBottom(pitchLine) - layout.getLineTop(pitchLine),
         )
     }
 }

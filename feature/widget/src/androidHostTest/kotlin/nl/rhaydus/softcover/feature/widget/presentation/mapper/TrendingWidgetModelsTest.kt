@@ -13,11 +13,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
+import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
+import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
+import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeedFetchStatus
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingPosition
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingSettings
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingSettingsChange
@@ -47,14 +51,17 @@ class TrendingWidgetModelsTest {
         isSignedIn: Boolean = true,
         position: Flow<TrendingPosition> = flowOf(positionAt(0)),
         settingsChanges: Flow<TrendingSettingsChange> = emptyFlow(),
-        observeTrending: (TrendingPeriod) -> Flow<List<Book>>,
+        fetchStatus: (TrendingFeed) -> Flow<TrendingFeedFetchStatus> = { flowOf(TrendingFeedFetchStatus.Settled) },
+        observeTrending: (TrendingFeed) -> Flow<List<Book>>,
     ): Flow<TrendingWidgetUiModel> = trendingWidgetModels(
         isSignedIn = flowOf(isSignedIn),
         themeConfiguration = flowOf(ThemeConfiguration()),
         position = position,
         settingsChanges = settingsChanges,
         observeTrending = observeTrending,
-        eyebrowFor = { period -> "Eyebrow ${period.name}" },
+        fetchStatus = fetchStatus,
+        eyebrowFor = { feed -> "Eyebrow ${feed.eyebrowName()}" },
+        emptyHeadlineFor = { feed -> "Headline ${feed.eyebrowName()}" },
         coverUri = { book ->
             requestedBookIds += book.id
             delay(coverDelaysMs[book.id] ?: 0L)
@@ -62,15 +69,20 @@ class TrendingWidgetModelsTest {
         },
     )
 
+    private fun TrendingFeed.eyebrowName(): String = when (this) {
+        is TrendingFeed.Trending -> period.name
+        is TrendingFeed.Upcoming -> "Upcoming${window.name}"
+    }
+
     private fun positionAt(
         page: Int,
         period: TrendingPeriod = TrendingPeriod.Week,
     ): TrendingPosition = TrendingPosition(
-        period = period,
+        feed = TrendingFeed.Trending(period = period),
         page = page,
     )
 
-    private fun fixedBooks(books: List<Book>): (TrendingPeriod) -> Flow<List<Book>> = { flowOf(books) }
+    private fun fixedBooks(books: List<Book>): (TrendingFeed) -> Flow<List<Book>> = { flowOf(books) }
 
     @Nested
     inner class TrendingWidgetModels {
@@ -91,14 +103,145 @@ class TrendingWidgetModelsTest {
         }
 
         @Test
-        fun `an empty trending list shows the empty content with the period eyebrow`() = runTest {
+        fun `an empty list after a completed fetch shows the empty content with the feed's eyebrow and headline`() =
+            runTest {
+                // ----- Arrange -----
+                val flow = models(observeTrending = fixedBooks(emptyList()))
+
+                // ----- Act -----
+                flow.test {
+                    // ----- Assert -----
+                    awaitItem().content shouldBe TrendingWidgetUiModel.Content.Empty(
+                        eyebrow = "Eyebrow Week",
+                        headline = "Headline Week",
+                    )
+                    awaitComplete()
+                }
+            }
+
+        @Test
+        fun `an empty list shows the loader while the feed is still loading`() = runTest {
             // ----- Arrange -----
-            val flow = models(observeTrending = fixedBooks(emptyList()))
+            val flow = models(
+                fetchStatus = { flowOf(TrendingFeedFetchStatus.Loading) },
+                observeTrending = fixedBooks(emptyList()),
+            )
+
+            // ----- Act -----
+            val content = flow.first().content
+
+            // ----- Assert -----
+            content shouldBe TrendingWidgetUiModel.Content.Switching(eyebrow = "Eyebrow Week")
+        }
+
+        @Test
+        fun `an empty list after a failed fetch shows the fetch failed content with the feed's eyebrow`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                fetchStatus = { flowOf(TrendingFeedFetchStatus.Failed) },
+                observeTrending = fixedBooks(emptyList()),
+            )
 
             // ----- Act -----
             flow.test {
                 // ----- Assert -----
-                awaitItem().content shouldBe TrendingWidgetUiModel.Content.Empty(eyebrow = "Eyebrow Week")
+                awaitItem().content shouldBe TrendingWidgetUiModel.Content.FetchFailed(eyebrow = "Eyebrow Week")
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `a ranking is shown even when the last fetch failed`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                fetchStatus = { flowOf(TrendingFeedFetchStatus.Failed) },
+                observeTrending = fixedBooks(listOf(book(1))),
+            )
+
+            // ----- Act & Assert -----
+            flow.test {
+                awaitItem().content.shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>()
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `the loader gives way to the empty content when the fetch settles with nothing`() = runTest {
+            // ----- Arrange -----
+            val status = MutableStateFlow(TrendingFeedFetchStatus.Loading)
+            val flow = models(
+                fetchStatus = { status },
+                observeTrending = fixedBooks(emptyList()),
+            )
+
+            // ----- Act & Assert -----
+            flow.test {
+                awaitItem().content shouldBe TrendingWidgetUiModel.Content.Switching(eyebrow = "Eyebrow Week")
+                status.value = TrendingFeedFetchStatus.Settled
+                awaitItem().content shouldBe TrendingWidgetUiModel.Content.Empty(
+                    eyebrow = "Eyebrow Week",
+                    headline = "Headline Week",
+                )
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `the loader of an upcoming feed carries that feed's eyebrow`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                position = flowOf(
+                    TrendingPosition(
+                        feed = TrendingFeed.Upcoming(window = UpcomingWindow.SixMonths),
+                        page = 0,
+                    ),
+                ),
+                fetchStatus = { flowOf(TrendingFeedFetchStatus.Loading) },
+                observeTrending = fixedBooks(emptyList()),
+            )
+
+            // ----- Act -----
+            val content = flow.first().content
+
+            // ----- Assert -----
+            content shouldBe TrendingWidgetUiModel.Content.Switching(eyebrow = "Eyebrow UpcomingSixMonths")
+        }
+
+        @Test
+        fun `a ranking never shows the loader even while a fetch runs`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                fetchStatus = { flowOf(TrendingFeedFetchStatus.Loading) },
+                observeTrending = fixedBooks(listOf(book(1))),
+            )
+
+            // ----- Act & Assert -----
+            flow.test {
+                awaitItem().content.shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>()
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `an upcoming feed's empty content takes its headline from that feed`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                position = flowOf(
+                    TrendingPosition(
+                        feed = TrendingFeed.Upcoming(window = UpcomingWindow.Year),
+                        page = 0,
+                    ),
+                ),
+                observeTrending = fixedBooks(emptyList()),
+            )
+
+            // ----- Act -----
+            flow.test {
+                // ----- Assert -----
+                awaitItem().content shouldBe TrendingWidgetUiModel.Content.Empty(
+                    eyebrow = "Eyebrow UpcomingYear",
+                    headline = "Headline UpcomingYear",
+                )
                 awaitComplete()
             }
         }
@@ -327,13 +470,13 @@ class TrendingWidgetModelsTest {
         fun `switching the period resubscribes to that period's list`() = runTest {
             // ----- Arrange -----
             val position = MutableStateFlow(positionAt(0))
-            val booksByPeriod = mapOf(
-                TrendingPeriod.Week to listOf(book(1), book(2)),
-                TrendingPeriod.Year to listOf(book(100), book(200)),
+            val booksByFeed = mapOf<TrendingFeed, List<Book>>(
+                TrendingFeed.Trending(period = TrendingPeriod.Week) to listOf(book(1), book(2)),
+                TrendingFeed.Trending(period = TrendingPeriod.Year) to listOf(book(100), book(200)),
             )
             val flow = models(
                 position = position,
-                observeTrending = { period -> flowOf(booksByPeriod.getValue(period)) },
+                observeTrending = { feed -> flowOf(booksByFeed.getValue(feed)) },
             )
 
             // ----- Act -----
@@ -357,13 +500,38 @@ class TrendingWidgetModelsTest {
             yearContent.eyebrow shouldBe "Eyebrow Year"
             yearContent.items.map { it.bookId } shouldContainExactly listOf(100, 200)
         }
+
+        @Test
+        fun `an upcoming feed lists its own books under its own eyebrow`() = runTest {
+            // ----- Arrange -----
+            val upcoming = TrendingFeed.Upcoming(window = UpcomingWindow.SixMonths)
+            val flow = models(
+                position = flowOf(
+                    TrendingPosition(
+                        feed = upcoming,
+                        page = 0,
+                    ),
+                ),
+                observeTrending = { feed ->
+                    flowOf(if (feed == upcoming) listOf(book(7), book(8)) else listOf(book(1)))
+                },
+            )
+
+            // ----- Act & Assert -----
+            flow.test {
+                val ranked = awaitItem().content.shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>()
+                ranked.eyebrow shouldBe "Eyebrow UpcomingSixMonths"
+                ranked.items.map { it.bookId } shouldContainExactly listOf(7, 8)
+                awaitComplete()
+            }
+        }
     }
 
     @Nested
     inner class SettingsChanges {
         private fun changeTo(period: TrendingPeriod) = TrendingSettingsChange(
             appWidgetId = 1,
-            settings = TrendingSettings(period = period),
+            settings = TrendingSettings(feed = TrendingFeed.Trending(period = period)),
         )
 
         private fun replayed(change: TrendingSettingsChange): MutableSharedFlow<TrendingSettingsChange> =

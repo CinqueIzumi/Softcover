@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.widget.domain.model
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
+import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -22,19 +23,19 @@ class TrendingRefreshPlanTest {
         }
 
         @Test
-        fun `the shortest interval wins and each period is listed once`() {
+        fun `the shortest interval wins and each feed is listed once`() {
             // ----- Arrange -----
             val placed = listOf(
                 TrendingSettings(
-                    period = TrendingPeriod.Week,
+                    feed = TrendingFeed.Trending(period = TrendingPeriod.Week),
                     cadence = TrendingRefreshCadence.Daily,
                 ),
                 TrendingSettings(
-                    period = TrendingPeriod.Week,
+                    feed = TrendingFeed.Trending(period = TrendingPeriod.Week),
                     cadence = TrendingRefreshCadence.TwiceDaily,
                 ),
                 TrendingSettings(
-                    period = TrendingPeriod.Year,
+                    feed = TrendingFeed.Trending(period = TrendingPeriod.Year),
                     cadence = TrendingRefreshCadence.Daily,
                 ),
             )
@@ -45,7 +46,28 @@ class TrendingRefreshPlanTest {
             // ----- Assert -----
             result shouldBe TrendingRefreshPlan(
                 interval = TrendingRefreshCadence.TwiceDaily.interval,
-                periods = setOf(TrendingPeriod.Week, TrendingPeriod.Year),
+                feeds = setOf(
+                    TrendingFeed.Trending(period = TrendingPeriod.Week),
+                    TrendingFeed.Trending(period = TrendingPeriod.Year),
+                ),
+            )
+        }
+
+        @Test
+        fun `a trending and an upcoming widget over the same span are separate feeds`() {
+            // ----- Arrange -----
+            val placed = listOf(
+                TrendingSettings(feed = TrendingFeed.Trending(period = TrendingPeriod.Year)),
+                TrendingSettings(feed = TrendingFeed.Upcoming(window = UpcomingWindow.Year)),
+            )
+
+            // ----- Act -----
+            val result = trendingRefreshPlan(placed)
+
+            // ----- Assert -----
+            result?.feeds shouldBe setOf(
+                TrendingFeed.Trending(period = TrendingPeriod.Year),
+                TrendingFeed.Upcoming(window = UpcomingWindow.Year),
             )
         }
     }

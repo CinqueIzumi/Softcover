@@ -4,7 +4,9 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import com.apollographql.cache.normalized.FetchPolicy
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
@@ -21,6 +23,7 @@ import nl.rhaydus.softcover.GetEditionsByIdsQuery.Data.Edition.Companion.edition
 import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
 import nl.rhaydus.softcover.GetLatestUnfinishedReadQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
+import nl.rhaydus.softcover.GetUpcomingReleaseIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.GetUserBooksQuery.Data.Me.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.InsertUserBookWithStatusMutation
@@ -42,6 +45,7 @@ import nl.rhaydus.softcover.UpdateUserBookStatusMutation
 import nl.rhaydus.softcover.UpdateUserBookStatusMutation.Data.Update_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
+import nl.rhaydus.softcover.core.book.data.mapper.toMonths
 import nl.rhaydus.softcover.core.book.data.mapper.toTrendingDuration
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
@@ -54,6 +58,7 @@ import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
+import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.util.localDateOf
@@ -81,6 +86,12 @@ interface BooksRemoteDataSource {
     ): List<Book>
 
     suspend fun fetchTrendingBookIds(period: TrendingPeriod): List<Int>
+
+    /** Ids of the [limit] most-shelved books whose release date falls within [window], most-wanted first. */
+    suspend fun fetchUpcomingBookIds(
+        window: UpcomingWindow,
+        limit: Int,
+    ): List<Int>
 
     suspend fun markBookAsWantToRead(
         bookId: Int,
@@ -337,6 +348,24 @@ internal class BooksRemoteDataSourceImpl(
         ?.ids
         ?.mapNotNull { it }
         .orEmpty()
+
+    override suspend fun fetchUpcomingBookIds(
+        window: UpcomingWindow,
+        limit: Int,
+    ): List<Int> {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
+        return apolloClient
+            .safeQuery(
+                query = GetUpcomingReleaseIdsQuery(
+                    today = today.toString(),
+                    maxDate = today.plus(DatePeriod(months = window.toMonths())).toString(),
+                    limit = limit,
+                ),
+            )
+            .books
+            .map { it.id }
+    }
 
     override suspend fun getEditionsByBookId(
         bookId: Int,

@@ -33,6 +33,14 @@ import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_finished_jo
 import nl.rhaydus.softcover.fragment.UserBookFragment.User_book_read_started_journal.Companion.readingJournalFragment as userBookReadStartedJournalFragment
 import nl.rhaydus.softcover.fragment.UserBookReadFragment
 
+private val WhitespaceRun = Regex("\\s+")
+
+/** Hardcover stores some names with runs of spaces; the app shows them single-spaced. */
+private fun String.toDisplayName(): String = trim().replace(
+    regex = WhitespaceRun,
+    replacement = " ",
+)
+
 private fun String?.toLocalDateOrNull(): LocalDate? {
     val raw = this?.trim().orEmpty()
 
@@ -73,7 +81,7 @@ internal fun EditionDetailFragment.toBookEdition(): BookEdition {
         val author = contribution.author ?: return@mapNotNull null
 
         Author(
-            name = author.name,
+            name = author.name.toDisplayName(),
             id = author.id,
         )
     }
@@ -133,7 +141,7 @@ private fun BookListFragment.authors(): List<Author> = contributions.mapNotNull 
     val author = contribution.author ?: return@mapNotNull null
 
     Author(
-        name = author.name,
+        name = author.name.toDisplayName(),
         id = author.id,
     )
 }

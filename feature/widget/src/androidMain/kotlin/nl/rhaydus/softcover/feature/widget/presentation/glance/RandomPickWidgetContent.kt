@@ -41,6 +41,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.callback.ShuffleCallback
 import nl.rhaydus.softcover.feature.widget.presentation.component.BackdropUris
+import nl.rhaydus.softcover.feature.widget.presentation.component.CoverPlaceholder
 import nl.rhaydus.softcover.feature.widget.presentation.component.ReservedLinesTitle
 import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
@@ -239,7 +240,8 @@ private fun PickedBook(
             Box(
                 modifier = GlanceModifier
                     .fillMaxWidth()
-                    .defaultWeight(),
+                    .defaultWeight()
+                    .padding(horizontal = Spacing.xs),
                 contentAlignment = Alignment.Center,
             ) {
                 Cover(cover = content.cover)
@@ -305,13 +307,7 @@ private fun Cover(cover: RandomPickWidgetUiModel.Cover) {
             contentScale = ContentScale.Fit,
         )
     } else {
-        Image(
-            provider = ImageProvider(R.drawable.widget_cover_placeholder),
-            contentDescription = null,
-            modifier = GlanceModifier.fillMaxSize(),
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(GlanceTheme.colors.surfaceVariant),
-        )
+        CoverPlaceholder()
     }
 }
 

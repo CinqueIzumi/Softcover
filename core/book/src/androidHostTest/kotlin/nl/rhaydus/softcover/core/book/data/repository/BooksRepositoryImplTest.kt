@@ -23,8 +23,12 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.baseBook
@@ -48,6 +52,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
+import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -5606,8 +5611,36 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `an empty API result leaves the cached rows and fetch time untouched`() = runTest {
+        fun `an empty API result records the fetch time with an empty list`() = runTest {
             // ----- Arrange -----
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshTrendingBooks(
+                period = TrendingPeriod.Week,
+                maxAge = 1.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceTrendingBooks(
+                    period = TrendingPeriod.Week,
+                    requestedIds = emptyList(),
+                    books = emptyList(),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `an empty API result leaves the cached ranking alone when a fetch time exists`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getTrendingFetchedAt(period = TrendingPeriod.Week)
+            } returns Clock.System.now() - 2.hours
+
             coEvery {
                 booksRemoteDataSource.fetchTrendingBookIds(period = TrendingPeriod.Week)
             } returns emptyList()
@@ -5895,6 +5928,263 @@ class BooksRepositoryImplTest {
                     requestedIds = any(),
                     books = any(),
                     fetchedAt = any(),
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class RefreshUpcomingBooks {
+        private val window = UpcomingWindow.ThreeMonths
+
+        private fun upcomingBook(
+            id: Int,
+            releaseDate: LocalDate? = null,
+        ): Book = mockk(relaxed = true) {
+            every {
+                this@mockk.id
+            } returns id
+
+            every {
+                this@mockk.releaseDate
+            } returns releaseDate
+        }
+
+        @BeforeEach
+        fun setUpStore() {
+            coEvery {
+                booksLocalDataSource.getUpcomingFetchedAt(window = any())
+            } returns null
+
+            coEvery {
+                booksLocalDataSource.getExistingUserBookBookIds(ids = any())
+            } returns emptyList()
+        }
+
+        @Test
+        fun `skips the fetch when the window's last fetch is younger than maxAge`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getUpcomingFetchedAt(window = window)
+            } returns Clock.System.now() - 1.minutes
+
+            // ----- Act -----
+            repository.refreshUpcomingBooks(
+                window = window,
+                maxAge = 1.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchUpcomingBookIds(
+                    window = any(),
+                    limit = any(),
+                )
+            }
+            coVerify(exactly = 0) {
+                booksLocalDataSource.replaceUpcomingBooks(
+                    window = any(),
+                    requestedIds = any(),
+                    books = any(),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `fetches and replaces the window's list when the last fetch is older than maxAge`() = runTest {
+            // ----- Arrange -----
+            val first = upcomingBook(5)
+            val second = upcomingBook(6)
+
+            coEvery {
+                booksLocalDataSource.getUpcomingFetchedAt(window = window)
+            } returns Clock.System.now() - 2.hours
+
+            coEvery {
+                booksRemoteDataSource.fetchUpcomingBookIds(
+                    window = window,
+                    limit = any(),
+                )
+            } returns listOf(5, 6, 5)
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = any())
+            } returns listOf(first, second)
+
+            // ----- Act -----
+            repository.refreshUpcomingBooks(
+                window = window,
+                maxAge = 1.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceUpcomingBooks(
+                    window = window,
+                    requestedIds = listOf(5, 6),
+                    books = listOf(first, second),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `fetches when the window was never fetched`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRemoteDataSource.fetchUpcomingBookIds(
+                    window = window,
+                    limit = any(),
+                )
+            } returns listOf(9)
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = any())
+            } returns listOf(upcomingBook(9))
+
+            // ----- Act -----
+            repository.refreshUpcomingBooks(
+                window = window,
+                maxAge = 1.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceUpcomingBooks(
+                    window = window,
+                    requestedIds = listOf(9),
+                    books = any(),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `an empty API result records the window's fetch time with an empty list`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRemoteDataSource.fetchUpcomingBookIds(
+                    window = window,
+                    limit = any(),
+                )
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshUpcomingBooks(
+                window = window,
+                maxAge = Duration.ZERO,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceUpcomingBooks(
+                    window = window,
+                    requestedIds = emptyList(),
+                    books = emptyList(),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `an empty API result keeps only the cached books released after today and records the fetch time`() =
+            runTest {
+                // ----- Arrange -----
+                val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+                val released = upcomingBook(
+                    id = 1,
+                    releaseDate = today.plus(DatePeriod(days = -1)),
+                )
+                val releasedToday = upcomingBook(
+                    id = 2,
+                    releaseDate = today,
+                )
+                val tomorrow = upcomingBook(
+                    id = 3,
+                    releaseDate = today.plus(DatePeriod(days = 1)),
+                )
+                val undated = upcomingBook(
+                    id = 4,
+                    releaseDate = null,
+                )
+
+                coEvery {
+                    booksLocalDataSource.getUpcomingFetchedAt(window = window)
+                } returns Clock.System.now() - 2.hours
+
+                coEvery {
+                    booksLocalDataSource.getUpcomingBooks(window = window)
+                } returns listOf(
+                    released,
+                    releasedToday,
+                    tomorrow,
+                    undated,
+                )
+
+                coEvery {
+                    booksRemoteDataSource.fetchUpcomingBookIds(
+                        window = window,
+                        limit = any(),
+                    )
+                } returns emptyList()
+
+                // ----- Act -----
+                repository.refreshUpcomingBooks(
+                    window = window,
+                    maxAge = 1.hours,
+                )
+
+                // ----- Assert -----
+                coVerify(exactly = 1) {
+                    booksLocalDataSource.replaceUpcomingBooks(
+                        window = window,
+                        requestedIds = listOf(3, 4),
+                        books = emptyList(),
+                        fetchedAt = any(),
+                    )
+                }
+            }
+
+        @Test
+        fun `checks maxAge against the requested window's fetch time only`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getUpcomingFetchedAt(window = UpcomingWindow.Month)
+            } returns Clock.System.now() - 1.minutes
+
+            coEvery {
+                booksLocalDataSource.getUpcomingFetchedAt(window = UpcomingWindow.Year)
+            } returns Clock.System.now() - 2.hours
+
+            coEvery {
+                booksRemoteDataSource.fetchUpcomingBookIds(
+                    window = UpcomingWindow.Year,
+                    limit = any(),
+                )
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshUpcomingBooks(
+                window = UpcomingWindow.Month,
+                maxAge = 1.hours,
+            )
+            repository.refreshUpcomingBooks(
+                window = UpcomingWindow.Year,
+                maxAge = 1.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchUpcomingBookIds(
+                    window = UpcomingWindow.Month,
+                    limit = any(),
+                )
+            }
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchUpcomingBookIds(
+                    window = UpcomingWindow.Year,
+                    limit = any(),
                 )
             }
         }

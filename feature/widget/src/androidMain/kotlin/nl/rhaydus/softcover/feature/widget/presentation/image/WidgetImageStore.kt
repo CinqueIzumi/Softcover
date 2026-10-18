@@ -22,49 +22,32 @@ internal class WidgetImageStore(
 ) {
     private val directory: File = WidgetImageFiles.directory(context)
 
-    /** [render] runs only when no file exists for [key] yet. Null when [render] returns null. */
+    /**
+     * [render] runs only when no non-empty file exists for [key] yet. Null when [render] returns null or the write
+     * fails.
+     */
     suspend fun uriFor(
         key: String,
+        format: WidgetImageFormat = WidgetImageFormat.Lossless,
         render: suspend () -> Bitmap?,
     ): Uri? {
         val file = File(
             directory,
-            fileName(key),
+            fileName(
+                key = key,
+                format = format,
+            ),
         )
 
-        val touchedAt = clock.now().toEpochMilliseconds()
-        val hit = withContext(ioDispatcher) { file.exists() && file.setLastModified(touchedAt) }
-        if (hit) return uriOf(file)
+        if (touch(file)) return uriOf(file)
 
         val bitmap = render() ?: return null
 
-        return withContext(ioDispatcher) {
-            var temp: File? = null
-            runCatchingCancellable {
-                directory.mkdirs()
-                val created = File.createTempFile(
-                    "render",
-                    ".tmp",
-                    directory,
-                )
-                temp = created
-                created.outputStream().use {
-                    bitmap.compress(
-                        Bitmap.CompressFormat.PNG,
-                        100,
-                        it,
-                    )
-                }
-                if (created.renameTo(file)) uriOf(file) else null
-            }.onFailure { error ->
-                AppLog.e(
-                    error,
-                    "Writing a widget image failed",
-                )
-            }.also {
-                temp?.delete()
-            }.getOrNull()
-        }
+        return write(
+            bitmap = bitmap,
+            format = format,
+            file = file,
+        )
     }
 
     /** Deletes files not touched for [maxAge]. */
@@ -78,10 +61,72 @@ internal class WidgetImageStore(
         }
     }
 
+    suspend fun clear() {
+        withContext(ioDispatcher) {
+            directory.listFiles().orEmpty().filter { it.isImage() }.forEach { it.delete() }
+        }
+    }
+
+    private fun File.isImage(): Boolean = WidgetImageFiles.NAME_PATTERN.matches(name)
+
+    private suspend fun touch(file: File): Boolean {
+        val touchedAt = clock.now().toEpochMilliseconds()
+
+        return withContext(ioDispatcher) {
+            when {
+                file.exists().not() -> false
+                file.length() == 0L -> {
+                    file.delete()
+                    false
+                }
+
+                else -> file.setLastModified(touchedAt)
+            }
+        }
+    }
+
+    private suspend fun write(
+        bitmap: Bitmap,
+        format: WidgetImageFormat,
+        file: File,
+    ): Uri? = withContext(ioDispatcher) {
+        var temp: File? = null
+        runCatchingCancellable {
+            directory.mkdirs()
+            val created = File.createTempFile(
+                "render",
+                TEMP_SUFFIX,
+                directory,
+            )
+            temp = created
+            val compressed = created.outputStream().use {
+                format.compress(
+                    bitmap = bitmap,
+                    output = it,
+                )
+            }
+            if (compressed && created.length() > 0L && created.renameTo(file)) uriOf(file) else null
+        }.onFailure { error ->
+            AppLog.e(
+                error,
+                "Writing a widget image failed",
+            )
+        }.also {
+            temp?.delete()
+        }.getOrNull()
+    }
+
     private fun uriOf(file: File): Uri = "content://${WidgetImageFiles.authority(context)}/${file.name}".toUri()
 
-    private fun fileName(key: String): String {
+    private fun fileName(
+        key: String,
+        format: WidgetImageFormat,
+    ): String {
         val digest = MessageDigest.getInstance("SHA-256").digest(key.toByteArray())
-        return digest.joinToString(separator = "") { "%02x".format(it) } + WidgetImageFiles.EXTENSION
+        return digest.joinToString(separator = "") { "%02x".format(it) } + format.extension
+    }
+
+    private companion object {
+        const val TEMP_SUFFIX = ".tmp"
     }
 }

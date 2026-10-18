@@ -6,6 +6,8 @@ import nl.rhaydus.softcover.feature.widget.data.repository.CurrentlyReadingRepos
 import nl.rhaydus.softcover.feature.widget.data.repository.QuoteWidgetRepositoryImpl
 import nl.rhaydus.softcover.feature.widget.data.repository.RandomPickRepositoryImpl
 import nl.rhaydus.softcover.feature.widget.data.repository.TrendingRepositoryImpl
+import nl.rhaydus.softcover.feature.widget.domain.model.QuoteFetchTracker
+import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFetchTracker
 import nl.rhaydus.softcover.feature.widget.domain.repository.CurrentlyReadingRepository
 import nl.rhaydus.softcover.feature.widget.domain.repository.QuoteWidgetRepository
 import nl.rhaydus.softcover.feature.widget.domain.repository.RandomPickRepository
@@ -24,7 +26,10 @@ import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveRandomPickChang
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveRandomPickSettingsChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveSelectedBookChangesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingChangesUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingFeedFetchingUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingFeedUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingSettingsChangesUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.RefreshTrendingFeedUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ResolveRandomPickUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.SaveRandomPickSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.SaveTrendingSettingsUseCase
@@ -49,6 +54,8 @@ import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import nl.rhaydus.softcover.feature.widget.presentation.placed.AndroidHomeScreenWidgets
 import nl.rhaydus.softcover.feature.widget.presentation.placed.WidgetInstanceChanges
+import nl.rhaydus.softcover.feature.widget.presentation.refresh.QuoteFetcher
+import nl.rhaydus.softcover.feature.widget.presentation.refresh.TrendingFeedFetcher
 import nl.rhaydus.softcover.feature.widget.presentation.refresh.WidgetRefresher
 import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.RandomPickSettingsScreenModel
 import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.TrendingSettingsScreenModel
@@ -105,6 +112,54 @@ val widgetModule = module {
     factory { ObserveTrendingChangesUseCase(trendingRepository = get()) }
 
     factory { ObserveTrendingSettingsChangesUseCase(trendingRepository = get()) }
+
+    factory {
+        ObserveTrendingFeedUseCase(
+            observeTrendingBooks = get(),
+            observeUpcomingBooks = get(),
+        )
+    }
+
+    factory {
+        RefreshTrendingFeedUseCase(
+            refreshTrendingBooks = get(),
+            refreshUpcomingBooks = get(),
+            fetchTracker = get(),
+        )
+    }
+
+    single { TrendingFetchTracker() }
+
+    single { QuoteFetchTracker() }
+
+    factory {
+        ObserveTrendingFeedFetchingUseCase(
+            observeTrendingFetchedAt = get(),
+            observeUpcomingFetchedAt = get(),
+            fetchTracker = get(),
+        )
+    }
+
+    single { TrendingWidget() }
+
+    single {
+        TrendingFeedFetcher(
+            widget = get(),
+            repainter = get(),
+            applicationScope = get(),
+            refreshTrendingFeed = get(),
+        )
+    }
+
+    single {
+        QuoteFetcher(
+            widget = QuoteWidget(),
+            repainter = get(),
+            applicationScope = get(),
+            refreshAllQuotes = get(),
+            fetchTracker = get(),
+        )
+    }
 
     single { WidgetRepainter(context = androidContext()) }
 
@@ -164,8 +219,10 @@ val widgetModule = module {
         TrendingWidgetDependencies(
             environment = get(),
             repainter = get(),
-            observeTrendingBooks = get(),
-            refreshTrendingBooks = get(),
+            observeTrendingFeed = get(),
+            observeTrendingFeedFetching = get(),
+            refreshTrendingFeed = get(),
+            fetcher = get(),
             getTrendingPosition = get(),
             advanceTrendingPage = get(),
             observeTrendingChanges = get(),
@@ -182,6 +239,8 @@ val widgetModule = module {
             getQuoteSelection = get(),
             cycleQuote = get(),
             observeQuoteSelectionChanges = get(),
+            fetchTracker = get(),
+            fetcher = get(),
         )
     }
 
@@ -200,6 +259,7 @@ val widgetModule = module {
             saveTrendingSettings = get(),
             repainter = get(),
             scheduler = get(),
+            fetcher = get(),
             getThemeConfiguration = get(),
             appDispatchers = get(),
             flows = listOf(TrendingThemeCollector()),
@@ -210,6 +270,7 @@ val widgetModule = module {
         WidgetMaintenanceScheduler(
             context = androidContext(),
             ownedWidgets = get(),
+            imageStore = get(),
         )
     }
 
@@ -258,10 +319,13 @@ val widgetModule = module {
             getCurrentlyReadingUserBooks = get(),
             getWantToReadUserBooks = get(),
             getAllUserLists = get(),
-            observeTrendingBooks = get(),
+            observeTrendingFeed = get(),
             trendingRefreshScheduler = get(),
             observeAllQuotes = get(),
             quoteRefreshScheduler = get(),
+            imageStore = get(),
+            trendingFetchTracker = get(),
+            quoteFetchTracker = get(),
         )
     }
 

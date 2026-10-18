@@ -586,6 +586,43 @@ class BookMapperTest {
                 ),
             )
         }
+
+        @Test
+        fun `collapses and trims whitespace in author names`() {
+            // ----- Arrange -----
+            val contributions = listOf("Morgan   James", " Morgan James ").mapIndexed { index, rawName ->
+                val author = mockk<EditionDetailFragment.Contribution.Author> {
+                    every {
+                        id
+                    } returns index
+                    every {
+                        name
+                    } returns rawName
+                }
+
+                mockk<EditionDetailFragment.Contribution> {
+                    every {
+                        this@mockk.author
+                    } returns author
+                }
+            }
+            val fragment = mockk<EditionDetailFragment>()
+
+            fragment.stubEditionFields()
+
+            every {
+                fragment.contributions
+            } returns contributions
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.authors.map { it.name } shouldBe listOf(
+                "Morgan James",
+                "Morgan James",
+            )
+        }
     }
 
     @Nested
@@ -668,6 +705,41 @@ class BookMapperTest {
             result.isCompilation shouldBe true
             result.description shouldBe "A description"
             result.headline shouldBe "A headline"
+        }
+
+        @Test
+        fun `collapses and trims whitespace in author names`() {
+            // ----- Arrange -----
+            val contributions = listOf("Morgan   James", " Morgan James ").mapIndexed { index, rawName ->
+                val author = mockk<BookListFragment.Contribution.Author> {
+                    every {
+                        id
+                    } returns index
+                    every {
+                        name
+                    } returns rawName
+                }
+
+                mockk<BookListFragment.Contribution> {
+                    every {
+                        this@mockk.author
+                    } returns author
+                }
+            }
+            val fragment = stubUserBookFragment(
+                bookListFragment = stubBookListFragment(
+                    contributions = contributions,
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.authors.map { it.name } shouldBe listOf(
+                "Morgan James",
+                "Morgan James",
+            )
         }
 
         @Test

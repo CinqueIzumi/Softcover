@@ -19,11 +19,14 @@ import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.layout.width
 import androidx.glance.text.FontFamily
 import androidx.glance.text.FontStyle
 import androidx.glance.text.FontWeight
@@ -33,8 +36,10 @@ import androidx.glance.text.TextStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.callback.CycleQuoteCallback
+import nl.rhaydus.softcover.feature.widget.presentation.callback.QuoteRetryCallback
 import nl.rhaydus.softcover.feature.widget.presentation.component.CYCLE_EYEBROW_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.component.CycleEyebrow
+import nl.rhaydus.softcover.feature.widget.presentation.component.RefreshButton
 import nl.rhaydus.softcover.feature.widget.presentation.model.QuoteWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
@@ -43,6 +48,8 @@ import nl.rhaydus.softcover.feature.widget.presentation.util.fitQuoteText
 import nl.rhaydus.softcover.feature.widget.presentation.util.singleLineHeightPx
 
 private const val BYLINE_FONT_SIZE_SP = 12
+private const val QUOTE_MARK_FONT_SIZE_SP = 72
+private const val QUOTE_MARK_GUTTER_DP = 44
 
 @Composable
 internal fun QuoteWidgetContent(
@@ -75,6 +82,12 @@ internal fun QuoteWidgetContent(
                     subline = context.getString(R.string.quote_empty_subline),
                 )
 
+                QuoteWidgetUiModel.Content.FetchFailed -> Message(
+                    headline = context.getString(R.string.quote_failed_headline),
+                    subline = context.getString(R.string.quote_failed_subline),
+                    onRefresh = actionRunCallback<QuoteRetryCallback>(),
+                )
+
                 is QuoteWidgetUiModel.Content.Shown -> Shown(
                     content = content,
                     openBook = openBook(content.bookId),
@@ -94,6 +107,7 @@ private fun widgetCornerRadius(): GlanceModifier = if (Build.VERSION.SDK_INT >= 
 private fun Message(
     headline: String,
     subline: String?,
+    onRefresh: Action? = null,
 ) {
     Column(
         modifier = GlanceModifier
@@ -125,6 +139,8 @@ private fun Message(
                 ),
             )
         }
+
+        if (onRefresh != null) RefreshButton(onClick = onRefresh)
     }
 }
 
@@ -147,7 +163,8 @@ private fun Shown(
     }
 
     val textFit = fitQuoteText(
-        availableWidthPx = ((size.width - Spacing.xxs * 2 - Spacing.sm * 2).value * density).toInt(),
+        availableWidthPx = ((size.width - Spacing.xxs * 2 - QUOTE_MARK_GUTTER_DP.dp - Spacing.sm).value * density)
+            .toInt(),
         availableHeightPx = ((size.height - Spacing.xxs * 2 - CYCLE_EYEBROW_HEIGHT_DP.dp).value * density)
             .toInt() - bylineHeightPx,
         measure = androidQuoteTextMeasurer(
@@ -157,19 +174,6 @@ private fun Shown(
     )
 
     Box(modifier = GlanceModifier.fillMaxSize()) {
-        Text(
-            text = "“",
-            modifier = GlanceModifier.padding(
-                start = Spacing.xs,
-                top = Spacing.xxs,
-            ),
-            style = TextStyle(
-                color = LocalWidgetExtraColors.current.quoteGlyph,
-                fontSize = 96.sp,
-                fontFamily = FontFamily.Serif,
-            ),
-        )
-
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
@@ -189,36 +193,58 @@ private fun Shown(
                 nextDescription = context.getString(R.string.quote_next),
             )
 
-            Column(
+            Row(
                 modifier = GlanceModifier
                     .fillMaxWidth()
-                    .defaultWeight()
-                    .padding(horizontal = Spacing.sm)
-                    .clickable(openBook),
-                verticalAlignment = Alignment.CenterVertically,
+                    .defaultWeight(),
             ) {
-                Text(
-                    text = content.quoteText,
-                    maxLines = textFit.maxLines,
-                    style = TextStyle(
-                        color = GlanceTheme.colors.onBackground,
-                        fontSize = textFit.fontSizeSp.sp,
-                        fontStyle = FontStyle.Italic,
-                        fontFamily = FontFamily.Serif,
-                    ),
-                )
-
-                if (content.byline != null) {
-                    Spacer(modifier = GlanceModifier.height(Spacing.xxs))
-
+                Box(
+                    modifier = GlanceModifier
+                        .width(QUOTE_MARK_GUTTER_DP.dp)
+                        .fillMaxHeight()
+                        .padding(start = Spacing.xs),
+                ) {
                     Text(
-                        text = content.byline,
-                        maxLines = 1,
+                        text = "“",
                         style = TextStyle(
-                            color = GlanceTheme.colors.primary,
-                            fontSize = BYLINE_FONT_SIZE_SP.sp,
+                            color = LocalWidgetExtraColors.current.quoteGlyph,
+                            fontSize = QUOTE_MARK_FONT_SIZE_SP.sp,
+                            fontFamily = FontFamily.Serif,
                         ),
                     )
+                }
+
+                Column(
+                    modifier = GlanceModifier
+                        .fillMaxWidth()
+                        .defaultWeight()
+                        .padding(end = Spacing.sm)
+                        .clickable(openBook),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = content.quoteText,
+                        maxLines = textFit.maxLines,
+                        style = TextStyle(
+                            color = GlanceTheme.colors.onBackground,
+                            fontSize = textFit.fontSizeSp.sp,
+                            fontStyle = FontStyle.Italic,
+                            fontFamily = FontFamily.Serif,
+                        ),
+                    )
+
+                    if (content.byline != null) {
+                        Spacer(modifier = GlanceModifier.height(Spacing.xxs))
+
+                        Text(
+                            text = content.byline,
+                            maxLines = 1,
+                            style = TextStyle(
+                                color = GlanceTheme.colors.primary,
+                                fontSize = BYLINE_FONT_SIZE_SP.sp,
+                            ),
+                        )
+                    }
                 }
             }
         }

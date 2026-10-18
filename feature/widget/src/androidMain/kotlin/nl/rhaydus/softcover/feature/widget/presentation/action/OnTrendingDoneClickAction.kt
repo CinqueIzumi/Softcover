@@ -17,7 +17,7 @@ internal data object OnTrendingDoneClickAction : TrendingSettingsAction {
         dependencies.saveSettings(
             appWidgetId = local.appWidgetId,
             settings = TrendingSettings(
-                period = local.period,
+                feed = local.feed,
                 cadence = local.cadence,
             ),
         )

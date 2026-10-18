@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
+import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageFormat
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.render.BackdropImages
@@ -25,7 +26,10 @@ internal class CurrentlyReadingImages(
         val source = book.coverSource() ?: return null
         val sizePx = (COVER_HEIGHT_DP * density).roundToInt()
 
-        return store.uriFor(key = "cr-cover:${source.keyPart()}:$sizePx") {
+        return store.uriFor(
+            format = WidgetImageFormat.Photo,
+            key = "cr-cover:v2:${source.keyPart()}:$sizePx",
+        ) {
             loadCoverBitmap(
                 context = context,
                 source = source,

@@ -8,6 +8,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import nl.rhaydus.softcover.feature.widget.presentation.glance.OwnedWidgets
+import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -16,6 +17,7 @@ import java.util.concurrent.TimeUnit
 internal class WidgetMaintenanceScheduler(
     private val context: Context,
     private val ownedWidgets: OwnedWidgets,
+    private val imageStore: WidgetImageStore,
 ) {
     fun schedule() {
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
@@ -73,6 +75,8 @@ internal class WidgetMaintenanceScheduler(
 
         workManager.cancelUniqueWork(WORK_NAME)
         workManager.cancelUniqueWork(MIDNIGHT_WORK_NAME)
+
+        imageStore.clear()
     }
 
     private suspend fun anyPlaced(): Boolean {

@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
 import nl.rhaydus.softcover.core.uibinding.cover.resolveCoverSource
+import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageFormat
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import kotlin.math.roundToInt
 
@@ -64,6 +65,7 @@ internal class BackdropImages(
         val coverPx = (coverHeightDp * density).roundToInt()
 
         return store.uriFor(
+            format = WidgetImageFormat.Photo,
             key = "backdrop:v$BACKDROP_RENDER_VERSION:${source.keyPart()}:${backdropWidthPx}x$backdropHeightPx:cover$coverPx",
             render = {
                 loadCoverBitmap(
@@ -95,7 +97,7 @@ internal class BackdropImages(
         const val MASK_RENDER_VERSION = 1
 
         /** Bump whenever the blur constants or `renderBackdrop` change, or stored backdrops keep the old look. */
-        const val BACKDROP_RENDER_VERSION = 1
+        const val BACKDROP_RENDER_VERSION = 2
 
         const val BACKDROP_SCALE = 0.5f
         const val BACKDROP_WIDTH_DP = 110

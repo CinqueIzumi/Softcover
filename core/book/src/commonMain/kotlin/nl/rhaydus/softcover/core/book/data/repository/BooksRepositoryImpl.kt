@@ -31,6 +31,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
+import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
@@ -38,6 +39,8 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
+
+private const val UPCOMING_BOOKS_LIMIT = 10
 
 internal class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
@@ -58,6 +61,8 @@ internal class BooksRepositoryImpl(
     private val inflightMutex = Mutex()
 
     private val trendingRefreshMutexes = TrendingPeriod.entries.associateWith { Mutex() }
+
+    private val upcomingRefreshMutexes = UpcomingWindow.entries.associateWith { Mutex() }
 
     private val stagedRemovalMutex = Mutex()
     private val stagedRemovalBookIds = mutableSetOf<Int>()
@@ -331,20 +336,90 @@ internal class BooksRepositoryImpl(
         period: TrendingPeriod,
         maxAge: Duration,
     ) = trendingRefreshMutexes.getValue(period).withLock {
+        refreshRankedBooks(
+            maxAge = maxAge,
+            getFetchedAt = { booksLocalDataSource.getTrendingFetchedAt(period = period) },
+            fetchIds = { booksRemoteDataSource.fetchTrendingBookIds(period = period) },
+            replace = { rankedIds, books, now ->
+                booksLocalDataSource.replaceTrendingBooks(
+                    period = period,
+                    requestedIds = rankedIds,
+                    books = books,
+                    fetchedAt = now,
+                )
+            },
+        )
+    }
+
+    override fun observeUpcomingBooks(window: UpcomingWindow): Flow<List<Book>> =
+        booksLocalDataSource.observeUpcomingBooks(window = window)
+
+    override fun observeUpcomingFetchedAt(window: UpcomingWindow): Flow<Instant?> =
+        booksLocalDataSource.observeUpcomingFetchedAt(window = window)
+
+    override suspend fun refreshUpcomingBooks(
+        window: UpcomingWindow,
+        maxAge: Duration,
+    ) = upcomingRefreshMutexes.getValue(window).withLock {
+        refreshRankedBooks(
+            maxAge = maxAge,
+            getFetchedAt = { booksLocalDataSource.getUpcomingFetchedAt(window = window) },
+            fetchIds = {
+                booksRemoteDataSource.fetchUpcomingBookIds(
+                    window = window,
+                    limit = UPCOMING_BOOKS_LIMIT,
+                )
+            },
+            idsToKeepOnEmptyResponse = {
+                val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
+                booksLocalDataSource
+                    .getUpcomingBooks(window = window)
+                    .filterNot { book -> book.releaseDate?.let { it <= today } == true }
+                    .map { it.id }
+            },
+            replace = { rankedIds, books, now ->
+                booksLocalDataSource.replaceUpcomingBooks(
+                    window = window,
+                    requestedIds = rankedIds,
+                    books = books,
+                    fetchedAt = now,
+                )
+            },
+        )
+    }
+
+    private suspend fun refreshRankedBooks(
+        maxAge: Duration,
+        getFetchedAt: suspend () -> Instant?,
+        fetchIds: suspend () -> List<Int>,
+        idsToKeepOnEmptyResponse: (suspend () -> List<Int>)? = null,
+        replace: suspend (rankedIds: List<Int>, books: List<Book>, now: Instant) -> Unit,
+    ) {
         val now = Clock.System.now()
-        val lastFetchedAt = booksLocalDataSource.getTrendingFetchedAt(period = period)
+        val lastFetchedAt = getFetchedAt()
 
         val age = lastFetchedAt?.let { now - it }
         val isFresh = age != null && age >= Duration.ZERO && age < maxAge
 
         if (maxAge > Duration.ZERO && isFresh) {
-            return@withLock
+            return
         }
 
-        val rankedIds = booksRemoteDataSource.fetchTrendingBookIds(period = period).distinct()
+        val rankedIds = fetchIds().distinct()
 
-        if (rankedIds.isEmpty()) {
-            return@withLock
+        // A cached ranking outlives an empty response, which is more likely transient than a feed that emptied.
+        // A feed whose entries expire passes the ids still worth keeping.
+        if (rankedIds.isEmpty() && lastFetchedAt != null) {
+            idsToKeepOnEmptyResponse?.let { idsToKeep ->
+                replace(
+                    idsToKeep(),
+                    emptyList(),
+                    now,
+                )
+            }
+
+            return
         }
 
         // Only books with a user_books row are skipped: re-caching those would re-insert their
@@ -358,11 +433,10 @@ internal class BooksRepositoryImpl(
             booksRemoteDataSource.fetchBooksByIds(ids = idsToFetch).withoutStagedRemovals()
         }
 
-        booksLocalDataSource.replaceTrendingBooks(
-            period = period,
-            requestedIds = rankedIds,
-            books = fetchedBooks,
-            fetchedAt = now,
+        replace(
+            rankedIds,
+            fetchedBooks,
+            now,
         )
     }
 

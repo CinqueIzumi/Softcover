@@ -23,18 +23,18 @@ internal class TrendingPageCallback : ActionCallback, KoinComponent {
         val dependencies = get<TrendingWidgetDependencies>()
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(glanceId)
 
-        val period = dependencies.getTrendingPosition(appWidgetId = appWidgetId)
+        val feed = dependencies.getTrendingPosition(appWidgetId = appWidgetId)
             .onFailure { error ->
                 AppLog.e(
                     error,
-                    "Reading the trending period failed",
+                    "Reading the trending feed failed",
                 )
             }
             .getOrNull()
-            ?.period
+            ?.feed
             ?: return
 
-        val books = dependencies.observeTrendingBooks(period = period).firstOrNull() ?: return
+        val books = dependencies.observeTrendingFeed(feed = feed).firstOrNull() ?: return
 
         dependencies.advanceTrendingPage(
             appWidgetId = appWidgetId,

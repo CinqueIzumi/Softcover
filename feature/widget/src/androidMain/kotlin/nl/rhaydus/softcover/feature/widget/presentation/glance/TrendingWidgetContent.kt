@@ -47,6 +47,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.domain.util.TRENDING_PAGE_SIZE
 import nl.rhaydus.softcover.feature.widget.presentation.callback.TrendingPageCallback
+import nl.rhaydus.softcover.feature.widget.presentation.callback.TrendingRetryCallback
+import nl.rhaydus.softcover.feature.widget.presentation.component.RefreshButton
 import nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
@@ -92,10 +94,19 @@ internal fun TrendingWidgetContent(
 
                 is TrendingWidgetUiModel.Content.Empty -> Message(
                     eyebrow = content.eyebrow,
-                    headline = context.getString(R.string.trending_empty_headline),
+                    headline = content.headline,
                     subline = context.getString(R.string.trending_empty_subline),
                     openExplore = openExplore,
                     openSettings = openSettings,
+                )
+
+                is TrendingWidgetUiModel.Content.FetchFailed -> Message(
+                    eyebrow = content.eyebrow,
+                    headline = context.getString(R.string.trending_failed_headline),
+                    subline = context.getString(R.string.trending_failed_subline),
+                    openExplore = openExplore,
+                    openSettings = openSettings,
+                    onRefresh = actionRunCallback<TrendingRetryCallback>(),
                 )
 
                 is TrendingWidgetUiModel.Content.Ranked -> Ranked(
@@ -151,6 +162,7 @@ private fun Message(
     subline: String?,
     openExplore: Action,
     openSettings: Action,
+    onRefresh: Action? = null,
 ) {
     Column(
         modifier = GlanceModifier
@@ -197,6 +209,8 @@ private fun Message(
                     ),
                 )
             }
+
+            if (onRefresh != null) RefreshButton(onClick = onRefresh)
         }
     }
 }
@@ -210,6 +224,8 @@ private fun Ranked(
 ) {
     val size = LocalSize.current
     val stacked = size.height >= STACKED_MIN_HEIGHT_DP.dp
+
+    val cellWidth = (size.width - Spacing.xxs * 2) / TRENDING_PAGE_SIZE
 
     val coverHeight = trendingCoverHeightDp(
         widgetHeightDp = size.height.value.toInt(),
@@ -232,19 +248,17 @@ private fun Ranked(
             modifier = GlanceModifier
                 .fillMaxWidth()
                 .defaultWeight(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
         ) {
             content.items.forEach { item ->
                 BookCell(
                     item = item,
                     stacked = stacked,
+                    cellWidth = cellWidth,
                     coverHeight = coverHeight,
                     openBook = openBook(item.bookId),
-                    modifier = GlanceModifier.defaultWeight(),
                 )
             }
-
-            if (content.items.size < TRENDING_PAGE_SIZE) Spacer(modifier = GlanceModifier.defaultWeight())
         }
 
         if (content.pageLabel != null) {
@@ -257,11 +271,16 @@ private fun Ranked(
 private fun BookCell(
     item: TrendingWidgetUiModel.Item,
     stacked: Boolean,
+    cellWidth: Dp,
     coverHeight: Dp,
     openBook: Action,
-    modifier: GlanceModifier,
 ) {
-    val cellModifier = modifier
+    val innerWidth = cellWidth - Spacing.xxs * 2
+    val rankWidth = RANK_WIDTH_DP.dp
+    val coverWidth = coverHeight * 2 / 3
+
+    val cellModifier = GlanceModifier
+        .width(cellWidth)
         .padding(horizontal = Spacing.xxs)
         .clickable(openBook)
 
@@ -278,20 +297,26 @@ private fun BookCell(
             Spacer(modifier = GlanceModifier.height(Spacing.xxs))
 
             Row(verticalAlignment = Alignment.Top) {
-                Rank(rank = item.rank)
+                Rank(
+                    rank = item.rank,
+                    width = rankWidth,
+                )
 
                 Caption(
                     item = item,
-                    modifier = GlanceModifier.defaultWeight(),
+                    modifier = GlanceModifier.width((innerWidth - rankWidth).coerceAtLeast(0.dp)),
                 )
             }
         }
     } else {
         Row(
             modifier = cellModifier,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
         ) {
-            Rank(rank = item.rank)
+            Rank(
+                rank = item.rank,
+                width = rankWidth,
+            )
 
             Cover(
                 cover = item.cover,
@@ -302,23 +327,29 @@ private fun BookCell(
 
             Caption(
                 item = item,
-                modifier = GlanceModifier.defaultWeight(),
+                modifier = GlanceModifier.width((innerWidth - rankWidth - coverWidth - Spacing.xs).coerceAtLeast(0.dp)),
             )
         }
     }
 }
 
+private const val RANK_WIDTH_DP = 22
+
 @Composable
-private fun Rank(rank: String) {
+private fun Rank(
+    rank: String,
+    width: Dp,
+) {
     Text(
         text = rank,
+        maxLines = 1,
         style = TextStyle(
             color = GlanceTheme.colors.onBackground,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Serif,
         ),
-        modifier = GlanceModifier.width(16.dp),
+        modifier = GlanceModifier.width(width),
     )
 }
 

@@ -13,7 +13,13 @@ internal data class QuoteWidgetUiModel(
 
         data object Empty : Content
 
-        /** [eyebrow] is "QUOTE OF THE DAY" or "QUOTES · 2/5"; [byline] is `null` when the quote has no book title and no position. */
+        /** A fetch failed and there is nothing cached to show. */
+        data object FetchFailed : Content
+
+        /**
+         * [eyebrow] is "QUOTE OF THE DAY" or "QUOTES · 2/5"; [byline] is `null` when the quote has no book title and
+         * no position.
+         */
         data class Shown(
             val quoteText: String,
             val byline: String?,

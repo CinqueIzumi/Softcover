@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.koin.koinScreenModel
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.component.button.PillButton
@@ -18,13 +19,17 @@ import nl.rhaydus.softcover.feature.widget.presentation.action.LoadTrendingSetti
 import nl.rhaydus.softcover.feature.widget.presentation.action.OnTrendingBackClickAction
 import nl.rhaydus.softcover.feature.widget.presentation.action.OnTrendingCadenceSelectedAction
 import nl.rhaydus.softcover.feature.widget.presentation.action.OnTrendingDoneClickAction
-import nl.rhaydus.softcover.feature.widget.presentation.action.OnTrendingPeriodSelectedAction
+import nl.rhaydus.softcover.feature.widget.presentation.action.OnTrendingFeedSelectedAction
+import nl.rhaydus.softcover.feature.widget.presentation.action.OnTrendingKindSelectedAction
 import nl.rhaydus.softcover.feature.widget.presentation.event.TrendingSettingsEvent
 import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.TrendingSettingsScreenModel
 
 internal class TrendingSettingsScreen(
     private val appWidgetId: Int,
 ) : Screen {
+    /** Voyager keys the screen model by this, and the class name alone would hand one widget's model to the next. */
+    override val key: ScreenKey = "${TrendingSettingsScreen::class.qualifiedName}-$appWidgetId"
+
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<TrendingSettingsScreenModel>()
@@ -47,13 +52,24 @@ internal class TrendingSettingsScreen(
             topBar = state.topBar,
             onBack = { screenModel.runAction(OnTrendingBackClickAction) },
         ) {
-            SectionHeader(model = state.titleHeader)
+            SectionHeader(model = state.showHeader)
+
+            ChipFlow(
+                set = state.kindChips,
+                onEvent = { event, kind ->
+                    if (event is ChipEvent.Clicked) {
+                        screenModel.runAction(OnTrendingKindSelectedAction(kind = kind))
+                    }
+                },
+            )
+
+            SectionHeader(model = state.periodHeader)
 
             ChipFlow(
                 set = state.periodChips,
-                onEvent = { event, period ->
+                onEvent = { event, feed ->
                     if (event is ChipEvent.Clicked) {
-                        screenModel.runAction(OnTrendingPeriodSelectedAction(period = period))
+                        screenModel.runAction(OnTrendingFeedSelectedAction(feed = feed))
                     }
                 },
             )

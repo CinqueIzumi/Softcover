@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.koin.koinScreenModel
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.component.button.PillButton
@@ -25,6 +26,9 @@ import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.RandomPickSe
 internal class RandomPickSettingsScreen(
     private val appWidgetId: Int,
 ) : Screen {
+    /** Voyager keys the screen model by this, and the class name alone would hand one widget's model to the next. */
+    override val key: ScreenKey = "${RandomPickSettingsScreen::class.qualifiedName}-$appWidgetId"
+
     @Composable
     override fun Content() {
         val screenModel = koinScreenModel<RandomPickSettingsScreenModel>()

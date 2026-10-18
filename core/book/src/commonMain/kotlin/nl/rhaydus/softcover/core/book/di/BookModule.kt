@@ -29,11 +29,14 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUpcomingBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUpcomingFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshUpcomingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResumeIfPausedUseCase
@@ -128,6 +131,18 @@ val bookModule = module {
 
     factory {
         RefreshTrendingBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        ObserveUpcomingBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        ObserveUpcomingFetchedAtUseCase(booksRepository = get())
+    }
+
+    factory {
+        RefreshUpcomingBooksUseCase(booksRepository = get())
     }
 
     factory {

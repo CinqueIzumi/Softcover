@@ -20,6 +20,11 @@ internal suspend fun TrendingSettingsDependencies.saveSettings(
             widget = TrendingWidget(),
             appWidgetId = appWidgetId,
         )
+
+        fetcher.fetch(
+            feeds = listOf(settings.feed),
+            maxAge = settings.cadence.interval / 2,
+        )
     }.onFailure { error ->
         AppLog.e(
             error,

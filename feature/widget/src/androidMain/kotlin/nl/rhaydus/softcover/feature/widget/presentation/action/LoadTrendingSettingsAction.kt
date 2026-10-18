@@ -2,13 +2,16 @@ package nl.rhaydus.softcover.feature.widget.presentation.action
 
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingCancellable
+import nl.rhaydus.softcover.feature.widget.domain.model.kind
 import nl.rhaydus.softcover.feature.widget.presentation.event.TrendingSettingsEvent
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.mapper.trendingCadenceChipsFor
-import nl.rhaydus.softcover.feature.widget.presentation.mapper.trendingPeriodChipsFor
+import nl.rhaydus.softcover.feature.widget.presentation.mapper.trendingFeedChipsFor
+import nl.rhaydus.softcover.feature.widget.presentation.mapper.trendingKindChipsFor
 import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.TrendingSettingsDependencies
 import nl.rhaydus.softcover.feature.widget.presentation.state.TrendingSettingsLocalVariables
 import nl.rhaydus.softcover.feature.widget.presentation.state.TrendingSettingsUiState
+import nl.rhaydus.softcover.feature.widget.presentation.state.withFeed
 import nl.rhaydus.toad.ActionScope
 
 internal class LoadTrendingSettingsAction(private val appWidgetId: Int) : TrendingSettingsAction {
@@ -21,16 +24,16 @@ internal class LoadTrendingSettingsAction(private val appWidgetId: Int) : Trendi
         dependencies.getTrendingSettings(appWidgetId = appWidgetId)
             .onSuccess { settings ->
                 scope.setLocalVariables {
-                    it.copy(
+                    it.withFeed(feed = settings.feed).copy(
                         appWidgetId = appWidgetId,
-                        period = settings.period,
                         cadence = settings.cadence,
                     )
                 }
 
                 scope.setState {
                     it.copy(
-                        periodChips = trendingPeriodChipsFor(selected = settings.period),
+                        kindChips = trendingKindChipsFor(selected = settings.feed.kind),
+                        periodChips = trendingFeedChipsFor(selected = settings.feed),
                         cadenceChips = trendingCadenceChipsFor(selected = settings.cadence),
                     )
                 }
