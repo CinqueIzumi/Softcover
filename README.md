@@ -109,7 +109,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 
 ### Home-screen widgets (Android)
 - **Currently Reading** — your current book over a blurred cover backdrop, cycling through the shelf, with progress updates straight from the widget.
-- **Trending** — Hardcover's trending top 10, paged per period.
+- **Trending** — Hardcover's trending top 10 per period, or the 10 most-wanted books releasing in the next month, 3 months, 6 months or year.
 - **Random pick** — a book from your library to read next.
 - **Quote of the day** — one of your saved quotes, sized to fit the widget, with its book.
 
