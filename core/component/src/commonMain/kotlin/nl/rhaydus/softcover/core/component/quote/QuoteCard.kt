@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -31,10 +30,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
-/**
- * One saved quote in the Editorial quote pattern: an oversized low-alpha opening mark behind the italic
- * passage, the byline beneath it, and a menu holding Delete. Only whether the menu is open is local.
- */
+/** One saved quote, drawn in the list form of the Editorial quote pattern. */
 @Composable
 fun QuoteCard(
     model: QuoteCardUiModel,
@@ -53,7 +49,7 @@ fun QuoteCard(
 
             SoftcoverText(
                 text = "“",
-                style = MaterialTheme.editorialTypography.quoteGlyph.copy(fontSize = 92.sp),
+                style = MaterialTheme.editorialTypography.quoteGlyph.copy(fontSize = 48.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = glyphAlpha),
                 modifier = Modifier
                     .align(Alignment.TopStart)
@@ -69,7 +65,7 @@ fun QuoteCard(
 
                 SoftcoverText(
                     text = model.text,
-                    style = MaterialTheme.editorialTypography.headlineMedium.copy(fontStyle = FontStyle.Italic),
+                    style = MaterialTheme.editorialTypography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 

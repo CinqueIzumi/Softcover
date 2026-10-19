@@ -17,17 +17,20 @@ import androidx.glance.unit.ColorProvider
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
+internal fun bookTitleStyle(textAlign: TextAlign): TextStyle = TextStyle(
+    color = GlanceTheme.colors.onSurface,
+    fontSize = 14.sp,
+    fontWeight = FontWeight.Bold,
+    fontFamily = FontFamily.Serif,
+    textAlign = textAlign,
+)
+
+@Composable
 internal fun ReservedLinesTitle(
     title: String,
     reservedLines: Int,
 ) {
-    val style = TextStyle(
-        color = GlanceTheme.colors.onSurface,
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Bold,
-        fontFamily = FontFamily.Serif,
-        textAlign = TextAlign.Center,
-    )
+    val style = bookTitleStyle(TextAlign.Center)
 
     Box(
         modifier = GlanceModifier.padding(horizontal = Spacing.xs),

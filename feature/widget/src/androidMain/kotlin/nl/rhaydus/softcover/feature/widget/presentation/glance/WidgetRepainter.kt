@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.widget.presentation.glance
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.updateAll
 
 /**
  * Repaints an instance that has no live Glance session. A live session does not re-run `provideGlance` on
@@ -20,10 +19,6 @@ internal class WidgetRepainter(context: Context) {
             context = context,
             id = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
         )
-    }
-
-    suspend fun repaintAll(widget: GlanceAppWidget) {
-        widget.updateAll(context)
     }
 
     /** Repaints [appWidgetId] only if [widget] is placed on a home screen, and returns whether it did. */

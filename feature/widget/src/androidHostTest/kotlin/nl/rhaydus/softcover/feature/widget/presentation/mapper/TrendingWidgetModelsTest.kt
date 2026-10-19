@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
@@ -34,13 +35,14 @@ class TrendingWidgetModelsTest {
     private val requestedBookIds = mutableListOf<Int>()
     private val coverUris = mutableMapOf<Int, Uri?>()
     private val coverDelaysMs = mutableMapOf<Int, Long>()
+    private val requestedHeights = mutableListOf<Int>()
 
     private fun book(id: Int): Book = mockk<Book> {
         every {
             this@mockk.id
         } returns id
         every {
-            title
+            displayTitle
         } returns "Title $id"
         every {
             authorString
@@ -51,6 +53,7 @@ class TrendingWidgetModelsTest {
         isSignedIn: Boolean = true,
         position: Flow<TrendingPosition> = flowOf(positionAt(0)),
         settingsChanges: Flow<TrendingSettingsChange> = emptyFlow(),
+        coverHeightDp: Flow<Int> = flowOf(200),
         fetchStatus: (TrendingFeed) -> Flow<TrendingFeedFetchStatus> = { flowOf(TrendingFeedFetchStatus.Settled) },
         observeTrending: (TrendingFeed) -> Flow<List<Book>>,
     ): Flow<TrendingWidgetUiModel> = trendingWidgetModels(
@@ -62,15 +65,18 @@ class TrendingWidgetModelsTest {
         fetchStatus = fetchStatus,
         eyebrowFor = { feed -> "Eyebrow ${feed.eyebrowName()}" },
         emptyHeadlineFor = { feed -> "Headline ${feed.eyebrowName()}" },
-        coverUri = { book ->
+        coverUri = { book, heightDp ->
             requestedBookIds += book.id
+            requestedHeights += heightDp
             delay(coverDelaysMs[book.id] ?: 0L)
             coverUris[book.id]
         },
+        coverHeightDp = coverHeightDp,
     )
 
     private fun TrendingFeed.eyebrowName(): String = when (this) {
         is TrendingFeed.Trending -> period.name
+        is TrendingFeed.Recent -> "Recent${window.name}"
         is TrendingFeed.Upcoming -> "Upcoming${window.name}"
     }
 
@@ -247,6 +253,30 @@ class TrendingWidgetModelsTest {
         }
 
         @Test
+        fun `a recent feed's empty content takes its headline from that feed`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                position = flowOf(
+                    TrendingPosition(
+                        feed = TrendingFeed.Recent(window = RecentWindow.Month),
+                        page = 0,
+                    ),
+                ),
+                observeTrending = fixedBooks(emptyList()),
+            )
+
+            // ----- Act -----
+            flow.test {
+                // ----- Assert -----
+                awaitItem().content shouldBe TrendingWidgetUiModel.Content.Empty(
+                    eyebrow = "Eyebrow RecentMonth",
+                    headline = "Headline RecentMonth",
+                )
+                awaitComplete()
+            }
+        }
+
+        @Test
         fun `the first page carries rank, book details and the page label`() = runTest {
             // ----- Arrange -----
             val flow = models(observeTrending = fixedBooks(listOf(book(30), book(10), book(20), book(40), book(50))))
@@ -361,6 +391,51 @@ class TrendingWidgetModelsTest {
                     TrendingWidgetUiModel.Cover.Missing,
                 )
                 awaitComplete()
+            }
+        }
+
+        @Test
+        fun `covers resolve at the first reported cover height`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                coverHeightDp = flowOf(240),
+                observeTrending = fixedBooks(listOf(book(1), book(2))),
+            )
+
+            // ----- Act -----
+            flow.test {
+                awaitItem()
+                awaitComplete()
+            }
+
+            // ----- Assert -----
+            requestedHeights shouldContainExactly listOf(240, 240)
+        }
+
+        @Test
+        fun `a new cover height resolves the page's covers again at that height and emits them`() = runTest {
+            // ----- Arrange -----
+            val heights = MutableStateFlow(200)
+            val uri = mockk<Uri>()
+            coverUris[1] = uri
+            val flow = models(
+                coverHeightDp = heights,
+                observeTrending = fixedBooks(listOf(book(1), book(2))),
+            )
+
+            // ----- Act -----
+            flow.test {
+                awaitItem()
+                heights.value = 320
+                val reresolved = awaitItem().content.shouldBeInstanceOf<TrendingWidgetUiModel.Content.Ranked>()
+
+                // ----- Assert -----
+                reresolved.items.map { it.cover } shouldContainExactly listOf(
+                    TrendingWidgetUiModel.Cover.Loaded(uri = uri),
+                    TrendingWidgetUiModel.Cover.Missing,
+                )
+                requestedHeights shouldContainExactly listOf(200, 200, 320, 320)
+                cancelAndIgnoreRemainingEvents()
             }
         }
 

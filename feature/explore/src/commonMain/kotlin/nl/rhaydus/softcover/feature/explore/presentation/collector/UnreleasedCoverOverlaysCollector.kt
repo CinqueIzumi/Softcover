@@ -70,7 +70,7 @@ internal class UnreleasedCoverOverlaysCollector : ExploreCollector {
 
 private fun List<Book>.toUnreleasedCoverOverlays(): Map<Int, CoverOverlayUiModel> =
     mapNotNull { book ->
-        val releaseDate = book.effectiveReleaseDate
+        val releaseDate = book.releaseDate
         if (book.isUnreleased && releaseDate != null) {
             book.id to CoverOverlayUiModel(
                 badge = releaseDate.toCompactUnreleasedBadgeUiModel(),

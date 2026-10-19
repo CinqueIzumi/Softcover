@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressUris
 import org.junit.jupiter.api.Nested
@@ -29,12 +30,14 @@ class CurrentlyReadingWidgetModelsTest {
 
     private val renders = mutableListOf<RenderCall>()
     private val coverRequests = mutableListOf<Int>()
+    private val coverHeights = mutableListOf<Int>()
+    private val artworkRequests = mutableListOf<Int>()
     private val coverUri = mockk<Uri>()
     private val progressUris = WavyProgressUris(
         track = mockk<Uri>(),
         indicator = mockk<Uri>(),
     )
-    private val artwork = CurrentlyReadingWidgetUiModel.Artwork(
+    private val artwork = BookArtworkUiModel(
         backdrop = null,
         veil = mockk<Uri>(),
         veilLift = mockk<Uri>(),
@@ -62,7 +65,7 @@ class CurrentlyReadingWidgetModelsTest {
                 this@mockk.id
             } returns id
             every {
-                title
+                displayTitle
             } returns "Title $id"
             every {
                 authorString
@@ -77,9 +80,11 @@ class CurrentlyReadingWidgetModelsTest {
         isSignedIn: Boolean = true,
         shelf: Flow<List<Book>>,
         selectedBookId: Flow<Int?> = flowOf(null),
-        barWidthsDp: List<Int> = listOf(100),
-        coverUri: suspend (Book) -> Uri? = { book ->
+        coverHeightDp: Flow<Int> = flowOf(200),
+        barWidthsDp: Flow<Set<Int>> = flowOf(setOf(100)),
+        coverUri: suspend (Book, Int) -> Uri? = { book, heightDp ->
             coverRequests += book.id
+            coverHeights += heightDp
             this.coverUri
         },
     ): Flow<CurrentlyReadingWidgetUiModel> = currentlyReadingWidgetModels(
@@ -88,6 +93,7 @@ class CurrentlyReadingWidgetModelsTest {
         shelf = shelf,
         selectedBookId = selectedBookId,
         coverUri = coverUri,
+        coverHeightDp = coverHeightDp,
         barWidthsDp = barWidthsDp,
         progressUris = { fraction, widthDp ->
             renders += RenderCall(
@@ -96,7 +102,10 @@ class CurrentlyReadingWidgetModelsTest {
             )
             progressUris
         },
-        artworkUris = { artwork },
+        artworkUris = { book ->
+            artworkRequests += book.id
+            artwork
+        },
     )
 
     private fun CurrentlyReadingWidgetUiModel.reading() =
@@ -249,7 +258,29 @@ class CurrentlyReadingWidgetModelsTest {
                 reading.cover.shouldBeNull()
                 reading.progress shouldBe emptyMap()
                 reading.artwork.shouldBeNull()
+                reading.imagesPending shouldBe true
                 cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `the stage after a book without a cover or artwork no longer has its images pending`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                shelf = flowOf(listOf(book(1))),
+                coverUri = { _, _ -> null },
+            )
+
+            // ----- Act -----
+            flow.test {
+                val text = awaitItem().reading()
+                val images = awaitItem().reading()
+                cancelAndIgnoreRemainingEvents()
+
+                // ----- Assert -----
+                text.imagesPending shouldBe true
+                images.cover.shouldBeNull()
+                images.imagesPending shouldBe false
             }
         }
 
@@ -259,7 +290,7 @@ class CurrentlyReadingWidgetModelsTest {
             val flow = models(
                 shelf = flowOf(books),
                 selectedBookId = flowOf(2),
-                barWidthsDp = listOf(90, 140),
+                barWidthsDp = flowOf(setOf(90, 140)),
             )
 
             // ----- Act -----
@@ -273,6 +304,7 @@ class CurrentlyReadingWidgetModelsTest {
                     cover = null,
                     progress = emptyMap(),
                     artwork = null,
+                    imagesPending = true,
                 ) shouldBe text
                 images.cover shouldBe coverUri
                 images.progress shouldBe mapOf(
@@ -319,7 +351,7 @@ class CurrentlyReadingWidgetModelsTest {
                     ),
                 ),
                 selectedBookId = flowOf(2),
-                barWidthsDp = listOf(90, 140, 200),
+                barWidthsDp = flowOf(setOf(90, 140, 200)),
             )
 
             // ----- Act -----
@@ -346,8 +378,9 @@ class CurrentlyReadingWidgetModelsTest {
                 themeConfiguration = flowOf(ThemeConfiguration()),
                 shelf = flowOf(listOf(book(1))),
                 selectedBookId = flowOf(null),
-                coverUri = { null },
-                barWidthsDp = listOf(90, 140),
+                coverUri = { _, _ -> null },
+                coverHeightDp = flowOf(200),
+                barWidthsDp = flowOf(setOf(90, 140)),
                 progressUris = { _, widthDp -> if (widthDp == 90) null else progressUris },
             )
 
@@ -404,7 +437,7 @@ class CurrentlyReadingWidgetModelsTest {
             val flow = models(
                 shelf = flowOf(books),
                 selectedBookId = selected,
-                coverUri = { book -> if (book.id == 1) gate.await() else coverUri },
+                coverUri = { book, _ -> if (book.id == 1) gate.await() else coverUri },
             )
 
             flow.test {
@@ -419,6 +452,78 @@ class CurrentlyReadingWidgetModelsTest {
                 val images = awaitItem().reading()
                 images.title shouldBe "Title 2"
                 images.cover shouldBe coverUri
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `a new set of widths re-emits the model with progress for exactly those widths`() = runTest {
+            // ----- Arrange -----
+            val widths = MutableStateFlow(setOf(90))
+            val flow = models(
+                shelf = flowOf(books),
+                barWidthsDp = widths,
+            )
+
+            flow.test {
+                awaitItem()
+                awaitItem().reading().progress.keys shouldBe setOf(90)
+
+                // ----- Act -----
+                widths.value = setOf(140, 200)
+
+                // ----- Assert -----
+                awaitItem().reading().progress.keys shouldBe setOf(140, 200)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `the cover and artwork are produced once per shown book however often the widths change`() = runTest {
+            // ----- Arrange -----
+            val widths = MutableStateFlow(setOf(90))
+            val flow = models(
+                shelf = flowOf(books),
+                selectedBookId = flowOf(2),
+                barWidthsDp = widths,
+            )
+
+            flow.test {
+                awaitItem()
+                awaitItem()
+
+                // ----- Act -----
+                widths.value = setOf(140)
+                awaitItem()
+                widths.value = setOf(200)
+                awaitItem()
+
+                // ----- Assert -----
+                coverRequests shouldContainExactly listOf(2)
+                artworkRequests shouldContainExactly listOf(2)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `a new cover height produces the cover again at that height`() = runTest {
+            // ----- Arrange -----
+            val heights = MutableStateFlow(200)
+            val flow = models(
+                shelf = flowOf(books),
+                coverHeightDp = heights,
+            )
+
+            flow.test {
+                awaitItem()
+                awaitItem()
+
+                // ----- Act -----
+                heights.value = 320
+                awaitItem()
+
+                // ----- Assert -----
+                coverHeights shouldContainExactly listOf(200, 320)
                 cancelAndIgnoreRemainingEvents()
             }
         }

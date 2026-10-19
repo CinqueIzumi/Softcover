@@ -81,7 +81,7 @@ import kotlin.coroutines.CoroutineContext
     views = [
         BookEditionView::class
     ],
-    version = 57,
+    version = 58,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -1477,6 +1477,13 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_57_58 = object : Migration(57, 58) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE book_quotes ADD COLUMN editionTitle TEXT")
+                connection.execSQL("ALTER TABLE book_quotes ADD COLUMN editionCoverUrl TEXT")
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1535,6 +1542,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_54_55,
             MIGRATION_55_56,
             MIGRATION_56_57,
+            MIGRATION_57_58,
         )
     }
 }

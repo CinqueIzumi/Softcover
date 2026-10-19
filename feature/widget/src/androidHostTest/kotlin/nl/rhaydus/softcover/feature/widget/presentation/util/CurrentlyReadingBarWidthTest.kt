@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.feature.widget.presentation.util
 
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.kotest.matchers.ints.shouldBeGreaterThan
-import io.kotest.matchers.ints.shouldBeLessThanOrEqual
+import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -12,41 +12,84 @@ class CurrentlyReadingBarWidthTest {
     @Nested
     inner class ProgressBarWidthDp {
         @Test
-        fun `the bar and label never exceed the widget width`() {
-            // ----- Act & Assert -----
-            for (width in WIDGET_WIDTHS_DP) {
-                val bar = progressBarWidthDp(widgetWidth = width.dp)
-
-                if (bar > PROGRESS_BAR_HEIGHT_DP) {
-                    val row = bar.dp + PROGRESS_LABEL_WIDTH_DP + Spacing.xxs * 2
-
-                    row.value.toInt() shouldBeLessThanOrEqual width
-                }
-            }
-        }
-
-        @Test
         fun `a widget too narrow for the row keeps a bar as wide as it is tall`() {
             // ----- Arrange -----
-            val widget = 40.dp
+            val size = DpSize(
+                width = 40.dp,
+                height = 110.dp,
+            )
 
             // ----- Act -----
-            val bar = progressBarWidthDp(widgetWidth = widget)
+            val bar = progressBarWidthDp(size)
 
             // ----- Assert -----
             bar shouldBe PROGRESS_BAR_HEIGHT_DP
         }
 
         @Test
-        fun `a wider widget gets a wider bar`() {
+        fun `a wider stacked widget gets a wider bar`() {
             // ----- Arrange -----
-            val narrow = progressBarWidthDp(widgetWidth = 180.dp)
+            val narrowSize = DpSize(
+                width = 180.dp,
+                height = 400.dp,
+            )
+            val wideSize = DpSize(
+                width = 320.dp,
+                height = 400.dp,
+            )
 
             // ----- Act -----
-            val wide = progressBarWidthDp(widgetWidth = 320.dp)
+            val narrow = progressBarWidthDp(narrowSize)
+            val wide = progressBarWidthDp(wideSize)
 
             // ----- Assert -----
             wide shouldBeGreaterThan narrow
+        }
+
+        @Test
+        fun `a side by side size gets a narrower bar than a stacked size of the same width`() {
+            // ----- Arrange -----
+            val stackedSize = DpSize(
+                width = 320.dp,
+                height = 320.dp,
+            )
+            val sideBySideSize = DpSize(
+                width = 320.dp,
+                height = 110.dp,
+            )
+
+            // ----- Act -----
+            val stacked = progressBarWidthDp(stackedSize)
+            val sideBySide = progressBarWidthDp(sideBySideSize)
+
+            // ----- Assert -----
+            sideBySide shouldBeLessThan stacked
+        }
+    }
+
+    @Nested
+    inner class ProgressBarWidthsDp {
+        @Test
+        fun `returns one width per distinct reported size`() {
+            // ----- Arrange -----
+            val small = DpSize(
+                width = 180.dp,
+                height = 400.dp,
+            )
+            val large = DpSize(
+                width = 320.dp,
+                height = 400.dp,
+            )
+            val sizes = listOf(small, large, small)
+
+            // ----- Act -----
+            val widths = progressBarWidthsDp(sizes)
+
+            // ----- Assert -----
+            widths shouldBe setOf(
+                progressBarWidthDp(small),
+                progressBarWidthDp(large),
+            )
         }
     }
 }

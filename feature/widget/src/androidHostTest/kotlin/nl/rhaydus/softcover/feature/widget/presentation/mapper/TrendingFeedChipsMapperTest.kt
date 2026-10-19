@@ -2,10 +2,12 @@ package nl.rhaydus.softcover.feature.widget.presentation.mapper
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeedKind
+import nl.rhaydus.softcover.feature.widget.domain.model.kind
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -23,6 +25,19 @@ class TrendingFeedChipsMapperTest {
             // ----- Assert -----
             result.chips.map { result.payloadByKey.getValue(it.key) } shouldContainExactly
                 TrendingPeriod.entries.map { TrendingFeed.Trending(period = it) }
+        }
+
+        @Test
+        fun `a recent selection offers every recent window and nothing else`() {
+            // ----- Arrange -----
+            val selected = TrendingFeed.Recent(window = RecentWindow.Month)
+
+            // ----- Act -----
+            val result = trendingFeedChipsFor(selected = selected)
+
+            // ----- Assert -----
+            result.chips.map { result.payloadByKey.getValue(it.key) } shouldContainExactly
+                RecentWindow.entries.map { TrendingFeed.Recent(window = it) }
         }
 
         @Test
@@ -55,31 +70,38 @@ class TrendingFeedChipsMapperTest {
     @Nested
     inner class TrendingKindChipsFor {
         @Test
-        fun `offers both kinds with only the selected one selected`() {
+        fun `offers trending, recent and upcoming in that order with only the selected one selected`() {
             // ----- Arrange -----
-            val selected = TrendingFeedKind.Upcoming
+            val selected = TrendingFeedKind.Recent
 
             // ----- Act -----
             val result = trendingKindChipsFor(selected = selected)
 
             // ----- Assert -----
-            result.chips.map { result.payloadByKey[it.key] } shouldContainExactly TrendingFeedKind.entries
-            result.chips.map { it.selected } shouldContainExactly listOf(false, true)
+            result.chips.map { result.payloadByKey[it.key] } shouldContainExactly
+                listOf(
+                    TrendingFeedKind.Trending,
+                    TrendingFeedKind.Recent,
+                    TrendingFeedKind.Upcoming,
+                )
+            result.chips.map { it.selected } shouldContainExactly listOf(false, true, false)
         }
     }
 
     @Nested
     inner class Label {
         @Test
-        fun `every feed has a distinct label`() {
+        fun `feeds of the same kind have distinct labels`() {
             // ----- Arrange -----
-            val feeds = TrendingFeed.All
+            val feedsByKind = TrendingFeed.All.groupBy { it.kind }
 
             // ----- Act -----
-            val result = feeds.map { it.label() }
+            val result = feedsByKind.mapValues { (_, feeds) -> feeds.map { it.label() } }
 
             // ----- Assert -----
-            result.distinct().size shouldBe feeds.size
+            result.forEach { (_, labels) ->
+                labels.distinct().size shouldBe labels.size
+            }
         }
     }
 }

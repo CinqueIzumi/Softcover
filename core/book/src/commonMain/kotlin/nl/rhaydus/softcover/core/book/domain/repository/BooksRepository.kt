@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
@@ -112,6 +113,21 @@ interface BooksRepository {
      */
     suspend fun refreshTrendingBooks(
         period: TrendingPeriod,
+        maxAge: Duration,
+    )
+
+    /** The most-shelved books released within the past [window], in rank order. */
+    fun observeRecentBooks(window: RecentWindow): Flow<List<Book>>
+
+    /** When [window]'s recent releases were last fetched, or `null` if a fetch has never completed. */
+    fun observeRecentFetchedAt(window: RecentWindow): Flow<Instant?>
+
+    /**
+     * Fetches [window]'s recent releases only when its last completed fetch is older than
+     * [maxAge]. Refreshes of the same window are serialized; different windows refresh concurrently.
+     */
+    suspend fun refreshRecentBooks(
+        window: RecentWindow,
         maxAge: Duration,
     )
 

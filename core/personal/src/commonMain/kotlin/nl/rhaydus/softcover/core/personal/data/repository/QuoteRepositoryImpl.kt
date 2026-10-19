@@ -56,6 +56,8 @@ internal class QuoteRepositoryImpl(
         actionAt: Instant?,
         position: QuotePosition?,
         bookTitle: String?,
+        editionTitle: String?,
+        editionCoverUrl: String?,
     ): Long {
         val now: Instant = clock.now()
 
@@ -68,6 +70,8 @@ internal class QuoteRepositoryImpl(
                 actionAt = actionAt ?: now,
                 position = position,
                 bookTitle = bookTitle,
+                editionTitle = editionTitle,
+                editionCoverUrl = editionCoverUrl,
             ),
             enqueuedAt = now.toString(),
         )

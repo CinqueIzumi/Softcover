@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.widget.presentation.util
 
-import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -9,30 +10,26 @@ class RandomPickCoverSizeTest {
     @Nested
     inner class RandomPickCoverHeightDp {
         @Test
-        fun `a widget shorter than its chrome gets no cover`() {
+        fun `a stacked size uses the random pick eyebrow and foot`() {
             // ----- Arrange -----
-            val widgetHeightDp = 10
+            val heightDp = 320
+            val sizes = listOf(
+                DpSize(
+                    width = 160.dp,
+                    height = heightDp.dp,
+                ),
+            )
+            val expected = stackedCoverHeightDp(
+                heightDp = heightDp,
+                eyebrowDp = randomPickEyebrowDp(heightDp),
+                footDp = randomPickFootDp(heightDp),
+            )
 
             // ----- Act -----
-            val result = randomPickCoverHeightDp(widgetHeightDp = widgetHeightDp)
+            val result = randomPickCoverHeightDp(sizes)
 
             // ----- Assert -----
-            result shouldBe 0
-        }
-    }
-
-    @Nested
-    inner class MaxRandomPickCoverHeightDp {
-        @Test
-        fun `is at least the cover height of every widget height the launcher can give`() {
-            // ----- Arrange -----
-            val heights = 0..319
-
-            // ----- Act -----
-            val max = maxRandomPickCoverHeightDp()
-
-            // ----- Assert -----
-            heights.forEach { max shouldBeGreaterThanOrEqual randomPickCoverHeightDp(widgetHeightDp = it) }
+            result shouldBe expected
         }
     }
 }

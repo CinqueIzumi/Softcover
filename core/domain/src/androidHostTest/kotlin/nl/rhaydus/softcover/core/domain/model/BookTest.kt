@@ -6,6 +6,7 @@ import io.mockk.mockk
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import org.junit.jupiter.api.Nested
@@ -19,12 +20,13 @@ class BookTest {
         id: Int,
         owned: Boolean = false,
         releaseDate: LocalDate? = null,
+        title: String? = null,
     ): BookEdition = BookEdition(
         id = id,
         canonicalId = null,
         bookId = 1,
         publisher = null,
-        title = null,
+        title = title,
         url = null,
         localImagePath = null,
         isbn10 = null,
@@ -70,6 +72,95 @@ class BookTest {
         every {
             it.editionId
         } returns editionId
+    }
+
+    // ----- displayTitle -----
+
+    @Nested
+    inner class DisplayTitle {
+        @Test
+        fun `uses the title of the user's own edition`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(
+                    buildEdition(
+                        id = 1,
+                        title = "Other Title",
+                    ),
+                    buildEdition(
+                        id = 2,
+                        title = "My Edition",
+                    ),
+                ),
+                userBook = buildUserBook(editionId = 2),
+            )
+
+            // ----- Act -----
+            val result = book.displayTitle
+
+            // ----- Assert -----
+            result shouldBe "My Edition"
+        }
+
+        @Test
+        fun `falls back to the book title when the user's edition title is blank`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(buildEdition(
+                    id = 2,
+                    title = "   ",
+                ),),
+                userBook = buildUserBook(editionId = 2),
+            )
+
+            // ----- Act -----
+            val result = book.displayTitle
+
+            // ----- Assert -----
+            result shouldBe "Test Book"
+        }
+
+        @Test
+        fun `falls back to the book title when the user's edition has no title`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(buildEdition(
+                    id = 2,
+                    title = null,
+                ),),
+                userBook = buildUserBook(editionId = 2),
+            )
+
+            // ----- Act -----
+            val result = book.displayTitle
+
+            // ----- Assert -----
+            result shouldBe "Test Book"
+        }
+
+        @Test
+        fun `ignores owned and default editions when there is no user book`() {
+            // ----- Arrange -----
+            val owned = buildEdition(
+                id = 1,
+                owned = true,
+                title = "Owned Title",
+            )
+            val default = buildEdition(
+                id = 2,
+                title = "Default Title",
+            )
+            val book = buildBook(
+                editions = listOf(owned, default),
+                defaultEdition = default,
+            )
+
+            // ----- Act -----
+            val result = book.displayTitle
+
+            // ----- Assert -----
+            result shouldBe "Test Book"
+        }
     }
 
     // ----- currentEdition -----
@@ -398,150 +489,21 @@ class BookTest {
         }
     }
 
-    // ----- effectiveReleaseDate / isUnreleased -----
+    // ----- isUnreleased -----
 
     @Nested
     inner class ReleaseInfo {
         @Test
-        fun `effectiveReleaseDate prefers currentEdition release date when present`() {
-            // ----- Arrange -----
-            val editionDate = LocalDate(
-                2025,
-                1,
-                1,
-            )
-            val defaultDate = LocalDate(
-                2020,
-                6,
-                1,
-            )
-            val bookDate = LocalDate(
-                2015,
-                3,
-                15,
-            )
-
-            val currentEdition = buildEdition(
-                id = 10,
-                owned = true,
-                releaseDate = editionDate,
-            )
-            val defaultEdition = buildEdition(
-                id = 20,
-                releaseDate = defaultDate,
-            )
-            val book = buildBook(
-                editions = listOf(currentEdition),
-                defaultEdition = defaultEdition,
-                releaseDate = bookDate,
-            )
-
-            // ----- Act -----
-            val result = book.effectiveReleaseDate
-
-            // ----- Assert -----
-            result shouldBe editionDate
-        }
-
-        @Test
-        fun `effectiveReleaseDate falls back to defaultEdition release date when currentEdition has none`() {
-            // ----- Arrange -----
-            val defaultDate = LocalDate(
-                2020,
-                6,
-                1,
-            )
-            val bookDate = LocalDate(
-                2015,
-                3,
-                15,
-            )
-
-            val currentEdition = buildEdition(
-                id = 10,
-                owned = true,
-                releaseDate = null,
-            )
-            val defaultEdition = buildEdition(
-                id = 20,
-                releaseDate = defaultDate,
-            )
-            val book = buildBook(
-                editions = listOf(currentEdition),
-                defaultEdition = defaultEdition,
-                releaseDate = bookDate,
-            )
-
-            // ----- Act -----
-            val result = book.effectiveReleaseDate
-
-            // ----- Assert -----
-            result shouldBe defaultDate
-        }
-
-        @Test
-        fun `effectiveReleaseDate falls back to book releaseDate when neither edition supplies one`() {
-            // ----- Arrange -----
-            val bookDate = LocalDate(
-                2015,
-                3,
-                15,
-            )
-
-            val currentEdition = buildEdition(
-                id = 10,
-                owned = true,
-                releaseDate = null,
-            )
-            val defaultEdition = buildEdition(
-                id = 20,
-                releaseDate = null,
-            )
-            val book = buildBook(
-                editions = listOf(currentEdition),
-                defaultEdition = defaultEdition,
-                releaseDate = bookDate,
-            )
-
-            // ----- Act -----
-            val result = book.effectiveReleaseDate
-
-            // ----- Assert -----
-            result shouldBe bookDate
-        }
-
-        @Test
-        fun `effectiveReleaseDate is null when no source supplies one`() {
-            // ----- Arrange -----
-            val edition = buildEdition(
-                id = 10,
-                releaseDate = null,
-            )
-            val book = buildBook(
-                editions = listOf(edition),
-                releaseDate = null,
-            )
-
-            // ----- Act -----
-            val result = book.effectiveReleaseDate
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `isUnreleased is true for a future effectiveReleaseDate`() {
+        fun `isUnreleased is true for a future book releaseDate`() {
             // ----- Arrange -----
             val futureDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).plus(
                 7,
                 DateTimeUnit.DAY,
             )
-
-            val edition = buildEdition(
-                id = 10,
+            val book = buildBook(
+                editions = listOf(buildEdition(id = 1)),
                 releaseDate = futureDate,
             )
-            val book = buildBook(editions = listOf(edition))
 
             // ----- Act -----
             val result = book.isUnreleased
@@ -551,15 +513,16 @@ class BookTest {
         }
 
         @Test
-        fun `isUnreleased is false for today's effectiveReleaseDate`() {
+        fun `isUnreleased is false for a past book releaseDate`() {
             // ----- Arrange -----
-            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-
-            val edition = buildEdition(
-                id = 10,
-                releaseDate = today,
+            val pastDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).minus(
+                7,
+                DateTimeUnit.DAY,
             )
-            val book = buildBook(editions = listOf(edition))
+            val book = buildBook(
+                editions = listOf(buildEdition(id = 1)),
+                releaseDate = pastDate,
+            )
 
             // ----- Act -----
             val result = book.isUnreleased
@@ -569,15 +532,60 @@ class BookTest {
         }
 
         @Test
-        fun `isUnreleased is false when effectiveReleaseDate is null`() {
+        fun `isUnreleased is false for today's book releaseDate`() {
             // ----- Arrange -----
-            val edition = buildEdition(
-                id = 10,
+            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            val book = buildBook(
+                editions = listOf(buildEdition(id = 1)),
+                releaseDate = today,
+            )
+
+            // ----- Act -----
+            val result = book.isUnreleased
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `isUnreleased is false when book releaseDate is null`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                editions = listOf(buildEdition(id = 1)),
                 releaseDate = null,
             )
+
+            // ----- Act -----
+            val result = book.isUnreleased
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `isUnreleased ignores a future edition releaseDate when the book was released`() {
+            // ----- Arrange -----
+            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            val futureDate = today.plus(
+                7,
+                DateTimeUnit.DAY,
+            )
+            val currentEdition = buildEdition(
+                id = 10,
+                owned = true,
+                releaseDate = futureDate,
+            )
+            val defaultEdition = buildEdition(
+                id = 20,
+                releaseDate = futureDate,
+            )
             val book = buildBook(
-                editions = listOf(edition),
-                releaseDate = null,
+                editions = listOf(currentEdition),
+                defaultEdition = defaultEdition,
+                releaseDate = today.minus(
+                    7,
+                    DateTimeUnit.DAY,
+                ),
             )
 
             // ----- Act -----

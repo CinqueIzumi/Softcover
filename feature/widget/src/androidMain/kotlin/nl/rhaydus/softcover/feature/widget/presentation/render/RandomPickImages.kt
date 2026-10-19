@@ -6,8 +6,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageFormat
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
-import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
-import nl.rhaydus.softcover.feature.widget.presentation.util.maxRandomPickCoverHeightDp
+import nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel
 import kotlin.math.roundToInt
 
 /** Turns a book into the image files the Random pick widget shows, reusing a file whose key already exists. */
@@ -16,16 +15,18 @@ internal class RandomPickImages(
     private val density: Float,
     private val store: WidgetImageStore,
 ) {
-    private val coverPx = (maxRandomPickCoverHeightDp() * density).roundToInt()
-
     private val backdrops = BackdropImages(
         context = context,
         density = density,
         store = store,
     )
 
-    suspend fun coverUri(book: Book): Uri? {
+    suspend fun coverUri(
+        book: Book,
+        coverHeightDp: Int,
+    ): Uri? {
         val source = book.coverSource() ?: return null
+        val coverPx = (coverHeightDp * density).roundToInt()
 
         return store.uriFor(
             format = WidgetImageFormat.Photo,
@@ -41,11 +42,10 @@ internal class RandomPickImages(
     }
 
     /** `null` when a gradient file could not be written, since the backdrop is not worth drawing without them. */
-    suspend fun artwork(book: Book): RandomPickWidgetUiModel.Artwork? = backdrops.artwork(
-        book = book,
-        coverHeightDp = maxRandomPickCoverHeightDp(),
+    suspend fun artwork(book: Book): BookArtworkUiModel? = backdrops.artwork(
+        source = book.coverSource(),
     ) { backdrop, veil, veilLift, washPrimary, washTertiary ->
-        RandomPickWidgetUiModel.Artwork(
+        BookArtworkUiModel(
             backdrop = backdrop,
             veil = veil,
             veilLift = veilLift,

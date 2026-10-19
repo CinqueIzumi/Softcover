@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_quote_text"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:autoSizeMaxTextSize="18sp"
+    android:autoSizeMinTextSize="12sp"
+    android:autoSizeStepGranularity="1sp"
+    android:autoSizeTextType="uniform"
+    android:ellipsize="end"
+    android:fontFamily="serif"
+    android:includeFontPadding="false"
+    android:gravity="top|start"
+    android:textStyle="italic" />

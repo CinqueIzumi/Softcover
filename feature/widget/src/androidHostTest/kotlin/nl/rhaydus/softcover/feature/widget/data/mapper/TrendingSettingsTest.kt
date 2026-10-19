@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.widget.data.mapper
 import androidx.datastore.preferences.core.mutablePreferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
@@ -146,6 +147,66 @@ class TrendingSettingsTest {
 
             // ----- Assert -----
             result shouldBe TrendingFeed.Trending(period = TrendingPeriod.Year)
+        }
+
+        @Test
+        fun `a recent feed reads back with its window and page`() {
+            // ----- Arrange -----
+            val preferences = mutablePreferencesOf()
+            val feed = TrendingFeed.Recent(window = RecentWindow.ThreeMonths)
+
+            // ----- Act -----
+            preferences.write(feed)
+            preferences.writeTrendingPage(1)
+            val result = preferences.toTrendingPosition()
+
+            // ----- Assert -----
+            result shouldBe TrendingPosition(
+                feed = feed,
+                page = 1,
+            )
+        }
+
+        @Test
+        fun `writing a recent feed over an upcoming one reads back as recent`() {
+            // ----- Arrange -----
+            val preferences = mutablePreferencesOf()
+            preferences.write(TrendingFeed.Upcoming(window = UpcomingWindow.Year))
+
+            // ----- Act -----
+            preferences.write(TrendingFeed.Recent(window = RecentWindow.Week))
+            val result = preferences.toTrendingFeed()
+
+            // ----- Assert -----
+            result shouldBe TrendingFeed.Recent(window = RecentWindow.Week)
+        }
+
+        @Test
+        fun `writing a trending feed over a recent one reads back as trending`() {
+            // ----- Arrange -----
+            val preferences = mutablePreferencesOf()
+            preferences.write(TrendingFeed.Recent(window = RecentWindow.Month))
+
+            // ----- Act -----
+            preferences.write(TrendingFeed.Trending(period = TrendingPeriod.Year))
+            val result = preferences.toTrendingFeed()
+
+            // ----- Assert -----
+            result shouldBe TrendingFeed.Trending(period = TrendingPeriod.Year)
+        }
+
+        @Test
+        fun `writing an upcoming feed over a recent one reads back as upcoming`() {
+            // ----- Arrange -----
+            val preferences = mutablePreferencesOf()
+            preferences.write(TrendingFeed.Recent(window = RecentWindow.SixMonths))
+
+            // ----- Act -----
+            preferences.write(TrendingFeed.Upcoming(window = UpcomingWindow.Month))
+            val result = preferences.toTrendingFeed()
+
+            // ----- Assert -----
+            result shouldBe TrendingFeed.Upcoming(window = UpcomingWindow.Month)
         }
     }
 }

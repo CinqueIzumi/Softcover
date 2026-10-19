@@ -48,6 +48,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
+import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
@@ -6184,6 +6185,232 @@ class BooksRepositoryImplTest {
             coVerify(exactly = 1) {
                 booksRemoteDataSource.fetchUpcomingBookIds(
                     window = UpcomingWindow.Year,
+                    limit = any(),
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class RefreshRecentBooks {
+        private val window = RecentWindow.ThreeMonths
+
+        private fun recentBook(
+            id: Int,
+            releaseDate: LocalDate? = null,
+        ): Book = mockk(relaxed = true) {
+            every {
+                this@mockk.id
+            } returns id
+
+            every {
+                this@mockk.releaseDate
+            } returns releaseDate
+        }
+
+        @BeforeEach
+        fun setUpStore() {
+            coEvery {
+                booksLocalDataSource.getRecentFetchedAt(window = any())
+            } returns null
+
+            coEvery {
+                booksLocalDataSource.getExistingUserBookBookIds(ids = any())
+            } returns emptyList()
+        }
+
+        @Test
+        fun `skips the fetch when the window's last fetch is younger than maxAge`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getRecentFetchedAt(window = window)
+            } returns Clock.System.now() - 1.minutes
+
+            // ----- Act -----
+            repository.refreshRecentBooks(
+                window = window,
+                maxAge = 1.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchRecentBookIds(
+                    window = any(),
+                    limit = any(),
+                )
+            }
+            coVerify(exactly = 0) {
+                booksLocalDataSource.replaceRecentBooks(
+                    window = any(),
+                    requestedIds = any(),
+                    books = any(),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `fetches and replaces the window's list when the last fetch is older than maxAge`() = runTest {
+            // ----- Arrange -----
+            val first = recentBook(5)
+            val second = recentBook(6)
+
+            coEvery {
+                booksLocalDataSource.getRecentFetchedAt(window = window)
+            } returns Clock.System.now() - 2.hours
+
+            coEvery {
+                booksRemoteDataSource.fetchRecentBookIds(
+                    window = window,
+                    limit = any(),
+                )
+            } returns listOf(5, 6, 5)
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = any())
+            } returns listOf(first, second)
+
+            // ----- Act -----
+            repository.refreshRecentBooks(
+                window = window,
+                maxAge = 1.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceRecentBooks(
+                    window = window,
+                    requestedIds = listOf(5, 6),
+                    books = listOf(first, second),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `an empty API result records the window's fetch time with an empty list`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRemoteDataSource.fetchRecentBookIds(
+                    window = window,
+                    limit = any(),
+                )
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshRecentBooks(
+                window = window,
+                maxAge = Duration.ZERO,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceRecentBooks(
+                    window = window,
+                    requestedIds = emptyList(),
+                    books = emptyList(),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `an empty API result keeps only the cached books released after the window start`() = runTest {
+            // ----- Arrange -----
+            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            val windowStart = today.plus(DatePeriod(months = -3))
+            val beforeWindow = recentBook(
+                id = 1,
+                releaseDate = windowStart.plus(DatePeriod(days = -1)),
+            )
+            val onWindowStart = recentBook(
+                id = 2,
+                releaseDate = windowStart,
+            )
+            val dayAfterWindowStart = recentBook(
+                id = 3,
+                releaseDate = windowStart.plus(DatePeriod(days = 1)),
+            )
+            val undated = recentBook(
+                id = 4,
+                releaseDate = null,
+            )
+
+            coEvery {
+                booksLocalDataSource.getRecentFetchedAt(window = window)
+            } returns Clock.System.now() - 2.hours
+
+            coEvery {
+                booksLocalDataSource.getRecentBooks(window = window)
+            } returns listOf(
+                beforeWindow,
+                onWindowStart,
+                dayAfterWindowStart,
+                undated,
+            )
+
+            coEvery {
+                booksRemoteDataSource.fetchRecentBookIds(
+                    window = window,
+                    limit = any(),
+                )
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshRecentBooks(
+                window = window,
+                maxAge = 1.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceRecentBooks(
+                    window = window,
+                    requestedIds = listOf(3, 4),
+                    books = emptyList(),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `checks maxAge against the requested window's fetch time only`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getRecentFetchedAt(window = RecentWindow.Month)
+            } returns Clock.System.now() - 1.minutes
+
+            coEvery {
+                booksLocalDataSource.getRecentFetchedAt(window = RecentWindow.SixMonths)
+            } returns Clock.System.now() - 2.hours
+
+            coEvery {
+                booksRemoteDataSource.fetchRecentBookIds(
+                    window = RecentWindow.SixMonths,
+                    limit = any(),
+                )
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshRecentBooks(
+                window = RecentWindow.Month,
+                maxAge = 1.hours,
+            )
+            repository.refreshRecentBooks(
+                window = RecentWindow.SixMonths,
+                maxAge = 1.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchRecentBookIds(
+                    window = RecentWindow.Month,
+                    limit = any(),
+                )
+            }
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchRecentBookIds(
+                    window = RecentWindow.SixMonths,
                     limit = any(),
                 )
             }

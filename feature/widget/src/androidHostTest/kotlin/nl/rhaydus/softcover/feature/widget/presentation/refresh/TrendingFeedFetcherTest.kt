@@ -13,22 +13,22 @@ import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
 import nl.rhaydus.softcover.feature.widget.domain.usecase.RefreshTrendingFeedUseCase
+import nl.rhaydus.softcover.feature.widget.presentation.glance.BackgroundWidgetRenderer
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
-import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.hours
 
 class TrendingFeedFetcherTest {
     private val widget = mockk<TrendingWidget>()
-    private val repainter = mockk<WidgetRepainter>()
+    private val renderer = mockk<BackgroundWidgetRenderer>()
     private val refreshTrendingFeed = mockk<RefreshTrendingFeedUseCase>()
     private val week = TrendingFeed.Trending(period = TrendingPeriod.Week)
     private val upcoming = TrendingFeed.Upcoming(window = UpcomingWindow.Month)
 
     private fun TestScope.fetcher(): TrendingFeedFetcher = TrendingFeedFetcher(
         widget = widget,
-        repainter = repainter,
+        renderer = renderer,
         applicationScope = ApplicationScope(CoroutineScope(StandardTestDispatcher(testScheduler))),
         refreshTrendingFeed = refreshTrendingFeed,
     )
@@ -109,7 +109,7 @@ class TrendingFeedFetcherTest {
                 )
             } returns Result.success(Unit)
             coEvery {
-                repainter.repaintAll(widget)
+                renderer.renderAll(widget)
             } returns Unit
 
             // ----- Act -----
@@ -120,7 +120,7 @@ class TrendingFeedFetcherTest {
             runCurrent()
 
             // ----- Assert -----
-            coVerify(exactly = 1) { repainter.repaintAll(widget) }
+            coVerify(exactly = 1) { renderer.renderAll(widget) }
         }
 
         @Test
@@ -139,7 +139,7 @@ class TrendingFeedFetcherTest {
                 )
             } returns Result.success(Unit)
             coEvery {
-                repainter.repaintAll(widget)
+                renderer.renderAll(widget)
             } returns Unit
 
             // ----- Act -----
@@ -150,7 +150,7 @@ class TrendingFeedFetcherTest {
             runCurrent()
 
             // ----- Assert -----
-            coVerify(exactly = 1) { repainter.repaintAll(widget) }
+            coVerify(exactly = 1) { renderer.renderAll(widget) }
         }
     }
 }

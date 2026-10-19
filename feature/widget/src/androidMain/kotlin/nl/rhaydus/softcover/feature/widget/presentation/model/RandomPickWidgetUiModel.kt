@@ -19,14 +19,18 @@ internal data class RandomPickWidgetUiModel(
 
         data class EmptyPool(val eyebrow: String) : Content
 
-        /** [artwork] is `null` while its files are being prepared, and the backdrop is left out. */
+        /**
+         * [imagesPending] is `true` until the cover and artwork work has finished. [artwork] is `null` while it is
+         * pending or when it produced nothing, and the backdrop is left out.
+         */
         data class Picked(
             val eyebrow: String,
             val bookId: Int,
             val title: String,
             val author: String,
             val cover: Cover,
-            val artwork: Artwork?,
+            val artwork: BookArtworkUiModel?,
+            val imagesPending: Boolean,
         ) : Content
     }
 
@@ -38,13 +42,4 @@ internal data class RandomPickWidgetUiModel(
 
         data class Loaded(val uri: Uri) : Cover
     }
-
-    /** [backdrop] is `null` while the book has no cover. */
-    data class Artwork(
-        val backdrop: Uri?,
-        val veil: Uri,
-        val veilLift: Uri,
-        val washPrimary: Uri,
-        val washTertiary: Uri,
-    )
 }

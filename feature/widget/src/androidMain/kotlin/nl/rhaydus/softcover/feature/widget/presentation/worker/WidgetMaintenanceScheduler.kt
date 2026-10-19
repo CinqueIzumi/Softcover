@@ -7,24 +7,28 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetNextWeeklyPickExpiryUseCase
 import nl.rhaydus.softcover.feature.widget.presentation.glance.OwnedWidgets
+import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidget
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
+import kotlin.time.Clock
 
 internal class WidgetMaintenanceScheduler(
     private val context: Context,
     private val ownedWidgets: OwnedWidgets,
     private val imageStore: WidgetImageStore,
+    private val getNextWeeklyPickExpiry: GetNextWeeklyPickExpiryUseCase,
 ) {
     fun schedule() {
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.UPDATE,
             PeriodicWorkRequestBuilder<WidgetMaintenanceWorker>(
-                1,
+                24,
                 TimeUnit.HOURS,
             ).build(),
         )
@@ -61,7 +65,34 @@ internal class WidgetMaintenanceScheduler(
                     Duration.between(
                         now,
                         midnight,
-                    ).toMillis() + MIDNIGHT_SLACK_MILLIS,
+                    ).toMillis() + SLACK_MILLIS,
+                    TimeUnit.MILLISECONDS,
+                )
+                .build(),
+        )
+    }
+
+    suspend fun scheduleNextPickExpiry() {
+        val manager = GlanceAppWidgetManager(context)
+
+        val appWidgetIds = manager.getGlanceIds(RandomPickWidget::class.java)
+            .map { glanceId -> manager.getAppWidgetId(glanceId) }
+
+        val expiry = getNextWeeklyPickExpiry(appWidgetIds = appWidgetIds).getOrThrow()
+        val workManager = WorkManager.getInstance(context)
+
+        if (expiry == null) {
+            workManager.cancelUniqueWork(PICK_EXPIRY_WORK_NAME)
+
+            return
+        }
+
+        workManager.enqueueUniqueWork(
+            PICK_EXPIRY_WORK_NAME,
+            ExistingWorkPolicy.REPLACE,
+            OneTimeWorkRequestBuilder<WidgetMaintenanceWorker>()
+                .setInitialDelay(
+                    (expiry - Clock.System.now()).inWholeMilliseconds + SLACK_MILLIS,
                     TimeUnit.MILLISECONDS,
                 )
                 .build(),
@@ -75,6 +106,7 @@ internal class WidgetMaintenanceScheduler(
 
         workManager.cancelUniqueWork(WORK_NAME)
         workManager.cancelUniqueWork(MIDNIGHT_WORK_NAME)
+        workManager.cancelUniqueWork(PICK_EXPIRY_WORK_NAME)
 
         imageStore.clear()
     }
@@ -90,6 +122,7 @@ internal class WidgetMaintenanceScheduler(
         const val CANCEL_WORK_NAME = "widget_maintenance_cancel"
         const val REPAINT_WORK_NAME = "widget_maintenance_repaint"
         const val MIDNIGHT_WORK_NAME = "widget_maintenance_midnight"
-        const val MIDNIGHT_SLACK_MILLIS = 5_000L
+        const val PICK_EXPIRY_WORK_NAME = "widget_maintenance_pick_expiry"
+        const val SLACK_MILLIS = 5_000L
     }
 }

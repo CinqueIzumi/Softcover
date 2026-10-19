@@ -9,4 +9,10 @@ fragment QuoteFieldsFragment on reading_journals {
     book {
         title
     }
+    edition {
+        title
+        image {
+            url
+        }
+    }
 }

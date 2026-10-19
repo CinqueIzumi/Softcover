@@ -1,20 +1,31 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
+import android.content.Context
+import android.content.res.Configuration
+import android.graphics.Typeface
 import android.os.Build
+import android.text.TextPaint
+import android.util.TypedValue
+import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.Action
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.appWidgetBackground
-import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -27,29 +38,25 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
-import androidx.glance.text.FontFamily
-import androidx.glance.text.FontStyle
-import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
-import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.callback.CycleQuoteCallback
 import nl.rhaydus.softcover.feature.widget.presentation.callback.QuoteRetryCallback
+import nl.rhaydus.softcover.feature.widget.presentation.component.BackdropUris
 import nl.rhaydus.softcover.feature.widget.presentation.component.CYCLE_EYEBROW_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.component.CycleEyebrow
+import nl.rhaydus.softcover.feature.widget.presentation.component.MessageText
 import nl.rhaydus.softcover.feature.widget.presentation.component.RefreshButton
+import nl.rhaydus.softcover.feature.widget.presentation.component.widgetCornerRadius
 import nl.rhaydus.softcover.feature.widget.presentation.model.QuoteWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
-import nl.rhaydus.softcover.feature.widget.presentation.util.androidQuoteTextMeasurer
-import nl.rhaydus.softcover.feature.widget.presentation.util.fitQuoteText
-import nl.rhaydus.softcover.feature.widget.presentation.util.singleLineHeightPx
 
 private const val BYLINE_FONT_SIZE_SP = 12
-private const val QUOTE_MARK_FONT_SIZE_SP = 72
-private const val QUOTE_MARK_GUTTER_DP = 44
+private const val QUOTE_MIN_FONT_SIZE_SP = 12
 
 @Composable
 internal fun QuoteWidgetContent(
@@ -97,12 +104,6 @@ internal fun QuoteWidgetContent(
     }
 }
 
-private fun widgetCornerRadius(): GlanceModifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-    GlanceModifier.cornerRadius(android.R.dimen.system_app_widget_background_radius)
-} else {
-    GlanceModifier
-}
-
 @Composable
 private fun Message(
     headline: String,
@@ -116,29 +117,10 @@ private fun Message(
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = headline,
-            style = TextStyle(
-                color = GlanceTheme.colors.onBackground,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif,
-                textAlign = TextAlign.Center,
-            ),
+        MessageText(
+            headline = headline,
+            subline = subline,
         )
-
-        if (subline != null) {
-            Spacer(modifier = GlanceModifier.height(Spacing.xxs))
-
-            Text(
-                text = subline,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurfaceVariant,
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center,
-                ),
-            )
-        }
 
         if (onRefresh != null) RefreshButton(onClick = onRefresh)
     }
@@ -150,34 +132,46 @@ private fun Shown(
     openBook: Action,
 ) {
     val context = LocalContext.current
-    val size = LocalSize.current
-    val density = context.resources.displayMetrics.density
+    val outerPadding = Spacing.xxs
+    val rowTopPadding = Spacing.xxs
+    val bylineGap = Spacing.xxs
 
-    val bylineHeightPx = if (content.byline != null) {
-        singleLineHeightPx(
-            context = context,
-            fontSizeSp = BYLINE_FONT_SIZE_SP,
-        ) + (Spacing.xxs.value * density).toInt()
+    val bylineHeight = if (content.byline != null) {
+        bylineGap + context.pxToDp(px = bylineLineHeightPx(context = context))
     } else {
-        0
+        0.dp
     }
 
-    val textFit = fitQuoteText(
-        availableWidthPx = ((size.width - Spacing.xxs * 2 - QUOTE_MARK_GUTTER_DP.dp - Spacing.sm).value * density)
-            .toInt(),
-        availableHeightPx = ((size.height - Spacing.xxs * 2 - CYCLE_EYEBROW_HEIGHT_DP.dp).value * density)
-            .toInt() - bylineHeightPx,
-        measure = androidQuoteTextMeasurer(
+    val quoteHeight = LocalSize.current.height - outerPadding * 2 - CYCLE_EYEBROW_HEIGHT_DP.dp - rowTopPadding -
+        bylineHeight
+
+    val quoteView = quoteRemoteViews(
+        context = context,
+        text = content.quoteText,
+        color = GlanceTheme.colors.onSurface,
+        maxLines = quoteMaxLines(
             context = context,
-            text = content.quoteText,
+            heightPx = (quoteHeight.value * context.resources.displayMetrics.density).toInt(),
         ),
     )
 
     Box(modifier = GlanceModifier.fillMaxSize()) {
+        val artwork = content.artwork
+
+        if (artwork != null) {
+            BackdropUris(
+                backdrop = artwork.backdrop,
+                veil = artwork.veil,
+                veilLift = artwork.veilLift,
+                washPrimary = artwork.washPrimary,
+                washTertiary = artwork.washTertiary,
+            )
+        }
+
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .padding(Spacing.xxs),
+                .padding(outerPadding),
         ) {
             CycleEyebrow(
                 label = content.eyebrow,
@@ -196,51 +190,46 @@ private fun Shown(
             Row(
                 modifier = GlanceModifier
                     .fillMaxWidth()
-                    .defaultWeight(),
+                    .defaultWeight()
+                    .padding(
+                        start = Spacing.md,
+                        top = rowTopPadding,
+                    ),
             ) {
-                Box(
+                Image(
+                    provider = ImageProvider(R.drawable.ic_widget_quote_mark),
+                    contentDescription = null,
                     modifier = GlanceModifier
-                        .width(QUOTE_MARK_GUTTER_DP.dp)
-                        .fillMaxHeight()
-                        .padding(start = Spacing.xs),
-                ) {
-                    Text(
-                        text = "“",
-                        style = TextStyle(
-                            color = LocalWidgetExtraColors.current.quoteGlyph,
-                            fontSize = QUOTE_MARK_FONT_SIZE_SP.sp,
-                            fontFamily = FontFamily.Serif,
-                        ),
-                    )
-                }
+                        .width(26.dp)
+                        .height(20.dp),
+                    colorFilter = ColorFilter.tint(LocalWidgetExtraColors.current.quoteGlyph),
+                )
+
+                Spacer(modifier = GlanceModifier.width(Spacing.xs))
 
                 Column(
                     modifier = GlanceModifier
                         .fillMaxWidth()
+                        .fillMaxHeight()
                         .defaultWeight()
                         .padding(end = Spacing.sm)
                         .clickable(openBook),
-                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = content.quoteText,
-                        maxLines = textFit.maxLines,
-                        style = TextStyle(
-                            color = GlanceTheme.colors.onBackground,
-                            fontSize = textFit.fontSizeSp.sp,
-                            fontStyle = FontStyle.Italic,
-                            fontFamily = FontFamily.Serif,
-                        ),
+                    AndroidRemoteViews(
+                        remoteViews = quoteView,
+                        modifier = GlanceModifier
+                            .fillMaxWidth()
+                            .defaultWeight(),
                     )
 
                     if (content.byline != null) {
-                        Spacer(modifier = GlanceModifier.height(Spacing.xxs))
+                        Spacer(modifier = GlanceModifier.height(bylineGap))
 
                         Text(
                             text = content.byline,
                             maxLines = 1,
                             style = TextStyle(
-                                color = GlanceTheme.colors.primary,
+                                color = GlanceTheme.colors.onSurfaceVariant,
                                 fontSize = BYLINE_FONT_SIZE_SP.sp,
                             ),
                         )
@@ -249,6 +238,87 @@ private fun Shown(
             }
         }
     }
+}
+
+private fun quoteRemoteViews(
+    context: Context,
+    text: String,
+    color: ColorProvider,
+    maxLines: Int,
+): RemoteViews {
+    val views = RemoteViews(
+        context.packageName,
+        R.layout.widget_quote_text,
+    )
+
+    views.setTextViewText(
+        R.id.widget_quote_text,
+        text,
+    )
+
+    views.setInt(
+        R.id.widget_quote_text,
+        "setMaxLines",
+        maxLines,
+    )
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        views.setColorInt(
+            R.id.widget_quote_text,
+            "setTextColor",
+            color.getColor(context.withNightMode(isNight = false)).toArgb(),
+            color.getColor(context.withNightMode(isNight = true)).toArgb(),
+        )
+    } else {
+        views.setTextColor(
+            R.id.widget_quote_text,
+            color.getColor(context).toArgb(),
+        )
+    }
+
+    return views
+}
+
+private fun quoteMaxLines(
+    context: Context,
+    heightPx: Int,
+): Int {
+    val paint = TextPaint().apply {
+        typeface = Typeface.create(
+            Typeface.SERIF,
+            Typeface.ITALIC,
+        )
+        textSize = context.spToPx(sp = QUOTE_MIN_FONT_SIZE_SP)
+    }
+
+    val lineHeightPx = paint.fontMetricsInt.descent - paint.fontMetricsInt.ascent
+
+    return (heightPx / lineHeightPx.coerceAtLeast(1)).coerceAtLeast(1)
+}
+
+private fun bylineLineHeightPx(context: Context): Int {
+    val paint = TextPaint().apply {
+        textSize = context.spToPx(sp = BYLINE_FONT_SIZE_SP)
+    }
+
+    return paint.fontMetricsInt.bottom - paint.fontMetricsInt.top
+}
+
+private fun Context.spToPx(sp: Int): Float = TypedValue.applyDimension(
+    TypedValue.COMPLEX_UNIT_SP,
+    sp.toFloat(),
+    resources.displayMetrics,
+)
+
+private fun Context.pxToDp(px: Int): Dp = (px / resources.displayMetrics.density).dp
+
+private fun Context.withNightMode(isNight: Boolean): Context {
+    val configuration = Configuration(resources.configuration)
+    val nightFlag = if (isNight) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+
+    configuration.uiMode = (configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or nightFlag
+
+    return createConfigurationContext(configuration)
 }
 
 private fun cycleAction(

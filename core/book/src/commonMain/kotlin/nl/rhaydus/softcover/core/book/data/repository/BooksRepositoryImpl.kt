@@ -7,6 +7,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
@@ -15,6 +16,7 @@ import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
+import nl.rhaydus.softcover.core.book.data.mapper.toDatePeriod
 import nl.rhaydus.softcover.core.book.data.sync.UserBookCacheGate
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
@@ -28,6 +30,7 @@ import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
@@ -40,6 +43,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
 
+private const val RECENT_BOOKS_LIMIT = 10
 private const val UPCOMING_BOOKS_LIMIT = 10
 
 internal class BooksRepositoryImpl(
@@ -61,6 +65,8 @@ internal class BooksRepositoryImpl(
     private val inflightMutex = Mutex()
 
     private val trendingRefreshMutexes = TrendingPeriod.entries.associateWith { Mutex() }
+
+    private val recentRefreshMutexes = RecentWindow.entries.associateWith { Mutex() }
 
     private val upcomingRefreshMutexes = UpcomingWindow.entries.associateWith { Mutex() }
 
@@ -343,6 +349,45 @@ internal class BooksRepositoryImpl(
             replace = { rankedIds, books, now ->
                 booksLocalDataSource.replaceTrendingBooks(
                     period = period,
+                    requestedIds = rankedIds,
+                    books = books,
+                    fetchedAt = now,
+                )
+            },
+        )
+    }
+
+    override fun observeRecentBooks(window: RecentWindow): Flow<List<Book>> =
+        booksLocalDataSource.observeRecentBooks(window = window)
+
+    override fun observeRecentFetchedAt(window: RecentWindow): Flow<Instant?> =
+        booksLocalDataSource.observeRecentFetchedAt(window = window)
+
+    override suspend fun refreshRecentBooks(
+        window: RecentWindow,
+        maxAge: Duration,
+    ) = recentRefreshMutexes.getValue(window).withLock {
+        refreshRankedBooks(
+            maxAge = maxAge,
+            getFetchedAt = { booksLocalDataSource.getRecentFetchedAt(window = window) },
+            fetchIds = {
+                booksRemoteDataSource.fetchRecentBookIds(
+                    window = window,
+                    limit = RECENT_BOOKS_LIMIT,
+                )
+            },
+            idsToKeepOnEmptyResponse = {
+                val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+                val minDate = today.minus(window.toDatePeriod())
+
+                booksLocalDataSource
+                    .getRecentBooks(window = window)
+                    .filterNot { book -> book.releaseDate?.let { it <= minDate } == true }
+                    .map { it.id }
+            },
+            replace = { rankedIds, books, now ->
+                booksLocalDataSource.replaceRecentBooks(
+                    window = window,
                     requestedIds = rankedIds,
                     books = books,
                     fetchedAt = now,

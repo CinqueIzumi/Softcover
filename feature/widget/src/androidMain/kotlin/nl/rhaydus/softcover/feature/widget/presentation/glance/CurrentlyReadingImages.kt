@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageFormat
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
-import nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel
+import nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.render.BackdropImages
 import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressUris
 import nl.rhaydus.softcover.feature.widget.presentation.render.coverSource
@@ -22,9 +22,12 @@ internal class CurrentlyReadingImages(
     private val backdrops: BackdropImages,
     private val density: Float,
 ) {
-    suspend fun coverUri(book: Book): Uri? {
+    suspend fun coverUri(
+        book: Book,
+        coverHeightDp: Int,
+    ): Uri? {
         val source = book.coverSource() ?: return null
-        val sizePx = (COVER_HEIGHT_DP * density).roundToInt()
+        val sizePx = (coverHeightDp * density).roundToInt()
 
         return store.uriFor(
             format = WidgetImageFormat.Photo,
@@ -38,11 +41,10 @@ internal class CurrentlyReadingImages(
         }
     }
 
-    suspend fun artworkUris(book: Book): CurrentlyReadingWidgetUiModel.Artwork? = backdrops.artwork(
-        book = book,
-        coverHeightDp = COVER_HEIGHT_DP,
+    suspend fun artworkUris(book: Book): BookArtworkUiModel? = backdrops.artwork(
+        source = book.coverSource(),
     ) { backdrop, veil, veilLift, washPrimary, washTertiary ->
-        CurrentlyReadingWidgetUiModel.Artwork(
+        BookArtworkUiModel(
             backdrop = backdrop,
             veil = veil,
             veilLift = veilLift,

@@ -47,8 +47,10 @@ Notes on features that are leaves only for their *screens*:
   - **Refresh.** `WidgetRefresher` repaints every widget on debounced signals (theme, sign-in, the Reading
     and Want-to-Read shelves, lists, every trending period), and only while one is placed. A write to
     per-instance state reaches a live Glance session through its repository change flow, and an instance
-    with no session through `WidgetRepainter`. `WidgetMaintenanceWorker` runs hourly and at each midnight
-    (Daily picks roll over); `TrendingRefreshWorker` runs for the periods in use at the shortest placed
+    with no session through `WidgetRepainter`. Background repaints go through `BackgroundWidgetRenderer`, which
+    pushes models without a Glance session; `WidgetRepainter` serves interactive repaints.
+    `WidgetMaintenanceWorker` runs daily, plus a one-off repaint at the earliest Weekly Random pick expiry;
+    `TrendingRefreshWorker` runs for the periods in use at the shortest placed
     cadence, network-constrained. `QuoteRefreshWorker` refetches the quotes daily while a Quote widget is
     placed, and once on placement and on sign-in; the quotes also feed a repaint signal.
 

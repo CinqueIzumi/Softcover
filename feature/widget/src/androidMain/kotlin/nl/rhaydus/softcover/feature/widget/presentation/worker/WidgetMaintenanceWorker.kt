@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.widget.presentation.worker
 
 import android.content.Context
-import androidx.glance.appwidget.updateAll
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingCancellable
+import nl.rhaydus.softcover.feature.widget.presentation.glance.BackgroundWidgetRenderer
 import nl.rhaydus.softcover.feature.widget.presentation.glance.OwnedWidgets
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import org.koin.core.component.KoinComponent
@@ -19,15 +19,9 @@ internal class WidgetMaintenanceWorker(
     override suspend fun doWork(): Result {
         if (GlobalContext.getOrNull() == null) return Result.retry()
 
-        get<OwnedWidgets>().widgets.forEach { widget ->
-            runCatchingCancellable { widget.updateAll(applicationContext) }
-                .onFailure { error ->
-                    AppLog.e(
-                        error,
-                        "Maintenance update of a widget failed",
-                    )
-                }
-        }
+        val renderer = get<BackgroundWidgetRenderer>()
+
+        get<OwnedWidgets>().widgets.forEach { widget -> renderer.renderAll(widget) }
 
         runCatchingCancellable { get<WidgetImageStore>().prune() }
             .onFailure { error ->
@@ -42,6 +36,14 @@ internal class WidgetMaintenanceWorker(
                 AppLog.e(
                     error,
                     "Scheduling the midnight widget update failed",
+                )
+            }
+
+        runCatchingCancellable { get<WidgetMaintenanceScheduler>().scheduleNextPickExpiry() }
+            .onFailure { error ->
+                AppLog.e(
+                    error,
+                    "Scheduling the Random pick expiry widget update failed",
                 )
             }
 

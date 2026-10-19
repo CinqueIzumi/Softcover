@@ -15,4 +15,6 @@ data class Quote(
     /** The insert has not been confirmed by Hardcover yet. */
     val isPending: Boolean,
     val bookTitle: String? = null,
+    val editionTitle: String? = null,
+    val editionCoverUrl: String? = null,
 )

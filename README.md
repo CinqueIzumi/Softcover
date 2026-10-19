@@ -108,10 +108,10 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 - See the home-screen widgets you've placed on a **Widgets** page, and tune each one from there.
 
 ### Home-screen widgets (Android)
-- **Currently Reading** — your current book over a blurred cover backdrop, cycling through the shelf, with progress updates straight from the widget.
-- **Trending** — Hardcover's trending top 10 per period, or the 10 most-wanted books releasing in the next month, 3 months, 6 months or year.
-- **Random pick** — a book from your library to read next.
-- **Quote of the day** — one of your saved quotes, sized to fit the widget, with its book.
+- **Currently Reading** — your current book over a blurred cover backdrop, cycling through the shelf, with progress updates straight from the widget; laid out side by side when the widget is wide.
+- **Trending** — Hardcover's trending top 10 per period, the 10 most-wanted books releasing in the next month, 3 months, 6 months or year, or the books released in the past week, month, 3 months or 6 months.
+- **Random pick** — a book from your library to read next, laid out side by side when the widget is wide.
+- **Quote of the day** — one of your saved quotes, autosized to fit the widget, over the cover and title of the edition it came from.
 
 ### Onboarding
 - Connect your Hardcover account on first launch by entering your API token, after a short introductory walkthrough.

@@ -91,12 +91,16 @@ class QuoteRepositoryImplTest {
                 actionAt = actionAt,
                 position = null,
                 bookTitle = "Dune",
+                editionTitle = "Dune (Illustrated)",
+                editionCoverUrl = "https://example.com/cover.jpg",
             )
 
             // ----- Assert -----
             result shouldBe 12L
             saved.captured.actionAtEpochMillis shouldBe actionAt.toEpochMilliseconds()
             saved.captured.bookTitle shouldBe "Dune"
+            saved.captured.editionTitle shouldBe "Dune (Illustrated)"
+            saved.captured.editionCoverUrl shouldBe "https://example.com/cover.jpg"
 
             coVerifyOrder {
                 localDataSource.insertWithWrite(
@@ -130,6 +134,8 @@ class QuoteRepositoryImplTest {
                 actionAt = null,
                 position = null,
                 bookTitle = null,
+                editionTitle = null,
+                editionCoverUrl = null,
             )
 
             // ----- Assert -----

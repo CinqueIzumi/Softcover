@@ -55,7 +55,6 @@ class UnreleasedCoverOverlaysCollectorTest {
     private fun stubBook(
         id: Int,
         isUnreleased: Boolean = true,
-        effectiveReleaseDate: LocalDate? = RELEASE_DATE,
         releaseDate: LocalDate? = RELEASE_DATE,
     ): Book = mockk {
         every {
@@ -65,10 +64,6 @@ class UnreleasedCoverOverlaysCollectorTest {
         every {
             this@mockk.isUnreleased
         } returns isUnreleased
-
-        every {
-            this@mockk.effectiveReleaseDate
-        } returns effectiveReleaseDate
 
         every {
             this@mockk.releaseDate
@@ -126,7 +121,7 @@ class UnreleasedCoverOverlaysCollectorTest {
             // ----- Arrange -----
             val book = stubBook(
                 id = 1,
-                effectiveReleaseDate = null,
+                releaseDate = null,
             )
             stateFlow.value = ExploreScreenUiState(trendingBooks = persistentListOf(book))
             val collector = UnreleasedCoverOverlaysCollector()
@@ -193,41 +188,6 @@ class UnreleasedCoverOverlaysCollectorTest {
         }
 
         @Test
-        fun `featuredReleaseBadge uses the book-level releaseDate over the edition-derived date`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val bookDebut = LocalDate(
-                    2026,
-                    9,
-                    15,
-                )
-                val editionDate = LocalDate(
-                    2026,
-                    12,
-                    8,
-                )
-                val featured = stubBook(
-                    id = 6,
-                    effectiveReleaseDate = editionDate,
-                    releaseDate = bookDebut,
-                )
-                stateFlow.value = ExploreScreenUiState(featuredUpcomingRelease = featured)
-                val collector = UnreleasedCoverOverlaysCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.featuredReleaseBadge shouldBe bookDebut.toFeaturedUnreleasedBadgeUiModel()
-                job.cancel()
-            }
-
-        @Test
         fun `featuredReleaseBadge does not gate on isUnreleased`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val featured = stubBook(
@@ -274,7 +234,6 @@ class UnreleasedCoverOverlaysCollectorTest {
             // ----- Arrange -----
             val featured = stubBook(
                 id = 8,
-                effectiveReleaseDate = RELEASE_DATE,
                 releaseDate = null,
             )
             stateFlow.value = ExploreScreenUiState(featuredUpcomingRelease = featured)

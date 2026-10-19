@@ -7,11 +7,14 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecentBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUpcomingBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecentBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshUpcomingBooksUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
@@ -24,11 +27,14 @@ class TrendingFeedUseCasesTest {
     @Nested
     inner class ObserveTrendingFeed {
         private val trendingBooks = listOf(mockk<Book>())
+        private val recentBooks = listOf(mockk<Book>(), mockk<Book>(), mockk<Book>())
         private val upcomingBooks = listOf(mockk<Book>(), mockk<Book>())
         private val observeTrendingBooks = mockk<ObserveTrendingBooksUseCase>()
+        private val observeRecentBooks = mockk<ObserveRecentBooksUseCase>()
         private val observeUpcomingBooks = mockk<ObserveUpcomingBooksUseCase>()
         private val useCase = ObserveTrendingFeedUseCase(
             observeTrendingBooks = observeTrendingBooks,
+            observeRecentBooks = observeRecentBooks,
             observeUpcomingBooks = observeUpcomingBooks,
         )
 
@@ -44,6 +50,20 @@ class TrendingFeedUseCasesTest {
 
             // ----- Assert -----
             result shouldBe trendingBooks
+        }
+
+        @Test
+        fun `a recent feed lists the books of its window`() = runTest {
+            // ----- Arrange -----
+            every {
+                observeRecentBooks(window = RecentWindow.ThreeMonths)
+            } returns flowOf(recentBooks)
+
+            // ----- Act -----
+            val result = useCase(feed = TrendingFeed.Recent(window = RecentWindow.ThreeMonths)).first()
+
+            // ----- Assert -----
+            result shouldBe recentBooks
         }
 
         @Test
@@ -64,9 +84,11 @@ class TrendingFeedUseCasesTest {
     @Nested
     inner class RefreshTrendingFeed {
         private val refreshTrendingBooks = mockk<RefreshTrendingBooksUseCase>()
+        private val refreshRecentBooks = mockk<RefreshRecentBooksUseCase>()
         private val refreshUpcomingBooks = mockk<RefreshUpcomingBooksUseCase>()
         private val useCase = RefreshTrendingFeedUseCase(
             refreshTrendingBooks = refreshTrendingBooks,
+            refreshRecentBooks = refreshRecentBooks,
             refreshUpcomingBooks = refreshUpcomingBooks,
             fetchTracker = TrendingFetchTracker(),
         )
@@ -85,6 +107,27 @@ class TrendingFeedUseCasesTest {
             // ----- Act -----
             val result = useCase(
                 feed = TrendingFeed.Trending(period = TrendingPeriod.Week),
+                maxAge = 3.hours,
+            )
+
+            // ----- Assert -----
+            result shouldBe failure
+        }
+
+        @Test
+        fun `a recent feed refreshes its window and reports that outcome`() = runTest {
+            // ----- Arrange -----
+            val failure = Result.failure<Unit>(IllegalStateException("down"))
+            coEvery {
+                refreshRecentBooks(
+                    window = RecentWindow.Week,
+                    maxAge = 3.hours,
+                )
+            } returns failure
+
+            // ----- Act -----
+            val result = useCase(
+                feed = TrendingFeed.Recent(window = RecentWindow.Week),
                 maxAge = 3.hours,
             )
 

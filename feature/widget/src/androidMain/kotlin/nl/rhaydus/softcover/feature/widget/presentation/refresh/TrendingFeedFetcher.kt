@@ -9,8 +9,8 @@ import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
 import nl.rhaydus.softcover.feature.widget.domain.usecase.RefreshTrendingFeedUseCase
+import nl.rhaydus.softcover.feature.widget.presentation.glance.BackgroundWidgetRenderer
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
-import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
 import kotlin.time.Duration
 
 /**
@@ -20,7 +20,7 @@ import kotlin.time.Duration
  */
 internal class TrendingFeedFetcher(
     private val widget: TrendingWidget,
-    private val repainter: WidgetRepainter,
+    private val renderer: BackgroundWidgetRenderer,
     private val applicationScope: ApplicationScope,
     private val refreshTrendingFeed: RefreshTrendingFeedUseCase,
 ) {
@@ -45,7 +45,7 @@ internal class TrendingFeedFetcher(
                 }.awaitAll()
             }
 
-            runCatchingCancellable { repainter.repaintAll(widget) }
+            runCatchingCancellable { renderer.renderAll(widget) }
                 .onFailure { error ->
                     AppLog.e(
                         error,

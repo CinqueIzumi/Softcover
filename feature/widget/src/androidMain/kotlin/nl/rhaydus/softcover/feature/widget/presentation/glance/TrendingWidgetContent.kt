@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
-import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
@@ -40,7 +39,6 @@ import androidx.glance.semantics.semantics
 import androidx.glance.text.FontFamily
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
-import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.CornerRadius
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -49,10 +47,15 @@ import nl.rhaydus.softcover.feature.widget.domain.util.TRENDING_PAGE_SIZE
 import nl.rhaydus.softcover.feature.widget.presentation.callback.TrendingPageCallback
 import nl.rhaydus.softcover.feature.widget.presentation.callback.TrendingRetryCallback
 import nl.rhaydus.softcover.feature.widget.presentation.component.RefreshButton
+import nl.rhaydus.softcover.feature.widget.presentation.component.WidgetMessage
+import nl.rhaydus.softcover.feature.widget.presentation.component.widgetCornerRadius
 import nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
 import nl.rhaydus.softcover.feature.widget.presentation.util.STACKED_MIN_HEIGHT_DP
+import nl.rhaydus.softcover.feature.widget.presentation.util.TRENDING_AUTHOR_SP
+import nl.rhaydus.softcover.feature.widget.presentation.util.TRENDING_TITLE_MAX_LINES
+import nl.rhaydus.softcover.feature.widget.presentation.util.TRENDING_TITLE_SP
 import nl.rhaydus.softcover.feature.widget.presentation.util.trendingCoverHeightDp
 
 @Composable
@@ -120,12 +123,6 @@ internal fun TrendingWidgetContent(
     }
 }
 
-private fun widgetCornerRadius(): GlanceModifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-    GlanceModifier.cornerRadius(android.R.dimen.system_app_widget_background_radius)
-} else {
-    GlanceModifier
-}
-
 @Composable
 private fun Switching(
     eyebrow: String,
@@ -164,55 +161,22 @@ private fun Message(
     openSettings: Action,
     onRefresh: Action? = null,
 ) {
-    Column(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .padding(Spacing.xxs),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        if (eyebrow != null) {
-            Header(
-                eyebrow = eyebrow,
-                openExplore = openExplore,
-                openSettings = openSettings,
-            )
-        }
-
-        Column(
-            modifier = GlanceModifier
-                .fillMaxWidth()
-                .defaultWeight()
-                .padding(Spacing.xs),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = headline,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onBackground,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif,
-                    textAlign = TextAlign.Center,
-                ),
-            )
-
-            if (subline != null) {
-                Spacer(modifier = GlanceModifier.height(Spacing.xxs))
-
-                Text(
-                    text = subline,
-                    style = TextStyle(
-                        color = GlanceTheme.colors.onSurfaceVariant,
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                    ),
+    WidgetMessage(
+        headline = headline,
+        subline = subline,
+        header = {
+            if (eyebrow != null) {
+                Header(
+                    eyebrow = eyebrow,
+                    openExplore = openExplore,
+                    openSettings = openSettings,
                 )
             }
-
+        },
+        footer = {
             if (onRefresh != null) RefreshButton(onClick = onRefresh)
-        }
-    }
+        },
+    )
 }
 
 @Composable
@@ -231,6 +195,7 @@ private fun Ranked(
         widgetHeightDp = size.height.value.toInt(),
         widgetWidthDp = size.width.value.toInt(),
         showsPageRow = content.showsArrows,
+        fontScale = LocalContext.current.resources.configuration.fontScale,
     ).dp
 
     Column(
@@ -361,10 +326,10 @@ private fun Caption(
     Column(modifier = modifier) {
         Text(
             text = item.title,
-            maxLines = 2,
+            maxLines = TRENDING_TITLE_MAX_LINES,
             style = TextStyle(
                 color = GlanceTheme.colors.onBackground,
-                fontSize = 12.sp,
+                fontSize = TRENDING_TITLE_SP.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif,
             ),
@@ -375,7 +340,7 @@ private fun Caption(
             maxLines = 1,
             style = TextStyle(
                 color = GlanceTheme.colors.onSurfaceVariant,
-                fontSize = 10.sp,
+                fontSize = TRENDING_AUTHOR_SP.sp,
             ),
         )
     }

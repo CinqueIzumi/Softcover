@@ -20,8 +20,10 @@ introduce any region.
 
 ### Editorial quote
 
-- Oversized low-alpha `quoteGlyph` (`onSurfaceVariant`) behind an italic `headlineMedium` pull quote, with a
-  `primary` byline beneath. Surfaces notes, reviews or a featured passage.
+- Featured form: an oversized low-alpha `quoteGlyph` (`onSurfaceVariant`) behind an italic `headlineMedium`
+  pull quote, with a `primary` byline beneath. Surfaces a review or a featured passage.
+- List form (`QuoteCard`, the reader's saved quotes): the editorial `bodyLarge` passage (regular italic) under a
+  48sp mark.
 - Its empty-state form is `EmptyState`: an italic encouragement headline in the quote's place, no byline.
 
 ### Standfirst

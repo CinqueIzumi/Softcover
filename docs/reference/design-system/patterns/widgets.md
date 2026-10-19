@@ -21,15 +21,25 @@
   by 180dp, Crop-scaled to every size) or, with no cover, a `primary` and `tertiary` gradient wash; then the
   `veil` and, in light only, the `veilLift`, both tinted `surfaceContainerHigh`. Gradients are white alpha
   masks tinted at draw time, so a palette or day/night switch needs no re-render.
+- Widgets title a book with `Book.displayTitle`: the reader's own edition title, else the book title.
 - `ReservedLinesTitle`: bold 14sp serif centred, up to two lines, holding the height of `reservedLines`
   lines (an invisible text holds it, Glance has no `minLines`).
-- Portrait stacked layout, shared by Currently Reading and Random pick, chosen by the available height
-  (`PORTRAIT_HEIGHTS_DP` 110, 150, 180): eyebrow, cover, title, author, one centred foot row. At 110dp only
-  the cover and the foot row (plus Currently Reading's eyebrow); from 150dp the eyebrow, the title
-  reserving one line and the author; from 180dp the title reserves two lines.
+- `SingleBookWidgetLayout` is the book state of Currently Reading and Random pick; each widget passes only its
+  eyebrow and foot row. Both run on `SizeMode.Exact`, so the layout sees the widget's real size, and picks:
+  - **Stacked** when the widget is not wider than tall: eyebrow, cover (inset `Spacing.xs` each side), title,
+    author, one centred foot row. Under 150dp only the cover and the foot row (plus Currently Reading's
+    eyebrow); from 150dp the eyebrow, the title reserving one line and the author; from 180dp the title
+    reserves two lines.
+  - **Side by side** when wider than tall: the 2:3 cover fills the height at the start, inset `Spacing.xs` from the
+    top, bottom and start edges, and the text column
+    beside it holds the eyebrow, the title (start-aligned, as many of up to three lines as fit) and author
+    centred in the space left, and the foot row. The author drops when not even one title line fits beside it.
+- Message states (loading, signed out, empty) share `WidgetMessage`: a centred serif headline and sans
+  subline.
 - The wavy progress bar is a bitmap pair (`WavyProgressBitmaps`: track, indicator) from a pure
-  `CanvasDrawScope` renderer matching the app's `ProgressBar`, 12dp tall, pre-rendered per width bucket
-  (`progressBarWidthDp`), tinted `secondaryContainer` and `primary`.
+  `CanvasDrawScope` renderer matching the app's `ProgressBar`, 12dp tall, pre-rendered at the bar width
+  (`progressBarWidthDp`) of every size the launcher reports for the instance (`reportedWidgetSizes`, matching
+  what Glance composes) and re-rendered when a resize changes them, tinted `secondaryContainer` and `primary`.
 - Hit boxes grow in width, not height, where height would shrink the covers: Trending's header and page
   row stay 28dp tall with 40dp-wide tune and page targets; the shuffle button is 48dp; the Random pick
   and Currently Reading eyebrows are 28dp, with 40dp-wide cycle arrows (`CycleEyebrow`) on Currently Reading's
@@ -37,9 +47,8 @@
 
 ### Currently Reading widget
 
-- Portrait, min 110 x 180dp, resizable to 110 x 110dp; responsive buckets are widths 110, 180, 250, 320
-  and 390dp (one per launcher cell count) by the portrait heights: 15 sizes, under Android's cap of 16 per
-  responsive widget, so adding a width or height needs another removed. Uses the portrait stacked layout.
+- Min 110 x 180dp, resizable to 110 x 110dp and to any width. Uses `SingleBookWidgetLayout`. Covers render
+  at the tallest cover slot of the reported sizes, again only when that height changes.
 - Anatomy: the same skeleton as Random pick. The eyebrow reads `READING · n/m` (`READING` with one book)
   and, with more than one book, holds ‹ › glyphs at its ends that cycle the shelf (most recently updated
   first, wraps); the choice is kept by book id per instance and falls back to the first. The eyebrow shows
@@ -52,9 +61,8 @@
 
 ### Random pick widget
 
-- Same portrait look and backdrop as Currently Reading (min 110 x 180dp, resizable to 110dp tall); buckets
-  110dp wide by the portrait heights, with the portrait stacked layout and the shuffle button as its foot
-  row.
+- Same look, backdrop, sizing and `SingleBookWidgetLayout` as Currently Reading (min 110 x 180dp, resizable
+  to 110dp tall), with the shuffle button as its foot row. Its eyebrow is left out under 150dp.
 - Eyebrow `WHAT NEXT? · <SOURCE>` (Want to read, Owned, or the list's name), tapping it opens the settings
   activity. The 48dp shuffle button picks again (`ShuffleCallback`).
 - Taps: a picked book opens its detail (`OpenBook(bookId)`); the empty and signed-out states open the Reading
@@ -66,12 +74,12 @@
 
 ### Trending widget
 
-- Landscape, min 250 x 110dp, resizable; buckets 250 and 320dp wide by 110, 180, 250 and 320dp tall, so it grows with the widget. Two books per page
+- Landscape, min 250 x 110dp, resizable, on `SizeMode.Exact`, so the two cells span its real width. Two books per page
   of the period's top ten, with `1/5` and 40dp-wide page chevrons when there is more than one page.
 - Anatomy: a 28dp header (eyebrow, then a 40dp-wide tune target), two book cells, the page row. Under 150dp tall a
   cell puts rank and caption beside the cover; from 150dp it stacks them under it. The cover height fills
   what the header, caption and page row leave, capped so a 2:3 cover fits its cell's width
-  (`trendingCoverHeightDp`). Covers load once at the largest drawn height and every size reuses that bitmap.
+  (`trendingCoverHeightDp`). Covers render at the tallest reported size and re-render on resize.
 - Eyebrow per period: TRENDING THIS WEEK, THIS MONTH, PAST 3 MONTHS, PAST YEAR, ALL TIME.
 - Taps: a cover cell opens the book (`OpenBook`); the eyebrow opens the Explore tab; the tune glyph opens the
   settings activity; the rest opens the Reading tab. Empty: **Nothing is trending yet** / "Check back after the
@@ -82,10 +90,14 @@
 ### Quote of the day widget
 
 - Landscape, min 250 x 110dp, resizable; buckets 250, 320 and 390dp wide by 110, 180 and 250dp tall. Paper
-  `background`, no backdrop; a low-alpha `quoteGlyph` opening mark sits behind the text.
-- Anatomy: a `CycleEyebrow` (`QUOTE OF THE DAY`, or `QUOTES · n/m` once the reader steps off the first quote), then the quote
-  in italic serif and a 12sp `primary` byline "Book title · position". Quote size and line cap follow the
-  height: 14sp by 2 lines, 16sp by 5, 18sp by 7.
+  `background` under the shared `Backdrop`, blurred from the quote's own edition cover (stored on the quote,
+  so a book outside the library still has one) or the washes without it; a low-alpha `quoteGlyph` opening
+  mark, a vector drawable, sits left of the quote, top-aligned with it.
+- Anatomy: a `CycleEyebrow` (`QUOTE OF THE DAY`, or `QUOTES · n/m` once the reader steps off the first
+  quote), then the quote in italic serif `onSurface` and a 12sp `onSurfaceVariant` byline "Edition title ·
+  position" (book title
+  when the quote has no edition title). The quote autosizes from 18sp down to 12sp to fit the space above the
+  byline.
 - A hash of each quote's content and the date orders the reader's quotes, so the first changes at midnight.
   Arrows (only with more than one quote) walk that order and wrap; the pick is kept per instance with its day
   and lapses at midnight.

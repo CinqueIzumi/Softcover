@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.widget.presentation.refresh
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.updateAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -32,6 +31,7 @@ import nl.rhaydus.softcover.feature.widget.domain.model.QuoteFetchTracker
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFetchTracker
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingFeedUseCase
+import nl.rhaydus.softcover.feature.widget.presentation.glance.BackgroundWidgetRenderer
 import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidget
@@ -47,6 +47,7 @@ import kotlin.time.Duration.Companion.seconds
  */
 internal class WidgetRefresher(
     private val context: Context,
+    private val renderer: BackgroundWidgetRenderer,
     private val applicationScope: ApplicationScope,
     private val widgets: List<GlanceAppWidget>,
     private val getThemeConfiguration: GetThemeConfigurationUseCase,
@@ -236,6 +237,7 @@ internal class WidgetRefresher(
      * while emitting. The first emission is the current value, which the widgets already show.
      */
     private fun signal(source: () -> Flow<*>): Flow<Unit> = flow { emitAll(source()) }
+        .distinctUntilChanged()
         .drop(1)
         .map { }
         .catch { error ->
@@ -247,13 +249,7 @@ internal class WidgetRefresher(
 
     private suspend fun refresh(targets: List<GlanceAppWidget>) {
         targets.forEach { widget ->
-            runCatchingCancellable { widget.updateAll(context) }
-                .onFailure { error ->
-                    AppLog.e(
-                        error,
-                        "Updating widget failed",
-                    )
-                }
+            renderer.renderAll(widget)
         }
     }
 

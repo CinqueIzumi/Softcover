@@ -17,7 +17,8 @@ internal data class CurrentlyReadingWidgetUiModel(
 
         /**
          * [eyebrow] is "READING · 2/4", or "READING" while the shelf holds one book, which also hides the arrows.
-         * While the images are still being stored [cover] and [artwork] are `null` and [progress] is empty.
+         * [imagesPending] is `true` until the image work has finished; meanwhile [cover] and [artwork] are `null` and
+         * [progress] is empty.
          */
         data class Reading(
             val title: String,
@@ -25,20 +26,12 @@ internal data class CurrentlyReadingWidgetUiModel(
             val bookId: Int,
             val progressLabel: String,
             val cover: Uri?,
-            /** One render per bar width in dp, keyed by [progressBarWidthDp] of each responsive size bucket. */
+            /** One render per bar width in dp, keyed by [progressBarWidthDp] of each size the launcher reports. */
             val progress: Map<Int, WavyProgressUris>,
             val eyebrow: String,
             val canCycle: Boolean,
-            val artwork: Artwork?,
+            val artwork: BookArtworkUiModel?,
+            val imagesPending: Boolean,
         ) : Content
     }
-
-    /** [backdrop] is `null` while the book has no cover. */
-    data class Artwork(
-        val backdrop: Uri?,
-        val veil: Uri,
-        val veilLift: Uri,
-        val washPrimary: Uri,
-        val washTertiary: Uri,
-    )
 }
