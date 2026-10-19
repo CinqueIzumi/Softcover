@@ -2,7 +2,7 @@
 
 What we're building next for [Softcover](https://github.com/CinqueIzumi/Softcover), grouped by the version it's planned to land in. This is the public view of our plan.
 
-**Current release: 3.2.2.** Softcover runs on Android, iPhone, iPad and desktop. 3.2.2 lets the Trending widget show the most-wanted books coming out soon, and has every widget ready the moment you place it, on top of 3.2.0's home-screen widgets, synced quotes and a record of every read-through.
+**Current release: 3.2.3.** Softcover runs on Android, iPhone, iPad and desktop. 3.2.3 lets the Trending widget show what just came out as well as what's coming soon, and has every widget make full use of the space you give it, on top of 3.2.0's home-screen widgets, synced quotes and a record of every read-through.
 
 A few honest caveats:
 - **These are plans, not promises.** Versions are listed in the order we intend to ship them, but order can shift and some items may move, merge, or change shape.

@@ -2,6 +2,20 @@
 
 What changed in each release of Softcover, newest first.
 
+## 3.2.3: Fresh off the press
+
+*2026-10-19*
+
+Trending now looks back as well as ahead, and every widget makes better use of the space you give it.
+
+- Trending can show what just came out: books released in the past week, month, 3 months or 6 months
+- A new edition of an older book is badged with that edition's release, and its book page says when the book was first published
+- Quote of the day sits over the cover and title of the edition the quote came from, with text sized to fit
+- Currently Reading and Random pick lay out side by side when the widget is wide
+- Trending's covers and cells match the widget's exact size, with room for a two-line title and the author
+- Saved quotes read in regular editorial body text under a smaller quotation mark
+- Widgets refresh in the background more reliably
+
 ## 3.2.2: What's coming next
 
 *2026-10-18*
