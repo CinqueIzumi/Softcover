@@ -100,7 +100,8 @@ internal class TrendingWidgetModelSource(
             coverHeightDp = options
                 .map { bundle ->
                     trendingCoverHeightDp(
-                        bundle.reportedWidgetSizes { context.providerMinSize(appWidgetId) },
+                        sizes = bundle.reportedWidgetSizes { context.providerMinSize(appWidgetId) },
+                        fontScale = context.resources.configuration.fontScale,
                     )
                 }
                 .distinctUntilChanged(),

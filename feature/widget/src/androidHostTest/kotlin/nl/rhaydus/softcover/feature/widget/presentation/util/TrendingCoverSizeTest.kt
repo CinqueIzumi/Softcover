@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.widget.presentation.util
 
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -20,6 +21,7 @@ class TrendingCoverSizeTest {
                 widgetHeightDp = widgetHeightDp,
                 widgetWidthDp = widgetWidthDp,
                 showsPageRow = false,
+                fontScale = 1f,
             )
 
             // ----- Assert -----
@@ -37,6 +39,7 @@ class TrendingCoverSizeTest {
                 widgetHeightDp = widgetHeightDp,
                 widgetWidthDp = widgetWidthDp,
                 showsPageRow = false,
+                fontScale = 1f,
             )
 
             // ----- Assert -----
@@ -54,10 +57,59 @@ class TrendingCoverSizeTest {
                 widgetHeightDp = widgetHeightDp,
                 widgetWidthDp = widgetWidthDp,
                 showsPageRow = true,
+                fontScale = 1f,
             )
 
             // ----- Assert -----
             result shouldBe 0
+        }
+
+        @Test
+        fun `a larger font scale gives a stacked widget a shorter cover`() {
+            // ----- Arrange -----
+            val widgetHeightDp = 300
+            val widgetWidthDp = 800
+
+            // ----- Act -----
+            val atDefaultScale = trendingCoverHeightDp(
+                widgetHeightDp = widgetHeightDp,
+                widgetWidthDp = widgetWidthDp,
+                showsPageRow = false,
+                fontScale = 1f,
+            )
+            val atLargerScale = trendingCoverHeightDp(
+                widgetHeightDp = widgetHeightDp,
+                widgetWidthDp = widgetWidthDp,
+                showsPageRow = false,
+                fontScale = 1.3f,
+            )
+
+            // ----- Assert -----
+            atLargerScale shouldBeLessThan atDefaultScale
+        }
+
+        @Test
+        fun `font scale does not change the cover of a side by side widget`() {
+            // ----- Arrange -----
+            val widgetHeightDp = 120
+            val widgetWidthDp = 400
+
+            // ----- Act -----
+            val atDefaultScale = trendingCoverHeightDp(
+                widgetHeightDp = widgetHeightDp,
+                widgetWidthDp = widgetWidthDp,
+                showsPageRow = false,
+                fontScale = 1f,
+            )
+            val atLargerScale = trendingCoverHeightDp(
+                widgetHeightDp = widgetHeightDp,
+                widgetWidthDp = widgetWidthDp,
+                showsPageRow = false,
+                fontScale = 1.3f,
+            )
+
+            // ----- Assert -----
+            atLargerScale shouldBe atDefaultScale
         }
     }
 
@@ -78,13 +130,17 @@ class TrendingCoverSizeTest {
             )
 
             // ----- Act -----
-            val result = trendingCoverHeightDp(sizes)
+            val result = trendingCoverHeightDp(
+                sizes = sizes,
+                fontScale = 1f,
+            )
 
             // ----- Assert -----
             result shouldBe trendingCoverHeightDp(
                 widgetHeightDp = 200,
                 widgetWidthDp = 400,
                 showsPageRow = false,
+                fontScale = 1f,
             )
         }
 
@@ -94,7 +150,10 @@ class TrendingCoverSizeTest {
             val sizes = emptyList<DpSize>()
 
             // ----- Act -----
-            val result = trendingCoverHeightDp(sizes)
+            val result = trendingCoverHeightDp(
+                sizes = sizes,
+                fontScale = 1f,
+            )
 
             // ----- Assert -----
             result shouldBe 1

@@ -53,6 +53,9 @@ import nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiMo
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
 import nl.rhaydus.softcover.feature.widget.presentation.util.STACKED_MIN_HEIGHT_DP
+import nl.rhaydus.softcover.feature.widget.presentation.util.TRENDING_AUTHOR_SP
+import nl.rhaydus.softcover.feature.widget.presentation.util.TRENDING_TITLE_MAX_LINES
+import nl.rhaydus.softcover.feature.widget.presentation.util.TRENDING_TITLE_SP
 import nl.rhaydus.softcover.feature.widget.presentation.util.trendingCoverHeightDp
 
 @Composable
@@ -192,6 +195,7 @@ private fun Ranked(
         widgetHeightDp = size.height.value.toInt(),
         widgetWidthDp = size.width.value.toInt(),
         showsPageRow = content.showsArrows,
+        fontScale = LocalContext.current.resources.configuration.fontScale,
     ).dp
 
     Column(
@@ -322,10 +326,10 @@ private fun Caption(
     Column(modifier = modifier) {
         Text(
             text = item.title,
-            maxLines = 2,
+            maxLines = TRENDING_TITLE_MAX_LINES,
             style = TextStyle(
                 color = GlanceTheme.colors.onBackground,
-                fontSize = 12.sp,
+                fontSize = TRENDING_TITLE_SP.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif,
             ),
@@ -336,7 +340,7 @@ private fun Caption(
             maxLines = 1,
             style = TextStyle(
                 color = GlanceTheme.colors.onSurfaceVariant,
-                fontSize = 10.sp,
+                fontSize = TRENDING_AUTHOR_SP.sp,
             ),
         )
     }
