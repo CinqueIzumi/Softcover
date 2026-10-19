@@ -241,7 +241,7 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.sectio
     - runAction: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.GeneralBookInfoSection(heroEdition: nl.rhaydus.softcover.feature.book_detail.presentation.state.HeroEditionUiModel?, heroCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, backdropCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, title: kotlin.String?, titleTransitionKey: nl.rhaydus.softcover.core.component.transition.BookTransitionKey?, ratingTransitionKey: nl.rhaydus.softcover.core.component.transition.BookTransitionKey?, seriesText: kotlin.String?, rating: kotlin.Double?, releaseYear: kotlin.Int?, unreleasedBadge: nl.rhaydus.softcover.core.component.badge.BadgeUiModel?, isLoading: kotlin.Boolean, isExpired: kotlin.Boolean, ownedCoverBadge: nl.rhaydus.softcover.core.component.badge.BadgeUiModel?, onCoverClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.GeneralBookInfoSection(heroEdition: nl.rhaydus.softcover.feature.book_detail.presentation.state.HeroEditionUiModel?, heroCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, backdropCover: nl.rhaydus.softcover.core.component.cover.CoverUiModel?, title: kotlin.String?, titleTransitionKey: nl.rhaydus.softcover.core.component.transition.BookTransitionKey?, ratingTransitionKey: nl.rhaydus.softcover.core.component.transition.BookTransitionKey?, seriesText: kotlin.String?, rating: kotlin.Double?, releaseYear: kotlin.Int?, unreleasedBadge: nl.rhaydus.softcover.core.component.badge.BadgeUiModel?, releaseCaption: kotlin.String?, isLoading: kotlin.Boolean, isExpired: kotlin.Boolean, ownedCoverBadge: nl.rhaydus.softcover.core.component.badge.BadgeUiModel?, onCoverClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -255,6 +255,7 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.sectio
     - rating: STABLE (class with no mutable properties)
     - releaseYear: STABLE (class with no mutable properties)
     - unreleasedBadge: STABLE (marked @Stable or @Immutable)
+    - releaseCaption: STABLE (class with no mutable properties)
     - isLoading: STABLE (primitive type)
     - isExpired: STABLE (primitive type)
     - ownedCoverBadge: STABLE (marked @Stable or @Immutable)

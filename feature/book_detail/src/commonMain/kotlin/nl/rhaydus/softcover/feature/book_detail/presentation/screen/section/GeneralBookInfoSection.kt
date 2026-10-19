@@ -72,6 +72,7 @@ internal fun GeneralBookInfoSection(
     rating: Double?,
     releaseYear: Int?,
     unreleasedBadge: BadgeUiModel?,
+    releaseCaption: String?,
     isLoading: Boolean,
     isExpired: Boolean,
     ownedCoverBadge: BadgeUiModel?,
@@ -252,6 +253,18 @@ internal fun GeneralBookInfoSection(
                     Spacer(modifier = Modifier.height(Spacing.xs))
 
                     Badge(model = unreleasedBadge)
+
+                    if (releaseCaption != null) {
+                        Spacer(modifier = Modifier.height(Spacing.xxs))
+
+                        SoftcoverText(
+                            text = releaseCaption,
+                            color = Color.White.copy(alpha = textSecondaryAlpha),
+                            style = MaterialTheme.editorialTypography.bodySmall.copy(
+                                shadow = secondaryShadow,
+                            ),
+                        )
+                    }
                 }
 
                 val isAudiobook = heroEdition?.isAudiobook == true

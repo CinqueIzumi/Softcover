@@ -36,12 +36,9 @@ data class Book(
     val isPaused: Boolean
         get() = status == BookStatus.Paused
 
-    val effectiveReleaseDate: LocalDate?
-        get() = currentEdition?.releaseDate ?: defaultEdition?.releaseDate ?: releaseDate
-
     val isUnreleased: Boolean
         get() {
-            val release = effectiveReleaseDate ?: return false
+            val release = releaseDate ?: return false
 
             return release > Clock.System.todayIn(TimeZone.currentSystemDefault())
         }

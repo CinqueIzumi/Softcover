@@ -39,6 +39,7 @@ internal fun BookHero(
             seriesText = state.heroSeriesText,
             releaseYear = state.heroReleaseYear,
             unreleasedBadge = state.unreleasedBadge,
+            releaseCaption = state.releaseCaption,
             ownedCoverBadge = state.ownedCoverBadge,
             onCoverClick = onCoverClick,
         )

@@ -175,6 +175,8 @@ internal data class BookDetailUiState(
 
     val unreleasedBadge: BadgeUiModel? = null,
 
+    val releaseCaption: String? = null,
+
     /** The "Find it" pills, mapped by `ExternalLinksCollector` off [displayedEdition]; null without an ISBN. */
     val externalLinks: ImmutableList<PillButtonUiModel>? = null,
 
