@@ -42,6 +42,12 @@ internal class RandomPickRepositoryImpl(private val context: Context) : RandomPi
         glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
     ).toRandomPickSettings()
 
+    override suspend fun getState(appWidgetId: Int): RandomPickState = getAppWidgetState(
+        context = context,
+        definition = PreferencesGlanceStateDefinition,
+        glanceId = GlanceAppWidgetManager(context).getGlanceIdBy(appWidgetId),
+    ).toRandomPickState()
+
     override suspend fun saveSettings(
         appWidgetId: Int,
         settings: RandomPickSettings,

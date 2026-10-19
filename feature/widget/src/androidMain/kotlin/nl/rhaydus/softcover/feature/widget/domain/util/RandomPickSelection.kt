@@ -6,11 +6,14 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickCadence
+import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettings
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSource
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickState
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Instant
+
+private val WEEKLY_PICK_LIFETIME = 7.days
 
 internal fun isSourceAvailable(
     source: RandomPickSource,
@@ -97,7 +100,18 @@ private fun isFresh(
 
     return when (cadence) {
         RandomPickCadence.Daily -> pickedAt.toLocalDateTime(timeZone).date == now.toLocalDateTime(timeZone).date
-        RandomPickCadence.Weekly -> now - pickedAt < 7.days
+        RandomPickCadence.Weekly -> now - pickedAt < WEEKLY_PICK_LIFETIME
         RandomPickCadence.OnShuffleOnly -> true
     }
+}
+
+internal fun weeklyPickExpiry(
+    settings: RandomPickSettings,
+    state: RandomPickState,
+): Instant? {
+    if (settings.cadence != RandomPickCadence.Weekly) return null
+
+    val pickedAt = state.pickedAtMillis?.let { Instant.fromEpochMilliseconds(it) } ?: return null
+
+    return pickedAt + WEEKLY_PICK_LIFETIME
 }

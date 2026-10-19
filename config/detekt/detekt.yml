@@ -112,6 +112,14 @@ style:
     methods:
       - value: 'androidx.glance.ImageProvider(android.graphics.Bitmap)'
         reason: 'A bitmap in a widget update is multiplied per responsive size. Store it with WidgetImageStore.uriFor and use ImageProvider(uri).'
+      - value: 'androidx.glance.action.action(kotlin.String, kotlin.Function0)'
+        reason: 'A lambda action needs a live Glance session and breaks in background-rendered RemoteViews. Use actionRunCallback or actionStartActivity.'
+      - value: 'androidx.glance.action.clickable(androidx.glance.GlanceModifier, kotlin.Function0)'
+        reason: 'A lambda action needs a live Glance session and breaks in background-rendered RemoteViews. Use actionRunCallback or actionStartActivity.'
+      - value: 'androidx.glance.action.clickable(androidx.glance.GlanceModifier, kotlin.Int, kotlin.Function0)'
+        reason: 'A lambda action needs a live Glance session and breaks in background-rendered RemoteViews. Use actionRunCallback or actionStartActivity.'
+      - value: 'androidx.glance.action.clickable(androidx.glance.GlanceModifier, kotlin.String, kotlin.Int, kotlin.Function0)'
+        reason: 'A lambda action needs a live Glance session and breaks in background-rendered RemoteViews. Use actionRunCallback or actionStartActivity.'
   UnusedPrivateMember:
     # The shared baseline also exempts `Composable`. Softcover deliberately does not: an unused private
     # @Composable is dead UI code and should be caught. Only previews are exempt (they are entry points).

@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.feature.widget.domain.repository.TrendingRepository
 import nl.rhaydus.softcover.feature.widget.domain.usecase.AdvanceTrendingPageUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.CycleQuoteUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.CycleSelectedBookUseCase
+import nl.rhaydus.softcover.feature.widget.domain.usecase.GetNextWeeklyPickExpiryUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.GetPlacedTrendingSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.GetQuoteSelectionUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.GetRandomPickSettingsUseCase
@@ -40,15 +41,22 @@ import nl.rhaydus.softcover.feature.widget.presentation.collector.RandomPickList
 import nl.rhaydus.softcover.feature.widget.presentation.collector.RandomPickThemeCollector
 import nl.rhaydus.softcover.feature.widget.presentation.collector.TrendingThemeCollector
 import nl.rhaydus.softcover.feature.widget.presentation.collector.UpdateProgressThemeCollector
+import nl.rhaydus.softcover.feature.widget.presentation.glance.AndroidWidgetHost
+import nl.rhaydus.softcover.feature.widget.presentation.glance.BackgroundWidgetRenderer
 import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidgetDependencies
+import nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidgetModelSource
+import nl.rhaydus.softcover.feature.widget.presentation.glance.LiveWidgetSessions
 import nl.rhaydus.softcover.feature.widget.presentation.glance.OwnedWidgets
 import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidgetDependencies
+import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidgetModelSource
 import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidgetDependencies
+import nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidgetModelSource
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidgetDependencies
+import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidgetModelSource
 import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetEnvironment
 import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
@@ -88,6 +96,8 @@ val widgetModule = module {
     factory { ObserveQuoteSelectionChangesUseCase(quoteWidgetRepository = get()) }
 
     factory { GetRandomPickSettingsUseCase(randomPickRepository = get()) }
+
+    factory { GetNextWeeklyPickExpiryUseCase(randomPickRepository = get()) }
 
     factory { SaveRandomPickSettingsUseCase(randomPickRepository = get()) }
 
@@ -145,7 +155,7 @@ val widgetModule = module {
     single {
         TrendingFeedFetcher(
             widget = get(),
-            repainter = get(),
+            renderer = get(),
             applicationScope = get(),
             refreshTrendingFeed = get(),
         )
@@ -154,7 +164,7 @@ val widgetModule = module {
     single {
         QuoteFetcher(
             widget = QuoteWidget(),
-            repainter = get(),
+            renderer = get(),
             applicationScope = get(),
             refreshAllQuotes = get(),
             fetchTracker = get(),
@@ -162,6 +172,66 @@ val widgetModule = module {
     }
 
     single { WidgetRepainter(context = androidContext()) }
+
+    single { LiveWidgetSessions() }
+
+    single {
+        TrendingWidgetModelSource(
+            context = androidContext(),
+            environment = get(),
+            observeTrendingFeed = get(),
+            observeTrendingFeedFetching = get(),
+            getTrendingPosition = get(),
+            observeTrendingChanges = get(),
+            observeTrendingSettingsChanges = get(),
+        )
+    }
+
+    single {
+        CurrentlyReadingWidgetModelSource(
+            context = androidContext(),
+            environment = get(),
+            getCurrentlyReadingUserBooks = get(),
+            getSelectedBookId = get(),
+            observeSelectedBookChanges = get(),
+        )
+    }
+
+    single {
+        RandomPickWidgetModelSource(
+            context = androidContext(),
+            environment = get(),
+            getWantToReadUserBooks = get(),
+            getAllUserLists = get(),
+            resolveRandomPick = get(),
+            observeRandomPickChanges = get(),
+            observeRandomPickSettingsChanges = get(),
+        )
+    }
+
+    single {
+        QuoteWidgetModelSource(
+            context = androidContext(),
+            environment = get(),
+            observeAllQuotes = get(),
+            getQuoteSelection = get(),
+            observeQuoteSelectionChanges = get(),
+            fetchTracker = get(),
+        )
+    }
+
+    single {
+        BackgroundWidgetRenderer(
+            host = AndroidWidgetHost(androidContext()),
+            liveSessions = get(),
+            sources = mapOf(
+                TrendingWidget::class.java to get<TrendingWidgetModelSource>(),
+                CurrentlyReadingWidget::class.java to get<CurrentlyReadingWidgetModelSource>(),
+                RandomPickWidget::class.java to get<RandomPickWidgetModelSource>(),
+                QuoteWidget::class.java to get<QuoteWidgetModelSource>(),
+            ),
+        )
+    }
 
     single {
         WidgetImageStore(
@@ -185,9 +255,7 @@ val widgetModule = module {
             environment = get(),
             repainter = get(),
             getCurrentlyReadingUserBooks = get(),
-            getSelectedBookId = get(),
             cycleSelectedBook = get(),
-            observeSelectedBookChanges = get(),
         )
     }
 
@@ -197,10 +265,7 @@ val widgetModule = module {
             repainter = get(),
             getWantToReadUserBooks = get(),
             getAllUserLists = get(),
-            resolveRandomPick = get(),
             shuffleRandomPick = get(),
-            observeRandomPickChanges = get(),
-            observeRandomPickSettingsChanges = get(),
         )
     }
 
@@ -220,13 +285,11 @@ val widgetModule = module {
             environment = get(),
             repainter = get(),
             observeTrendingFeed = get(),
-            observeTrendingFeedFetching = get(),
             refreshTrendingFeed = get(),
             fetcher = get(),
             getTrendingPosition = get(),
             advanceTrendingPage = get(),
-            observeTrendingChanges = get(),
-            observeTrendingSettingsChanges = get(),
+            renderer = get(),
         )
     }
 
@@ -236,9 +299,7 @@ val widgetModule = module {
             repainter = get(),
             observeAllQuotes = get(),
             refreshAllQuotes = get(),
-            getQuoteSelection = get(),
             cycleQuote = get(),
-            observeQuoteSelectionChanges = get(),
             fetchTracker = get(),
             fetcher = get(),
         )
@@ -271,6 +332,7 @@ val widgetModule = module {
             context = androidContext(),
             ownedWidgets = get(),
             imageStore = get(),
+            getNextWeeklyPickExpiry = get(),
         )
     }
 
@@ -312,6 +374,7 @@ val widgetModule = module {
     single {
         WidgetRefresher(
             context = androidContext(),
+            renderer = get(),
             applicationScope = get(),
             widgets = get<OwnedWidgets>().widgets,
             getThemeConfiguration = get(),

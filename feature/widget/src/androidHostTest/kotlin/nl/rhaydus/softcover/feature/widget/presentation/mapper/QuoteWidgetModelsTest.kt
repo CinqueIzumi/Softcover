@@ -426,7 +426,30 @@ class QuoteWidgetModelsTest {
             val second = emissions[1].content.shouldBeInstanceOf<QuoteWidgetUiModel.Content.Shown>()
             first.artwork.shouldBeNull()
             second.artwork shouldBe resolved
-            second.copy(artwork = null) shouldBe first
+            second.copy(
+                artwork = null,
+                imagesPending = true,
+            ) shouldBe first
+        }
+
+        @Test
+        fun `the text stage has its images pending and the stage after a quote without artwork does not`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                quotes = testQuotes(count = 2),
+                artworkUris = { null },
+            )
+
+            // ----- Act -----
+            val emissions = flow.toList()
+
+            // ----- Assert -----
+            emissions.size shouldBe 2
+            val first = emissions[0].content.shouldBeInstanceOf<QuoteWidgetUiModel.Content.Shown>()
+            val second = emissions[1].content.shouldBeInstanceOf<QuoteWidgetUiModel.Content.Shown>()
+            first.imagesPending shouldBe true
+            second.artwork.shouldBeNull()
+            second.imagesPending shouldBe false
         }
     }
 }

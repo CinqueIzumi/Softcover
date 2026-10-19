@@ -11,20 +11,20 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshAllQuotesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.model.QuoteFetchTracker
+import nl.rhaydus.softcover.feature.widget.presentation.glance.BackgroundWidgetRenderer
 import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidget
-import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class QuoteFetcherTest {
     private val widget = mockk<QuoteWidget>()
-    private val repainter = mockk<WidgetRepainter>()
+    private val renderer = mockk<BackgroundWidgetRenderer>()
     private val refreshAllQuotes = mockk<RefreshAllQuotesUseCase>()
     private val fetchTracker = QuoteFetchTracker()
 
     private fun TestScope.fetcher(): QuoteFetcher = QuoteFetcher(
         widget = widget,
-        repainter = repainter,
+        renderer = renderer,
         applicationScope = ApplicationScope(CoroutineScope(StandardTestDispatcher(testScheduler))),
         refreshAllQuotes = refreshAllQuotes,
         fetchTracker = fetchTracker,
@@ -39,7 +39,7 @@ class QuoteFetcherTest {
                 refreshAllQuotes()
             } returns Result.success(Unit)
             coEvery {
-                repainter.repaintAll(widget)
+                renderer.renderAll(widget)
             } returns Unit
 
             // ----- Act -----
@@ -48,7 +48,7 @@ class QuoteFetcherTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) { refreshAllQuotes() }
-            coVerify(exactly = 1) { repainter.repaintAll(widget) }
+            coVerify(exactly = 1) { renderer.renderAll(widget) }
         }
 
         @Test
@@ -58,7 +58,7 @@ class QuoteFetcherTest {
                 refreshAllQuotes()
             } returns Result.failure(IllegalStateException("down"))
             coEvery {
-                repainter.repaintAll(widget)
+                renderer.renderAll(widget)
             } returns Unit
 
             // ----- Act -----
@@ -66,7 +66,7 @@ class QuoteFetcherTest {
             runCurrent()
 
             // ----- Assert -----
-            coVerify(exactly = 1) { repainter.repaintAll(widget) }
+            coVerify(exactly = 1) { renderer.renderAll(widget) }
         }
     }
 }

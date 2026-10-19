@@ -96,7 +96,10 @@ internal fun quoteWidgetModels(
         emit(
             QuoteWidgetUiModel(
                 themeConfiguration = inputs.themeConfiguration,
-                content = content.copy(artwork = artworkUris(shown)),
+                content = content.copy(
+                    artwork = artworkUris(shown),
+                    imagesPending = false,
+                ),
             ),
         )
     }
@@ -128,6 +131,7 @@ private fun toQuoteContent(
         eyebrow = if (rank == 0) QUOTE_OF_THE_DAY_EYEBROW else "QUOTES · ${rank + 1}/${ranking.size}",
         hasArrows = ranking.size > 1,
         artwork = null,
+        imagesPending = true,
     )
 }
 

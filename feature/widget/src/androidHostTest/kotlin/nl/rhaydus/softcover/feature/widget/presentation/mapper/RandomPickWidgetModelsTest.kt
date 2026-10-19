@@ -263,6 +263,38 @@ class RandomPickWidgetModelsTest {
         }
 
         @Test
+        fun `the text stage has its images pending and the stage after a book without a cover does not`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                resolution = Result.success(
+                    RandomPickResolution.Resolved(
+                        book = book(3),
+                        source = RandomPickSource.WantToRead,
+                    ),
+                ),
+                coverUri = {
+                    delay(1.seconds)
+                    null
+                },
+                artwork = { null },
+            )
+
+            // ----- Act -----
+            flow.test {
+                // ----- Assert -----
+                val first = awaitItem().content
+                    .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+                first.imagesPending shouldBe true
+
+                val second = awaitItem().content
+                    .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+                second.cover shouldBe RandomPickWidgetUiModel.Cover.Missing
+                second.imagesPending shouldBe false
+                awaitComplete()
+            }
+        }
+
+        @Test
         fun `a book without a cover file shows the missing cover`() = runTest {
             // ----- Arrange -----
             val flow = models(

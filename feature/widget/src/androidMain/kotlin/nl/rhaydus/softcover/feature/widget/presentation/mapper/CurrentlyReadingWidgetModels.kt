@@ -79,6 +79,7 @@ internal fun currentlyReadingWidgetModels(
                             cover = cover,
                             progress = progress,
                             artwork = artwork,
+                            imagesPending = false,
                         ),
                     ),
                 )
@@ -113,6 +114,7 @@ private fun CurrentlyReadingWidgetInputs.toTextContent(): CurrentlyReadingWidget
         },
         canCycle = books.size > 1,
         artwork = null,
+        imagesPending = true,
     )
 }
 

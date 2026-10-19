@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.widget.presentation.refresh
 
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.updateAll
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -10,10 +9,10 @@ import io.mockk.coVerify
 import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -21,7 +20,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -37,6 +35,7 @@ import nl.rhaydus.softcover.feature.widget.domain.model.QuoteFetchTracker
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFetchTracker
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveTrendingFeedUseCase
+import nl.rhaydus.softcover.feature.widget.presentation.glance.BackgroundWidgetRenderer
 import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
@@ -50,17 +49,13 @@ class WidgetRefresherTest {
 
     private val context = mockk<Context>(relaxed = true)
 
+    private val renderer = mockk<BackgroundWidgetRenderer>()
+
     @BeforeEach
     fun setUp() {
-        mockkStatic("androidx.glance.appwidget.GlanceAppWidgetKt")
         coEvery {
-            any<GlanceAppWidget>().updateAll(any())
+            renderer.renderAll(any())
         } returns Unit
-    }
-
-    @AfterEach
-    fun tearDown() {
-        unmockkStatic("androidx.glance.appwidget.GlanceAppWidgetKt")
     }
 
     private fun quote(text: String): Quote = Quote(
@@ -78,7 +73,7 @@ class WidgetRefresherTest {
     private fun TestScope.refresher(
         userId: MutableStateFlow<Int>,
         scheduler: TrendingRefreshScheduler = mockk(relaxed = true),
-        quotes: MutableStateFlow<List<Quote>> = MutableStateFlow(emptyList()),
+        quotes: Flow<List<Quote>> = MutableStateFlow(emptyList()),
         quoteScheduler: QuoteRefreshScheduler = mockk(relaxed = true),
         widgets: List<GlanceAppWidget> = emptyList(),
         observeTrendingFeed: ObserveTrendingFeedUseCase = mockk(relaxed = true),
@@ -98,6 +93,7 @@ class WidgetRefresherTest {
 
         return WidgetRefresher(
             context = context,
+            renderer = renderer,
             applicationScope = ApplicationScope(CoroutineScope(StandardTestDispatcher(testScheduler))),
             widgets = widgets,
             getThemeConfiguration = mockk(relaxed = true),
@@ -202,7 +198,7 @@ class WidgetRefresherTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                widget.updateAll(context)
+                renderer.renderAll(widget)
             }
         }
 
@@ -225,7 +221,70 @@ class WidgetRefresherTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                widget.updateAll(any())
+                renderer.renderAll(widget)
+            }
+        }
+    }
+
+    @Nested
+    inner class UnchangedReEmissions {
+        @Test
+        fun `a quote source re-emitting an equal list repaints nothing`() = runTest {
+            // ----- Arrange -----
+            val widget = mockk<QuoteWidget>()
+            val quotes = MutableSharedFlow<List<Quote>>(
+                replay = 1,
+                extraBufferCapacity = 8,
+            )
+            quotes.tryEmit(listOf(quote(text = "First")))
+            val refresher = refresher(
+                userId = MutableStateFlow(signedInUserId),
+                quotes = quotes,
+                widgets = listOf(widget),
+            )
+            refresher.start()
+            refresher.onEnabled(widget)
+            runCurrent()
+
+            // ----- Act -----
+            quotes.tryEmit(listOf(quote(text = "First")))
+            quotes.tryEmit(listOf(quote(text = "First")))
+            advanceTimeBy(2.seconds)
+            runCurrent()
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                renderer.renderAll(widget)
+            }
+        }
+
+        @Test
+        fun `an equal re-emission followed by a real change repaints exactly once`() = runTest {
+            // ----- Arrange -----
+            val widget = mockk<QuoteWidget>()
+            val quotes = MutableSharedFlow<List<Quote>>(
+                replay = 1,
+                extraBufferCapacity = 8,
+            )
+            quotes.tryEmit(listOf(quote(text = "First")))
+            val refresher = refresher(
+                userId = MutableStateFlow(signedInUserId),
+                quotes = quotes,
+                widgets = listOf(widget),
+            )
+            refresher.start()
+            refresher.onEnabled(widget)
+            runCurrent()
+
+            // ----- Act -----
+            quotes.tryEmit(listOf(quote(text = "First")))
+            quotes.tryEmit(listOf(quote(text = "Second")))
+            advanceTimeBy(2.seconds)
+            runCurrent()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                renderer.renderAll(widget)
             }
         }
     }
@@ -262,10 +321,10 @@ class WidgetRefresherTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                trending.updateAll(context)
+                renderer.renderAll(trending)
             }
             coVerify(exactly = 0) {
-                quote.updateAll(any())
+                renderer.renderAll(quote)
             }
         }
 
@@ -292,10 +351,10 @@ class WidgetRefresherTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                quote.updateAll(context)
+                renderer.renderAll(quote)
             }
             coVerify(exactly = 0) {
-                trending.updateAll(any())
+                renderer.renderAll(trending)
             }
         }
     }
@@ -342,7 +401,7 @@ class WidgetRefresherTest {
 
             // ----- Assert -----
             coVerifyOrder {
-                widget.updateAll(context)
+                renderer.renderAll(widget)
                 imageStore.clear()
             }
         }

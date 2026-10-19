@@ -19,7 +19,8 @@ internal data class QuoteWidgetUiModel(
 
         /**
          * [eyebrow] is "QUOTE OF THE DAY" or "QUOTES · 2/5"; [byline] is `null` when the quote has no edition title,
-         * no book title and no position.
+         * no book title and no position. [imagesPending] is `true` until the artwork work has finished, whether or
+         * not it produced an [artwork].
          */
         data class Shown(
             val quoteText: String,
@@ -28,6 +29,7 @@ internal data class QuoteWidgetUiModel(
             val eyebrow: String,
             val hasArrows: Boolean,
             val artwork: Artwork?,
+            val imagesPending: Boolean,
         ) : Content
     }
 

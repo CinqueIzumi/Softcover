@@ -6,8 +6,8 @@ import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshAllQuotesUseCase
 import nl.rhaydus.softcover.feature.widget.domain.model.QuoteFetchTracker
+import nl.rhaydus.softcover.feature.widget.presentation.glance.BackgroundWidgetRenderer
 import nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidget
-import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
 
 /**
  * Fetches quotes on the application scope, so a retry does not wait on WorkManager constraints or quota. The repaint
@@ -15,7 +15,7 @@ import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
  */
 internal class QuoteFetcher(
     private val widget: QuoteWidget,
-    private val repainter: WidgetRepainter,
+    private val renderer: BackgroundWidgetRenderer,
     private val applicationScope: ApplicationScope,
     private val refreshAllQuotes: RefreshAllQuotesUseCase,
     private val fetchTracker: QuoteFetchTracker,
@@ -30,7 +30,7 @@ internal class QuoteFetcher(
                     )
                 }
 
-            runCatchingCancellable { repainter.repaintAll(widget) }
+            runCatchingCancellable { renderer.renderAll(widget) }
                 .onFailure { error ->
                     AppLog.e(
                         error,

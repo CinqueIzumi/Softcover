@@ -166,6 +166,14 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyRe
     - openReading: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
+public fun nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidgetModelSource.Content(appWidgetId: kotlin.Int, model: nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - appWidgetId: STABLE (primitive type)
+    - model: UNSTABLE (has mutable properties or unstable members)
+
+@Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Eyebrow(text: kotlin.String, openSettings: androidx.glance.action.Action): kotlin.Unit
   skippable: false
   restartable: true
@@ -252,6 +260,14 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidget
     - openBook: STABLE (function type)
 
 @Composable
+public fun nl.rhaydus.softcover.feature.widget.presentation.glance.QuoteWidgetModelSource.Content(appWidgetId: kotlin.Int, model: nl.rhaydus.softcover.feature.widget.presentation.model.QuoteWidgetUiModel): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - appWidgetId: STABLE (primitive type)
+    - model: UNSTABLE (has mutable properties or unstable members)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidgetContent(model: nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel, openApp: androidx.glance.action.Action, openSettings: androidx.glance.action.Action, openBook: kotlin.Function1<@[ParameterName(name = \): kotlin.Unit
   skippable: false
   restartable: true
@@ -260,6 +276,14 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickW
     - openApp: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - openBook: STABLE (function type)
+
+@Composable
+public fun nl.rhaydus.softcover.feature.widget.presentation.glance.RandomPickWidgetModelSource.Content(appWidgetId: kotlin.Int, model: nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - appWidgetId: STABLE (primitive type)
+    - model: UNSTABLE (has mutable properties or unstable members)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.widget.presentation.glance.Rank(rank: kotlin.String, width: androidx.compose.ui.unit.Dp): kotlin.Unit
@@ -328,6 +352,22 @@ internal fun nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWid
     - openExplore: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - openSettings: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - openBook: STABLE (function type)
+
+@Composable
+public fun nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidgetModelSource.Content(appWidgetId: kotlin.Int, model: nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - appWidgetId: STABLE (primitive type)
+    - model: UNSTABLE (has mutable properties or unstable members)
+
+@Composable
+public fun nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetModelSource.Content(appWidgetId: kotlin.Int, model: T of nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetModelSource): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - appWidgetId: STABLE (primitive type)
+    - model: RUNTIME (requires runtime check)
 
 @Composable
 public fun nl.rhaydus.softcover.feature.widget.presentation.screen.RandomPickSettingsScreen.Content(): kotlin.Unit

@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickCadence
+import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettings
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSource
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickState
 import org.junit.jupiter.api.Nested
@@ -645,6 +646,71 @@ class RandomPickSelectionTest {
             // ----- Assert -----
             result.pickedBookId.shouldBeNull()
             result.pickedAtMillis.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class WeeklyPickExpiry {
+        @Test
+        fun `weekly expires seven days after the pick`() {
+            // ----- Arrange -----
+            val pickedAt = at(
+                day = 1,
+                hour = 9,
+            )
+
+            // ----- Act -----
+            val result = weeklyPickExpiry(
+                settings = RandomPickSettings(cadence = RandomPickCadence.Weekly),
+                state = RandomPickState(
+                    pickedBookId = 1,
+                    pickedAtMillis = pickedAt.toEpochMilliseconds(),
+                ),
+            )
+
+            // ----- Assert -----
+            result shouldBe pickedAt + 7.days
+        }
+
+        @Test
+        fun `daily and on shuffle only never expire`() {
+            // ----- Arrange -----
+            val state = RandomPickState(
+                pickedBookId = 1,
+                pickedAtMillis = at(
+                    day = 1,
+                    hour = 9,
+                ).toEpochMilliseconds(),
+            )
+
+            // ----- Act -----
+            val daily = weeklyPickExpiry(
+                settings = RandomPickSettings(cadence = RandomPickCadence.Daily),
+                state = state,
+            )
+            val onShuffleOnly = weeklyPickExpiry(
+                settings = RandomPickSettings(cadence = RandomPickCadence.OnShuffleOnly),
+                state = state,
+            )
+
+            // ----- Assert -----
+            daily.shouldBeNull()
+            onShuffleOnly.shouldBeNull()
+        }
+
+        @Test
+        fun `weekly without a pick has no expiry`() {
+            // ----- Arrange -----
+            val settings = RandomPickSettings(cadence = RandomPickCadence.Weekly)
+
+            // ----- Act -----
+            val result = weeklyPickExpiry(
+                settings = settings,
+                state = RandomPickState(),
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
         }
     }
 }

@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickResolution
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettings
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettingsChange
+import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickState
 
 internal interface RandomPickRepository {
     /** Emits the id of the instance whose pick or settings changed. */
@@ -18,6 +19,8 @@ internal interface RandomPickRepository {
     val settingsChanges: Flow<RandomPickSettingsChange>
 
     suspend fun getSettings(appWidgetId: Int): RandomPickSettings
+
+    suspend fun getState(appWidgetId: Int): RandomPickState
 
     suspend fun saveSettings(
         appWidgetId: Int,

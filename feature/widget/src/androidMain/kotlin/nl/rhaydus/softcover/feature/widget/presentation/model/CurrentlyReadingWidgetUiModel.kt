@@ -17,7 +17,8 @@ internal data class CurrentlyReadingWidgetUiModel(
 
         /**
          * [eyebrow] is "READING · 2/4", or "READING" while the shelf holds one book, which also hides the arrows.
-         * While the images are still being stored [cover] and [artwork] are `null` and [progress] is empty.
+         * [imagesPending] is `true` until the image work has finished; meanwhile [cover] and [artwork] are `null` and
+         * [progress] is empty.
          */
         data class Reading(
             val title: String,
@@ -30,6 +31,7 @@ internal data class CurrentlyReadingWidgetUiModel(
             val eyebrow: String,
             val canCycle: Boolean,
             val artwork: BookArtworkUiModel?,
+            val imagesPending: Boolean,
         ) : Content
     }
 }

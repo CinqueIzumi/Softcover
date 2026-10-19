@@ -15,25 +15,41 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 
+internal suspend fun <T> GlanceAppWidget.provideSharedContent(
+    source: WidgetModelSource<T>,
+    appWidgetId: Int,
+    liveSessions: LiveWidgetSessions,
+): Nothing {
+    liveSessions.markLive(appWidgetId)
+
+    try {
+        provideSharedContent(
+            models = { options ->
+                source.models(
+                    appWidgetId = appWidgetId,
+                    options = options,
+                )
+            },
+            initial = source.loadingModel(),
+        ) { model ->
+            source.Content(
+                appWidgetId = appWidgetId,
+                model = model,
+            )
+        }
+    } finally {
+        liveSessions.markEnded(appWidgetId)
+    }
+}
+
 /**
  * Provides [content] from [models], collecting the cold [models] once for the session. An exact-size widget on
  * API 31+ composes [content] once per size the launcher reports, and collecting directly there would repeat the
  * database, cover and render work in every one. [models] must not depend on `LocalSize`.
- */
-internal suspend fun <T> GlanceAppWidget.provideSharedContent(
-    models: Flow<T>,
-    initial: T,
-    content: @Composable (T) -> Unit,
-): Nothing = provideSharedContent(
-    models = { models },
-    initial = initial,
-    content = content,
-)
-
-/**
- * [provideSharedContent] that also hands [models] the widget's launcher options, which change when the user
- * resizes it. Glance does not re-run `provideGlance` on a resize, only recomposes with new `LocalAppWidgetOptions`.
- * The empty bundle Glance provides before it has fetched the real options is not forwarded.
+ *
+ * [models] receives the widget's launcher options, which change when the user resizes it. Glance does not re-run
+ * `provideGlance` on a resize, only recomposes with new `LocalAppWidgetOptions`. The empty bundle Glance provides
+ * before it has fetched the real options is not forwarded.
  */
 internal suspend fun <T> GlanceAppWidget.provideSharedContent(
     models: (options: Flow<Bundle>) -> Flow<T>,

@@ -193,6 +193,7 @@ private suspend fun FlowCollector<RandomPickWidgetUiModel>.emitResolved(
                     book = book,
                     cover = RandomPickWidgetUiModel.Cover.Pending,
                     artwork = null,
+                    imagesPending = true,
                 ),
             ),
         )
@@ -219,6 +220,7 @@ private suspend fun FlowCollector<RandomPickWidgetUiModel>.emitResolved(
                             book = book,
                             cover = RandomPickWidgetUiModel.Cover.Pending,
                             artwork = null,
+                            imagesPending = true,
                         ),
                     ),
                 )
@@ -235,6 +237,7 @@ private suspend fun FlowCollector<RandomPickWidgetUiModel>.emitResolved(
                         book = book,
                         cover = uri.toCover(),
                         artwork = resolvedArtwork,
+                        imagesPending = false,
                     ),
                 ),
             )
@@ -252,6 +255,7 @@ private fun picked(
     book: Book,
     cover: RandomPickWidgetUiModel.Cover,
     artwork: BookArtworkUiModel?,
+    imagesPending: Boolean,
 ) = RandomPickWidgetUiModel.Content.Picked(
     eyebrow = eyebrow,
     bookId = book.id,
@@ -259,6 +263,7 @@ private fun picked(
     author = book.authorString,
     cover = cover,
     artwork = artwork,
+    imagesPending = imagesPending,
 )
 
 private fun Uri?.toCover(): RandomPickWidgetUiModel.Cover = if (this == null) {

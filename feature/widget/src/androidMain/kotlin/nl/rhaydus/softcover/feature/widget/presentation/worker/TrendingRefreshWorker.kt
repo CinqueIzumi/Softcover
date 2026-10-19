@@ -55,7 +55,7 @@ internal class TrendingRefreshWorker(
                 .any { it }
         }
 
-        runCatchingCancellable { dependencies.repainter.repaintAll(TrendingWidget()) }
+        runCatchingCancellable { dependencies.renderer.renderAll(TrendingWidget()) }
             .onFailure { error ->
                 AppLog.e(
                     error,

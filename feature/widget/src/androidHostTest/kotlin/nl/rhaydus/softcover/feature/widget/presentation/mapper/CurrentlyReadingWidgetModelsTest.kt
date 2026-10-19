@@ -258,7 +258,29 @@ class CurrentlyReadingWidgetModelsTest {
                 reading.cover.shouldBeNull()
                 reading.progress shouldBe emptyMap()
                 reading.artwork.shouldBeNull()
+                reading.imagesPending shouldBe true
                 cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `the stage after a book without a cover or artwork no longer has its images pending`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                shelf = flowOf(listOf(book(1))),
+                coverUri = { _, _ -> null },
+            )
+
+            // ----- Act -----
+            flow.test {
+                val text = awaitItem().reading()
+                val images = awaitItem().reading()
+                cancelAndIgnoreRemainingEvents()
+
+                // ----- Assert -----
+                text.imagesPending shouldBe true
+                images.cover.shouldBeNull()
+                images.imagesPending shouldBe false
             }
         }
 
@@ -282,6 +304,7 @@ class CurrentlyReadingWidgetModelsTest {
                     cover = null,
                     progress = emptyMap(),
                     artwork = null,
+                    imagesPending = true,
                 ) shouldBe text
                 images.cover shouldBe coverUri
                 images.progress shouldBe mapOf(
