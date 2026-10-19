@@ -1,0 +1,17 @@
+# Ids of the most-shelved books whose own release_date falls within the recent window
+# (minDate, today], most-wanted first.
+query GetRecentReleaseIds(
+    $minDate: date!,
+    $today: date!,
+    $limit: Int!,
+) {
+    books(
+        where: {
+            release_date: { _gt: $minDate, _lte: $today }
+        }
+        order_by: [{ users_count: desc }]
+        limit: $limit
+    ) {
+        id
+    }
+}

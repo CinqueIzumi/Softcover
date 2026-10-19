@@ -171,5 +171,6 @@ internal class TrendingWidgetModelSource(
 
 private fun TrendingFeed.emptyHeadlineRes(): Int = when (this) {
     is TrendingFeed.Trending -> R.string.trending_empty_headline
+    is TrendingFeed.Recent -> R.string.recent_empty_headline
     is TrendingFeed.Upcoming -> R.string.upcoming_empty_headline
 }

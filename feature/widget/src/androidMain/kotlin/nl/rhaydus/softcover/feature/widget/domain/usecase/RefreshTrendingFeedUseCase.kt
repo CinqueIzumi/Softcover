@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.widget.domain.usecase
 
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecentBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshUpcomingBooksUseCase
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
@@ -8,6 +9,7 @@ import kotlin.time.Duration
 
 internal class RefreshTrendingFeedUseCase(
     private val refreshTrendingBooks: RefreshTrendingBooksUseCase,
+    private val refreshRecentBooks: RefreshRecentBooksUseCase,
     private val refreshUpcomingBooks: RefreshUpcomingBooksUseCase,
     private val fetchTracker: TrendingFetchTracker,
 ) {
@@ -18,6 +20,11 @@ internal class RefreshTrendingFeedUseCase(
         when (feed) {
             is TrendingFeed.Trending -> refreshTrendingBooks(
                 period = feed.period,
+                maxAge = maxAge,
+            )
+
+            is TrendingFeed.Recent -> refreshRecentBooks(
+                window = feed.window,
                 maxAge = maxAge,
             )
 

@@ -6,6 +6,7 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.state.PreferencesGlanceStateDefinition
+import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.feature.widget.R
@@ -32,7 +33,15 @@ internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
 
 internal fun TrendingFeed.eyebrowRes(): Int = when (this) {
     is TrendingFeed.Trending -> period.eyebrowRes()
+    is TrendingFeed.Recent -> window.eyebrowRes()
     is TrendingFeed.Upcoming -> window.eyebrowRes()
+}
+
+private fun RecentWindow.eyebrowRes(): Int = when (this) {
+    RecentWindow.Week -> R.string.recent_eyebrow_week
+    RecentWindow.Month -> R.string.recent_eyebrow_month
+    RecentWindow.ThreeMonths -> R.string.recent_eyebrow_three_months
+    RecentWindow.SixMonths -> R.string.recent_eyebrow_six_months
 }
 
 private fun UpcomingWindow.eyebrowRes(): Int = when (this) {

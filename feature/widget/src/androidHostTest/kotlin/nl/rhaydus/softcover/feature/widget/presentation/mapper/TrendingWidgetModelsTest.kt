@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
@@ -75,6 +76,7 @@ class TrendingWidgetModelsTest {
 
     private fun TrendingFeed.eyebrowName(): String = when (this) {
         is TrendingFeed.Trending -> period.name
+        is TrendingFeed.Recent -> "Recent${window.name}"
         is TrendingFeed.Upcoming -> "Upcoming${window.name}"
     }
 
@@ -245,6 +247,30 @@ class TrendingWidgetModelsTest {
                 awaitItem().content shouldBe TrendingWidgetUiModel.Content.Empty(
                     eyebrow = "Eyebrow UpcomingYear",
                     headline = "Headline UpcomingYear",
+                )
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `a recent feed's empty content takes its headline from that feed`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                position = flowOf(
+                    TrendingPosition(
+                        feed = TrendingFeed.Recent(window = RecentWindow.Month),
+                        page = 0,
+                    ),
+                ),
+                observeTrending = fixedBooks(emptyList()),
+            )
+
+            // ----- Act -----
+            flow.test {
+                // ----- Assert -----
+                awaitItem().content shouldBe TrendingWidgetUiModel.Content.Empty(
+                    eyebrow = "Eyebrow RecentMonth",
+                    headline = "Headline RecentMonth",
                 )
                 awaitComplete()
             }

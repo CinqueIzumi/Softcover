@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgetKind
 import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgets
 import nl.rhaydus.softcover.core.presentation.widget.PlacedHomeScreenWidget
+import nl.rhaydus.softcover.feature.widget.domain.model.kind
 import nl.rhaydus.softcover.feature.widget.domain.usecase.GetRandomPickSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.GetTrendingSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ObserveRandomPickChangesUseCase
@@ -179,6 +180,7 @@ internal class AndroidHomeScreenWidgets(
 
             HomeScreenWidgetKind.Trending -> getTrendingSettings(appWidgetId = id).getOrThrow().let { settings ->
                 listOf(
+                    settings.feed.kind.label(),
                     settings.feed.label(),
                     settings.cadence.label(),
                 ).joinToString(SUMMARY_SEPARATOR)

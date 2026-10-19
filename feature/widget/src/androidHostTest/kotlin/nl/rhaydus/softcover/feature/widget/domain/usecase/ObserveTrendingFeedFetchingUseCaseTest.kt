@@ -9,8 +9,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.awaitCancellation
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecentFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUpcomingFetchedAtUseCase
+import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.feature.widget.domain.model.TrendingFeed
@@ -22,13 +24,16 @@ import kotlin.time.Instant
 
 class ObserveTrendingFeedFetchingUseCaseTest {
     private val week = TrendingFeed.Trending(period = TrendingPeriod.Week)
+    private val recent = TrendingFeed.Recent(window = RecentWindow.Month)
     private val upcoming = TrendingFeed.Upcoming(window = UpcomingWindow.Year)
     private val fetchedAt = Instant.fromEpochMilliseconds(1_000)
     private val observeTrendingFetchedAt = mockk<ObserveTrendingFetchedAtUseCase>()
+    private val observeRecentFetchedAt = mockk<ObserveRecentFetchedAtUseCase>()
     private val observeUpcomingFetchedAt = mockk<ObserveUpcomingFetchedAtUseCase>()
     private val tracker = TrendingFetchTracker()
     private val useCase = ObserveTrendingFeedFetchingUseCase(
         observeTrendingFetchedAt = observeTrendingFetchedAt,
+        observeRecentFetchedAt = observeRecentFetchedAt,
         observeUpcomingFetchedAt = observeUpcomingFetchedAt,
         fetchTracker = tracker,
     )
@@ -95,6 +100,23 @@ class ObserveTrendingFeedFetchingUseCaseTest {
 
             // ----- Assert -----
             result shouldBe TrendingFeedFetchStatus.Failed
+        }
+
+        @Test
+        fun `a recent feed reads the fetched time of its window`() = runTest {
+            // ----- Arrange -----
+            every {
+                observeTrendingFetchedAt(any())
+            } returns flowOf(null)
+            every {
+                observeRecentFetchedAt(window = RecentWindow.Month)
+            } returns flowOf(fetchedAt)
+
+            // ----- Act -----
+            val result = useCase(recent).first()
+
+            // ----- Assert -----
+            result shouldBe TrendingFeedFetchStatus.Settled
         }
 
         @Test

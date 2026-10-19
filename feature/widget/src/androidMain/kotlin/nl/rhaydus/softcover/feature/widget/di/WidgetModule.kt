@@ -126,6 +126,7 @@ val widgetModule = module {
     factory {
         ObserveTrendingFeedUseCase(
             observeTrendingBooks = get(),
+            observeRecentBooks = get(),
             observeUpcomingBooks = get(),
         )
     }
@@ -133,6 +134,7 @@ val widgetModule = module {
     factory {
         RefreshTrendingFeedUseCase(
             refreshTrendingBooks = get(),
+            refreshRecentBooks = get(),
             refreshUpcomingBooks = get(),
             fetchTracker = get(),
         )
@@ -145,6 +147,7 @@ val widgetModule = module {
     factory {
         ObserveTrendingFeedFetchingUseCase(
             observeTrendingFetchedAt = get(),
+            observeRecentFetchedAt = get(),
             observeUpcomingFetchedAt = get(),
             fetchTracker = get(),
         )
