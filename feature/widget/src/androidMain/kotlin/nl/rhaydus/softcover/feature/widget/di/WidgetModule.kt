@@ -58,6 +58,7 @@ import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidget
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidgetDependencies
 import nl.rhaydus.softcover.feature.widget.presentation.glance.TrendingWidgetModelSource
 import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetEnvironment
+import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetHost
 import nl.rhaydus.softcover.feature.widget.presentation.glance.WidgetRepainter
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import nl.rhaydus.softcover.feature.widget.presentation.placed.AndroidHomeScreenWidgets
@@ -223,9 +224,11 @@ val widgetModule = module {
         )
     }
 
+    single<WidgetHost> { AndroidWidgetHost(androidContext()) }
+
     single {
         BackgroundWidgetRenderer(
-            host = AndroidWidgetHost(androidContext()),
+            host = get(),
             liveSessions = get(),
             sources = mapOf(
                 TrendingWidget::class.java to get<TrendingWidgetModelSource>(),

@@ -46,6 +46,8 @@ class SoftcoverModulesVerificationTest {
                     Boolean::class,
                     // getAll() calls return a List assembled at runtime, never a bound type
                     List::class,
+                    // BackgroundWidgetRenderer's sources Map is assembled inline in the definition, never a bound type
+                    Map::class,
                 ),
             )
         }
