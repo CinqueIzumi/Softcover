@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
-import android.net.Uri
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -18,46 +16,38 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.CircularProgressIndicator
-import androidx.glance.appwidget.ImageProvider
 import androidx.glance.appwidget.appWidgetBackground
-import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
-import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
-import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.semantics.contentDescription
 import androidx.glance.semantics.semantics
-import androidx.glance.text.FontFamily
-import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
-import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.presentation.activity.updateProgressIntent
 import nl.rhaydus.softcover.feature.widget.presentation.callback.CycleBookCallback
-import nl.rhaydus.softcover.feature.widget.presentation.component.BackdropUris
-import nl.rhaydus.softcover.feature.widget.presentation.component.CoverPlaceholder
+import nl.rhaydus.softcover.feature.widget.presentation.component.CYCLE_EYEBROW_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.component.CycleEyebrow
-import nl.rhaydus.softcover.feature.widget.presentation.component.ReservedLinesTitle
+import nl.rhaydus.softcover.feature.widget.presentation.component.SingleBookWidgetLayout
 import nl.rhaydus.softcover.feature.widget.presentation.component.UriMask
+import nl.rhaydus.softcover.feature.widget.presentation.component.WidgetMessage
+import nl.rhaydus.softcover.feature.widget.presentation.component.widgetCornerRadius
 import nl.rhaydus.softcover.feature.widget.presentation.model.CurrentlyReadingWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.render.WavyProgressUris
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
 import nl.rhaydus.softcover.feature.widget.presentation.util.PROGRESS_BAR_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.util.PROGRESS_LABEL_WIDTH_DP
-import nl.rhaydus.softcover.feature.widget.presentation.util.TALLEST_HEIGHT_DP
-import nl.rhaydus.softcover.feature.widget.presentation.util.TALL_HEIGHT_DP
+import nl.rhaydus.softcover.feature.widget.presentation.util.PROGRESS_ROW_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.util.progressBarWidthDp
 
 @Composable
@@ -74,7 +64,8 @@ internal fun CurrentlyReadingWidgetContent(
                 .appWidgetBackground()
                 .background(
                     when (model.content) {
-                        is CurrentlyReadingWidgetUiModel.Content.Reading -> LocalWidgetExtraColors.current.surfaceContainerHigh
+                        is CurrentlyReadingWidgetUiModel.Content.Reading ->
+                            LocalWidgetExtraColors.current.surfaceContainerHigh
                         else -> GlanceTheme.colors.background
                     },
                 )
@@ -83,14 +74,16 @@ internal fun CurrentlyReadingWidgetContent(
             contentAlignment = Alignment.Center,
         ) {
             when (val content = model.content) {
-                CurrentlyReadingWidgetUiModel.Content.Loading -> CircularProgressIndicator(color = GlanceTheme.colors.primary)
+                CurrentlyReadingWidgetUiModel.Content.Loading -> CircularProgressIndicator(
+                    color = GlanceTheme.colors.primary,
+                )
 
-                CurrentlyReadingWidgetUiModel.Content.SignedOut -> Message(
+                CurrentlyReadingWidgetUiModel.Content.SignedOut -> WidgetMessage(
                     headline = context.getString(R.string.widget_sign_in),
                     subline = null,
                 )
 
-                CurrentlyReadingWidgetUiModel.Content.Empty -> Message(
+                CurrentlyReadingWidgetUiModel.Content.Empty -> WidgetMessage(
                     headline = context.getString(R.string.currently_reading_between_books),
                     subline = context.getString(R.string.currently_reading_between_books_subline),
                 )
@@ -101,82 +94,18 @@ internal fun CurrentlyReadingWidgetContent(
     }
 }
 
-private fun widgetCornerRadius(): GlanceModifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-    GlanceModifier.cornerRadius(android.R.dimen.system_app_widget_background_radius)
-} else {
-    GlanceModifier
-}
-
-@Composable
-private fun Message(
-    headline: String,
-    subline: String?,
-) {
-    Column(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .padding(Spacing.xxs),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Column(
-            modifier = GlanceModifier
-                .fillMaxWidth()
-                .defaultWeight()
-                .padding(Spacing.xs),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = headline,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onBackground,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif,
-                    textAlign = TextAlign.Center,
-                ),
-            )
-
-            if (subline != null) {
-                Spacer(modifier = GlanceModifier.height(Spacing.xxs))
-
-                Text(
-                    text = subline,
-                    style = TextStyle(
-                        color = GlanceTheme.colors.onSurfaceVariant,
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-            }
-        }
-    }
-}
-
 @Composable
 private fun Reading(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
     val context = LocalContext.current
-    val artwork = content.artwork
-    val height = LocalSize.current.height
-    val width = LocalSize.current.width
 
-    Box(modifier = GlanceModifier.fillMaxSize()) {
-        if (artwork != null) {
-            BackdropUris(
-                backdrop = artwork.backdrop,
-                veil = artwork.veil,
-                veilLift = artwork.veilLift,
-                washPrimary = artwork.washPrimary,
-                washTertiary = artwork.washTertiary,
-            )
-        }
-
-        Column(
-            modifier = GlanceModifier
-                .fillMaxSize()
-                .padding(Spacing.xxs),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+    SingleBookWidgetLayout(
+        title = content.title,
+        author = content.author,
+        cover = content.cover,
+        eyebrowHeightDp = CYCLE_EYEBROW_HEIGHT_DP,
+        footHeightDp = PROGRESS_ROW_HEIGHT_DP,
+        artwork = content.artwork,
+        eyebrow = {
             CycleEyebrow(
                 label = content.eyebrow,
                 previous = cycleAction(
@@ -190,57 +119,11 @@ private fun Reading(content: CurrentlyReadingWidgetUiModel.Content.Reading) {
                 previousDescription = context.getString(R.string.currently_reading_previous_book),
                 nextDescription = context.getString(R.string.currently_reading_next_book),
             )
-
-            Box(
-                modifier = GlanceModifier
-                    .fillMaxWidth()
-                    .defaultWeight(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Cover(
-                    cover = content.cover,
-                )
-            }
-
-            if (height >= TALL_HEIGHT_DP.dp) {
-                Spacer(modifier = GlanceModifier.height(Spacing.xxs))
-
-                ReservedLinesTitle(
-                    title = content.title,
-                    reservedLines = if (height >= TALLEST_HEIGHT_DP.dp) 2 else 1,
-                )
-
-                Text(
-                    text = content.author,
-                    maxLines = 1,
-                    modifier = GlanceModifier.padding(horizontal = Spacing.xs),
-                    style = TextStyle(
-                        color = GlanceTheme.colors.onSurfaceVariant,
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-            }
-
+        },
+        foot = {
             ProgressRow(content = content)
-        }
-    }
-}
-
-@Composable
-private fun Cover(
-    cover: Uri?,
-) {
-    if (cover != null) {
-        Image(
-            provider = ImageProvider(cover),
-            contentDescription = null,
-            modifier = GlanceModifier.fillMaxSize(),
-            contentScale = ContentScale.Fit,
-        )
-    } else {
-        CoverPlaceholder()
-    }
+        },
+    )
 }
 
 @Composable
@@ -249,7 +132,7 @@ private fun ProgressRow(content: CurrentlyReadingWidgetUiModel.Content.Reading) 
 
     Row(
         modifier = GlanceModifier
-            .height(40.dp)
+            .height(PROGRESS_ROW_HEIGHT_DP.dp)
             .semantics { contentDescription = context.getString(R.string.currently_reading_update_progress) }
             .clickable(
                 actionStartActivity(
@@ -272,7 +155,7 @@ private fun ProgressRow(content: CurrentlyReadingWidgetUiModel.Content.Reading) 
                 color = GlanceTheme.colors.onSurface,
                 fontSize = 12.sp,
             ),
-            modifier = GlanceModifier.width(PROGRESS_LABEL_WIDTH_DP),
+            modifier = GlanceModifier.width(PROGRESS_LABEL_WIDTH_DP.dp),
         )
 
         Spacer(modifier = GlanceModifier.width(Spacing.xxs))
@@ -288,7 +171,7 @@ private fun ProgressRow(content: CurrentlyReadingWidgetUiModel.Content.Reading) 
 
 @Composable
 private fun ProgressBar(progress: Map<Int, WavyProgressUris>) {
-    val widthDp = progressBarWidthDp(LocalSize.current.width)
+    val widthDp = progressBarWidthDp(LocalSize.current)
 
     val bars = progress[widthDp]
 

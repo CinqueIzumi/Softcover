@@ -2,17 +2,20 @@ package nl.rhaydus.softcover.feature.widget.presentation.mapper
 
 import android.net.Uri
 import app.cash.turbine.test
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -22,6 +25,7 @@ import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickResolution
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettings
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettingsChange
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSource
+import nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -29,6 +33,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class RandomPickWidgetModelsTest {
     private val requestedBookIds = mutableListOf<Int>()
+    private val requestedHeights = mutableListOf<Int>()
 
     private fun book(id: Int): Book = mockk<Book> {
         every {
@@ -54,7 +59,7 @@ class RandomPickWidgetModelsTest {
 
     private val uri = mockk<Uri>()
 
-    private val artwork = RandomPickWidgetUiModel.Artwork(
+    private val artwork = BookArtworkUiModel(
         backdrop = null,
         veil = uri,
         veilLift = uri,
@@ -68,8 +73,9 @@ class RandomPickWidgetModelsTest {
         wantToRead: Flow<List<Book>> = flowOf(emptyList()),
         changes: Flow<Unit> = flowOf(Unit),
         settingsChanges: Flow<RandomPickSettingsChange> = emptyFlow(),
+        coverHeightDp: Flow<Int> = flowOf(200),
         coverUri: suspend (Book) -> Uri? = { null },
-        artwork: suspend (Book) -> RandomPickWidgetUiModel.Artwork? = { null },
+        artwork: suspend (Book) -> BookArtworkUiModel? = { null },
     ): Flow<RandomPickWidgetUiModel> = randomPickWidgetModels(
         isSignedIn = flowOf(isSignedIn),
         themeConfiguration = flowOf(ThemeConfiguration()),
@@ -78,11 +84,13 @@ class RandomPickWidgetModelsTest {
         changes = changes,
         settingsChanges = settingsChanges,
         resolve = { _, _ -> resolution },
-        coverUri = {
-            requestedBookIds += it.id
-            coverUri(it)
+        coverUri = { book, heightDp ->
+            requestedBookIds += book.id
+            requestedHeights += heightDp
+            coverUri(book)
         },
-        artwork = artwork,
+        coverHeightDp = coverHeightDp,
+        artwork = { book -> artwork(book) },
     )
 
     @Nested
@@ -275,6 +283,96 @@ class RandomPickWidgetModelsTest {
                 awaitComplete()
             }
         }
+
+        @Test
+        fun `a new cover height produces the cover again at that height and emits it`() = runTest {
+            // ----- Arrange -----
+            val heights = MutableStateFlow(200)
+            val flow = models(
+                resolution = Result.success(
+                    RandomPickResolution.Resolved(
+                        book = book(3),
+                        source = RandomPickSource.WantToRead,
+                    ),
+                ),
+                coverHeightDp = heights,
+                coverUri = { uri },
+            )
+
+            flow.test {
+                awaitItem()
+
+                // ----- Act -----
+                heights.value = 320
+                val content = awaitItem().content
+                    .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+
+                // ----- Assert -----
+                content.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(uri = uri)
+                requestedHeights shouldContainExactly listOf(200, 320)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `a height change does not emit the pending cover again`() = runTest {
+            // ----- Arrange -----
+            val heights = MutableStateFlow(200)
+            val flow = models(
+                resolution = Result.success(
+                    RandomPickResolution.Resolved(
+                        book = book(3),
+                        source = RandomPickSource.WantToRead,
+                    ),
+                ),
+                coverHeightDp = heights,
+                coverUri = {
+                    delay(1.seconds)
+                    uri
+                },
+            )
+
+            flow.test {
+                awaitItem().content
+                    .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+                    .cover shouldBe RandomPickWidgetUiModel.Cover.Pending
+                awaitItem()
+
+                // ----- Act -----
+                heights.value = 320
+                val content = awaitItem().content
+                    .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+
+                // ----- Assert -----
+                content.cover shouldBe RandomPickWidgetUiModel.Cover.Loaded(uri = uri)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        @Test
+        fun `a cover height that never arrives still shows the book with a pending cover`() = runTest {
+            // ----- Arrange -----
+            val flow = models(
+                resolution = Result.success(
+                    RandomPickResolution.Resolved(
+                        book = book(3),
+                        source = RandomPickSource.WantToRead,
+                    ),
+                ),
+                coverHeightDp = flow { awaitCancellation() },
+            )
+
+            // ----- Act -----
+            flow.test {
+                val content = awaitItem().content
+                    .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+
+                // ----- Assert -----
+                content.cover shouldBe RandomPickWidgetUiModel.Cover.Pending
+                requestedHeights.shouldBeEmpty()
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
     }
 
     @Nested
@@ -462,7 +560,8 @@ class RandomPickWidgetModelsTest {
                     successes = 1,
                     source = RandomPickSource.WantToRead,
                 ),
-                coverUri = { null },
+                coverUri = { _, _ -> null },
+                coverHeightDp = flowOf(200),
                 artwork = { null },
             )
 

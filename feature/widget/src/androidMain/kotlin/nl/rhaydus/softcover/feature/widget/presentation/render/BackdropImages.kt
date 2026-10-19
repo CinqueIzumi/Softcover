@@ -29,20 +29,13 @@ internal class BackdropImages(
 
     /**
      * Hands the five stored images to [build], or returns `null` when a gradient file could not be written,
-     * since the backdrop is not worth drawing without them. The backdrop is `null` while [source] is
-     * `null`; [coverHeightDp] is the size the cover is decoded at before it is blurred.
+     * since the backdrop is not worth drawing without them. The backdrop is `null` while [source] is `null`.
      */
     suspend fun <T> artwork(
         source: CoverSource?,
-        coverHeightDp: Int,
         build: (backdrop: Uri?, veil: Uri, veilLift: Uri, washPrimary: Uri, washTertiary: Uri) -> T,
     ): T? = coroutineScope {
-        val backdrop = async {
-            backdropUri(
-                source,
-                coverHeightDp,
-            )
-        }
+        val backdrop = async { backdropUri(source) }
         val veil = async { maskUri(name = "veil") { masks.veil } }
         val veilLift = async { maskUri(name = "veilLift") { masks.veilLift } }
         val washPrimary = async { maskUri(name = "washPrimary") { masks.washPrimary } }
@@ -57,22 +50,17 @@ internal class BackdropImages(
         )
     }
 
-    private suspend fun backdropUri(
-        source: CoverSource?,
-        coverHeightDp: Int,
-    ): Uri? {
+    private suspend fun backdropUri(source: CoverSource?): Uri? {
         if (source == null) return null
-
-        val coverPx = (coverHeightDp * density).roundToInt()
 
         return store.uriFor(
             format = WidgetImageFormat.Photo,
-            key = "backdrop:v$BACKDROP_RENDER_VERSION:${source.keyPart()}:${backdropWidthPx}x$backdropHeightPx:cover$coverPx",
+            key = "backdrop:v$BACKDROP_RENDER_VERSION:${source.keyPart()}:${backdropWidthPx}x$backdropHeightPx",
             render = {
                 loadCoverBitmap(
                     context = context,
                     source = source,
-                    sizePx = coverPx,
+                    sizePx = backdropHeightPx,
                 )?.let { cover ->
                     renderBackdrop(
                         cover = cover,
@@ -98,7 +86,7 @@ internal class BackdropImages(
         const val MASK_RENDER_VERSION = 1
 
         /** Bump whenever the blur constants or `renderBackdrop` change, or stored backdrops keep the old look. */
-        const val BACKDROP_RENDER_VERSION = 2
+        const val BACKDROP_RENDER_VERSION = 3
 
         const val BACKDROP_SCALE = 0.5f
         const val BACKDROP_WIDTH_DP = 110

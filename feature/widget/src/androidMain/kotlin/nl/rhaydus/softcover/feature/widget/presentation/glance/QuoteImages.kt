@@ -17,7 +17,6 @@ internal class QuoteImages(
                     persistEditionId = null,
                 )
             },
-        coverHeightDp = 180,
     ) { backdrop, veil, veilLift, washPrimary, washTertiary ->
         QuoteWidgetUiModel.Artwork(
             backdrop = backdrop,

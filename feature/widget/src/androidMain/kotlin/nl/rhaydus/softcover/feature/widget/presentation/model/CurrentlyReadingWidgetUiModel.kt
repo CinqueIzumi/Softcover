@@ -25,20 +25,11 @@ internal data class CurrentlyReadingWidgetUiModel(
             val bookId: Int,
             val progressLabel: String,
             val cover: Uri?,
-            /** One render per bar width in dp, keyed by [progressBarWidthDp] of each responsive size bucket. */
+            /** One render per bar width in dp, keyed by [progressBarWidthDp] of each size the launcher reports. */
             val progress: Map<Int, WavyProgressUris>,
             val eyebrow: String,
             val canCycle: Boolean,
-            val artwork: Artwork?,
+            val artwork: BookArtworkUiModel?,
         ) : Content
     }
-
-    /** [backdrop] is `null` while the book has no cover. */
-    data class Artwork(
-        val backdrop: Uri?,
-        val veil: Uri,
-        val veilLift: Uri,
-        val washPrimary: Uri,
-        val washTertiary: Uri,
-    )
 }

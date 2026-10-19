@@ -26,7 +26,7 @@ internal data class RandomPickWidgetUiModel(
             val title: String,
             val author: String,
             val cover: Cover,
-            val artwork: Artwork?,
+            val artwork: BookArtworkUiModel?,
         ) : Content
     }
 
@@ -38,13 +38,4 @@ internal data class RandomPickWidgetUiModel(
 
         data class Loaded(val uri: Uri) : Cover
     }
-
-    /** [backdrop] is `null` while the book has no cover. */
-    data class Artwork(
-        val backdrop: Uri?,
-        val veil: Uri,
-        val veilLift: Uri,
-        val washPrimary: Uri,
-        val washTertiary: Uri,
-    )
 }

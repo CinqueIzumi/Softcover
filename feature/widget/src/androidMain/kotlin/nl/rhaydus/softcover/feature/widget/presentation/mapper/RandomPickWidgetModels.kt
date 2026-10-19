@@ -6,9 +6,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -21,6 +23,7 @@ import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickResolution
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettingsChange
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSource
+import nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.model.RandomPickWidgetUiModel
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -33,9 +36,9 @@ private class RandomPickWidgetInputs(
 )
 
 /**
- * A picked book emits its text first with the cover pending, then again with its image files. Files that already
- * exist resolve within [IMAGE_HIT_WINDOW] and skip the pending step. A failed resolve is logged and the last
- * model stays.
+ * A picked book emits its text first with the cover pending, then again with its image files, and again whenever
+ * [coverHeightDp] changes. Files that already exist resolve within [IMAGE_HIT_WINDOW] and skip the pending step.
+ * A failed resolve is logged and the last model stays.
  *
  * Each [settingsChanges] emission, which arrives ahead of its matching [changes] one, first shows the loading
  * frame with the eyebrow for the new settings, then the resolved content. If that resolve fails, the model that
@@ -51,8 +54,9 @@ internal fun randomPickWidgetModels(
     changes: Flow<Unit>,
     settingsChanges: Flow<RandomPickSettingsChange> = emptyFlow(),
     resolve: suspend (wantToRead: List<Book>, lists: List<BookList>) -> Result<RandomPickResolution>,
-    coverUri: suspend (Book) -> Uri?,
-    artwork: suspend (Book) -> RandomPickWidgetUiModel.Artwork?,
+    coverUri: suspend (book: Book, coverHeightDp: Int) -> Uri?,
+    coverHeightDp: Flow<Int>,
+    artwork: suspend (Book) -> BookArtworkUiModel?,
 ): Flow<RandomPickWidgetUiModel> = flow {
     var announced: RandomPickSettingsChange? = null
     var lastSettled: RandomPickWidgetUiModel? = null
@@ -105,6 +109,7 @@ internal fun randomPickWidgetModels(
                 inputs = inputs,
                 resolve = resolve,
                 coverUri = coverUri,
+                coverHeightDp = coverHeightDp,
                 artwork = artwork,
             )
 
@@ -119,8 +124,9 @@ internal fun randomPickWidgetModels(
 private suspend fun FlowCollector<RandomPickWidgetUiModel>.resolveInto(
     inputs: RandomPickWidgetInputs,
     resolve: suspend (wantToRead: List<Book>, lists: List<BookList>) -> Result<RandomPickResolution>,
-    coverUri: suspend (Book) -> Uri?,
-    artwork: suspend (Book) -> RandomPickWidgetUiModel.Artwork?,
+    coverUri: suspend (book: Book, coverHeightDp: Int) -> Uri?,
+    coverHeightDp: Flow<Int>,
+    artwork: suspend (Book) -> BookArtworkUiModel?,
 ): Boolean {
     if (inputs.isSignedIn.not()) {
         emit(inputs.model(RandomPickWidgetUiModel.Content.SignedOut))
@@ -148,6 +154,7 @@ private suspend fun FlowCollector<RandomPickWidgetUiModel>.resolveInto(
             inputs = inputs,
             resolution = resolution,
             coverUri = coverUri,
+            coverHeightDp = coverHeightDp,
             artwork = artwork,
         )
     }
@@ -158,8 +165,9 @@ private suspend fun FlowCollector<RandomPickWidgetUiModel>.resolveInto(
 private suspend fun FlowCollector<RandomPickWidgetUiModel>.emitResolved(
     inputs: RandomPickWidgetInputs,
     resolution: RandomPickResolution.Resolved,
-    coverUri: suspend (Book) -> Uri?,
-    artwork: suspend (Book) -> RandomPickWidgetUiModel.Artwork?,
+    coverUri: suspend (book: Book, coverHeightDp: Int) -> Uri?,
+    coverHeightDp: Flow<Int>,
+    artwork: suspend (Book) -> BookArtworkUiModel?,
 ) {
     val eyebrow = eyebrowFor(
         source = resolution.source,
@@ -173,37 +181,64 @@ private suspend fun FlowCollector<RandomPickWidgetUiModel>.emitResolved(
         return
     }
 
-    coroutineScope {
-        val cover = async { coverUri(book) }
-        val art = async { artwork(book) }
+    var shown = false
 
-        val ready = withTimeoutOrNull(IMAGE_HIT_WINDOW) { cover.await() to art.await() }
+    val firstHeight = withTimeoutOrNull(IMAGE_HIT_WINDOW) { coverHeightDp.firstOrNull() }
 
-        if (ready == null) {
-            emit(
-                inputs.model(
-                    picked(
-                        eyebrow = eyebrow,
-                        book = book,
-                        cover = RandomPickWidgetUiModel.Cover.Pending,
-                        artwork = null,
-                    ),
-                ),
-            )
-        }
-
-        val (uri, resolvedArtwork) = ready ?: (cover.await() to art.await())
-
+    if (firstHeight == null) {
         emit(
             inputs.model(
                 picked(
                     eyebrow = eyebrow,
                     book = book,
-                    cover = uri.toCover(),
-                    artwork = resolvedArtwork,
+                    cover = RandomPickWidgetUiModel.Cover.Pending,
+                    artwork = null,
                 ),
             ),
         )
+    }
+
+    coverHeightDp.collectLatest { heightDp ->
+        coroutineScope {
+            val cover = async {
+                coverUri(
+                    book,
+                    heightDp,
+                )
+            }
+
+            val art = async { artwork(book) }
+
+            val ready = withTimeoutOrNull(IMAGE_HIT_WINDOW) { cover.await() to art.await() }
+
+            if (ready == null && shown.not()) {
+                emit(
+                    inputs.model(
+                        picked(
+                            eyebrow = eyebrow,
+                            book = book,
+                            cover = RandomPickWidgetUiModel.Cover.Pending,
+                            artwork = null,
+                        ),
+                    ),
+                )
+            }
+
+            val (uri, resolvedArtwork) = ready ?: (cover.await() to art.await())
+
+            shown = true
+
+            emit(
+                inputs.model(
+                    picked(
+                        eyebrow = eyebrow,
+                        book = book,
+                        cover = uri.toCover(),
+                        artwork = resolvedArtwork,
+                    ),
+                ),
+            )
+        }
     }
 }
 
@@ -216,7 +251,7 @@ private fun picked(
     eyebrow: String,
     book: Book,
     cover: RandomPickWidgetUiModel.Cover,
-    artwork: RandomPickWidgetUiModel.Artwork?,
+    artwork: BookArtworkUiModel?,
 ) = RandomPickWidgetUiModel.Content.Picked(
     eyebrow = eyebrow,
     bookId = book.id,

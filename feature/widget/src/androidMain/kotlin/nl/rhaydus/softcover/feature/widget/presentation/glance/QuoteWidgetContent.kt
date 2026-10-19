@@ -26,7 +26,6 @@ import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.appWidgetBackground
-import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -39,10 +38,7 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
-import androidx.glance.text.FontFamily
-import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
-import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -52,7 +48,9 @@ import nl.rhaydus.softcover.feature.widget.presentation.callback.QuoteRetryCallb
 import nl.rhaydus.softcover.feature.widget.presentation.component.BackdropUris
 import nl.rhaydus.softcover.feature.widget.presentation.component.CYCLE_EYEBROW_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.component.CycleEyebrow
+import nl.rhaydus.softcover.feature.widget.presentation.component.MessageText
 import nl.rhaydus.softcover.feature.widget.presentation.component.RefreshButton
+import nl.rhaydus.softcover.feature.widget.presentation.component.widgetCornerRadius
 import nl.rhaydus.softcover.feature.widget.presentation.model.QuoteWidgetUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.theme.LocalWidgetExtraColors
 import nl.rhaydus.softcover.feature.widget.presentation.theme.SoftcoverWidgetTheme
@@ -106,12 +104,6 @@ internal fun QuoteWidgetContent(
     }
 }
 
-private fun widgetCornerRadius(): GlanceModifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-    GlanceModifier.cornerRadius(android.R.dimen.system_app_widget_background_radius)
-} else {
-    GlanceModifier
-}
-
 @Composable
 private fun Message(
     headline: String,
@@ -125,29 +117,10 @@ private fun Message(
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = headline,
-            style = TextStyle(
-                color = GlanceTheme.colors.onBackground,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif,
-                textAlign = TextAlign.Center,
-            ),
+        MessageText(
+            headline = headline,
+            subline = subline,
         )
-
-        if (subline != null) {
-            Spacer(modifier = GlanceModifier.height(Spacing.xxs))
-
-            Text(
-                text = subline,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurfaceVariant,
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center,
-                ),
-            )
-        }
 
         if (onRefresh != null) RefreshButton(onClick = onRefresh)
     }

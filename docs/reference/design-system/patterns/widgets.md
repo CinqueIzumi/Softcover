@@ -24,13 +24,22 @@
 - Widgets title a book with `Book.displayTitle`: the reader's own edition title, else the book title.
 - `ReservedLinesTitle`: bold 14sp serif centred, up to two lines, holding the height of `reservedLines`
   lines (an invisible text holds it, Glance has no `minLines`).
-- Portrait stacked layout, shared by Currently Reading and Random pick, chosen by the available height
-  (`PORTRAIT_HEIGHTS_DP` 110, 150, 180): eyebrow, cover, title, author, one centred foot row. At 110dp only
-  the cover and the foot row (plus Currently Reading's eyebrow); from 150dp the eyebrow, the title
-  reserving one line and the author; from 180dp the title reserves two lines.
+- `SingleBookWidgetLayout` is the book state of Currently Reading and Random pick; each widget passes only its
+  eyebrow and foot row. Both run on `SizeMode.Exact`, so the layout sees the widget's real size, and picks:
+  - **Stacked** when the widget is not wider than tall: eyebrow, cover (inset `Spacing.xs` each side), title,
+    author, one centred foot row. Under 150dp only the cover and the foot row (plus Currently Reading's
+    eyebrow); from 150dp the eyebrow, the title reserving one line and the author; from 180dp the title
+    reserves two lines.
+  - **Side by side** when wider than tall: the 2:3 cover fills the height at the start, inset `Spacing.xs` from the
+    top, bottom and start edges, and the text column
+    beside it holds the eyebrow, the title (start-aligned, as many of up to three lines as fit) and author
+    centred in the space left, and the foot row. The author drops when not even one title line fits beside it.
+- Message states (loading, signed out, empty) share `WidgetMessage`: a centred serif headline and sans
+  subline.
 - The wavy progress bar is a bitmap pair (`WavyProgressBitmaps`: track, indicator) from a pure
-  `CanvasDrawScope` renderer matching the app's `ProgressBar`, 12dp tall, pre-rendered per width bucket
-  (`progressBarWidthDp`), tinted `secondaryContainer` and `primary`.
+  `CanvasDrawScope` renderer matching the app's `ProgressBar`, 12dp tall, pre-rendered at the bar width
+  (`progressBarWidthDp`) of every size the launcher reports for the instance (`reportedWidgetSizes`, matching
+  what Glance composes) and re-rendered when a resize changes them, tinted `secondaryContainer` and `primary`.
 - Hit boxes grow in width, not height, where height would shrink the covers: Trending's header and page
   row stay 28dp tall with 40dp-wide tune and page targets; the shuffle button is 48dp; the Random pick
   and Currently Reading eyebrows are 28dp, with 40dp-wide cycle arrows (`CycleEyebrow`) on Currently Reading's
@@ -38,9 +47,8 @@
 
 ### Currently Reading widget
 
-- Portrait, min 110 x 180dp, resizable to 110 x 110dp; responsive buckets are widths 110, 180, 250, 320
-  and 390dp (one per launcher cell count) by the portrait heights: 15 sizes, under Android's cap of 16 per
-  responsive widget, so adding a width or height needs another removed. Uses the portrait stacked layout.
+- Min 110 x 180dp, resizable to 110 x 110dp and to any width. Uses `SingleBookWidgetLayout`. Covers render
+  at the tallest cover slot of the reported sizes, again only when that height changes.
 - Anatomy: the same skeleton as Random pick. The eyebrow reads `READING · n/m` (`READING` with one book)
   and, with more than one book, holds ‹ › glyphs at its ends that cycle the shelf (most recently updated
   first, wraps); the choice is kept by book id per instance and falls back to the first. The eyebrow shows
@@ -53,9 +61,8 @@
 
 ### Random pick widget
 
-- Same portrait look and backdrop as Currently Reading (min 110 x 180dp, resizable to 110dp tall); buckets
-  110dp wide by the portrait heights, with the portrait stacked layout and the shuffle button as its foot
-  row.
+- Same look, backdrop, sizing and `SingleBookWidgetLayout` as Currently Reading (min 110 x 180dp, resizable
+  to 110dp tall), with the shuffle button as its foot row. Its eyebrow is left out under 150dp.
 - Eyebrow `WHAT NEXT? · <SOURCE>` (Want to read, Owned, or the list's name), tapping it opens the settings
   activity. The 48dp shuffle button picks again (`ShuffleCallback`).
 - Taps: a picked book opens its detail (`OpenBook(bookId)`); the empty and signed-out states open the Reading

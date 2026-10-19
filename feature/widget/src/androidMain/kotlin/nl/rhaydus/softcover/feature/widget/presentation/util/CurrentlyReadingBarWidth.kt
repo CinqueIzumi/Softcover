@@ -1,46 +1,32 @@
 package nl.rhaydus.softcover.feature.widget.presentation.util
 
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import kotlin.math.roundToInt
-
-internal val WIDGET_WIDTHS_DP = listOf(110, 180, 250, 320, 390)
-
-internal const val COMPACT_HEIGHT_DP = 110
-internal const val TALL_HEIGHT_DP = 150
-internal const val TALLEST_HEIGHT_DP = 180
-
-internal val PORTRAIT_HEIGHTS_DP = listOf(COMPACT_HEIGHT_DP, TALL_HEIGHT_DP, TALLEST_HEIGHT_DP)
 
 internal const val PROGRESS_BAR_HEIGHT_DP = 12
 
+internal const val PROGRESS_ROW_HEIGHT_DP = 40
+
 /** Room for "100%", so the bar and the edit glyph keep their place as the digits change. */
-internal val PROGRESS_LABEL_WIDTH_DP = 34.dp
+internal const val PROGRESS_LABEL_WIDTH_DP = 34
 
 private const val PROGRESS_FIXED_RESERVE_DP = 30
 
-/** The foot row's bar width: the widget minus the column padding, the percent label and the edit glyph. */
-internal fun progressBarWidthDp(widgetWidth: Dp): Int =
-    (widgetWidth - Spacing.xxs * 2 - PROGRESS_LABEL_WIDTH_DP - PROGRESS_FIXED_RESERVE_DP.dp)
+/** The foot row's bar width: the room the layout gives the row, minus the percent label and the edit glyph. */
+internal fun progressBarWidthDp(size: DpSize): Int {
+    val rowWidth = if (isSideBySide(size)) {
+        sideColumnWidthDp(size)
+    } else {
+        size.width.value.toInt() - columnPaddingDp()
+    }
+
+    return (rowWidth.dp - PROGRESS_LABEL_WIDTH_DP.dp - PROGRESS_FIXED_RESERVE_DP.dp)
         .value
         .roundToInt()
         .coerceAtLeast(PROGRESS_BAR_HEIGHT_DP)
-
-internal fun progressBarWidthsDp(): List<Int> = WIDGET_WIDTHS_DP.map { progressBarWidthDp(it.dp) }
-
-internal fun portraitSizes(widthsDp: List<Int>): Set<DpSize> {
-    val sizes = mutableSetOf<DpSize>()
-
-    for (width in widthsDp) {
-        for (height in PORTRAIT_HEIGHTS_DP) {
-            sizes += DpSize(
-                width = width.dp,
-                height = height.dp,
-            )
-        }
-    }
-
-    return sizes
 }
+
+internal fun progressBarWidthsDp(sizes: List<DpSize>): Set<Int> = sizes
+    .map { progressBarWidthDp(it) }
+    .toSet()
