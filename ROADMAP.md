@@ -13,6 +13,16 @@ A few honest caveats:
 
 ---
 
+## 3.2.3: Fresh off the press
+
+Trending looks back as well as ahead, and every widget makes better use of the space you give it.
+
+- **Just out.** Trending can show the books released in the past week, month, 3 months or 6 months.
+- **The right release date.** A new edition of an older book is badged with that edition's release, and its book page says when the book was first published.
+- **Quotes with their book.** Quote of the day sits over the cover and title of the edition the quote came from, with text sized to fit.
+- **Room to breathe.** Currently Reading and Random pick lay out side by side when wide, and Trending fits its covers to the widget with room for a two-line title and the author.
+- **Steadier updates.** Widgets refresh in the background without running out of their update allowance.
+
 ## 3.3.0: The reading record
 
 Everything you might want to record about a book, and every statistic that comes out of it. What you keep private never leaves your device.
