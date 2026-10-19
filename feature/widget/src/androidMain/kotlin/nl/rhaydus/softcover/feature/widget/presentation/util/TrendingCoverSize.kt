@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.widget.presentation.util
 
+import androidx.compose.ui.unit.DpSize
+
 /** Height at or above which a cell stacks its text under the cover instead of beside it. */
 internal const val STACKED_MIN_HEIGHT_DP = 150
 
@@ -25,6 +27,15 @@ internal fun trendingCoverHeightDp(
     return minOf(
         fitsHeight,
         fitsWidth,
+    )
+}
+
+/** The tallest [trendingCoverHeightDp] over [sizes], without the page row so it never undershoots a drawn cover. */
+internal fun trendingCoverHeightDp(sizes: List<DpSize>): Int = tallestOf(sizes) { size ->
+    trendingCoverHeightDp(
+        widgetHeightDp = size.height.value.toInt(),
+        widgetWidthDp = size.width.value.toInt(),
+        showsPageRow = false,
     )
 }
 

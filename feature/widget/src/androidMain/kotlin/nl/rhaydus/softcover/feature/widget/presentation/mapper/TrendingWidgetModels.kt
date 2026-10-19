@@ -9,10 +9,12 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -48,9 +50,9 @@ private class TrendingWidgetInputs(
  * [position] re-emits on every settings or page change, because a live Glance session does not re-run
  * `provideGlance`. [observeTrending] arrives ordered by rank.
  *
- * Each input emits the page with its covers pending, then again with their [coverUri]s. Covers that resolve
- * within [COVER_HIT_WINDOW] skip the pending step. Once the page is shown, the neighbouring pages' covers are
- * resolved in the background so a page turn finds them ready.
+ * Each input emits the page with its covers pending, then again with their [coverUri]s, and again whenever
+ * [coverHeightDp] changes. Covers that resolve within [COVER_HIT_WINDOW] skip the pending step. Once the page is
+ * shown, the neighbouring pages' covers are resolved in the background so a page turn finds them ready.
  *
  * An empty ranking shows the loader, with the eyebrow of the feed, until [fetchStatus] says the feed has had data,
  * so [TrendingWidgetUiModel.Content.Empty] means a fetch finished with nothing, and
@@ -71,7 +73,8 @@ internal fun trendingWidgetModels(
     fetchStatus: (TrendingFeed) -> Flow<TrendingFeedFetchStatus>,
     eyebrowFor: (TrendingFeed) -> String,
     emptyHeadlineFor: (TrendingFeed) -> String,
-    coverUri: suspend (Book) -> Uri?,
+    coverUri: suspend (book: Book, coverHeightDp: Int) -> Uri?,
+    coverHeightDp: Flow<Int>,
 ): Flow<TrendingWidgetUiModel> {
     val positionedBooks = position.flatMapLatest { current ->
         combine(
@@ -127,6 +130,7 @@ internal fun trendingWidgetModels(
                     eyebrowFor = eyebrowFor,
                     emptyHeadlineFor = emptyHeadlineFor,
                     coverUri = coverUri,
+                    coverHeightDp = coverHeightDp,
                 )
             },
         )
@@ -137,7 +141,8 @@ private suspend fun FlowCollector<TrendingWidgetUiModel>.emitRanking(
     inputs: TrendingWidgetInputs,
     eyebrowFor: (TrendingFeed) -> String,
     emptyHeadlineFor: (TrendingFeed) -> String,
-    coverUri: suspend (Book) -> Uri?,
+    coverUri: suspend (book: Book, coverHeightDp: Int) -> Uri?,
+    coverHeightDp: Flow<Int>,
 ) {
     if (inputs.isSignedIn.not()) {
         emit(inputs.model(TrendingWidgetUiModel.Content.SignedOut))
@@ -170,28 +175,12 @@ private suspend fun FlowCollector<TrendingWidgetUiModel>.emitRanking(
         pageCount = pages,
     )
 
-    coroutineScope {
-        val shown = top.pageBooks(page)
-        val covers = shown.map { book -> async { coverUri(book) } }
+    val shown = top.pageBooks(page)
+    var displayed = false
 
-        val ready = withTimeoutOrNull(COVER_HIT_WINDOW) { covers.awaitAll() }
+    val firstHeight = withTimeoutOrNull(COVER_HIT_WINDOW) { coverHeightDp.firstOrNull() }
 
-        val resolved = ready ?: run {
-            emit(
-                inputs.model(
-                    ranked(
-                        eyebrow = eyebrow,
-                        page = page,
-                        pages = pages,
-                        top = top,
-                        covers = List(shown.size) { TrendingWidgetUiModel.Cover.Pending },
-                    ),
-                ),
-            )
-
-            covers.awaitAll()
-        }
-
+    if (firstHeight == null) {
         emit(
             inputs.model(
                 ranked(
@@ -199,23 +188,75 @@ private suspend fun FlowCollector<TrendingWidgetUiModel>.emitRanking(
                     page = page,
                     pages = pages,
                     top = top,
-                    covers = resolved.map { it.toCover() },
+                    covers = List(shown.size) { TrendingWidgetUiModel.Cover.Pending },
                 ),
             ),
         )
+    }
 
-        listOf(-1, 1)
-            .map { step ->
-                nextPage(
-                    stored = page,
-                    pageCount = pages,
-                    step = step,
+    coverHeightDp.collectLatest { heightDp ->
+        coroutineScope {
+            val covers = shown.map { book ->
+                async {
+                    coverUri(
+                        book,
+                        heightDp,
+                    )
+                }
+            }
+
+            val ready = withTimeoutOrNull(COVER_HIT_WINDOW) { covers.awaitAll() }
+
+            if (ready == null && displayed.not()) {
+                emit(
+                    inputs.model(
+                        ranked(
+                            eyebrow = eyebrow,
+                            page = page,
+                            pages = pages,
+                            top = top,
+                            covers = List(shown.size) { TrendingWidgetUiModel.Cover.Pending },
+                        ),
+                    ),
                 )
             }
-            .distinct()
-            .filter { it != page }
-            .flatMap { top.pageBooks(it) }
-            .forEach { book -> launch { coverUri(book) } }
+
+            val resolved = ready ?: covers.awaitAll()
+
+            displayed = true
+
+            emit(
+                inputs.model(
+                    ranked(
+                        eyebrow = eyebrow,
+                        page = page,
+                        pages = pages,
+                        top = top,
+                        covers = resolved.map { it.toCover() },
+                    ),
+                ),
+            )
+
+            listOf(-1, 1)
+                .map { step ->
+                    nextPage(
+                        stored = page,
+                        pageCount = pages,
+                        step = step,
+                    )
+                }
+                .distinct()
+                .filter { it != page }
+                .flatMap { top.pageBooks(it) }
+                .forEach { book ->
+                    launch {
+                        coverUri(
+                            book,
+                            heightDp,
+                        )
+                    }
+                }
+        }
     }
 }
 

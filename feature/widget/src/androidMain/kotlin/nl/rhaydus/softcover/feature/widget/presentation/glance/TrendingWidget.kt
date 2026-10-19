@@ -1,14 +1,15 @@
 package nl.rhaydus.softcover.feature.widget.presentation.glance
 
 import android.content.Context
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
+import android.os.Bundle
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.state.PreferencesGlanceStateDefinition
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -26,6 +27,8 @@ import nl.rhaydus.softcover.feature.widget.presentation.activity.widgetSettingsI
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageFormat
 import nl.rhaydus.softcover.feature.widget.presentation.mapper.trendingWidgetModels
 import nl.rhaydus.softcover.feature.widget.presentation.model.TrendingWidgetUiModel
+import nl.rhaydus.softcover.feature.widget.presentation.util.providerMinSize
+import nl.rhaydus.softcover.feature.widget.presentation.util.reportedWidgetSizes
 import nl.rhaydus.softcover.feature.widget.presentation.util.trendingCoverHeightDp
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -34,7 +37,7 @@ import kotlin.math.roundToInt
 internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
     override val stateDefinition = PreferencesGlanceStateDefinition
 
-    override val sizeMode = SizeMode.Responsive(TRENDING_SIZES)
+    override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(
         context: Context,
@@ -69,49 +72,58 @@ internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
         val themeConfigurations = environment.getThemeConfiguration()
         val initialTheme = environment.initialTheme(themeConfigurations)
 
-        val coverHeightPx = (COVER_BITMAP_HEIGHT_DP * density).roundToInt()
+        val models = { options: Flow<Bundle> ->
+            trendingWidgetModels(
+                isSignedIn = environment.isSignedIn(),
+                themeConfiguration = themeConfigurations,
+                position = dependencies.observeTrendingChanges()
+                    .onStart { emit(appWidgetId) }
+                    .filter { it == appWidgetId }
+                    .map {
+                        dependencies.getTrendingPosition(appWidgetId = appWidgetId)
+                            .onFailure { error ->
+                                AppLog.e(
+                                    error,
+                                    "Trending position unavailable",
+                                )
+                            }
+                            .getOrNull()
+                    }
+                    .filterNotNull(),
+                settingsChanges = dependencies.observeTrendingSettingsChanges()
+                    .filter { it.appWidgetId == appWidgetId },
+                observeTrending = { feed -> dependencies.observeTrendingFeed(feed = feed) },
+                fetchStatus = { feed -> dependencies.observeTrendingFeedFetching(feed = feed) },
+                eyebrowFor = { feed -> context.getString(feed.eyebrowRes()) },
+                emptyHeadlineFor = { feed -> context.getString(feed.emptyHeadlineRes()) },
+                coverUri = { book, coverHeightDp ->
+                    val coverHeightPx = (coverHeightDp * density).roundToInt()
 
-        val models = trendingWidgetModels(
-            isSignedIn = environment.isSignedIn(),
-            themeConfiguration = themeConfigurations,
-            position = dependencies.observeTrendingChanges()
-                .onStart { emit(appWidgetId) }
-                .filter { it == appWidgetId }
-                .map {
-                    dependencies.getTrendingPosition(appWidgetId = appWidgetId)
-                        .onFailure { error ->
-                            AppLog.e(
-                                error,
-                                "Trending position unavailable",
+                    val source = resolveCoverSource(
+                        edition = book.currentEdition,
+                        defaultEdition = book.defaultEdition,
+                        fallbackCoverUrl = book.coverUrl,
+                    )
+
+                    source?.let {
+                        environment.imageStore.uriFor("trending-cover:v2:$it:$coverHeightPx", WidgetImageFormat.Photo) {
+                            loadCoverBitmap(
+                                context = context,
+                                source = it,
+                                sizePx = coverHeightPx,
                             )
                         }
-                        .getOrNull()
-                }
-                .filterNotNull(),
-            settingsChanges = dependencies.observeTrendingSettingsChanges()
-                .filter { it.appWidgetId == appWidgetId },
-            observeTrending = { feed -> dependencies.observeTrendingFeed(feed = feed) },
-            fetchStatus = { feed -> dependencies.observeTrendingFeedFetching(feed = feed) },
-            eyebrowFor = { feed -> context.getString(feed.eyebrowRes()) },
-            emptyHeadlineFor = { feed -> context.getString(feed.emptyHeadlineRes()) },
-            coverUri = { book ->
-                val source = resolveCoverSource(
-                    edition = book.currentEdition,
-                    defaultEdition = book.defaultEdition,
-                    fallbackCoverUrl = book.coverUrl,
-                )
-
-                source?.let {
-                    environment.imageStore.uriFor("trending-cover:v2:$it:$coverHeightPx", WidgetImageFormat.Photo) {
-                        loadCoverBitmap(
-                            context = context,
-                            source = it,
-                            sizePx = coverHeightPx,
+                    }
+                },
+                coverHeightDp = options
+                    .map { bundle ->
+                        trendingCoverHeightDp(
+                            bundle.reportedWidgetSizes { context.providerMinSize(appWidgetId) },
                         )
                     }
-                }
-            },
-        )
+                    .distinctUntilChanged(),
+            )
+        }
 
         val loadingModel = TrendingWidgetUiModel(
             themeConfiguration = initialTheme,
@@ -131,49 +143,6 @@ internal class TrendingWidget : GlanceAppWidget(), KoinComponent {
             )
         }
     }
-}
-
-private val TRENDING_SIZES = setOf(
-    DpSize(
-        width = 250.dp,
-        height = 110.dp,
-    ),
-    DpSize(
-        width = 320.dp,
-        height = 110.dp,
-    ),
-    DpSize(
-        width = 250.dp,
-        height = 180.dp,
-    ),
-    DpSize(
-        width = 320.dp,
-        height = 180.dp,
-    ),
-    DpSize(
-        width = 250.dp,
-        height = 250.dp,
-    ),
-    DpSize(
-        width = 250.dp,
-        height = 320.dp,
-    ),
-    DpSize(
-        width = 320.dp,
-        height = 250.dp,
-    ),
-    DpSize(
-        width = 320.dp,
-        height = 320.dp,
-    ),
-)
-
-private val COVER_BITMAP_HEIGHT_DP = TRENDING_SIZES.maxOf { size ->
-    trendingCoverHeightDp(
-        widgetHeightDp = size.height.value.toInt(),
-        widgetWidthDp = size.width.value.toInt(),
-        showsPageRow = false,
-    )
 }
 
 private fun TrendingFeed.emptyHeadlineRes(): Int = when (this) {

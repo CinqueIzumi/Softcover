@@ -74,12 +74,12 @@
 
 ### Trending widget
 
-- Landscape, min 250 x 110dp, resizable; buckets 250 and 320dp wide by 110, 180, 250 and 320dp tall, so it grows with the widget. Two books per page
+- Landscape, min 250 x 110dp, resizable, on `SizeMode.Exact`, so the two cells span its real width. Two books per page
   of the period's top ten, with `1/5` and 40dp-wide page chevrons when there is more than one page.
 - Anatomy: a 28dp header (eyebrow, then a 40dp-wide tune target), two book cells, the page row. Under 150dp tall a
   cell puts rank and caption beside the cover; from 150dp it stacks them under it. The cover height fills
   what the header, caption and page row leave, capped so a 2:3 cover fits its cell's width
-  (`trendingCoverHeightDp`). Covers load once at the largest drawn height and every size reuses that bitmap.
+  (`trendingCoverHeightDp`). Covers render at the tallest reported size and re-render on resize.
 - Eyebrow per period: TRENDING THIS WEEK, THIS MONTH, PAST 3 MONTHS, PAST YEAR, ALL TIME.
 - Taps: a cover cell opens the book (`OpenBook`); the eyebrow opens the Explore tab; the tune glyph opens the
   settings activity; the rest opens the Reading tab. Empty: **Nothing is trending yet** / "Check back after the

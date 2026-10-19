@@ -65,7 +65,7 @@ internal fun tallestCoverHeightDp(
     sizes: List<DpSize>,
     eyebrowDp: (heightDp: Int) -> Int,
     footDp: (heightDp: Int) -> Int,
-): Int = sizes.maxOfOrNull { size ->
+): Int = tallestOf(sizes) { size ->
     if (isSideBySide(size)) {
         sideCoverHeightDp(size)
     } else {
@@ -77,7 +77,12 @@ internal fun tallestCoverHeightDp(
             footDp = footDp(heightDp),
         )
     }
-}?.coerceAtLeast(MIN_COVER_HEIGHT_DP) ?: MIN_COVER_HEIGHT_DP
+}
+
+internal fun tallestOf(
+    sizes: List<DpSize>,
+    coverHeightDp: (DpSize) -> Int,
+): Int = sizes.maxOfOrNull(coverHeightDp)?.coerceAtLeast(MIN_COVER_HEIGHT_DP) ?: MIN_COVER_HEIGHT_DP
 
 private const val MIN_COVER_HEIGHT_DP = 1
 private const val SIDE_TITLE_MAX_LINES = 3
