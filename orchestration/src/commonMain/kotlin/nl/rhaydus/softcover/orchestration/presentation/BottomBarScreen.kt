@@ -20,6 +20,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -81,13 +82,26 @@ internal object BottomBarScreen : Screen {
         // surface, so dropping it on full process recreation regresses no existing behaviour.
         val paneBook = remember { mutableStateOf<ScreenDestination.BookDetail?>(null) }
 
-        // Leaving the two-pane while a book is open carries it over as a pushed screen so the reader
-        // doesn't lose it; growing back leaves an already-pushed detail alone (no resize thrash).
+        // Bumped on every open from a list so the pane restarts at that book even when it is already
+        // the pane's root.
+        val paneOpenToken = remember { mutableIntStateOf(0) }
+
+        // The pane stack as destinations, reported by the host so it outlives the pane leaving composition.
+        val paneStack = remember { mutableStateOf<List<ScreenDestination.BookDetail>>(emptyList()) }
+
+        // Leaving the two-pane while a book is open carries the whole pane stack over as pushed screens
+        // so the reader doesn't lose it; growing back leaves an already-pushed detail alone (no resize
+        // thrash).
         LaunchedEffect(widthClass) {
             if (widthClass != WindowWidthClass.EXPANDED) {
                 paneBook.value?.let { carried ->
+                    val carriedStack = paneStack.value
+                        .ifEmpty { listOf(carried) }
+                        .map { appNavigator.screen(it) }
+
                     paneBook.value = null
-                    rootNavigator.push(appNavigator.screen(carried))
+                    paneStack.value = emptyList()
+                    rootNavigator.push(carriedStack)
                 }
             }
         }
@@ -116,6 +130,7 @@ internal object BottomBarScreen : Screen {
             ) {
                 BookDetailPresenter { destination ->
                     if (widthClass == WindowWidthClass.EXPANDED && tabNavigator.current.isDetailCapable()) {
+                        paneOpenToken.intValue++
                         paneBook.value = destination
                     } else {
                         rootNavigator.push(appNavigator.screen(destination))
@@ -173,6 +188,8 @@ internal object BottomBarScreen : Screen {
                                                     destination = destination,
                                                     onClose = { paneBook.value = null },
                                                     overlayNavigator = rootNavigator,
+                                                    openToken = paneOpenToken.intValue,
+                                                    onStackChanged = { paneStack.value = it },
                                                 )
                                             } else {
                                                 EmptyState(
