@@ -10,9 +10,9 @@ then the follow-ups below.
   `recommendations-vibe`, which starts from `origin/release/3.3.0` and hasn't been pushed. Phase 1 has been
   built: the code is reviewed, `styleCheck` passed, and `check koverXmlReport -x lint` passed. No GitHub
   issue exists; the user will file one.
-- **Next:** step 1e, the ranked-list storage rename.
+- **Next:** phase 2, step 2a, designed with the user first.
 - **Open questions:** see `## Risks`.
-- **Uncommitted:** all of phase 1, this tracker, and `ACTIVE.md` pointing at it (in the worktree only).
+- **Uncommitted:** nothing. Phase 1 is committed on the local branch, not pushed.
 
 ## What the API offers
 
@@ -58,7 +58,7 @@ upcoming and recent.
 | 1b | Explore, see below | `softcover-implementer` | [x] |
 | 1c | Tests, see below | two `softcover-test-writer` agents in parallel | [x] |
 | 1d | `styleCheck`, `softcover-reviewer`, `check koverXmlReport -x lint`, then the user's device check | main | [x] |
-| 1e | Rename the shared ranked-list storage, see below | `softcover-implementer`, then `softcover-test-writer` | [ ] |
+| 1e | Rename the shared ranked-list storage, see below | `softcover-implementer`, then `softcover-test-writer` | [x] |
 
 **1a: data.**
 

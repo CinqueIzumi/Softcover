@@ -14,8 +14,8 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.model.BookEntity
 import nl.rhaydus.softcover.core.database.model.ListBookEntity
-import nl.rhaydus.softcover.core.database.model.TrendingBookEntity
-import nl.rhaydus.softcover.core.database.model.TrendingMetaEntity
+import nl.rhaydus.softcover.core.database.model.RankedBookEntity
+import nl.rhaydus.softcover.core.database.model.RankedListMetaEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.domain.model.Book
 import org.junit.jupiter.api.AfterEach
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class BookDaoTrendingTest {
+class BookDaoRankedBooksTest {
     private companion object {
         const val WEEK = "week"
         const val MONTH = "month"
@@ -123,15 +123,15 @@ class BookDaoTrendingTest {
         )
     }
 
-    private suspend fun trendingIds(period: String = WEEK): List<Int> =
-        dao.observeTrendingBooks(period = period).first().map { it.book.id }
+    private suspend fun rankedIds(listKey: String = WEEK): List<Int> =
+        dao.observeRankedBooks(listKey = listKey).first().map { it.book.id }
 
     private suspend fun libraryIds(): List<Int> = dao.observeBooks().first().map { it.book.id }
 
     @Nested
     inner class ObserveBooks {
         @Test
-        fun `excludes books referenced only by trending`() = runTest(testDispatcher) {
+        fun `excludes books referenced only by a ranked list`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
@@ -139,10 +139,10 @@ class BookDaoTrendingTest {
                 userBookId = 10,
                 bookId = 1,
             )
-            dao.upsertTrending(
+            dao.upsertRankedBooks(
                 rows = listOf(
-                    TrendingBookEntity(
-                        period = WEEK,
+                    RankedBookEntity(
+                        listKey = WEEK,
                         bookId = 2,
                         rank = 0,
                     ),
@@ -176,7 +176,7 @@ class BookDaoTrendingTest {
     }
 
     @Nested
-    inner class ReplaceTrendingBooks {
+    inner class ReplaceRankedBooks {
         @Test
         fun `caches the books, ranks them in requested order and records the fetch together`() =
             runTest(testDispatcher) {
@@ -188,16 +188,16 @@ class BookDaoTrendingTest {
                 )
 
                 // ----- Act -----
-                dao.replaceTrendingBooks(
-                    period = WEEK,
+                dao.replaceRankedBooks(
+                    listKey = WEEK,
                     requestedIds = listOf(3, 1, 2),
                     books = books,
                     fetchedAtEpochMillis = 200L,
                 )
 
                 // ----- Assert -----
-                trendingIds() shouldContainExactly listOf(3, 1, 2)
-                dao.getTrendingFetchedAt(period = WEEK) shouldBe 200L
+                rankedIds() shouldContainExactly listOf(3, 1, 2)
+                dao.getRankedListFetchedAt(listKey = WEEK) shouldBe 200L
             }
 
         @Test
@@ -208,15 +208,15 @@ class BookDaoTrendingTest {
                 domainBook(id = 20),
                 domainBook(id = 30),
             )
-            dao.replaceTrendingBooks(
-                period = WEEK,
+            dao.replaceRankedBooks(
+                listKey = WEEK,
                 requestedIds = listOf(30, 10, 20),
                 books = books,
                 fetchedAtEpochMillis = 200L,
             )
 
             // ----- Act -----
-            val ids = dao.getTrendingBookIds(period = WEEK)
+            val ids = dao.getRankedBookIds(listKey = WEEK)
 
             // ----- Assert -----
             ids shouldContainExactly listOf(30, 10, 20)
@@ -231,25 +231,25 @@ class BookDaoTrendingTest {
             )
 
             // ----- Act -----
-            dao.replaceTrendingBooks(
-                period = WEEK,
+            dao.replaceRankedBooks(
+                listKey = WEEK,
                 requestedIds = listOf(1, 4),
                 books = books,
                 fetchedAtEpochMillis = 200L,
             )
 
             // ----- Assert -----
-            trendingIds() shouldContainExactly listOf(1, 9)
+            rankedIds() shouldContainExactly listOf(1, 9)
         }
 
         @Test
-        fun `deletes a book that left trending and is no longer referenced`() = runTest(testDispatcher) {
+        fun `deletes a book that left a ranked list and is no longer referenced`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
-            dao.upsertTrending(
+            dao.upsertRankedBooks(
                 rows = listOf(
-                    TrendingBookEntity(
-                        period = WEEK,
+                    RankedBookEntity(
+                        listKey = WEEK,
                         bookId = 1,
                         rank = 0,
                     ),
@@ -257,8 +257,8 @@ class BookDaoTrendingTest {
             )
 
             // ----- Act -----
-            dao.replaceTrendingBooks(
-                period = WEEK,
+            dao.replaceRankedBooks(
+                listKey = WEEK,
                 requestedIds = listOf(2),
                 books = listOf(domainBook(id = 2)),
                 fetchedAtEpochMillis = 200L,
@@ -267,11 +267,11 @@ class BookDaoTrendingTest {
             // ----- Assert -----
             dao.getBookById(id = 1).shouldBeNull()
             dao.getBookById(id = 2).shouldNotBeNull()
-            trendingIds() shouldContainExactly listOf(2)
+            rankedIds() shouldContainExactly listOf(2)
         }
 
         @Test
-        fun `keeps a book that left trending but is in the library or on a list`() = runTest(testDispatcher) {
+        fun `keeps a book that left a ranked list but is in the library or on a list`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
@@ -280,15 +280,15 @@ class BookDaoTrendingTest {
                 bookId = 1,
             )
             insertListBook(bookId = 2)
-            dao.upsertTrending(
+            dao.upsertRankedBooks(
                 rows = listOf(
-                    TrendingBookEntity(
-                        period = WEEK,
+                    RankedBookEntity(
+                        listKey = WEEK,
                         bookId = 1,
                         rank = 0,
                     ),
-                    TrendingBookEntity(
-                        period = WEEK,
+                    RankedBookEntity(
+                        listKey = WEEK,
                         bookId = 2,
                         rank = 1,
                     ),
@@ -296,8 +296,8 @@ class BookDaoTrendingTest {
             )
 
             // ----- Act -----
-            dao.replaceTrendingBooks(
-                period = WEEK,
+            dao.replaceRankedBooks(
+                listKey = WEEK,
                 requestedIds = listOf(3),
                 books = listOf(domainBook(id = 3)),
                 fetchedAtEpochMillis = 200L,
@@ -309,13 +309,13 @@ class BookDaoTrendingTest {
         }
 
         @Test
-        fun `does not delete an unreferenced book that was never trending`() = runTest(testDispatcher) {
+        fun `does not delete an unreferenced book that was never ranked`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 7)
 
             // ----- Act -----
-            dao.replaceTrendingBooks(
-                period = WEEK,
+            dao.replaceRankedBooks(
+                listKey = WEEK,
                 requestedIds = listOf(1),
                 books = listOf(domainBook(id = 1)),
                 fetchedAtEpochMillis = 200L,
@@ -326,44 +326,44 @@ class BookDaoTrendingTest {
         }
 
         @Test
-        fun `leaves the other periods' rows and fetch time untouched`() = runTest(testDispatcher) {
+        fun `leaves the other lists' rows and fetch time untouched`() = runTest(testDispatcher) {
             // ----- Arrange -----
-            dao.replaceTrendingBooks(
-                period = MONTH,
+            dao.replaceRankedBooks(
+                listKey = MONTH,
                 requestedIds = listOf(5, 6),
                 books = listOf(domainBook(id = 5), domainBook(id = 6)),
                 fetchedAtEpochMillis = 100L,
             )
 
             // ----- Act -----
-            dao.replaceTrendingBooks(
-                period = WEEK,
+            dao.replaceRankedBooks(
+                listKey = WEEK,
                 requestedIds = listOf(1),
                 books = listOf(domainBook(id = 1)),
                 fetchedAtEpochMillis = 200L,
             )
 
             // ----- Assert -----
-            trendingIds(period = MONTH) shouldContainExactly listOf(5, 6)
-            dao.getTrendingFetchedAt(period = MONTH) shouldBe 100L
-            trendingIds(period = WEEK) shouldContainExactly listOf(1)
-            dao.getTrendingFetchedAt(period = WEEK) shouldBe 200L
+            rankedIds(listKey = MONTH) shouldContainExactly listOf(5, 6)
+            dao.getRankedListFetchedAt(listKey = MONTH) shouldBe 100L
+            rankedIds(listKey = WEEK) shouldContainExactly listOf(1)
+            dao.getRankedListFetchedAt(listKey = WEEK) shouldBe 200L
         }
 
         @Test
-        fun `only cleans up books that left the replaced period`() = runTest(testDispatcher) {
+        fun `only cleans up books that left the replaced list`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 5)
-            dao.upsertTrending(
+            dao.upsertRankedBooks(
                 rows = listOf(
-                    TrendingBookEntity(
-                        period = WEEK,
+                    RankedBookEntity(
+                        listKey = WEEK,
                         bookId = 1,
                         rank = 0,
                     ),
-                    TrendingBookEntity(
-                        period = MONTH,
+                    RankedBookEntity(
+                        listKey = MONTH,
                         bookId = 5,
                         rank = 0,
                     ),
@@ -372,8 +372,8 @@ class BookDaoTrendingTest {
             insertBook(id = 7)
 
             // ----- Act -----
-            dao.replaceTrendingBooks(
-                period = WEEK,
+            dao.replaceRankedBooks(
+                listKey = WEEK,
                 requestedIds = listOf(2),
                 books = listOf(domainBook(id = 2)),
                 fetchedAtEpochMillis = 200L,
@@ -386,18 +386,18 @@ class BookDaoTrendingTest {
         }
 
         @Test
-        fun `keeps a book that left one period but still trends in another`() = runTest(testDispatcher) {
+        fun `keeps a book that left one list but is still ranked in another`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
-            dao.upsertTrending(
+            dao.upsertRankedBooks(
                 rows = listOf(
-                    TrendingBookEntity(
-                        period = WEEK,
+                    RankedBookEntity(
+                        listKey = WEEK,
                         bookId = 1,
                         rank = 0,
                     ),
-                    TrendingBookEntity(
-                        period = MONTH,
+                    RankedBookEntity(
+                        listKey = MONTH,
                         bookId = 1,
                         rank = 0,
                     ),
@@ -405,8 +405,8 @@ class BookDaoTrendingTest {
             )
 
             // ----- Act -----
-            dao.replaceTrendingBooks(
-                period = WEEK,
+            dao.replaceRankedBooks(
+                listKey = WEEK,
                 requestedIds = listOf(2),
                 books = listOf(domainBook(id = 2)),
                 fetchedAtEpochMillis = 200L,
@@ -414,22 +414,22 @@ class BookDaoTrendingTest {
 
             // ----- Assert -----
             dao.getBookById(id = 1).shouldNotBeNull()
-            trendingIds(period = MONTH) shouldContainExactly listOf(1)
-            trendingIds(period = WEEK) shouldContainExactly listOf(2)
+            rankedIds(listKey = MONTH) shouldContainExactly listOf(1)
+            rankedIds(listKey = WEEK) shouldContainExactly listOf(2)
         }
     }
 
     @Nested
     inner class OrphanCleanup {
         @Test
-        fun `does not treat a trending book as an orphan`() = runTest(testDispatcher) {
+        fun `does not treat a ranked book as an orphan`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
-            dao.upsertTrending(
+            dao.upsertRankedBooks(
                 rows = listOf(
-                    TrendingBookEntity(
-                        period = WEEK,
+                    RankedBookEntity(
+                        listKey = WEEK,
                         bookId = 1,
                         rank = 0,
                     ),
@@ -450,20 +450,20 @@ class BookDaoTrendingTest {
     @Nested
     inner class RedirectBookId {
         @Test
-        fun `moves a trending row to the new id keeping its rank`() = runTest(testDispatcher) {
+        fun `moves a ranked row to the new id keeping its rank`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
             insertBook(id = 3)
-            dao.upsertTrending(
+            dao.upsertRankedBooks(
                 rows = listOf(
-                    TrendingBookEntity(
-                        period = WEEK,
+                    RankedBookEntity(
+                        listKey = WEEK,
                         bookId = 3,
                         rank = 0,
                     ),
-                    TrendingBookEntity(
-                        period = WEEK,
+                    RankedBookEntity(
+                        listKey = WEEK,
                         bookId = 1,
                         rank = 1,
                     ),
@@ -477,11 +477,11 @@ class BookDaoTrendingTest {
             )
 
             // ----- Assert -----
-            trendingIds() shouldContainExactly listOf(3, 2)
+            rankedIds() shouldContainExactly listOf(3, 2)
         }
 
         @Test
-        fun `drops the old trending rows and keeps the user book when the new id has no book`() =
+        fun `drops the old ranked rows and keeps the user book when the new id has no book`() =
             runTest(testDispatcher) {
                 // ----- Arrange -----
                 insertBook(id = 1)
@@ -489,15 +489,15 @@ class BookDaoTrendingTest {
                     userBookId = 10,
                     bookId = 1,
                 )
-                dao.upsertTrending(
+                dao.upsertRankedBooks(
                     rows = listOf(
-                        TrendingBookEntity(
-                            period = WEEK,
+                        RankedBookEntity(
+                            listKey = WEEK,
                             bookId = 1,
                             rank = 0,
                         ),
-                        TrendingBookEntity(
-                            period = MONTH,
+                        RankedBookEntity(
+                            listKey = MONTH,
                             bookId = 1,
                             rank = 0,
                         ),
@@ -511,25 +511,25 @@ class BookDaoTrendingTest {
                 )
 
                 // ----- Assert -----
-                trendingIds(period = WEEK) shouldContainExactly emptyList()
-                trendingIds(period = MONTH) shouldContainExactly emptyList()
+                rankedIds(listKey = WEEK) shouldContainExactly emptyList()
+                rankedIds(listKey = MONTH) shouldContainExactly emptyList()
                 dao.getBookIdByUserBookId(userBookId = 10) shouldBe 1
             }
 
         @Test
-        fun `moves the trending rows of every period to an existing new book`() = runTest(testDispatcher) {
+        fun `moves the ranked rows of every list to an existing new book`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
             insertBook(id = 2)
-            dao.upsertTrending(
+            dao.upsertRankedBooks(
                 rows = listOf(
-                    TrendingBookEntity(
-                        period = WEEK,
+                    RankedBookEntity(
+                        listKey = WEEK,
                         bookId = 1,
                         rank = 0,
                     ),
-                    TrendingBookEntity(
-                        period = MONTH,
+                    RankedBookEntity(
+                        listKey = MONTH,
                         bookId = 1,
                         rank = 3,
                     ),
@@ -543,25 +543,25 @@ class BookDaoTrendingTest {
             )
 
             // ----- Assert -----
-            trendingIds(period = WEEK) shouldContainExactly listOf(2)
-            trendingIds(period = MONTH) shouldContainExactly listOf(2)
+            rankedIds(listKey = WEEK) shouldContainExactly listOf(2)
+            rankedIds(listKey = MONTH) shouldContainExactly listOf(2)
         }
     }
 
     @Nested
     inner class DeleteAllForUserBookId {
         @Test
-        fun `keeps a book that is still trending`() = runTest(testDispatcher) {
+        fun `keeps a book that is still ranked`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
             insertUserBook(
                 userBookId = 10,
                 bookId = 1,
             )
-            dao.upsertTrending(
+            dao.upsertRankedBooks(
                 rows = listOf(
-                    TrendingBookEntity(
-                        period = WEEK,
+                    RankedBookEntity(
+                        listKey = WEEK,
                         bookId = 1,
                         rank = 0,
                     ),
@@ -572,12 +572,12 @@ class BookDaoTrendingTest {
             dao.deleteAllForUserBookId(userBookId = 10)
 
             // ----- Assert -----
-            trendingIds() shouldContainExactly listOf(1)
+            rankedIds() shouldContainExactly listOf(1)
             dao.getBookIdByUserBookId(userBookId = 10).shouldBeNull()
         }
 
         @Test
-        fun `deletes a book that is not trending`() = runTest(testDispatcher) {
+        fun `deletes a book that is not ranked`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
             insertUserBook(
@@ -596,22 +596,22 @@ class BookDaoTrendingTest {
     @Nested
     inner class DeleteAllLocalData {
         @Test
-        fun `empties both trending tables`() = runTest(testDispatcher) {
+        fun `empties both ranked tables`() = runTest(testDispatcher) {
             // ----- Arrange -----
             insertBook(id = 1)
-            dao.upsertTrending(
+            dao.upsertRankedBooks(
                 rows = listOf(
-                    TrendingBookEntity(
-                        period = WEEK,
+                    RankedBookEntity(
+                        listKey = WEEK,
                         bookId = 1,
                         rank = 0,
                     ),
                 ),
             )
 
-            dao.upsertTrendingMeta(
-                meta = TrendingMetaEntity(
-                    period = WEEK,
+            dao.upsertRankedListMeta(
+                meta = RankedListMetaEntity(
+                    listKey = WEEK,
                     fetchedAtEpochMillis = 100L,
                 ),
             )
@@ -620,8 +620,8 @@ class BookDaoTrendingTest {
             dao.deleteAllLocalData()
 
             // ----- Assert -----
-            trendingIds() shouldContainExactly emptyList()
-            dao.getTrendingFetchedAt(period = WEEK).shouldBeNull()
+            rankedIds() shouldContainExactly emptyList()
+            dao.getRankedListFetchedAt(listKey = WEEK).shouldBeNull()
         }
     }
 }

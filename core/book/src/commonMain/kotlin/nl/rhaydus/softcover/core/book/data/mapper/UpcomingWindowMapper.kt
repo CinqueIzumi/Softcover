@@ -9,5 +9,5 @@ internal fun UpcomingWindow.toMonths(): Int = when (this) {
     UpcomingWindow.Year -> 12
 }
 
-/** Prefixed so an upcoming list shares the trending tables without colliding with a trending period's key. */
+/** Prefixed so an upcoming list shares the ranked_books table without colliding with a trending period's key. */
 internal fun UpcomingWindow.toStorageKey(): String = "upcoming_${name.lowercase()}"

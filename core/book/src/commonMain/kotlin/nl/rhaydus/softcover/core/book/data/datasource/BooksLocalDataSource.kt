@@ -178,35 +178,35 @@ internal class BooksLocalDataSourceImpl(
             .toModelsReusingUnchanged()
 
     override fun observeTrendingBooks(period: TrendingPeriod): Flow<List<Book>> = dao
-        .observeTrendingBooks(period = period.toStorageKey())
+        .observeRankedBooks(listKey = period.toStorageKey())
         .distinctUntilChanged()
         .toModelsReusingUnchanged()
 
     override fun observeTrendingFetchedAt(period: TrendingPeriod): Flow<Instant?> = dao
-        .observeTrendingFetchedAt(period = period.toStorageKey())
+        .observeRankedListFetchedAt(listKey = period.toStorageKey())
         .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
         .distinctUntilChanged()
 
     override suspend fun getTrendingFetchedAt(period: TrendingPeriod): Instant? = dao
-        .getTrendingFetchedAt(period = period.toStorageKey())
+        .getRankedListFetchedAt(listKey = period.toStorageKey())
         ?.let(Instant::fromEpochMilliseconds)
 
     override fun observeUpcomingBooks(window: UpcomingWindow): Flow<List<Book>> = dao
-        .observeTrendingBooks(period = window.toStorageKey())
+        .observeRankedBooks(listKey = window.toStorageKey())
         .distinctUntilChanged()
         .toModelsReusingUnchanged()
 
     override suspend fun getUpcomingBooks(window: UpcomingWindow): List<Book> = dao
-        .getTrendingBooks(period = window.toStorageKey())
+        .getRankedBooks(listKey = window.toStorageKey())
         .map { entity -> entity.toModel() }
 
     override fun observeUpcomingFetchedAt(window: UpcomingWindow): Flow<Instant?> = dao
-        .observeTrendingFetchedAt(period = window.toStorageKey())
+        .observeRankedListFetchedAt(listKey = window.toStorageKey())
         .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
         .distinctUntilChanged()
 
     override suspend fun getUpcomingFetchedAt(window: UpcomingWindow): Instant? = dao
-        .getTrendingFetchedAt(period = window.toStorageKey())
+        .getRankedListFetchedAt(listKey = window.toStorageKey())
         ?.let(Instant::fromEpochMilliseconds)
 
     override suspend fun replaceUpcomingBooks(
@@ -216,8 +216,8 @@ internal class BooksLocalDataSourceImpl(
         fetchedAt: Instant,
     ) {
         deleteStaleCovers(
-            dao.replaceTrendingBooks(
-                period = window.toStorageKey(),
+            dao.replaceRankedBooks(
+                listKey = window.toStorageKey(),
                 requestedIds = requestedIds,
                 books = books,
                 fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
@@ -226,21 +226,21 @@ internal class BooksLocalDataSourceImpl(
     }
 
     override fun observeRecentBooks(window: RecentWindow): Flow<List<Book>> = dao
-        .observeTrendingBooks(period = window.toStorageKey())
+        .observeRankedBooks(listKey = window.toStorageKey())
         .distinctUntilChanged()
         .toModelsReusingUnchanged()
 
     override suspend fun getRecentBooks(window: RecentWindow): List<Book> = dao
-        .getTrendingBooks(period = window.toStorageKey())
+        .getRankedBooks(listKey = window.toStorageKey())
         .map { entity -> entity.toModel() }
 
     override fun observeRecentFetchedAt(window: RecentWindow): Flow<Instant?> = dao
-        .observeTrendingFetchedAt(period = window.toStorageKey())
+        .observeRankedListFetchedAt(listKey = window.toStorageKey())
         .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
         .distinctUntilChanged()
 
     override suspend fun getRecentFetchedAt(window: RecentWindow): Instant? = dao
-        .getTrendingFetchedAt(period = window.toStorageKey())
+        .getRankedListFetchedAt(listKey = window.toStorageKey())
         ?.let(Instant::fromEpochMilliseconds)
 
     override suspend fun replaceRecentBooks(
@@ -250,8 +250,8 @@ internal class BooksLocalDataSourceImpl(
         fetchedAt: Instant,
     ) {
         deleteStaleCovers(
-            dao.replaceTrendingBooks(
-                period = window.toStorageKey(),
+            dao.replaceRankedBooks(
+                listKey = window.toStorageKey(),
                 requestedIds = requestedIds,
                 books = books,
                 fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
@@ -260,20 +260,20 @@ internal class BooksLocalDataSourceImpl(
     }
 
     override fun observeRecommendedBooks(): Flow<List<Book>> = dao
-        .observeTrendingBooks(period = RECOMMENDATIONS_STORAGE_KEY)
+        .observeRankedBooks(listKey = RECOMMENDATIONS_STORAGE_KEY)
         .distinctUntilChanged()
         .toModelsReusingUnchanged()
 
     override suspend fun getRecommendedBookIds(): List<Int> = dao
-        .getTrendingBookIds(period = RECOMMENDATIONS_STORAGE_KEY)
+        .getRankedBookIds(listKey = RECOMMENDATIONS_STORAGE_KEY)
 
     override fun observeRecommendedFetchedAt(): Flow<Instant?> = dao
-        .observeTrendingFetchedAt(period = RECOMMENDATIONS_STORAGE_KEY)
+        .observeRankedListFetchedAt(listKey = RECOMMENDATIONS_STORAGE_KEY)
         .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
         .distinctUntilChanged()
 
     override suspend fun getRecommendedFetchedAt(): Instant? = dao
-        .getTrendingFetchedAt(period = RECOMMENDATIONS_STORAGE_KEY)
+        .getRankedListFetchedAt(listKey = RECOMMENDATIONS_STORAGE_KEY)
         ?.let(Instant::fromEpochMilliseconds)
 
     override suspend fun replaceRecommendedBooks(
@@ -282,8 +282,8 @@ internal class BooksLocalDataSourceImpl(
         fetchedAt: Instant,
     ) {
         deleteStaleCovers(
-            dao.replaceTrendingBooks(
-                period = RECOMMENDATIONS_STORAGE_KEY,
+            dao.replaceRankedBooks(
+                listKey = RECOMMENDATIONS_STORAGE_KEY,
                 requestedIds = requestedIds,
                 books = books,
                 fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
@@ -310,8 +310,8 @@ internal class BooksLocalDataSourceImpl(
         fetchedAt: Instant,
     ) {
         deleteStaleCovers(
-            dao.replaceTrendingBooks(
-                period = period.toStorageKey(),
+            dao.replaceRankedBooks(
+                listKey = period.toStorageKey(),
                 requestedIds = requestedIds,
                 books = books,
                 fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),

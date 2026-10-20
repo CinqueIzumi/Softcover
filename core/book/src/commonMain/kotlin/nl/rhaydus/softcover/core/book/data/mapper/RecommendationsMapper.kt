@@ -17,7 +17,7 @@ internal fun SystemVibe.toVibeSlug(): String = when (this) {
     SystemVibe.TopPicks -> "top-picks"
 }
 
-/** Shares the trending tables without colliding with a trending, upcoming or recent key. */
+/** Shares the ranked_books table without colliding with a trending, upcoming or recent key. */
 internal const val RECOMMENDATIONS_STORAGE_KEY = "recommendations"
 
 /**

@@ -10,5 +10,5 @@ internal fun RecentWindow.toDatePeriod(): DatePeriod = when (this) {
     RecentWindow.SixMonths -> DatePeriod(months = 6)
 }
 
-/** Prefixed so a recent list shares the trending tables without colliding with a trending or upcoming key. */
+/** Prefixed so a recent list shares the ranked_books table without colliding with a trending or upcoming key. */
 internal fun RecentWindow.toStorageKey(): String = "recent_${name.lowercase()}"

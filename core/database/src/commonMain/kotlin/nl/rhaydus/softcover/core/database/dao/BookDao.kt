@@ -28,11 +28,11 @@ import nl.rhaydus.softcover.core.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.database.model.ListBookFull
 import nl.rhaydus.softcover.core.database.model.ListBookPositionRow
 import nl.rhaydus.softcover.core.database.model.ListSignatureRow
+import nl.rhaydus.softcover.core.database.model.RankedBookEntity
+import nl.rhaydus.softcover.core.database.model.RankedListMetaEntity
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
-import nl.rhaydus.softcover.core.database.model.TrendingBookEntity
-import nl.rhaydus.softcover.core.database.model.TrendingMetaEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -583,59 +583,59 @@ interface BookDao {
     @Query("SELECT COUNT(*) FROM list_books WHERE bookId = :bookId")
     suspend fun countListBooksForBook(bookId: Int): Int
 
-    @Query("SELECT COUNT(*) FROM trending_books WHERE bookId = :bookId")
-    suspend fun countTrendingForBook(bookId: Int): Int
+    @Query("SELECT COUNT(*) FROM ranked_books WHERE bookId = :bookId")
+    suspend fun countRankedForBook(bookId: Int): Int
 
-    @Query("DELETE FROM trending_books")
-    suspend fun deleteAllTrendingBooks()
+    @Query("DELETE FROM ranked_books")
+    suspend fun deleteAllRankedBooks()
 
-    @Query("DELETE FROM trending_books WHERE period = :period")
-    suspend fun deleteTrendingBooks(period: String)
+    @Query("DELETE FROM ranked_books WHERE listKey = :listKey")
+    suspend fun deleteRankedBooks(listKey: String)
 
-    @Query("DELETE FROM trending_books WHERE bookId = :bookId")
-    suspend fun deleteTrendingForBook(bookId: Int)
+    @Query("DELETE FROM ranked_books WHERE bookId = :bookId")
+    suspend fun deleteRankedForBook(bookId: Int)
 
-    @Query("DELETE FROM trending_meta")
-    suspend fun deleteTrendingMeta()
-
-    @Upsert
-    suspend fun upsertTrending(rows: List<TrendingBookEntity>)
+    @Query("DELETE FROM ranked_list_meta")
+    suspend fun deleteAllRankedListMeta()
 
     @Upsert
-    suspend fun upsertTrendingMeta(meta: TrendingMetaEntity)
+    suspend fun upsertRankedBooks(rows: List<RankedBookEntity>)
 
-    @Query("SELECT fetchedAtEpochMillis FROM trending_meta WHERE period = :period")
-    fun observeTrendingFetchedAt(period: String): Flow<Long?>
+    @Upsert
+    suspend fun upsertRankedListMeta(meta: RankedListMetaEntity)
 
-    @Query("SELECT fetchedAtEpochMillis FROM trending_meta WHERE period = :period")
-    suspend fun getTrendingFetchedAt(period: String): Long?
+    @Query("SELECT fetchedAtEpochMillis FROM ranked_list_meta WHERE listKey = :listKey")
+    fun observeRankedListFetchedAt(listKey: String): Flow<Long?>
+
+    @Query("SELECT fetchedAtEpochMillis FROM ranked_list_meta WHERE listKey = :listKey")
+    suspend fun getRankedListFetchedAt(listKey: String): Long?
 
     @Transaction
     @Query(
         """
         SELECT b.*
         FROM books b
-        INNER JOIN trending_books tb ON tb.bookId = b.id
-        WHERE tb.period = :period
+        INNER JOIN ranked_books tb ON tb.bookId = b.id
+        WHERE tb.listKey = :listKey
         ORDER BY tb.rank ASC
         """,
     )
-    fun observeTrendingBooks(period: String): Flow<List<BookFullEntity>>
+    fun observeRankedBooks(listKey: String): Flow<List<BookFullEntity>>
 
     @Transaction
     @Query(
         """
         SELECT b.*
         FROM books b
-        INNER JOIN trending_books tb ON tb.bookId = b.id
-        WHERE tb.period = :period
+        INNER JOIN ranked_books tb ON tb.bookId = b.id
+        WHERE tb.listKey = :listKey
         ORDER BY tb.rank ASC
         """,
     )
-    suspend fun getTrendingBooks(period: String): List<BookFullEntity>
+    suspend fun getRankedBooks(listKey: String): List<BookFullEntity>
 
-    @Query("SELECT bookId FROM trending_books WHERE period = :period ORDER BY rank ASC")
-    suspend fun getTrendingBookIds(period: String): List<Int>
+    @Query("SELECT bookId FROM ranked_books WHERE listKey = :listKey ORDER BY rank ASC")
+    suspend fun getRankedBookIds(listKey: String): List<Int>
 
     @Query("SELECT bookId FROM user_books WHERE bookId IN (:bookIds)")
     suspend fun getBookIdsWithUserBook(bookIds: List<Int>): List<Int>
@@ -649,24 +649,24 @@ interface BookDao {
         WHERE b.id IN (:bookIds)
           AND b.id NOT IN (SELECT bookId FROM user_books)
           AND b.id NOT IN (SELECT bookId FROM list_books)
-          AND b.id NOT IN (SELECT bookId FROM trending_books)
+          AND b.id NOT IN (SELECT bookId FROM ranked_books)
         """,
     )
     suspend fun getUnreferencedBookIds(bookIds: List<Int>): List<Int>
 
     /**
-     * Replaces only [period]'s list; other periods keep their rows. Ranks follow [requestedIds];
+     * Replaces only [listKey]'s list; other lists keep their rows. Ranks follow [requestedIds];
      * books returned under an id that was not requested are appended after them in [books] order.
      * Returns the evicted cover paths, as [cacheBooks] does.
      */
     @Transaction
-    suspend fun replaceTrendingBooks(
-        period: String,
+    suspend fun replaceRankedBooks(
+        listKey: String,
         requestedIds: List<Int>,
         books: List<Book>,
         fetchedAtEpochMillis: Long,
     ): List<String> {
-        val previousIds = getTrendingBookIds(period = period)
+        val previousIds = getRankedBookIds(listKey = listKey)
         val evictedPaths = cacheBooks(books = books)
 
         val requested = requestedIds.toSet()
@@ -676,27 +676,27 @@ interface BookDao {
         val rankedIds = candidateIds.filter { it in storedIds }
         val rankedIdSet = rankedIds.toSet()
 
-        deleteTrendingBooks(period = period)
-        upsertTrending(
+        deleteRankedBooks(listKey = listKey)
+        upsertRankedBooks(
             rows = rankedIds.mapIndexed { rank, bookId ->
-                TrendingBookEntity(
-                    period = period,
+                RankedBookEntity(
+                    listKey = listKey,
                     bookId = bookId,
                     rank = rank,
                 )
             },
         )
-        upsertTrendingMeta(
-            meta = TrendingMetaEntity(
-                period = period,
+        upsertRankedListMeta(
+            meta = RankedListMetaEntity(
+                listKey = listKey,
                 fetchedAtEpochMillis = fetchedAtEpochMillis,
             ),
         )
 
-        val leftTrending = previousIds.filterNot { it in rankedIdSet }
+        val leftRanked = previousIds.filterNot { it in rankedIdSet }
 
-        if (leftTrending.isNotEmpty()) {
-            deleteBooksWithChildren(bookIds = getUnreferencedBookIds(bookIds = leftTrending))
+        if (leftRanked.isNotEmpty()) {
+            deleteBooksWithChildren(bookIds = getUnreferencedBookIds(bookIds = leftRanked))
         }
 
         return evictedPaths
@@ -740,7 +740,7 @@ interface BookDao {
         SELECT b.id FROM books b
         WHERE b.id NOT IN (SELECT bookId FROM user_books)
           AND b.id NOT IN (SELECT bookId FROM list_books)
-          AND b.id NOT IN (SELECT bookId FROM trending_books)
+          AND b.id NOT IN (SELECT bookId FROM ranked_books)
         """,
     )
     suspend fun getOrphanBookIds(): List<Int>
@@ -768,8 +768,8 @@ interface BookDao {
         newId: Int,
     )
 
-    @Query("UPDATE OR REPLACE trending_books SET bookId = :newId WHERE bookId = :oldId")
-    suspend fun redirectTrendingBooksBookId(
+    @Query("UPDATE OR REPLACE ranked_books SET bookId = :newId WHERE bookId = :oldId")
+    suspend fun redirectRankedBooksBookId(
         oldId: Int,
         newId: Int,
     )
@@ -783,8 +783,8 @@ interface BookDao {
 
         val newIdHasBook = getExistingBookIds(bookIds = listOf(newId)).isNotEmpty()
 
-        // user_books and trending_books reference books(id); re-pointing at a missing row violates
-        // the foreign key. A user book stays on its old id; cached trending rows are only a cache.
+        // user_books and ranked_books reference books(id); re-pointing at a missing row violates
+        // the foreign key. A user book stays on its old id; cached ranked rows are only a cache.
         if (newIdHasBook) {
             redirectUserBooksBookId(
                 oldId = oldId,
@@ -798,12 +798,12 @@ interface BookDao {
         )
 
         if (newIdHasBook) {
-            redirectTrendingBooksBookId(
+            redirectRankedBooksBookId(
                 oldId = oldId,
                 newId = newId,
             )
         } else {
-            deleteTrendingForBook(bookId = oldId)
+            deleteRankedForBook(bookId = oldId)
         }
     }
 
@@ -845,7 +845,7 @@ interface BookDao {
         deleteUserBookByUserBookId(userBookId)
 
         if (countListBooksForBook(bookId = bookId) > 0) return
-        if (countTrendingForBook(bookId = bookId) > 0) return
+        if (countRankedForBook(bookId = bookId) > 0) return
 
         clearBookAuthors(bookId)
         clearEditionAuthors(bookId)
@@ -877,8 +877,8 @@ interface BookDao {
         deleteAllPendingQuoteWrites()
         deleteAllReadingSessions()
         deleteAllProgressHistory()
-        deleteAllTrendingBooks()
-        deleteTrendingMeta()
+        deleteAllRankedBooks()
+        deleteAllRankedListMeta()
 
         deleteAllUserBooks()
         deleteAllBookEditions()
