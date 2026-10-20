@@ -186,9 +186,8 @@ component/
 **No `*Previews.kt` third file.** Fixtures live on the model's companion via `UiModelPreviews<T>`
 (`:core:component/gallery/`), so forgetting one is a compile error rather than a missing file.
 
-**The gallery splits across two modules.** The registry (`:core:component/gallery/`) is pure data; the
-screen lives in `feature:settings`, because it is a shipped, navigable screen and G1 bans
-`:core:component` from Voyager.
+**The gallery registry is data.** `:core:component/gallery/` holds no screen; the `:showcase` app and the
+design-preset renders read it.
 
 The `core` tier holds two **kinds** of module, and a new one should land deliberately in one bucket:
 

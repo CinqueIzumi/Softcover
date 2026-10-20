@@ -13,7 +13,7 @@ paths:
 - A test earns its place only when input decides output: a mapper, formatter, collector, a `resolve` with a
   real branch, or a fixture list that must cover every variant. Never assert a value you can only get by
   copying a literal out of production code (a style table's dp / alpha / typography, a constructor default).
-  Such a test breaks on every deliberate redesign and catches no regression. The gallery is the visual check.
+  Such a test breaks on every deliberate redesign and catches no regression. The `:showcase` app is the visual check.
 - Every test passes all of these checks, whether it is being written or audited:
   - **Behaviour, not implementation.** If a refactor that keeps behaviour unchanged would break the test, it
     is in the way. Assert observable output, not call order, `verify` on an internal seam, or mock-shaped

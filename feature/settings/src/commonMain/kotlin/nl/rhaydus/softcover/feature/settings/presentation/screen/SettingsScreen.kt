@@ -118,9 +118,6 @@ object SettingsScreen : Screen {
             navigateToRoadmap = {
                 navigator.parent?.push(DocumentPageScreen(DocumentPage.ROADMAP))
             },
-            navigateToComponentGallery = {
-                navigator.parent?.push(ComponentGalleryScreen())
-            },
             libraryVisibilityState = libraryVisibilityState,
             libraryVisibilityRunAction = { action -> libraryVisibilityModel?.runAction(action) },
             roadmapState = roadmapState,
@@ -159,10 +156,7 @@ internal expect val settingsUsesMasterDetail: Boolean
  * [whatsNewState] / [whatsNewRunAction] back the desktop pane's `Roadmap` and `What's new` categories
  * and are null on mobile, which pushes [DocumentPageScreen] through [navigateToRoadmap] /
  * [navigateToWhatsNew] instead; desktop leaves those two unused in favour of its sidebar's category
- * selection. [navigateToComponentGallery]
- * is the inverse: desktop wires it to the master–detail `About` category's own version-footer easter
- * egg (`component-contract.md` § 7.5), while mobile leaves it unused — [AboutScreen], which mobile
- * pushes instead, wires that same gesture to its own navigator directly.
+ * selection.
  */
 @Composable
 internal expect fun SettingsScreenLayout(
@@ -176,7 +170,6 @@ internal expect fun SettingsScreenLayout(
     navigateToAbout: () -> Unit,
     navigateToWhatsNew: () -> Unit,
     navigateToRoadmap: () -> Unit,
-    navigateToComponentGallery: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
     roadmapState: DocumentPageUiState?,

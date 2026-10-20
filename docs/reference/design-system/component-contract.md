@@ -103,10 +103,10 @@ data class ChipUiModel(…) {
 }
 ```
 
-The companion implements `UiModelPreviews<T>` (`gallery/`), keyed by the label the Component Gallery shows;
+The companion implements `UiModelPreviews<T>` (`gallery/`), keyed by the label the `:showcase` app shows;
 `@Preview`s read a fixture by that label. It is required wherever the model is rendered in the gallery or a
 `@Preview`, or its fixtures are read by a test — a model nothing reads carries no companion. The fixtures
-are both the Component Gallery's data and the mappers' expected outputs. Cover the variants, not the
+are both the `:showcase` app's data and the mappers' expected outputs. Cover the variants, not the
 permutations: one fixture per `variant` branch, plus one per decoration that changes the anatomy (a
 truncating title, a missing cover, a selected state). A fixture that differs only in string content is
 noise.
@@ -275,39 +275,19 @@ Consequences:
   `DatePicker`). A modal host's model ships `previews` where R5 requires it, and its own `@Preview`
   functions render from that map.
 
-### 7.5 The Component Gallery
+### 7.5 The `:showcase` app
 
-The gallery is the library's **visual acceptance surface**: every UI model's `previews`, rendered across
-both brightnesses and all five spine colours (§ 2.1). There are no Compose UI tests. The gallery and the
-`:showcase` app, which shows the same registry and the main phone screens and renders both to PNG for the
-design preset, are the visual check. Unit tests cover model logic and fixture coverage, never copied style
-values or defaults (`.claude/rules/tests.md`).
+The `:showcase` app is the library's **visual check**: components run live in it (real sheets, dialogs,
+snackbars, scrolling bars), in any palette and brightness (§ 2.1). There are no Compose UI tests. Unit tests
+cover model logic and fixture coverage, never copied style values or defaults (`.claude/rules/tests.md`).
 
-It is a **shipped easter egg**, rendered on Android, iOS and desktop from `commonMain`:
-
-- **Seven taps on the About screen's version footer**, each within two seconds of the last (a longer pause
-  resets the count). The seventh tap confirms with a haptic and pushes the gallery. The footer gives no
-  hint.
 - **The registry is data in the library.** `GalleryRegistry` (`:core:component/gallery/`) pairs each
-  component with its family and fixtures. A new component adds its entry in the same change.
-- **The screen lives in `feature:settings`**, which pushes it itself from the tap gesture. It has no nav
-  destination and no sidebar row.
+  component with its family and fixtures. A new component adds its entry in the same change, since the
+  registry is also the source of the still renders for the design preset.
+- **Behaviour gets a live demo.** A component that opens, dismisses, scrolls, animates or holds state also
+  adds a demo in `:showcase` in the same change.
 - **The themed region is shared.** `GalleryThemedRegion` in `:core:component`'s `gallery/` takes design-system
-  types (palette, brightness, optional family); `feature:settings` and the `:showcase` app both call it.
-
-**Anatomy.** An intro line, then a "Preview controls" region opened by a `SectionHeader` (Section register) with two
-override chip rows, **Brightness** (`ThemeMode`) and **Spine colour** (`ColorPalette`), each a wrapping row
-of `Chip`s under a bar-less `eyebrowSmall` sub-label. Tapping the selected chip clears the override back to
-the app's own setting (tap-to-toggle-off), and a short gloss line under the rows says so. A third chip row
-filters the sections to one family, with the same toggle-off rule. All three rows stay in the app's own
-look, outside the overridden theme.
-
-Below sits the **themed region**: a `SoftcoverTheme` resolved from the overrides (each falling back to
-`LocalThemeConfiguration` when `null`; dynamic colour forced off whenever a palette override is set),
-wrapping a hairline-bordered, rounded surface filled with that theme's `background`. Inside, each visible
-family gets a `SectionHeader` (Section register), then per component its name and blurb, then each fixture as a small
-label over a tonal tile that constrains the fixture's width and lets it size its own height. The registry is
-never empty, so the frame has no empty state of its own.
+  types (palette, brightness, optional family); `:showcase` and the design-preset renders both call it.
 
 ### 7.6 Where consolidation is the wrong call
 

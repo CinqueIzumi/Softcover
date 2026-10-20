@@ -27,9 +27,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screen.section.Version
  * [onRoadmapClick]) — and closes with `VersionFooter`. About is the
  * app's **one and only** place the version shows: the mobile Settings menu and the desktop sidebar both
  * dropped their own copies specifically so it isn't visible in two places at once, so this is the single
- * call site for it, unconditionally, rather than a per-host toggle. [onComponentGalleryUnlocked] is
- * threaded straight through to that `VersionFooter` (its `onSecretUnlocked`) — see that composable's
- * KDoc for the tap gesture itself.
+ * call site for it, unconditionally, rather than a per-host toggle.
  */
 @Composable
 internal fun AboutContent(
@@ -40,7 +38,6 @@ internal fun AboutContent(
     openUrl: (String) -> Unit,
     onWhatsNewClick: () -> Unit,
     onRoadmapClick: () -> Unit,
-    onComponentGalleryUnlocked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -76,10 +73,7 @@ internal fun AboutContent(
 
         Spacer(modifier = Modifier.height(Spacing.section))
 
-        VersionFooter(
-            versionLabel = versionLabel,
-            onSecretUnlocked = onComponentGalleryUnlocked,
-        )
+        VersionFooter(versionLabel = versionLabel)
     }
 }
 

@@ -31,7 +31,7 @@ internal actual val settingsUsesMasterDetail: Boolean = true
 
 /**
  * Desktop Settings: a category source list beside a detail pane that swaps categories inline. Only
- * Profile, Hidden suggestions and the Component Gallery push a screen; the other `navigateTo*`
+ * Profile and Hidden suggestions push a screen; the other `navigateTo*`
  * callbacks are unused here.
  */
 @Composable
@@ -46,7 +46,6 @@ internal actual fun SettingsScreenLayout(
     navigateToAbout: () -> Unit,
     navigateToWhatsNew: () -> Unit,
     navigateToRoadmap: () -> Unit,
-    navigateToComponentGallery: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
     roadmapState: DocumentPageUiState?,
@@ -132,7 +131,6 @@ internal actual fun SettingsScreenLayout(
                         onRoadmapClick = {
                             settingsRunAction(OnSettingsCategorySelectedAction(category = SettingsCategory.ROADMAP))
                         },
-                        onComponentGalleryUnlocked = navigateToComponentGallery,
                         modifier = Modifier.fillMaxWidth(),
                     )
 

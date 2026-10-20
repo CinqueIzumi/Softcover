@@ -34,7 +34,6 @@ class AboutScreen : Screen {
             onNavigateBack = navigator::pop,
             onWhatsNewClick = { navigator.push(DocumentPageScreen(DocumentPage.WHATS_NEW)) },
             onRoadmapClick = { navigator.push(DocumentPageScreen(DocumentPage.ROADMAP)) },
-            onComponentGalleryUnlocked = { navigator.push(ComponentGalleryScreen()) },
         )
     }
 }
@@ -46,11 +45,6 @@ class AboutScreen : Screen {
  * category. [onWhatsNewClick] and [onRoadmapClick] push [DocumentPageScreen] onto this screen's own
  * navigator, even on desktop, since the master–detail pane's own `About` category selects the `What's
  * new` and `Roadmap` categories through its own callbacks instead (see `SettingsScreenLayout`).
- * [onComponentGalleryUnlocked] fires from the version footer's
- * seven-tap easter egg (`component-contract.md` § 7.5) and, on this standalone page, pushes
- * [ComponentGalleryScreen] onto this screen's own navigator — the master–detail pane's `About`
- * category wires the same gesture to its own local navigator instead (see `section/AboutPane.kt`'s
- * `AboutPane`).
  */
 @Composable
 internal expect fun AboutScreenLayout(
@@ -63,5 +57,4 @@ internal expect fun AboutScreenLayout(
     onNavigateBack: () -> Unit,
     onWhatsNewClick: () -> Unit,
     onRoadmapClick: () -> Unit,
-    onComponentGalleryUnlocked: () -> Unit,
 )

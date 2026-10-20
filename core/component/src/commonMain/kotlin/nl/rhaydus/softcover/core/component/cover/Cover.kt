@@ -227,8 +227,8 @@ fun interface CoverImagePersister {
 }
 
 /**
- * The [CoverImagePersister] in scope, or `null` when nothing should persist — the Component Gallery
- * and every other preview leave this at its default `null` and simply skip persisting.
+ * The [CoverImagePersister] in scope, or `null` when nothing should persist — the `:showcase` app
+ * and every preview leave this at its default `null` and simply skip persisting.
  */
 val LocalCoverImagePersister = staticCompositionLocalOf<CoverImagePersister?> { null }
 

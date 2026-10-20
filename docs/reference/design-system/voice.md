@@ -1,7 +1,7 @@
 # 8. Voice and copy
 
 Every user-facing string follows these rules: labels, headlines, eyebrows, glosses, captions, empty states,
-snackbars, dialogs, notifications and share cards. Previews, the Component Gallery and debug routes are exempt.
+snackbars, dialogs, notifications and share cards. Previews, the `:showcase` app and debug routes are exempt.
 
 ## 8.1 Voice
 

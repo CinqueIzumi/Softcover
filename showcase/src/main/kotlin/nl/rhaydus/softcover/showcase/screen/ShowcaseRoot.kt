@@ -29,7 +29,7 @@ import nl.rhaydus.softcover.showcase.state.ShowcaseUiState
 
 /**
  * The showcase's one screen: a palette, brightness and family switcher in the default look, above the
- * component gallery painted in the chosen one.
+ * component registry painted in the chosen one.
  */
 @Composable
 internal fun ShowcaseRoot(

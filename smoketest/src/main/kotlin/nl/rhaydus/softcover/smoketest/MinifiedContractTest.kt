@@ -227,7 +227,6 @@ class MinifiedContractTest {
             "nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilitySettingsScreen",
             "nl.rhaydus.softcover.feature.settings.presentation.screen.WidgetsSettingsScreen",
             "nl.rhaydus.softcover.feature.settings.presentation.screen.DocumentPageScreen",
-            "nl.rhaydus.softcover.feature.settings.presentation.screen.ComponentGalleryScreen",
             "nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreen",
             "nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen",
             "nl.rhaydus.softcover.feature.book_detail.presentation.screen.FullScreenCoverScreen",
