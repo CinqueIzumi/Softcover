@@ -45,58 +45,76 @@ internal fun DiscoverySections(
         },
     )
 
-    UpNextSection(
-        set = state.upNext.set,
-        header = state.upNextHeader,
-        onBookClick = onBookClick,
-        runAction = runAction,
-    ) { onCardEvent ->
-        rail(
-            ExploreRail.UP_NEXT,
-            state.upNext,
-            onCardEvent,
-        )
-    }
-
     Column {
-        BecauseYouReadSection(
-            header = state.becauseYouReadHeader,
-            genreControl = state.becauseYouReadGenreControl,
-            set = state.becauseYouRead.set,
+        RecommendedSection(
+            header = state.recommendedHeader,
+            set = state.recommended.set,
+            visible = state.recommendedVisible,
             onBookClick = onBookClick,
-            runAction = runAction,
             trailingGap = sectionGap,
         ) { onCardEvent ->
             rail(
-                ExploreRail.BECAUSE_YOU_READ,
-                state.becauseYouRead,
+                ExploreRail.RECOMMENDED,
+                state.recommended,
                 onCardEvent,
             )
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(sectionGap)) {
-            TrendingSection(
-                set = state.trending.set,
-                header = state.trendingHeader,
+            UpNextSection(
+                set = state.upNext.set,
+                header = state.upNextHeader,
                 onBookClick = onBookClick,
+                runAction = runAction,
             ) { onCardEvent ->
                 rail(
-                    ExploreRail.TRENDING,
-                    state.trending,
+                    ExploreRail.UP_NEXT,
+                    state.upNext,
                     onCardEvent,
                 )
             }
 
-            MoodGrid(
-                tiles = state.moodTiles,
-                header = state.moodGridHeader,
-                runAction = runAction,
-            )
+            Column {
+                BecauseYouReadSection(
+                    header = state.becauseYouReadHeader,
+                    genreControl = state.becauseYouReadGenreControl,
+                    set = state.becauseYouRead.set,
+                    onBookClick = onBookClick,
+                    runAction = runAction,
+                    trailingGap = sectionGap,
+                ) { onCardEvent ->
+                    rail(
+                        ExploreRail.BECAUSE_YOU_READ,
+                        state.becauseYouRead,
+                        onCardEvent,
+                    )
+                }
 
-            RecentSearchesSection(
-                chips = state.recentSearchChips,
-                runAction = runAction,
-            )
+                Column(verticalArrangement = Arrangement.spacedBy(sectionGap)) {
+                    TrendingSection(
+                        set = state.trending.set,
+                        header = state.trendingHeader,
+                        onBookClick = onBookClick,
+                    ) { onCardEvent ->
+                        rail(
+                            ExploreRail.TRENDING,
+                            state.trending,
+                            onCardEvent,
+                        )
+                    }
+
+                    MoodGrid(
+                        tiles = state.moodTiles,
+                        header = state.moodGridHeader,
+                        runAction = runAction,
+                    )
+
+                    RecentSearchesSection(
+                        chips = state.recentSearchChips,
+                        runAction = runAction,
+                    )
+                }
+            }
         }
     }
 }

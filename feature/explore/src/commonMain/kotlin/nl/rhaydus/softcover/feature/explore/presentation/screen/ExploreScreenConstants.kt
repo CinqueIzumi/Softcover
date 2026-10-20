@@ -8,6 +8,7 @@ internal const val SEARCH_RESULTS_LOAD_MORE_THRESHOLD = 4
 // Distinct shared-element surfaces so the same book showing up in more than one rail
 // registers a unique key in the SharedTransitionScope.
 internal const val SURFACE_TRENDING = "explore-trending"
+internal const val SURFACE_RECOMMENDED = "explore-recommended"
 internal const val SURFACE_UP_NEXT = "explore-up-next"
 internal const val SURFACE_BECAUSE_YOU_READ = "explore-because-you-read"
 internal const val SURFACE_FEATURED = "explore-featured"

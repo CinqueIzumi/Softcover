@@ -4,8 +4,10 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecommendedFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecommendedBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
@@ -21,6 +23,7 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.GetMoodTagsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetPreviousSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksHasMoreUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.GetRecommendedBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveAllSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveSearchQueryUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchByMoodUseCase
@@ -48,6 +51,9 @@ internal class ExploreScreenScreenModel(
     private val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
     private val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
     private val observeTrendingFetchedAtUseCase: ObserveTrendingFetchedAtUseCase,
+    private val getRecommendedBooksUseCase: GetRecommendedBooksUseCase,
+    private val refreshRecommendedBooksUseCase: RefreshRecommendedBooksUseCase,
+    private val observeRecommendedFetchedAtUseCase: ObserveRecommendedFetchedAtUseCase,
     private val getContinueSeriesBooksUseCase: GetContinueSeriesBooksUseCase,
     private val dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
     private val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
@@ -83,6 +89,9 @@ internal class ExploreScreenScreenModel(
         observeTrendingBooksUseCase = observeTrendingBooksUseCase,
         refreshTrendingBooksUseCase = refreshTrendingBooksUseCase,
         observeTrendingFetchedAtUseCase = observeTrendingFetchedAtUseCase,
+        getRecommendedBooksUseCase = getRecommendedBooksUseCase,
+        refreshRecommendedBooksUseCase = refreshRecommendedBooksUseCase,
+        observeRecommendedFetchedAtUseCase = observeRecommendedFetchedAtUseCase,
         getContinueSeriesBooksUseCase = getContinueSeriesBooksUseCase,
         dismissContinueSeriesBookUseCase = dismissContinueSeriesBookUseCase,
         dismissContinueSeriesUseCase = dismissContinueSeriesUseCase,

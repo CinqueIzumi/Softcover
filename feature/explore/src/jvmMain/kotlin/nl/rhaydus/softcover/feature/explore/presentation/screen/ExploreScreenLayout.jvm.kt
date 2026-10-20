@@ -26,13 +26,13 @@ import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreO
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
 /**
- * Desktop Explore (explore-3a): a full-width discovery surface (no two-pane — a tapped book pushes
+ * Desktop Explore: a full-width discovery surface (no two-pane — a tapped book pushes
  * detail full-screen, see `wideGridTabsUseDetailPane`). A static editorial header carries an explicit
  * Refresh control and the barcode-scan affordance; a persistent [EditorialSearchField] sits beneath it
  * (desktop has no search-focus takeover — the field is always in place, per the foundation's persistent-
  * field pattern for a static editorial header). With the field empty and no mood filter active, the body
- * is the discovery wall: the featured release, then trending / because-you-read / up-next rendered as
- * wrapping multi-column grids ([FlowRow][androidx.compose.foundation.layout.FlowRow] of the shared cards),
+ * is the discovery wall: the featured release, then the recommended, up-next, because-you-read and
+ * trending rails rendered as wrapping multi-column grids ([FlowRow][androidx.compose.foundation.layout.FlowRow] of the shared cards),
  * the mood grid, and recent-search history — all scrolled by a
  * [DesktopVerticalScrollbar][nl.rhaydus.designsystem.component.DesktopVerticalScrollbar]. With a query or
  * mood filter active the body becomes a multi-column results grid. No pager and no pull-to-refresh. The

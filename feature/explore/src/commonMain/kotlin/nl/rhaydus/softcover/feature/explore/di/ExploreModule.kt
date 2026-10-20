@@ -30,6 +30,8 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.GetMoodTagsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetPreviousSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksHasMoreUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.GetRecommendedBooksUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.ObserveOwnedBookIdsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveAllSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveSearchQueryUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchByMoodUseCase
@@ -58,6 +60,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.PreviousQueri
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksHasMoreCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.RecentSearchChipsCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.RecommendedBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.SearchTopBarCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.SortPillCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.TrendingBooksCollector
@@ -95,6 +98,9 @@ val exploreModule = module {
             observeTrendingBooksUseCase = get(),
             refreshTrendingBooksUseCase = get(),
             observeTrendingFetchedAtUseCase = get(),
+            getRecommendedBooksUseCase = get(),
+            refreshRecommendedBooksUseCase = get(),
+            observeRecommendedFetchedAtUseCase = get(),
             getContinueSeriesBooksUseCase = get(),
             dismissContinueSeriesBookUseCase = get(),
             dismissContinueSeriesUseCase = get(),
@@ -126,6 +132,8 @@ val exploreModule = module {
     factory { OfflineStateCollector() } bind ExploreCollector::class
 
     factory { TrendingBooksCollector() } bind ExploreCollector::class
+
+    factory { RecommendedBooksCollector() } bind ExploreCollector::class
 
     factory { ContinueSeriesBooksCollector() } bind ExploreCollector::class
     factory { ContinueSeriesMenuCollector() } bind ExploreCollector::class
@@ -270,9 +278,23 @@ val exploreModule = module {
     factory {
         GetBecauseYouReadBooksUseCase(
             booksRepository = get(),
-            listsRepository = get(),
+            observeOwnedBookIds = get(),
             exploreRepository = get(),
             getBecauseYouReadGenreUseCase = get(),
+        )
+    }
+
+    factory {
+        ObserveOwnedBookIdsUseCase(
+            booksRepository = get(),
+            listsRepository = get(),
+        )
+    }
+
+    factory {
+        GetRecommendedBooksUseCase(
+            observeRecommendedBooks = get(),
+            observeOwnedBookIds = get(),
         )
     }
 

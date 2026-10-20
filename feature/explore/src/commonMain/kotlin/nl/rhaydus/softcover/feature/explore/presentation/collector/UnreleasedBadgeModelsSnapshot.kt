@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 internal data class UnreleasedBadgeModelsSnapshot(
     val featuredUpcomingRelease: Book?,
     val trendingBooks: List<Book>,
+    val recommendedBooks: List<Book>,
     val becauseYouReadBooks: List<Book>,
     val continueSeriesBooks: List<Book>,
     val queriedBooks: List<Book>,

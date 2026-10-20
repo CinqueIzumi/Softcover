@@ -276,6 +276,18 @@ internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.Re
     - runAction: STABLE (function type)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.RecommendedSection(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, set: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, visible: kotlin.Boolean, onBookClick: kotlin.Function2<nl.rhaydus.softcover.core.domain.model.Book, kotlin.String?, kotlin.Unit>, trailingGap: androidx.compose.ui.unit.Dp, rail: @[Composable] androidx.compose.runtime.internal.ComposableFunction1<kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - header: STABLE (marked @Stable or @Immutable)
+    - set: STABLE (marked @Stable or @Immutable)
+    - visible: STABLE (primitive type)
+    - onBookClick: STABLE (function type)
+    - trailingGap: STABLE (marked @Stable or @Immutable)
+    - rail: STABLE (composable function type)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.ScrollToTopWhenResultsReplacedEffect(state: nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState, scrollToTop: kotlin.coroutines.SuspendFunction0<kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true

@@ -42,6 +42,17 @@ internal val TRENDING_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(rail
 
 internal val BECAUSE_YOU_READ_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = bylineColumnStandIns(railStandInCount)
 
+internal val RECOMMENDED_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(railStandInCount) { index ->
+    columnStandInCard(
+        bookId = -(index + 1),
+        coverVariant = CoverVariant.Raised,
+        text = BookCardContent(
+            title = "The Name of the Wind",
+            byline = "By Patrick Rothfuss",
+        ),
+    )
+}.toImmutableList()
+
 internal val UP_NEXT_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(railStandInCount) { index ->
     columnStandInCard(
         bookId = -(index + 1),

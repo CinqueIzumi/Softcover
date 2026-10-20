@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
@@ -19,16 +21,30 @@ internal data object OnRefreshAction : ExploreAction {
 
         dependencies.continueSeriesRefreshTrigger.update { it + 1 }
 
-        dependencies.refreshTrendingBooksUseCase(
-            period = TrendingPeriod.Week,
-            maxAge = Duration.ZERO,
-        )
-            .onFailure { error ->
-                AppLog.e(
-                    error,
-                    "Failed to refresh trending books",
+        coroutineScope {
+            launch {
+                dependencies.refreshTrendingBooksUseCase(
+                    period = TrendingPeriod.Week,
+                    maxAge = Duration.ZERO,
                 )
+                    .onFailure { error ->
+                        AppLog.e(
+                            error,
+                            "Failed to refresh trending books",
+                        )
+                    }
             }
+
+            launch {
+                dependencies.refreshRecommendedBooksUseCase(maxAge = Duration.ZERO)
+                    .onFailure { error ->
+                        AppLog.e(
+                            error,
+                            "Failed to refresh recommended books",
+                        )
+                    }
+            }
+        }
 
         scope.setState { it.copy(isRefreshing = false) }
     }

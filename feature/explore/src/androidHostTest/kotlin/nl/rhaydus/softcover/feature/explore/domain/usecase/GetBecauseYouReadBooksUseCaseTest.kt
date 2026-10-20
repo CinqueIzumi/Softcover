@@ -61,7 +61,10 @@ class GetBecauseYouReadBooksUseCaseTest {
 
         useCase = GetBecauseYouReadBooksUseCase(
             booksRepository = booksRepository,
-            listsRepository = listsRepository,
+            observeOwnedBookIds = ObserveOwnedBookIdsUseCase(
+                booksRepository = booksRepository,
+                listsRepository = listsRepository,
+            ),
             exploreRepository = exploreRepository,
             getBecauseYouReadGenreUseCase = getBecauseYouReadGenreUseCase,
         )

@@ -750,4 +750,79 @@ class BookCardModelsCollectorTest {
                 job.cancel()
             }
     }
+
+    @Nested
+    inner class Recommended {
+        private fun TestScope.launchCollector() = launch {
+            BookCardModelsCollector().onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            )
+        }
+
+        @Test
+        fun `shows loading stand-ins and stays visible while loading with no books`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launchCollector()
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    recommendedBooks = persistentListOf(),
+                    loadingRecommendedBooks = true,
+                )
+
+                // ----- Assert -----
+                val cards = stateFlow.value.recommended.cards
+                cards.isNotEmpty() shouldBe true
+                cards.all { it.isLoading } shouldBe true
+                stateFlow.value.recommendedVisible shouldBe true
+                job.cancel()
+            }
+
+        @Test
+        fun `swaps the stand-ins for real cards in rank order once books arrive`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launchCollector()
+                stateFlow.value = stateFlow.value.copy(
+                    recommendedBooks = persistentListOf(),
+                    loadingRecommendedBooks = true,
+                )
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    recommendedBooks = persistentListOf(
+                        book(id = 7),
+                        book(id = 3),
+                    ),
+                    loadingRecommendedBooks = false,
+                )
+
+                // ----- Assert -----
+                stateFlow.value.recommended.cards.map { it.key } shouldBe listOf(
+                    BookCardKey.Book(bookId = 7),
+                    BookCardKey.Book(bookId = 3),
+                )
+                stateFlow.value.recommendedVisible shouldBe true
+                job.cancel()
+            }
+
+        @Test
+        fun `is hidden with no cards when loaded and empty`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                recommendedBooks = persistentListOf(),
+                loadingRecommendedBooks = false,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.recommended.cards shouldBe persistentListOf()
+            stateFlow.value.recommendedVisible shouldBe false
+            job.cancel()
+        }
+    }
 }
