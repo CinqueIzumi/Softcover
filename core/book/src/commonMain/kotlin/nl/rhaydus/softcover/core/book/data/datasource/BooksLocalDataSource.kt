@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.softcover.core.book.data.mapper.RECOMMENDATIONS_STORAGE_KEY
 import nl.rhaydus.softcover.core.book.data.mapper.toStorageKey
 import nl.rhaydus.softcover.core.book.data.sort.toOrderByFragment
 import nl.rhaydus.softcover.core.book.data.storage.EditionImageStorage
@@ -60,6 +61,20 @@ interface BooksLocalDataSource {
 
     suspend fun replaceRecentBooks(
         window: RecentWindow,
+        requestedIds: List<Int>,
+        books: List<Book>,
+        fetchedAt: Instant,
+    )
+
+    fun observeRecommendedBooks(): Flow<List<Book>>
+
+    suspend fun getRecommendedBookIds(): List<Int>
+
+    fun observeRecommendedFetchedAt(): Flow<Instant?>
+
+    suspend fun getRecommendedFetchedAt(): Instant?
+
+    suspend fun replaceRecommendedBooks(
         requestedIds: List<Int>,
         books: List<Book>,
         fetchedAt: Instant,
@@ -237,6 +252,38 @@ internal class BooksLocalDataSourceImpl(
         deleteStaleCovers(
             dao.replaceTrendingBooks(
                 period = window.toStorageKey(),
+                requestedIds = requestedIds,
+                books = books,
+                fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
+            ),
+        )
+    }
+
+    override fun observeRecommendedBooks(): Flow<List<Book>> = dao
+        .observeTrendingBooks(period = RECOMMENDATIONS_STORAGE_KEY)
+        .distinctUntilChanged()
+        .toModelsReusingUnchanged()
+
+    override suspend fun getRecommendedBookIds(): List<Int> = dao
+        .getTrendingBookIds(period = RECOMMENDATIONS_STORAGE_KEY)
+
+    override fun observeRecommendedFetchedAt(): Flow<Instant?> = dao
+        .observeTrendingFetchedAt(period = RECOMMENDATIONS_STORAGE_KEY)
+        .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
+        .distinctUntilChanged()
+
+    override suspend fun getRecommendedFetchedAt(): Instant? = dao
+        .getTrendingFetchedAt(period = RECOMMENDATIONS_STORAGE_KEY)
+        ?.let(Instant::fromEpochMilliseconds)
+
+    override suspend fun replaceRecommendedBooks(
+        requestedIds: List<Int>,
+        books: List<Book>,
+        fetchedAt: Instant,
+    ) {
+        deleteStaleCovers(
+            dao.replaceTrendingBooks(
+                period = RECOMMENDATIONS_STORAGE_KEY,
                 requestedIds = requestedIds,
                 books = books,
                 fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),

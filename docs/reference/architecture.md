@@ -213,6 +213,9 @@ inline the integers at call sites, and re-confirm with the Hardcover team before
     renamed to the "other" category, which is a real gender bucket in its own right.
   - The bucket also contains **non-person entities** (publishers, design studios, collective
     pseudonyms). Filter them out before charting, or the "other" share reads inflated.
+- **`vibe_type`** (on `vibes`) — **`0` = made by the reader, `1` = Recommendations, `3` = Top Picks,
+  `4` = book club.** Observed in the data, not confirmed by Hardcover; no vibe has type `2`. System vibes are
+  identified by type and slug: `SystemVibe` (`:core:domain`), mapped in one place, `:core:book`'s `RecommendationsMapper`.
 
 ## Platform seams from the foundation
 
@@ -247,6 +250,7 @@ Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core
 - **DataStore**: simple key-value preferences (app settings, search history).
 - **Trending** is cached in Room per `TrendingPeriod`, with a fetched-at stamp; `ObserveTrendingBooksUseCase`
   and `RefreshTrendingBooksUseCase` (`maxAge`) are the one source for Explore, Reading and the widget.
+  Upcoming, recent and recommendations share the same tables under prefixed or named keys.
 - **External navigation.** A surface outside the app (a widget) opens it through
   `ExternalNavigationRequest` (tab, book, book verdict, Focus Mode), encoded by `AppEntryPoint.intent` as a
   `softcover://open/...` URI whose wire names are never derived from enum names. `ExternalNavigationRequests`

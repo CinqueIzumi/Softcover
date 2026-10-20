@@ -201,6 +201,28 @@ class BookDaoTrendingTest {
             }
 
         @Test
+        fun `returns the ids by rank rather than by book id`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val books = listOf(
+                domainBook(id = 10),
+                domainBook(id = 20),
+                domainBook(id = 30),
+            )
+            dao.replaceTrendingBooks(
+                period = WEEK,
+                requestedIds = listOf(30, 10, 20),
+                books = books,
+                fetchedAtEpochMillis = 200L,
+            )
+
+            // ----- Act -----
+            val ids = dao.getTrendingBookIds(period = WEEK)
+
+            // ----- Assert -----
+            ids shouldContainExactly listOf(30, 10, 20)
+        }
+
+        @Test
         fun `appends a book returned under a redirected id after the requested ones`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val books = listOf(

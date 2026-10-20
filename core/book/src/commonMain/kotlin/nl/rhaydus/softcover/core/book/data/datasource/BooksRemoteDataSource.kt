@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
 import nl.rhaydus.softcover.GetLatestUnfinishedReadQuery
 import nl.rhaydus.softcover.GetRecentReleaseIdsQuery
 import nl.rhaydus.softcover.GetSimilarBooksQuery
+import nl.rhaydus.softcover.GetSystemVibeBookIdsQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.GetUpcomingReleaseIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
@@ -46,11 +47,14 @@ import nl.rhaydus.softcover.UpdateUserBookReviewMutation
 import nl.rhaydus.softcover.UpdateUserBookReviewMutation.Data.Update_user_book.User_book.Companion.userBookFragment as updateUserBookReviewUserBookFragment
 import nl.rhaydus.softcover.UpdateUserBookStatusMutation
 import nl.rhaydus.softcover.UpdateUserBookStatusMutation.Data.Update_user_book.User_book.Companion.userBookFragment
+import nl.rhaydus.softcover.core.book.data.mapper.parseCachedBookIds
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
 import nl.rhaydus.softcover.core.book.data.mapper.toDatePeriod
 import nl.rhaydus.softcover.core.book.data.mapper.toMonths
 import nl.rhaydus.softcover.core.book.data.mapper.toTrendingDuration
+import nl.rhaydus.softcover.core.book.data.mapper.toVibeSlug
+import nl.rhaydus.softcover.core.book.data.mapper.toVibeType
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.model.SimilarBookCandidate
@@ -64,11 +68,13 @@ import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.util.localDateOf
+import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.fragment.BookListFragment.Book_series.Companion.bookSeriesFragment
@@ -110,6 +116,15 @@ interface BooksRemoteDataSource {
         window: RecentWindow,
         limit: Int,
     ): List<Int>
+
+    /**
+     * Ids of up to [limit] books from the reader's [vibe], best match first, or `null` when
+     * Hardcover has not generated one yet. Throws when the vibe's id list is malformed.
+     */
+    suspend fun fetchSystemVibeBookIds(
+        vibe: SystemVibe,
+        limit: Int,
+    ): List<Int>?
 
     suspend fun markBookAsWantToRead(
         bookId: Int,
@@ -221,6 +236,7 @@ private const val UPSERT_BOOK_STATUS_FETCHING: String = "fetching"
 internal class BooksRemoteDataSourceImpl(
     private val apolloClient: ApolloClient,
     private val appDispatchers: AppDispatchers,
+    private val getUserIdUseCase: GetUserIdUseCase,
 ) : BooksRemoteDataSource {
     override suspend fun fetchBookById(id: Int): Book {
         val book = fetchBookByIdRaw(id)
@@ -444,6 +460,30 @@ internal class BooksRemoteDataSourceImpl(
             )
             .books
             .map { it.id }
+    }
+
+    override suspend fun fetchSystemVibeBookIds(
+        vibe: SystemVibe,
+        limit: Int,
+    ): List<Int>? {
+        val userId = getUserIdUseCase().getOrThrow()
+
+        val row = apolloClient
+            .safeQuery(
+                query = GetSystemVibeBookIdsQuery(
+                    userId = userId,
+                    vibeType = vibe.toVibeType(),
+                    slug = vibe.toVibeSlug(),
+                ),
+            )
+            .vibes
+            .firstOrNull()
+            ?: return null
+
+        return parseCachedBookIds(
+            cachedBookIds = row.cached_book_ids,
+            limit = limit,
+        )
     }
 
     override suspend fun getEditionsByBookId(

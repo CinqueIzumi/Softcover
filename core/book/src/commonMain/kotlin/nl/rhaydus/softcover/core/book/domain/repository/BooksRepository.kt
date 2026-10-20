@@ -131,6 +131,18 @@ interface BooksRepository {
         maxAge: Duration,
     )
 
+    /** The reader's Hardcover recommendations, best match first. */
+    fun observeRecommendedBooks(): Flow<List<Book>>
+
+    /** When recommendations were last fetched, or `null` if a fetch has never completed. */
+    fun observeRecommendedFetchedAt(): Flow<Instant?>
+
+    /**
+     * Checks the ranked ids only when the last completed fetch is older than [maxAge]. The books are
+     * re-fetched only when the ranking changed, or when [maxAge] is [Duration.ZERO].
+     */
+    suspend fun refreshRecommendedBooks(maxAge: Duration)
+
     /** The most-shelved books releasing within [window], in rank order. */
     fun observeUpcomingBooks(window: UpcomingWindow): Flow<List<Book>>
 

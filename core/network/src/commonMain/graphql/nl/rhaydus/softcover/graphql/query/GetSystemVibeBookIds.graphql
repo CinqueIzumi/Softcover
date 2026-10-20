@@ -1,0 +1,11 @@
+# One named system vibe of the reader; cached_book_ids is a jsonb array of ranked book ids.
+# Filter on the user_id column: the `user` relationship filter returns [].
+query GetSystemVibeBookIds($userId: Int!, $vibeType: Int!, $slug: String!) {
+    vibes(
+        where: {user_id: {_eq: $userId}, vibe_type: {_eq: $vibeType}, slug: {_eq: $slug}}
+        limit: 1
+    ) {
+        id
+        cached_book_ids
+    }
+}

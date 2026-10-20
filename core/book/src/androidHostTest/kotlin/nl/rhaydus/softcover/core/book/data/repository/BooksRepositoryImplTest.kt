@@ -64,6 +64,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -6412,6 +6413,271 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource.fetchRecentBookIds(
                     window = RecentWindow.SixMonths,
                     limit = any(),
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class RefreshRecommendedBooks {
+        private fun recommendedBook(id: Int): Book = mockk(relaxed = true) {
+            every {
+                this@mockk.id
+            } returns id
+        }
+
+        @BeforeEach
+        fun setUpStore() {
+            coEvery {
+                booksLocalDataSource.getRecommendedFetchedAt()
+            } returns null
+
+            coEvery {
+                booksLocalDataSource.getRecommendedBookIds()
+            } returns emptyList()
+
+            coEvery {
+                booksLocalDataSource.getExistingUserBookBookIds(ids = any())
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchSystemVibeBookIds(
+                    vibe = any(),
+                    limit = any(),
+                )
+            } returns emptyList()
+        }
+
+        @Test
+        fun `skips the fetch while the ranking is cached and younger than maxAge`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getRecommendedFetchedAt()
+            } returns Clock.System.now() - 2.hours
+
+            coEvery {
+                booksLocalDataSource.getRecommendedBookIds()
+            } returns listOf(1, 2)
+
+            // ----- Act -----
+            repository.refreshRecommendedBooks(maxAge = 24.hours)
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchSystemVibeBookIds(
+                    vibe = any(),
+                    limit = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `an unchanged ranking is re-stamped without hydrating the books again`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getRecommendedFetchedAt()
+            } returns Clock.System.now() - 2.days
+
+            coEvery {
+                booksLocalDataSource.getRecommendedBookIds()
+            } returns listOf(1, 2)
+
+            coEvery {
+                booksRemoteDataSource.fetchSystemVibeBookIds(
+                    vibe = any(),
+                    limit = any(),
+                )
+            } returns listOf(1, 2)
+
+            // ----- Act -----
+            repository.refreshRecommendedBooks(maxAge = 1.hours)
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchBooksByIds(ids = any())
+            }
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceRecommendedBooks(
+                    requestedIds = listOf(1, 2),
+                    books = emptyList(),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `a reordered ranking is hydrated`() = runTest {
+            // ----- Arrange -----
+            val first = recommendedBook(id = 1)
+            val second = recommendedBook(id = 2)
+
+            coEvery {
+                booksLocalDataSource.getRecommendedFetchedAt()
+            } returns Clock.System.now() - 2.days
+
+            coEvery {
+                booksLocalDataSource.getRecommendedBookIds()
+            } returns listOf(1, 2)
+
+            coEvery {
+                booksRemoteDataSource.fetchSystemVibeBookIds(
+                    vibe = any(),
+                    limit = any(),
+                )
+            } returns listOf(2, 1)
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = any())
+            } returns listOf(second, first)
+
+            // ----- Act -----
+            repository.refreshRecommendedBooks(maxAge = 1.hours)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceRecommendedBooks(
+                    requestedIds = listOf(2, 1),
+                    books = listOf(second, first),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `a forced refresh hydrates even when the ranking is unchanged`() = runTest {
+            // ----- Arrange -----
+            val first = recommendedBook(id = 1)
+
+            coEvery {
+                booksLocalDataSource.getRecommendedFetchedAt()
+            } returns Clock.System.now() - 2.days
+
+            coEvery {
+                booksLocalDataSource.getRecommendedBookIds()
+            } returns listOf(1)
+
+            coEvery {
+                booksRemoteDataSource.fetchSystemVibeBookIds(
+                    vibe = any(),
+                    limit = any(),
+                )
+            } returns listOf(1)
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = any())
+            } returns listOf(first)
+
+            // ----- Act -----
+            repository.refreshRecommendedBooks(maxAge = Duration.ZERO)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchBooksByIds(ids = listOf(1))
+            }
+        }
+
+        @Test
+        fun `a first-ever empty result stamps the fetch time with an empty ranking`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRemoteDataSource.fetchSystemVibeBookIds(
+                    vibe = any(),
+                    limit = any(),
+                )
+            } returns emptyList()
+
+            // ----- Act -----
+            repository.refreshRecommendedBooks(maxAge = 24.hours)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceRecommendedBooks(
+                    requestedIds = emptyList(),
+                    books = emptyList(),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `a first-ever null result stamps the fetch time with an empty ranking`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRemoteDataSource.fetchSystemVibeBookIds(
+                    vibe = any(),
+                    limit = any(),
+                )
+            } returns null
+
+            // ----- Act -----
+            repository.refreshRecommendedBooks(maxAge = 24.hours)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceRecommendedBooks(
+                    requestedIds = emptyList(),
+                    books = emptyList(),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `an empty response keeps the cached ids and re-stamps`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksLocalDataSource.getRecommendedFetchedAt()
+            } returns Clock.System.now() - 2.days
+
+            coEvery {
+                booksLocalDataSource.getRecommendedBookIds()
+            } returns listOf(5, 6)
+
+            // ----- Act -----
+            repository.refreshRecommendedBooks(maxAge = 24.hours)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceRecommendedBooks(
+                    requestedIds = listOf(5, 6),
+                    books = emptyList(),
+                    fetchedAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `does not re-hydrate ids that already have a user_books row`() = runTest {
+            // ----- Arrange -----
+            val fresh = recommendedBook(id = 2)
+
+            coEvery {
+                booksRemoteDataSource.fetchSystemVibeBookIds(
+                    vibe = any(),
+                    limit = any(),
+                )
+            } returns listOf(1, 2)
+
+            coEvery {
+                booksLocalDataSource.getExistingUserBookBookIds(ids = any())
+            } returns listOf(1)
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = any())
+            } returns listOf(fresh)
+
+            // ----- Act -----
+            repository.refreshRecommendedBooks(maxAge = 24.hours)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchBooksByIds(ids = listOf(2))
+            }
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceRecommendedBooks(
+                    requestedIds = listOf(1, 2),
+                    books = listOf(fresh),
+                    fetchedAt = any(),
                 )
             }
         }

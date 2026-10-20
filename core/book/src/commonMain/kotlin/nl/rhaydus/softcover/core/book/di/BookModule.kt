@@ -32,6 +32,8 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecentBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecentFetchedAtUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecommendedBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecommendedFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveShelvedBookIdsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
@@ -42,6 +44,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecentBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecommendedBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshUpcomingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
@@ -58,6 +61,7 @@ import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
 import org.koin.dsl.module
 
@@ -67,12 +71,14 @@ val bookModule = module {
         dispatcherModule,
         databaseModule,
         apolloModule,
+        identityModule,
     )
 
     single<BooksRemoteDataSource> {
         BooksRemoteDataSourceImpl(
             apolloClient = get(),
             appDispatchers = get(),
+            getUserIdUseCase = get(),
         )
     }
 
@@ -165,6 +171,18 @@ val bookModule = module {
 
     factory {
         RefreshRecentBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        ObserveRecommendedBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        ObserveRecommendedFetchedAtUseCase(booksRepository = get())
+    }
+
+    factory {
+        RefreshRecommendedBooksUseCase(booksRepository = get())
     }
 
     factory {

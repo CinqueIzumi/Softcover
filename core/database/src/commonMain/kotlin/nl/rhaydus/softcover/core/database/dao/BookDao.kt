@@ -634,7 +634,7 @@ interface BookDao {
     )
     suspend fun getTrendingBooks(period: String): List<BookFullEntity>
 
-    @Query("SELECT bookId FROM trending_books WHERE period = :period")
+    @Query("SELECT bookId FROM trending_books WHERE period = :period ORDER BY rank ASC")
     suspend fun getTrendingBookIds(period: String): List<Int>
 
     @Query("SELECT bookId FROM user_books WHERE bookId IN (:bookIds)")
