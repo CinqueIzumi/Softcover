@@ -72,6 +72,28 @@ internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardProgressBar(pr
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+public fun nl.rhaydus.softcover.core.component.bookcard.BookCardRail(model: nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel<P of nl.rhaydus.softcover.core.component.bookcard.BookCardRail>, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardRailEvent, kotlin.Unit>, listState: androidx.compose.foundation.lazy.LazyListState, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - listState: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardRailNearEndEffect(listState: androidx.compose.foundation.lazy.LazyListState, cardCount: kotlin.Int, isAppending: kotlin.Boolean, canLoadMore: kotlin.Boolean, showsStandIns: kotlin.Boolean, onNearEnd: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - listState: STABLE (marked @Stable or @Immutable)
+    - cardCount: STABLE (primitive type)
+    - isAppending: STABLE (primitive type)
+    - canLoadMore: STABLE (primitive type)
+    - showsStandIns: STABLE (primitive type)
+    - onNearEnd: STABLE (function type)
+
+@Composable
 internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardRowLayout(model: nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel, variant: nl.rhaydus.softcover.core.component.bookcard.BookCardVariant.Row, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>?): kotlin.Unit
   skippable: true
   restartable: true

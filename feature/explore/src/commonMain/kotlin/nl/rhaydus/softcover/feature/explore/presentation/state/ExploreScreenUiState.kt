@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
@@ -32,10 +33,12 @@ import nl.rhaydus.softcover.feature.explore.presentation.mapper.SEARCH_RESULT_ST
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.TRENDING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.UP_NEXT_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.noSearchResultsEmptyState
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.toRailModel
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSortPillButton
 import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreControlUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesMenuSheetUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardUiModel
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreRail
 import nl.rhaydus.toad.UiState
 
 internal data class ExploreScreenUiState(
@@ -46,9 +49,12 @@ internal data class ExploreScreenUiState(
     val unreleasedCoverOverlays: ImmutableMap<Int, CoverOverlayUiModel> = persistentMapOf(),
     val featuredReleaseBadge: BadgeUiModel? = null,
     // Loading stand-ins until the surface has loaded.
-    val trending: BookCardSet<Book> = BookCardSet.standIns(TRENDING_STAND_IN_CARDS),
-    val becauseYouRead: BookCardSet<Book> = BookCardSet.standIns(BECAUSE_YOU_READ_STAND_IN_CARDS),
-    val upNext: BookCardSet<Book> = BookCardSet.standIns(UP_NEXT_STAND_IN_CARDS),
+    val trending: BookCardRailUiModel<Book> =
+        ExploreRail.TRENDING.toRailModel(set = BookCardSet.standIns(TRENDING_STAND_IN_CARDS)),
+    val becauseYouRead: BookCardRailUiModel<Book> =
+        ExploreRail.BECAUSE_YOU_READ.toRailModel(set = BookCardSet.standIns(BECAUSE_YOU_READ_STAND_IN_CARDS)),
+    val upNext: BookCardRailUiModel<Book> =
+        ExploreRail.UP_NEXT.toRailModel(set = BookCardSet.standIns(UP_NEXT_STAND_IN_CARDS)),
     // Loading stand-ins until the first search lands; a later search keeps the previous results
     // up until its own arrive.
     val searchResults: BookCardSet<Book> = BookCardSet.standIns(SEARCH_RESULT_STAND_IN_CARDS),

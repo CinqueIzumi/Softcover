@@ -44,11 +44,13 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchActivate
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchDismissedAction
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodChipsSnapshot
 import nl.rhaydus.softcover.feature.explore.presentation.collector.RecentSearchChipsSnapshot
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.toRailModel
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSearchResultCard
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toTrendingCard
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ActiveSearchContent
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.EditorialContent
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreOverlays
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreRail
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SearchFocusScreen
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreSearchPhase
@@ -242,11 +244,11 @@ private val previewRecentSearchQueries = persistentListOf(
     "Piranesi",
 )
 
-private val previewMockState = ExploreScreenUiState(
+private fun previewMockState() = ExploreScreenUiState(
     previousSearchQueries = previewRecentSearchQueries,
     recentSearchChips = RecentSearchChipsSnapshot(previousSearchQueries = previewRecentSearchQueries).compute(),
     trendingBooks = ExploreMockData.trending.toImmutableList(),
-    trending = ExploreMockData.trending.toPreviewTrendingSet(),
+    trending = ExploreRail.TRENDING.toRailModel(set = ExploreMockData.trending.toPreviewTrendingSet()),
     loadingTrendingBooks = false,
     continueSeriesBooks = ExploreMockData.continueSeries.toImmutableList(),
     loadingContinueSeriesBooks = false,
@@ -264,7 +266,7 @@ private fun ExploreScreenPreview() {
             onBookClick = { _, _ -> },
             onScanClick = {},
             isOnline = true,
-            state = previewMockState,
+            state = previewMockState(),
         )
     }
 }
@@ -280,7 +282,7 @@ private fun EmptyFirstLaunchExploreScreenPreview() {
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending.toImmutableList(),
-                trending = ExploreMockData.trending.toPreviewTrendingSet(),
+                trending = ExploreRail.TRENDING.toRailModel(set = ExploreMockData.trending.toPreviewTrendingSet()),
                 loadingTrendingBooks = false,
                 continueSeriesBooks = persistentListOf(),
                 loadingContinueSeriesBooks = false,
@@ -330,7 +332,7 @@ private fun LoadingContinueSeriesExploreScreenPreview() {
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending.toImmutableList(),
-                trending = ExploreMockData.trending.toPreviewTrendingSet(),
+                trending = ExploreRail.TRENDING.toRailModel(set = ExploreMockData.trending.toPreviewTrendingSet()),
                 loadingTrendingBooks = false,
                 continueSeriesBooks = persistentListOf(),
                 loadingContinueSeriesBooks = true,
@@ -352,7 +354,7 @@ private fun SearchFocusExploreScreenPreview() {
             onBookClick = { _, _ -> },
             onScanClick = {},
             isOnline = true,
-            state = previewMockState.copy(
+            state = previewMockState().copy(
                 searchFocused = true,
                 moodTags = previewSearchFocusMoodTags.toImmutableList(),
                 moodChips = MoodChipsSnapshot(moodTags = previewSearchFocusMoodTags).compute(),
@@ -370,7 +372,7 @@ private fun OfflineExploreScreenPreview() {
             onBookClick = { _, _ -> },
             onScanClick = {},
             isOnline = false,
-            state = previewMockState,
+            state = previewMockState(),
         )
     }
 }
