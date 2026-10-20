@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.widget.presentation.util
 
 import androidx.compose.ui.unit.DpSize
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import kotlin.math.ceil
 
 internal const val TALL_HEIGHT_DP = 150
 internal const val TALLEST_HEIGHT_DP = 180
@@ -26,23 +27,23 @@ internal fun sideColumnWidthDp(size: DpSize): Int =
 internal fun sideShowsAuthor(
     size: DpSize,
     fixedRowsDp: Int,
-): Boolean = sideColumnHeightDp(size) - fixedRowsDp >= TITLE_LINE_DP + AUTHOR_DP
+    fontScale: Float,
+): Boolean = sideColumnHeightDp(size) - fixedRowsDp >= titleLineDp(fontScale) + authorDp(fontScale)
 
 internal fun sideTitleLines(
     size: DpSize,
     fixedRowsDp: Int,
+    fontScale: Float,
 ): Int {
     val showsAuthor = sideShowsAuthor(
         size = size,
         fixedRowsDp = fixedRowsDp,
+        fontScale = fontScale,
     )
 
-    val author = if (showsAuthor) AUTHOR_DP else 0
+    val author = if (showsAuthor) authorDp(fontScale) else 0
 
-    return ((sideColumnHeightDp(size) - fixedRowsDp - author) / TITLE_LINE_DP).coerceIn(
-        1,
-        SIDE_TITLE_MAX_LINES,
-    )
+    return ((sideColumnHeightDp(size) - fixedRowsDp - author) / titleLineDp(fontScale)).coerceAtLeast(1)
 }
 
 internal fun stackedTitleLines(heightDp: Int): Int = if (heightDp >= TALLEST_HEIGHT_DP) 2 else 1
@@ -85,6 +86,9 @@ internal fun tallestOf(
 ): Int = sizes.maxOfOrNull(coverHeightDp)?.coerceAtLeast(MIN_COVER_HEIGHT_DP) ?: MIN_COVER_HEIGHT_DP
 
 private const val MIN_COVER_HEIGHT_DP = 1
-private const val SIDE_TITLE_MAX_LINES = 3
 private const val TITLE_LINE_DP = 20
 private const val AUTHOR_DP = 16
+
+private fun titleLineDp(fontScale: Float): Int = ceil(TITLE_LINE_DP * fontScale).toInt()
+
+private fun authorDp(fontScale: Float): Int = ceil(AUTHOR_DP * fontScale).toInt()
