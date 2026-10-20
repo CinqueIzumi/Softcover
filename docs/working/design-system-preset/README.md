@@ -8,11 +8,13 @@ No GitHub issue. Branch `design-system-preset` (from `release/3.3.0`, local only
 
 ## Now
 
-- **State:** plan approved 2026-10-21; step 0 done (rule amendments).
-- **Next:** step 1, the token export.
+- **State:** steps 0 and 1 done; reviewer passed step 1.
+- **Next:** step 2, the `:showcase` skeleton.
 - **Open questions:** none.
-- **Uncommitted:** this file, the `ACTIVE.md` line, `.claude/rules/tests.md`, `.claude/rules/showcase.md`,
-  `component-contract.md` § 7.5.
+- **Carry into step 5:** pass the exporter's paths through a `CommandLineArgumentProvider` with declared
+  input/output dirs (they are absolute `args` today); list `exportDesignTokens`, `checkDesignPresetContent`
+  and `testDesignPreset` in `.claude/rules/build-wiring.md`. On the next foundation bump, add
+  `**/jvmDesignPresetTest/**` to the shared detekt test globs and drop the local `FunctionNaming` block.
 
 ## Steps
 
@@ -22,7 +24,7 @@ One step per session. Commits only when the user asks.
   `:showcase` only; the render runner is a generator that asserts nothing and is written by
   `softcover-implementer`. `docs/reference/design-system/component-contract.md:281`: the showcase app and its
   renders join the in-app gallery as the visual check.
-- [ ] **1. Token export (`softcover-implementer`).**
+- [x] **1. Token export (`softcover-implementer`).**
   - Refactor `appTypography()` (`core/designsystem/.../theme/Type.kt:135-157`) into a non-composable
     `buildAppTypography(display, body)`; refresh the stability baseline if it moves.
   - A `jvm().compilations.create("designPreset")` in `:core:designsystem` with `associateWith(main)`, run by a

@@ -129,13 +129,23 @@ fun bodyFontFamily(): FontFamily {
 }
 
 /**
- * The app's Material 3 typography — the baseline scale with the display family on the large/headline
- * roles and the body family on the rest. Composable because the families resolve CMP font resources.
+ * The app's Material 3 typography. Composable because the families resolve CMP font resources; the
+ * scale itself lives in [buildAppTypography].
  */
 @Composable
-internal fun appTypography(): Typography {
-    val display = displayFontFamily()
-    val body = bodyFontFamily()
+internal fun appTypography(): Typography = buildAppTypography(
+    display = displayFontFamily(),
+    body = bodyFontFamily(),
+)
+
+/**
+ * The Material 3 baseline scale with [display] on the display and headline roles and [body] on the
+ * rest. Pure, so the design-token export can build the scale without resolving font resources.
+ */
+internal fun buildAppTypography(
+    display: FontFamily,
+    body: FontFamily,
+): Typography {
     val baseline = Typography()
 
     return Typography(
