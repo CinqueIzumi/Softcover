@@ -8,9 +8,11 @@ No GitHub issue. Branch `design-system-preset` (from `release/3.3.0`, local only
 
 ## Now
 
-- **State:** steps 0 and 1 done; reviewer passed step 1.
-- **Next:** step 2, the `:showcase` skeleton.
+- **State:** steps 0–2 done; reviewer passed step 2.
+- **Next:** step 3, the screen showcase entries.
 - **Open questions:** none.
+- **Carry into step 3:** with Koin in `:showcase`, add `core-common` and inject `AppDispatchers` into
+  `ShowcaseScreenModel` (drop `Dispatchers.Main.immediate` from `ShowcaseScreen`).
 - **Carry into step 5:** pass the exporter's paths through a `CommandLineArgumentProvider` with declared
   input/output dirs (they are absolute `args` today); list `exportDesignTokens`, `checkDesignPresetContent`
   and `testDesignPreset` in `.claude/rules/build-wiring.md`. On the next foundation bump, add
@@ -38,7 +40,7 @@ One step per session. Commits only when the user asks.
   - A content check in root `check`: every token the README and `bundle.css` cite exists, `bundle.css` has no
     raw hex.
   - Tests (`softcover-test-writer`): colour formatting with alpha, role enumeration, the content check.
-- [ ] **2. `:showcase` skeleton (`softcover-implementer`).** Android application module, own applicationId,
+- [x] **2. `:showcase` skeleton (`softcover-implementer`).** Android application module, own applicationId,
   `app` tier in `tierOf` (`build.gradle.kts:367`), excluded from kover aggregation. Move the gallery render loop
   (`feature/settings/.../ComponentGalleryContent.kt:166-286`) into a public composable in `:core:component`,
   used by Settings and the showcase. Opens on a palette × brightness switcher and the component gallery.

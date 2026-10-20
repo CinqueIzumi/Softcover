@@ -292,6 +292,8 @@ It is a **shipped easter egg**, rendered on Android, iOS and desktop from `commo
   component with its family and fixtures. A new component adds its entry in the same change.
 - **The screen lives in `feature:settings`**, which pushes it itself from the tap gesture. It has no nav
   destination and no sidebar row.
+- **The themed region is shared.** `GalleryThemedRegion` in `:core:component`'s `gallery/` takes design-system
+  types (palette, brightness, optional family); `feature:settings` and the `:showcase` app both call it.
 
 **Anatomy.** An intro line, then a "Preview controls" region opened by a `SectionHeader` (Section register) with two
 override chip rows, **Brightness** (`ThemeMode`) and **Spine colour** (`ColorPalette`), each a wrapping row

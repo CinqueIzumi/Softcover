@@ -1,29 +1,20 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipFlow
 import nl.rhaydus.softcover.core.component.chip.ChipSet
-import nl.rhaydus.softcover.core.component.gallery.GalleryEntry
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
-import nl.rhaydus.softcover.core.component.gallery.GalleryFixture
-import nl.rhaydus.softcover.core.component.gallery.GalleryRegistry
+import nl.rhaydus.softcover.core.component.gallery.GalleryThemedRegion
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
@@ -76,7 +67,7 @@ internal fun ComponentGalleryContent(
 
         Spacer(modifier = Modifier.height(Spacing.section))
 
-        GalleryThemedRegion(state = state)
+        GalleryPreview(state = state)
     }
 }
 // endregion
@@ -156,15 +147,11 @@ private fun GalleryControlLabel(text: String) {
 // endregion
 // region Themed region
 /**
- * Everything a reader previews sits inside its own framed paper rather than bleeding into the page:
- * a [SoftcoverTheme] resolved from [state]'s overrides (falling back to [LocalThemeConfiguration] —
- * the app's own current setting — wherever an override is `null`), painted onto a hairline-bordered
- * [Surface] filled with that theme's own `background`. The border and independent fill are what let the
- * reader see the previewed palette's paper as a distinct spread, not as a continuation of the chrome
- * above (which stays in the app's own look throughout).
+ * The previewed gallery: [state]'s overrides, each falling back to [LocalThemeConfiguration] (the app's
+ * own current setting) where `null`.
  */
 @Composable
-private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
+private fun GalleryPreview(state: ComponentGalleryUiState) {
     val configuration = LocalThemeConfiguration.current
 
     val themeMode = state.themeModeOverride ?: configuration.themeMode
@@ -172,116 +159,12 @@ private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
     // Dynamic colour replaces the chosen palette outright (see SoftcoverTheme's KDoc) — so once a
     // palette override is in effect here, dynamic colour must step aside, or the wallpaper scheme
     // would silently override the override right back.
-    val dynamicColor = configuration.useDynamicColor && state.paletteOverride == null
-
-    SoftcoverTheme(
+    GalleryThemedRegion(
         palette = state.resolvedPalette,
         brightness = themeMode.toSchemeBrightness(systemInDark = isSystemInDarkTheme()),
-        dynamicColor = dynamicColor,
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = Corners.xl,
-            color = MaterialTheme.colorScheme.background,
-            contentColor = MaterialTheme.colorScheme.onBackground,
-            border = BorderStroke(
-                1.dp,
-                MaterialTheme.colorScheme.outlineVariant,
-            ),
-        ) {
-            Column(modifier = Modifier.padding(Spacing.xl)) {
-                val visibleFamilies = GalleryFamily.entries.filter {
-                    state.selectedFamily == null || it == state.selectedFamily
-                }
-
-                visibleFamilies.forEachIndexed { index, family ->
-                    if (index > 0) Spacer(modifier = Modifier.height(Spacing.section))
-
-                    GalleryFamilySection(
-                        family = family,
-                        header = state.familySectionHeaders.getValue(family),
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun GalleryFamilySection(
-    family: GalleryFamily,
-    header: SectionHeaderUiModel,
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        SectionHeader(model = header)
-
-        Spacer(modifier = Modifier.height(Spacing.md))
-
-        val entries = GalleryRegistry.entries.filter { it.family == family }
-
-        entries.forEachIndexed { index, entry ->
-            if (index > 0) Spacer(modifier = Modifier.height(Spacing.xxxl))
-
-            GalleryEntrySection(entry = entry)
-        }
-    }
-}
-
-@Composable
-private fun GalleryEntrySection(entry: GalleryEntry) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        SoftcoverText(
-            text = entry.name,
-            style = MaterialTheme.editorialTypography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.xxs))
-
-        SoftcoverText(
-            text = entry.blurb,
-            style = MaterialTheme.editorialTypography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.md))
-
-        entry.fixtures.forEachIndexed { index, fixture ->
-            if (index > 0) Spacer(modifier = Modifier.height(Spacing.md))
-
-            GalleryFixtureFrame(fixture = fixture)
-        }
-    }
-}
-
-/**
- * One fixture's frame: its label, quiet and small, above a [Surface] tile that constrains the
- * fixture's *width* (via the [Modifier] handed to [GalleryFixture.render]) while leaving its height to
- * the fixture itself — a chip sizes to a line, a card sizes to its own body, and neither is stretched
- * or clipped to match its neighbours.
- */
-@Composable
-private fun GalleryFixtureFrame(fixture: GalleryFixture) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        SoftcoverText(
-            text = fixture.label.uppercase(),
-            style = MaterialTheme.editorialTypography.eyebrowSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.xs))
-
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = Corners.md,
-            color = MaterialTheme.colorScheme.surfaceContainerLow,
-        ) {
-            fixture.render(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(Spacing.md),
-            )
-        }
-    }
+        sectionHeaders = state.familySectionHeaders,
+        family = state.selectedFamily,
+        dynamicColor = configuration.useDynamicColor && state.paletteOverride == null,
+    )
 }
 // endregion

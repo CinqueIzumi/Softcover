@@ -906,6 +906,28 @@ private fun nl.rhaydus.softcover.core.component.gallery.GalleryDatePicker(model:
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+private fun nl.rhaydus.softcover.core.component.gallery.GalleryEntrySection(entry: nl.rhaydus.softcover.core.component.gallery.GalleryEntry): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - entry: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.gallery.GalleryFamilySection(family: nl.rhaydus.softcover.core.component.gallery.GalleryFamily, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - family: STABLE (class with no mutable properties)
+    - header: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.gallery.GalleryFixtureFrame(fixture: nl.rhaydus.softcover.core.component.gallery.GalleryFixture): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - fixture: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.core.component.gallery.GallerySheetFrame(scaffold: nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel, modifier: androidx.compose.ui.Modifier, lazyBody: kotlin.Boolean, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
@@ -914,6 +936,18 @@ internal fun nl.rhaydus.softcover.core.component.gallery.GallerySheetFrame(scaff
     - modifier: STABLE (marked @Stable or @Immutable)
     - lazyBody: STABLE (primitive type)
     - content: STABLE (composable function type)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.gallery.GalleryThemedRegion(palette: nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette, brightness: nl.rhaydus.softcover.core.designsystem.presentation.theme.SchemeBrightness, sectionHeaders: kotlinx.collections.immutable.ImmutableMap<nl.rhaydus.softcover.core.component.gallery.GalleryFamily, nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel>, modifier: androidx.compose.ui.Modifier, family: nl.rhaydus.softcover.core.component.gallery.GalleryFamily?, dynamicColor: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - palette: STABLE (class with no mutable properties)
+    - brightness: STABLE (class with no mutable properties)
+    - sectionHeaders: STABLE (known stable type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - family: STABLE (class with no mutable properties)
+    - dynamicColor: STABLE (primitive type)
 
 @Composable
 public fun nl.rhaydus.softcover.core.component.haptics.rememberReorderHaptics(): nl.rhaydus.softcover.core.component.haptics.ReorderHaptics

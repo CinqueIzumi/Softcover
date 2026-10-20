@@ -27,11 +27,12 @@ plugins {
 
 // Code coverage. Kover is applied to every shipped module (below) and aggregated into a single XML
 // report at the root — `./gradlew koverXmlReport` → build/reports/kover/report.xml — which CI uploads
-// to Codecov. Build tooling is not shipped code, so it is excluded from the report: :detekt-rules, and
-// :core:designsystem's design-token exporter (the `preset` package).
+// to Codecov. Build tooling is not shipped code, so it is excluded from the report: :detekt-rules, the
+// :showcase app (a design-preset renderer, not the product) and :core:designsystem's design-token exporter
+// (the `preset` package).
 dependencies {
     subprojects
-        .filter { it.path != ":detekt-rules" }
+        .filter { it.path != ":detekt-rules" && it.path != ":showcase" }
         .forEach { kover(it) }
 }
 
@@ -102,7 +103,7 @@ subprojects {
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
     // Coverage instrumentation for every shipped module; the merged report is wired at the root above.
-    if (path != ":detekt-rules") {
+    if (path != ":detekt-rules" && path != ":showcase") {
         apply(plugin = "org.jetbrains.kotlinx.kover")
     }
 
@@ -395,7 +396,7 @@ fun tierOf(path: String): String? = when {
     path.startsWith(":core:") -> "core"
     path.startsWith(":feature:") -> "feature"
     path == ":orchestration" -> "orchestration"
-    path == ":app" || path == ":desktopApp" -> "app"
+    path == ":app" || path == ":desktopApp" || path == ":showcase" -> "app"
     else -> null
 }
 

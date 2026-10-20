@@ -69,7 +69,7 @@ only on modules **below** its tier.
 
 | Tier | Modules |
 |------|---------|
-| T3 app shell | `:app` |
+| T3 app shell | `:app`, `:showcase` (the design-preset showcase app; depends on `:core:designsystem` and `:core:component` only) |
 | T3 orchestration | `:orchestration` |
 | T1 features | `:feature:{lists, profile, onboarding, explore, library, book_detail, reading, session, scan, settings, app_update, widget}` |
 | T0 core | `:core:{domain, database, network, notification, preferences, identity, book, lists, deadlines, personal, profile, connectivity, designsystem, component, uibinding, presentation}` |
