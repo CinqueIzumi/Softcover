@@ -8,6 +8,8 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.button.PillButtonContent
 import nl.rhaydus.softcover.core.component.button.PillButtonTone
@@ -52,8 +54,11 @@ import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.core.uibinding.session.ConfirmedPause
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.BOOK_REVIEW_STAND_INS
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.SIMILAR_BOOKS_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.editionCountHeaderFor
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.similarBooksCardWidth
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 import nl.rhaydus.toad.UiState
 
@@ -142,6 +147,10 @@ internal data class BookDetailUiState(
         eyebrow = "Reviews",
         headline = "What readers think",
     ),
+    val similarBooksSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Similar books",
+        headline = "If you liked this",
+    ),
     val findItLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Find it"),
     val tagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Tags"),
     val yourTagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Your tags"),
@@ -211,6 +220,25 @@ internal data class BookDetailUiState(
     val ownedCoverBadge: BadgeUiModel? = null,
 
     val reviews: ImmutableList<BookReviewUiModel> = BOOK_REVIEW_STAND_INS,
+
+    /**
+     * The Similar books rail, mapped by `SimilarBooksRailCollector`; loading stand-ins until the first page
+     * lands, and no cards once it came back empty or failed, which collapses the section.
+     */
+    val similarBooks: BookCardRailUiModel<BookDetailAction> = BookCardRailUiModel(
+        set = BookCardSet.standIns(SIMILAR_BOOKS_STAND_IN_CARDS),
+        cardWidth = similarBooksCardWidth(),
+        staggerKey = "similar:$bookId",
+    ),
+
+    /** The ids of the similar books loaded so far, in rank order; `null` until the first page has settled. */
+    val similarBookIds: ImmutableList<Int>? = null,
+
+    /** A similar-books page request is running. */
+    val isLoadingSimilarBooks: Boolean = false,
+
+    /** The ranking has pages left to request. */
+    val similarBooksHasMore: Boolean = true,
 
     /** The reviews footer's "avg across N ratings" line; `null` without ratings. */
     val reviewsSummary: String? = null,

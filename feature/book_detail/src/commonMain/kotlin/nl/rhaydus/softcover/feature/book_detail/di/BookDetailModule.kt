@@ -59,6 +59,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReviewsSu
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShareCardsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShelveControlHeaderCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShelveReadingStatusCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.SimilarBooksLoadCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.SimilarBooksRailCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagChipModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorChipModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorSheetCollector
@@ -98,6 +100,8 @@ val bookDetailModule = module {
     factory { OfflineStateCollector() } bind BookDetailCollector::class
     factory { BookDeadlineCollector() } bind BookDetailCollector::class
     factory { ReviewsSummaryCollector() } bind BookDetailCollector::class
+    factory { SimilarBooksLoadCollector() } bind BookDetailCollector::class
+    factory { SimilarBooksRailCollector() } bind BookDetailCollector::class
     factory { UnreleasedBadgeCollector() } bind BookDetailCollector::class
     factory { ExternalLinksCollector() } bind BookDetailCollector::class
     factory { CalloutsCollector() } bind BookDetailCollector::class
@@ -243,6 +247,8 @@ val bookDetailModule = module {
             deleteQuoteUseCase = get(),
             observeBookQuotesUseCase = get(),
             refreshBookQuotesUseCase = get(),
+            loadSimilarBooksPageUseCase = get(),
+            observeShelvedBookIdsUseCase = get(),
         )
     }
 }

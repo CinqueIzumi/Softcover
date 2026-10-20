@@ -158,6 +158,10 @@ class BookDetailScreen(
                     )
                 }
 
+                is BookDetailEvent.OpenSimilarBookEvent -> {
+                    navigator.push(item = appNavigator.screen(it.destination))
+                }
+
                 is BookDetailEvent.ShelfChangedEvent,
                 is BookDetailEvent.ProgressUpdatedEvent,
                 is BookDetailEvent.MutationSucceededEvent,
