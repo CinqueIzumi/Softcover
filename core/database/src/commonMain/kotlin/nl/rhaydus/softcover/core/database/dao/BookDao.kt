@@ -640,6 +640,9 @@ interface BookDao {
     @Query("SELECT bookId FROM user_books WHERE bookId IN (:bookIds)")
     suspend fun getBookIdsWithUserBook(bookIds: List<Int>): List<Int>
 
+    @Query("SELECT bookId FROM user_books WHERE bookId IN (:bookIds)")
+    fun observeBookIdsWithUserBook(bookIds: List<Int>): Flow<List<Int>>
+
     @Query(
         """
         SELECT b.id FROM books b

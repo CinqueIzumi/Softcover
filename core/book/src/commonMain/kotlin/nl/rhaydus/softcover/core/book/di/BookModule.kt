@@ -7,9 +7,11 @@ import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.repository.BooksRepositoryImpl
+import nl.rhaydus.softcover.core.book.data.repository.SimilarBooksRepositoryImpl
 import nl.rhaydus.softcover.core.book.data.sync.OfflineUserBookSyncImpl
 import nl.rhaydus.softcover.core.book.data.sync.UserBookCacheGate
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.book.domain.repository.SimilarBooksRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.CommitBookRemovalUseCase
@@ -23,12 +25,14 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedBooksByStatusUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.LoadSimilarBooksPageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecentBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecentFetchedAtUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveShelvedBookIdsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUpcomingBooksUseCase
@@ -85,6 +89,21 @@ val bookModule = module {
             networkAvailability = get(),
             applicationScope = get(),
         )
+    }
+
+    single<SimilarBooksRepository> {
+        SimilarBooksRepositoryImpl(
+            booksRemoteDataSource = get(),
+            booksLocalDataSource = get(),
+        )
+    }
+
+    factory {
+        LoadSimilarBooksPageUseCase(similarBooksRepository = get())
+    }
+
+    factory {
+        ObserveShelvedBookIdsUseCase(similarBooksRepository = get())
     }
 
     single<BooksRepository> {

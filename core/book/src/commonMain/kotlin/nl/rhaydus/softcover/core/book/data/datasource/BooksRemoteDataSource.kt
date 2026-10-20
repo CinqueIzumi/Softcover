@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.GetEditionsByIdsQuery.Data.Edition.Companion.edition
 import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
 import nl.rhaydus.softcover.GetLatestUnfinishedReadQuery
 import nl.rhaydus.softcover.GetRecentReleaseIdsQuery
+import nl.rhaydus.softcover.GetSimilarBooksQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.GetUpcomingReleaseIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
@@ -52,6 +53,8 @@ import nl.rhaydus.softcover.core.book.data.mapper.toMonths
 import nl.rhaydus.softcover.core.book.data.mapper.toTrendingDuration
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.core.book.domain.model.SimilarBookCandidate
+import nl.rhaydus.softcover.core.book.domain.model.SimilarBookSeed
 import nl.rhaydus.softcover.core.book.domain.model.UnfinishedRead
 import nl.rhaydus.softcover.core.database.mapper.reviewSlateFromDocument
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -68,6 +71,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.util.localDateOf
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
+import nl.rhaydus.softcover.fragment.BookListFragment.Book_series.Companion.bookSeriesFragment
 import nl.rhaydus.softcover.type.DatesReadInput
 import nl.rhaydus.softcover.type.UserBookCreateInput
 import nl.rhaydus.softcover.type.UserBookUpdateInput
@@ -88,6 +92,10 @@ interface BooksRemoteDataSource {
         ids: List<Int>,
         forceNetwork: Boolean = false,
     ): List<Book>
+
+    suspend fun fetchSimilarBookSeed(bookId: Int): SimilarBookSeed
+
+    suspend fun fetchSimilarCandidates(ids: List<Int>): List<SimilarBookCandidate>
 
     suspend fun fetchTrendingBookIds(period: TrendingPeriod): List<Int>
 
@@ -349,6 +357,49 @@ internal class BooksRemoteDataSourceImpl(
             )
 
             result.books.mapNotNull { it.booksByIdsBookDetailFragment()?.toBook() }
+        }
+    }
+
+    override suspend fun fetchSimilarBookSeed(bookId: Int): SimilarBookSeed {
+        val result = apolloClient.safeQuery(
+            query = GetSimilarBooksQuery(bookId = bookId),
+            fetchPolicy = FetchPolicy.CacheFirst,
+        )
+
+        val raw = result.books.firstOrNull() ?: throw BookNotFoundException(bookId = bookId)
+
+        val sourceSeries = raw.book_series.mapNotNull { it.series }
+
+        return SimilarBookSeed(
+            sourceBookId = bookId,
+            sourceCanonicalId = raw.canonical?.id,
+            rankedIds = raw.cached_similar_book_ids.toBookIds(),
+            excludedSeriesBookIds = sourceSeries.flatMap { series -> series.book_series.map { it.book_id } }.toSet(),
+            sourceSeriesIds = sourceSeries.map { it.id }.toSet(),
+        )
+    }
+
+    // The series ids come from the raw rows because Book.bookSeries keeps only the first series.
+    override suspend fun fetchSimilarCandidates(ids: List<Int>): List<SimilarBookCandidate> {
+        if (ids.isEmpty()) return emptyList()
+
+        return ids.chunked(BATCH_ID_LIMIT).flatMap { chunk ->
+            val result = apolloClient.safeQuery(
+                query = GetBooksByIdsQuery(ids = chunk),
+                fetchPolicy = FetchPolicy.CacheFirst,
+            )
+
+            result.books.mapNotNull { raw ->
+                val detail = raw.booksByIdsBookDetailFragment() ?: return@mapNotNull null
+                val book = detail.toBook() ?: return@mapNotNull null
+
+                SimilarBookCandidate(
+                    book = book,
+                    seriesIds = detail.book_series
+                        .mapNotNull { it.bookSeriesFragment()?.series?.id }
+                        .toSet(),
+                )
+            }
         }
     }
 
@@ -873,3 +924,8 @@ internal class BooksRemoteDataSourceImpl(
         )
     }
 }
+
+// jsonb is unmapped, so the ids arrive as whatever the JSON decoder produced.
+private fun Any?.toBookIds(): List<Int> = (this as? List<*>)
+    .orEmpty()
+    .mapNotNull { (it as? Number)?.toInt() ?: (it as? String)?.toIntOrNull() }
