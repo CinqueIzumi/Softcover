@@ -278,8 +278,9 @@ Consequences:
 ### 7.5 The Component Gallery
 
 The gallery is the library's **visual acceptance surface**: every UI model's `previews`, rendered across
-both brightnesses and all five spine colours (§ 2.1). There are no Compose UI tests; the gallery is the
-visual check. Unit tests cover model logic and fixture coverage, never copied style
+both brightnesses and all five spine colours (§ 2.1). There are no Compose UI tests. The gallery and the
+`:showcase` app, which shows the same registry and the main phone screens and renders both to PNG for the
+design preset, are the visual check. Unit tests cover model logic and fixture coverage, never copied style
 values or defaults (`.claude/rules/tests.md`).
 
 It is a **shipped easter egg**, rendered on Android, iOS and desktop from `commonMain`:

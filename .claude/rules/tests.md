@@ -30,7 +30,7 @@ paths:
 - Test sources are gated by ktlint and detekt like main sources; see `.claude/rules/kotlin-style.md`.
 - Fakes are MockK stubs of only the public surface the code under test calls (e.g. `safeQuery`/
   `safeMutation` via `mockkStatic`) — never MockServer, WireMock, embedded servers, or new test
-  dependencies.
+  dependencies. The one exception is `:showcase`'s render runner: `.claude/rules/showcase.md`.
 
 ## Device suite (minified)
 
