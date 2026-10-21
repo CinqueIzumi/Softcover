@@ -17,8 +17,14 @@ internal fun SystemVibe.toVibeSlug(): String = when (this) {
     SystemVibe.TopPicks -> "top-picks"
 }
 
-/** Shares the ranked_books table without colliding with a trending, upcoming or recent key. */
-internal const val RECOMMENDATIONS_STORAGE_KEY = "recommendations"
+/**
+ * Shares the ranked_books table without colliding with a trending, upcoming or recent key. The keys are
+ * persisted: renaming one orphans every cached ranking under the old key.
+ */
+internal fun SystemVibe.toStorageKey(): String = when (this) {
+    SystemVibe.Recommendations -> "recommendations"
+    SystemVibe.TopPicks -> "top-picks"
+}
 
 /**
  * Throws [UnexpectedApiException] when [cachedBookIds] is not a list; elements that are not ids are skipped.

@@ -13,10 +13,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecommendedBooksUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.lists.domain.usecase.RefreshRecommendedFeedUseCase
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
@@ -30,14 +30,14 @@ import kotlin.time.Duration
 
 class OnRefreshActionTest {
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
-    private lateinit var refreshRecommendedBooksUseCase: RefreshRecommendedBooksUseCase
+    private lateinit var refreshRecommendedFeedUseCase: RefreshRecommendedFeedUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     @BeforeEach
     fun setUp() {
         refreshLibraryUseCase = mockk()
-        refreshRecommendedBooksUseCase = mockk()
+        refreshRecommendedFeedUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -54,8 +54,8 @@ class OnRefreshActionTest {
             } returns refreshLibraryUseCase
 
             every {
-                mock.refreshRecommendedBooksUseCase
-            } returns refreshRecommendedBooksUseCase
+                mock.refreshRecommendedFeedUseCase
+            } returns refreshRecommendedFeedUseCase
 
             every {
                 mock.coroutineScope
@@ -146,7 +146,7 @@ class OnRefreshActionTest {
             } returns Result.success(Unit)
 
             coEvery {
-                refreshRecommendedBooksUseCase(maxAge = any())
+                refreshRecommendedFeedUseCase(maxAge = any())
             } returns Result.success(Unit)
 
             val action = OnRefreshAction()
@@ -159,7 +159,7 @@ class OnRefreshActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                refreshRecommendedBooksUseCase(maxAge = Duration.ZERO)
+                refreshRecommendedFeedUseCase(maxAge = Duration.ZERO)
             }
         }
 
@@ -179,7 +179,7 @@ class OnRefreshActionTest {
             } returns Result.success(Unit)
 
             coEvery {
-                refreshRecommendedBooksUseCase(maxAge = any())
+                refreshRecommendedFeedUseCase(maxAge = any())
             } coAnswers { pending.await() }
 
             val action = OnRefreshAction()
@@ -220,7 +220,7 @@ class OnRefreshActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                refreshRecommendedBooksUseCase(maxAge = any())
+                refreshRecommendedFeedUseCase(maxAge = any())
             }
         }
     }

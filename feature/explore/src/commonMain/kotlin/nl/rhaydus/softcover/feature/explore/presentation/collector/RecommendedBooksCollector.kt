@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
+import nl.rhaydus.softcover.feature.explore.presentation.state.toRecommendedHeader
 import nl.rhaydus.toad.ActionScope
 
 internal class RecommendedBooksCollector : ExploreCollector {
@@ -18,6 +19,7 @@ internal class RecommendedBooksCollector : ExploreCollector {
                     it.copy(
                         recommendedBooks = feed.books.toImmutableList(),
                         loadingRecommendedBooks = feed.isLoading,
+                        recommendedHeader = feed.source.toRecommendedHeader(isLoading = feed.isLoading),
                     )
                 }
             }

@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetRecommendedBooksUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveOwnedBookIdsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveRecommendedFeedUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.RefreshRecommendedFeedUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.ReorderListBooksUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
@@ -89,7 +90,7 @@ val listsModule = module {
 
     factory {
         GetRecommendedBooksUseCase(
-            observeRecommendedBooks = get(),
+            observeSystemVibeBooks = get(),
             observeOwnedBookIds = get(),
         )
     }
@@ -97,8 +98,12 @@ val listsModule = module {
     factory {
         ObserveRecommendedFeedUseCase(
             getRecommendedBooks = get(),
-            observeRecommendedFetchedAt = get(),
-            refreshRecommendedBooks = get(),
+            observeSystemVibeFetchedAt = get(),
+            refreshSystemVibeBooks = get(),
         )
+    }
+
+    factory {
+        RefreshRecommendedFeedUseCase(refreshSystemVibeBooks = get())
     }
 }

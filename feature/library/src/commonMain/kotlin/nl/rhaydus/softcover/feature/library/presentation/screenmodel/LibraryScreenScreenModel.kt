@@ -10,13 +10,13 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecommendedBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveRecommendedFeedUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.RefreshRecommendedFeedUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.ReorderListBooksUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetListRankedUseCase
@@ -65,7 +65,7 @@ internal class LibraryScreenScreenModel(
     private val reorderListBooksUseCase: ReorderListBooksUseCase,
     private val setListRankedUseCase: SetListRankedUseCase,
     private val observeRecommendedFeedUseCase: ObserveRecommendedFeedUseCase,
-    private val refreshRecommendedBooksUseCase: RefreshRecommendedBooksUseCase,
+    private val refreshRecommendedFeedUseCase: RefreshRecommendedFeedUseCase,
     appDispatchers: AppDispatchers,
     flows: List<LibraryCollector>,
 ) : ToadScreenModel<LibraryUiState, LibraryEvent, LibraryDependencies, LibraryCollector, LibraryLocalVariables>(
@@ -100,7 +100,7 @@ internal class LibraryScreenScreenModel(
         reorderListBooksUseCase = reorderListBooksUseCase,
         setListRankedUseCase = setListRankedUseCase,
         observeRecommendedFeedUseCase = observeRecommendedFeedUseCase,
-        refreshRecommendedBooksUseCase = refreshRecommendedBooksUseCase,
+        refreshRecommendedFeedUseCase = refreshRecommendedFeedUseCase,
         mainDispatcher = appDispatchers.main,
         defaultDispatcher = appDispatchers.default,
         coroutineScope = screenModelScope,

@@ -11,9 +11,9 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecommendedBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
+import nl.rhaydus.softcover.core.lists.domain.usecase.RefreshRecommendedFeedUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -26,7 +26,7 @@ import kotlin.time.Duration
 
 class OnRefreshActionTest {
     private lateinit var refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase
-    private lateinit var refreshRecommendedBooksUseCase: RefreshRecommendedBooksUseCase
+    private lateinit var refreshRecommendedFeedUseCase: RefreshRecommendedFeedUseCase
     private lateinit var refreshTrigger: MutableStateFlow<Long>
     private lateinit var dependencies: ExploreDependencies
     private lateinit var stateFlow: MutableStateFlow<ExploreScreenUiState>
@@ -35,7 +35,7 @@ class OnRefreshActionTest {
     @BeforeEach
     fun setUp() {
         refreshTrendingBooksUseCase = mockk()
-        refreshRecommendedBooksUseCase = mockk()
+        refreshRecommendedFeedUseCase = mockk()
         refreshTrigger = MutableStateFlow(0L)
         stateFlow = MutableStateFlow(ExploreScreenUiState())
         scope = ActionScope(
@@ -52,7 +52,7 @@ class OnRefreshActionTest {
         } returns Result.success(Unit)
 
         coEvery {
-            refreshRecommendedBooksUseCase(maxAge = any())
+            refreshRecommendedFeedUseCase(maxAge = any())
         } returns Result.success(Unit)
 
         dependencies = mockk<ExploreDependencies>(relaxed = true).also { mock ->
@@ -61,8 +61,8 @@ class OnRefreshActionTest {
             } returns refreshTrendingBooksUseCase
 
             every {
-                mock.refreshRecommendedBooksUseCase
-            } returns refreshRecommendedBooksUseCase
+                mock.refreshRecommendedFeedUseCase
+            } returns refreshRecommendedFeedUseCase
 
             every {
                 mock.continueSeriesRefreshTrigger
@@ -140,7 +140,7 @@ class OnRefreshActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                refreshRecommendedBooksUseCase(maxAge = Duration.ZERO)
+                refreshRecommendedFeedUseCase(maxAge = Duration.ZERO)
             }
         }
 
@@ -148,7 +148,7 @@ class OnRefreshActionTest {
         fun `clears the refreshing flag when the recommendations refresh fails`() = runTest {
             // ----- Arrange -----
             coEvery {
-                refreshRecommendedBooksUseCase(maxAge = any())
+                refreshRecommendedFeedUseCase(maxAge = any())
             } returns Result.failure(IllegalStateException("offline"))
 
             // ----- Act -----
@@ -166,7 +166,7 @@ class OnRefreshActionTest {
             // ----- Arrange -----
             val recommendationsGate = CompletableDeferred<Result<Unit>>()
             coEvery {
-                refreshRecommendedBooksUseCase(maxAge = any())
+                refreshRecommendedFeedUseCase(maxAge = any())
             } coAnswers {
                 recommendationsGate.await()
             }

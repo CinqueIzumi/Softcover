@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core.book.data.mapper
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -125,6 +126,36 @@ class RecommendationsMapperTest {
                     limit = 10,
                 )
             }
+        }
+    }
+
+    @Nested
+    inner class ToStorageKey {
+        @Test
+        fun `keeps the persisted key of each vibe`() {
+            // ----- Arrange -----
+            val vibes = SystemVibe.entries
+
+            // ----- Act -----
+            val result = vibes.associateWith { it.toStorageKey() }
+
+            // ----- Assert -----
+            result shouldBe mapOf(
+                SystemVibe.Recommendations to "recommendations",
+                SystemVibe.TopPicks to "top-picks",
+            )
+        }
+
+        @Test
+        fun `gives every vibe a distinct key`() {
+            // ----- Arrange -----
+            val vibes = SystemVibe.entries
+
+            // ----- Act -----
+            val keys = vibes.map { it.toStorageKey() }
+
+            // ----- Assert -----
+            keys.distinct() shouldBe keys
         }
     }
 }

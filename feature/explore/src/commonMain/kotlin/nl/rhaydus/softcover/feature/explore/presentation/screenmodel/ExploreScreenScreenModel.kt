@@ -6,10 +6,10 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecommendedBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveRecommendedFeedUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.RefreshRecommendedFeedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.feature.explore.domain.usecase.ClearSearchResultsUseCase
@@ -51,7 +51,7 @@ internal class ExploreScreenScreenModel(
     private val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
     private val observeTrendingFetchedAtUseCase: ObserveTrendingFetchedAtUseCase,
     private val observeRecommendedFeedUseCase: ObserveRecommendedFeedUseCase,
-    private val refreshRecommendedBooksUseCase: RefreshRecommendedBooksUseCase,
+    private val refreshRecommendedFeedUseCase: RefreshRecommendedFeedUseCase,
     private val getContinueSeriesBooksUseCase: GetContinueSeriesBooksUseCase,
     private val dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
     private val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
@@ -88,7 +88,7 @@ internal class ExploreScreenScreenModel(
         refreshTrendingBooksUseCase = refreshTrendingBooksUseCase,
         observeTrendingFetchedAtUseCase = observeTrendingFetchedAtUseCase,
         observeRecommendedFeedUseCase = observeRecommendedFeedUseCase,
-        refreshRecommendedBooksUseCase = refreshRecommendedBooksUseCase,
+        refreshRecommendedFeedUseCase = refreshRecommendedFeedUseCase,
         getContinueSeriesBooksUseCase = getContinueSeriesBooksUseCase,
         dismissContinueSeriesBookUseCase = dismissContinueSeriesBookUseCase,
         dismissContinueSeriesUseCase = dismissContinueSeriesUseCase,

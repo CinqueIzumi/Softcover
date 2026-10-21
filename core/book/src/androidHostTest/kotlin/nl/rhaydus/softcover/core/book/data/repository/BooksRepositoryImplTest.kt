@@ -52,6 +52,7 @@ import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
@@ -6429,11 +6430,11 @@ class BooksRepositoryImplTest {
         @BeforeEach
         fun setUpStore() {
             coEvery {
-                booksLocalDataSource.getRecommendedFetchedAt()
+                booksLocalDataSource.getSystemVibeFetchedAt(vibe = SystemVibe.Recommendations)
             } returns null
 
             coEvery {
-                booksLocalDataSource.getRecommendedBookIds()
+                booksLocalDataSource.getSystemVibeBookIds(vibe = SystemVibe.Recommendations)
             } returns emptyList()
 
             coEvery {
@@ -6452,15 +6453,18 @@ class BooksRepositoryImplTest {
         fun `skips the fetch while the ranking is cached and younger than maxAge`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksLocalDataSource.getRecommendedFetchedAt()
+                booksLocalDataSource.getSystemVibeFetchedAt(vibe = SystemVibe.Recommendations)
             } returns Clock.System.now() - 2.hours
 
             coEvery {
-                booksLocalDataSource.getRecommendedBookIds()
+                booksLocalDataSource.getSystemVibeBookIds(vibe = SystemVibe.Recommendations)
             } returns listOf(1, 2)
 
             // ----- Act -----
-            repository.refreshRecommendedBooks(maxAge = 24.hours)
+            repository.refreshSystemVibeBooks(
+                vibe = SystemVibe.Recommendations,
+                maxAge = 24.hours,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 0) {
@@ -6475,11 +6479,11 @@ class BooksRepositoryImplTest {
         fun `an unchanged ranking is re-stamped without hydrating the books again`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksLocalDataSource.getRecommendedFetchedAt()
+                booksLocalDataSource.getSystemVibeFetchedAt(vibe = SystemVibe.Recommendations)
             } returns Clock.System.now() - 2.days
 
             coEvery {
-                booksLocalDataSource.getRecommendedBookIds()
+                booksLocalDataSource.getSystemVibeBookIds(vibe = SystemVibe.Recommendations)
             } returns listOf(1, 2)
 
             coEvery {
@@ -6490,14 +6494,18 @@ class BooksRepositoryImplTest {
             } returns listOf(1, 2)
 
             // ----- Act -----
-            repository.refreshRecommendedBooks(maxAge = 1.hours)
+            repository.refreshSystemVibeBooks(
+                vibe = SystemVibe.Recommendations,
+                maxAge = 1.hours,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 0) {
                 booksRemoteDataSource.fetchBooksByIds(ids = any())
             }
             coVerify(exactly = 1) {
-                booksLocalDataSource.replaceRecommendedBooks(
+                booksLocalDataSource.replaceSystemVibeBooks(
+                    vibe = SystemVibe.Recommendations,
                     requestedIds = listOf(1, 2),
                     books = emptyList(),
                     fetchedAt = any(),
@@ -6512,11 +6520,11 @@ class BooksRepositoryImplTest {
             val second = recommendedBook(id = 2)
 
             coEvery {
-                booksLocalDataSource.getRecommendedFetchedAt()
+                booksLocalDataSource.getSystemVibeFetchedAt(vibe = SystemVibe.Recommendations)
             } returns Clock.System.now() - 2.days
 
             coEvery {
-                booksLocalDataSource.getRecommendedBookIds()
+                booksLocalDataSource.getSystemVibeBookIds(vibe = SystemVibe.Recommendations)
             } returns listOf(1, 2)
 
             coEvery {
@@ -6531,11 +6539,15 @@ class BooksRepositoryImplTest {
             } returns listOf(second, first)
 
             // ----- Act -----
-            repository.refreshRecommendedBooks(maxAge = 1.hours)
+            repository.refreshSystemVibeBooks(
+                vibe = SystemVibe.Recommendations,
+                maxAge = 1.hours,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksLocalDataSource.replaceRecommendedBooks(
+                booksLocalDataSource.replaceSystemVibeBooks(
+                    vibe = SystemVibe.Recommendations,
                     requestedIds = listOf(2, 1),
                     books = listOf(second, first),
                     fetchedAt = any(),
@@ -6549,11 +6561,11 @@ class BooksRepositoryImplTest {
             val first = recommendedBook(id = 1)
 
             coEvery {
-                booksLocalDataSource.getRecommendedFetchedAt()
+                booksLocalDataSource.getSystemVibeFetchedAt(vibe = SystemVibe.Recommendations)
             } returns Clock.System.now() - 2.days
 
             coEvery {
-                booksLocalDataSource.getRecommendedBookIds()
+                booksLocalDataSource.getSystemVibeBookIds(vibe = SystemVibe.Recommendations)
             } returns listOf(1)
 
             coEvery {
@@ -6568,7 +6580,10 @@ class BooksRepositoryImplTest {
             } returns listOf(first)
 
             // ----- Act -----
-            repository.refreshRecommendedBooks(maxAge = Duration.ZERO)
+            repository.refreshSystemVibeBooks(
+                vibe = SystemVibe.Recommendations,
+                maxAge = Duration.ZERO,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
@@ -6587,11 +6602,15 @@ class BooksRepositoryImplTest {
             } returns emptyList()
 
             // ----- Act -----
-            repository.refreshRecommendedBooks(maxAge = 24.hours)
+            repository.refreshSystemVibeBooks(
+                vibe = SystemVibe.Recommendations,
+                maxAge = 24.hours,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksLocalDataSource.replaceRecommendedBooks(
+                booksLocalDataSource.replaceSystemVibeBooks(
+                    vibe = SystemVibe.Recommendations,
                     requestedIds = emptyList(),
                     books = emptyList(),
                     fetchedAt = any(),
@@ -6610,11 +6629,15 @@ class BooksRepositoryImplTest {
             } returns null
 
             // ----- Act -----
-            repository.refreshRecommendedBooks(maxAge = 24.hours)
+            repository.refreshSystemVibeBooks(
+                vibe = SystemVibe.Recommendations,
+                maxAge = 24.hours,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksLocalDataSource.replaceRecommendedBooks(
+                booksLocalDataSource.replaceSystemVibeBooks(
+                    vibe = SystemVibe.Recommendations,
                     requestedIds = emptyList(),
                     books = emptyList(),
                     fetchedAt = any(),
@@ -6626,19 +6649,23 @@ class BooksRepositoryImplTest {
         fun `an empty response keeps the cached ids and re-stamps`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksLocalDataSource.getRecommendedFetchedAt()
+                booksLocalDataSource.getSystemVibeFetchedAt(vibe = SystemVibe.Recommendations)
             } returns Clock.System.now() - 2.days
 
             coEvery {
-                booksLocalDataSource.getRecommendedBookIds()
+                booksLocalDataSource.getSystemVibeBookIds(vibe = SystemVibe.Recommendations)
             } returns listOf(5, 6)
 
             // ----- Act -----
-            repository.refreshRecommendedBooks(maxAge = 24.hours)
+            repository.refreshSystemVibeBooks(
+                vibe = SystemVibe.Recommendations,
+                maxAge = 24.hours,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                booksLocalDataSource.replaceRecommendedBooks(
+                booksLocalDataSource.replaceSystemVibeBooks(
+                    vibe = SystemVibe.Recommendations,
                     requestedIds = listOf(5, 6),
                     books = emptyList(),
                     fetchedAt = any(),
@@ -6667,18 +6694,118 @@ class BooksRepositoryImplTest {
             } returns listOf(fresh)
 
             // ----- Act -----
-            repository.refreshRecommendedBooks(maxAge = 24.hours)
+            repository.refreshSystemVibeBooks(
+                vibe = SystemVibe.Recommendations,
+                maxAge = 24.hours,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 1) {
                 booksRemoteDataSource.fetchBooksByIds(ids = listOf(2))
             }
             coVerify(exactly = 1) {
-                booksLocalDataSource.replaceRecommendedBooks(
+                booksLocalDataSource.replaceSystemVibeBooks(
+                    vibe = SystemVibe.Recommendations,
                     requestedIds = listOf(1, 2),
                     books = listOf(fresh),
                     fetchedAt = any(),
                 )
+            }
+        }
+
+        @Test
+        fun `refreshing Top Picks stores under its own key and leaves Recommendations untouched`() = runTest {
+            // ----- Arrange -----
+            val pick = recommendedBook(id = 7)
+
+            coEvery {
+                booksLocalDataSource.getSystemVibeFetchedAt(vibe = SystemVibe.TopPicks)
+            } returns null
+
+            coEvery {
+                booksLocalDataSource.getSystemVibeBookIds(vibe = SystemVibe.TopPicks)
+            } returns emptyList()
+
+            coEvery {
+                booksRemoteDataSource.fetchSystemVibeBookIds(
+                    vibe = SystemVibe.TopPicks,
+                    limit = any(),
+                )
+            } returns listOf(7)
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = any())
+            } returns listOf(pick)
+
+            // ----- Act -----
+            repository.refreshSystemVibeBooks(
+                vibe = SystemVibe.TopPicks,
+                maxAge = 24.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceSystemVibeBooks(
+                    vibe = SystemVibe.TopPicks,
+                    requestedIds = listOf(7),
+                    books = listOf(pick),
+                    fetchedAt = any(),
+                )
+            }
+            coVerify(exactly = 0) {
+                booksLocalDataSource.replaceSystemVibeBooks(
+                    vibe = SystemVibe.Recommendations,
+                    requestedIds = any(),
+                    books = any(),
+                    fetchedAt = any(),
+                )
+            }
+            coVerify(exactly = 0) {
+                booksLocalDataSource.getSystemVibeFetchedAt(vibe = SystemVibe.Recommendations)
+            }
+        }
+
+        @Test
+        fun `refreshing Recommendations leaves the Top Picks ranking untouched`() = runTest {
+            // ----- Arrange -----
+            val recommended = recommendedBook(id = 3)
+
+            coEvery {
+                booksRemoteDataSource.fetchSystemVibeBookIds(
+                    vibe = SystemVibe.Recommendations,
+                    limit = any(),
+                )
+            } returns listOf(3)
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(ids = any())
+            } returns listOf(recommended)
+
+            // ----- Act -----
+            repository.refreshSystemVibeBooks(
+                vibe = SystemVibe.Recommendations,
+                maxAge = 24.hours,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.replaceSystemVibeBooks(
+                    vibe = SystemVibe.Recommendations,
+                    requestedIds = listOf(3),
+                    books = listOf(recommended),
+                    fetchedAt = any(),
+                )
+            }
+            coVerify(exactly = 0) {
+                booksLocalDataSource.replaceSystemVibeBooks(
+                    vibe = SystemVibe.TopPicks,
+                    requestedIds = any(),
+                    books = any(),
+                    fetchedAt = any(),
+                )
+            }
+            coVerify(exactly = 0) {
+                booksLocalDataSource.getSystemVibeFetchedAt(vibe = SystemVibe.TopPicks)
             }
         }
     }

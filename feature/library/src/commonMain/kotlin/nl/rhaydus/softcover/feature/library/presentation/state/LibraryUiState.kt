@@ -29,6 +29,7 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
@@ -272,10 +273,7 @@ internal data class LibraryUiState(
 
     val recommendedBooks: ImmutableList<Book> = persistentListOf(),
     val loadingRecommendedBooks: Boolean = true,
-    val recommendedHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "Not on your shelf yet",
-        headline = "Recommended for you",
-    ),
+    val recommendedHeader: SectionHeaderUiModel = SystemVibe.Recommendations.toRecommendedHeader(isLoading = true),
 
     val recommendedRailByTab: ImmutableMap<String, BookCardSet<Book>> = persistentMapOf(),
 ) : UiState {

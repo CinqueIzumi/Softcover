@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
@@ -131,17 +132,20 @@ interface BooksRepository {
         maxAge: Duration,
     )
 
-    /** The reader's Hardcover recommendations, best match first. */
-    fun observeRecommendedBooks(): Flow<List<Book>>
+    /** The books on Hardcover's [vibe] for the reader, best match first. */
+    fun observeSystemVibeBooks(vibe: SystemVibe): Flow<List<Book>>
 
-    /** When recommendations were last fetched, or `null` if a fetch has never completed. */
-    fun observeRecommendedFetchedAt(): Flow<Instant?>
+    /** When [vibe] was last fetched, or `null` if a fetch has never completed. */
+    fun observeSystemVibeFetchedAt(vibe: SystemVibe): Flow<Instant?>
 
     /**
      * Checks the ranked ids only when the last completed fetch is older than [maxAge]. The books are
      * re-fetched only when the ranking changed, or when [maxAge] is [Duration.ZERO].
      */
-    suspend fun refreshRecommendedBooks(maxAge: Duration)
+    suspend fun refreshSystemVibeBooks(
+        vibe: SystemVibe,
+        maxAge: Duration,
+    )
 
     /** The most-shelved books releasing within [window], in rank order. */
     fun observeUpcomingBooks(window: UpcomingWindow): Flow<List<Book>>

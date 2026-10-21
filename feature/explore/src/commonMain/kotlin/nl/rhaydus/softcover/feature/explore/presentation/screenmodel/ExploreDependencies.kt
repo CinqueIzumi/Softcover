@@ -7,10 +7,10 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecommendedBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveRecommendedFeedUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.RefreshRecommendedFeedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.feature.explore.domain.usecase.ClearSearchResultsUseCase
@@ -47,7 +47,7 @@ internal data class ExploreDependencies(
     val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
     val observeTrendingFetchedAtUseCase: ObserveTrendingFetchedAtUseCase,
     val observeRecommendedFeedUseCase: ObserveRecommendedFeedUseCase,
-    val refreshRecommendedBooksUseCase: RefreshRecommendedBooksUseCase,
+    val refreshRecommendedFeedUseCase: RefreshRecommendedFeedUseCase,
     val getContinueSeriesBooksUseCase: GetContinueSeriesBooksUseCase,
     val dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
     val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,

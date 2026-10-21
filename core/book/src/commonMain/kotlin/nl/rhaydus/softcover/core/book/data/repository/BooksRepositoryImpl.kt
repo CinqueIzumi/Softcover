@@ -70,7 +70,7 @@ internal class BooksRepositoryImpl(
 
     private val recentRefreshMutexes = RecentWindow.entries.associateWith { Mutex() }
 
-    private val recommendedRefreshMutex = Mutex()
+    private val systemVibeRefreshMutexes = SystemVibe.entries.associateWith { Mutex() }
 
     private val upcomingRefreshMutexes = UpcomingWindow.entries.associateWith { Mutex() }
 
@@ -400,26 +400,32 @@ internal class BooksRepositoryImpl(
         )
     }
 
-    override fun observeRecommendedBooks(): Flow<List<Book>> = booksLocalDataSource.observeRecommendedBooks()
+    override fun observeSystemVibeBooks(vibe: SystemVibe): Flow<List<Book>> =
+        booksLocalDataSource.observeSystemVibeBooks(vibe = vibe)
 
-    override fun observeRecommendedFetchedAt(): Flow<Instant?> = booksLocalDataSource.observeRecommendedFetchedAt()
+    override fun observeSystemVibeFetchedAt(vibe: SystemVibe): Flow<Instant?> =
+        booksLocalDataSource.observeSystemVibeFetchedAt(vibe = vibe)
 
-    override suspend fun refreshRecommendedBooks(maxAge: Duration) = recommendedRefreshMutex.withLock {
+    override suspend fun refreshSystemVibeBooks(
+        vibe: SystemVibe,
+        maxAge: Duration,
+    ) = systemVibeRefreshMutexes.getValue(vibe).withLock {
         refreshRankedBooks(
             maxAge = maxAge,
-            getFetchedAt = { booksLocalDataSource.getRecommendedFetchedAt() },
+            getFetchedAt = { booksLocalDataSource.getSystemVibeFetchedAt(vibe = vibe) },
             fetchIds = {
                 booksRemoteDataSource
                     .fetchSystemVibeBookIds(
-                        vibe = SystemVibe.Recommendations,
+                        vibe = vibe,
                         limit = RECOMMENDED_BOOKS_LIMIT,
                     )
                     .orEmpty()
             },
-            idsToKeepOnEmptyResponse = { booksLocalDataSource.getRecommendedBookIds() },
-            cachedRankedIds = { booksLocalDataSource.getRecommendedBookIds() },
+            idsToKeepOnEmptyResponse = { booksLocalDataSource.getSystemVibeBookIds(vibe = vibe) },
+            cachedRankedIds = { booksLocalDataSource.getSystemVibeBookIds(vibe = vibe) },
             replace = { rankedIds, books, now ->
-                booksLocalDataSource.replaceRecommendedBooks(
+                booksLocalDataSource.replaceSystemVibeBooks(
+                    vibe = vibe,
                     requestedIds = rankedIds,
                     books = books,
                     fetchedAt = now,

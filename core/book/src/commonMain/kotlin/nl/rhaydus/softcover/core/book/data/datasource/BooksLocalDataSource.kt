@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.common.AppDispatchers
-import nl.rhaydus.softcover.core.book.data.mapper.RECOMMENDATIONS_STORAGE_KEY
 import nl.rhaydus.softcover.core.book.data.mapper.toStorageKey
 import nl.rhaydus.softcover.core.book.data.sort.toOrderByFragment
 import nl.rhaydus.softcover.core.book.data.storage.EditionImageStorage
@@ -20,6 +19,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -66,15 +66,16 @@ interface BooksLocalDataSource {
         fetchedAt: Instant,
     )
 
-    fun observeRecommendedBooks(): Flow<List<Book>>
+    fun observeSystemVibeBooks(vibe: SystemVibe): Flow<List<Book>>
 
-    suspend fun getRecommendedBookIds(): List<Int>
+    suspend fun getSystemVibeBookIds(vibe: SystemVibe): List<Int>
 
-    fun observeRecommendedFetchedAt(): Flow<Instant?>
+    fun observeSystemVibeFetchedAt(vibe: SystemVibe): Flow<Instant?>
 
-    suspend fun getRecommendedFetchedAt(): Instant?
+    suspend fun getSystemVibeFetchedAt(vibe: SystemVibe): Instant?
 
-    suspend fun replaceRecommendedBooks(
+    suspend fun replaceSystemVibeBooks(
+        vibe: SystemVibe,
         requestedIds: List<Int>,
         books: List<Book>,
         fetchedAt: Instant,
@@ -259,31 +260,32 @@ internal class BooksLocalDataSourceImpl(
         )
     }
 
-    override fun observeRecommendedBooks(): Flow<List<Book>> = dao
-        .observeRankedBooks(listKey = RECOMMENDATIONS_STORAGE_KEY)
+    override fun observeSystemVibeBooks(vibe: SystemVibe): Flow<List<Book>> = dao
+        .observeRankedBooks(listKey = vibe.toStorageKey())
         .distinctUntilChanged()
         .toModelsReusingUnchanged()
 
-    override suspend fun getRecommendedBookIds(): List<Int> = dao
-        .getRankedBookIds(listKey = RECOMMENDATIONS_STORAGE_KEY)
+    override suspend fun getSystemVibeBookIds(vibe: SystemVibe): List<Int> = dao
+        .getRankedBookIds(listKey = vibe.toStorageKey())
 
-    override fun observeRecommendedFetchedAt(): Flow<Instant?> = dao
-        .observeRankedListFetchedAt(listKey = RECOMMENDATIONS_STORAGE_KEY)
+    override fun observeSystemVibeFetchedAt(vibe: SystemVibe): Flow<Instant?> = dao
+        .observeRankedListFetchedAt(listKey = vibe.toStorageKey())
         .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
         .distinctUntilChanged()
 
-    override suspend fun getRecommendedFetchedAt(): Instant? = dao
-        .getRankedListFetchedAt(listKey = RECOMMENDATIONS_STORAGE_KEY)
+    override suspend fun getSystemVibeFetchedAt(vibe: SystemVibe): Instant? = dao
+        .getRankedListFetchedAt(listKey = vibe.toStorageKey())
         ?.let(Instant::fromEpochMilliseconds)
 
-    override suspend fun replaceRecommendedBooks(
+    override suspend fun replaceSystemVibeBooks(
+        vibe: SystemVibe,
         requestedIds: List<Int>,
         books: List<Book>,
         fetchedAt: Instant,
     ) {
         deleteStaleCovers(
             dao.replaceRankedBooks(
-                listKey = RECOMMENDATIONS_STORAGE_KEY,
+                listKey = vibe.toStorageKey(),
                 requestedIds = requestedIds,
                 books = books,
                 fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),

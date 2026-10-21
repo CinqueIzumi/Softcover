@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
@@ -78,10 +79,7 @@ internal data class ExploreScreenUiState(
     val loadingRecommendedBooks: Boolean = true,
     // Built off the recommended fields above by `BookCardModelsCollector`; false collapses the section.
     val recommendedVisible: Boolean = true,
-    val recommendedHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "Recommended for you",
-        headline = "Based on what you've read",
-    ),
+    val recommendedHeader: SectionHeaderUiModel = SystemVibe.Recommendations.toRecommendedHeader(isLoading = true),
     val continueSeriesBooks: ImmutableList<Book> = persistentListOf(),
     val loadingContinueSeriesBooks: Boolean = true,
     val upNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(

@@ -32,7 +32,7 @@ internal class OnRefreshAction : LibraryAction {
 
             if (selectedTab.isWantToRead()) {
                 launch {
-                    dependencies.refreshRecommendedBooksUseCase(maxAge = Duration.ZERO)
+                    dependencies.refreshRecommendedFeedUseCase(maxAge = Duration.ZERO)
                         .onFailure { error ->
                             AppLog.e(
                                 error,

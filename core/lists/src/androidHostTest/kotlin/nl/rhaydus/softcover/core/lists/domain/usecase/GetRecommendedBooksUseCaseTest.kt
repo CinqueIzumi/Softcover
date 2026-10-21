@@ -6,8 +6,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecommendedBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveSystemVibeBooksUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -21,11 +22,11 @@ class GetRecommendedBooksUseCaseTest {
     fun setUp() {
         recommendedFlow = MutableStateFlow(emptyList())
         ownedFlow = MutableStateFlow(emptySet())
-        val observeRecommendedBooks = mockk<ObserveRecommendedBooksUseCase>()
+        val observeSystemVibeBooks = mockk<ObserveSystemVibeBooksUseCase>()
         val observeOwnedBookIds = mockk<ObserveOwnedBookIdsUseCase>()
 
         every {
-            observeRecommendedBooks()
+            observeSystemVibeBooks(vibe = SystemVibe.Recommendations)
         } returns recommendedFlow
 
         every {
@@ -33,7 +34,7 @@ class GetRecommendedBooksUseCaseTest {
         } returns ownedFlow
 
         useCase = GetRecommendedBooksUseCase(
-            observeRecommendedBooks = observeRecommendedBooks,
+            observeSystemVibeBooks = observeSystemVibeBooks,
             observeOwnedBookIds = observeOwnedBookIds,
         )
     }
@@ -54,7 +55,10 @@ class GetRecommendedBooksUseCaseTest {
             recommendedFlow.value = listOf(5, 1, 9).map(::recommended)
 
             // ----- Act & Assert -----
-            useCase(limit = 25).test {
+            useCase(
+                vibe = SystemVibe.Recommendations,
+                limit = 25,
+            ).test {
                 awaitItem().map { it.idOf() } shouldBe listOf(5, 1, 9)
             }
         }
@@ -66,7 +70,10 @@ class GetRecommendedBooksUseCaseTest {
             ownedFlow.value = setOf(2)
 
             // ----- Act & Assert -----
-            useCase(limit = 25).test {
+            useCase(
+                vibe = SystemVibe.Recommendations,
+                limit = 25,
+            ).test {
                 awaitItem().map { it.idOf() } shouldBe listOf(1, 3)
             }
         }
@@ -81,7 +88,10 @@ class GetRecommendedBooksUseCaseTest {
             ownedFlow.value = ownedIds
 
             // ----- Act -----
-            useCase(limit = 25).test {
+            useCase(
+                vibe = SystemVibe.Recommendations,
+                limit = 25,
+            ).test {
                 val resultIds = awaitItem().map { it.idOf() }
 
                 // ----- Assert -----
@@ -97,7 +107,10 @@ class GetRecommendedBooksUseCaseTest {
             recommendedFlow.value = listOf(1, 2, 3).map(::recommended)
 
             // ----- Act & Assert -----
-            useCase(limit = 25).test {
+            useCase(
+                vibe = SystemVibe.Recommendations,
+                limit = 25,
+            ).test {
                 awaitItem().map { it.idOf() } shouldBe listOf(1, 2, 3)
 
                 ownedFlow.value = setOf(2)

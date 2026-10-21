@@ -9,12 +9,11 @@ then the follow-ups below.
 - **State:** phase 1 (1a–1e) is built, device-checked and committed in four commits on the local branch
   `recommendations-vibe` (worktree `../Softcover-recommendations-vibe`, from `origin/release/3.3.0`, not
   pushed). No GitHub issue yet.
-- **Next:** design step 2b (`## Phase 2`, row 2b: Top Picks for a thin reading history) with the user
-  before building. Work in the worktree; the main checkout's `ACTIVE.md` lacks this. The device's local
-  Want to read rows were deleted for the 2a check; a pull to refresh on that tab restores them.
+- **Next:** design 2c with the user (investigate `vibe_exclusions_attributes` on a system vibe first). Work in
+  the worktree; the main checkout's `ACTIVE.md` lacks this. The device's local Want to read rows and cached
+  Recommendations were deleted for the 2b check; a pull to refresh restores them.
 - **Open questions:** none.
-- **Verification:** `check koverXmlReport -x lint` passed after the last code change (bar a one-line KDoc,
-  compiled and ktlint-checked since).
+- **Verification:** `check koverXmlReport -x lint` passed after the last code change.
 - **Uncommitted:** nothing.
 
 ## What the API offers
@@ -57,9 +56,24 @@ Each step is designed with the user before it is built.
 | Step | Scope | Status |
 |---|---|---|
 | 2a | Library: when the Want to read shelf is empty, show the top recommendations with an add button | [x] |
-| 2b | Top Picks (`vibe_type` 3) for a thin reading history: show it until the reader has rated a few books, then Recommendations. Ties into issue #202 (onboarding starter list) | [ ] |
+| 2b | Top Picks (`vibe_type` 3) as the fallback when Recommendations is missing or empty after the owned filter, see below | [x] |
 | 2c | Investigate first: can a system vibe take `vibe_exclusions_attributes`? Then "Not for me" on a recommended card, synced as an exclusion if it can be, otherwise hidden locally like Up next (and listed in Settings' hidden suggestions) | [ ] |
 | 2d | Featured public vibes (`featured: true`) on Explore, as rails or tiles beside Browse by mood | [ ] |
+
+### Step 2b: Top Picks fallback
+
+Agreed with the user:
+
+- **When:** the rails (Explore, Library) show Top Picks only when Recommendations is missing or leaves nothing
+  after the owned filter. No rating-count threshold.
+- **Heading:** Explore "Top picks" / "Popular with readers right now"; Library keeps the eyebrow "Not on your
+  shelf yet" with the headline "Top picks".
+- **Storage:** the same named-feed path as Recommendations, under its own ranked-list key. No schema change.
+
+| Step | Scope | Who | Status |
+|---|---|---|---|
+| 2b-1 | `:core:book` path takes a `SystemVibe`; the feed refreshes both and reports its source; both screens' headers follow it; pull to refresh covers both | `softcover-implementer` | [x] |
+| 2b-2 | Tests, `styleCheck`, `softcover-reviewer`, `check koverXmlReport -x lint`, the user's device check; the header masks while the source is undecided | main | [x] |
 
 ### Step 2a: recommendations on Library's Want to read shelf
 

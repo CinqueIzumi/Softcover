@@ -121,7 +121,7 @@ val libraryModule = module {
             reorderListBooksUseCase = get(),
             setListRankedUseCase = get(),
             observeRecommendedFeedUseCase = get(),
-            refreshRecommendedBooksUseCase = get(),
+            refreshRecommendedFeedUseCase = get(),
         )
     }
 }

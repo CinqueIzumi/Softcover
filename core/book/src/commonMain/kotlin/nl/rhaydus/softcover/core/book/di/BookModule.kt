@@ -32,9 +32,9 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecentBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecentFetchedAtUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecommendedBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecommendedFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveShelvedBookIdsUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveSystemVibeBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveSystemVibeFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUpcomingBooksUseCase
@@ -44,7 +44,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecentBooksUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecommendedBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshSystemVibeBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshUpcomingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
@@ -174,15 +174,15 @@ val bookModule = module {
     }
 
     factory {
-        ObserveRecommendedBooksUseCase(booksRepository = get())
+        ObserveSystemVibeBooksUseCase(booksRepository = get())
     }
 
     factory {
-        ObserveRecommendedFetchedAtUseCase(booksRepository = get())
+        ObserveSystemVibeFetchedAtUseCase(booksRepository = get())
     }
 
     factory {
-        RefreshRecommendedBooksUseCase(booksRepository = get())
+        RefreshSystemVibeBooksUseCase(booksRepository = get())
     }
 
     factory {

@@ -36,7 +36,7 @@ internal data object OnRefreshAction : ExploreAction {
             }
 
             launch {
-                dependencies.refreshRecommendedBooksUseCase(maxAge = Duration.ZERO)
+                dependencies.refreshRecommendedFeedUseCase(maxAge = Duration.ZERO)
                     .onFailure { error ->
                         AppLog.e(
                             error,
