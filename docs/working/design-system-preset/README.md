@@ -1,28 +1,21 @@
 # Design system preset and showcase
 
-A `:showcase` Android app that renders every component and the five main phone screens from fixtures, and a
-repo-committed `design/` preset that turns the real tokens, those renders and a hand-written brand book into a
+A `:showcase` Android app that renders every component from fixtures, live and interactive, and a
+repo-committed `design/` preset that turns the real tokens, component renders and a hand-written brand book into a
 Claude Design System artifact any contributor can publish. Nothing here touches `:app` builds or the APK.
 No GitHub issue. Branch `design-system-preset` (from `release/3.3.0`, local only), worktree
 `../Softcover-design-system-preset`.
 
 ## Now
 
-- **State:** steps 0–2c committed (`a65fd65ce`). 2d and 2e built, uncommitted: 17 live family pages under
-  `showcase/.../live/<family>/` (one TOAD slice each, Koin in `di/Live{Sheets,Overlays,InPage}Module.kt`),
-  routed from Home via `live/LiveScreens.kt` (`liveScreen()` / `hasLiveScreen()`), live rows badged "Live".
-  `MinifiedContractTest` has AAA markers. Snackbar-from-callback bug filed as F53 in
-  `foundation-upstream-candidates.md`. Reviewer: no defects.
-- **De-duplication done (user chose A):** every page uses `appearance/action/` generic actions
-  (`OnAppearanceClicked/Dismissed`, `OnPalette/BrightnessSelected`, `OnBackClickedAction(backEvent)`),
-  `appearance/screenmodel/AppearanceDependencies`, `appearance/screen/AppearanceSheetHost`; `runAction`
-  takes `UiAction<…>`. 94 per-page files deleted; 5 shared-action tests added.
-- **Next:** the user's device check on Medium_Phone (reinstalled after the refactor; reviewer passed the
-  de-duplication); commit when the user says, then step 3.
-- **Open questions:** none. User OK'd the SHEET loading `delay` loop and pinned search/editorial bars.
-- **Verification:** `scripts/gradle-quiet.sh :showcase:testDebugUnitTest styleCheck` passed after the
-  last edit; AAA markers complete, no `!!` in `showcase/`.
-- **Uncommitted:** all of the above.
+- **State:** steps 0–2e committed (`0dccb6922`): 17 live family pages under `showcase/.../live/<family>/`,
+  routed from Home via `live/LiveScreens.kt`, sharing `appearance/action/` generic actions and
+  `AppearanceSheetHost`. Step 3 was built, then dropped and fully reverted at the user's call (see
+  Decisions); steps 3 and 7 are dropped.
+- **Next:** step 4 (render runner, component fixtures only), starting with its Robolectric font/icon spike.
+- **Open questions:** none.
+- **Verification:** the revert restores the tree to `0dccb6922` apart from this file; nothing to rerun.
+- **Uncommitted:** this file only.
 - **Carry into step 5:** pass the exporter's paths through a `CommandLineArgumentProvider` with declared
   input/output dirs (they are absolute `args` today); list `exportDesignTokens`, `checkDesignPresetContent`
   and `testDesignPreset` in `.claude/rules/build-wiring.md`. On the next foundation bump, add
@@ -70,11 +63,7 @@ One step per session. Commits only when the user asks.
 - [x] **2e. In-page demos (`softcover-implementer`, parallel with 2d).** Top bars on a scrolling page with
   `enterAlwaysScrollBehavior`, search and editorial bars, a live sidebar, stateful chips / controls / fields
   / selection, chrome buttons over a cover. Each family page is a small ScreenModel; tests per round.
-- [ ] **3. Screen showcase entries (5 parallel `softcover-implementer`s).** Library, Reading, Book detail,
-  Explore, Profile each expose public entries rendering the phone layout (not the Screen) with fixture states in
-  main code, beside `ExploreMockData` / `ProfileScreenPreviewState`. `:showcase` provides real fakes (no relaxed
-  mocks) for `ActiveSessionController`, `AppNavigator`, `NavPulse`, `TabReselectRegistry`, in an isolated Koin
-  context. The showcase lists the screens.
+- ~~**3. Screen showcase entries.**~~ Dropped (see Decisions).
 - [ ] **4. Render runner (`softcover-implementer`).** Spike first: Fraunces and a `SoftcoverIcon` render under
   Robolectric from `:showcase`; stop and report if not. Robolectric + Roborazzi as `:showcase` test deps only;
   runs only when a Gradle property is set (class filter, `roborazzi.test.record=true`), never in `check` or
@@ -92,16 +81,13 @@ One step per session. Commits only when the user asks.
   the bundle, create or update the contributor's own artifact (URL in `local.properties` `design.artifactUrl`),
   upload icons and logo as assets, write the index, publish in ≤255-path batches with the index last.
   `design/README.md` for contributors; a CLAUDE.md "Where things live" row.
-- [ ] **7. Replace `screenshots/`.** Generate the six README shots (`reading`, `library`, `book-detail`,
-  `explore`, `profile-stats`, `profile-taste`; dark, 1080×2300, quantised) from the showcase renders via a
-  task, and rewrite `screenshots/README.md` (drop the duplicated lines 58-60 / 62-64). Settle with the user
-  first: fixtures draw coverless monogram covers, where the current shots show real cover art.
+- ~~**7. Replace `screenshots/`.**~~ Dropped (see Decisions).
 - [ ] **8. Gates.** `softcover-reviewer`, `styleCheck`, `./gradlew check buildHealth`.
 
 ## Decisions
 
 - Themes are the default Softcover palette (light, dark, dim); the other four palettes are a `Palettes.md` section (artifact cap: 8 themes).
-- Screens render the phone layouts via Robolectric in `:showcase`; no desktop layouts.
+- No screen renders: outside the app shell the phone layouts lack the tab bar, real covers and live state, so the preset ships components and foundations only and the README screenshots stay hand-captured.
 - Hand-written HTML for the 12 core components only; the rest ship as PNG renders.
 - Generated tokens and PNGs are built, never committed.
 - `:showcase` is a separate app module, not an `:app` flavor.
@@ -112,5 +98,4 @@ One step per session. Commits only when the user asks.
 ## Risks
 
 - Compose resources (fonts, drawables) under Robolectric are unverified: step 4's spike.
-- Robolectric gives zero status-bar insets, and the tab bar lives in `:orchestration`: screen renders lack both.
 - `checkModuleGraph` skips untiered paths (`build.gradle.kts:702`); step 2 tiers `:showcase`.
