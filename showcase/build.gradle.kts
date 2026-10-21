@@ -22,6 +22,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
     lint {
         warningsAsErrors = true
         abortOnError = true
@@ -59,8 +62,28 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.kotest)
     testImplementation(libs.coroutines.test)
+
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.junit)
+    testRuntimeOnly(libs.junit.vintage.engine)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
 }
+
+val renderRequested = providers.gradleProperty("showcaseRender").isPresent
+val renderOutputDir = rootProject.layout.buildDirectory.dir("design-preset/renders")
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    val renderRunner = "nl.rhaydus.softcover.showcase.render.*"
+    if (renderRequested) {
+        filter.includeTestsMatching(renderRunner)
+        systemProperty("roborazzi.test.record", "true")
+        systemProperty("showcase.render.dir", renderOutputDir.get().asFile.absolutePath)
+        outputs.upToDateWhen { false }
+    } else {
+        filter.excludeTestsMatching(renderRunner)
+    }
 }

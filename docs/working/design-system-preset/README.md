@@ -12,10 +12,16 @@ No GitHub issue. Branch `design-system-preset` (from `release/3.3.0`, local only
   routed from Home via `live/LiveScreens.kt`, sharing `appearance/action/` generic actions and
   `AppearanceSheetHost`. Step 3 was built, then dropped and fully reverted at the user's call (see
   Decisions); steps 3 and 7 are dropped.
-- **Next:** step 4 (render runner, component fixtures only), starting with its Robolectric font/icon spike.
+- **Step 4 built, uncommitted:** spike passed (Fraunces + `SoftcoverIcon` render). `showcase/src/test/.../render/`
+  draws every `GalleryRegistry` fixture to `build/design-preset/renders/<brightness>/<family>/<entry>/<fixture>.png`
+  (276 per light/dark/dim, none skipped) via `scripts/gradle-quiet.sh :showcase:testDebugUnitTest -PshowcaseRender`;
+  fails if a step-5 component name (chart: `ColumnChart`) leaves the registry. Robolectric 4.17 / Roborazzi
+  1.76.0 in `:showcase` tests only; gotchas in `.claude/rules/build-wiring.md`. Reviewer passed; slug
+  uniqueness fixed for fixtures and entries.
+- **Next:** commit on request, then step 5 (brand book, `bundle.css`, 12 hand-written components, bundle task).
 - **Open questions:** none.
-- **Verification:** the revert restores the tree to `0dccb6922` apart from this file; nothing to rerun.
-- **Uncommitted:** this file only.
+- **Verification:** `-PshowcaseRender` produced 828 PNGs; `:showcase:testDebugUnitTest styleCheck` passed
+  without the property, which skips the runner.
 - **Carry into step 5:** pass the exporter's paths through a `CommandLineArgumentProvider` with declared
   input/output dirs (they are absolute `args` today); list `exportDesignTokens`, `checkDesignPresetContent`
   and `testDesignPreset` in `.claude/rules/build-wiring.md`. On the next foundation bump, add
@@ -64,7 +70,7 @@ One step per session. Commits only when the user asks.
   `enterAlwaysScrollBehavior`, search and editorial bars, a live sidebar, stateful chips / controls / fields
   / selection, chrome buttons over a cover. Each family page is a small ScreenModel; tests per round.
 - ~~**3. Screen showcase entries.**~~ Dropped (see Decisions).
-- [ ] **4. Render runner (`softcover-implementer`).** Spike first: Fraunces and a `SoftcoverIcon` render under
+- [x] **4. Render runner (`softcover-implementer`).** Spike first: Fraunces and a `SoftcoverIcon` render under
   Robolectric from `:showcase`; stop and report if not. Robolectric + Roborazzi as `:showcase` test deps only;
   runs only when a Gradle property is set (class filter, `roborazzi.test.record=true`), never in `check` or
   `koverXmlReport`. One capture per fixture (no tall sheets), phone size via `@Config(qualifiers=…)`, light,
