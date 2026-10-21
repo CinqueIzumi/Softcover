@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.explore.domain.usecase
+package nl.rhaydus.softcover.core.lists.domain.usecase
 
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
@@ -54,7 +54,7 @@ class GetRecommendedBooksUseCaseTest {
             recommendedFlow.value = listOf(5, 1, 9).map(::recommended)
 
             // ----- Act & Assert -----
-            useCase().test {
+            useCase(limit = 25).test {
                 awaitItem().map { it.idOf() } shouldBe listOf(5, 1, 9)
             }
         }
@@ -66,7 +66,7 @@ class GetRecommendedBooksUseCaseTest {
             ownedFlow.value = setOf(2)
 
             // ----- Act & Assert -----
-            useCase().test {
+            useCase(limit = 25).test {
                 awaitItem().map { it.idOf() } shouldBe listOf(1, 3)
             }
         }
@@ -81,7 +81,7 @@ class GetRecommendedBooksUseCaseTest {
             ownedFlow.value = ownedIds
 
             // ----- Act -----
-            useCase().test {
+            useCase(limit = 25).test {
                 val resultIds = awaitItem().map { it.idOf() }
 
                 // ----- Assert -----
@@ -97,7 +97,7 @@ class GetRecommendedBooksUseCaseTest {
             recommendedFlow.value = listOf(1, 2, 3).map(::recommended)
 
             // ----- Act & Assert -----
-            useCase().test {
+            useCase(limit = 25).test {
                 awaitItem().map { it.idOf() } shouldBe listOf(1, 2, 3)
 
                 ownedFlow.value = setOf(2)

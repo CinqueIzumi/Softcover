@@ -1,6 +1,10 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -8,6 +12,7 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
+import kotlin.time.Duration
 
 internal class OnRefreshAction : LibraryAction {
     override suspend fun execute(
@@ -20,10 +25,29 @@ internal class OnRefreshAction : LibraryAction {
 
         scope.setState { it.copy(isLoading = true) }
 
-        dependencies.refreshLibraryUseCase(scope = refreshScope).onApiFailure()
+        coroutineScope {
+            launch {
+                dependencies.refreshLibraryUseCase(scope = refreshScope).onApiFailure()
+            }
+
+            if (selectedTab.isWantToRead()) {
+                launch {
+                    dependencies.refreshRecommendedBooksUseCase(maxAge = Duration.ZERO)
+                        .onFailure { error ->
+                            AppLog.e(
+                                error,
+                                "Failed to refresh recommended books",
+                            )
+                        }
+                }
+            }
+        }
 
         scope.setState { it.copy(isLoading = false) }
     }
+
+    private fun LibraryTab?.isWantToRead(): Boolean =
+        this is LibraryTab.Status && status == UserBookStatus.WANT_TO_READ
 
     private fun LibraryTab?.toRefreshScope(): RefreshScope = when (this) {
         null,

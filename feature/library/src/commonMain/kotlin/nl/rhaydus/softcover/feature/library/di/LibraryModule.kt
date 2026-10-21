@@ -29,6 +29,8 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollec
 import nl.rhaydus.softcover.feature.library.presentation.collector.MastheadCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.PillButtonsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.RearrangeChipCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.RecommendedBooksCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.RecommendedRailCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSidebarCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSwipeCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelvesSheetCollector
@@ -86,6 +88,9 @@ val libraryModule = module {
 
     factory { DisplayListsCollector() } bind LibraryCollector::class
 
+    factory { RecommendedBooksCollector() } bind LibraryCollector::class
+    factory { RecommendedRailCollector() } bind LibraryCollector::class
+
     factory {
         LibraryScreenScreenModel(
             getSortedAllUserBooksUseCase = get(),
@@ -115,6 +120,8 @@ val libraryModule = module {
             removeBookFromListUseCase = get(),
             reorderListBooksUseCase = get(),
             setListRankedUseCase = get(),
+            observeRecommendedFeedUseCase = get(),
+            refreshRecommendedBooksUseCase = get(),
         )
     }
 }

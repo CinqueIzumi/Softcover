@@ -5,12 +5,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecommendedFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecommendedBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
+import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveRecommendedFeedUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.feature.explore.domain.usecase.ClearSearchResultsUseCase
@@ -24,7 +24,6 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.GetMoodTagsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetPreviousSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksHasMoreUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksUseCase
-import nl.rhaydus.softcover.feature.explore.domain.usecase.GetRecommendedBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveAllSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveSearchQueryUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchByMoodUseCase
@@ -47,9 +46,8 @@ internal data class ExploreDependencies(
     val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
     val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
     val observeTrendingFetchedAtUseCase: ObserveTrendingFetchedAtUseCase,
-    val getRecommendedBooksUseCase: GetRecommendedBooksUseCase,
+    val observeRecommendedFeedUseCase: ObserveRecommendedFeedUseCase,
     val refreshRecommendedBooksUseCase: RefreshRecommendedBooksUseCase,
-    val observeRecommendedFetchedAtUseCase: ObserveRecommendedFetchedAtUseCase,
     val getContinueSeriesBooksUseCase: GetContinueSeriesBooksUseCase,
     val dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
     val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,

@@ -14,9 +14,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.control.Toggle
@@ -58,40 +66,58 @@ internal fun BookCardTrailingControl(
  * cover's corner.
  */
 @Composable
-internal fun BookCardMenuButton(
+internal fun BookCardCoverButton(
+    icon: SoftcoverIcon,
     contentDescription: String,
     onClick: () -> Unit,
+    enabled: Boolean = true,
+    checked: Boolean? = null,
 ) {
-    val icon = drawableIconResource(
-        icon = SoftcoverIcon.MoreVert,
+    val resource = drawableIconResource(
+        icon = icon,
         contentDescription = contentDescription,
     )
 
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier.pointerHandCursor(),
-    ) {
-        Box(
+    val toggleSemantics = if (checked != null) {
+        Modifier.semantics {
+            role = Role.Switch
+            toggleableState = ToggleableState(checked)
+        }
+    } else {
+        Modifier
+    }
+
+    DesktopTooltip(text = contentDescription) {
+        IconButton(
+            onClick = onClick,
+            enabled = enabled,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(Spacing.xxs),
-            contentAlignment = Alignment.TopEnd,
+                .pointerHandCursor()
+                .alpha(if (enabled) 1f else DISABLED_ALPHA)
+                .then(toggleSemantics),
         ) {
             Box(
                 modifier = Modifier
-                    .size(26.dp)
-                    .background(
-                        color = MonogramCoverInk.copy(alpha = 0.42f),
-                        shape = CircleShape,
-                    ),
-                contentAlignment = Alignment.Center,
+                    .fillMaxSize()
+                    .padding(Spacing.xxs),
+                contentAlignment = Alignment.TopEnd,
             ) {
-                Icon(
-                    painter = icon.getIconPainter(),
-                    contentDescription = icon.contentDescription,
-                    tint = MonogramCoverForeground,
-                    modifier = Modifier.size(16.dp),
-                )
+                Box(
+                    modifier = Modifier
+                        .size(26.dp)
+                        .background(
+                            color = MonogramCoverInk.copy(alpha = 0.42f),
+                            shape = CircleShape,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = resource.getIconPainter(),
+                        contentDescription = resource.contentDescription,
+                        tint = MonogramCoverForeground,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
             }
         }
     }

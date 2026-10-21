@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.explore.domain.usecase
+package nl.rhaydus.softcover.core.lists.domain.usecase
 
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe

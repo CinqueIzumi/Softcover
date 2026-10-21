@@ -21,10 +21,12 @@ internal fun computeDisplayBooks(
                 q,
                 ignoreCase = true,
             ) ||
-                book.authors.any { it.name.contains(
-                    q,
-                    ignoreCase = true,
-                ) }
+                book.authors.any {
+                    it.name.contains(
+                        q,
+                        ignoreCase = true,
+                    )
+                }
         }
     }
 
@@ -50,10 +52,12 @@ internal fun computeDisplayEditions(
                 q,
                 ignoreCase = true,
             ) ||
-                edition.authors.any { it.name.contains(
-                    q,
-                    ignoreCase = true,
-                ) }
+                edition.authors.any {
+                    it.name.contains(
+                        q,
+                        ignoreCase = true,
+                    )
+                }
         }
     }
 

@@ -1,0 +1,20 @@
+package nl.rhaydus.softcover.feature.library.presentation.action
+
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.error.onApiFailure
+import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.toad.ActionScope
+
+internal class OnAddRecommendedToWantToReadAction(
+    private val book: Book,
+) : LibraryAction {
+    override suspend fun execute(
+        dependencies: LibraryDependencies,
+        scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
+    ) {
+        dependencies.markBookAsWantToReadUseCase(book = book).onApiFailure()
+    }
+}

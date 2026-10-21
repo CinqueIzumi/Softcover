@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.explore.domain.usecase
+package nl.rhaydus.softcover.core.lists.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine

@@ -30,8 +30,6 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.GetMoodTagsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetPreviousSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksHasMoreUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksUseCase
-import nl.rhaydus.softcover.feature.explore.domain.usecase.GetRecommendedBooksUseCase
-import nl.rhaydus.softcover.feature.explore.domain.usecase.ObserveOwnedBookIdsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveAllSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveSearchQueryUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchByMoodUseCase
@@ -98,9 +96,8 @@ val exploreModule = module {
             observeTrendingBooksUseCase = get(),
             refreshTrendingBooksUseCase = get(),
             observeTrendingFetchedAtUseCase = get(),
-            getRecommendedBooksUseCase = get(),
+            observeRecommendedFeedUseCase = get(),
             refreshRecommendedBooksUseCase = get(),
-            observeRecommendedFetchedAtUseCase = get(),
             getContinueSeriesBooksUseCase = get(),
             dismissContinueSeriesBookUseCase = get(),
             dismissContinueSeriesUseCase = get(),
@@ -281,20 +278,6 @@ val exploreModule = module {
             observeOwnedBookIds = get(),
             exploreRepository = get(),
             getBecauseYouReadGenreUseCase = get(),
-        )
-    }
-
-    factory {
-        ObserveOwnedBookIdsUseCase(
-            booksRepository = get(),
-            listsRepository = get(),
-        )
-    }
-
-    factory {
-        GetRecommendedBooksUseCase(
-            observeRecommendedBooks = get(),
-            observeOwnedBookIds = get(),
         )
     }
 

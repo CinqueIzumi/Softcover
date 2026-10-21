@@ -1,10 +1,15 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen.section
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopContextMenu
 import nl.rhaydus.designsystem.component.DesktopContextMenuItem
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
@@ -61,16 +67,42 @@ internal fun BookList(
 
     if (rawBooks != null && rawBooks.isEmpty() && state.isLoading.not()) {
         state.emptyStatesByTab[tab.id]?.let { emptyState ->
-            EmptyState(
-                model = emptyState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        start = Spacing.gutter,
-                        end = Spacing.gutter,
-                        bottom = rememberBottomBarPadding(),
-                    ),
-            )
+            val recommendedRail = state.recommendedRailByTab[tab.id]
+
+            if (recommendedRail == null) {
+                EmptyState(
+                    model = emptyState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = Spacing.gutter,
+                            end = Spacing.gutter,
+                            bottom = rememberBottomBarPadding(),
+                        ),
+                )
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(bottom = rememberBottomBarPadding()),
+                ) {
+                    EmptyState(
+                        model = emptyState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(Spacing.section),
+                    )
+
+                    RecommendedRail(
+                        header = state.recommendedHeader,
+                        set = recommendedRail,
+                        horizontalInset = Spacing.gutter,
+                        onBookClick = onBookClick,
+                        runAction = runAction,
+                    )
+                }
+            }
         }
 
         return
@@ -383,6 +415,22 @@ internal fun BookList(
                         },
                     )
                 }
+            }
+        }
+
+        state.recommendedRailByTab[tab.id]?.let { recommendedRail ->
+            item(
+                key = "recommended-rail",
+                span = { GridItemSpan(maxLineSpan) },
+                contentType = "recommended",
+            ) {
+                RecommendedRail(
+                    header = state.recommendedHeader,
+                    set = recommendedRail,
+                    horizontalInset = 0.dp,
+                    onBookClick = onBookClick,
+                    runAction = runAction,
+                )
             }
         }
     }

@@ -269,6 +269,15 @@ internal data class LibraryUiState(
     val chooseListsSheet: SheetSession<ChooseListsUiModel, CreateList> = SheetSession.Closed,
 
     val isChooseListsSheetRequested: Boolean = false,
+
+    val recommendedBooks: ImmutableList<Book> = persistentListOf(),
+    val loadingRecommendedBooks: Boolean = true,
+    val recommendedHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Not on your shelf yet",
+        headline = "Recommended for you",
+    ),
+
+    val recommendedRailByTab: ImmutableMap<String, BookCardSet<Book>> = persistentMapOf(),
 ) : UiState {
     fun sortModeFor(tabId: String): LibrarySortMode =
         resolveSortMode(

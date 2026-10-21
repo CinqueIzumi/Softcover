@@ -52,11 +52,13 @@ internal fun List<BookEdition>.applyEditionSort(
         LibrarySortMode.TITLE -> sortedByCachedKey { it.title.orEmpty().lowercase() }
         LibrarySortMode.AUTHOR -> sortedByCachedKey { it.firstAuthor() }
         LibrarySortMode.PAGE_COUNT -> sortedByCachedKey { it.pages ?: 0 }
-        LibrarySortMode.RELEASE_DATE -> sortedByCachedKey { it.releaseDate ?: LocalDate(
-            9999,
-            12,
-            31,
-        ) }
+        LibrarySortMode.RELEASE_DATE -> sortedByCachedKey {
+            it.releaseDate ?: LocalDate(
+                9999,
+                12,
+                31,
+            )
+        }
         LibrarySortMode.DATE_ADDED -> sortedByCachedKey {
             addedAtByEditionId[it.id] ?: MISSING_ADDED_AT_SENTINEL
         }

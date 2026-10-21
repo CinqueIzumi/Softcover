@@ -8,11 +8,13 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecommendedBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveRecommendedFeedUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.ReorderListBooksUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetListRankedUseCase
@@ -55,6 +57,8 @@ internal class LibraryDependencies(
     val removeBookFromListUseCase: RemoveBookFromListUseCase,
     val reorderListBooksUseCase: ReorderListBooksUseCase,
     val setListRankedUseCase: SetListRankedUseCase,
+    val observeRecommendedFeedUseCase: ObserveRecommendedFeedUseCase,
+    val refreshRecommendedBooksUseCase: RefreshRecommendedBooksUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
     val defaultDispatcher: CoroutineDispatcher,

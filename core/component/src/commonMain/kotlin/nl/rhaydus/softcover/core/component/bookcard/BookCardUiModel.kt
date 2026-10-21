@@ -146,6 +146,20 @@ data class BookCardUiModel(
                     hasMenu = true,
                 ),
             ),
+            "Column, bookmark" to BookCardUiModel(
+                key = BookCardKey.Book(bookId = 9),
+                variant = BookCardVariant.Column(
+                    cover = bookCover(title = "Piranesi"),
+                    text = BookCardContent(
+                        title = "Piranesi",
+                        byline = "By Susanna Clarke",
+                    ),
+                    bookmark = BookCardTrailing.Bookmark.labelled(
+                        saved = false,
+                        contentDescription = "Add to Want to read",
+                    ),
+                ),
+            ),
             "Column, progress" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 5),
                 variant = BookCardVariant.Column(

@@ -6,13 +6,16 @@ then the follow-ups below.
 
 ## Now
 
-- **State:** written 2026-10-21. The worktree `../Softcover-recommendations-vibe` is on the local branch
-  `recommendations-vibe`, which starts from `origin/release/3.3.0` and hasn't been pushed. Phase 1 has been
-  built: the code is reviewed, `styleCheck` passed, and `check koverXmlReport -x lint` passed. No GitHub
-  issue exists; the user will file one.
-- **Next:** phase 2, step 2a, designed with the user first.
-- **Open questions:** see `## Risks`.
-- **Uncommitted:** nothing. Phase 1 is committed on the local branch, not pushed.
+- **State:** phase 1 (1a–1e) is built, device-checked and committed in four commits on the local branch
+  `recommendations-vibe` (worktree `../Softcover-recommendations-vibe`, from `origin/release/3.3.0`, not
+  pushed). No GitHub issue yet.
+- **Next:** design step 2b (`## Phase 2`, row 2b: Top Picks for a thin reading history) with the user
+  before building. Work in the worktree; the main checkout's `ACTIVE.md` lacks this. The device's local
+  Want to read rows were deleted for the 2a check; a pull to refresh on that tab restores them.
+- **Open questions:** none.
+- **Verification:** `check koverXmlReport -x lint` passed after the last code change (bar a one-line KDoc,
+  compiled and ktlint-checked since).
+- **Uncommitted:** nothing.
 
 ## What the API offers
 
@@ -44,92 +47,8 @@ Agreed with the user:
   library changes.
 - **No list yet:** the rail stays hidden.
 
-**Shape.** A ranked feed in `:core:book` that goes through the generic `refreshRankedBooks`, like trending,
-upcoming and recent.
-
-- It is stored in `trending_books` / `trending_meta` under one named `"recommendations"` key. The key column
-  is free-form and already shared by prefixed keys, so there is no Room schema change and no migration.
-- The sign-out wipe clears it, and the orphan prune counts its rows.
-- The owned-books filter stays in Explore, because `:core:lists` depends on `:core:book`.
-
-| Step | Scope | Who | Status |
-|---|---|---|---|
-| 1a | Data, see below | `softcover-implementer` | [x] |
-| 1b | Explore, see below | `softcover-implementer` | [x] |
-| 1c | Tests, see below | two `softcover-test-writer` agents in parallel | [x] |
-| 1d | `styleCheck`, `softcover-reviewer`, `check koverXmlReport -x lint`, then the user's device check | main | [x] |
-| 1e | Rename the shared ranked-list storage, see below | `softcover-implementer`, then `softcover-test-writer` | [x] |
-
-**1a: data.**
-
-- **Query:** `GetSystemVibeBookIds.graphql` in `core/network/.../graphql/query/`.
-- **Remote:** `BooksRemoteDataSource.fetchSystemVibeBookIds(vibe: SystemVibe, limit): List<Int>?`, matching the
-  vibe on type and slug. It injects
-  `GetUserIdUseCase`, as `QuoteRemoteDataSource` does.
-  - It returns `null` when the reader has no such vibe.
-  - It throws when `cached_book_ids` is not an array.
-  - It skips elements that are neither a number nor a numeric string, with a `toString().toIntOrNull()`
-    fallback.
-- **Module edge:** `implementation(project(":core:identity"))` (not `api`), plus `includes(identityModule)`
-  in `bookModule`.
-- **Repository:** `observeRecommendedBooks`, `observeRecommendedFetchedAt` and
-  `refreshRecommendedBooks(maxAge)`, behind their own `Mutex`.
-  - An empty result is stamped, so loading settles.
-  - Checked at most hourly; the books are hydrated only when the ranking changed, and pull to refresh always
-    hydrates.
-- **Use cases:** `ObserveRecommendedBooksUseCase`, `ObserveRecommendedFetchedAtUseCase` and
-  `RefreshRecommendedBooksUseCase`, bound in `bookModule`.
-- **Docs:** the `vibe_type` entry, and the Local Storage line in `docs/reference/architecture.md`
-  (which feeds share the trending tables).
-- **Verify:** compile only, `:core:book` / `:core:network`, plus `checkModuleGraph`. Tests are red until 1c.
-
-**1b: Explore.**
-
-- **Use cases:**
-  - `ObserveOwnedBookIdsUseCase`, extracted from `GetBecauseYouReadBooksUseCase.buildExcludedBookIds`, which
-    then uses it.
-  - `GetRecommendedBooksUseCase`: rank order, owned books out, 25 cap.
-- **Collector:** `RecommendedBooksCollector`, shaped like `TrendingBooksCollector`: refresh with `maxAge`
-  24h, loading = `fetchedAt == null && !settled`.
-- **State:** `recommended` card set, header, books and loading fields, plus `RECOMMENDED_STAND_IN_CARDS`.
-- **Cards and rails:**
-  - `SURFACE_RECOMMENDED`.
-  - `ExploreRail.RECOMMENDED`, with card widths in both the mobile and the jvm `ExploreCardRail`.
-  - The `UnreleasedCoverOverlaysCollector` input.
-  - The Because-you-read card mapper gets a shape name, since it now has two users.
-- **Section:** `RecommendedSection` takes Because you read's shape: `AnimatedVisibility` on "loading or has
-  cards", with a `trailingGap`. `DiscoverySections` re-nests, so a collapse animates rather than jumps.
-- **Refresh:** `OnRefreshAction` refreshes the list alongside trending (`maxAge` zero). `isRefreshing`
-  waits for both.
-- **DI:** the ScreenModel, `ExploreDependencies` and `ExploreModule`.
-- **Previews:** add `ExploreMockData` so the loaded previews show cards.
-- **Stability:** run `:feature:explore:stabilityDump`.
-- **Stale KDoc** (through `document-code`): the jvm layout's rail order, the `UnreleasedCoverOverlaysCollector`
-  claim about `OnRefreshAction`, and the rail list in `BookCardModelsCollector`.
-
-**1c: tests.**
-
-- **`:core:book`:**
-  - jsonb parsing;
-  - refresh: skipped while fresh, an unchanged ranking only re-stamped, a changed one or a forced refresh hydrated, an empty response keeps the
-    cached ranking, the 50 cap.
-- **Explore:**
-  - the filter: order kept, 25 cap, live re-filter;
-  - the collector's loading state;
-  - `OnRefreshAction` running both refreshes;
-  - the recommended card set.
-
-**1e: rename the shared ranked-list storage.** `trending_books` / `trending_meta` hold every ranked list
-(trending, upcoming, recent, recommendations), so the trending name misleads. No behaviour change.
-
-- **Room:** rename the tables (e.g. `ranked_books` / `ranked_books_meta`), the `period` column (e.g. `listKey`)
-  and the entities, with a migration that keeps every row. Needs a data-survival test and the full-chain
-  migration test.
-- **Code:** rename the `BookDao` methods (`observeTrendingBooks(period)` → `observeRankedBooks(key)`, …) and
-  the matching `BooksLocalDataSource` internals. Feed-specific repository and use-case names stay
-  (`observeTrendingBooks(period)` is still trending).
-- **Docs:** the Local Storage line in `docs/reference/architecture.md`, and the storage-key KDocs.
-- **Verify:** compile, `:core:database` and `:core:book` host tests, then the full gate.
+Built, device-checked and committed (1a–1e): a ranked `"recommendations"` feed in `:core:book` stored in
+the shared `ranked_books` tables, and the Explore rail.
 
 ## Phase 2: follow-ups
 
@@ -137,10 +56,29 @@ Each step is designed with the user before it is built.
 
 | Step | Scope | Status |
 |---|---|---|
-| 2a | Library: when the Want to read shelf is empty, show the top recommendations with an add button | [ ] |
+| 2a | Library: when the Want to read shelf is empty, show the top recommendations with an add button | [x] |
 | 2b | Top Picks (`vibe_type` 3) for a thin reading history: show it until the reader has rated a few books, then Recommendations. Ties into issue #202 (onboarding starter list) | [ ] |
 | 2c | Investigate first: can a system vibe take `vibe_exclusions_attributes`? Then "Not for me" on a recommended card, synced as an exclusion if it can be, otherwise hidden locally like Up next (and listed in Settings' hidden suggestions) | [ ] |
 | 2d | Featured public vibes (`featured: true`) on Explore, as rails or tiles beside Browse by mood | [ ] |
+
+### Step 2a: recommendations on Library's Want to read shelf
+
+Agreed with the user:
+
+- **When:** while the Want to read shelf holds fewer than 5 books. On an empty shelf the rail sits under the
+  empty-state message; otherwise it sits under the shelf's books. A book added drops out and the next one fills in.
+- **Layout:** a sideways-scrolling row of 10 column cards, each with a bookmark toggle that adds the book to
+  Want to read. Tapping a cover opens Book Detail.
+- **Copy:** no mention of Hardcover. Eyebrow "Not on your shelf yet", headline "Recommended for you".
+- **No list, or nothing left after the filter:** the rail stays hidden and the shelf shows what it does today.
+
+| Step | Scope | Who | Status |
+|---|---|---|---|
+| 2a-1 | `:core:component`: an optional `BookCardTrailing.Bookmark` on `BookCardVariant.Column`, below the text, emitting `TrailingClicked`; gallery preview | `softcover-implementer` | [x] |
+| 2a-2 | Move `ObserveOwnedBookIdsUseCase` and `GetRecommendedBooksUseCase` from `feature/explore` to `:core:lists`; the display cap becomes a parameter (Explore 25, Library 10) | `softcover-implementer` | [x] |
+| 2a-3 | Library: collector (refresh, hourly check), state, card mapper, the rail in the Want to read tab, add action via `MarkBookAsWantToReadUseCase`, pull to refresh | `softcover-implementer` | [x] |
+| 2a-4 | Tests, a shared `ObserveRecommendedFeedUseCase` replacing the two near-identical collectors, `styleCheck`, `softcover-reviewer`, `check koverXmlReport -x lint` | main | [x] |
+| 2a-5 | The user's device check; the bookmark moved onto the cover's top-end corner, the empty state got `Spacing.section` padding | user | [x] |
 
 ## Phase 3: personal genre vibes for supporters in Because you read
 
@@ -169,7 +107,7 @@ also the fallback while a new vibe has no books yet.
 
 ## Out of scope
 
-- A Recommended feed in the Trending widget: it is being prepared on the current branch.
+- A Recommended feed in the Trending widget: in progress elsewhere.
 - The reader's own vibes as rails.
 - A vibe builder.
 - "More like this" on Book Detail.

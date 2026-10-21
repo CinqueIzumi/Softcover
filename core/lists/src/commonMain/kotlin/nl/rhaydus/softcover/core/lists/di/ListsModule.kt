@@ -12,6 +12,9 @@ import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.DrainPendingListWritesUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.GetRecommendedBooksUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveOwnedBookIdsUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveRecommendedFeedUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.ReorderListBooksUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
@@ -75,5 +78,27 @@ val listsModule = module {
 
     factory {
         DrainPendingListWritesUseCase(listsRepository = get())
+    }
+
+    factory {
+        ObserveOwnedBookIdsUseCase(
+            booksRepository = get(),
+            listsRepository = get(),
+        )
+    }
+
+    factory {
+        GetRecommendedBooksUseCase(
+            observeRecommendedBooks = get(),
+            observeOwnedBookIds = get(),
+        )
+    }
+
+    factory {
+        ObserveRecommendedFeedUseCase(
+            getRecommendedBooks = get(),
+            observeRecommendedFetchedAt = get(),
+            refreshRecommendedBooks = get(),
+        )
     }
 }
