@@ -2,13 +2,13 @@ package nl.rhaydus.softcover.showcase.home.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
-import nl.rhaydus.softcover.showcase.home.action.HomeAction
 import nl.rhaydus.softcover.showcase.home.event.HomeEvent
 import nl.rhaydus.softcover.showcase.home.state.HomeLocalVariables
 import nl.rhaydus.softcover.showcase.home.state.HomeUiState
 import nl.rhaydus.softcover.showcase.store.ShowcaseThemeStore
 import nl.rhaydus.toad.Collector
 import nl.rhaydus.toad.ToadScreenModel
+import nl.rhaydus.toad.UiAction
 
 internal class HomeScreenModel(
     appDispatchers: AppDispatchers,
@@ -35,5 +35,5 @@ internal class HomeScreenModel(
         startInitializers()
     }
 
-    fun runAction(action: HomeAction) = dispatch(action = action)
+    fun runAction(action: UiAction<HomeDependencies, HomeUiState, HomeEvent, HomeLocalVariables>) = dispatch(action = action)
 }

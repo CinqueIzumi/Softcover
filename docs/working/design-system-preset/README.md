@@ -8,11 +8,21 @@ No GitHub issue. Branch `design-system-preset` (from `release/3.3.0`, local only
 
 ## Now
 
-- **State:** steps 0–2 done. The user wants a live, interactive showcase instead of still renders; 2b–2e
-  added.
-- **Next:** 2d and 2e in parallel (2b and 2c done; reviewer passed both). Add the "live" marker on family
-  rows with the demos.
-- **Open questions:** none.
+- **State:** steps 0–2c committed (`a65fd65ce`). 2d and 2e built, uncommitted: 17 live family pages under
+  `showcase/.../live/<family>/` (one TOAD slice each, Koin in `di/Live{Sheets,Overlays,InPage}Module.kt`),
+  routed from Home via `live/LiveScreens.kt` (`liveScreen()` / `hasLiveScreen()`), live rows badged "Live".
+  `MinifiedContractTest` has AAA markers. Snackbar-from-callback bug filed as F53 in
+  `foundation-upstream-candidates.md`. Reviewer: no defects.
+- **De-duplication done (user chose A):** every page uses `appearance/action/` generic actions
+  (`OnAppearanceClicked/Dismissed`, `OnPalette/BrightnessSelected`, `OnBackClickedAction(backEvent)`),
+  `appearance/screenmodel/AppearanceDependencies`, `appearance/screen/AppearanceSheetHost`; `runAction`
+  takes `UiAction<…>`. 94 per-page files deleted; 5 shared-action tests added.
+- **Next:** the user's device check on Medium_Phone (reinstalled after the refactor; reviewer passed the
+  de-duplication); commit when the user says, then step 3.
+- **Open questions:** none. User OK'd the SHEET loading `delay` loop and pinned search/editorial bars.
+- **Verification:** `scripts/gradle-quiet.sh :showcase:testDebugUnitTest styleCheck` passed after the
+  last edit; AAA markers complete, no `!!` in `showcase/`.
+- **Uncommitted:** all of the above.
 - **Carry into step 5:** pass the exporter's paths through a `CommandLineArgumentProvider` with declared
   input/output dirs (they are absolute `args` today); list `exportDesignTokens`, `checkDesignPresetContent`
   and `testDesignPreset` in `.claude/rules/build-wiring.md`. On the next foundation bump, add
@@ -53,11 +63,11 @@ One step per session. Commits only when the user asks.
   brightness) applied app-wide, changed from a top-bar sheet; home list of the 32 families, live ones marked;
   a family page of registry fixtures; a root `SoftcoverSnackbarHost`. Remove the framed-gallery screen and
   `GalleryThemedRegion`.
-- [ ] **2d. Overlay demos (`softcover-implementer`, parallel with 2e).** Sheets via `SheetSession` on the
+- [x] **2d. Overlay demos (`softcover-implementer`, parallel with 2e).** Sheets via `SheetSession` on the
   UiState (scaffolds, progress, verdict, quote, choose-lists, share-card; short, long, loading, error cases),
   the date picker dialog, snackbars via `SnackBarManager` (plain, with action, over a sheet), the
   mark-as-read burst, dismissable banners.
-- [ ] **2e. In-page demos (`softcover-implementer`, parallel with 2d).** Top bars on a scrolling page with
+- [x] **2e. In-page demos (`softcover-implementer`, parallel with 2d).** Top bars on a scrolling page with
   `enterAlwaysScrollBehavior`, search and editorial bars, a live sidebar, stateful chips / controls / fields
   / selection, chrome buttons over a cover. Each family page is a small ScreenModel; tests per round.
 - [ ] **3. Screen showcase entries (5 parallel `softcover-implementer`s).** Library, Reading, Book detail,

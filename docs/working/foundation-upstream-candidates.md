@@ -369,6 +369,14 @@ Filed but not yet implemented in the foundation.
 - **Impact in the app:** both buttons pass `icon.contentDescription` to the leading `Icon`, so a screen reader reads the label twice ("Update progress, Update progress"): Reading's `FeaturedSessionButton` and `FeaturedBackdropCard`, and every other labelled button with an icon.
 - **What to build:** render the leading icon with `contentDescription = null` in `RhaydusButton` and in `RhaydusSplitButton`'s leading half, because the label already names the button. The split button's trailing toggle keeps its description. Note the ignored description in both KDocs.
 
+### F53 — `SnackBarManager` drops a snackbar posted from another's `onActionClick` / `onDismiss`
+
+- **Type:** bug
+- **Home:** `nl.rhaydus:designsystem-core` (`SnackBarManager`)
+- **Status:** **Open.** No app workaround: no screen posts a follow-up snackbar from a callback today.
+- **Impact in the app:** `showSnackBar` runs `onActionClick` / `onDismiss` inside its `try`, before `finally` resets `isShowing`, so a snackbar posted from the callback (an "Undone" confirmation) is silently dropped.
+- **What to build:** reset `isShowing` before invoking the callback, and add a test that a snackbar posted from `onActionClick` shows.
+
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
 - **Type:** gate (custom Gradle task)

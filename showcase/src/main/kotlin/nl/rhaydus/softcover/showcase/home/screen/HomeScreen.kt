@@ -11,6 +11,7 @@ import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.showcase.family.screen.FamilyScreen
 import nl.rhaydus.softcover.showcase.home.event.HomeEvent
 import nl.rhaydus.softcover.showcase.home.screenmodel.HomeScreenModel
+import nl.rhaydus.softcover.showcase.live.liveScreen
 
 internal class HomeScreen : Screen {
     @Composable
@@ -23,7 +24,7 @@ internal class HomeScreen : Screen {
 
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
-                is HomeEvent.OpenFamily -> navigator.push(FamilyScreen(family = it.family))
+                is HomeEvent.OpenFamily -> navigator.push(it.family.liveScreen() ?: FamilyScreen(family = it.family))
             }
         }
 

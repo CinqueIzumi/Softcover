@@ -13,23 +13,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.header.PageMasthead
-import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
-import nl.rhaydus.softcover.showcase.appearance.event.AppearanceSheetEvent
-import nl.rhaydus.softcover.showcase.appearance.screen.AppearanceSheet
-import nl.rhaydus.softcover.showcase.home.action.HomeAction
-import nl.rhaydus.softcover.showcase.home.action.OnAppearanceClickedAction
-import nl.rhaydus.softcover.showcase.home.action.OnAppearanceDismissedAction
-import nl.rhaydus.softcover.showcase.home.action.OnBrightnessSelectedAction
+import nl.rhaydus.softcover.showcase.appearance.action.OnAppearanceClickedAction
+import nl.rhaydus.softcover.showcase.appearance.screen.AppearanceSheetHost
 import nl.rhaydus.softcover.showcase.home.action.OnFamilyClickedAction
-import nl.rhaydus.softcover.showcase.home.action.OnPaletteSelectedAction
+import nl.rhaydus.softcover.showcase.home.event.HomeEvent
+import nl.rhaydus.softcover.showcase.home.screenmodel.HomeDependencies
+import nl.rhaydus.softcover.showcase.home.state.HomeLocalVariables
 import nl.rhaydus.softcover.showcase.home.state.HomeUiState
+import nl.rhaydus.toad.UiAction
 
 @Composable
 internal fun HomeScreenLayout(
     state: HomeUiState,
-    runAction: (HomeAction) -> Unit,
+    runAction: (UiAction<HomeDependencies, HomeUiState, HomeEvent, HomeLocalVariables>) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         PageMasthead(
@@ -56,20 +54,8 @@ internal fun HomeScreenLayout(
         }
     }
 
-    state.appearance.sheet.modelOrNull?.let { sheet ->
-        AppearanceSheet(
-            model = sheet,
-            paletteChips = state.appearance.paletteChips,
-            brightnessChips = state.appearance.brightnessChips,
-            onEvent = { event ->
-                when (event) {
-                    is AppearanceSheetEvent.PaletteSelected -> runAction(OnPaletteSelectedAction(palette = event.palette))
-                    is AppearanceSheetEvent.BrightnessSelected -> runAction(
-                        OnBrightnessSelectedAction(brightness = event.brightness),
-                    )
-                    AppearanceSheetEvent.Dismissed -> runAction(OnAppearanceDismissedAction())
-                }
-            },
-        )
-    }
+    AppearanceSheetHost(
+        appearance = state.appearance,
+        runAction = runAction,
+    )
 }

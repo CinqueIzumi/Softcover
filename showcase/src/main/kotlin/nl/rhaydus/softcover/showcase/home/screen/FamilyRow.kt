@@ -1,12 +1,16 @@
 package nl.rhaydus.softcover.showcase.home.screen
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -25,11 +29,18 @@ internal fun FamilyRow(
                 .clickable(onClick = onClick)
                 .padding(horizontal = Spacing.xl, vertical = Spacing.md),
         ) {
-            SoftcoverText(
-                text = model.label,
-                style = MaterialTheme.editorialTypography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SoftcoverText(
+                    text = model.label,
+                    style = MaterialTheme.editorialTypography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+
+                model.liveBadge?.let { Badge(model = it) }
+            }
 
             SoftcoverText(
                 text = model.countLabel,

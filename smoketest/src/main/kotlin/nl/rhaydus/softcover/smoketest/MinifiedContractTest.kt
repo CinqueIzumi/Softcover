@@ -39,7 +39,11 @@ class MinifiedContractTest {
 
     @Test
     fun glanceActionCallbacksAreInstantiableByOriginalName() {
-        val failures = GLANCE_CALLBACKS.mapNotNull { (name, consequence) ->
+        // ----- Arrange -----
+        val callbacks = GLANCE_CALLBACKS
+
+        // ----- Act -----
+        val failures = callbacks.mapNotNull { (name, consequence) ->
             failureOrNull(name, consequence) {
                 val callback = load(name).getDeclaredConstructor().newInstance()
 
@@ -47,32 +51,42 @@ class MinifiedContractTest {
             }
         }
 
+        // ----- Assert -----
         failOnAny(failures)
     }
 
     @Test
     fun glanceAppWidgetsLoadUnderTheirOriginalNamesAndStayDistinct() {
-        val failures = GLANCE_WIDGETS.mapNotNull { (name, consequence) ->
+        // ----- Arrange -----
+        val widgets = GLANCE_WIDGETS
+
+        // ----- Act -----
+        val failures = widgets.mapNotNull { (name, consequence) ->
             failureOrNull(
                 name = name,
                 consequence = consequence,
             )
         }
 
-        failOnAny(failures)
+        val distinct = widgets.map { it.first }.map(::load).toSet()
 
-        val distinct = GLANCE_WIDGETS.map { it.first }.map(::load).toSet()
+        // ----- Assert -----
+        failOnAny(failures)
 
         assertEquals(
             "R8 merged two Glance widgets into one class",
-            GLANCE_WIDGETS.size,
+            widgets.size,
             distinct.size,
         )
     }
 
     @Test
     fun coroutineWorkersExposeTheConstructorWorkManagerCalls() {
-        val failures = WORKERS.mapNotNull { (name, consequence) ->
+        // ----- Arrange -----
+        val workers = WORKERS
+
+        // ----- Act -----
+        val failures = workers.mapNotNull { (name, consequence) ->
             failureOrNull(name, consequence) {
                 val constructor = load(name).getConstructor(
                     Context::class.java,
@@ -83,41 +97,57 @@ class MinifiedContractTest {
             }
         }
 
+        // ----- Assert -----
         failOnAny(failures)
     }
 
     @Test
     fun mlKitComponentRegistrarsKeepTheConstructorFirebaseDiscoveryCalls() {
-        val failures = ML_KIT_REGISTRARS.mapNotNull { name ->
+        // ----- Arrange -----
+        val registrars = ML_KIT_REGISTRARS
+
+        // ----- Act -----
+        val failures = registrars.mapNotNull { name ->
             failureOrNull(name, "the barcode scanner cannot initialise") {
                 load(name).getDeclaredConstructor()
             }
         }
 
+        // ----- Assert -----
         failOnAny(failures)
     }
 
     @Test
     fun roomDatabaseImplementationLoads() {
+        // ----- Arrange -----
+        val databaseImpl = DATABASE_IMPL
+
+        // ----- Act -----
         val failures = listOfNotNull(
             failureOrNull(
-                name = DATABASE_IMPL,
+                name = databaseImpl,
                 consequence = "opening the database throws and the app cannot start",
             ),
         )
 
+        // ----- Assert -----
         failOnAny(failures)
     }
 
     @Test
     fun voyagerScreensAndTabsLoadUnderTheirOriginalNames() {
-        val failures = VOYAGER_DESTINATIONS.mapNotNull { name ->
+        // ----- Arrange -----
+        val destinations = VOYAGER_DESTINATIONS
+
+        // ----- Act -----
+        val failures = destinations.mapNotNull { name ->
             failureOrNull(
                 name = name,
                 consequence = "navigating to this screen fails after process restore, which re-creates it by name",
             )
         }
 
+        // ----- Assert -----
         failOnAny(failures)
     }
 

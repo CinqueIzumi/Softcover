@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
 import nl.rhaydus.softcover.core.component.gallery.GalleryRegistry
+import nl.rhaydus.softcover.showcase.live.hasLiveScreen
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -49,6 +50,18 @@ class HomeMapperTest {
 
             // ----- Assert -----
             row.countLabel shouldBe "$count components"
+        }
+
+        @Test
+        fun `badges exactly the families that have a live screen`() {
+            // ----- Arrange -----
+            val expected = GalleryFamily.entries.filter { it.hasLiveScreen() }
+
+            // ----- Act -----
+            val rows = familyRows()
+
+            // ----- Assert -----
+            rows.filter { it.liveBadge != null }.map { it.family } shouldBe expected
         }
     }
 }

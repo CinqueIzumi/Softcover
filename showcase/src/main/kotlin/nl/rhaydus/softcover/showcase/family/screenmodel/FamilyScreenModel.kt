@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.showcase.family.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
-import nl.rhaydus.softcover.showcase.family.action.FamilyAction
 import nl.rhaydus.softcover.showcase.family.event.FamilyEvent
 import nl.rhaydus.softcover.showcase.family.mapper.entrySections
 import nl.rhaydus.softcover.showcase.family.mapper.familyTopBar
@@ -12,6 +11,7 @@ import nl.rhaydus.softcover.showcase.family.state.FamilyUiState
 import nl.rhaydus.softcover.showcase.store.ShowcaseThemeStore
 import nl.rhaydus.toad.Collector
 import nl.rhaydus.toad.ToadScreenModel
+import nl.rhaydus.toad.UiAction
 
 internal class FamilyScreenModel(
     appDispatchers: AppDispatchers,
@@ -42,5 +42,5 @@ internal class FamilyScreenModel(
         startInitializers()
     }
 
-    fun runAction(action: FamilyAction) = dispatch(action = action)
+    fun runAction(action: UiAction<FamilyDependencies, FamilyUiState, FamilyEvent, FamilyLocalVariables>) = dispatch(action = action)
 }

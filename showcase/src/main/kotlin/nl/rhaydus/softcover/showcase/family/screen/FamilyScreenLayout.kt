@@ -16,25 +16,23 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
-import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
-import nl.rhaydus.softcover.showcase.appearance.event.AppearanceSheetEvent
-import nl.rhaydus.softcover.showcase.appearance.screen.AppearanceSheet
-import nl.rhaydus.softcover.showcase.family.action.FamilyAction
-import nl.rhaydus.softcover.showcase.family.action.OnAppearanceClickedAction
-import nl.rhaydus.softcover.showcase.family.action.OnAppearanceDismissedAction
-import nl.rhaydus.softcover.showcase.family.action.OnBackClickedAction
-import nl.rhaydus.softcover.showcase.family.action.OnBrightnessSelectedAction
-import nl.rhaydus.softcover.showcase.family.action.OnPaletteSelectedAction
+import nl.rhaydus.softcover.showcase.appearance.action.OnAppearanceClickedAction
+import nl.rhaydus.softcover.showcase.appearance.action.OnBackClickedAction
+import nl.rhaydus.softcover.showcase.appearance.screen.AppearanceSheetHost
+import nl.rhaydus.softcover.showcase.family.event.FamilyEvent
+import nl.rhaydus.softcover.showcase.family.screenmodel.FamilyDependencies
+import nl.rhaydus.softcover.showcase.family.state.FamilyLocalVariables
 import nl.rhaydus.softcover.showcase.family.state.FamilyUiState
+import nl.rhaydus.toad.UiAction
 
 @Composable
 internal fun FamilyScreenLayout(
     state: FamilyUiState,
-    runAction: (FamilyAction) -> Unit,
+    runAction: (UiAction<FamilyDependencies, FamilyUiState, FamilyEvent, FamilyLocalVariables>) -> Unit,
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
@@ -43,7 +41,7 @@ internal fun FamilyScreenLayout(
                 model = state.topBar,
                 onEvent = { event ->
                     when (event) {
-                        TopBarEvent.BackClicked -> runAction(OnBackClickedAction())
+                        TopBarEvent.BackClicked -> runAction(OnBackClickedAction(backEvent = FamilyEvent.NavigateBack))
                     }
                 },
             ) { colors ->
@@ -74,20 +72,8 @@ internal fun FamilyScreenLayout(
         }
     }
 
-    state.appearance.sheet.modelOrNull?.let { sheet ->
-        AppearanceSheet(
-            model = sheet,
-            paletteChips = state.appearance.paletteChips,
-            brightnessChips = state.appearance.brightnessChips,
-            onEvent = { event ->
-                when (event) {
-                    is AppearanceSheetEvent.PaletteSelected -> runAction(OnPaletteSelectedAction(palette = event.palette))
-                    is AppearanceSheetEvent.BrightnessSelected -> runAction(
-                        OnBrightnessSelectedAction(brightness = event.brightness),
-                    )
-                    AppearanceSheetEvent.Dismissed -> runAction(OnAppearanceDismissedAction())
-                }
-            },
-        )
-    }
+    AppearanceSheetHost(
+        appearance = state.appearance,
+        runAction = runAction,
+    )
 }
