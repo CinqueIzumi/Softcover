@@ -1,23 +1,31 @@
 package nl.rhaydus.softcover.core.lists.di
 
 import nl.rhaydus.softcover.core.book.di.bookModule
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import nl.rhaydus.softcover.core.lists.data.datasource.HiddenRecommendationsLocalDataSource
+import nl.rhaydus.softcover.core.lists.data.datasource.HiddenRecommendationsLocalDataSourceImpl
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSourceImpl
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSourceImpl
+import nl.rhaydus.softcover.core.lists.data.repository.HiddenRecommendationsRepositoryImpl
 import nl.rhaydus.softcover.core.lists.data.repository.ListsRepositoryImpl
+import nl.rhaydus.softcover.core.lists.domain.repository.HiddenRecommendationsRepository
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.DrainPendingListWritesUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetRecommendedBooksUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.HideRecommendedBookUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveHiddenRecommendationsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveOwnedBookIdsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveRecommendedFeedUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RefreshRecommendedFeedUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.ReorderListBooksUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.RestoreRecommendedBookUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetListRankedUseCase
 import nl.rhaydus.softcover.core.network.di.apolloModule
@@ -40,6 +48,16 @@ val listsModule = module {
 
     single<ListsLocalDataSource> {
         ListsLocalDataSourceImpl(dao = get())
+    }
+
+    single<HiddenRecommendationsLocalDataSource> {
+        HiddenRecommendationsLocalDataSourceImpl(
+            dao = get<SoftcoverDatabase>().hiddenRecommendationDao(),
+        )
+    }
+
+    single<HiddenRecommendationsRepository> {
+        HiddenRecommendationsRepositoryImpl(localDataSource = get())
     }
 
     single<ListsRepository> {
@@ -92,7 +110,20 @@ val listsModule = module {
         GetRecommendedBooksUseCase(
             observeSystemVibeBooks = get(),
             observeOwnedBookIds = get(),
+            observeHiddenRecommendations = get(),
         )
+    }
+
+    factory {
+        HideRecommendedBookUseCase(hiddenRecommendationsRepository = get())
+    }
+
+    factory {
+        RestoreRecommendedBookUseCase(hiddenRecommendationsRepository = get())
+    }
+
+    factory {
+        ObserveHiddenRecommendationsUseCase(hiddenRecommendationsRepository = get())
     }
 
     factory {

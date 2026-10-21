@@ -553,6 +553,9 @@ interface BookDao {
     @Query("DELETE FROM dismissed_continue_series")
     suspend fun deleteAllDismissedContinueSeries()
 
+    @Query("DELETE FROM hidden_recommendations")
+    suspend fun deleteAllHiddenRecommendations()
+
     @Query("DELETE FROM book_quotes")
     suspend fun deleteAllQuotes()
 
@@ -870,6 +873,7 @@ interface BookDao {
         deleteAllShelfManualOrder()
         deleteAllDismissedContinueSeriesBooks()
         deleteAllDismissedContinueSeries()
+        deleteAllHiddenRecommendations()
         deleteAllBookDeadlines()
         deleteAllPendingUserBookWrites()
         deleteAllPendingListWrites()

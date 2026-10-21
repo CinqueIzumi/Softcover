@@ -6,15 +6,15 @@ then the follow-ups below.
 
 ## Now
 
-- **State:** phase 1 (1a–1e) is built, device-checked and committed in four commits on the local branch
+- **State:** phase 1, 2a and 2b are built, device-checked and committed on the local branch
   `recommendations-vibe` (worktree `../Softcover-recommendations-vibe`, from `origin/release/3.3.0`, not
-  pushed). No GitHub issue yet.
-- **Next:** design 2c with the user (investigate `vibe_exclusions_attributes` on a system vibe first). Work in
-  the worktree; the main checkout's `ACTIVE.md` lacks this. The device's local Want to read rows and cached
-  Recommendations were deleted for the 2b check; a pull to refresh restores them.
+  pushed; 2b is `53c23328f`). No GitHub issue yet.
+- **Next:** build 2c (approved, below), all sub-steps in one session. Work in the worktree; the main checkout's
+  `ACTIVE.md` lacks this.
 - **Open questions:** none.
-- **Verification:** `check koverXmlReport -x lint` passed after the last code change.
-- **Uncommitted:** nothing.
+- **Verification:** `check koverXmlReport -x lint` (includes the style gates) passed after the last code
+  change; the close-out glom and AAA checks were clean.
+- **Uncommitted:** this Now block update only.
 
 ## What the API offers
 
@@ -57,8 +57,31 @@ Each step is designed with the user before it is built.
 |---|---|---|
 | 2a | Library: when the Want to read shelf is empty, show the top recommendations with an add button | [x] |
 | 2b | Top Picks (`vibe_type` 3) as the fallback when Recommendations is missing or empty after the owned filter, see below | [x] |
-| 2c | Investigate first: can a system vibe take `vibe_exclusions_attributes`? Then "Not for me" on a recommended card, synced as an exclusion if it can be, otherwise hidden locally like Up next (and listed in Settings' hidden suggestions) | [ ] |
+| 2c | "Not for me" on a recommended card, hidden locally like Up next and restorable from Settings' hidden suggestions, see below | [ ] |
 | 2d | Featured public vibes (`featured: true`) on Explore, as rails or tiles beside Browse by mood | [ ] |
+
+### Step 2c: "Not for me", hidden locally
+
+Agreed with the user:
+
+- **No sync:** exclusions can't be read back and testing one on a real account may be irreversible, so the
+  hide stays on the device.
+- **Storage:** a `hidden_recommendations` Room table (book id, title, cover, author), migration 59 → 60,
+  cleared on sign-out. Owned by `:core:lists`.
+- **Filter:** a third input to `GetRecommendedBooksUseCase`'s combine, before `take(limit)`; covers
+  Recommendations and Top Picks on both screens.
+- **UI:** an overflow button on the recommended cards (Explore and Library) opens a sheet with one row "Not for
+  me" / "Stop recommending this book"; the snackbar `"<title>" won't be suggested again` offers Undo.
+- **Restore:** a third group on Hidden suggestions, "Hidden recommendations" / "Hidden from Recommended for you
+  and Top picks. Tap Restore to bring one back."; the intro becomes "Books and series you've hidden stay out
+  of your suggestions on Explore and Library. Restore one to see it again."
+
+| Step | Scope | Who | Status |
+|---|---|---|---|
+| 2c-1 | Table, migration, `:core:lists` data source and use cases, the filter, sign-out clearing; its tests | `softcover-implementer` | [x] |
+| 2c-2 | Overflow menu, sheet and snackbar on the Explore and Library recommended rails | `softcover-implementer` | [ ] |
+| 2c-3 | The Hidden suggestions group and intro | `softcover-implementer` | [ ] |
+| 2c-4 | Tests (migration survival and full chain), `styleCheck`, `softcover-reviewer`, `check koverXmlReport -x lint`, the user's device check | main | [ ] |
 
 ### Step 2b: Top Picks fallback
 
