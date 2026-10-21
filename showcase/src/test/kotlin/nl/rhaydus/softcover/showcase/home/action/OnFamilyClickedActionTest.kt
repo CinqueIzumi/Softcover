@@ -1,0 +1,53 @@
+package nl.rhaydus.softcover.showcase.home.action
+
+import io.kotest.matchers.shouldBe
+import io.mockk.mockk
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
+import nl.rhaydus.softcover.showcase.home.event.HomeEvent
+import nl.rhaydus.softcover.showcase.home.screenmodel.HomeDependencies
+import nl.rhaydus.softcover.showcase.home.state.HomeLocalVariables
+import nl.rhaydus.softcover.showcase.home.state.HomeUiState
+import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class OnFamilyClickedActionTest {
+    private lateinit var dependencies: HomeDependencies
+    private lateinit var stateFlow: MutableStateFlow<HomeUiState>
+    private lateinit var eventChannel: Channel<HomeEvent>
+    private lateinit var scope: ActionScope<HomeUiState, HomeEvent, HomeLocalVariables>
+
+    @BeforeEach
+    fun setUp() {
+        dependencies = mockk(relaxed = true)
+        stateFlow = MutableStateFlow(HomeUiState())
+        eventChannel = Channel(Channel.BUFFERED)
+        scope = ActionScope(
+            stateFlow = stateFlow,
+            localVariablesFlow = MutableStateFlow(HomeLocalVariables()),
+            eventChannel = eventChannel,
+        )
+    }
+
+    @Nested
+    inner class Execute {
+        @Test
+        fun `sends the open-family event for the clicked family`() = runTest {
+            // ----- Arrange -----
+            val action = OnFamilyClickedAction(family = GalleryFamily.CHIP)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.receive() shouldBe HomeEvent.OpenFamily(family = GalleryFamily.CHIP)
+        }
+    }
+}

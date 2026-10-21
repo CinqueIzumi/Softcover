@@ -286,8 +286,8 @@ cover model logic and fixture coverage, never copied style values or defaults (`
   registry is also the source of the still renders for the design preset.
 - **Behaviour gets a live demo.** A component that opens, dismisses, scrolls, animates or holds state also
   adds a demo in `:showcase` in the same change.
-- **The themed region is shared.** `GalleryThemedRegion` in `:core:component`'s `gallery/` takes design-system
-  types (palette, brightness, optional family); `:showcase` and the design-preset renders both call it.
+- **The showcase owns its look.** `:showcase` keeps one theme store (palette and brightness) and wraps its
+  whole navigator in `SoftcoverTheme`, so every screen, sheet and dialog it opens wears the chosen look.
 
 ### 7.6 Where consolidation is the wrong call
 

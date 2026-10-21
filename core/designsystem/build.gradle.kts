@@ -122,6 +122,7 @@ kotlin {
             // reference. Used only from XML (not Kotlin), so dependency-analysis can't see it — excluded from
             // the buildHealth unused-check in the root build.
             implementation(libs.material.components)
+            implementation(libs.androidx.activity.compose)
         }
     }
 }

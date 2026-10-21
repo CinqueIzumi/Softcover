@@ -23,6 +23,13 @@ public fun nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGly
   params:
 
 @Composable
+public fun nl.rhaydus.softcover.core.designsystem.presentation.systembar.ApplySystemBarAppearance(isDark: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - isDark: STABLE (primitive type)
+
+@Composable
 public fun nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme(palette: nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette, brightness: nl.rhaydus.softcover.core.designsystem.presentation.theme.SchemeBrightness, dynamicColor: kotlin.Boolean, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true

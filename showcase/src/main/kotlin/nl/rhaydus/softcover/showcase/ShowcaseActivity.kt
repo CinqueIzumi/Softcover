@@ -4,14 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import cafe.adriel.voyager.navigator.Navigator
-import nl.rhaydus.softcover.showcase.screen.ShowcaseScreen
+import nl.rhaydus.softcover.core.designsystem.presentation.systembar.transparentSystemBarStyle
+import nl.rhaydus.softcover.showcase.screen.ShowcaseRoot
 
 class ShowcaseActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = transparentSystemBarStyle(darkTheme = null),
+            navigationBarStyle = transparentSystemBarStyle(darkTheme = null),
+        )
         super.onCreate(savedInstanceState)
 
-        setContent { Navigator(screen = ShowcaseScreen()) }
+        setContent { ShowcaseRoot() }
     }
 }

@@ -40,8 +40,13 @@ dependencies {
     implementation(project(":core:component"))
 
     implementation(libs.rhaydus.toad)
+    implementation(libs.rhaydus.coreCommon)
+
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose.multiplatform)
 
     implementation(libs.voyager.navigator)
+    implementation(libs.voyager.koin)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)

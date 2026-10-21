@@ -10,10 +10,9 @@ No GitHub issue. Branch `design-system-preset` (from `release/3.3.0`, local only
 
 - **State:** steps 0–2 done. The user wants a live, interactive showcase instead of still renders; 2b–2e
   added.
-- **Next:** 2c, the showcase shell (2b done; reviewer passed).
-- **Open questions:** Softcover launcher icon for the showcase (fits 2c).
-- **Carry into 2c:** with Koin in `:showcase`, add `core-common` and inject `AppDispatchers` (drop
-  `Dispatchers.Main.immediate` from `ShowcaseScreen`).
+- **Next:** 2d and 2e in parallel (2b and 2c done; reviewer passed both). Add the "live" marker on family
+  rows with the demos.
+- **Open questions:** none.
 - **Carry into step 5:** pass the exporter's paths through a `CommandLineArgumentProvider` with declared
   input/output dirs (they are absolute `args` today); list `exportDesignTokens`, `checkDesignPresetContent`
   and `testDesignPreset` in `.claude/rules/build-wiring.md`. On the next foundation bump, add
@@ -50,7 +49,7 @@ One step per session. Commits only when the user asks.
   footer entry points and `SettingsModule` wiring; stability baseline; `MinifiedContractTest.kt:230`; docs and
   rules naming it. Rewrite `component-contract.md` §7.5: the showcase is the visual check; a new component
   still adds its `GalleryRegistry` entry, and one with behaviour also adds a live demo in `:showcase`.
-- [ ] **2c. Showcase shell (`softcover-implementer`).** Voyager + Koin; a showcase-wide theme store (palette,
+- [x] **2c. Showcase shell (`softcover-implementer`).** Voyager + Koin; a showcase-wide theme store (palette,
   brightness) applied app-wide, changed from a top-bar sheet; home list of the 32 families, live ones marked;
   a family page of registry fixtures; a root `SoftcoverSnackbarHost`. Remove the framed-gallery screen and
   `GalleryThemedRegion`.
