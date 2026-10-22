@@ -4,7 +4,9 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
@@ -35,7 +37,7 @@ internal val bookEntries: ImmutableList<GalleryEntry> = persistentListOf(
 
             Cover(
                 model = model,
-                modifier = modifier.width(width),
+                modifier = modifier.wrapContentWidth(align = Alignment.Start).width(width),
             )
         },
     ),
@@ -64,7 +66,7 @@ internal val bookEntries: ImmutableList<GalleryEntry> = persistentListOf(
             MoodTile(
                 model = model,
                 onEvent = {},
-                modifier = modifier.width(160.dp),
+                modifier = modifier.wrapContentWidth(align = Alignment.Start).width(160.dp),
             )
         },
     ),

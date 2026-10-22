@@ -201,17 +201,30 @@ abstract class DesignPresetBundleTask : DefaultTask() {
         shown: List<Fixture>,
         out: File,
     ): String {
-        val height = shown.sumOf {
+        val heights = shown.map {
             val png = File(
                 out,
                 "renders/light/${entry.path}/${it.slug}.png",
             )
             24 + pngHeight(png) / DENSITY + 16
         }
-        val cardHeight = (height + 2 * PAD).coerceIn(
+        val columns = (1..shown.size).firstOrNull { count ->
+            gridHeight(
+                heights,
+                count,
+            ) + 2 * PAD <= MAX_HEIGHT
+        } ?: shown.size.coerceAtLeast(1)
+        val cardHeight = (
+            gridHeight(
+                heights,
+                columns,
+            ) + 2 * PAD
+        ).coerceIn(
             MIN_HEIGHT,
             MAX_HEIGHT,
         )
+        val gridWidth = columns * RENDER_WIDTH + (columns - 1) * GAP + 2 * PAD
+        val cardWidth = if (columns > 1) " width=$gridWidth" else ""
         val group = escape(entry.family)
         val figures = shown.joinToString("\n") { fixture ->
             val path = "../../renders/{theme}/${entry.path}/${fixture.slug}.png"
@@ -227,13 +240,13 @@ abstract class DesignPresetBundleTask : DefaultTask() {
   </figure>"""
         }
 
-        return """<!-- @dsCard group="$group" height=$cardHeight -->
+        return """<!-- @dsCard group="$group" height=$cardHeight$cardWidth -->
 <!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
 <style>
-  body { margin: 0; padding: ${PAD}px; background: var(--background); color: var(--on-surface); font-family: var(--font-body); }
+  body { margin: 0; padding: ${PAD}px; background: var(--background); color: var(--on-surface); font-family: var(--font-body); display: grid; grid-template-columns: repeat($columns, minmax(0, 1fr)); column-gap: ${GAP}px; align-items: start; }
   figure { margin: 0 0 16px; }
   figcaption { margin-bottom: 8px; font-size: 13px; color: var(--on-surface-variant); }
   img { display: block; max-width: 100%; height: auto; }
@@ -265,6 +278,11 @@ $figures
         logger.lifecycle("design preset bundle: ${files.size} files (limit ${maxFiles.get()})")
         if (files.size > maxFiles.get()) throw GradleException("The bundle has ${files.size} files; the limit is ${maxFiles.get()}")
     }
+
+    private fun gridHeight(
+        heights: List<Int>,
+        columns: Int,
+    ): Int = heights.chunked(columns).sumOf { row -> row.max() }
 
     private fun pngHeight(file: File): Int = file.inputStream().use { stream ->
         val header = stream.readNBytes(PNG_HEADER_BYTES)
@@ -324,6 +342,8 @@ $figures
         const val CURRENT_COLOR = "currentColor"
         const val DENSITY = 2
         const val PAD = 16
+        const val GAP = 16
+        const val RENDER_WIDTH = 412
         const val MIN_HEIGHT = 40
         const val MAX_HEIGHT = 4000
         const val MAX_RENDER_BYTES = 512 * 1024

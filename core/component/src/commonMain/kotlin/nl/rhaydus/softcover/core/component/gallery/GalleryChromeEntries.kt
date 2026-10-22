@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
@@ -216,7 +218,7 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
                         isLoading = true,
                         standIn = "A two line stand-in\nfor a longer description",
                         maxLines = 2,
-                        modifier = modifier.width(140.dp),
+                        modifier = modifier.wrapContentWidth(align = Alignment.Start).width(140.dp),
                     )
                 },
             ),
@@ -246,7 +248,7 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
         content = { model, modifier ->
             MarkAsReadBurst(
                 model = model,
-                modifier = modifier.size(160.dp),
+                modifier = modifier.wrapContentWidth(align = Alignment.Start).size(160.dp),
             )
         },
     ),

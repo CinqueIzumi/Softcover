@@ -3,10 +3,12 @@ package nl.rhaydus.softcover.core.component.gallery
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarVisuals
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -169,7 +171,7 @@ internal val leafEntries: ImmutableList<GalleryEntry> = persistentListOf(
                 render = { modifier ->
                     SnackbarSurface(
                         data = plainSnackbar,
-                        modifier = modifier,
+                        modifier = modifier.wrapContentWidth(align = Alignment.Start),
                     )
                 },
             ),
@@ -178,7 +180,7 @@ internal val leafEntries: ImmutableList<GalleryEntry> = persistentListOf(
                 render = { modifier ->
                     SnackbarSurface(
                         data = actionSnackbar,
-                        modifier = modifier,
+                        modifier = modifier.wrapContentWidth(align = Alignment.Start),
                     )
                 },
             ),
