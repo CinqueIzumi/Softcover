@@ -59,7 +59,16 @@ abstract class DesignPresetBundleTask : DefaultTask() {
         ).listFiles { file -> file.isDirectory }.orEmpty().sorted().forEach(::writeAssetReadme)
 
         val entries = readIndex()
-        entries.filterNot { it.handWritten }.forEach { entry ->
+        val missingFolders = entries.mapNotNull { it.handWrittenFolder }.filterNot { folder ->
+            File(
+                out,
+                "components/$folder",
+            ).isDirectory
+        }
+        if (missingFolders.isNotEmpty()) {
+            throw GradleException("design/project/components has no hand-written folder: ${missingFolders.joinToString()}")
+        }
+        entries.filter { it.handWrittenFolder == null }.forEach { entry ->
             copyRenders(
                 entry,
                 out,
@@ -123,7 +132,7 @@ abstract class DesignPresetBundleTask : DefaultTask() {
                 familySlug = map["familySlug"].toString(),
                 slug = map["slug"].toString(),
                 blurb = map["blurb"].toString(),
-                handWritten = map["handWritten"] == true,
+                handWrittenFolder = map["handWrittenFolder"] as? String,
                 fixtures = (map["fixtures"] as? List<*>).orEmpty().mapNotNull { fixture ->
                     val item = fixture as? Map<*, *> ?: return@mapNotNull null
                     Fixture(
@@ -331,7 +340,7 @@ $figures
         val familySlug: String,
         val slug: String,
         val blurb: String,
-        val handWritten: Boolean,
+        val handWrittenFolder: String?,
         val fixtures: List<Fixture>,
     ) {
         val path: String get() = "$familySlug/$slug"

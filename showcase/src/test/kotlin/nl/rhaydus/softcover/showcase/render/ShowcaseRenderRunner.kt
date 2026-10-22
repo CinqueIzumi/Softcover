@@ -101,8 +101,8 @@ class ShowcaseRenderRunner {
                         entry.blurb,
                     )
                     .put(
-                        "handWritten",
-                        entry.name in RequiredComponents.names,
+                        "handWrittenFolder",
+                        RequiredComponents.folders[entry.name] ?: JSONObject.NULL,
                     )
                     .put(
                         "fixtures",

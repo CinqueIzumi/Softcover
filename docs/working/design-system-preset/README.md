@@ -20,9 +20,9 @@ No GitHub issue. Branch `design-system-preset` (from `release/3.3.0`, local only
   `DesignPresetArguments` in build-logic, gallery KDoc, module-structure row, `RenderSlugTest`), unused
   `:showcase` test deps swapped for `ui-test`; `check buildHealth` passed.
 - **Next:** commit step 8, then close the plan.
-- **Open questions:** is `design/project/components/BookCover/` meant alongside `Cover/`? No gallery entry
-  ties it in.
-- **Uncommitted:** step 8 fixes and this tracker.
+- **Open questions:** none. `BookCover/` is the hand-written `Cover` entry (`components/Cover` is the
+  system cover); `RequiredComponents` maps entry → folder and the bundle fails on a missing folder.
+- **Uncommitted:** the `BookCover` mapping and this tracker.
 - **Carry:** on the next foundation bump, add `**/jvmDesignPresetTest/**` to the shared detekt test globs and
   drop the local `FunctionNaming` block.
 
