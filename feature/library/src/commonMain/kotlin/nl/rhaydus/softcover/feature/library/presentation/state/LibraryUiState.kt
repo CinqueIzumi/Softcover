@@ -275,7 +275,12 @@ internal data class LibraryUiState(
     val loadingRecommendedBooks: Boolean = true,
     val recommendedHeader: SectionHeaderUiModel = SystemVibe.Recommendations.toRecommendedHeader(isLoading = true),
 
-    val recommendedRailByTab: ImmutableMap<String, BookCardSet<Book>> = persistentMapOf(),
+    val recommendedRailByTab: ImmutableMap<String, LibraryRecommendedRail> = persistentMapOf(),
+
+    /** The recommended book whose overflow menu is requested; the sheet in [recommendedMenu] follows it. */
+    val recommendedMenuBookId: Int? = null,
+
+    val recommendedMenu: SheetSession<RecommendedMenuSheetUiModel, PendingRecommendedHide> = SheetSession.Closed,
 ) : UiState {
     fun sortModeFor(tabId: String): LibrarySortMode =
         resolveSortMode(

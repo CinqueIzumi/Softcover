@@ -1,13 +1,15 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
-import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -15,7 +17,9 @@ import nl.rhaydus.softcover.feature.library.presentation.mapper.RECOMMENDED_STAN
 import nl.rhaydus.softcover.feature.library.presentation.mapper.toRecommendedCard
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryRecommendedRail
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.RecommendedRailPlacement
 import nl.rhaydus.toad.ActionScope
 
 private const val RECOMMENDED_SHELF_LIMIT = 5
@@ -54,7 +58,7 @@ private fun LibraryUiState.wantToReadCount(): Int? {
     return books.size.takeUnless { books.isEmpty() && isLoading }
 }
 
-private fun RecommendedRailSnapshot.toRails(): ImmutableMap<String, BookCardSet<Book>> {
+private fun RecommendedRailSnapshot.toRails(): ImmutableMap<String, LibraryRecommendedRail> {
     val shelfHasRoom = wantToReadCount != null && wantToReadCount < RECOMMENDED_SHELF_LIMIT
     val idle = selectionMode.not() && isRearranging.not()
     val hasContent = loadingRecommendedBooks || recommendedBooks.isNotEmpty()
@@ -67,5 +71,25 @@ private fun RecommendedRailSnapshot.toRails(): ImmutableMap<String, BookCardSet<
         recommendedBooks.map { book -> book.toRecommendedCard() to book }.toBookCardSet()
     }
 
-    return persistentMapOf(WANT_TO_READ_TAB_ID to set)
+    val underEmptyState = wantToReadCount == 0
+
+    val rail = BookCardRailUiModel(
+        set = set,
+        cardWidth = 118.dp,
+        staggerKey = "library:recommended",
+        horizontalInset = if (underEmptyState) Spacing.gutter else 0.dp,
+    )
+
+    val placement = if (underEmptyState) {
+        RecommendedRailPlacement.UnderEmptyState
+    } else {
+        RecommendedRailPlacement.UnderGrid
+    }
+
+    val wantToReadRail = LibraryRecommendedRail(
+        rail = rail,
+        placement = placement,
+    )
+
+    return persistentMapOf(WANT_TO_READ_TAB_ID to wantToReadRail)
 }

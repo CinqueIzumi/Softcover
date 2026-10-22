@@ -32,6 +32,7 @@ internal fun Book.toRecommendedCard(): BookCardUiModel = BookCardUiModel(
             byline = byline(author = authorString),
             titleTransitionKey = transitionKey(element = BookTransitionElement.Title),
         ),
+        hasMenu = true,
         bookmark = BookCardTrailing.Bookmark.labelled(
             saved = false,
             contentDescription = "Add to Want to read",
@@ -55,6 +56,7 @@ internal val RECOMMENDED_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(R
                 title = "The Name of the Wind",
                 byline = "By Patrick Rothfuss",
             ),
+            hasMenu = true,
         ),
         isLoading = true,
     )

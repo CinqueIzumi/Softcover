@@ -20,6 +20,8 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
+import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnRecommendedMenuOpenAction
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_RECOMMENDED
 
 @Composable
@@ -28,17 +30,28 @@ internal fun RecommendedSection(
     set: BookCardSet<Book>,
     visible: Boolean,
     onBookClick: (Book, String?) -> Unit,
+    runAction: (ExploreAction) -> Unit,
     trailingGap: Dp,
     rail: @Composable ((BookCardEvent) -> Unit) -> Unit,
 ) {
     val onCardEvent = rememberPrefetchingBookCardEventHandler(
         set = set,
     ) { event, book ->
-        if (event is BookCardEvent.Clicked) {
-            onBookClick(
+        when (event) {
+            is BookCardEvent.Clicked -> onBookClick(
                 book,
                 SURFACE_RECOMMENDED,
             )
+
+            is BookCardEvent.MenuClicked -> {
+                runAction(OnRecommendedMenuOpenAction(bookId = book.id))
+            }
+
+            is BookCardEvent.LongClicked,
+            is BookCardEvent.PressStarted,
+            is BookCardEvent.TrailingClicked,
+            is BookCardEvent.ShakeEnded,
+                -> Unit
         }
     }
 

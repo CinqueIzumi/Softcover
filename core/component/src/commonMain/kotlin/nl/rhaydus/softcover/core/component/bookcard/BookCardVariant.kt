@@ -14,7 +14,7 @@ sealed interface BookCardVariant {
     /**
      * @property hasMenu Draws the overflow button over the cover's top-end corner; a tap emits
      * [BookCardEvent.MenuClicked].
-     * @property bookmark Draws over the cover's top-end corner, before the overflow button; a tap emits
+     * @property bookmark Draws over the cover's top-start corner; a tap emits
      * [BookCardEvent.TrailingClicked].
      */
     data class Column(

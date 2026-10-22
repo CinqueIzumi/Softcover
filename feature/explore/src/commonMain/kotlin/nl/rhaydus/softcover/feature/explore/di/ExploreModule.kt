@@ -59,6 +59,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksC
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksHasMoreCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.RecentSearchChipsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.RecommendedBooksCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.RecommendedMenuCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.SearchTopBarCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.SortPillCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.TrendingBooksCollector
@@ -103,6 +104,8 @@ val exploreModule = module {
             dismissContinueSeriesUseCase = get(),
             undoContinueSeriesBookDismissalUseCase = get(),
             undoContinueSeriesDismissalUseCase = get(),
+            hideRecommendedBookUseCase = get(),
+            restoreRecommendedBookUseCase = get(),
             enrichDismissedContinueSeriesMetadataUseCase = get(),
             getFeaturedUpcomingReleaseUseCase = get(),
             getBecauseYouReadBooksUseCase = get(),
@@ -134,6 +137,7 @@ val exploreModule = module {
 
     factory { ContinueSeriesBooksCollector() } bind ExploreCollector::class
     factory { ContinueSeriesMenuCollector() } bind ExploreCollector::class
+    factory { RecommendedMenuCollector() } bind ExploreCollector::class
 
     factory { EnrichDismissedMetadataCollector() } bind ExploreCollector::class
 
@@ -167,6 +171,9 @@ val exploreModule = module {
             undoContinueSeriesDismissalUseCase = get(),
             dismissContinueSeriesBookUseCase = get(),
             dismissContinueSeriesUseCase = get(),
+            observeHiddenRecommendationsUseCase = get(),
+            hideRecommendedBookUseCase = get(),
+            restoreRecommendedBookUseCase = get(),
             enrichDismissedContinueSeriesMetadataUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),

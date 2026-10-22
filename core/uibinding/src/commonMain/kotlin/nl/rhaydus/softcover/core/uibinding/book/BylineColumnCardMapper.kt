@@ -10,11 +10,14 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
 import nl.rhaydus.softcover.core.domain.model.Book
 
-/** A column card of the cover, the title and the "By X" byline: the card of every "more books" rail. */
+/**
+ * A column card of the cover, the title and the "By X" byline: the card of every "more books" rail.
+ */
 fun Book.toBylineColumnCard(
     cover: CoverUiModel?,
     coverBadge: CoverOverlayUiModel?,
     transitionSurface: String? = null,
+    hasMenu: Boolean = false,
 ): BookCardUiModel = BookCardUiModel(
     key = BookCardKey.Book(bookId = id),
     variant = BookCardVariant.Column(
@@ -32,5 +35,6 @@ fun Book.toBylineColumnCard(
             ),
             byline = byline(author = authorString),
         ),
+        hasMenu = hasMenu,
     ),
 )

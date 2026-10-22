@@ -62,14 +62,16 @@ internal fun BookCardTrailingControl(
 }
 
 /**
- * The circle sits in the touch target's top-end corner, not its centre, so it lands 6dp in from the
- * cover's corner.
+ * The circle sits in the touch target's [corner], not its centre, so it lands 6dp in from the cover's
+ * matching corner.
  */
 @Composable
 internal fun BookCardCoverButton(
     icon: SoftcoverIcon,
     contentDescription: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    corner: Alignment = Alignment.TopEnd,
     enabled: Boolean = true,
     checked: Boolean? = null,
 ) {
@@ -91,7 +93,7 @@ internal fun BookCardCoverButton(
         IconButton(
             onClick = onClick,
             enabled = enabled,
-            modifier = Modifier
+            modifier = modifier
                 .pointerHandCursor()
                 .alpha(if (enabled) 1f else DISABLED_ALPHA)
                 .then(toggleSemantics),
@@ -100,7 +102,7 @@ internal fun BookCardCoverButton(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(Spacing.xxs),
-                contentAlignment = Alignment.TopEnd,
+                contentAlignment = corner,
             ) {
                 Box(
                     modifier = Modifier

@@ -108,20 +108,22 @@ private fun BookCardCoverScaffold(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            if (isLoading.not() && (hasMenu || bookmark != null || content != null)) {
+            if (isLoading.not() && bookmark != null) {
+                val toggle = bookmark.toggle
+
+                BookCardCoverButton(
+                    icon = if (toggle.checked) toggle.on else toggle.off,
+                    contentDescription = toggle.description,
+                    enabled = toggle.enabled,
+                    checked = toggle.checked,
+                    onClick = { onEvent(BookCardEvent.TrailingClicked(key = model.key)) },
+                    modifier = Modifier.align(Alignment.TopStart),
+                    corner = Alignment.TopStart,
+                )
+            }
+
+            if (isLoading.not() && (hasMenu || content != null)) {
                 Row(modifier = Modifier.align(Alignment.TopEnd)) {
-                    if (bookmark != null) {
-                        val toggle = bookmark.toggle
-
-                        BookCardCoverButton(
-                            icon = if (toggle.checked) toggle.on else toggle.off,
-                            contentDescription = toggle.description,
-                            enabled = toggle.enabled,
-                            checked = toggle.checked,
-                            onClick = { onEvent(BookCardEvent.TrailingClicked(key = model.key)) },
-                        )
-                    }
-
                     if (hasMenu) {
                         BookCardCoverButton(
                             icon = SoftcoverIcon.MoreVert,

@@ -32,13 +32,15 @@ public fun nl.rhaydus.softcover.core.component.bookcard.BookCard(model: nl.rhayd
     - content: STABLE (composable function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardCoverButton(icon: nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon, contentDescription: kotlin.String, onClick: kotlin.Function0<kotlin.Unit>, enabled: kotlin.Boolean, checked: kotlin.Boolean?): kotlin.Unit
+internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardCoverButton(icon: nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon, contentDescription: kotlin.String, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, corner: androidx.compose.ui.Alignment, enabled: kotlin.Boolean, checked: kotlin.Boolean?): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - icon: STABLE (class with no mutable properties)
     - contentDescription: STABLE (String is immutable)
     - onClick: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - corner: STABLE (marked @Stable or @Immutable)
     - enabled: STABLE (primitive type)
     - checked: STABLE (class with no mutable properties)
 

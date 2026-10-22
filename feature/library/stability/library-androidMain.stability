@@ -265,13 +265,12 @@ internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.Ma
     - onCollapsibleSized: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.RecommendedRail(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, set: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, horizontalInset: androidx.compose.ui.unit.Dp, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.RecommendedRail(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, rail: nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel<nl.rhaydus.softcover.core.domain.model.Book>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - header: STABLE (marked @Stable or @Immutable)
-    - set: STABLE (marked @Stable or @Immutable)
-    - horizontalInset: STABLE (marked @Stable or @Immutable)
+    - rail: STABLE (marked @Stable or @Immutable)
     - onBookClick: STABLE (function type)
     - runAction: STABLE (function type)
 

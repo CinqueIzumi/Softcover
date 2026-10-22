@@ -17,6 +17,26 @@ internal fun becauseYouReadGenreSheetScaffold(): SheetScaffoldUiModel =
         ),
     )
 
+internal fun recommendedMenuSheetScaffoldFor(
+    book: Book,
+    eyebrow: String,
+): SheetScaffoldUiModel =
+    SheetScaffoldUiModel(
+        header = SheetHeaderUiModel(
+            section = SectionHeaderUiModel.Section(
+                eyebrow = eyebrow,
+                headline = book.title,
+            ),
+        ),
+        footer = SheetFooterUiModel.Stacked(
+            primary = null,
+            secondary = SheetFooterButton(
+                label = "Cancel",
+                dismissesSheet = true,
+            ),
+        ),
+    )
+
 internal fun continueSeriesMenuSheetScaffoldFor(book: Book): SheetScaffoldUiModel =
     SheetScaffoldUiModel(
         header = SheetHeaderUiModel(

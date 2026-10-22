@@ -9,12 +9,13 @@ then the follow-ups below.
 - **State:** phase 1, 2a and 2b are built, device-checked and committed on the local branch
   `recommendations-vibe` (worktree `../Softcover-recommendations-vibe`, from `origin/release/3.3.0`, not
   pushed; 2b is `53c23328f`). No GitHub issue yet.
-- **Next:** build 2c (approved, below), all sub-steps in one session. Work in the worktree; the main checkout's
-  `ACTIVE.md` lacks this.
+- **Base:** rebased onto the local `162-similar-books-carousel` (shared `BookCardRail`); 162 merges first.
+- **Next:** design 2d (featured public vibes on Explore) with the user. Work in the worktree; the main
+  checkout's `ACTIVE.md` lacks this.
 - **Open questions:** none.
 - **Verification:** `check koverXmlReport -x lint` (includes the style gates) passed after the last code
   change; the close-out glom and AAA checks were clean.
-- **Uncommitted:** this Now block update only.
+- **Uncommitted:** nothing.
 
 ## What the API offers
 
@@ -57,7 +58,7 @@ Each step is designed with the user before it is built.
 |---|---|---|
 | 2a | Library: when the Want to read shelf is empty, show the top recommendations with an add button | [x] |
 | 2b | Top Picks (`vibe_type` 3) as the fallback when Recommendations is missing or empty after the owned filter, see below | [x] |
-| 2c | "Not for me" on a recommended card, hidden locally like Up next and restorable from Settings' hidden suggestions, see below | [ ] |
+| 2c | "Not for me" on a recommended card, hidden locally like Up next and restorable from Settings' hidden suggestions, see below | [x] |
 | 2d | Featured public vibes (`featured: true`) on Explore, as rails or tiles beside Browse by mood | [ ] |
 
 ### Step 2c: "Not for me", hidden locally
@@ -79,9 +80,9 @@ Agreed with the user:
 | Step | Scope | Who | Status |
 |---|---|---|---|
 | 2c-1 | Table, migration, `:core:lists` data source and use cases, the filter, sign-out clearing; its tests | `softcover-implementer` | [x] |
-| 2c-2 | Overflow menu, sheet and snackbar on the Explore and Library recommended rails | `softcover-implementer` | [ ] |
-| 2c-3 | The Hidden suggestions group and intro | `softcover-implementer` | [ ] |
-| 2c-4 | Tests (migration survival and full chain), `styleCheck`, `softcover-reviewer`, `check koverXmlReport -x lint`, the user's device check | main | [ ] |
+| 2c-2 | Overflow menu, sheet and snackbar on the Explore and Library recommended rails; Library's rail on the shared `BookCardRail` | `softcover-implementer` | [x] |
+| 2c-3 | The Hidden suggestions group and intro | `softcover-implementer` | [x] |
+| 2c-4 | Tests (migration survival and full chain), `styleCheck`, `softcover-reviewer`, `check koverXmlReport -x lint`, the user's device check; the bookmark moved to the cover's top-start corner, and the collector alone places Library's rail | main | [x] |
 
 ### Step 2b: Top Picks fallback
 

@@ -40,6 +40,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSortPillButton
 import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreControlUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesMenuSheetUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardUiModel
+import nl.rhaydus.softcover.feature.explore.presentation.model.RecommendedMenuSheetUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreRail
 import nl.rhaydus.toad.UiState
 
@@ -90,6 +91,10 @@ internal data class ExploreScreenUiState(
     val continueSeriesMenuBookId: Int? = null,
 
     val continueSeriesMenu: SheetSession<ContinueSeriesMenuSheetUiModel, PendingContinueSeriesDismissal> = SheetSession.Closed,
+
+    val recommendedMenuBookId: Int? = null,
+
+    val recommendedMenu: SheetSession<RecommendedMenuSheetUiModel, PendingRecommendedHide> = SheetSession.Closed,
     /** `null` until the library's offline copy has resolved. */
     val offlineEmptyState: EmptyStateUiModel? = null,
     val masthead: PageMastheadUiModel = PageMastheadUiModel(

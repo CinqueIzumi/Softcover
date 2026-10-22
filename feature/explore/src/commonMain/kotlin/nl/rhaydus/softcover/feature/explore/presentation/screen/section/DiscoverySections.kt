@@ -51,6 +51,7 @@ internal fun DiscoverySections(
             set = state.recommended.set,
             visible = state.recommendedVisible,
             onBookClick = onBookClick,
+            runAction = runAction,
             trailingGap = sectionGap,
         ) { onCardEvent ->
             rail(

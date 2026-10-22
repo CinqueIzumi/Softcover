@@ -12,10 +12,13 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  * [Section] opens a region with a rounded bar and an optional headline/description, [Inline] marks a
  * smaller region with a hairline bar and no headline, and [Label] carries no bar at all.
  *
+ * @property eyebrow The small-caps line every register opens with.
  * @property isLoading Masks the header's text in place; the model's own text sizes the mask.
  */
 @Immutable
 sealed interface SectionHeaderUiModel {
+    val eyebrow: String
+
     val isLoading: Boolean
 
     /**
@@ -23,7 +26,7 @@ sealed interface SectionHeaderUiModel {
      * the secondary constructor takes plain strings for the common case of no emphasis.
      */
     data class Section(
-        val eyebrow: String,
+        override val eyebrow: String,
         val headline: ImmutableList<HeaderTextSegment>?,
         val description: ImmutableList<HeaderTextSegment>?,
         override val isLoading: Boolean = false,
@@ -45,13 +48,13 @@ sealed interface SectionHeaderUiModel {
     }
 
     data class Inline(
-        val eyebrow: String,
+        override val eyebrow: String,
         val tone: SectionHeaderTone = SectionHeaderTone.Accent,
         override val isLoading: Boolean = false,
     ) : SectionHeaderUiModel
 
     data class Label(
-        val eyebrow: String,
+        override val eyebrow: String,
         val tone: SectionHeaderTone = SectionHeaderTone.Muted,
         override val isLoading: Boolean = false,
     ) : SectionHeaderUiModel

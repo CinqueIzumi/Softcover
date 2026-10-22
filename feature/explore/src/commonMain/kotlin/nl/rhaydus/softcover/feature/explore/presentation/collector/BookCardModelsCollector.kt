@@ -86,7 +86,14 @@ internal class BookCardModelsCollector : ExploreCollector {
                             coverSurface = SURFACE_RECOMMENDED,
                             overlays = snapshot.unreleasedCoverOverlays,
                             standIns = RECOMMENDED_STAND_IN_CARDS,
-                            map = Book::toBylineColumnCard,
+                            map = { book, cover, overlay, surface ->
+                                book.toBylineColumnCard(
+                                    cover = cover,
+                                    coverBadge = overlay,
+                                    transitionSurface = surface,
+                                    hasMenu = true,
+                                )
+                            },
                         ),
                         recommendedVisible = snapshot.loadingRecommendedBooks ||
                             snapshot.recommendedBooks.isNotEmpty(),

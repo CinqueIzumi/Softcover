@@ -20,7 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopContextMenu
 import nl.rhaydus.designsystem.component.DesktopContextMenuItem
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
@@ -50,6 +49,7 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnReorderShelfBo
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSelectBookRangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleBookSelectionAction
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.RecommendedRailPlacement
 import nl.rhaydus.softcover.feature.library.presentation.state.bookReorderStatusFor
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
@@ -66,12 +66,15 @@ internal fun BookList(
     val rawBooks = state.booksByTab[tab.id]
 
     if (rawBooks != null && rawBooks.isEmpty() && state.isLoading.not()) {
-        state.emptyStatesByTab[tab.id]?.let { emptyState ->
-            val recommendedRail = state.recommendedRailByTab[tab.id]
+        val emptyState = state.emptyStatesByTab[tab.id]
+        val recommendedRail = state.recommendedRailByTab[tab.id]?.takeIf {
+            it.placement == RecommendedRailPlacement.UnderEmptyState
+        }
 
-            if (recommendedRail == null) {
+        if (recommendedRail == null) {
+            emptyState?.let {
                 EmptyState(
-                    model = emptyState,
+                    model = it,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(
@@ -80,28 +83,29 @@ internal fun BookList(
                             bottom = rememberBottomBarPadding(),
                         ),
                 )
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(bottom = rememberBottomBarPadding()),
-                ) {
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = rememberBottomBarPadding()),
+            ) {
+                emptyState?.let {
                     EmptyState(
-                        model = emptyState,
+                        model = it,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(Spacing.section),
                     )
-
-                    RecommendedRail(
-                        header = state.recommendedHeader,
-                        set = recommendedRail,
-                        horizontalInset = Spacing.gutter,
-                        onBookClick = onBookClick,
-                        runAction = runAction,
-                    )
                 }
+
+                RecommendedRail(
+                    header = state.recommendedHeader,
+                    rail = recommendedRail.rail,
+                    onBookClick = onBookClick,
+                    runAction = runAction,
+                )
             }
         }
 
@@ -418,7 +422,9 @@ internal fun BookList(
             }
         }
 
-        state.recommendedRailByTab[tab.id]?.let { recommendedRail ->
+        state.recommendedRailByTab[tab.id]?.takeIf {
+            it.placement == RecommendedRailPlacement.UnderGrid
+        }?.let { recommendedRail ->
             item(
                 key = "recommended-rail",
                 span = { GridItemSpan(maxLineSpan) },
@@ -426,8 +432,7 @@ internal fun BookList(
             ) {
                 RecommendedRail(
                     header = state.recommendedHeader,
-                    set = recommendedRail,
-                    horizontalInset = 0.dp,
+                    rail = recommendedRail.rail,
                     onBookClick = onBookClick,
                     runAction = runAction,
                 )

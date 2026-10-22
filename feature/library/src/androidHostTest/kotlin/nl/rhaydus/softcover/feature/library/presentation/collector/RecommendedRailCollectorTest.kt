@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import androidx.compose.ui.unit.dp
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
@@ -19,6 +21,7 @@ import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.RecommendedRailPlacement
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -95,7 +98,7 @@ class RecommendedRailCollectorTest {
 
                 // ----- Assert -----
                 rails.keys shouldBe setOf(wantToReadTab.id)
-                rails.getValue(wantToReadTab.id).cards.map { it.key } shouldBe listOf(
+                rails.getValue(wantToReadTab.id).rail.set.cards.map { it.key } shouldBe listOf(
                     BookCardKey.Book(bookId = 1),
                     BookCardKey.Book(bookId = 2),
                 )
@@ -177,7 +180,7 @@ class RecommendedRailCollectorTest {
                 }
 
                 // ----- Act -----
-                val set = stateFlow.value.recommendedRailByTab[wantToReadTab.id].shouldNotBeNull()
+                val set = stateFlow.value.recommendedRailByTab[wantToReadTab.id].shouldNotBeNull().rail.set
 
                 // ----- Assert -----
                 set.cards.isNotEmpty() shouldBe true
@@ -315,6 +318,46 @@ class RecommendedRailCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.recommendedRailByTab.keys.shouldBeEmpty()
+            job.cancel()
+        }
+
+        @Test
+        fun `places the rail under the empty state with a gutter inset`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val stateFlow = MutableStateFlow(state(shelfBooks = emptyList()))
+            val job = launch {
+                RecommendedRailCollector().onLaunch(
+                    scope = scopeFor(stateFlow),
+                    dependencies = mockk<LibraryDependencies>(relaxed = true),
+                )
+            }
+
+            // ----- Act -----
+            val libraryRail = stateFlow.value.recommendedRailByTab[wantToReadTab.id].shouldNotBeNull()
+
+            // ----- Assert -----
+            libraryRail.placement shouldBe RecommendedRailPlacement.UnderEmptyState
+            libraryRail.rail.horizontalInset shouldBe Spacing.gutter
+            job.cancel()
+        }
+
+        @Test
+        fun `places the rail under the grid with no inset`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val stateFlow = MutableStateFlow(state(shelfBooks = shelf(count = 2)))
+            val job = launch {
+                RecommendedRailCollector().onLaunch(
+                    scope = scopeFor(stateFlow),
+                    dependencies = mockk<LibraryDependencies>(relaxed = true),
+                )
+            }
+
+            // ----- Act -----
+            val libraryRail = stateFlow.value.recommendedRailByTab[wantToReadTab.id].shouldNotBeNull()
+
+            // ----- Assert -----
+            libraryRail.placement shouldBe RecommendedRailPlacement.UnderGrid
+            libraryRail.rail.horizontalInset shouldBe 0.dp
             job.cancel()
         }
     }

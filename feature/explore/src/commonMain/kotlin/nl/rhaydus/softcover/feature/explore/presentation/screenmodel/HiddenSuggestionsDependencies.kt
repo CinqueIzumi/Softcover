@@ -2,6 +2,9 @@ package nl.rhaydus.softcover.feature.explore.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import nl.rhaydus.softcover.core.lists.domain.usecase.HideRecommendedBookUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveHiddenRecommendationsUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.RestoreRecommendedBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.EnrichDismissedContinueSeriesMetadataUseCase
@@ -18,6 +21,9 @@ internal class HiddenSuggestionsDependencies(
     val undoContinueSeriesDismissalUseCase: UndoContinueSeriesDismissalUseCase,
     val dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
     val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
+    val observeHiddenRecommendationsUseCase: ObserveHiddenRecommendationsUseCase,
+    val hideRecommendedBookUseCase: HideRecommendedBookUseCase,
+    val restoreRecommendedBookUseCase: RestoreRecommendedBookUseCase,
     val enrichDismissedContinueSeriesMetadataUseCase: EnrichDismissedContinueSeriesMetadataUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,

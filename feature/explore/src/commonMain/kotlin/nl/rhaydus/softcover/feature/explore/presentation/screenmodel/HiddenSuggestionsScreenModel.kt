@@ -2,6 +2,9 @@ package nl.rhaydus.softcover.feature.explore.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.softcover.core.lists.domain.usecase.HideRecommendedBookUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveHiddenRecommendationsUseCase
+import nl.rhaydus.softcover.core.lists.domain.usecase.RestoreRecommendedBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.EnrichDismissedContinueSeriesMetadataUseCase
@@ -23,6 +26,9 @@ internal class HiddenSuggestionsScreenModel(
     private val undoContinueSeriesDismissalUseCase: UndoContinueSeriesDismissalUseCase,
     private val dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
     private val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
+    private val observeHiddenRecommendationsUseCase: ObserveHiddenRecommendationsUseCase,
+    private val hideRecommendedBookUseCase: HideRecommendedBookUseCase,
+    private val restoreRecommendedBookUseCase: RestoreRecommendedBookUseCase,
     private val enrichDismissedContinueSeriesMetadataUseCase: EnrichDismissedContinueSeriesMetadataUseCase,
     appDispatchers: AppDispatchers,
     flows: List<HiddenSuggestionsCollector>,
@@ -44,6 +50,9 @@ internal class HiddenSuggestionsScreenModel(
         undoContinueSeriesDismissalUseCase = undoContinueSeriesDismissalUseCase,
         dismissContinueSeriesBookUseCase = dismissContinueSeriesBookUseCase,
         dismissContinueSeriesUseCase = dismissContinueSeriesUseCase,
+        observeHiddenRecommendationsUseCase = observeHiddenRecommendationsUseCase,
+        hideRecommendedBookUseCase = hideRecommendedBookUseCase,
+        restoreRecommendedBookUseCase = restoreRecommendedBookUseCase,
         enrichDismissedContinueSeriesMetadataUseCase = enrichDismissedContinueSeriesMetadataUseCase,
         mainDispatcher = appDispatchers.main,
         coroutineScope = screenModelScope,
