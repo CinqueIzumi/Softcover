@@ -1,13 +1,14 @@
 ---
 name: publish-design-system
-description: Build the Softcover design preset and publish it to the contributor's own Claude Design System artifact — create it on first run, update it in place after. Use when asked to publish, sync or update the design system / design preset.
+description: Build the Softcover design preset and publish it to the project's one shared Claude Design System artifact, updating it in place. Use when asked to publish, sync or update the design system / design preset, and after a merge that changes tokens, components, gallery fixtures or design/project.
 disable-model-invocation: true
 ---
 
 # Publish the design system
 
-Publishes `build/design-preset/project/` (built by `designPresetBundle`) as a Claude Design System artifact
-owned by whoever runs this. The format the files follow is the Design System Artifact type
+Publishes `build/design-preset/project/` (built by `designPresetBundle`) to the project's one shared Claude
+Design System artifact. The code is the source of truth and the artifact is its generated view: nothing flows
+back from the page. The format the files follow is the Design System Artifact type
 (`https://claude.ai/artifact/5M7UeXXcx16TP3vzVFNDzd`); `action: "read"` with that `type_url` shows its
 `SKILL.md`, and its `artifact-type/reference/format.md` holds every cap.
 
@@ -18,13 +19,16 @@ Run `scripts/gradle-quiet.sh designPresetBundle`. It renders the showcase, expor
 
 ## 2. Find the target
 
-Read `design.artifactUrl` from `local.properties` (git-ignored, one per contributor).
+Read `artifactUrl` from `design/design-system.properties` (committed; one artifact for the whole project).
 
-- **Absent:** create one. Artifact `publish` with `type_url` = the type above, `title` = `Softcover`,
-  `auto_open` = `after_first_write`, no files. Write the returned url to `local.properties` as
-  `design.artifactUrl=<url>`. This is a new system: its index gets `createdOnFiles` in step 5.
-- **Present:** Artifact `read` with `url` and `path` = `project/design-system.json`. Keep the result: step 5
-  merges into it. Also list `scope: "files"` to know what is already published.
+- **Present:** Artifact `read` with `url` and `path` = `project/design-system.json`. The result must say the
+  person can edit it ("writer"); if not, stop and tell them to ask the artifact's owner for edit access from its
+  Share menu. Keep the result: step 5 merges into it. Also list `scope: "files"` to know what is already
+  published.
+- **Absent:** only when the user confirms the project has no system yet. Artifact `publish` with `type_url` =
+  the type above, `title` = `Softcover`, `auto_open` = `after_first_write`, no files; write the returned url to
+  `design/design-system.properties` as `artifactUrl=<url>` and tell the user to commit it and share the
+  artifact with the team. This is a new system: its index gets `createdOnFiles` in step 5.
 
 Never pass `type_url` to an existing system; that makes a second one.
 
@@ -64,8 +68,9 @@ Write `build/design-preset/project/design-system.json` and publish it alone, in 
 - **Update:** `read` the index again right before this call, keep every key it has (its marker, `title`,
   `sections`, `blobs`, `docs`, records a person added), and change only `groups`, the `assetGroups` records
   from step 3 and `lastChange`.
-- `lastChange` = `{"by": "<the person's name, else Claude>", "at": "<now>", "via": "Claude Code", "note":
-  "<one line: what changed>"}`.
+- `lastChange` = `{"by": "<the person's name, else Claude>", "at": "<now>", "via": "CI · /publish-design-system
+  from <short commit sha>", "note": "<one line: what changed>"}`. The `CI` prefix makes the page warn that edits
+  made there are overwritten by the next publish.
 
 A refusal because someone saved meanwhile: read the index again, redo the merge once; a second refusal, stop and
 say so.

@@ -23,5 +23,7 @@ Softcover's design system as a Claude Design System artifact: tokens, fonts, ico
 
 ## Publishing
 
-In Claude Code, run `/publish-design-system`. The first run creates your own artifact and stores its url as
-`design.artifactUrl` in `local.properties`; later runs update it in place.
+The code is the source of truth; the artifact is its generated view. The project has one shared artifact, its url
+committed as `artifactUrl` in `design/design-system.properties`. After a merge that changes tokens, components,
+gallery fixtures or `design/project/**`, run `/publish-design-system` in Claude Code to update it in place. Edits
+made on the page are overwritten by the next publish. Edit access is granted from the artifact's Share menu.
