@@ -12,24 +12,21 @@ No GitHub issue. Branch `design-system-preset` (from `release/3.3.0`, local only
   routed from Home via `live/LiveScreens.kt`, sharing `appearance/action/` generic actions and
   `AppearanceSheetHost`. Step 3 was built, then dropped and fully reverted at the user's call (see
   Decisions); steps 3 and 7 are dropped.
-- **Committed:** step 4 render runner (`549c8368d`).
-- **Step 5 built, uncommitted:** `design/project/README.md` (brand book), `design/project/components/`
-  (`bundle.css`, 12 hand-written static components, `BookCover` for the registry's `Cover`, the system
-  `Cover/`). Root `designPresetBundle` (`build-logic/.../DesignPresetBundle{Task,ConventionPlugin}.kt`)
-  assembles 740 files into `build/design-preset/project/`: committed content, exporter output, renders and a
-  generated preview + README for the 47 PNG-only components (from the runner's `renders/index.json`). Renders
-  now run via `:showcase:renderShowcase` (the `-PshowcaseRender` property is gone). Format rules the content
-  follows: the Design System artifact type (`https://claude.ai/artifact/5M7UeXXcx16TP3vzVFNDzd`). Three review
-  passes (light, dark/dim, docs) fixed; StatTile's 75% `on-primary` caption mirrors the app and stays flagged.
-- **Next:** commit on request, then step 6 (publish skill: index `design-system.json` with `createdOnFiles`,
-  asset uploads for `assets/**`, ≤255-path batches, index last).
+- **Committed:** step 4 render runner (`549c8368d`); step 5 brand book, components and `designPresetBundle`
+  (`9fcbb8b64`, 740 bundle files).
+- **Step 6 written:** `.claude/skills/publish-design-system/SKILL.md` (user-invoked: build, create or read
+  the artifact from `local.properties` `design.artifactUrl`, upload `assets/**` into `assetGroups`, publish
+  files in ≤255-path / ≤16 MiB calls with the cover last, write the index last, merging into the live one on
+  update), `design/README.md`, a CLAUDE.md "Where things live" row. Shapes from the Design System type's
+  `SKILL.md` (`https://claude.ai/artifact/5M7UeXXcx16TP3vzVFNDzd`). Not yet run.
+- **Next:** in a session started from this worktree (skills load from the launch directory, so the main
+  checkout's session never listed it), the user runs `/publish-design-system` to prove it end to end; fix the
+  skill from what breaks. Then step 8 (reviewer, `styleCheck`, `check buildHealth`).
 - **Open questions:** none.
-- **Verification:** `designPresetBundle checkDesignPresetContent testDesignPreset :showcase:testDebugUnitTest
-  styleCheck checkDocBudgets` passed after the last edit.
-- **Carry into step 5:** pass the exporter's paths through a `CommandLineArgumentProvider` with declared
-  input/output dirs (they are absolute `args` today); list `exportDesignTokens`, `checkDesignPresetContent`
-  and `testDesignPreset` in `.claude/rules/build-wiring.md`. On the next foundation bump, add
-  `**/jvmDesignPresetTest/**` to the shared detekt test globs and drop the local `FunctionNaming` block.
+- **Verification:** `checkDocBudgets` passed; `styleCheck` passed after the last Kotlin edit (step 5).
+- **Uncommitted:** the publish skill, `design/README.md`, the CLAUDE.md row and this tracker.
+- **Carry:** on the next foundation bump, add `**/jvmDesignPresetTest/**` to the shared detekt test globs and
+  drop the local `FunctionNaming` block.
 
 ## Steps
 
@@ -87,7 +84,7 @@ One step per session. Commits only when the user asks.
   `designPresetBundle` (never `assemble*` / `publish*`: the slow-Gradle hook blocks them) builds
   `build/design-preset/project/`: committed content, generated tokens and sections, fonts, SVGs, renders,
   generated README + preview for PNG-only components.
-- [ ] **6. Publish skill and docs (main conversation).** `.claude/skills/publish-design-system/SKILL.md`: run
+- [x] **6. Publish skill and docs (main conversation).** `.claude/skills/publish-design-system/SKILL.md`: run
   the bundle, create or update the contributor's own artifact (URL in `local.properties` `design.artifactUrl`),
   upload icons and logo as assets, write the index, publish in ≤255-path batches with the index last.
   `design/README.md` for contributors; a CLAUDE.md "Where things live" row.
