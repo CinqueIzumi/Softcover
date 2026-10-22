@@ -23,6 +23,7 @@ plugins {
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.kover)
     id("softcover.doc-budgets")
+    id("softcover.design-preset-bundle")
 }
 
 // Code coverage. Kover is applied to every shipped module (below) and aggregated into a single XML

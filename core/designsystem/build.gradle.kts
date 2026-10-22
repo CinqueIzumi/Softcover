@@ -1,6 +1,29 @@
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
+import org.gradle.process.CommandLineArgumentProvider
+import java.io.File
+
 plugins {
     id("softcover.kmp.library")
     id("softcover.kmp.compose")
+}
+
+/**
+ * The exporter's command line. The paths are `@Internal`: their absolute form must not reach the task's
+ * cache key, and the files they point at are declared as inputs and outputs on the task itself.
+ */
+class DesignPresetArguments(
+    @get:Input val mode: String,
+    @get:Internal val moduleDir: File,
+    @get:Internal val outDir: File,
+    @get:Internal val designDir: File,
+) : CommandLineArgumentProvider {
+    override fun asArguments(): Iterable<String> = listOf(
+        mode,
+        "--module-dir=${moduleDir.absolutePath}",
+        "--out=${outDir.absolutePath}",
+        "--design-dir=${designDir.absolutePath}",
+    )
 }
 
 // Compose Multiplatform resource accessor: keep `Res` internal to this module (consumers reach
@@ -42,11 +65,13 @@ kotlin {
             designPreset.runtimeDependencyFiles,
         )
         mainClass.set("nl.rhaydus.softcover.core.designsystem.preset.MainKt")
-        args(
-            mode,
-            "--module-dir=${projectDir.absolutePath}",
-            "--out=${designPresetDir.get().asFile.absolutePath}",
-            "--design-dir=${rootProject.layout.projectDirectory.dir("design/project").asFile.absolutePath}",
+        argumentProviders.add(
+            DesignPresetArguments(
+                mode = mode,
+                moduleDir = projectDir,
+                outDir = designPresetDir.get().asFile,
+                designDir = rootProject.layout.projectDirectory.dir("design/project").asFile,
+            ),
         )
         inputs.files(fileTree("src/commonMain/composeResources"), fileTree("src/androidMain/res"))
     }
@@ -63,7 +88,17 @@ kotlin {
         taskName = "checkDesignPresetContent",
         taskDescription = "Fails when design/project cites a token that does not exist or hard-codes a colour.",
         mode = "check",
-    )
+    ).configure {
+        val stamp = layout.buildDirectory.file("design-preset-check/passed.stamp")
+        inputs.files(fileTree(rootProject.layout.projectDirectory.dir("design/project")))
+        outputs.file(stamp)
+        doLast {
+            stamp.get().asFile.apply {
+                parentFile.mkdirs()
+                writeText("passed")
+            }
+        }
+    }
 
     // Unit tests for the exporter. The test compilation is associated with `designPreset`, which is itself
     // associated with `main`, so both sets of `internal` declarations are visible.

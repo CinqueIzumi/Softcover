@@ -1,0 +1,44 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Softcover</title>
+<style>
+  html, body { margin: 0; background: var(--background); }
+  svg { display: block; width: 960px; height: 288px; }
+  .ground { fill: var(--background); }
+  .brand { fill: var(--primary); }
+  .blush { fill: var(--secondary); }
+  .butter { fill: var(--tertiary); }
+  .ink-block { fill: var(--inverse-surface); }
+  .numeral { fill: var(--primary-container); font-family: var(--font-display); font-style: italic; font-weight: 600; font-size: 380px; }
+  .name { fill: var(--on-surface); font-family: var(--font-display); font-style: italic; font-weight: 600; font-size: 88px; }
+  .tagline { fill: var(--on-surface-variant); font-family: var(--font-body); font-size: 14px; }
+  .r-xxl { rx: var(--radius-xxl); ry: var(--radius-xxl); }
+  .r-lg { rx: var(--radius-lg); ry: var(--radius-lg); }
+  .r-sm { rx: var(--radius-sm); ry: var(--radius-sm); }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 960 288" role="img" aria-label="Softcover">
+  <!--
+    Blocks: primary 288x192, tertiary 144x144, secondary 96x144, inverse-surface 48x48, all on background.
+    Arrangement: the large primary block sits inside the field with the lighter blocks stepping down its right side; the ink square anchors the lower left of the field, 480 to 960 only.
+    Pattern: one oversized numeral, because Softcover is editorial and serif and its Fraunces italic numerals carry the stat hero, so the numeral is clipped by the primary block as a shape.
+    Steps and radii: space-x5l (48px) for the smallest side and its multiples (96, 144, 192, 288) for the rest, radius-xxl on the primary block, radius-lg on the butter and blush blocks, radius-sm on the ink square.
+  -->
+  <defs>
+    <clipPath id="primary-clip"><rect class="r-xxl" x="528" y="48" width="288" height="192"/></clipPath>
+  </defs>
+  <rect class="ground" width="960" height="288"/>
+  <rect class="brand r-xxl" x="528" y="48" width="288" height="192"/>
+  <text class="numeral" x="570" y="330" clip-path="url(#primary-clip)" aria-hidden="true">3</text>
+  <rect class="butter r-lg" x="816" y="0" width="144" height="144"/>
+  <rect class="blush r-lg" x="816" y="144" width="96" height="144"/>
+  <rect class="ink-block r-sm" x="480" y="240" width="48" height="48"/>
+  <text class="name editorial-display" x="48" y="216" aria-label="Softcover">Softcover</text>
+  <text class="tagline" x="50" y="256">A quiet place to keep your reading.</text>
+</svg>
+</body>
+</html>

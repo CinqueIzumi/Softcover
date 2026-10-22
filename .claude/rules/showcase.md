@@ -9,6 +9,7 @@ paths:
   for the design preset. It asserts nothing, so it is not a test, and it
   is written by `softcover-implementer`, not `softcover-test-writer`.
 - Robolectric and Roborazzi are allowed here and nowhere else. No other module takes them, in any source set.
-- The runner runs only when its Gradle property is set. It never runs in `check`, `test` or
-  `koverXmlReport`.
+- The runner runs only through `:showcase:renderShowcase` (a dependency of the root `designPresetBundle`). It
+  never runs in `check`, `test` or `koverXmlReport`, and it also writes `index.json`, the entry metadata the
+  bundle generates the PNG-only components from.
 - A unit test of showcase logic follows `.claude/rules/tests.md` and goes to `softcover-test-writer`.

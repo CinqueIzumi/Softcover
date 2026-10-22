@@ -55,5 +55,9 @@ gradlePlugin {
             id = "softcover.doc-budgets"
             implementationClass = "DocBudgetsConventionPlugin"
         }
+        register("designPresetBundle") {
+            id = "softcover.design-preset-bundle"
+            implementationClass = "DesignPresetBundleConventionPlugin"
+        }
     }
 }

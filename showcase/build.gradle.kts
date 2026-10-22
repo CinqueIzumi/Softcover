@@ -72,18 +72,25 @@ dependencies {
     testImplementation(libs.androidx.compose.ui.test.junit4)
 }
 
-val renderRequested = providers.gradleProperty("showcaseRender").isPresent
 val renderOutputDir = rootProject.layout.buildDirectory.dir("design-preset/renders")
+val renderRunner = "nl.rhaydus.softcover.showcase.render.*"
 
-tasks.withType<Test> {
+// The render runner generates the design preset's images and is not a test: every ordinary Test task
+// excludes it, and only `renderShowcase` includes it.
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
-    val renderRunner = "nl.rhaydus.softcover.showcase.render.*"
-    if (renderRequested) {
-        filter.includeTestsMatching(renderRunner)
-        systemProperty("roborazzi.test.record", "true")
-        systemProperty("showcase.render.dir", renderOutputDir.get().asFile.absolutePath)
-        outputs.upToDateWhen { false }
-    } else {
-        filter.excludeTestsMatching(renderRunner)
-    }
+    if (name != "renderShowcase") filter.excludeTestsMatching(renderRunner)
+}
+
+tasks.register<Test>("renderShowcase") {
+    group = "design preset"
+    description = "Draws every gallery fixture to PNG under build/design-preset/renders."
+
+    val debugUnitTest = tasks.named<Test>("testDebugUnitTest").get()
+    testClassesDirs = debugUnitTest.testClassesDirs
+    classpath = debugUnitTest.classpath
+    filter.includeTestsMatching(renderRunner)
+    systemProperty("roborazzi.test.record", "true")
+    systemProperty("showcase.render.dir", renderOutputDir.get().asFile.absolutePath)
+    outputs.dir(renderOutputDir)
 }

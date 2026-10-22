@@ -12,16 +12,20 @@ No GitHub issue. Branch `design-system-preset` (from `release/3.3.0`, local only
   routed from Home via `live/LiveScreens.kt`, sharing `appearance/action/` generic actions and
   `AppearanceSheetHost`. Step 3 was built, then dropped and fully reverted at the user's call (see
   Decisions); steps 3 and 7 are dropped.
-- **Step 4 built, uncommitted:** spike passed (Fraunces + `SoftcoverIcon` render). `showcase/src/test/.../render/`
-  draws every `GalleryRegistry` fixture to `build/design-preset/renders/<brightness>/<family>/<entry>/<fixture>.png`
-  (276 per light/dark/dim, none skipped) via `scripts/gradle-quiet.sh :showcase:testDebugUnitTest -PshowcaseRender`;
-  fails if a step-5 component name (chart: `ColumnChart`) leaves the registry. Robolectric 4.17 / Roborazzi
-  1.76.0 in `:showcase` tests only; gotchas in `.claude/rules/build-wiring.md`. Reviewer passed; slug
-  uniqueness fixed for fixtures and entries.
-- **Next:** commit on request, then step 5 (brand book, `bundle.css`, 12 hand-written components, bundle task).
+- **Committed:** step 4 render runner (`549c8368d`).
+- **Step 5 built, uncommitted:** `design/project/README.md` (brand book), `design/project/components/`
+  (`bundle.css`, 12 hand-written static components, `BookCover` for the registry's `Cover`, the system
+  `Cover/`). Root `designPresetBundle` (`build-logic/.../DesignPresetBundle{Task,ConventionPlugin}.kt`)
+  assembles 740 files into `build/design-preset/project/`: committed content, exporter output, renders and a
+  generated preview + README for the 47 PNG-only components (from the runner's `renders/index.json`). Renders
+  now run via `:showcase:renderShowcase` (the `-PshowcaseRender` property is gone). Format rules the content
+  follows: the Design System artifact type (`https://claude.ai/artifact/5M7UeXXcx16TP3vzVFNDzd`). Three review
+  passes (light, dark/dim, docs) fixed; StatTile's 75% `on-primary` caption mirrors the app and stays flagged.
+- **Next:** commit on request, then step 6 (publish skill: index `design-system.json` with `createdOnFiles`,
+  asset uploads for `assets/**`, ≤255-path batches, index last).
 - **Open questions:** none.
-- **Verification:** `-PshowcaseRender` produced 828 PNGs; `:showcase:testDebugUnitTest styleCheck` passed
-  without the property, which skips the runner.
+- **Verification:** `designPresetBundle checkDesignPresetContent testDesignPreset :showcase:testDebugUnitTest
+  styleCheck checkDocBudgets` passed after the last edit.
 - **Carry into step 5:** pass the exporter's paths through a `CommandLineArgumentProvider` with declared
   input/output dirs (they are absolute `args` today); list `exportDesignTokens`, `checkDesignPresetContent`
   and `testDesignPreset` in `.claude/rules/build-wiring.md`. On the next foundation bump, add
@@ -76,7 +80,7 @@ One step per session. Commits only when the user asks.
   `koverXmlReport`. One capture per fixture (no tall sheets), phone size via `@Config(qualifiers=…)`, light,
   dark and dim; each hand-written component name must exist in `GalleryRegistry`. Spacing via tokens (detekt
   runs on test code).
-- [ ] **5. Content and bundle (main conversation + `softcover-implementer`).** `design/project/README.md`
+- [x] **5. Content and bundle (main conversation + `softcover-implementer`).** `design/project/README.md`
   brand book (voice, foundations, layout, decision rules as usage rules naming tokens), `components/bundle.css`,
   12 hand-written components (Cover, BookCard, Chip, PillButton, SectionHeader, PageMasthead, StatNumber,
   StatTile, a chart, Toggle, SheetRow, EmptyState) with `preview.html` + README, the cover. Root
