@@ -38,7 +38,7 @@ internal class BookListsCollector : LibraryCollector {
                 ).id
 
                 tabId to list.books.mapNotNull { listBook ->
-                    listBook.edition?.let { edition -> listBook to edition }
+                    listBook.shownEdition?.let { edition -> listBook to edition }
                 }
             }
 
@@ -53,7 +53,7 @@ internal class BookListsCollector : LibraryCollector {
             }
 
             val addedAtPerList: Map<String, Map<Int, String?>> = renderedByTab.mapValues { (_, rendered) ->
-                rendered.associate { (listBook, _) -> listBook.editionId to listBook.addedAt }
+                rendered.associate { (listBook, edition) -> edition.id to listBook.addedAt }
             }
 
             val booksById = enabledLists

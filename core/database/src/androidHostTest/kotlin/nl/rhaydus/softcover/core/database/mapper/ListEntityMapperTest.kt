@@ -358,159 +358,148 @@ class ListEntityMapperTest {
         }
 
         @Test
-        fun `prefers userBook editionId over defaultEditionId when edition exists in book editions`() {
+        fun `shows the cached userBook edition while keeping the row edition`() {
             // ----- Arrange -----
             val userBookEditionId = 55
-            val defaultEditionId = 99
-            val topLevelEditionId = 10
+            val rowEditionId = 10
 
-            val userBookEditionEntity = stubBookEditionEntity(
-                id = userBookEditionId,
-                bookId = 1,
-            )
             val userBookEditionView = stubBookEditionView(
-                entity = userBookEditionEntity,
+                entity = stubBookEditionEntity(
+                    id = userBookEditionId,
+                    bookId = 1,
+                ),
                 isOwned = false,
             )
             val userBookEditionWithAuthors = stubBookEditionWithAuthors(editionView = userBookEditionView)
 
-            val topLevelEditionEntity = stubBookEditionEntity(
-                id = topLevelEditionId,
-                bookId = 1,
-            )
-            val topLevelEditionView = stubBookEditionView(
-                entity = topLevelEditionEntity,
+            val rowEditionView = stubBookEditionView(
+                entity = stubBookEditionEntity(
+                    id = rowEditionId,
+                    bookId = 1,
+                ),
                 isOwned = false,
             )
-            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
+            val rowEditionWithAuthors = stubBookEditionWithAuthors(editionView = rowEditionView)
 
-            val userBookEntity = stubUserBookEntity(editionId = userBookEditionId)
-            val userBookWithJournals = stubUserBookWithJournals(userBook = userBookEntity)
-
-            val bookEntity = stubBookEntity(
-                id = 1,
-                defaultEditionId = defaultEditionId,
+            val userBookWithJournals = stubUserBookWithJournals(
+                userBook = stubUserBookEntity(editionId = userBookEditionId),
             )
             val bookFullEntity = stubBookFullEntity(
-                book = bookEntity,
+                book = stubBookEntity(
+                    id = 1,
+                    defaultEditionId = 99,
+                ),
                 editions = listOf(userBookEditionWithAuthors),
                 userBookWithJournals = userBookWithJournals,
             )
-
-            val listBookEntity = stubListBookEntity(
-                bookId = 1,
-                editionId = topLevelEditionId,
-            )
             val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
+                listBook = stubListBookEntity(
+                    bookId = 1,
+                    editionId = rowEditionId,
+                ),
                 book = bookFullEntity,
-                edition = topLevelEditionWithAuthors,
+                edition = rowEditionWithAuthors,
             )
 
             // ----- Act -----
             val result = listBookFull.toModel(isOwnedList = false)
 
             // ----- Assert -----
-            result.edition?.id shouldBe userBookEditionId
-            result.editionId shouldBe userBookEditionId
+            result.shownEdition?.id shouldBe userBookEditionId
+            result.edition?.id shouldBe rowEditionId
+            result.editionId shouldBe rowEditionId
         }
 
         @Test
-        fun `falls back to defaultEditionId when no userBook editionId but matching edition exists`() {
+        fun `shows the row edition when the book has no userBook edition even if its default edition differs`() {
             // ----- Arrange -----
             val defaultEditionId = 77
-            val topLevelEditionId = 10
+            val rowEditionId = 10
 
-            val defaultEditionEntity = stubBookEditionEntity(
-                id = defaultEditionId,
-                bookId = 1,
-            )
             val defaultEditionView = stubBookEditionView(
-                entity = defaultEditionEntity,
+                entity = stubBookEditionEntity(
+                    id = defaultEditionId,
+                    bookId = 1,
+                ),
                 isOwned = false,
             )
             val defaultEditionWithAuthors = stubBookEditionWithAuthors(editionView = defaultEditionView)
 
-            val topLevelEditionEntity = stubBookEditionEntity(
-                id = topLevelEditionId,
-                bookId = 1,
-            )
-            val topLevelEditionView = stubBookEditionView(
-                entity = topLevelEditionEntity,
+            val rowEditionView = stubBookEditionView(
+                entity = stubBookEditionEntity(
+                    id = rowEditionId,
+                    bookId = 1,
+                ),
                 isOwned = false,
             )
-            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
+            val rowEditionWithAuthors = stubBookEditionWithAuthors(editionView = rowEditionView)
 
-            val bookEntity = stubBookEntity(
-                id = 1,
-                defaultEditionId = defaultEditionId,
-            )
             val bookFullEntity = stubBookFullEntity(
-                book = bookEntity,
+                book = stubBookEntity(
+                    id = 1,
+                    defaultEditionId = defaultEditionId,
+                ),
                 editions = listOf(defaultEditionWithAuthors),
                 userBookWithJournals = null,
             )
-
-            val listBookEntity = stubListBookEntity(
-                bookId = 1,
-                editionId = topLevelEditionId,
-            )
             val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
+                listBook = stubListBookEntity(
+                    bookId = 1,
+                    editionId = rowEditionId,
+                ),
                 book = bookFullEntity,
-                edition = topLevelEditionWithAuthors,
+                edition = rowEditionWithAuthors,
             )
 
             // ----- Act -----
             val result = listBookFull.toModel(isOwnedList = false)
 
             // ----- Assert -----
-            result.edition?.id shouldBe defaultEditionId
-            result.editionId shouldBe defaultEditionId
+            result.shownEdition?.id shouldBe rowEditionId
+            result.edition?.id shouldBe rowEditionId
+            result.editionId shouldBe rowEditionId
         }
 
         @Test
-        fun `falls back to top-level edition when preferred id has no matching entry in book editions`() {
+        fun `shows the row edition when the userBook edition is not cached`() {
             // ----- Arrange -----
-            val topLevelEditionId = 10
+            val rowEditionId = 10
 
-            val topLevelEditionEntity = stubBookEditionEntity(
-                id = topLevelEditionId,
-                bookId = 1,
-            )
-            val topLevelEditionView = stubBookEditionView(
-                entity = topLevelEditionEntity,
+            val rowEditionView = stubBookEditionView(
+                entity = stubBookEditionEntity(
+                    id = rowEditionId,
+                    bookId = 1,
+                ),
                 isOwned = false,
             )
-            val topLevelEditionWithAuthors = stubBookEditionWithAuthors(editionView = topLevelEditionView)
+            val rowEditionWithAuthors = stubBookEditionWithAuthors(editionView = rowEditionView)
 
-            // defaultEditionId 99 is not present in the editions list, triggering fallback
-            val bookEntity = stubBookEntity(
-                id = 1,
-                defaultEditionId = 99,
+            val userBookWithJournals = stubUserBookWithJournals(
+                userBook = stubUserBookEntity(editionId = 55),
             )
             val bookFullEntity = stubBookFullEntity(
-                book = bookEntity,
+                book = stubBookEntity(
+                    id = 1,
+                    defaultEditionId = 99,
+                ),
                 editions = emptyList(),
-                userBookWithJournals = null,
-            )
-
-            val listBookEntity = stubListBookEntity(
-                bookId = 1,
-                editionId = topLevelEditionId,
+                userBookWithJournals = userBookWithJournals,
             )
             val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
+                listBook = stubListBookEntity(
+                    bookId = 1,
+                    editionId = rowEditionId,
+                ),
                 book = bookFullEntity,
-                edition = topLevelEditionWithAuthors,
+                edition = rowEditionWithAuthors,
             )
 
             // ----- Act -----
             val result = listBookFull.toModel(isOwnedList = false)
 
             // ----- Assert -----
-            result.edition?.id shouldBe topLevelEditionId
-            result.editionId shouldBe topLevelEditionId
+            result.shownEdition?.id shouldBe rowEditionId
+            result.edition?.id shouldBe rowEditionId
         }
 
         @Test
@@ -568,6 +557,7 @@ class ListEntityMapperTest {
             // ----- Assert -----
             result.edition?.id shouldBe topLevelEditionId
             result.editionId shouldBe topLevelEditionId
+            result.shownEdition?.id shouldBe topLevelEditionId
         }
 
         @Test

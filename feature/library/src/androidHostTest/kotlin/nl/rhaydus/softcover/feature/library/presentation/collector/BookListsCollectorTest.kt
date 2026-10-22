@@ -65,7 +65,10 @@ class BookListsCollectorTest {
         }
     }
 
-    private fun stubEdition(): BookEdition = mockk {
+    private fun stubEdition(id: Int = 0): BookEdition = mockk {
+        every {
+            this@mockk.id
+        } returns id
         every {
             url
         } returns "https://example.com/cover.jpg"
@@ -74,16 +77,23 @@ class BookListsCollectorTest {
         } returns null
     }
 
-    private fun stubListBook(edition: BookEdition?): ListBook = mockk {
+    private fun stubListBook(
+        shownEdition: BookEdition?,
+        rowEdition: BookEdition? = stubEdition(),
+        addedAt: String? = null,
+    ): ListBook = mockk {
+        every {
+            this@mockk.shownEdition
+        } returns shownEdition
         every {
             this@mockk.edition
-        } returns edition
+        } returns rowEdition
         every {
             this@mockk.editionId
         } returns 0
         every {
             this@mockk.addedAt
-        } returns null
+        } returns addedAt
         every {
             this@mockk.book
         } returns null
@@ -113,7 +123,7 @@ class BookListsCollectorTest {
         fun `writes editions of enabled list into editionsByTab keyed by list tab id`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val edition = stubEdition()
-            val listBook = stubListBook(edition = edition)
+            val listBook = stubListBook(shownEdition = edition)
             val list = stubBookList(
                 id = 5,
                 name = "Owned",
@@ -141,10 +151,79 @@ class BookListsCollectorTest {
         }
 
         @Test
+        fun `renders the shown edition rather than the row's edition`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val shown = stubEdition()
+            val listBook = stubListBook(
+                shownEdition = shown,
+                rowEdition = stubEdition(),
+            )
+            val list = stubBookList(
+                id = 5,
+                name = "Owned",
+                listBooks = listOf(listBook),
+            )
+            val tabId = LibraryTab.CustomList(
+                listId = 5,
+                listName = "Owned",
+            ).id
+            val collector = BookListsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            listsFlow.emit(listOf(list))
+            enabledListIdsFlow.emit(setOf(5))
+
+            // ----- Assert -----
+            stateFlow.value.editionsByTab[tabId] shouldBe listOf(shown)
+            job.cancel()
+        }
+
+        @Test
+        fun `keys the date added by the shown edition's id`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val shown = stubEdition(id = 42)
+            val listBook = stubListBook(
+                shownEdition = shown,
+                rowEdition = stubEdition(id = 7),
+                addedAt = "2024-03-01",
+            )
+            val list = stubBookList(
+                id = 5,
+                name = "Owned",
+                listBooks = listOf(listBook),
+            )
+            val tabId = LibraryTab.CustomList(
+                listId = 5,
+                listName = "Owned",
+            ).id
+            val collector = BookListsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            listsFlow.emit(listOf(list))
+            enabledListIdsFlow.emit(setOf(5))
+
+            // ----- Assert -----
+            stateFlow.value.addedAtByTab[tabId] shouldBe mapOf(42 to "2024-03-01")
+            job.cancel()
+        }
+
+        @Test
         fun `skips list books with null edition`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val listBookNoEdition = stubListBook(edition = null)
-            val listBookWithEdition = stubListBook(edition = stubEdition())
+            val listBookNoEdition = stubListBook(shownEdition = null)
+            val listBookWithEdition = stubListBook(shownEdition = stubEdition())
             val list = stubBookList(
                 id = 1,
                 name = "Owned",
@@ -175,7 +254,7 @@ class BookListsCollectorTest {
         fun `disabled lists are not written into editionsByTab`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val edition = stubEdition()
-            val listBook = stubListBook(edition = edition)
+            val listBook = stubListBook(shownEdition = edition)
             val disabledList = stubBookList(
                 id = 99,
                 name = "Hidden",
@@ -206,7 +285,7 @@ class BookListsCollectorTest {
         fun `strips previously enabled list tab when it is disabled on next emission`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val edition = stubEdition()
-            val listBook = stubListBook(edition = edition)
+            val listBook = stubListBook(shownEdition = edition)
             val list = stubBookList(
                 id = 3,
                 name = "Owned",
