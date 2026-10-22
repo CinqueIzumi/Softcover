@@ -505,3 +505,13 @@ clone would fail to *configure* — `build-logic` is not in the foundation's `ma
   and the supertypes to check as configuration, and ship `TransientNavArg` with the navigation contract.
   Document `keepRules/` as the consumer-rule convention. No Softcover build file registers these directories, so the foundation's
   convention plugins only need to keep AGP's default pickup intact.
+
+### F54 — detekt `FunctionNaming` test globs miss custom JVM test source sets
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:detekt-rules` shared `config/detekt.yml`
+- **Status:** **Open — worked around locally.** `:core:designsystem`'s `jvmDesignPresetTest` source set uses
+  backticked test names, so `config/detekt/detekt.yml` repeats the whole `FunctionNaming.excludes` list plus
+  `**/jvmDesignPresetTest/**`.
+- **What to build:** a shared glob that covers any `*Test` source set (e.g. `**/*Test/**`); then drop
+  Softcover's local `FunctionNaming` block.
