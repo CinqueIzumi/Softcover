@@ -265,9 +265,37 @@ class ProgressSheetMapperTest {
     @Nested
     inner class Scaffold {
         @Test
-        fun `header headline is the book title`() {
+        fun `header headline is the reader's edition title when they have one`() {
             // ----- Arrange -----
-            val book = PreviewData.baseBook.copy(title = "The Starless Sea")
+            val edition = PreviewData.baseEdition.copy(
+                id = 77,
+                title = "The Starless Sea (Illustrated)",
+            )
+            val book = PreviewData.baseBook.copy(
+                title = "The Starless Sea",
+                editions = listOf(edition),
+                userBook = PreviewData.baseBook.userBook?.copy(editionId = edition.id),
+            )
+
+            // ----- Act -----
+            val scaffold = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE).scaffold
+
+            // ----- Assert -----
+            scaffold.header.shouldNotBeNull().section.headlineText shouldBe "The Starless Sea (Illustrated)"
+        }
+
+        @Test
+        fun `header headline is the book title when the reader has no edition`() {
+            // ----- Arrange -----
+            val edition = PreviewData.baseEdition.copy(
+                id = 77,
+                title = "Some Other Edition",
+            )
+            val book = PreviewData.baseBook.copy(
+                title = "The Starless Sea",
+                editions = listOf(edition),
+                userBook = PreviewData.baseBook.userBook?.copy(editionId = null),
+            )
 
             // ----- Act -----
             val scaffold = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE).scaffold

@@ -2,8 +2,9 @@ package nl.rhaydus.softcover.feature.widget.presentation.render
 
 import android.content.Context
 import android.net.Uri
-import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
+import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickBook
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageFormat
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageStore
 import nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel
@@ -22,10 +23,10 @@ internal class RandomPickImages(
     )
 
     suspend fun coverUri(
-        book: Book,
+        pick: RandomPickBook,
         coverHeightDp: Int,
     ): Uri? {
-        val source = book.coverSource() ?: return null
+        val source = pick.coverSource() ?: return null
         val coverPx = (coverHeightDp * density).roundToInt()
 
         return store.uriFor(
@@ -42,8 +43,8 @@ internal class RandomPickImages(
     }
 
     /** `null` when a gradient file could not be written, since the backdrop is not worth drawing without them. */
-    suspend fun artwork(book: Book): BookArtworkUiModel? = backdrops.artwork(
-        source = book.coverSource(),
+    suspend fun artwork(pick: RandomPickBook): BookArtworkUiModel? = backdrops.artwork(
+        source = pick.coverSource(),
     ) { backdrop, veil, veilLift, washPrimary, washTertiary ->
         BookArtworkUiModel(
             backdrop = backdrop,
@@ -54,3 +55,5 @@ internal class RandomPickImages(
         )
     }
 }
+
+private fun RandomPickBook.coverSource(): CoverSource? = book.coverSource(edition = listEdition ?: book.currentEdition)

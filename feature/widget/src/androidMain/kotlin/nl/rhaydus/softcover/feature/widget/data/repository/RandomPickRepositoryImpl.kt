@@ -120,10 +120,12 @@ internal class RandomPickRepositoryImpl(private val context: Context) : RandomPi
             val state = preferences.toRandomPickState()
             val now = Clock.System.now()
 
-            if (isSourceAvailable(
-                    source = settings.source,
-                    lists = lists,
-                ).not()) {
+            val sourceAvailable = isSourceAvailable(
+                source = settings.source,
+                lists = lists,
+            )
+
+            if (sourceAvailable.not()) {
                 resolution = RandomPickResolution.SourceUnavailable
                 return@updateAppWidgetState
             }
@@ -155,7 +157,7 @@ internal class RandomPickRepositoryImpl(private val context: Context) : RandomPi
             if (next != state) preferences.write(next)
 
             resolution = RandomPickResolution.Resolved(
-                book = pool.firstOrNull { it.id == next.pickedBookId },
+                pick = pool.firstOrNull { it.book.id == next.pickedBookId },
                 source = settings.source,
             )
         }

@@ -13,9 +13,11 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.ListBook
+import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickBook
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickCadence
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettings
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSource
@@ -41,10 +43,16 @@ class RandomPickSelectionTest {
         } returns status
     }
 
+    private fun pick(id: Int): RandomPickBook = RandomPickBook(
+        book = book(id),
+        listEdition = null,
+    )
+
     private fun list(
         id: Int,
         slug: String = "list-$id",
         books: List<Book> = emptyList(),
+        shownEditions: Map<Int, BookEdition> = emptyMap(),
     ): BookList = BookList(
         id = id,
         name = "List $id",
@@ -56,6 +64,7 @@ class RandomPickSelectionTest {
                 bookId = it.id,
                 editionId = 0,
                 book = it,
+                shownEdition = shownEditions[it.id],
             )
         },
     )
@@ -92,10 +101,12 @@ class RandomPickSelectionTest {
         @Test
         fun `owned is available only when an owned list exists`() {
             // ----- Arrange -----
-            val withOwned = listOf(list(
-                id = 1,
-                slug = "owned",
-            ),)
+            val withOwned = listOf(
+                list(
+                    id = 1,
+                    slug = "owned",
+                ),
+            )
             val withoutOwned = listOf(list(id = 2))
 
             // ----- Act -----
@@ -149,7 +160,7 @@ class RandomPickSelectionTest {
             )
 
             // ----- Assert -----
-            result.map { it.id } shouldContainExactly listOf(1, 2)
+            result.map { it.book.id } shouldContainExactly listOf(1, 2)
         }
 
         @Test
@@ -175,7 +186,7 @@ class RandomPickSelectionTest {
             )
 
             // ----- Assert -----
-            result.map { it.id } shouldContainExactly listOf(20)
+            result.map { it.book.id } shouldContainExactly listOf(20)
         }
 
         @Test
@@ -200,7 +211,7 @@ class RandomPickSelectionTest {
             )
 
             // ----- Assert -----
-            result.map { it.id } shouldContainExactly listOf(20)
+            result.map { it.book.id } shouldContainExactly listOf(20)
         }
 
         @Test
@@ -257,8 +268,8 @@ class RandomPickSelectionTest {
             )
 
             // ----- Assert -----
-            owned.map { it.id } shouldContainExactly listOf(1, 2)
-            userList.map { it.id } shouldContainExactly listOf(1, 2)
+            owned.map { it.book.id } shouldContainExactly listOf(1, 2)
+            userList.map { it.book.id } shouldContainExactly listOf(1, 2)
         }
 
         @Test
@@ -279,7 +290,70 @@ class RandomPickSelectionTest {
             )
 
             // ----- Assert -----
-            result.map { it.id } shouldContainExactly listOf(1, 2)
+            result.map { it.book.id } shouldContainExactly listOf(1, 2)
+        }
+
+        @Test
+        fun `a user list pool carries each entry's shown edition as its list edition`() {
+            // ----- Arrange -----
+            val firstEdition = mockk<BookEdition>()
+            val lists = listOf(
+                list(
+                    id = 1,
+                    books = listOf(book(10), book(11)),
+                    shownEditions = mapOf(10 to firstEdition),
+                ),
+            )
+
+            // ----- Act -----
+            val result = buildPool(
+                source = RandomPickSource.UserList(listId = 1),
+                wantToRead = emptyList(),
+                lists = lists,
+            )
+
+            // ----- Assert -----
+            result.map { it.listEdition } shouldContainExactly listOf(firstEdition, null)
+        }
+
+        @Test
+        fun `an owned pool carries each entry's shown edition as its list edition`() {
+            // ----- Arrange -----
+            val ownedEdition = mockk<BookEdition>()
+            val lists = listOf(
+                list(
+                    id = 1,
+                    slug = "owned",
+                    books = listOf(book(10)),
+                    shownEditions = mapOf(10 to ownedEdition),
+                ),
+            )
+
+            // ----- Act -----
+            val result = buildPool(
+                source = RandomPickSource.Owned,
+                wantToRead = emptyList(),
+                lists = lists,
+            )
+
+            // ----- Assert -----
+            result.map { it.listEdition } shouldContainExactly listOf(ownedEdition)
+        }
+
+        @Test
+        fun `want to read picks have no list edition`() {
+            // ----- Arrange -----
+            val shelf = listOf(book(1))
+
+            // ----- Act -----
+            val result = buildPool(
+                source = RandomPickSource.WantToRead,
+                wantToRead = shelf,
+                lists = emptyList(),
+            )
+
+            // ----- Assert -----
+            result.map { it.listEdition } shouldContainExactly listOf(null)
         }
 
         @Test
@@ -301,10 +375,12 @@ class RandomPickSelectionTest {
         @Test
         fun `owned without an owned list gives an empty pool`() {
             // ----- Arrange -----
-            val lists = listOf(list(
-                id = 1,
-                books = listOf(book(10)),
-            ),)
+            val lists = listOf(
+                list(
+                    id = 1,
+                    books = listOf(book(10)),
+                ),
+            )
 
             // ----- Act -----
             val result = buildPool(
@@ -320,13 +396,13 @@ class RandomPickSelectionTest {
 
     @Nested
     inner class ResolvePick {
-        private val pool = (1..2).map { book(it) }
+        private val pool = (1..2).map { pick(it) }
 
         private fun resolve(
             state: RandomPickState,
             cadence: RandomPickCadence,
             now: Instant,
-            pool: List<Book> = this.pool,
+            pool: List<RandomPickBook> = this.pool,
         ): RandomPickState = resolvePick(
             state = state,
             cadence = cadence,
@@ -585,7 +661,7 @@ class RandomPickSelectionTest {
             // ----- Act -----
             val result = shufflePick(
                 state = state,
-                pool = (1..3).map { book(it) },
+                pool = (1..3).map { pick(it) },
                 now = now,
                 random = firstCandidate,
             )
@@ -612,7 +688,7 @@ class RandomPickSelectionTest {
             // ----- Act -----
             val result = shufflePick(
                 state = state,
-                pool = listOf(book(1)),
+                pool = listOf(pick(1)),
                 now = now,
                 random = firstCandidate,
             )
