@@ -773,7 +773,7 @@ class BookCardModelsCollectorTest {
                 )
 
                 // ----- Assert -----
-                val cards = stateFlow.value.recommended.cards
+                val cards = stateFlow.value.recommended.set.cards
                 cards.isNotEmpty() shouldBe true
                 cards.all { it.isLoading } shouldBe true
                 stateFlow.value.recommendedVisible shouldBe true
@@ -800,7 +800,7 @@ class BookCardModelsCollectorTest {
                 )
 
                 // ----- Assert -----
-                stateFlow.value.recommended.cards.map { it.key } shouldBe listOf(
+                stateFlow.value.recommended.set.cards.map { it.key } shouldBe listOf(
                     BookCardKey.Book(bookId = 7),
                     BookCardKey.Book(bookId = 3),
                 )
@@ -820,7 +820,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.recommended.cards shouldBe persistentListOf()
+            stateFlow.value.recommended.set.cards shouldBe persistentListOf()
             stateFlow.value.recommendedVisible shouldBe false
             job.cancel()
         }
