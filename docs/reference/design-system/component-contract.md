@@ -283,7 +283,8 @@ cover model logic and fixture coverage, never copied style values or defaults (`
 
 - **The registry is data in the library.** `GalleryRegistry` (`:core:component/gallery/`) pairs each
   component with its family and fixtures. A new component adds its entry in the same change, since the
-  registry is also the source of the still renders for the design preset.
+  registry is also the source of the still renders for the design preset; `GalleryCoverageTest` fails on a
+  public composable without one.
 - **Behaviour gets a live demo.** A component that opens, dismisses, scrolls, animates or holds state also
   adds a demo in `:showcase` in the same change.
 - **The showcase owns its look.** `:showcase` keeps one theme store (palette and brightness) and wraps its

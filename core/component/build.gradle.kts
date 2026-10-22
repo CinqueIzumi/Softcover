@@ -30,6 +30,10 @@ kotlin {
             api(libs.kotlinx.datetime)
         }
 
+        androidHostTest.dependencies {
+            implementation(libs.konsist)
+        }
+
         jvmMain.dependencies {
             api(libs.rhaydus.designsystemCore)
         }

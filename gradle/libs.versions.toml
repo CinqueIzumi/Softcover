@@ -47,6 +47,7 @@ splashVersion = "1.0.1"
 jUnitVersion = "5.11.4"
 junitPlatform = "1.11.4"
 kotestVersion = "5.9.1"
+konsistVersion = "0.17.3"
 mockkVersion = "1.13.17"
 robolectricVersion = "4.17"
 roborazziVersion = "1.76.0"
@@ -158,6 +159,7 @@ junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", ver
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "jUnitVersion" }
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junitPlatform" }
 kotest = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotestVersion" }
+konsist = { group = "com.lemonappdev", name = "konsist", version.ref = "konsistVersion" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockkVersion" }
 junit-vintage-engine = { group = "org.junit.vintage", name = "junit-vintage-engine", version.ref = "jUnitVersion" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectricVersion" }
