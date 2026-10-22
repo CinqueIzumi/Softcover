@@ -10,8 +10,8 @@ then the follow-ups below.
   `recommendations-vibe` (worktree `../Softcover-recommendations-vibe`, from `origin/release/3.3.0`, not
   pushed; 2b is `53c23328f`). No GitHub issue yet.
 - **Base:** rebased onto the local `162-similar-books-carousel` (shared `BookCardRail`); 162 merges first.
-- **Next:** design 2d (featured public vibes on Explore) with the user. Work in the worktree; the main
-  checkout's `ACTIVE.md` lacks this.
+- **Next:** none; every step is built or dropped, and the pro account's test vibes are deleted. No issue or
+  PR for now. Work in the worktree; the main checkout's `ACTIVE.md` lacks this.
 - **Open questions:** none.
 - **Verification:** `check koverXmlReport -x lint` (includes the style gates) passed after the last code
   change; the close-out glom and AAA checks were clean.
@@ -59,7 +59,6 @@ Each step is designed with the user before it is built.
 | 2a | Library: when the Want to read shelf is empty, show the top recommendations with an add button | [x] |
 | 2b | Top Picks (`vibe_type` 3) as the fallback when Recommendations is missing or empty after the owned filter, see below | [x] |
 | 2c | "Not for me" on a recommended card, hidden locally like Up next and restorable from Settings' hidden suggestions, see below | [x] |
-| 2d | Featured public vibes (`featured: true`) on Explore, as rails or tiles beside Browse by mood | [ ] |
 
 ### Step 2c: "Not for me", hidden locally
 
@@ -118,19 +117,6 @@ Agreed with the user:
 | 2a-4 | Tests, a shared `ObserveRecommendedFeedUseCase` replacing the two near-identical collectors, `styleCheck`, `softcover-reviewer`, `check koverXmlReport -x lint` | main | [x] |
 | 2a-5 | The user's device check; the bookmark moved onto the cover's top-end corner, the empty state got `Spacing.section` padding | user | [x] |
 
-## Phase 3: personal genre vibes for supporters in Because you read
-
-For a supporter, Because you read uses a private vibe the app keeps for each genre. Its signals are the genre
-plus the reader's history (e.g. dynamic signals from 4★+ reads), so the rail ranks books for this reader
-rather than by genre popularity. A non-supporter keeps today's `GetBooksByGenreTag` rail. The same rail is
-also the fallback while a new vibe has no books yet.
-
-| Step | Scope | Status |
-|---|---|---|
-| 3a | API spike: capture the `signal_type` / `category` strings the website sends for a genre vibe; measure how long `books_generated_at` takes after `insert_vibe`; check for a per-user vibe limit | [ ] |
-| 3b | Design: supporter detection (`me { pro }`), an opt-in (the app writes to the reader's account), one reused vibe per genre, recovery after a reinstall by a fixed title or slug, and clean-up | [ ] |
-| 3c | Build, then tests, review and gates | [ ] |
-
 ## Risks
 
 - **List length:** the filter can leave fewer than 25 of the 50 stored ids for a reader with big lists.
@@ -140,17 +126,17 @@ also the fallback while a new vibe has no books yet.
 - **Domain list on the state:** `recommendedBooks` puts another domain list on `ExploreScreenUiState`,
   matching its siblings. Step 5b of `domain-out-of-uistate` moves it with the rest. The UiState is already
   UNSTABLE in the baseline.
-- **Phase 3 hinges on 3a:** if the signal strings can't be found, or generation takes hours, the phase is
-  reworked or dropped.
 
 ## Out of scope
 
 - A Recommended feed in the Trending widget: in progress elsewhere.
 - The reader's own vibes as rails.
+- Featured public vibes on Explore: no added value for the reader.
 - A vibe builder.
 - "More like this" on Book Detail.
 - A vibe from a list.
-- Mood vibes: until phase 3 shows the mechanism works.
+- Personal genre vibes in Because you read: the engine's genre list isn't in the API and rejects `fantasy`.
+- Mood vibes.
 - A "see all 250" screen.
 
 ## Decisions
