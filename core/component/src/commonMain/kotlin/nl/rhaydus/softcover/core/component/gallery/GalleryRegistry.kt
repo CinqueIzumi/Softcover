@@ -4,10 +4,10 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 /**
- * The Component Gallery's data: every component paired with its family and its preview fixtures
+ * The gallery registry: every component paired with its family and its preview fixtures
  * (`component-contract.md` § 7.5). This object is pure data — it holds no navigation, no DI, no
- * Compose render body. The *screen* that walks this registry lives in `feature:settings`, because
- * screens belong to features and `:core:component` is banned from Voyager.
+ * Compose render body. The hosts that walk this registry (the `:showcase` app and the design-preset
+ * renders) live outside `:core:component`, because it is banned from Voyager and DI.
  */
 object GalleryRegistry {
     val entries: ImmutableList<GalleryEntry> = (

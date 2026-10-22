@@ -5,10 +5,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 
 /**
- * One rendered fixture in the Component Gallery — a single preview value from a UI model's
+ * One rendered fixture of the gallery registry — a single preview value from a UI model's
  * [UiModelPreviews.previews], paired with a label and the render that draws it.
  *
- * [render] takes a [Modifier] so the gallery's frame can size and constrain the fixture rather than
+ * [render] takes a [Modifier] so the host that draws it can size and constrain the fixture rather than
  * the fixture dictating its own layout bounds.
  */
 @Immutable

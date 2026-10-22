@@ -7,7 +7,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 /**
- * One component in the Component Gallery: its family, a short blurb, and its rendered
+ * One component in the gallery registry: its family, a short blurb, and its rendered
  * [UiModelPreviews] fixtures. The model type behind [fixtures] is erased — see [galleryEntry] for
  * the type-safe construction site.
  */

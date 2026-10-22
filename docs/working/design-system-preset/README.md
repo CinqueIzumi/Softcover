@@ -14,17 +14,15 @@ No GitHub issue. Branch `design-system-preset` (from `release/3.3.0`, local only
   Decisions); steps 3 and 7 are dropped.
 - **Committed:** step 4 render runner (`549c8368d`); step 5 brand book, components and `designPresetBundle`
   (`9fcbb8b64`, 740 bundle files).
-- **Step 6 written:** `.claude/skills/publish-design-system/SKILL.md` (user-invoked: build, create or read
-  the artifact from `local.properties` `design.artifactUrl`, upload `assets/**` into `assetGroups`, publish
-  files in ≤255-path / ≤16 MiB calls with the cover last, write the index last, merging into the live one on
-  update), `design/README.md`, a CLAUDE.md "Where things live" row. Shapes from the Design System type's
-  `SKILL.md` (`https://claude.ai/artifact/5M7UeXXcx16TP3vzVFNDzd`). Not yet run.
-- **Next:** in a session started from this worktree (skills load from the launch directory, so the main
-  checkout's session never listed it), the user runs `/publish-design-system` to prove it end to end; fix the
-  skill from what breaks. Then step 8 (reviewer, `styleCheck`, `check buildHealth`).
-- **Open questions:** none.
-- **Verification:** `checkDocBudgets` passed; `styleCheck` passed after the last Kotlin edit (step 5).
-- **Uncommitted:** the publish skill, `design/README.md`, the CLAUDE.md row and this tracker.
+- **Step 6 done:** `/publish-design-system` ran end to end (`cbb537db6`); the published fixes (empty
+  `bundle.js`, fixed-size fixtures, sheet frame height, snackbar width, column layout) are `69e812bd0`.
+- **Step 8 done:** branch review fixed (render dir cleared per run, tokens path from the exporter task,
+  `DesignPresetArguments` in build-logic, gallery KDoc, module-structure row, `RenderSlugTest`), unused
+  `:showcase` test deps swapped for `ui-test`; `check buildHealth` passed.
+- **Next:** commit step 8, then close the plan.
+- **Open questions:** is `design/project/components/BookCover/` meant alongside `Cover/`? No gallery entry
+  ties it in.
+- **Uncommitted:** step 8 fixes and this tracker.
 - **Carry:** on the next foundation bump, add `**/jvmDesignPresetTest/**` to the shared detekt test globs and
   drop the local `FunctionNaming` block.
 

@@ -4,7 +4,7 @@ import kotlinx.collections.immutable.ImmutableMap
 
 /**
  * The R5 fixture contract from `component-contract.md` § 7.2 — a UI model's `companion object`
- * implements this wherever the model is rendered in the Component Gallery or a `@Preview`, or its
+ * implements this wherever the model is drawn by the showcase app, the design-preset renders or a `@Preview`, or its
  * fixtures are read by a test.
  *
  * [previews] maps each fixture's gallery label to the fixture, so the gallery's data, the

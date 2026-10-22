@@ -68,12 +68,11 @@ dependencies {
     testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.robolectric)
     testImplementation(libs.roborazzi)
-    testImplementation(libs.roborazzi.compose)
-    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.compose.ui.test)
 }
 
 val renderOutputDir = rootProject.layout.buildDirectory.dir("design-preset/renders")
-val renderRunner = "nl.rhaydus.softcover.showcase.render.*"
+val renderRunner = "nl.rhaydus.softcover.showcase.render.ShowcaseRenderRunner"
 
 // The render runner generates the design preset's images and is not a test: every ordinary Test task
 // excludes it, and only `renderShowcase` includes it.
@@ -93,4 +92,6 @@ tasks.register<Test>("renderShowcase") {
     systemProperty("roborazzi.test.record", "true")
     systemProperty("showcase.render.dir", renderOutputDir.get().asFile.absolutePath)
     outputs.dir(renderOutputDir)
+    val renderDir = renderOutputDir
+    doFirst { renderDir.get().asFile.deleteRecursively() }
 }

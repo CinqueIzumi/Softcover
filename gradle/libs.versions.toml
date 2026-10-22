@@ -124,6 +124,7 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test" }
 apollo = { group = "com.apollographql.apollo", name = "apollo-runtime", version.ref = "apollo" }
 apollo-normalized-cache = { group = "com.apollographql.cache", name = "normalized-cache", version.ref = "apolloCache" }
 dataStore = { group = "androidx.datastore", name = "datastore", version.ref = "dataStore" }

@@ -20,7 +20,11 @@ class DesignPresetBundleConventionPlugin : Plugin<Project> {
             val handWritten = layout.projectDirectory.dir("design/project")
             handWrittenDir.set(handWritten)
             handWrittenFiles.from(fileTree(handWritten))
-            tokensDir.set(layout.projectDirectory.dir("core/designsystem/build/design-preset/project"))
+            tokensDir.fileProvider(
+                provider {
+                    project(":core:designsystem").tasks.getByName("exportDesignTokens").outputs.files.singleFile
+                },
+            )
             rendersDir.set(layout.buildDirectory.dir("design-preset/renders"))
             bundleDir.set(layout.buildDirectory.dir("design-preset/project"))
             maxFiles.set(MAX_FILES)
