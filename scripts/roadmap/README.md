@@ -31,7 +31,9 @@ from `versionName` and the intro from `header.md`.
 `ROADMAP.md` arrives through review like any other. Further milestone edits update that PR in
 place rather than stacking new ones; if `main` catches up by other means, the workflow closes
 the PR as redundant. The branch is rebuilt from `main` each run rather than appended to, so the
-diff stays one file and can never conflict.
+diff stays one file and can never conflict. The workflow then dispatches the full gate on the
+branch, because a push made with the workflow token starts no CI run and the PR's required checks
+would otherwise never report.
 
 Merging the PR is what publishes: the in-app Roadmap screen fetches the file from the default
 branch at runtime, so a milestone copy edit reaches users with no app release.
