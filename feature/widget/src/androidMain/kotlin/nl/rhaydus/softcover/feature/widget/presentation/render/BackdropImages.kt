@@ -7,6 +7,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.uibinding.cover.loadCoverBitmap
 import nl.rhaydus.softcover.core.uibinding.cover.resolveCoverSource
 import nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageFormat
@@ -101,9 +102,9 @@ internal class BackdropImages(
     }
 }
 
-/** Where [book]'s cover comes from, or `null` when it has none. */
-internal fun Book.coverSource(): CoverSource? = resolveCoverSource(
-    edition = currentEdition,
+/** Where the book's cover comes from, or `null` when it has none. */
+internal fun Book.coverSource(edition: BookEdition? = currentEdition): CoverSource? = resolveCoverSource(
+    edition = edition,
     defaultEdition = defaultEdition,
     fallbackCoverUrl = coverUrl,
 )

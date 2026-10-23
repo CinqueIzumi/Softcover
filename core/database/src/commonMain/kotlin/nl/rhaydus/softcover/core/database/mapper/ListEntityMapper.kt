@@ -1,9 +1,11 @@
 package nl.rhaydus.softcover.core.database.mapper
 
+import nl.rhaydus.softcover.core.database.model.BookEditionWithAuthors
 import nl.rhaydus.softcover.core.database.model.BookListEntity
 import nl.rhaydus.softcover.core.database.model.BookListWithBooks
 import nl.rhaydus.softcover.core.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.database.model.ListBookFull
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
@@ -28,36 +30,34 @@ internal fun ListBook.toEntity(): ListBookEntity = ListBookEntity(
     addedAt = addedAt,
 )
 
+private fun BookEditionWithAuthors.toDomainEdition(): BookEdition = edition.edition.toModel(
+    authors = authors,
+    owned = edition.isOwned,
+)
+
 fun ListBookFull.toModel(isOwnedList: Boolean): ListBook {
     val cachedBook = book
 
-    val preferredEdition = if (isOwnedList) {
+    val userBookEdition = if (isOwnedList) {
         null
     } else {
-        val preferredEditionId = cachedBook?.userBookWithJournals?.userBook?.editionId
-            ?: cachedBook?.book?.defaultEditionId
-
-        preferredEditionId?.let { id ->
-            cachedBook?.editions?.firstOrNull { it.edition.edition.id == id }
+        cachedBook?.userBookWithJournals?.userBook?.editionId?.let { id ->
+            cachedBook.editions.firstOrNull { it.edition.edition.id == id }
         }
     }
 
-    val resolvedEdition = preferredEdition ?: edition
+    val rowEdition = edition?.toDomainEdition()
 
     return ListBook(
         listBookId = listBook.listBookId,
         listId = listBook.listId,
         bookId = listBook.bookId,
-        editionId = resolvedEdition?.edition?.edition?.id ?: listBook.editionId,
+        editionId = listBook.editionId,
         position = listBook.position,
         addedAt = listBook.addedAt,
         book = book?.toModel(),
-        edition = resolvedEdition?.let { editionWithAuthors ->
-            editionWithAuthors.edition.edition.toModel(
-                authors = editionWithAuthors.authors,
-                owned = editionWithAuthors.edition.isOwned,
-            )
-        },
+        edition = rowEdition,
+        shownEdition = userBookEdition?.toDomainEdition() ?: rowEdition,
     )
 }
 

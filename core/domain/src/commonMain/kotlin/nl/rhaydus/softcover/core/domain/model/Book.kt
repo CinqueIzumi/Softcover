@@ -43,8 +43,17 @@ data class Book(
             return release > Clock.System.todayIn(TimeZone.currentSystemDefault())
         }
 
+    /**
+     * The title of the reader's own edition, else the book's title; never an owned or default edition's,
+     * unlike [currentEdition].
+     */
     val displayTitle: String
-        get() = editions.firstOrNull { it.id == userBook?.editionId }?.title?.takeIf { it.isNotBlank() } ?: title
+        get() = titleIn(editions.firstOrNull { it.id == userBook?.editionId })
+
+    fun titleIn(edition: BookEdition?): String = edition?.title?.takeIf { it.isNotBlank() } ?: title
+
+    fun authorsIn(edition: BookEdition?): String = edition?.authorString?.takeIf { it.isNotBlank() }
+        ?: authors.joinToString(", ") { it.name }
 
     val currentEdition: BookEdition?
         get() {
@@ -58,8 +67,7 @@ data class Book(
 
     /** Author names for display, falling back to the book's own authors when no edition is known. */
     val authorString: String
-        get() = currentEdition?.authorString?.takeIf { it.isNotBlank() }
-            ?: authors.joinToString(", ") { it.name }
+        get() = authorsIn(currentEdition)
 
     val firstPositionInSeries: Double?
         get() = positionsInSeries.firstOrNull()

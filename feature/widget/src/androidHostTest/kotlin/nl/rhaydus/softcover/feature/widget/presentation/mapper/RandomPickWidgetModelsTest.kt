@@ -18,9 +18,12 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickBook
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickResolution
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettings
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettingsChange
@@ -46,6 +49,60 @@ class RandomPickWidgetModelsTest {
             authorString
         } returns "Author $id"
     }
+
+    private fun edition(
+        title: String,
+        authorName: String,
+    ): BookEdition = BookEdition(
+        id = 50,
+        canonicalId = null,
+        bookId = 4,
+        publisher = null,
+        title = title,
+        url = null,
+        localImagePath = null,
+        isbn10 = null,
+        isbn13 = null,
+        pages = null,
+        audioSeconds = null,
+        authors = listOf(
+            Author(
+                id = 1,
+                name = authorName,
+            ),
+        ),
+        releaseYear = 2000,
+        format = "",
+        owned = false,
+    )
+
+    private fun realBook(): Book = Book(
+        id = 4,
+        title = "Book title",
+        editions = emptyList(),
+        defaultEdition = null,
+        rating = 0.0,
+        description = "",
+        releaseYear = 2000,
+        coverUrl = "",
+        authors = listOf(
+            Author(
+                id = 2,
+                name = "Book author",
+            ),
+        ),
+        usersCount = 0,
+        ratingsCount = 0,
+        bookSeries = null,
+        positionsInSeries = emptyList(),
+        isCompilation = false,
+        userBook = null,
+    )
+
+    private fun pick(id: Int): RandomPickBook = RandomPickBook(
+        book = book(id),
+        listEdition = null,
+    )
 
     private fun list(
         id: Int,
@@ -74,8 +131,8 @@ class RandomPickWidgetModelsTest {
         changes: Flow<Unit> = flowOf(Unit),
         settingsChanges: Flow<RandomPickSettingsChange> = emptyFlow(),
         coverHeightDp: Flow<Int> = flowOf(200),
-        coverUri: suspend (Book) -> Uri? = { null },
-        artwork: suspend (Book) -> BookArtworkUiModel? = { null },
+        coverUri: suspend (RandomPickBook) -> Uri? = { null },
+        artwork: suspend (RandomPickBook) -> BookArtworkUiModel? = { null },
     ): Flow<RandomPickWidgetUiModel> = randomPickWidgetModels(
         isSignedIn = flowOf(isSignedIn),
         themeConfiguration = flowOf(ThemeConfiguration()),
@@ -84,13 +141,13 @@ class RandomPickWidgetModelsTest {
         changes = changes,
         settingsChanges = settingsChanges,
         resolve = { _, _ -> resolution },
-        coverUri = { book, heightDp ->
-            requestedBookIds += book.id
+        coverUri = { pick, heightDp ->
+            requestedBookIds += pick.book.id
             requestedHeights += heightDp
-            coverUri(book)
+            coverUri(pick)
         },
         coverHeightDp = coverHeightDp,
-        artwork = { book -> artwork(book) },
+        artwork = { pick -> artwork(pick) },
     )
 
     @Nested
@@ -135,7 +192,7 @@ class RandomPickWidgetModelsTest {
                 isSignedIn = false,
                 resolution = Result.success(
                     RandomPickResolution.Resolved(
-                        book = book(1),
+                        pick = pick(1),
                         source = RandomPickSource.WantToRead,
                     ),
                 ),
@@ -168,7 +225,7 @@ class RandomPickWidgetModelsTest {
             val flow = models(
                 resolution = Result.success(
                     RandomPickResolution.Resolved(
-                        book = null,
+                        pick = null,
                         source = RandomPickSource.Owned,
                     ),
                 ),
@@ -184,6 +241,36 @@ class RandomPickWidgetModelsTest {
             }
 
             requestedBookIds shouldContainExactly emptyList()
+        }
+
+        @Test
+        fun `a pick from a list shows the list edition's title and author`() = runTest {
+            // ----- Arrange -----
+            val listPick = RandomPickBook(
+                book = realBook(),
+                listEdition = edition(
+                    title = "Edition title",
+                    authorName = "Edition author",
+                ),
+            )
+            val flow = models(
+                resolution = Result.success(
+                    RandomPickResolution.Resolved(
+                        pick = listPick,
+                        source = RandomPickSource.Owned,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            flow.test {
+                // ----- Assert -----
+                val content = awaitItem().content
+                    .shouldBeInstanceOf<RandomPickWidgetUiModel.Content.Picked>()
+                content.title shouldBe "Edition title"
+                content.author shouldBe "Edition author"
+                cancelAndIgnoreRemainingEvents()
+            }
         }
 
         @Test
@@ -203,7 +290,7 @@ class RandomPickWidgetModelsTest {
             val flow = models(
                 resolution = Result.success(
                     RandomPickResolution.Resolved(
-                        book = book(3),
+                        pick = pick(3),
                         source = RandomPickSource.WantToRead,
                     ),
                 ),
@@ -234,7 +321,7 @@ class RandomPickWidgetModelsTest {
             val flow = models(
                 resolution = Result.success(
                     RandomPickResolution.Resolved(
-                        book = book(3),
+                        pick = pick(3),
                         source = RandomPickSource.WantToRead,
                     ),
                 ),
@@ -268,7 +355,7 @@ class RandomPickWidgetModelsTest {
             val flow = models(
                 resolution = Result.success(
                     RandomPickResolution.Resolved(
-                        book = book(3),
+                        pick = pick(3),
                         source = RandomPickSource.WantToRead,
                     ),
                 ),
@@ -300,7 +387,7 @@ class RandomPickWidgetModelsTest {
             val flow = models(
                 resolution = Result.success(
                     RandomPickResolution.Resolved(
-                        book = book(3),
+                        pick = pick(3),
                         source = RandomPickSource.WantToRead,
                     ),
                 ),
@@ -323,7 +410,7 @@ class RandomPickWidgetModelsTest {
             val flow = models(
                 resolution = Result.success(
                     RandomPickResolution.Resolved(
-                        book = book(3),
+                        pick = pick(3),
                         source = RandomPickSource.WantToRead,
                     ),
                 ),
@@ -353,7 +440,7 @@ class RandomPickWidgetModelsTest {
             val flow = models(
                 resolution = Result.success(
                     RandomPickResolution.Resolved(
-                        book = book(3),
+                        pick = pick(3),
                         source = RandomPickSource.WantToRead,
                     ),
                 ),
@@ -387,7 +474,7 @@ class RandomPickWidgetModelsTest {
             val flow = models(
                 resolution = Result.success(
                     RandomPickResolution.Resolved(
-                        book = book(3),
+                        pick = pick(3),
                         source = RandomPickSource.WantToRead,
                     ),
                 ),
@@ -416,7 +503,7 @@ class RandomPickWidgetModelsTest {
 
         private fun resolved(source: RandomPickSource) = Result.success(
             RandomPickResolution.Resolved(
-                book = book(3),
+                pick = pick(3),
                 source = source,
             ),
         )

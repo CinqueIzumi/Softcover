@@ -21,7 +21,8 @@
   by 180dp, Crop-scaled to every size) or, with no cover, a `primary` and `tertiary` gradient wash; then the
   `veil` and, in light only, the `veilLift`, both tinted `surfaceContainerHigh`. Gradients are white alpha
   masks tinted at draw time, so a palette or day/night switch needs no re-render.
-- Widgets title a book with `Book.displayTitle`: the reader's own edition title, else the book title.
+- Widgets title a book with `Book.displayTitle`: the reader's own edition title, else the book title. The
+  book's default edition never supplies a title. The progress sheet heading follows the same rule.
 - `ReservedLinesTitle`: bold 14sp serif centred, up to two lines, holding the height of `reservedLines`
   lines (an invisible text holds it, Glance has no `minLines`).
 - `SingleBookWidgetLayout` is the book state of Currently Reading and Random pick; each widget passes only its
@@ -71,6 +72,9 @@
 - Settings: **Pick from** (Want to Read by default, Owned, or any of the reader's lists; a deleted list falls
   back to Want to Read) and **New pick** cadence (Daily by default, Weekly, Only when I shuffle). The pool is
   the source's not-started books; a pick that leaves the pool is replaced.
+- A pick drawn from a list shows the list entry's edition (`ListBook.shownEdition`: the reader's own edition,
+  else the entry's, or the owned row on Owned) for its title, author, cover and backdrop; a blank edition
+  title or author falls back to the book's. A Want to read pick uses the book as `Book.displayTitle` does.
 
 ### Trending widget
 
