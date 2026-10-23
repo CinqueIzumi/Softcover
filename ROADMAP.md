@@ -27,6 +27,7 @@ Everything you might want to record about a book, and every statistic that comes
 
 **Find it, and find it again:**
 - **Filter by your own tags**, and combine them: *mystery* and *dark*, but not *romance*.
+- **Similar reads** on every book: a carousel of books like the one you're looking at.
 - A **Kobo** link next to Bookshop and Amazon.
 
 **And the payoff, a long editorial Stats Atlas:**
@@ -60,7 +61,7 @@ Everything you might want to record about a book, and every statistic that comes
 
 ## 3.6.0: Discover more
 
-Browse Explore by **genre or mood**; separate **New & Noteworthy** from **Most Anticipated**; an **Award winners** carousel and a curated **Lists** carousel; similar reads on every book; gentle nudges for series you've stalled on; and **Audience** (YA / Middle Grade / New Adult) as its own filter, separate from genre.
+Browse Explore by **genre or mood**; separate **New & Noteworthy** from **Most Anticipated**; an **Award winners** carousel and a curated **Lists** carousel; gentle nudges for series you've stalled on; and **Audience** (YA / Middle Grade / New Adult) as its own filter, separate from genre.
 
 ## 3.7.0: Recommendations & search
 
