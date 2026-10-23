@@ -46,7 +46,7 @@ other records as they are; never delete an upload.
 ## 4. Publish the files
 
 Everything else under `build/design-preset/project/` goes as files, at `project/<path>`: `README.md`,
-`Palettes.md`, `tokens.json`, `components/**`, `fonts/**`, `renders/**` and each `assets/<Group>/README.md`.
+`Palettes.md`, `tokens.json`, `components/**` (with `softcover-tokens.css`), `fonts/**`, `renders/**` and each `assets/<Group>/README.md`.
 Artifact `publish` with `url`, `root` = `build/design-preset`, `file_path` = the absolute path of one file, and
 `files` mapping `project/<path>` → `project/<path>` for the rest:
 

@@ -37,10 +37,15 @@ private fun export(
     outDir.deleteRecursively()
     outDir.mkdirs()
 
+    val tokens = DesignTokens.build(fontsDir)
     File(
         outDir,
         "tokens.json",
-    ).writeText(Json.write(DesignTokens.build(fontsDir)))
+    ).writeText(Json.write(tokens))
+    File(
+        outDir,
+        "components/softcover-tokens.css",
+    ).apply { parentFile.mkdirs() }.writeText(TokensCss.render(tokens))
     File(
         outDir,
         "Palettes.md",

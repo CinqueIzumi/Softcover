@@ -9,8 +9,8 @@ Softcover's design system as a Claude Design System artifact: tokens, fonts, ico
 - `design/project/components/` — `bundle.css`, `bundle.js` (an empty `window.Softcover`: the page runs no
   preview without one), the hand-written components (`<Comp>/preview.html` +
   `README.md`) and the system cover (`Cover/preview.html`).
-- Everything else is generated, never committed: tokens, fonts and vector assets from
-  `:core:designsystem:exportDesignTokens`; PNG renders of every `GalleryRegistry` fixture from
+- Everything else is generated, never committed: tokens (`tokens.json`, `components/softcover-tokens.css`), fonts
+  and vector assets from `:core:designsystem:exportDesignTokens`; PNG renders of every `GalleryRegistry` fixture from
   `:showcase:renderShowcase`; a preview and README for each component without a hand-written folder.
 
 ## Changing it

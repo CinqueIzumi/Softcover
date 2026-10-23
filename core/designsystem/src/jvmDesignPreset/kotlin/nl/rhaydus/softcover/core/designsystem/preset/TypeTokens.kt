@@ -43,8 +43,8 @@ internal object TypeTokens {
         return linkedMapOf(
             "fonts" to FontFiles.entries(fontsDir),
             "families" to linkedMapOf(
-                DISPLAY to "\"$displayName\", Georgia, serif",
-                BODY to "\"$bodyName\", system-ui, sans-serif",
+                DISPLAY to "${TokensCss.quoted(displayName)}, Georgia, serif",
+                BODY to "${TokensCss.quoted(bodyName)}, system-ui, sans-serif",
             ),
             "groups" to listOf(
                 group(
@@ -154,6 +154,7 @@ internal object TypeTokens {
         entry["fontWeight"] = style.fontWeight?.weight ?: REGULAR_WEIGHT
         if (style.fontStyle == FontStyle.Italic) entry["fontStyle"] = "italic"
         entry["letterSpacing"] = (if (style.letterSpacing.isSp) style.letterSpacing.value else 0f).toPx()
+        if (features != null) entry["fontFeatureSettings"] = "\"$features\""
         entry["usage"] = if (features == null) usage else "$usage Uses tabular figures (tnum)."
 
         return entry
