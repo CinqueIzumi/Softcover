@@ -29,6 +29,10 @@ abstract class DesignPresetBundleTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val handWrittenFiles: ConfigurableFileCollection
 
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
+    abstract val screenPages: ConfigurableFileCollection
+
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val tokensDir: DirectoryProperty
@@ -52,6 +56,7 @@ abstract class DesignPresetBundleTask : DefaultTask() {
         val handWritten = handWrittenDir.get().asFile
         if (handWritten.isDirectory) handWritten.copyRecursively(out)
 
+        copyScreenPages(out)
         copyTokens(out)
         File(
             out,
@@ -80,6 +85,26 @@ abstract class DesignPresetBundleTask : DefaultTask() {
         }
 
         verifyBundle(out)
+    }
+
+    private fun copyScreenPages(out: File) {
+        screenPages.files.sortedBy { it.name }.forEach { page ->
+            if (page.isFile.not()) {
+                throw GradleException(
+                    "${page.path} is missing; the screen pages are copied from docs/reference/design-system/patterns",
+                )
+            }
+            val target = File(
+                out,
+                "screens/${page.name}",
+            )
+            if (target.exists()) {
+                throw GradleException(
+                    "${target.relativeTo(out)} exists in design/project and is copied from the screen pages",
+                )
+            }
+            page.copyTo(target)
+        }
     }
 
     private fun copyTokens(out: File) {

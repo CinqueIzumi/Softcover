@@ -58,9 +58,10 @@ file under `patterns/`.
 
 ## Settings
 
-- [Settings rows](patterns/settings.md#settings-rows) — the feature's menu and selectable row anatomy.
+- [Main Settings menu](patterns/settings.md#main-settings-menu-mobile) — flat icon-tile row groups.
+- [Settings rows](patterns/settings.md#settings-rows) — menu and choice row anatomy.
 - [Desktop settings master-detail](patterns/settings.md#desktop-settings-master-detail) — sidebar and inline pane on desktop.
-- [Theme picker](patterns/settings.md#theme-picker-preview-tiles) — Light / Dark / System tiles leading Appearance.
+- [Theme picker](patterns/settings.md#theme-picker-preview-tiles) — Light / Dark / Dim / System tiles.
 - [Spine-colour picker](patterns/settings.md#spine-colour-picker-the-featured-personalisation) — five palette tiles.
 - [Appearance settings rows](patterns/settings.md#appearance-settings-rows-flat-hairline-separated) — flat sections of Appearance.
 - [Desktop display scale](patterns/settings.md#desktop-display-scale) — desktop-only UI-scale selector.

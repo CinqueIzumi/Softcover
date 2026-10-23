@@ -81,7 +81,7 @@ Use `radius-xxs` (2px), `radius-xs` (4px), `radius-sm` (8px), `radius-md` (12px)
 
 ### Borders, shadows and elevation
 
-Softcover is flat. Express grouping with a tone step between `surface-container-*` fills, not with a shadow. Separate with whitespace first, a hairline in `outline-variant` second, a bordered control in `outline` rarely. The one shadow exception is the book cover, which carries a slight shadow. On a wide window a modal sheet becomes a centred `surface-container-lowest` panel, up to 420px wide, no border, `radius-xxl` corners and a 6px shadow over a `scrim`. Do not use coloured left-border cards.
+Softcover is flat. Express grouping with whitespace and hairlines, not with a shadow: grouped rows sit flat on `background` (step 5 under Composing a screen), and `surface-container` cards are for book and hero content only. Separate with whitespace first, a hairline in `outline-variant` second, a bordered control in `outline` rarely. The one shadow exception is the book cover, which carries a slight shadow. On a wide window a modal sheet becomes a centred `surface-container-lowest` panel, up to 420px wide, no border, `radius-xxl` corners and a 6px shadow over a `scrim`. Do not use coloured left-border cards.
 
 ### Imagery
 
@@ -117,17 +117,29 @@ Icons are the `SoftcoverIcon` set, shipped as SVGs under `assets/Icons/`: a Mate
 - Give an icon-only control a tooltip or an accessible label. Do not use emoji or text glyphs as icons.
 - Empty states and sign-in use the SVGs under `assets/Illustrations/`, with a `-dark` variant for dark themes.
 
+## Screens
+
+Each page below describes one existing screen family: its header register, group spacing and row anatomy.
+
+- [Settings](screens/settings.md): the Settings menu, its rows, Appearance, About and Library tabs.
+- [Explore and Profile](screens/explore-profile.md): the Explore tab and the Profile screen.
+- [Book detail](screens/book-detail.md): the book page and its sections.
+- [Library](screens/library.md): the Library tab, its shelves and filters.
+- [Reading](screens/reading.md): the Reading tab and its featured hero.
+- [Widgets](screens/widgets.md): the home-screen widgets and their settings.
+
 ## Composing a screen
 
-1. Pick the page canvas: `background`, with copy in `on-surface`.
-2. Title the page with `editorial-page-title` if it is a root tab, or a `title-large` top bar if it is pushed.
-3. Open each section with an `editorial-eyebrow` in `primary` and its 32 by 4 bar, then an `editorial-display` headline, then `editorial-body`. Separate sections with `space-section`. Use `editorial-eyebrow-small` with a 20 by 1 bar only inside a card or hero.
-4. Group content on `surface-container` cards. Step to `surface-container-high` or `surface-container-highest` to express focus, never to a shadow.
-5. Pad the page with `space-gutter`. Gaps inside a component are `space-sm` or `space-md`.
-6. Give an accent to text by colouring the eyebrow or a leading word in `primary`. Do not bold or recolour body copy.
-7. Use one filled button per region. Offer a small set of variants as a split button.
-8. Edit a single bounded number as a hero stat field in a modal sheet, in `editorial-stat-large`. Never use a bordered field.
-9. Let the reader choose a whole-app look with a miniature of the app's own page, not a colour swatch or a radio row.
-10. Show a modal interaction as a sheet, which becomes a centred panel on a wide window.
-11. Keep the single primary-filled stat hero to one per scrolling region.
-12. Check every text colour against its ground in the table above, in all three themes, before shipping.
+1. For an existing screen, start from its page under Screens and match its header register, group spacing and row anatomy before drawing.
+2. Pick the page canvas: `background`, with copy in `on-surface`.
+3. Title the page with `editorial-page-title` if it is a root tab, or a `title-large` top bar if it is pushed.
+4. Open each section with an `editorial-eyebrow` in `primary` and its 32 by 4 bar, then an `editorial-display` headline, then `editorial-body`. Separate sections with `space-section`. Use `editorial-eyebrow-small` with a 20 by 1 bar only inside a card or hero.
+5. Sit grouped rows (settings-style menus and lists) flat on `background`, a hairline in `outline-variant` above each row, each row led by a 42px `surface-container-high` icon tile with the glyph in `primary`. Use `surface-container` cards for book and hero content only. Step to `surface-container-high` or `surface-container-highest` to express focus, never to a shadow.
+6. Pad the page with `space-gutter`. Gaps inside a component are `space-sm` or `space-md`.
+7. Give an accent to text by colouring the eyebrow or a leading word in `primary`. Do not bold or recolour body copy.
+8. Use one filled button per region. Offer a small set of variants as a split button.
+9. Edit a single bounded number as a hero stat field in a modal sheet, in `editorial-stat-large`. Never use a bordered field.
+10. Let the reader choose a whole-app look with a miniature of the app's own page, not a colour swatch or a radio row.
+11. Show a modal interaction as a sheet, which becomes a centred panel on a wide window.
+12. Keep the single primary-filled stat hero to one per scrolling region.
+13. Check every text colour against its ground in the table above, in all three themes, before shipping.
