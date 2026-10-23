@@ -13,6 +13,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import nl.rhaydus.softcover.core.designsystem.presentation.systembar.transparentSystemBarStyle
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CheckForAppUpdateUseCase
 import nl.rhaydus.softcover.orchestration.navigation.parseExternalNavigationRequest
 import nl.rhaydus.softcover.orchestration.presentation.viewmodel.MainActivityViewModel

@@ -32,13 +32,11 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCode
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetThemeModeUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.collector.AppUpdateCollector
-import nl.rhaydus.softcover.feature.settings.presentation.collector.ComponentGalleryCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DisplayToggleRowsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DocumentPageCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DocumentPageContentCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DocumentPageRefreshCollector
-import nl.rhaydus.softcover.feature.settings.presentation.collector.GalleryThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryTabCountsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.PersistedLibraryVisibilityCollector
@@ -49,7 +47,6 @@ import nl.rhaydus.softcover.feature.settings.presentation.collector.UiScaleColle
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UserListsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.WidgetsSettingsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.model.DocumentPage
-import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.ComponentGalleryScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.DocumentPageScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
@@ -223,17 +220,6 @@ val settingsModule = module {
         DocumentPageScreenModel(
             page = page,
             source = get(named(page.name)),
-            appDispatchers = get(),
-            flows = getAll(),
-        )
-    }
-    // endregion
-    // region Component gallery
-    factory { GalleryThemeConfigurationCollector() } bind ComponentGalleryCollector::class
-
-    factory {
-        ComponentGalleryScreenModel(
-            getThemeConfigurationUseCase = get(),
             appDispatchers = get(),
             flows = getAll(),
         )

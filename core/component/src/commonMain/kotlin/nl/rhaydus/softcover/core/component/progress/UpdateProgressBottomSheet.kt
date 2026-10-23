@@ -157,7 +157,7 @@ internal fun ProgressBottomSheetContent(
 
 /**
  * The previews render `ProgressSheetUiModel.previews` rather than re-declaring their own values, so
- * the preview set and the Component Gallery's fixture set are one list and cannot drift. The
+ * the preview set and the `:showcase` app's fixture set are one list and cannot drift. The
  * fixtures are selected by what they demonstrate rather than by index, so reordering `previews`
  * cannot silently repoint a preview at a different case.
  */

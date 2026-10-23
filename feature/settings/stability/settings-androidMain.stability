@@ -5,7 +5,7 @@
 //   ./gradlew :settings:stabilityDump
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.AboutContent(versionLabel: kotlin.String, creditsHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, sourceHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, contactHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, onWhatsNewClick: kotlin.Function0<kotlin.Unit>, onRoadmapClick: kotlin.Function0<kotlin.Unit>, onComponentGalleryUnlocked: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.AboutContent(versionLabel: kotlin.String, creditsHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, sourceHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, contactHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, onWhatsNewClick: kotlin.Function0<kotlin.Unit>, onRoadmapClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -16,7 +16,6 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.AboutCont
     - openUrl: STABLE (function type)
     - onWhatsNewClick: STABLE (function type)
     - onRoadmapClick: STABLE (function type)
-    - onComponentGalleryUnlocked: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -26,7 +25,7 @@ public fun nl.rhaydus.softcover.feature.settings.presentation.screen.AboutScreen
   params:
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.AboutScreenLayout(topBar: nl.rhaydus.softcover.core.component.topbar.TopBarUiModel, versionLabel: kotlin.String, creditsHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, sourceHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, contactHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, onNavigateBack: kotlin.Function0<kotlin.Unit>, onWhatsNewClick: kotlin.Function0<kotlin.Unit>, onRoadmapClick: kotlin.Function0<kotlin.Unit>, onComponentGalleryUnlocked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.AboutScreenLayout(topBar: nl.rhaydus.softcover.core.component.topbar.TopBarUiModel, versionLabel: kotlin.String, creditsHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, sourceHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, contactHeader: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, onNavigateBack: kotlin.Function0<kotlin.Unit>, onWhatsNewClick: kotlin.Function0<kotlin.Unit>, onRoadmapClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -39,7 +38,6 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.AboutScre
     - onNavigateBack: STABLE (function type)
     - onWhatsNewClick: STABLE (function type)
     - onRoadmapClick: STABLE (function type)
-    - onComponentGalleryUnlocked: STABLE (function type)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.settings.presentation.screen.AboutScreenPreview(): kotlin.Unit
@@ -85,36 +83,6 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.Appearanc
     - state: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
     - onNavigateBack: STABLE (function type)
-
-@Composable
-internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.ComponentGalleryContent(state: nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGalleryAction, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - state: STABLE (class with no mutable properties)
-    - runAction: STABLE (function type)
-    - modifier: STABLE (marked @Stable or @Immutable)
-
-@Composable
-public fun nl.rhaydus.softcover.feature.settings.presentation.screen.ComponentGalleryScreen.Content(): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-
-@Composable
-internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.ComponentGalleryScreenLayout(state: nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGalleryAction, kotlin.Unit>, onNavigateBack: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - state: STABLE (class with no mutable properties)
-    - runAction: STABLE (function type)
-    - onNavigateBack: STABLE (function type)
-
-@Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.ComponentGalleryScreenPreview(): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
 
 @Composable
 private fun nl.rhaydus.softcover.feature.settings.presentation.screen.ContactSection(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
@@ -190,58 +158,6 @@ private fun nl.rhaydus.softcover.feature.settings.presentation.screen.DocumentPa
     - openUrl: STABLE (function type)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.GalleryControlLabel(text: kotlin.String): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - text: STABLE (String is immutable)
-
-@Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.GalleryEntrySection(entry: nl.rhaydus.softcover.core.component.gallery.GalleryEntry): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - entry: STABLE (marked @Stable or @Immutable)
-
-@Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.GalleryFamilyFilterRow(familyChips: nl.rhaydus.softcover.core.component.chip.ChipSet<nl.rhaydus.softcover.core.component.gallery.GalleryFamily>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGalleryAction, kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - familyChips: STABLE (marked @Stable or @Immutable)
-    - runAction: STABLE (function type)
-
-@Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.GalleryFamilySection(family: nl.rhaydus.softcover.core.component.gallery.GalleryFamily, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - family: STABLE (class with no mutable properties)
-    - header: STABLE (marked @Stable or @Immutable)
-
-@Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.GalleryFixtureFrame(fixture: nl.rhaydus.softcover.core.component.gallery.GalleryFixture): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - fixture: STABLE (marked @Stable or @Immutable)
-
-@Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.GalleryOverrideControls(state: nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGalleryAction, kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - state: STABLE (class with no mutable properties)
-    - runAction: STABLE (function type)
-
-@Composable
-private fun nl.rhaydus.softcover.feature.settings.presentation.screen.GalleryThemedRegion(state: nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - state: STABLE (class with no mutable properties)
-
-@Composable
 internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilityContent(state: nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction, kotlin.Unit>, onCreateListClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
@@ -273,7 +189,7 @@ public fun nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsScr
   params:
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsScreenLayout(state: nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState, settingsRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction, kotlin.Unit>, navigateToProfile: kotlin.Function0<kotlin.Unit>, navigateToAppearanceSettings: kotlin.Function0<kotlin.Unit>, navigateToLibraryVisibility: kotlin.Function0<kotlin.Unit>, navigateToWidgets: kotlin.Function0<kotlin.Unit>, navigateToHiddenSuggestions: kotlin.Function0<kotlin.Unit>, navigateToAbout: kotlin.Function0<kotlin.Unit>, navigateToWhatsNew: kotlin.Function0<kotlin.Unit>, navigateToRoadmap: kotlin.Function0<kotlin.Unit>, navigateToComponentGallery: kotlin.Function0<kotlin.Unit>, libraryVisibilityState: nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState, libraryVisibilityRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction, kotlin.Unit>, roadmapState: nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState?, roadmapRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction, kotlin.Unit>?, whatsNewState: nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState?, whatsNewRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction, kotlin.Unit>?, onCreateListClick: kotlin.Function0<kotlin.Unit>, onStartAppUpdate: kotlin.Function0<kotlin.Unit>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, debugSection: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsScreenLayout(state: nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState, settingsRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction, kotlin.Unit>, navigateToProfile: kotlin.Function0<kotlin.Unit>, navigateToAppearanceSettings: kotlin.Function0<kotlin.Unit>, navigateToLibraryVisibility: kotlin.Function0<kotlin.Unit>, navigateToWidgets: kotlin.Function0<kotlin.Unit>, navigateToHiddenSuggestions: kotlin.Function0<kotlin.Unit>, navigateToAbout: kotlin.Function0<kotlin.Unit>, navigateToWhatsNew: kotlin.Function0<kotlin.Unit>, navigateToRoadmap: kotlin.Function0<kotlin.Unit>, libraryVisibilityState: nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState, libraryVisibilityRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction, kotlin.Unit>, roadmapState: nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState?, roadmapRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction, kotlin.Unit>?, whatsNewState: nl.rhaydus.softcover.feature.settings.presentation.state.DocumentPageUiState?, whatsNewRunAction: kotlin.Function1<nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction, kotlin.Unit>?, onCreateListClick: kotlin.Function0<kotlin.Unit>, onStartAppUpdate: kotlin.Function0<kotlin.Unit>, openUrl: kotlin.Function1<kotlin.String, kotlin.Unit>, debugSection: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -287,7 +203,6 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsS
     - navigateToAbout: STABLE (function type)
     - navigateToWhatsNew: STABLE (function type)
     - navigateToRoadmap: STABLE (function type)
-    - navigateToComponentGallery: STABLE (function type)
     - libraryVisibilityState: STABLE (class with no mutable properties)
     - libraryVisibilityRunAction: STABLE (function type)
     - roadmapState: STABLE (class with no mutable properties)
@@ -545,10 +460,9 @@ internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.U
     - runAction: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.VersionFooter(versionLabel: kotlin.String, onSecretUnlocked: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.settings.presentation.screen.section.VersionFooter(versionLabel: kotlin.String): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - versionLabel: STABLE (String is immutable)
-    - onSecretUnlocked: STABLE (function type)
 

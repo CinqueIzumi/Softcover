@@ -13,7 +13,7 @@ paths:
 - A test earns its place only when input decides output: a mapper, formatter, collector, a `resolve` with a
   real branch, or a fixture list that must cover every variant. Never assert a value you can only get by
   copying a literal out of production code (a style table's dp / alpha / typography, a constructor default).
-  Such a test breaks on every deliberate redesign and catches no regression. The gallery is the visual check.
+  Such a test breaks on every deliberate redesign and catches no regression. The `:showcase` app is the visual check.
 - Every test passes all of these checks, whether it is being written or audited:
   - **Behaviour, not implementation.** If a refactor that keeps behaviour unchanged would break the test, it
     is in the way. Assert observable output, not call order, `verify` on an internal seam, or mock-shaped
@@ -30,7 +30,7 @@ paths:
 - Test sources are gated by ktlint and detekt like main sources; see `.claude/rules/kotlin-style.md`.
 - Fakes are MockK stubs of only the public surface the code under test calls (e.g. `safeQuery`/
   `safeMutation` via `mockkStatic`) — never MockServer, WireMock, embedded servers, or new test
-  dependencies.
+  dependencies. The one exception is `:showcase`'s render runner: `.claude/rules/showcase.md`.
 
 ## Device suite (minified)
 

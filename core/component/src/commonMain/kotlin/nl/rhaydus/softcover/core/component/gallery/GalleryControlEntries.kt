@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.core.component.gallery
 
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -28,7 +30,7 @@ internal val controlEntries: ImmutableList<GalleryEntry> = persistentListOf(
             ThemePreviewTile(
                 model = model,
                 onEvent = {},
-                modifier = modifier.width(120.dp),
+                modifier = modifier.wrapContentWidth(align = Alignment.Start).width(120.dp),
             )
         },
     ),
@@ -42,7 +44,7 @@ internal val controlEntries: ImmutableList<GalleryEntry> = persistentListOf(
             ColorPalettePreviewTile(
                 model = model,
                 onEvent = {},
-                modifier = modifier.width(120.dp),
+                modifier = modifier.wrapContentWidth(align = Alignment.Start).width(120.dp),
             )
         },
     ),

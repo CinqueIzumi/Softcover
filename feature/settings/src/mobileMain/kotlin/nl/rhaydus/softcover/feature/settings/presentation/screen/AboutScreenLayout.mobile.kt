@@ -31,7 +31,6 @@ internal actual fun AboutScreenLayout(
     onNavigateBack: () -> Unit,
     onWhatsNewClick: () -> Unit,
     onRoadmapClick: () -> Unit,
-    onComponentGalleryUnlocked: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier.testTag(SettingsTestTags.ABOUT_PAGE),
@@ -54,7 +53,6 @@ internal actual fun AboutScreenLayout(
             openUrl = openUrl,
             onWhatsNewClick = onWhatsNewClick,
             onRoadmapClick = onRoadmapClick,
-            onComponentGalleryUnlocked = onComponentGalleryUnlocked,
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
@@ -84,7 +82,6 @@ private fun AboutScreenPreview() {
             onNavigateBack = {},
             onWhatsNewClick = {},
             onRoadmapClick = {},
-            onComponentGalleryUnlocked = {},
         )
     }
 }

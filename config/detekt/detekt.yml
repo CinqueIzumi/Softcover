@@ -163,6 +163,12 @@ potential-bugs:
     active: true
     excludes: []
 
+naming:
+  FunctionNaming:
+    # The shared baseline's test globs predate the exporter's `jvmDesignPresetTest` source set, so its
+    # backticked test names need the same exemption.
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**', '**/jvmDesignPresetTest/**']
+
 exceptions:
   TooGenericExceptionThrown:
     # docs/reference/architecture.md mandates wrapping Apollo / data errors in RuntimeException with a

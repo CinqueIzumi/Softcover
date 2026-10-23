@@ -47,7 +47,10 @@ splashVersion = "1.0.1"
 jUnitVersion = "5.11.4"
 junitPlatform = "1.11.4"
 kotestVersion = "5.9.1"
+konsistVersion = "0.17.3"
 mockkVersion = "1.13.17"
+robolectricVersion = "4.17"
+roborazziVersion = "1.76.0"
 turbineVersion = "1.2.0"
 appUpdateVersion = "2.1.0"
 workVersion = "2.10.1"
@@ -122,6 +125,7 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test" }
 apollo = { group = "com.apollographql.apollo", name = "apollo-runtime", version.ref = "apollo" }
 apollo-normalized-cache = { group = "com.apollographql.cache", name = "normalized-cache", version.ref = "apolloCache" }
 dataStore = { group = "androidx.datastore", name = "datastore", version.ref = "dataStore" }
@@ -155,7 +159,12 @@ junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", ver
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "jUnitVersion" }
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junitPlatform" }
 kotest = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotestVersion" }
+konsist = { group = "com.lemonappdev", name = "konsist", version.ref = "konsistVersion" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockkVersion" }
+junit-vintage-engine = { group = "org.junit.vintage", name = "junit-vintage-engine", version.ref = "jUnitVersion" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectricVersion" }
+roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazziVersion" }
+roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose", version.ref = "roborazziVersion" }
 coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbineVersion" }
 play-app-update = { group = "com.google.android.play", name = "app-update", version.ref = "appUpdateVersion" }

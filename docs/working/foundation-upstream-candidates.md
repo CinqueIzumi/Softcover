@@ -369,6 +369,14 @@ Filed but not yet implemented in the foundation.
 - **Impact in the app:** both buttons pass `icon.contentDescription` to the leading `Icon`, so a screen reader reads the label twice ("Update progress, Update progress"): Reading's `FeaturedSessionButton` and `FeaturedBackdropCard`, and every other labelled button with an icon.
 - **What to build:** render the leading icon with `contentDescription = null` in `RhaydusButton` and in `RhaydusSplitButton`'s leading half, because the label already names the button. The split button's trailing toggle keeps its description. Note the ignored description in both KDocs.
 
+### F53 — `SnackBarManager` drops a snackbar posted from another's `onActionClick` / `onDismiss`
+
+- **Type:** bug
+- **Home:** `nl.rhaydus:designsystem-core` (`SnackBarManager`)
+- **Status:** **Open.** No app workaround: no screen posts a follow-up snackbar from a callback today.
+- **Impact in the app:** `showSnackBar` runs `onActionClick` / `onDismiss` inside its `try`, before `finally` resets `isShowing`, so a snackbar posted from the callback (an "Undone" confirmation) is silently dropped.
+- **What to build:** reset `isShowing` before invoking the callback, and add a test that a snackbar posted from `onActionClick` shows.
+
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
 - **Type:** gate (custom Gradle task)
@@ -497,3 +505,13 @@ clone would fail to *configure* — `build-logic` is not in the foundation's `ma
   and the supertypes to check as configuration, and ship `TransientNavArg` with the navigation contract.
   Document `keepRules/` as the consumer-rule convention. No Softcover build file registers these directories, so the foundation's
   convention plugins only need to keep AGP's default pickup intact.
+
+### F54 — detekt `FunctionNaming` test globs miss custom JVM test source sets
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:detekt-rules` shared `config/detekt.yml`
+- **Status:** **Open — worked around locally.** `:core:designsystem`'s `jvmDesignPresetTest` source set uses
+  backticked test names, so `config/detekt/detekt.yml` repeats the whole `FunctionNaming.excludes` list plus
+  `**/jvmDesignPresetTest/**`.
+- **What to build:** a shared glob that covers any `*Test` source set (e.g. `**/*Test/**`); then drop
+  Softcover's local `FunctionNaming` block.

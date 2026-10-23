@@ -1,10 +1,12 @@
 package nl.rhaydus.softcover.core.component.gallery
 
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
@@ -19,9 +21,9 @@ import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.component.cover.CoverlessTitleCover
 import nl.rhaydus.softcover.core.component.deadline.DeadlineRow
 import nl.rhaydus.softcover.core.component.deadline.DeadlineRowUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
@@ -160,9 +162,9 @@ internal val primitiveEntries: ImmutableList<GalleryEntry> = persistentListOf(
         content = { model, modifier ->
             CoverOverlay(
                 model = model,
-                modifier = modifier.width(96.dp),
+                modifier = modifier.wrapContentWidth(align = Alignment.Start).width(96.dp),
             ) {
-                CoverlessTitleCover(
+                Cover(
                     model = CoverUiModel(
                         source = null,
                         coverlessTitle = "Piranesi",

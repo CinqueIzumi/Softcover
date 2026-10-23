@@ -30,3 +30,10 @@ paths:
   `<module>/stability/`, for the `androidMain` target only, so composables in `jvmMain` or `iosMain` are
   never checked. Any change to a composable fails it, even a new one; refresh the baselines with
   `./gradlew stabilityDump` and commit them with the change.
+- Only `:showcase:renderShowcase` runs the render runner (class filter elsewhere). Robolectric needs JUnit 4
+  (vintage engine), `@GraphicsMode(NATIVE)` (else debug boxes), `sdk = [35]` (36 needs Java 21), plain
+  `Application` (the Koin one throws on the second test) and `ComponentActivity` registered by hand.
+- Design preset tasks: `:core:designsystem:exportDesignTokens`, `checkDesignPresetContent`, `testDesignPreset`,
+  and the root `designPresetBundle` (export + `renderShowcase` into `build/design-preset/project`; fails above
+  1,008 files). Never name one `assemble*` / `publish*`. Exporter paths go through a
+  `CommandLineArgumentProvider` with `@Internal` paths, keeping absolute paths out of the cache key.

@@ -23,15 +23,28 @@ plugins {
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.kover)
     id("softcover.doc-budgets")
+    id("softcover.design-preset-bundle")
 }
 
 // Code coverage. Kover is applied to every shipped module (below) and aggregated into a single XML
 // report at the root — `./gradlew koverXmlReport` → build/reports/kover/report.xml — which CI uploads
-// to Codecov. :detekt-rules is build tooling, not shipped code, so it is excluded from the report.
+// to Codecov. Build tooling is not shipped code, so it is excluded from the report: :detekt-rules, the
+// :showcase app (a design-preset renderer, not the product) and :core:designsystem's design-token exporter
+// (the `preset` package).
 dependencies {
     subprojects
-        .filter { it.path != ":detekt-rules" }
+        .filter { it.path != ":detekt-rules" && it.path != ":showcase" }
         .forEach { kover(it) }
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                packages("nl.rhaydus.softcover.core.designsystem.preset")
+            }
+        }
+    }
 }
 
 // The foundation's shared detekt baseline (F19) ships INSIDE the `nl.rhaydus:detekt-rules` jar as
@@ -77,6 +90,7 @@ val typeResolvedDetektTasks = setOf(
     "detektJvmMain",
     "detektMain",
     "detektAndroidHostTest",
+    "detektJvmDesignPreset",
 )
 
 // Captured here because the generated `libs` accessor is scoped to this script's project and is not
@@ -90,7 +104,7 @@ subprojects {
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
     // Coverage instrumentation for every shipped module; the merged report is wired at the root above.
-    if (path != ":detekt-rules") {
+    if (path != ":detekt-rules" && path != ":showcase") {
         apply(plugin = "org.jetbrains.kotlinx.kover")
     }
 
@@ -158,6 +172,12 @@ subprojects {
                 )
 
                 "detektJvmMain" -> setSource(project.files("src/commonMain/kotlin", "src/jvmMain/kotlin"))
+
+                // `:core:designsystem`'s design-token exporter: its own source set, with `commonMain` kept in
+                // scope so the `internal` palette and type builders it calls resolve.
+                "detektJvmDesignPreset" -> setSource(
+                    project.files("src/commonMain/kotlin", "src/jvmMain/kotlin", "src/jvmDesignPreset/kotlin"),
+                )
 
                 // The unit tests. Spelled out for the same reason as the main compilations: detekt would
                 // otherwise seed only the target's own source set, so a module that ever puts shared test
@@ -313,6 +333,14 @@ tasks.register<JavaExec>("ktlintCheck") {
     args("check", ktlintScanRoot)
 }
 
+// The design-system preset's hand-written content (`design/project`) may only cite tokens the exporter
+// generates, and `bundle.css` may not hard-code a colour. Absent content passes.
+tasks.register("checkDesignPresetContent") {
+    group = "verification"
+    description = "Checks design/project against the exported design tokens."
+    dependsOn(":core:designsystem:checkDesignPresetContent")
+}
+
 subprojects {
     tasks.matching { it.name == "check" }.configureEach {
         dependsOn(rootProject.tasks.named("ktlintCheck"))
@@ -320,6 +348,7 @@ subprojects {
         dependsOn(":checkResourcePackaging")
         dependsOn(":checkPresentationFileSize")
         dependsOn(":checkDocBudgets")
+        dependsOn(":checkDesignPresetContent")
     }
 }
 
@@ -368,7 +397,7 @@ fun tierOf(path: String): String? = when {
     path.startsWith(":core:") -> "core"
     path.startsWith(":feature:") -> "feature"
     path == ":orchestration" -> "orchestration"
-    path == ":app" || path == ":desktopApp" -> "app"
+    path == ":app" || path == ":desktopApp" || path == ":showcase" -> "app"
     else -> null
 }
 

@@ -24,7 +24,6 @@ internal actual fun AboutScreenLayout(
     onNavigateBack: () -> Unit,
     onWhatsNewClick: () -> Unit,
     onRoadmapClick: () -> Unit,
-    onComponentGalleryUnlocked: () -> Unit,
 ) {
     DesktopScrollPage(
         topBar = {
@@ -46,7 +45,6 @@ internal actual fun AboutScreenLayout(
             openUrl = openUrl,
             onWhatsNewClick = onWhatsNewClick,
             onRoadmapClick = onRoadmapClick,
-            onComponentGalleryUnlocked = onComponentGalleryUnlocked,
             modifier = Modifier.fillMaxWidth(),
         )
     }

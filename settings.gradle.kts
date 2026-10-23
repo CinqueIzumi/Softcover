@@ -40,6 +40,7 @@ if (foundationLocal) {
 }
 
 include(":app")
+include(":showcase")
 include(":smoketest")
 include(":desktopApp")
 include(":detekt-rules")

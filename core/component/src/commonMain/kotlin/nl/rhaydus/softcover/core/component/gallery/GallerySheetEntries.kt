@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.softcover.core.component.sheet.SheetActionRow
 import nl.rhaydus.softcover.core.component.sheet.SheetActionRowUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
@@ -103,7 +104,7 @@ internal fun GallerySheetFrame(
         modifier = if (scaffold.layout != SheetLayout.Scrolling) {
             modifier.height(420.dp)
         } else {
-            modifier.heightIn(max = 420.dp)
+            modifier.heightIn(max = rememberWindowSizeClass().heightDp)
         },
         lazyBody = lazyBody,
         content = content,

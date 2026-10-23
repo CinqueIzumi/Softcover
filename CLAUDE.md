@@ -74,6 +74,7 @@ descriptions — never hand-edit it. The full rules are in `.claude/rules/roadma
 | Writing Kotlin | [`docs/rhaydus/0.3.1/code-style.md`](docs/rhaydus/0.3.1/code-style.md), then [`docs/reference/code-style.md`](docs/reference/code-style.md) |
 | Looking for an existing component, modifier or util | [`docs/rhaydus/0.3.1/CAPABILITIES.md`](docs/rhaydus/0.3.1/CAPABILITIES.md) |
 | Adding a manifest component, worker, widget, Screen argument, or anything reached by name / touching keep rules | [`docs/reference/r8.md`](docs/reference/r8.md) |
+| Changing or publishing the Claude design preset | [`design/README.md`](design/README.md) |
 
 ## Rhaydus foundation (local override — pending foundation FU-6; re-running rhaydus-adopt reverts this)
 

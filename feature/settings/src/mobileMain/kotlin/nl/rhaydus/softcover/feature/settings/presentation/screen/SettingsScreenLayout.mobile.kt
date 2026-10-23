@@ -55,10 +55,6 @@ internal actual val settingsUsesMasterDetail: Boolean = false
  * *is* used — this menu's own direct "Roadmap" shortcut, alongside the desktop sidebar's equivalent row
  * (`section/SettingsCategorySidebar.kt`'s `SettingsCategorySidebar`) — even though the same screen is also
  * reachable a second way, via the row [AboutContent] renders once you're already on About.
- * [navigateToComponentGallery] is unused here, the mirror image of [navigateToRoadmap]'s desktop
- * story: mobile reaches the Component Gallery only through the version footer's easter egg on the
- * pushed [AboutScreen], which wires that gesture to its own navigator directly rather than through
- * this layout.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +69,6 @@ internal actual fun SettingsScreenLayout(
     navigateToAbout: () -> Unit,
     navigateToWhatsNew: () -> Unit,
     navigateToRoadmap: () -> Unit,
-    navigateToComponentGallery: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
     roadmapState: DocumentPageUiState?,
@@ -240,7 +235,6 @@ private fun SettingsScreenPreview() {
             navigateToAbout = {},
             navigateToWhatsNew = {},
             navigateToRoadmap = {},
-            navigateToComponentGallery = {},
             libraryVisibilityState = LibraryVisibilitySettingsUiState(),
             libraryVisibilityRunAction = {},
             roadmapState = null,
@@ -270,7 +264,6 @@ private fun SettingsScreenUpdateAvailablePreview() {
             navigateToAbout = {},
             navigateToWhatsNew = {},
             navigateToRoadmap = {},
-            navigateToComponentGallery = {},
             libraryVisibilityState = LibraryVisibilitySettingsUiState(),
             libraryVisibilityRunAction = {},
             roadmapState = null,
