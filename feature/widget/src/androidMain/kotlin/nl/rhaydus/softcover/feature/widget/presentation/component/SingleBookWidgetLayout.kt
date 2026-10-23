@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
+import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.appwidget.ImageProvider
 import androidx.glance.layout.Alignment
@@ -50,10 +51,12 @@ internal fun SingleBookWidgetLayout(
     foot: @Composable () -> Unit,
 ) {
     val size = LocalSize.current
+    val fontScale = LocalContext.current.resources.configuration.fontScale
 
     val showsAuthor = sideShowsAuthor(
         size = size,
         fixedRowsDp = eyebrowHeightDp + footHeightDp,
+        fontScale = fontScale,
     )
 
     Box(modifier = GlanceModifier.fillMaxSize()) {
@@ -107,6 +110,7 @@ internal fun SingleBookWidgetLayout(
                             maxLines = sideTitleLines(
                                 size = size,
                                 fixedRowsDp = eyebrowHeightDp + footHeightDp,
+                                fontScale = fontScale,
                             ),
                             style = bookTitleStyle(TextAlign.Start),
                         )

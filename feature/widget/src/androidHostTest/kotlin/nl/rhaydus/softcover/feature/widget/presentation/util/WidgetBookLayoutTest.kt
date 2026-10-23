@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.feature.widget.presentation.util
 
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import io.kotest.matchers.ints.shouldBeLessThanOrEqual
-import io.kotest.matchers.ints.shouldBeInRange
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeLessThan
+import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -72,6 +72,7 @@ class WidgetBookLayoutTest {
             val result = sideShowsAuthor(
                 size = size,
                 fixedRowsDp = 68,
+                fontScale = 1f,
             )
 
             // ----- Assert -----
@@ -90,6 +91,7 @@ class WidgetBookLayoutTest {
             val result = sideShowsAuthor(
                 size = size,
                 fixedRowsDp = 68,
+                fontScale = 1f,
             )
 
             // ----- Assert -----
@@ -111,6 +113,7 @@ class WidgetBookLayoutTest {
             val lines = sideTitleLines(
                 size = size,
                 fixedRowsDp = 60,
+                fontScale = 1f,
             )
 
             // ----- Assert -----
@@ -118,7 +121,7 @@ class WidgetBookLayoutTest {
         }
 
         @Test
-        fun `a tall wide size gets three lines`() {
+        fun `a tall wide size gets more than three lines`() {
             // ----- Arrange -----
             val size = DpSize(
                 width = 390.dp,
@@ -129,58 +132,65 @@ class WidgetBookLayoutTest {
             val lines = sideTitleLines(
                 size = size,
                 fixedRowsDp = 40,
+                fontScale = 1f,
             )
 
             // ----- Assert -----
-            lines shouldBe 3
+            lines shouldBeGreaterThan 3
         }
 
         @Test
-        fun `the title lines and author never overflow the compact currently reading text column`() {
+        fun `a larger font scale gets fewer lines in the same size`() {
             // ----- Arrange -----
             val size = DpSize(
-                width = 180.dp,
-                height = 110.dp,
+                width = 390.dp,
+                height = 250.dp,
+            )
+
+            // ----- Act -----
+            val normal = sideTitleLines(
+                size = size,
+                fixedRowsDp = 40,
+                fontScale = 1f,
+            )
+            val scaled = sideTitleLines(
+                size = size,
+                fixedRowsDp = 40,
+                fontScale = 1.3f,
+            )
+
+            // ----- Assert -----
+            scaled shouldBeLessThan normal
+        }
+
+        @Test
+        fun `the title lines and author never overflow a tall currently reading text column at a large font scale`() {
+            // ----- Arrange -----
+            val size = DpSize(
+                width = 390.dp,
+                height = 250.dp,
             )
             val fixedRowsDp = 68
-            val lineDp = 20
-            val authorDp = 16
+            val fontScale = 1.3f
+            val worstCaseLineDp = 25
+            val worstCaseAuthorDp = 20
 
             // ----- Act -----
             val lines = sideTitleLines(
                 size = size,
                 fixedRowsDp = fixedRowsDp,
+                fontScale = fontScale,
             )
             val showsAuthor = sideShowsAuthor(
                 size = size,
                 fixedRowsDp = fixedRowsDp,
+                fontScale = fontScale,
             )
-            val author = if (showsAuthor) authorDp else 0
+            val author = if (showsAuthor) worstCaseAuthorDp else 0
 
             // ----- Assert -----
-            (fixedRowsDp + lines * lineDp + author) shouldBeLessThanOrEqual sideColumnHeightDp(size)
-        }
-
-        @Test
-        fun `a wide size stays between one and three lines however tall it is`() {
-            // ----- Arrange -----
-            val heights = listOf(60, 110, 180, 250, 320)
-
-            // ----- Act -----
-            val lines = heights.map { height ->
-                val size = DpSize(
-                    width = 400.dp,
-                    height = height.dp,
-                )
-
-                sideTitleLines(
-                    size = size,
-                    fixedRowsDp = 40,
-                )
-            }
-
-            // ----- Assert -----
-            lines.forEach { it shouldBeInRange 1..3 }
+            showsAuthor shouldBe true
+            (fixedRowsDp + lines * worstCaseLineDp + author) shouldBeLessThanOrEqual sideColumnHeightDp(size)
         }
     }
 
