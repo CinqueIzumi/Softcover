@@ -8,11 +8,13 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.AMAZON_KEY
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.BOOKSHOP_KEY
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.KOBO_KEY
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.OPEN_LIBRARY_KEY
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -172,6 +174,70 @@ class OnExternalLinkClickActionTest {
         @Test
         fun `sends no event when no edition is displayed`() = runTest {
             // ----- Arrange -----
+            val action = OnExternalLinkClickAction(key = AMAZON_KEY)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
+        }
+
+        @Test
+        fun `sends the kobo search url built from the title and first author`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                previewEdition = buildEdition(
+                    id = 1,
+                    authors = listOf(
+                        Author(
+                            id = 1,
+                            name = "Frank Herbert",
+                        ),
+                    ),
+                ).copy(title = "Dune"),
+            )
+            val action = OnExternalLinkClickAction(key = KOBO_KEY)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+                .shouldBeInstanceOf<BookDetailEvent.OpenExternalLinkEvent>()
+            event.url shouldBe "https://www.kobo.com/search?query=Dune%20Frank%20Herbert"
+        }
+
+        @Test
+        fun `sends no event for the kobo key when the edition has no title`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
+            )
+            val action = OnExternalLinkClickAction(key = KOBO_KEY)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
+        }
+
+        @Test
+        fun `sends no event for an ISBN key when a titled edition has no ISBN`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = buildBookDetailUiState().copy(
+                previewEdition = buildEdition(id = 1).copy(title = "Dune"),
+            )
             val action = OnExternalLinkClickAction(key = AMAZON_KEY)
 
             // ----- Act -----

@@ -186,7 +186,10 @@ internal data class BookDetailUiState(
 
     val releaseCaption: String? = null,
 
-    /** The "Find it" pills, mapped by `ExternalLinksCollector` off [displayedEdition]; null without an ISBN. */
+    /**
+     * The "Find it" pills, mapped by `ExternalLinksCollector` off [displayedEdition]; null without an ISBN or a
+     * title.
+     */
     val externalLinks: ImmutableList<PillButtonUiModel>? = null,
 
     val updateProgressPill: PillButtonUiModel = PillButtonUiModel(

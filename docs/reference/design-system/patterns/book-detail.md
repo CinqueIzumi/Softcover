@@ -131,11 +131,12 @@
 
 ### External-links strip (labeled pills)
 
-- A bar-less `FIND IT` label over a wrapping `FlowRow` of labelled outline pills (Bookshop, Amazon,
-  OpenLibrary), each searching the selected edition's ISBN (`isbn13`, else `isbn10`).
+- A bar-less `FIND IT` label over a wrapping `FlowRow` of labelled outline pills (Bookshop, Amazon, Kobo,
+  OpenLibrary). The three ISBN pills search the selected edition's ISBN (`isbn13`, else `isbn10`); Kobo
+  searches its title plus first author on kobo.com, because Kobo cannot find print ISBNs.
 - A tap dispatches `OnExternalLinkClickAction`; the screen's `Content()` collects `OpenExternalLinkEvent`
   and calls `LocalUriHandler.openUri`. No leaf composable touches `LocalUriHandler`.
-- The section, label included, is omitted when the edition has no ISBN.
+- The section, label included, is omitted only when the edition has neither an ISBN nor a title.
 
 ### Verdict (rating and review)
 

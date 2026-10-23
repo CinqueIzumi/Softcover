@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.AMAZON_KEY
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.BOOKSHOP_KEY
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.KOBO_KEY
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.OPEN_LIBRARY_KEY
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -92,6 +93,53 @@ class ExternalLinksCollectorTest {
             }
             stateFlow.value = buildBookDetailUiState().copy(
                 previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(previewEdition = buildEdition(id = 2))
+
+            // ----- Assert -----
+            stateFlow.value.externalLinks.shouldBeNull()
+            job.cancel()
+        }
+
+        @Test
+        fun `externalLinks gains the kobo pill when the displayed edition gains a title`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = ExternalLinksCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            stateFlow.value = buildBookDetailUiState().copy(previewEdition = buildEdition(id = 1))
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                previewEdition = buildEdition(id = 2).copy(title = "Dune"),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.externalLinks.shouldNotBeNull().map { it.key } shouldBe listOf(KOBO_KEY)
+            job.cancel()
+        }
+
+        @Test
+        fun `externalLinks clears when the new edition has neither an ISBN nor a title`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = ExternalLinksCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            stateFlow.value = buildBookDetailUiState().copy(
+                previewEdition = buildEdition(id = 1).copy(
+                    isbn13 = "9780306406157",
+                    title = "Dune",
+                ),
             )
 
             // ----- Act -----
