@@ -37,7 +37,8 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          # A tag run's save could only ever be read back by that same tag.
+          cache-read-only: ${{ startsWith(github.ref, 'refs/tags/') }}
 
       # Hosted runners give only root access to /dev/kvm, which the managed emulator needs for acceleration.
       - name: Enable KVM

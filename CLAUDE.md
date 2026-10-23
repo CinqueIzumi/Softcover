@@ -35,7 +35,7 @@ book tracking platform, on Android (SDK 26+), iOS and desktop (JVM). Shared UI a
 ./gradlew styleCheck             # detekt + ktlint gates
 ./gradlew check koverXmlReport -x lint  # PR gate: what CI runs on PRs into release/*
 ./gradlew check                  # Everything except buildHealth; iOS compiles on macOS only
-./gradlew check buildHealth      # Full gate: CI on release merges and PRs into main
+./gradlew check buildHealth      # Full gate: CI on every push to main, release/*, hotfix/* and chore/*
 ```
 
 ## Tests

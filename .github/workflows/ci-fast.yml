@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # setup-gradle falls back to the newest entry for the same OS and job key, so sharing the key
-      # with ci-full.yml's Full gate lets PR runs restore what merges save.
+      # with ci-full.yml's Check job lets PR runs restore what pushes to the base branch save.
       GRADLE_BUILD_ACTION_CACHE_KEY_JOB: jvm
     steps:
       - name: Checkout
