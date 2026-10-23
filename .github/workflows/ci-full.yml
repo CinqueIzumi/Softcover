@@ -8,9 +8,6 @@ name: CI (full gate)
 on:
   push:
     branches: [main, 'release/**', 'hotfix/**', 'chore/**']
-  # The Roadmap workflow pushes chore/roadmap-sync with GITHUB_TOKEN, which never fires a push
-  # workflow, and dispatches this one instead.
-  workflow_dispatch:
 
 # Keyed by commit so a later push never cancels a run whose checks a PR may still need.
 concurrency:
