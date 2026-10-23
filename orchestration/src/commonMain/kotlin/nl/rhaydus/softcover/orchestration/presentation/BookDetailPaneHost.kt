@@ -2,10 +2,13 @@ package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.key
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
@@ -31,21 +34,13 @@ internal fun BookDetailPaneHost(
     destination: ScreenDestination.BookDetail,
     onClose: () -> Unit,
     overlayNavigator: Navigator,
+    openToken: Int,
+    onStackChanged: (List<ScreenDestination.BookDetail>) -> Unit,
 ) {
-    val backState = rememberNavigationEventState(NavigationEventInfo.None)
-
-    NavigationBackHandler(
-        state = backState,
-        isBackEnabled = true,
-        onBackCancelled = {},
-        onBackCompleted = onClose,
-    )
-
-    key(destination.id) {
+    key(openToken) {
         CompositionLocalProvider(
             LocalSharedTransitionScope provides null,
             LocalNavAnimatedVisibilityScope provides null,
-            LocalBookDetailPaneCloseHandler provides onClose,
             LocalBookDetailOverlayNavigator provides overlayNavigator,
         ) {
             Navigator(
@@ -56,7 +51,38 @@ internal fun BookDetailPaneHost(
                     showVerdictSheet = destination.showVerdictSheet,
                 ),
                 onBackPressed = null,
-            )
+            ) { paneNavigator ->
+                val backState = rememberNavigationEventState(NavigationEventInfo.None)
+
+                NavigationBackHandler(
+                    state = backState,
+                    isBackEnabled = true,
+                    onBackCancelled = {},
+                    onBackCompleted = {
+                        if (paneNavigator.canPop) paneNavigator.pop() else onClose()
+                    },
+                )
+
+                SideEffect {
+                    onStackChanged(paneNavigator.items.toDestinations(root = destination))
+                }
+
+                CompositionLocalProvider(
+                    LocalBookDetailPaneCloseHandler provides onClose.takeUnless { paneNavigator.canPop },
+                ) {
+                    CurrentScreen()
+                }
+            }
         }
     }
+}
+
+private fun List<Screen>.toDestinations(
+    root: ScreenDestination.BookDetail,
+): List<ScreenDestination.BookDetail> {
+    val pushed = drop(1)
+        .filterIsInstance<BookDetailScreen>()
+        .map { ScreenDestination.BookDetail(id = it.id) }
+
+    return listOf(root) + pushed
 }

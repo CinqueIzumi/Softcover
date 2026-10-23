@@ -18,13 +18,15 @@ internal fun nl.rhaydus.softcover.orchestration.presentation.ApplyPlatformThemeA
     - themeMode: STABLE (class with no mutable properties)
 
 @Composable
-internal fun nl.rhaydus.softcover.orchestration.presentation.BookDetailPaneHost(destination: nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination.BookDetail, onClose: kotlin.Function0<kotlin.Unit>, overlayNavigator: cafe.adriel.voyager.navigator.Navigator): kotlin.Unit
+internal fun nl.rhaydus.softcover.orchestration.presentation.BookDetailPaneHost(destination: nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination.BookDetail, onClose: kotlin.Function0<kotlin.Unit>, overlayNavigator: cafe.adriel.voyager.navigator.Navigator, openToken: kotlin.Int, onStackChanged: kotlin.Function1<kotlin.collections.List<nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination.BookDetail>, kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - destination: UNSTABLE (has mutable properties or unstable members)
     - onClose: STABLE (function type)
     - overlayNavigator: UNSTABLE (has mutable properties or unstable members)
+    - openToken: STABLE (primitive type)
+    - onStackChanged: STABLE (function type)
 
 @Composable
 public fun nl.rhaydus.softcover.orchestration.presentation.BottomBarScreen.Content(): kotlin.Unit

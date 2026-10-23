@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
@@ -19,6 +20,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 @Composable
 internal fun LensContent(
     state: BookDetailUiState,
+    similarBooksListState: LazyListState,
     runAction: (BookDetailAction) -> Unit,
 ) {
     val fadeSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
@@ -38,6 +40,7 @@ internal fun LensContent(
 
             BookDetailLens.THE_BOOK -> TheBookLensContent(
                 state = state,
+                similarBooksListState = similarBooksListState,
                 runAction = runAction,
             )
         }

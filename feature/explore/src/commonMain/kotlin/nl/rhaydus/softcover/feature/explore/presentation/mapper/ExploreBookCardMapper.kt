@@ -52,24 +52,6 @@ internal fun Book.toTrendingCard(
     ),
 )
 
-/** The "Because you read" card: the author is the byline. */
-internal fun Book.toBecauseYouReadCard(
-    cover: CoverUiModel?,
-    coverBadge: CoverOverlayUiModel?,
-    transitionSurface: String? = null,
-): BookCardUiModel = toColumnCard(
-    cover = cover,
-    coverBadge = coverBadge,
-    text = BookCardContent(
-        title = title,
-        titleTransitionKey = transitionKey(
-            element = BookTransitionElement.Title,
-            surface = transitionSurface,
-        ),
-        byline = byline(author = authorString),
-    ),
-)
-
 /** An "Up next in your series" card, released or not; the overflow button opens the dismiss sheet. */
 internal fun Book.toUpNextCard(
     cover: CoverUiModel?,

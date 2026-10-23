@@ -5,25 +5,28 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.uibinding.book.toBylineColumnCard
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.SEARCH_RESULT_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.TRENDING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.UP_NEXT_STAND_IN_CARDS
-import nl.rhaydus.softcover.feature.explore.presentation.mapper.toBecauseYouReadCard
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.toRailModel
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSearchResultCard
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toTrendingCard
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toUpNextCard
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_YOU_READ
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_TRENDING
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_UP_NEXT
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreRail
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -64,30 +67,30 @@ internal class BookCardModelsCollector : ExploreCollector {
             .collectLatest { snapshot ->
                 scope.setState {
                     it.copy(
-                        trending = snapshot.trendingBooks.toCardSet(
+                        trending = snapshot.trendingBooks.toRailModel(
+                            rail = ExploreRail.TRENDING,
                             loading = snapshot.loadingTrendingBooks,
-                            coverVariant = CoverVariant.Raised,
                             coverSurface = SURFACE_TRENDING,
                             overlays = snapshot.unreleasedCoverOverlays,
                             standIns = TRENDING_STAND_IN_CARDS,
                             map = Book::toTrendingCard,
                         ),
-                        becauseYouRead = snapshot.becauseYouReadBooks.toCardSet(
+                        becauseYouRead = snapshot.becauseYouReadBooks.toRailModel(
+                            rail = ExploreRail.BECAUSE_YOU_READ,
                             loading = snapshot.loadingBecauseYouReadBooks,
-                            coverVariant = CoverVariant.Raised,
                             coverSurface = SURFACE_BECAUSE_YOU_READ,
                             overlays = snapshot.unreleasedCoverOverlays,
                             standIns = BECAUSE_YOU_READ_STAND_IN_CARDS,
-                            map = Book::toBecauseYouReadCard,
+                            map = Book::toBylineColumnCard,
                         ),
                         becauseYouReadGenreControl = it.becauseYouReadGenreControl.copy(
                             visible = snapshot.becauseYouReadGenre != null &&
                                 (snapshot.loadingBecauseYouReadBooks || snapshot.becauseYouReadBooks.isNotEmpty()),
                             isLoading = snapshot.loadingBecauseYouReadBooks && snapshot.becauseYouReadBooks.isEmpty(),
                         ),
-                        upNext = snapshot.continueSeriesBooks.toCardSet(
+                        upNext = snapshot.continueSeriesBooks.toRailModel(
+                            rail = ExploreRail.UP_NEXT,
                             loading = snapshot.loadingContinueSeriesBooks,
-                            coverVariant = CoverVariant.Raised,
                             coverSurface = SURFACE_UP_NEXT,
                             overlays = snapshot.unreleasedCoverOverlays,
                             standIns = UP_NEXT_STAND_IN_CARDS,
@@ -110,6 +113,24 @@ internal class BookCardModelsCollector : ExploreCollector {
             }
     }
 }
+
+private inline fun List<Book>.toRailModel(
+    rail: ExploreRail,
+    loading: Boolean,
+    coverSurface: String?,
+    standIns: ImmutableList<BookCardUiModel>,
+    overlays: Map<Int, CoverOverlayUiModel>,
+    map: (Book, CoverUiModel, CoverOverlayUiModel?, String?) -> BookCardUiModel,
+): BookCardRailUiModel<Book> = rail.toRailModel(
+    set = toCardSet(
+        loading = loading,
+        coverVariant = CoverVariant.Raised,
+        coverSurface = coverSurface,
+        standIns = standIns,
+        overlays = overlays,
+        map = map,
+    ),
+)
 
 private inline fun List<Book>.toCardSet(
     loading: Boolean,

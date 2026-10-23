@@ -21,6 +21,7 @@ file under `patterns/`.
 - [Change edition sheet](patterns/book-detail.md#change-edition-sheet) — searchable single-choice edition picker.
 - [Shelve control](patterns/book-detail.md#shelve-control) — three-row Want to read / Reading / Read control.
 - [Lens toggle](patterns/book-detail.md#lens-toggle) — sticky switch between The Book and Yours.
+- [Similar books](patterns/book-detail.md#similar-books) — pageable "If you liked this" rail on The Book lens.
 - [Book-detail in-progress stat](patterns/book-detail.md#book-detail-in-progress-stat) — Reading-shelf hero stat with pace and deadline.
 - [Edition colophon line](patterns/book-detail.md#edition-colophon-line) — one-line publisher, format and ISBN readout.
 - [External-links strip](patterns/book-detail.md#external-links-strip-labeled-pills) — labelled pills to off-app lookups.

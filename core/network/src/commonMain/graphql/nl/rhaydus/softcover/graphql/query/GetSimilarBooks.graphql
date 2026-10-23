@@ -1,0 +1,17 @@
+query GetSimilarBooks($bookId: Int!) {
+    books(where: { id: { _eq: $bookId } }) {
+        id
+        canonical {
+            id
+        }
+        cached_similar_book_ids
+        book_series(order_by: { position: asc }) {
+            series {
+                id
+                book_series {
+                    book_id
+                }
+            }
+        }
+    }
+}

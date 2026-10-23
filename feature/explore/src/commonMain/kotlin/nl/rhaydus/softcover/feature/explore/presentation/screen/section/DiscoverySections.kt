@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
-import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
+import nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
@@ -19,7 +19,7 @@ internal fun DiscoverySections(
     runAction: (ExploreAction) -> Unit,
     onBookClick: (Book, String?) -> Unit,
     sectionGap: Dp,
-    rail: @Composable (ExploreRail, BookCardSet<Book>, (BookCardEvent) -> Unit) -> Unit,
+    rail: @Composable (ExploreRail, BookCardRailUiModel<Book>, (BookCardEvent) -> Unit) -> Unit,
 ) {
     val featuredBook = state.featuredUpcomingRelease
 
@@ -46,7 +46,7 @@ internal fun DiscoverySections(
     )
 
     UpNextSection(
-        set = state.upNext,
+        set = state.upNext.set,
         header = state.upNextHeader,
         onBookClick = onBookClick,
         runAction = runAction,
@@ -62,7 +62,7 @@ internal fun DiscoverySections(
         BecauseYouReadSection(
             header = state.becauseYouReadHeader,
             genreControl = state.becauseYouReadGenreControl,
-            set = state.becauseYouRead,
+            set = state.becauseYouRead.set,
             onBookClick = onBookClick,
             runAction = runAction,
             trailingGap = sectionGap,
@@ -76,7 +76,7 @@ internal fun DiscoverySections(
 
         Column(verticalArrangement = Arrangement.spacedBy(sectionGap)) {
             TrendingSection(
-                set = state.trending,
+                set = state.trending.set,
                 header = state.trendingHeader,
                 onBookClick = onBookClick,
             ) { onCardEvent ->

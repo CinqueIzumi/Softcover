@@ -4,12 +4,15 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardRail
+import nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.Cover
@@ -52,6 +55,21 @@ internal val bookEntries: ImmutableList<GalleryEntry> = persistentListOf(
                     onEvent = {},
                 )
             }
+        },
+    ),
+    galleryEntry(
+        name = "BookCardRail",
+        family = GalleryFamily.BOOKCARD,
+        blurb = "A horizontal rail of byline cards: loaded, loading stand-ins, and a trailing progress card " +
+            "while the next page is fetched.",
+        previews = BookCardRailUiModel,
+        content = { model, modifier ->
+            BookCardRail(
+                model = model,
+                onEvent = {},
+                listState = rememberLazyListState(),
+                modifier = modifier,
+            )
         },
     ),
     galleryEntry(

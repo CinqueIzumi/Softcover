@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.uibinding.book.bylineColumnStandIns
 import nl.rhaydus.softcover.core.uibinding.book.ratingPart
 
 internal val BECAUSE_YOU_READ_HEADER_STAND_IN = SectionHeaderUiModel.Section(
@@ -39,16 +40,7 @@ internal val TRENDING_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(rail
     )
 }.toImmutableList()
 
-internal val BECAUSE_YOU_READ_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(railStandInCount) { index ->
-    columnStandInCard(
-        bookId = -(index + 1),
-        coverVariant = CoverVariant.Raised,
-        text = BookCardContent(
-            title = "The Name of the Wind",
-            byline = "By Patrick Rothfuss",
-        ),
-    )
-}.toImmutableList()
+internal val BECAUSE_YOU_READ_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = bylineColumnStandIns(railStandInCount)
 
 internal val UP_NEXT_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(railStandInCount) { index ->
     columnStandInCard(

@@ -4,9 +4,11 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.LoadSimilarBooksPageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveShelvedBookIdsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
@@ -80,6 +82,8 @@ internal class BookDetailDependencies(
     val deleteQuoteUseCase: DeleteQuoteUseCase,
     val observeBookQuotesUseCase: ObserveBookQuotesUseCase,
     val refreshBookQuotesUseCase: RefreshBookQuotesUseCase,
+    val loadSimilarBooksPageUseCase: LoadSimilarBooksPageUseCase,
+    val observeShelvedBookIdsUseCase: ObserveShelvedBookIdsUseCase,
     val offlineCopy: OfflineCopy,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,

@@ -179,6 +179,7 @@ component/
 +              VerdictSheet  VerdictSheetUiModel/Event
 · bookcard/    BookCard  BookCardUiModel/Variant/Content/Decorations
 ·              BookCardEvent  BookCardKey                                    S7
+·              BookCardRail(+UiModel, +Event)
 · mood/        MoodTile  MoodTileUiModel/Event/Ink       S7
 · row/         ListRow  ListRowUiModel                                       S6
 ```

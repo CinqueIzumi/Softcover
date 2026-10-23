@@ -95,6 +95,18 @@
   Yours. Yours is disabled until the book has a user copy.
 - The inactive lens's sections are not composed.
 
+### Similar books
+
+- On The Book lens between Tags and Find it: a `Section` header ("Similar books" / "If you liked this") over a
+  full-bleed `BookCardRail` of byline column cards. A press pushes that book's detail onto the back stack,
+  in the two-pane layout too.
+- The first page loads once the book has loaded and The Book lens is up; the Yours lens costs no request.
+  Stand-ins reserve the footprint meanwhile, and the section collapses when the list comes back empty or
+  the request fails.
+- Scrolling near the end pages in more, with a trailing progress card. Shelved books and the book's own
+  series never appear, and a book shelved later drops out. The rail's `LazyListState` is hoisted above the
+  lens switch, so its scroll survives it.
+
 ### Book-detail in-progress stat
 
 - The Reading-shelf hero stat, shown for a Paused book too (its `Update` pill records progress, which

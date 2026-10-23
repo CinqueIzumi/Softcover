@@ -159,55 +159,6 @@ class ExploreBookCardMapperTest {
     }
 
     @Nested
-    inner class ToBecauseYouReadCard {
-        @Test
-        fun `prefixes the author string with By as the byline`() {
-            // ----- Arrange -----
-            val input = book(
-                authors = listOf(
-                    Author(
-                        id = 1,
-                        name = "Susanna Clarke",
-                    ),
-                    Author(
-                        id = 2,
-                        name = "Neil Gaiman",
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val card = input.toBecauseYouReadCard(
-                cover = cover,
-                coverBadge = overlay,
-            )
-
-            // ----- Assert -----
-            card.stacked().text.byline shouldBe "By Susanna Clarke, Neil Gaiman"
-            card.stacked().cover shouldBe BookCardCover(
-                model = cover,
-                badge = overlay,
-            )
-            card.key shouldBe BookCardKey.Book(bookId = 7)
-        }
-
-        @Test
-        fun `omits the byline when there is no author`() {
-            // ----- Arrange -----
-            val input = book(authors = emptyList())
-
-            // ----- Act -----
-            val card = input.toBecauseYouReadCard(
-                cover = null,
-                coverBadge = null,
-            )
-
-            // ----- Assert -----
-            card.stacked().text.byline.shouldBeNull()
-        }
-    }
-
-    @Nested
     inner class ToUpNextCard {
         private val series = BookSeries(
             id = 3,
@@ -490,25 +441,6 @@ class ExploreBookCardMapperTest {
             text.titleTransitionKey shouldBe titleKey(
                 bookId = 7,
                 surface = "trending",
-            )
-        }
-
-        @Test
-        fun `because you read threads the surface to the title key`() {
-            // ----- Arrange -----
-            val input = book(id = 9)
-
-            // ----- Act -----
-            val text = input.toBecauseYouReadCard(
-                cover = cover,
-                coverBadge = null,
-                transitionSurface = "becauseYouRead",
-            ).stacked().text
-
-            // ----- Assert -----
-            text.titleTransitionKey shouldBe titleKey(
-                bookId = 9,
-                surface = "becauseYouRead",
             )
         }
 
