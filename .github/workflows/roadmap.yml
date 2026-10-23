@@ -53,6 +53,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -107,6 +108,11 @@ jobs:
                 '' \
                 'This branch is rebuilt from scratch on every milestone change, so further edits update this PR in place rather than opening another.')"
           fi
+
+          # The required checks on main come from push runs of the full gate, and a push made
+          # with GITHUB_TOKEN never starts one. A dispatch does, and its checks land on the same
+          # commit the PR reports.
+          gh workflow run ci-full.yml --ref "$SYNC_BRANCH"
 
   check:
     name: Verify ROADMAP.md is generated

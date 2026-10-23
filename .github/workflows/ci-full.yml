@@ -1,33 +1,28 @@
 name: CI (full gate)
 
-# Branch rulesets require these job names (and ci-fast.yml's) by name. A job skipped by `if:` counts
-# as a passing required check, so the PR tier and the full tier are split by trigger into two
-# workflows instead.
+# Push-only on purpose. Required status checks are read from the pull request's head commit, so
+# the run a branch push produces is what the PR into main reports, and a pull_request trigger
+# would build the same commit a second time. The main ruleset requires branches to be up to date,
+# which makes the pushed tip the exact tree that merges. The branch list is every family that
+# opens pull requests into main.
 on:
-  pull_request:
-    branches: [main]
   push:
-    branches: [main, 'release/**']
-    # ROADMAP.md is regenerated and committed to main by the Roadmap workflow whenever a
-    # milestone description changes. Running the full build for a markdown commit buys nothing.
-    # Left off `pull_request` on purpose: a path-filtered run leaves its required checks pending,
-    # which blocks the PR.
-    paths-ignore:
-      - "ROADMAP.md"
-      - "docs/**"
-      - "**/*.md"
+    branches: [main, 'release/**', 'hotfix/**', 'chore/**']
+  # The Roadmap workflow pushes chore/roadmap-sync with GITHUB_TOKEN, which never fires a push
+  # workflow, and dispatches this one instead.
+  workflow_dispatch:
 
-# PR runs cancel when superseded; push runs are keyed by commit so a merge is never cancelled.
+# Keyed by commit so a later push never cancels a run whose checks a PR may still need.
 concurrency:
-  group: ci-full-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-full-${{ github.sha }}
+  cancel-in-progress: false
 
 jobs:
-  full-gate:
-    name: Full gate
+  check:
+    name: Check
     runs-on: ubuntu-latest
     env:
-      # Must match ci-fast.yml's key.
+      # Shared with ci-fast.yml so PR runs restore what pushes to their base branch saved.
       GRADLE_BUILD_ACTION_CACHE_KEY_JOB: jvm
     steps:
       - name: Checkout
@@ -44,10 +39,12 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          # setup-gradle only writes on the default branch unless told otherwise; release and
+          # hotfix pushes must save so the next push and the PRs into them start warm.
+          cache-read-only: false
 
       - name: Check
-        run: ./gradlew check buildHealth koverXmlReport :build-logic:test --continue --stacktrace
+        run: ./gradlew check koverXmlReport :build-logic:test -x lint --continue --stacktrace
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -56,6 +53,31 @@ jobs:
           fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  lint:
+    name: Lint & build health
+    runs-on: ubuntu-latest
+    env:
+      GRADLE_BUILD_ACTION_CACHE_KEY_JOB: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      - name: Lint and build health
+        run: ./gradlew lint buildHealth --continue --stacktrace
 
   r8-smoke:
     uses: ./.github/workflows/r8-smoke.yml
@@ -79,7 +101,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          cache-read-only: false
 
       # Kotlin version: keep in sync with `kotlin` in gradle/libs.versions.toml.
       - name: Restore Kotlin/Native cache
@@ -96,7 +118,6 @@ jobs:
           -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.native.jvmArgs=-Xmx3g
 
       - name: Save Kotlin/Native cache
-        if: github.event_name == 'push'
         uses: actions/cache/save@v4
         with:
           path: ~/.konan

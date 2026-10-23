@@ -22,7 +22,8 @@ milestone.
 
 - To change what it says, **edit the milestone description**, not the file.
 - `.github/workflows/roadmap.yml` regenerates it on any milestone change and opens a single pull request
-  (`chore/roadmap-sync`); it never pushes to `main`, and further edits update that PR in place. Merging it
+  (`chore/roadmap-sync`); it never pushes to `main`, and further edits update that PR in place. It then
+  dispatches the full gate on that branch, which is where the PR's required checks come from. Merging it
   publishes: the in-app Roadmap screen fetches the file from the default branch at runtime.
 - A pull request touching `ROADMAP.md` runs `generate_roadmap.py --check` and **fails if the file was
   hand-edited**.
