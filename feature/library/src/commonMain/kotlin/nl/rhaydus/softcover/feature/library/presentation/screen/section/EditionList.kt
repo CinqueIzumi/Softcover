@@ -154,7 +154,10 @@ internal fun EditionList(
     ) {
         state.customLists.firstOrNull { it.id == tab.listId }
             ?.books
-            ?.associate { it.editionId to it.listBookId }
+            ?.mapNotNull { listBook ->
+                listBook.shownEdition?.let { shown -> shown.id to listBook.listBookId }
+            }
+            ?.toMap()
             .orEmpty()
     }
 

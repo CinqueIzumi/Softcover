@@ -185,7 +185,7 @@ private fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.Con
     - runAction: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.DiscoverySections(state: nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction, kotlin.Unit>, onBookClick: kotlin.Function2<nl.rhaydus.softcover.core.domain.model.Book, kotlin.String?, kotlin.Unit>, sectionGap: androidx.compose.ui.unit.Dp, rail: @[Composable] androidx.compose.runtime.internal.ComposableFunction3<nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreRail, nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>, kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.DiscoverySections(state: nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction, kotlin.Unit>, onBookClick: kotlin.Function2<nl.rhaydus.softcover.core.domain.model.Book, kotlin.String?, kotlin.Unit>, sectionGap: androidx.compose.ui.unit.Dp, rail: @[Composable] androidx.compose.runtime.internal.ComposableFunction3<nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreRail, nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel<nl.rhaydus.softcover.core.domain.model.Book>, kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>, kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
   params:
@@ -208,12 +208,12 @@ internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.Ed
     - pullToRefreshState: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreCardRail(rail: nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreRail, set: nl.rhaydus.softcover.core.component.bookcard.BookCardSet<nl.rhaydus.softcover.core.domain.model.Book>, onCardEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreCardRail(rail: nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreRail, model: nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel<nl.rhaydus.softcover.core.domain.model.Book>, onCardEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - rail: STABLE (class with no mutable properties)
-    - set: STABLE (marked @Stable or @Immutable)
+    - model: STABLE (marked @Stable or @Immutable)
     - onCardEvent: STABLE (function type)
 
 @Composable

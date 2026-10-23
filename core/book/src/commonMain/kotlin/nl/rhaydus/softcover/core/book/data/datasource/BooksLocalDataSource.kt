@@ -4,6 +4,7 @@ import androidx.room.RoomRawQuery
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.common.AppDispatchers
@@ -65,6 +66,8 @@ interface BooksLocalDataSource {
     )
 
     suspend fun getExistingUserBookBookIds(ids: List<Int>): List<Int>
+
+    fun observeShelvedBookIds(ids: List<Int>): Flow<List<Int>>
 
     suspend fun replaceTrendingBooks(
         period: TrendingPeriod,
@@ -239,6 +242,12 @@ internal class BooksLocalDataSourceImpl(
                 fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
             ),
         )
+    }
+
+    override fun observeShelvedBookIds(ids: List<Int>): Flow<List<Int>> {
+        if (ids.isEmpty()) return flowOf(emptyList())
+
+        return dao.observeBookIdsWithUserBook(bookIds = ids)
     }
 
     override suspend fun getExistingUserBookBookIds(ids: List<Int>): List<Int> {

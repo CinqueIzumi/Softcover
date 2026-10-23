@@ -5,6 +5,7 @@ import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickBook
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickCadence
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSettings
 import nl.rhaydus.softcover.feature.widget.domain.model.RandomPickSource
@@ -29,31 +30,44 @@ internal fun buildPool(
     source: RandomPickSource,
     wantToRead: List<Book>,
     lists: List<BookList>,
-): List<Book> {
+): List<RandomPickBook> {
     val books = when (source) {
-        RandomPickSource.WantToRead -> wantToRead
+        RandomPickSource.WantToRead -> wantToRead.map { book ->
+            RandomPickBook(
+                book = book,
+                listEdition = null,
+            )
+        }
+
         RandomPickSource.Owned -> lists.firstOrNull { it.isOwned }.unreadBooks()
         is RandomPickSource.UserList -> lists.firstOrNull { it.id == source.listId }.unreadBooks()
     }
 
-    return books.distinctBy { it.id }
+    return books.distinctBy { it.book.id }
 }
 
-private fun BookList?.unreadBooks(): List<Book> = this?.books
+private fun BookList?.unreadBooks(): List<RandomPickBook> = this?.books
     .orEmpty()
-    .mapNotNull { it.book }
-    .filter { it.status == BookStatus.WantToRead || it.status == BookStatus.None }
+    .mapNotNull { listBook ->
+        listBook.book?.let { book ->
+            RandomPickBook(
+                book = book,
+                listEdition = listBook.shownEdition,
+            )
+        }
+    }
+    .filter { it.book.status == BookStatus.WantToRead || it.book.status == BookStatus.None }
 
 internal fun resolvePick(
     state: RandomPickState,
     cadence: RandomPickCadence,
-    pool: List<Book>,
+    pool: List<RandomPickBook>,
     now: Instant,
     timeZone: TimeZone,
     random: Random,
 ): RandomPickState {
     val stillValid = state.pickedBookId != null &&
-        pool.any { it.id == state.pickedBookId } &&
+        pool.any { it.book.id == state.pickedBookId } &&
         isFresh(
             state = state,
             cadence = cadence,
@@ -75,17 +89,17 @@ internal fun resolvePick(
 
 internal fun shufflePick(
     state: RandomPickState,
-    pool: List<Book>,
+    pool: List<RandomPickBook>,
     now: Instant,
     random: Random,
 ): RandomPickState {
-    val candidates = pool.filter { it.id != state.pickedBookId }.ifEmpty { pool }
+    val candidates = pool.filter { it.book.id != state.pickedBookId }.ifEmpty { pool }
 
     val picked = candidates.takeIf { it.isNotEmpty() }?.random(random)
         ?: return RandomPickState()
 
     return RandomPickState(
-        pickedBookId = picked.id,
+        pickedBookId = picked.book.id,
         pickedAtMillis = now.toEpochMilliseconds(),
     )
 }

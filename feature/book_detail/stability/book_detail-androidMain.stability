@@ -270,11 +270,12 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.sectio
     - runAction: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensContent(state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensContent(state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, similarBooksListState: androidx.compose.foundation.lazy.LazyListState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - state: UNSTABLE (has mutable properties or unstable members)
+    - similarBooksListState: STABLE (marked @Stable or @Immutable)
     - runAction: STABLE (function type)
 
 @Composable
@@ -351,6 +352,15 @@ private fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
     - enabled: STABLE (primitive type)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.SimilarBooksSection(state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, listState: androidx.compose.foundation.lazy.LazyListState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - state: UNSTABLE (has mutable properties or unstable members)
+    - listState: STABLE (marked @Stable or @Immutable)
+    - runAction: STABLE (function type)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.TagsSection(state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
@@ -359,11 +369,12 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.sectio
     - runAction: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.TheBookLensContent(state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.TheBookLensContent(state: nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState, similarBooksListState: androidx.compose.foundation.lazy.LazyListState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction, kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - state: UNSTABLE (has mutable properties or unstable members)
+    - similarBooksListState: STABLE (marked @Stable or @Immutable)
     - runAction: STABLE (function type)
 
 @Composable

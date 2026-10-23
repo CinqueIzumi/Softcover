@@ -106,10 +106,12 @@ class BookTest {
         fun `falls back to the book title when the user's edition title is blank`() {
             // ----- Arrange -----
             val book = buildBook(
-                editions = listOf(buildEdition(
-                    id = 2,
-                    title = "   ",
-                ),),
+                editions = listOf(
+                    buildEdition(
+                        id = 2,
+                        title = "   ",
+                    ),
+                ),
                 userBook = buildUserBook(editionId = 2),
             )
 
@@ -124,10 +126,12 @@ class BookTest {
         fun `falls back to the book title when the user's edition has no title`() {
             // ----- Arrange -----
             val book = buildBook(
-                editions = listOf(buildEdition(
-                    id = 2,
-                    title = null,
-                ),),
+                editions = listOf(
+                    buildEdition(
+                        id = 2,
+                        title = null,
+                    ),
+                ),
                 userBook = buildUserBook(editionId = 2),
             )
 
@@ -160,6 +164,130 @@ class BookTest {
 
             // ----- Assert -----
             result shouldBe "Test Book"
+        }
+    }
+
+    // ----- titleIn / authorsIn -----
+
+    @Nested
+    inner class TitleIn {
+        @Test
+        fun `uses the given edition's title`() {
+            // ----- Arrange -----
+            val book = buildBook(editions = emptyList())
+            val edition = buildEdition(
+                id = 3,
+                title = "Edition Title",
+            )
+
+            // ----- Act -----
+            val result = book.titleIn(edition)
+
+            // ----- Assert -----
+            result shouldBe "Edition Title"
+        }
+
+        @Test
+        fun `falls back to the book title when the edition title is blank`() {
+            // ----- Arrange -----
+            val book = buildBook(editions = emptyList())
+            val edition = buildEdition(
+                id = 3,
+                title = " ",
+            )
+
+            // ----- Act -----
+            val result = book.titleIn(edition)
+
+            // ----- Assert -----
+            result shouldBe "Test Book"
+        }
+
+        @Test
+        fun `falls back to the book title when the edition title is null`() {
+            // ----- Arrange -----
+            val book = buildBook(editions = emptyList())
+            val edition = buildEdition(
+                id = 3,
+                title = null,
+            )
+
+            // ----- Act -----
+            val result = book.titleIn(edition)
+
+            // ----- Assert -----
+            result shouldBe "Test Book"
+        }
+
+        @Test
+        fun `falls back to the book title when there is no edition`() {
+            // ----- Arrange -----
+            val book = buildBook(editions = emptyList())
+
+            // ----- Act -----
+            val result = book.titleIn(null)
+
+            // ----- Assert -----
+            result shouldBe "Test Book"
+        }
+    }
+
+    @Nested
+    inner class AuthorsIn {
+        private fun bookWithAuthors(): Book = buildBook(editions = emptyList()).copy(
+            authors = listOf(
+                Author(
+                    id = 1,
+                    name = "Book Author",
+                ),
+                Author(
+                    id = 2,
+                    name = "Second Author",
+                ),
+            ),
+        )
+
+        @Test
+        fun `uses the given edition's authors`() {
+            // ----- Arrange -----
+            val edition = buildEdition(id = 3).copy(
+                authors = listOf(
+                    Author(
+                        id = 9,
+                        name = "Edition Author",
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = bookWithAuthors().authorsIn(edition)
+
+            // ----- Assert -----
+            result shouldBe "Edition Author"
+        }
+
+        @Test
+        fun `falls back to the joined book authors when the edition has none`() {
+            // ----- Arrange -----
+            val edition = buildEdition(id = 3)
+
+            // ----- Act -----
+            val result = bookWithAuthors().authorsIn(edition)
+
+            // ----- Assert -----
+            result shouldBe "Book Author, Second Author"
+        }
+
+        @Test
+        fun `falls back to the joined book authors when there is no edition`() {
+            // ----- Arrange -----
+            val book = bookWithAuthors()
+
+            // ----- Act -----
+            val result = book.authorsIn(null)
+
+            // ----- Assert -----
+            result shouldBe "Book Author, Second Author"
         }
     }
 

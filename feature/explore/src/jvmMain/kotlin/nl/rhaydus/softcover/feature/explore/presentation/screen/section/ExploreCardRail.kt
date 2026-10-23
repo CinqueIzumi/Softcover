@@ -14,10 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LookaheadScope
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
-import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
+import nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel
 import nl.rhaydus.softcover.core.component.bookcard.bookCardHandOver
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
@@ -33,19 +32,13 @@ import nl.rhaydus.softcover.core.domain.model.Book
 )
 @Composable
 internal fun ExploreCardRail(
-    rail: ExploreRail,
-    set: BookCardSet<Book>,
+    model: BookCardRailUiModel<Book>,
     onCardEvent: (BookCardEvent) -> Unit,
 ) {
     val entry = rememberBookCardEntryCoordinator(
-        cards = set.cards,
-        key = rail.staggerKey,
+        cards = model.set.cards,
+        key = model.staggerKey,
     )
-
-    val cardWidth = when (rail) {
-        ExploreRail.UP_NEXT -> 150.dp
-        ExploreRail.BECAUSE_YOU_READ, ExploreRail.TRENDING -> 168.dp
-    }
 
     val placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Rect>()
 
@@ -59,7 +52,7 @@ internal fun ExploreCardRail(
                 verticalArrangement = Arrangement.spacedBy(Spacing.xl),
             ) {
                 ExitingItems(
-                    items = set.cards,
+                    items = model.set.cards,
                     keyOf = { it.key.lazyKey },
                     animatesExit = { it.isLoading.not() },
                     itemModifier = Modifier.animateBounds(
@@ -71,7 +64,7 @@ internal fun ExploreCardRail(
                         model = card,
                         onEvent = onCardEvent,
                         modifier = Modifier
-                            .width(cardWidth)
+                            .width(model.cardWidth)
                             .bookCardHandOver(
                                 card = card,
                                 coordinator = entry,

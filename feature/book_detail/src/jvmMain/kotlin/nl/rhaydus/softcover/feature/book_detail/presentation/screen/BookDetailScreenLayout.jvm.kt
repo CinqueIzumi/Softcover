@@ -194,6 +194,7 @@ private fun NarrativeColumn(
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
+    val similarBooksListState = rememberLazyListState()
 
     Box(modifier = modifier) {
         LazyColumn(
@@ -203,6 +204,7 @@ private fun NarrativeColumn(
         ) {
             lensItems(
                 state = state,
+                similarBooksListState = similarBooksListState,
                 runAction = runAction,
             )
         }
@@ -224,6 +226,7 @@ private fun SingleColumnContent(
     onCoverClick: () -> Unit,
 ) {
     val listState = rememberLazyListState()
+    val similarBooksListState = rememberLazyListState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -233,6 +236,7 @@ private fun SingleColumnContent(
         ) {
             bookDetailItems(
                 state = state,
+                similarBooksListState = similarBooksListState,
                 runAction = runAction,
                 onCoverClick = onCoverClick,
             )

@@ -1,11 +1,9 @@
 package nl.rhaydus.softcover.feature.widget.domain.model
 
-import nl.rhaydus.softcover.core.domain.model.Book
-
 internal sealed interface RandomPickResolution {
-    /** [book] is `null` when the source resolved but holds no unread book. */
+    /** [pick] is `null` when the source resolved but holds no unread book. */
     data class Resolved(
-        val book: Book?,
+        val pick: RandomPickBook?,
         val source: RandomPickSource,
     ) : RandomPickResolution
 

@@ -48,6 +48,7 @@ internal actual fun BookDetailScreenLayout(
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val lazyListState = rememberLazyListState()
+    val similarBooksListState = rememberLazyListState()
 
     val shouldBeExpanded by remember {
         derivedStateOf { lazyListState.firstVisibleItemIndex >= 1 }
@@ -91,6 +92,7 @@ internal actual fun BookDetailScreenLayout(
         ) {
             bookDetailItems(
                 state = state,
+                similarBooksListState = similarBooksListState,
                 runAction = runAction,
                 onCoverClick = onCoverClick,
             )

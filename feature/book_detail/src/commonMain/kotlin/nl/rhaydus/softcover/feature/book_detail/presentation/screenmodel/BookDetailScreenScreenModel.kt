@@ -4,9 +4,11 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetEditionsByBookIdUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.LoadSimilarBooksPageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveShelvedBookIdsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
@@ -94,6 +96,8 @@ internal class BookDetailScreenScreenModel(
     private val deleteQuoteUseCase: DeleteQuoteUseCase,
     private val observeBookQuotesUseCase: ObserveBookQuotesUseCase,
     private val refreshBookQuotesUseCase: RefreshBookQuotesUseCase,
+    private val loadSimilarBooksPageUseCase: LoadSimilarBooksPageUseCase,
+    private val observeShelvedBookIdsUseCase: ObserveShelvedBookIdsUseCase,
     offlineCopy: OfflineCopy,
     flows: List<BookDetailCollector>,
     appDispatchers: AppDispatchers,
@@ -148,6 +152,8 @@ internal class BookDetailScreenScreenModel(
         deleteQuoteUseCase = deleteQuoteUseCase,
         observeBookQuotesUseCase = observeBookQuotesUseCase,
         refreshBookQuotesUseCase = refreshBookQuotesUseCase,
+        loadSimilarBooksPageUseCase = loadSimilarBooksPageUseCase,
+        observeShelvedBookIdsUseCase = observeShelvedBookIdsUseCase,
         offlineCopy = offlineCopy,
     )
 

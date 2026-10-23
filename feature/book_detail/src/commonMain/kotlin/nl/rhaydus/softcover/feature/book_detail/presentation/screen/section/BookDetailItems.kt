@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
@@ -11,6 +12,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 
 internal fun LazyListScope.lensItems(
     state: BookDetailUiState,
+    similarBooksListState: LazyListState,
     runAction: (BookDetailAction) -> Unit,
 ) {
     stickyHeader(key = "lens_toggle") {
@@ -25,6 +27,7 @@ internal fun LazyListScope.lensItems(
     item(key = "lens_content") {
         LensContent(
             state = state,
+            similarBooksListState = similarBooksListState,
             runAction = runAction,
         )
     }
@@ -32,6 +35,7 @@ internal fun LazyListScope.lensItems(
 
 internal fun LazyListScope.bookDetailItems(
     state: BookDetailUiState,
+    similarBooksListState: LazyListState,
     runAction: (BookDetailAction) -> Unit,
     onCoverClick: () -> Unit,
 ) {
@@ -67,6 +71,7 @@ internal fun LazyListScope.bookDetailItems(
 
     lensItems(
         state = state,
+        similarBooksListState = similarBooksListState,
         runAction = runAction,
     )
 }
