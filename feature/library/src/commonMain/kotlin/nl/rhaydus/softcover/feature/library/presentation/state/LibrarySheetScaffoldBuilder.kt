@@ -28,6 +28,26 @@ internal fun arrangeSheetScaffoldFor(resultCount: Int): SheetScaffoldUiModel =
         ),
     )
 
+internal fun recommendedMenuSheetScaffoldFor(
+    eyebrow: String,
+    title: String,
+): SheetScaffoldUiModel =
+    SheetScaffoldUiModel(
+        header = SheetHeaderUiModel(
+            section = SectionHeaderUiModel.Section(
+                eyebrow = eyebrow,
+                headline = title,
+            ),
+        ),
+        footer = SheetFooterUiModel.Stacked(
+            primary = null,
+            secondary = SheetFooterButton(
+                label = "Cancel",
+                dismissesSheet = true,
+            ),
+        ),
+    )
+
 /**
  * The secondary "Clear all" is always present so the primary never shifts sideways when the first
  * filter is applied; [filtersActive] only enables it.

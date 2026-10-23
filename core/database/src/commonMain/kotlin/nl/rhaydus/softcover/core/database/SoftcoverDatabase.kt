@@ -10,6 +10,7 @@ import androidx.sqlite.execSQL
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.dao.BookDeadlineDao
 import nl.rhaydus.softcover.core.database.dao.DismissedContinueSeriesDao
+import nl.rhaydus.softcover.core.database.dao.HiddenRecommendationDao
 import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
 import nl.rhaydus.softcover.core.database.dao.PendingQuoteWriteDao
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
@@ -30,6 +31,7 @@ import nl.rhaydus.softcover.core.database.model.BookTagCrossRef
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesBookEntity
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesEntity
 import nl.rhaydus.softcover.core.database.model.EditionAuthorCrossRef
+import nl.rhaydus.softcover.core.database.model.HiddenRecommendationEntity
 import nl.rhaydus.softcover.core.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.database.model.PendingListWriteEntity
 import nl.rhaydus.softcover.core.database.model.PendingQuoteWriteEntity
@@ -37,12 +39,12 @@ import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.database.model.ProgressHistoryEntity
 import nl.rhaydus.softcover.core.database.model.PublishedDocumentEntity
 import nl.rhaydus.softcover.core.database.model.QuoteEntity
+import nl.rhaydus.softcover.core.database.model.RankedBookEntity
+import nl.rhaydus.softcover.core.database.model.RankedListMetaEntity
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
-import nl.rhaydus.softcover.core.database.model.TrendingBookEntity
-import nl.rhaydus.softcover.core.database.model.TrendingMetaEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
 import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
@@ -75,13 +77,14 @@ import kotlin.coroutines.CoroutineContext
         UserTagVocabularyEntity::class,
         PublishedDocumentEntity::class,
         ProgressHistoryEntity::class,
-        TrendingBookEntity::class,
-        TrendingMetaEntity::class,
+        RankedBookEntity::class,
+        RankedListMetaEntity::class,
+        HiddenRecommendationEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 58,
+    version = 60,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -94,6 +97,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun pendingListWriteDao(): PendingListWriteDao
 
     abstract fun dismissedContinueSeriesDao(): DismissedContinueSeriesDao
+
+    abstract fun hiddenRecommendationDao(): HiddenRecommendationDao
 
     abstract fun quoteDao(): QuoteDao
 
@@ -1484,6 +1489,33 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_58_59 = object : Migration(58, 59) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE trending_books RENAME TO ranked_books")
+                connection.execSQL("ALTER TABLE ranked_books RENAME COLUMN period TO listKey")
+                connection.execSQL("DROP INDEX IF EXISTS index_trending_books_bookId")
+                connection.execSQL("CREATE INDEX IF NOT EXISTS index_ranked_books_bookId ON ranked_books (bookId)")
+                connection.execSQL("ALTER TABLE trending_meta RENAME TO ranked_list_meta")
+                connection.execSQL("ALTER TABLE ranked_list_meta RENAME COLUMN period TO listKey")
+            }
+        }
+
+        private val MIGRATION_59_60 = object : Migration(59, 60) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS hidden_recommendations (
+                            bookId INTEGER NOT NULL,
+                            bookTitle TEXT,
+                            coverUrl TEXT,
+                            authorText TEXT,
+                            PRIMARY KEY(bookId)
+                        )
+                    """.trimIndent(),
+                )
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1543,6 +1575,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_55_56,
             MIGRATION_56_57,
             MIGRATION_57_58,
+            MIGRATION_58_59,
+            MIGRATION_59_60,
         )
     }
 }

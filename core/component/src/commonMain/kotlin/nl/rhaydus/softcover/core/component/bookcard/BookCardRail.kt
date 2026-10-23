@@ -77,7 +77,7 @@ fun <P> BookCardRail(
         LazyRow(
             modifier = modifier,
             state = listState,
-            contentPadding = PaddingValues(horizontal = Spacing.gutter),
+            contentPadding = PaddingValues(horizontal = model.horizontalInset),
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
             itemsIndexed(cards, key = { _, card -> card.key.lazyKey }) { index, card ->

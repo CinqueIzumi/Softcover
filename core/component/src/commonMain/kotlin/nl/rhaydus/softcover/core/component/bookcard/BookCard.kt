@@ -26,6 +26,7 @@ import androidx.compose.ui.state.ToggleableState
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.softcover.core.component.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.modifier.tactileClickable
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -48,6 +49,7 @@ fun BookCard(
             cover = variant.cover,
             hasMenu = false,
             text = null,
+            bookmark = null,
             onEvent = onEvent,
             modifier = modifier,
             content = content,
@@ -58,6 +60,7 @@ fun BookCard(
             cover = variant.cover,
             hasMenu = variant.hasMenu,
             text = variant.text,
+            bookmark = variant.bookmark,
             onEvent = onEvent,
             modifier = modifier,
             content = content,
@@ -79,6 +82,7 @@ private fun BookCardCoverScaffold(
     cover: BookCardCover?,
     hasMenu: Boolean,
     text: BookCardContent?,
+    bookmark: BookCardTrailing.Bookmark?,
     onEvent: (BookCardEvent) -> Unit,
     modifier: Modifier,
     content: (@Composable () -> Unit)?,
@@ -104,10 +108,25 @@ private fun BookCardCoverScaffold(
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            if (isLoading.not() && bookmark != null) {
+                val toggle = bookmark.toggle
+
+                BookCardCoverButton(
+                    icon = if (toggle.checked) toggle.on else toggle.off,
+                    contentDescription = toggle.description,
+                    enabled = toggle.enabled,
+                    checked = toggle.checked,
+                    onClick = { onEvent(BookCardEvent.TrailingClicked(key = model.key)) },
+                    modifier = Modifier.align(Alignment.TopStart),
+                    corner = Alignment.TopStart,
+                )
+            }
+
             if (isLoading.not() && (hasMenu || content != null)) {
                 Row(modifier = Modifier.align(Alignment.TopEnd)) {
                     if (hasMenu) {
-                        BookCardMenuButton(
+                        BookCardCoverButton(
+                            icon = SoftcoverIcon.MoreVert,
                             contentDescription = "More options",
                             onClick = { onEvent(BookCardEvent.MenuClicked(key = model.key)) },
                         )

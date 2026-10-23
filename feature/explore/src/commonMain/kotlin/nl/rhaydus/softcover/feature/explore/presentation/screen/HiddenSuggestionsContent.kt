@@ -33,8 +33,8 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestions
 /**
  * The Hidden-suggestions body, shared by the mobile [HiddenSuggestionsScreen] page and the desktop
  * standalone layout. An intro line opens the surface (the screen's title lives in the top bar, matching
- * the sibling Appearance / Library-tabs settings pages), then two hairline-separated groups — "Hidden
- * books" / "Hidden series" — each list their rows with a per-item warm "Restore" affordance; a group is
+ * the sibling Appearance / Library-tabs settings pages), then three hairline-separated groups — "Hidden
+ * books" / "Hidden series" / "Hidden recommendations" — each list their rows with a per-item warm "Restore" affordance; a group is
  * omitted entirely when its list is empty. It does not render the all-empty state
  * ([HiddenSuggestionsUiState.isEmpty]): the screen layouts show that outside the scroll, where it can
  * centre. The caller supplies the scroll / width [modifier].
@@ -62,6 +62,7 @@ internal fun HiddenSuggestionsContent(
 
         val hasBooksGroup = state.isLoadingBooks || state.hiddenBooks.isEmpty.not()
         val hasSeriesGroup = state.isLoadingSeries || state.hiddenSeries.isEmpty.not()
+        val hasRecommendationsGroup = state.isLoadingRecommendations || state.hiddenRecommendations.isEmpty.not()
 
         AnimatedVisibility(
             visible = hasBooksGroup,
@@ -76,7 +77,7 @@ internal fun HiddenSuggestionsContent(
                     runAction = runAction,
                 )
 
-                if (hasSeriesGroup) {
+                if (hasSeriesGroup || hasRecommendationsGroup) {
                     Spacer(modifier = Modifier.height(Spacing.section))
                 }
             }
@@ -87,10 +88,29 @@ internal fun HiddenSuggestionsContent(
             enter = fadeIn(animationSpec = effectsSpec) + expandVertically(animationSpec = spatialSpec),
             exit = fadeOut(animationSpec = effectsSpec) + shrinkVertically(animationSpec = spatialSpec),
         ) {
+            Column {
+                HiddenGroupSection(
+                    header = state.hiddenSeriesGroupHeader,
+                    set = state.hiddenSeries,
+                    isLoading = state.isLoadingSeries,
+                    runAction = runAction,
+                )
+
+                if (hasRecommendationsGroup) {
+                    Spacer(modifier = Modifier.height(Spacing.section))
+                }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = hasRecommendationsGroup,
+            enter = fadeIn(animationSpec = effectsSpec) + expandVertically(animationSpec = spatialSpec),
+            exit = fadeOut(animationSpec = effectsSpec) + shrinkVertically(animationSpec = spatialSpec),
+        ) {
             HiddenGroupSection(
-                header = state.hiddenSeriesGroupHeader,
-                set = state.hiddenSeries,
-                isLoading = state.isLoadingSeries,
+                header = state.hiddenRecommendationsGroupHeader,
+                set = state.hiddenRecommendations,
+                isLoading = state.isLoadingRecommendations,
                 runAction = runAction,
             )
         }

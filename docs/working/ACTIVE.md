@@ -1,1 +1,1 @@
-docs/working/domain-out-of-uistate/README.md
+docs/working/recommendations-vibe/README.md

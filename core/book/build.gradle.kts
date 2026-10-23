@@ -11,6 +11,7 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:domain"))
             implementation(project(":core:database"))
+            implementation(project(":core:identity"))
             api(project(":core:network"))
 
             implementation(libs.rhaydus.coreCommon)

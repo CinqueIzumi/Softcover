@@ -18,17 +18,15 @@ import nl.rhaydus.toad.ActionScope
 /**
  * Maps every book-carrying rail to its unreleased-cover-overlay UI models off the composition
  * (`component-contract.md` § 7.2 R9), deriving off [ActionScope.state] rather than being patched
- * into each writer: the same six actions/collectors [CoverModelsCollector] already guards against
- * write across the five source lists this reads (`TrendingBooksCollector` and `OnRefreshAction` both
- * write `trendingBooks`; `QueriedBooksCollector` and `ExploreSearchExecution` both write
- * `queriedBooks`; `BecauseYouReadCollector` and `OnBecauseYouReadGenreSelectedAction` both write
- * `becauseYouReadBooks`) — a derived field patched into each write site would be one forgotten
- * `copy` from a stale overlay.
+ * into each writer. Some rails have more than one writer (`QueriedBooksCollector` and
+ * `ExploreSearchExecution` both write `queriedBooks`; `BecauseYouReadCollector` and
+ * `OnBecauseYouReadGenreSelectedAction` both write `becauseYouReadBooks`), and a derived field patched
+ * into each write site would be one forgotten `copy` from a stale overlay.
  *
- * One map keyed by book id, unlike [CoverModelsCollector]'s five: a cover carries a per-rail
+ * One map keyed by book id, unlike the covers [BookCardModelsCollector] builds per rail: a cover carries a per-rail
  * `sharedTransitionKey` surface, so the same book yields a different cover per rail. A
- * [CoverOverlayUiModel] carries no such surface — the same book yields an identical one everywhere it
- * appears — so one id-keyed map is the single source of truth; five would just be five ways for the
+ * [CoverOverlayUiModel] carries no such surface, so the same book yields an identical one everywhere it
+ * appears. One id-keyed map is the single source of truth; one per rail would just be more ways for the
  * same book's overlay to disagree with itself.
  */
 internal class UnreleasedCoverOverlaysCollector : ExploreCollector {
@@ -41,6 +39,7 @@ internal class UnreleasedCoverOverlaysCollector : ExploreCollector {
                 UnreleasedBadgeModelsSnapshot(
                     featuredUpcomingRelease = it.featuredUpcomingRelease,
                     trendingBooks = it.trendingBooks,
+                    recommendedBooks = it.recommendedBooks,
                     becauseYouReadBooks = it.becauseYouReadBooks,
                     continueSeriesBooks = it.continueSeriesBooks,
                     queriedBooks = it.queriedBooks,
@@ -52,6 +51,7 @@ internal class UnreleasedCoverOverlaysCollector : ExploreCollector {
                     it.copy(
                         unreleasedCoverOverlays = (
                             snapshot.trendingBooks +
+                                snapshot.recommendedBooks +
                                 snapshot.becauseYouReadBooks +
                                 snapshot.continueSeriesBooks +
                                 snapshot.queriedBooks

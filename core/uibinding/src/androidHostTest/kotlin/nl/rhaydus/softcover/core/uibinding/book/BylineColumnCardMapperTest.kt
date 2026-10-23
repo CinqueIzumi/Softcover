@@ -121,6 +121,27 @@ class BylineColumnCardMapperTest {
         }
 
         @Test
+        fun `offers the overflow menu only when the rail asks for it`() {
+            // ----- Arrange -----
+            val input = book()
+
+            // ----- Act -----
+            val withMenu = input.toBylineColumnCard(
+                cover = cover,
+                coverBadge = null,
+                hasMenu = true,
+            )
+            val withoutMenu = input.toBylineColumnCard(
+                cover = cover,
+                coverBadge = null,
+            )
+
+            // ----- Assert -----
+            withMenu.column().hasMenu shouldBe true
+            withoutMenu.column().hasMenu shouldBe false
+        }
+
+        @Test
         fun `threads the surface to the title transition key`() {
             // ----- Arrange -----
             val input = book(id = 9)
@@ -155,6 +176,23 @@ class BylineColumnCardMapperTest {
             cards.size shouldBe count
             cards.map { it.key }.distinct().size shouldBe count
             cards.all { it.isLoading } shouldBe true
+        }
+
+        @Test
+        fun `gives every stand-in the overflow menu only when asked, so it does not pop in later`() {
+            // ----- Arrange -----
+            val count = 3
+
+            // ----- Act -----
+            val withMenu = bylineColumnStandIns(
+                count = count,
+                hasMenu = true,
+            )
+            val withoutMenu = bylineColumnStandIns(count = count)
+
+            // ----- Assert -----
+            withMenu.all { it.column().hasMenu } shouldBe true
+            withoutMenu.none { it.column().hasMenu } shouldBe true
         }
 
         @Test

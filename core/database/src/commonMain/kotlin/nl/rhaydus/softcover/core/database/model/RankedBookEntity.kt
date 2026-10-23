@@ -5,8 +5,8 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 
 @Entity(
-    tableName = "trending_books",
-    primaryKeys = ["period", "bookId"],
+    tableName = "ranked_books",
+    primaryKeys = ["listKey", "bookId"],
     foreignKeys = [
         ForeignKey(
             entity = BookEntity::class,
@@ -17,8 +17,8 @@ import androidx.room.Index
     ],
     indices = [Index("bookId")],
 )
-data class TrendingBookEntity(
-    val period: String,
+data class RankedBookEntity(
+    val listKey: String,
     val bookId: Int,
     val rank: Int,
 )

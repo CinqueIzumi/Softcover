@@ -11,9 +11,8 @@ import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.TagCategory
-import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
+import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveOwnedBookIdsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetBecauseYouReadGenreAsFlowUseCase
 import nl.rhaydus.softcover.feature.explore.domain.model.BecauseYouReadRecommendation
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
@@ -34,8 +33,8 @@ private const val GENRE_BOOKS_FETCH_LIMIT = GENRE_BOOKS_DISPLAY_LIMIT * 3
  * the same [buildGenreOptions] that backs the picker, so the default is always one of the offered options.
  * Deriving it locally rather than from profile stats keeps the rail off that slower network refresh.
  *
- * Owned books, shelved ([booksRepository]) or listed ([listsRepository]), are excluded client-side: the
- * server-side anti-join over the whole library was the rail's slowness. Reacting to both repositories also
+ * Owned books, shelved or listed ([observeOwnedBookIds]), are excluded client-side: the
+ * server-side anti-join over the whole library was the rail's slowness. Reacting to [observeOwnedBookIds] also
  * drops a book from an already-fetched rail as soon as the user shelves or lists it. Emits null when no
  * genre can be derived and none was chosen; the section hides rather than erroring.
  *
@@ -47,7 +46,7 @@ private const val GENRE_BOOKS_FETCH_LIMIT = GENRE_BOOKS_DISPLAY_LIMIT * 3
  */
 class GetBecauseYouReadBooksUseCase(
     private val booksRepository: BooksRepository,
-    private val listsRepository: ListsRepository,
+    private val observeOwnedBookIds: ObserveOwnedBookIdsUseCase,
     private val exploreRepository: ExploreRepository,
     private val getBecauseYouReadGenreUseCase: GetBecauseYouReadGenreAsFlowUseCase,
 ) {
@@ -67,15 +66,10 @@ class GetBecauseYouReadBooksUseCase(
         return combine(
             recommendationFlow,
             booksRepository.books,
-            listsRepository.allUserLists,
-        ) { recommendation, allUserBooks, allUserLists ->
-            val excludedBookIds = buildExcludedBookIds(
-                allUserBooks = allUserBooks,
-                allUserLists = allUserLists,
-            )
-
+            observeOwnedBookIds(),
+        ) { recommendation, allUserBooks, ownedBookIds ->
             recommendation
-                ?.excludingOwnedBooks(excludedBookIds = excludedBookIds)
+                ?.excludingOwnedBooks(excludedBookIds = ownedBookIds)
                 ?.copy(genreOptions = buildGenreOptions(books = allUserBooks))
         }
     }
@@ -124,13 +118,6 @@ class GetBecauseYouReadBooksUseCase(
             .filterNot { book -> book.id in excludedBookIds }
             .take(GENRE_BOOKS_DISPLAY_LIMIT),
     )
-
-    /** Ids the user already owns - on a shelf ([allUserBooks]) or on any list ([allUserLists]). */
-    private fun buildExcludedBookIds(
-        allUserBooks: List<Book>,
-        allUserLists: List<BookList>,
-    ): Set<Int> = allUserBooks.map { it.id }.toSet() +
-        allUserLists.flatMap { list -> list.books }.map { it.bookId }.toSet()
 
     /** The user's top [GENRE_OPTIONS_LIMIT] genres by how often they tag [books], most-read first. */
     private fun buildGenreOptions(books: List<Book>): List<String> = books

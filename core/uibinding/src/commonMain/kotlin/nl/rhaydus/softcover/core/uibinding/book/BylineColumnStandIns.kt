@@ -10,8 +10,14 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 
-/** [count] loading stand-ins shaped like [toBylineColumnCard]'s cards, under distinct negative book ids. */
-fun bylineColumnStandIns(count: Int): ImmutableList<BookCardUiModel> = List(count) { index ->
+/**
+ * [count] loading stand-ins shaped like [toBylineColumnCard]'s cards, under distinct negative book ids.
+ * [hasMenu] matches the real cards' so the overflow button doesn't pop in when they land.
+ */
+fun bylineColumnStandIns(
+    count: Int,
+    hasMenu: Boolean = false,
+): ImmutableList<BookCardUiModel> = List(count) { index ->
     BookCardUiModel(
         key = BookCardKey.Book(bookId = -(index + 1)),
         variant = BookCardVariant.Column(
@@ -27,6 +33,7 @@ fun bylineColumnStandIns(count: Int): ImmutableList<BookCardUiModel> = List(coun
                 title = "The Name of the Wind",
                 byline = "By Patrick Rothfuss",
             ),
+            hasMenu = hasMenu,
         ),
         isLoading = true,
     )

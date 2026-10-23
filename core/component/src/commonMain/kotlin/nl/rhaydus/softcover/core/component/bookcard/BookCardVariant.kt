@@ -14,11 +14,14 @@ sealed interface BookCardVariant {
     /**
      * @property hasMenu Draws the overflow button over the cover's top-end corner; a tap emits
      * [BookCardEvent.MenuClicked].
+     * @property bookmark Draws over the cover's top-start corner; a tap emits
+     * [BookCardEvent.TrailingClicked].
      */
     data class Column(
         val cover: BookCardCover?,
         val text: BookCardContent,
         val hasMenu: Boolean = false,
+        val bookmark: BookCardTrailing.Bookmark? = null,
     ) : BookCardVariant
 
     /** @property lead `null` is a coverless row. */

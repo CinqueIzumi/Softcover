@@ -6,5 +6,5 @@ import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreR
 
 internal actual fun railCardWidth(rail: ExploreRail): Dp = when (rail) {
     ExploreRail.UP_NEXT -> 126.dp
-    ExploreRail.BECAUSE_YOU_READ, ExploreRail.TRENDING -> 118.dp
+    ExploreRail.RECOMMENDED, ExploreRail.BECAUSE_YOU_READ, ExploreRail.TRENDING -> 118.dp
 }

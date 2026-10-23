@@ -213,6 +213,9 @@ inline the integers at call sites, and re-confirm with the Hardcover team before
     renamed to the "other" category, which is a real gender bucket in its own right.
   - The bucket also contains **non-person entities** (publishers, design studios, collective
     pseudonyms). Filter them out before charting, or the "other" share reads inflated.
+- **`vibe_type`** (on `vibes`) — **`0` = made by the reader, `1` = Recommendations, `3` = Top Picks,
+  `4` = book club.** Observed in the data, not confirmed by Hardcover; no vibe has type `2`. System vibes are
+  identified by type and slug: `SystemVibe` (`:core:domain`), mapped in one place, `:core:book`'s `RecommendationsMapper`.
 
 ## Platform seams from the foundation
 
@@ -245,8 +248,10 @@ Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core
   migrations, and **all** persisted entities + DAOs live in `:core:database` (not in the feature whose
   data source uses them — see the vertical-slice rule in module-structure.md).
 - **DataStore**: simple key-value preferences (app settings, search history).
-- **Trending** is cached in Room per `TrendingPeriod`, with a fetched-at stamp; `ObserveTrendingBooksUseCase`
-  and `RefreshTrendingBooksUseCase` (`maxAge`) are the one source for Explore, Reading and the widget.
+- **Ranked lists** live in the `ranked_books` / `ranked_list_meta` Room tables, keyed by a free-form `listKey`
+  with a fetched-at stamp. Trending is cached per `TrendingPeriod`; `ObserveTrendingBooksUseCase` and
+  `RefreshTrendingBooksUseCase` (`maxAge`) are the one source for Explore, Reading and the widget. Upcoming,
+  recent and system vibes (recommendations, top picks) share the same tables under prefixed or named keys.
 - **External navigation.** A surface outside the app (a widget) opens it through
   `ExternalNavigationRequest` (tab, book, book verdict, Focus Mode), encoded by `AppEntryPoint.intent` as a
   `softcover://open/...` URI whose wire names are never derived from enum names. `ExternalNavigationRequests`

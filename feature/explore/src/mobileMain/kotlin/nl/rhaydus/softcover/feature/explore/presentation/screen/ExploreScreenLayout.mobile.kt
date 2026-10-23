@@ -34,6 +34,7 @@ import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.core.presentation.util.scrollToTop
+import nl.rhaydus.softcover.core.uibinding.book.toBylineColumnCard
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
@@ -221,6 +222,18 @@ private fun List<Book>.toPreviewTrendingSet(): BookCardSet<Book> = map { book ->
     ) to book
 }.toBookCardSet()
 
+private fun List<Book>.toPreviewRecommendedSet(): BookCardSet<Book> = map { book ->
+    book.toBylineColumnCard(
+        cover = book.toCoverUiModel(
+            variant = CoverVariant.Raised,
+            shareTransition = true,
+            transitionSurface = SURFACE_RECOMMENDED,
+        ),
+        coverBadge = null,
+        transitionSurface = SURFACE_RECOMMENDED,
+    ) to book
+}.toBookCardSet()
+
 private val previewSearchFocusMoodTags = listOf(
     MoodTag(
         id = 1,
@@ -250,6 +263,9 @@ private fun previewMockState() = ExploreScreenUiState(
     trendingBooks = ExploreMockData.trending.toImmutableList(),
     trending = ExploreRail.TRENDING.toRailModel(set = ExploreMockData.trending.toPreviewTrendingSet()),
     loadingTrendingBooks = false,
+    recommendedBooks = ExploreMockData.recommended.toImmutableList(),
+    recommended = ExploreRail.RECOMMENDED.toRailModel(set = ExploreMockData.recommended.toPreviewRecommendedSet()),
+    loadingRecommendedBooks = false,
     continueSeriesBooks = ExploreMockData.continueSeries.toImmutableList(),
     loadingContinueSeriesBooks = false,
     loadingFeaturedUpcomingRelease = false,
@@ -284,6 +300,9 @@ private fun EmptyFirstLaunchExploreScreenPreview() {
                 trendingBooks = ExploreMockData.trending.toImmutableList(),
                 trending = ExploreRail.TRENDING.toRailModel(set = ExploreMockData.trending.toPreviewTrendingSet()),
                 loadingTrendingBooks = false,
+                recommendedBooks = ExploreMockData.recommended.toImmutableList(),
+                recommended = ExploreRail.RECOMMENDED.toRailModel(set = ExploreMockData.recommended.toPreviewRecommendedSet()),
+                loadingRecommendedBooks = false,
                 continueSeriesBooks = persistentListOf(),
                 loadingContinueSeriesBooks = false,
                 previousSearchQueries = persistentListOf(),
@@ -307,6 +326,9 @@ private fun LoadingTrendingExploreScreenPreview() {
             state = ExploreScreenUiState(
                 trendingBooks = persistentListOf(),
                 loadingTrendingBooks = true,
+                recommendedBooks = ExploreMockData.recommended.toImmutableList(),
+                recommended = ExploreRail.RECOMMENDED.toRailModel(set = ExploreMockData.recommended.toPreviewRecommendedSet()),
+                loadingRecommendedBooks = false,
                 continueSeriesBooks = ExploreMockData.continueSeries.toImmutableList(),
                 loadingContinueSeriesBooks = false,
                 previousSearchQueries = persistentListOf("Bubblegum", "Earthlings"),
@@ -334,6 +356,9 @@ private fun LoadingContinueSeriesExploreScreenPreview() {
                 trendingBooks = ExploreMockData.trending.toImmutableList(),
                 trending = ExploreRail.TRENDING.toRailModel(set = ExploreMockData.trending.toPreviewTrendingSet()),
                 loadingTrendingBooks = false,
+                recommendedBooks = ExploreMockData.recommended.toImmutableList(),
+                recommended = ExploreRail.RECOMMENDED.toRailModel(set = ExploreMockData.recommended.toPreviewRecommendedSet()),
+                loadingRecommendedBooks = false,
                 continueSeriesBooks = persistentListOf(),
                 loadingContinueSeriesBooks = true,
                 previousSearchQueries = persistentListOf(),

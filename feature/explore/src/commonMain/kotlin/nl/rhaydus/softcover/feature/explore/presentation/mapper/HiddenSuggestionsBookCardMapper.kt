@@ -12,11 +12,25 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.lists.domain.model.HiddenRecommendation
 import nl.rhaydus.softcover.core.uibinding.book.byline
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 
 internal fun DismissedSeriesBook.toHiddenBookCard(cover: CoverUiModel): BookCardUiModel = BookCardUiModel(
+    key = BookCardKey.Book(bookId = bookId),
+    variant = BookCardVariant.Row(
+        size = BookCardVariant.Row.Size.Compact,
+        lead = BookCardLead.Cover(cover = BookCardCover(model = cover)),
+        text = BookCardContent(
+            title = title ?: "Hidden book",
+            byline = byline(author = authorText),
+        ),
+        trailing = BookCardTrailing.Restore,
+    ),
+)
+
+internal fun HiddenRecommendation.toHiddenRecommendationCard(cover: CoverUiModel): BookCardUiModel = BookCardUiModel(
     key = BookCardKey.Book(bookId = bookId),
     variant = BookCardVariant.Row(
         size = BookCardVariant.Row.Size.Compact,

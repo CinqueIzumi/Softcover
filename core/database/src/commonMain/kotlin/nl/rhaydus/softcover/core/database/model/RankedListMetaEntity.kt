@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.core.database.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "trending_meta")
-data class TrendingMetaEntity(
-    @PrimaryKey val period: String,
+@Entity(tableName = "ranked_list_meta")
+data class RankedListMetaEntity(
+    @PrimaryKey val listKey: String,
     val fetchedAtEpochMillis: Long,
 )

@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -60,6 +61,21 @@ interface BooksLocalDataSource {
 
     suspend fun replaceRecentBooks(
         window: RecentWindow,
+        requestedIds: List<Int>,
+        books: List<Book>,
+        fetchedAt: Instant,
+    )
+
+    fun observeSystemVibeBooks(vibe: SystemVibe): Flow<List<Book>>
+
+    suspend fun getSystemVibeBookIds(vibe: SystemVibe): List<Int>
+
+    fun observeSystemVibeFetchedAt(vibe: SystemVibe): Flow<Instant?>
+
+    suspend fun getSystemVibeFetchedAt(vibe: SystemVibe): Instant?
+
+    suspend fun replaceSystemVibeBooks(
+        vibe: SystemVibe,
         requestedIds: List<Int>,
         books: List<Book>,
         fetchedAt: Instant,
@@ -163,35 +179,35 @@ internal class BooksLocalDataSourceImpl(
             .toModelsReusingUnchanged()
 
     override fun observeTrendingBooks(period: TrendingPeriod): Flow<List<Book>> = dao
-        .observeTrendingBooks(period = period.toStorageKey())
+        .observeRankedBooks(listKey = period.toStorageKey())
         .distinctUntilChanged()
         .toModelsReusingUnchanged()
 
     override fun observeTrendingFetchedAt(period: TrendingPeriod): Flow<Instant?> = dao
-        .observeTrendingFetchedAt(period = period.toStorageKey())
+        .observeRankedListFetchedAt(listKey = period.toStorageKey())
         .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
         .distinctUntilChanged()
 
     override suspend fun getTrendingFetchedAt(period: TrendingPeriod): Instant? = dao
-        .getTrendingFetchedAt(period = period.toStorageKey())
+        .getRankedListFetchedAt(listKey = period.toStorageKey())
         ?.let(Instant::fromEpochMilliseconds)
 
     override fun observeUpcomingBooks(window: UpcomingWindow): Flow<List<Book>> = dao
-        .observeTrendingBooks(period = window.toStorageKey())
+        .observeRankedBooks(listKey = window.toStorageKey())
         .distinctUntilChanged()
         .toModelsReusingUnchanged()
 
     override suspend fun getUpcomingBooks(window: UpcomingWindow): List<Book> = dao
-        .getTrendingBooks(period = window.toStorageKey())
+        .getRankedBooks(listKey = window.toStorageKey())
         .map { entity -> entity.toModel() }
 
     override fun observeUpcomingFetchedAt(window: UpcomingWindow): Flow<Instant?> = dao
-        .observeTrendingFetchedAt(period = window.toStorageKey())
+        .observeRankedListFetchedAt(listKey = window.toStorageKey())
         .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
         .distinctUntilChanged()
 
     override suspend fun getUpcomingFetchedAt(window: UpcomingWindow): Instant? = dao
-        .getTrendingFetchedAt(period = window.toStorageKey())
+        .getRankedListFetchedAt(listKey = window.toStorageKey())
         ?.let(Instant::fromEpochMilliseconds)
 
     override suspend fun replaceUpcomingBooks(
@@ -201,8 +217,8 @@ internal class BooksLocalDataSourceImpl(
         fetchedAt: Instant,
     ) {
         deleteStaleCovers(
-            dao.replaceTrendingBooks(
-                period = window.toStorageKey(),
+            dao.replaceRankedBooks(
+                listKey = window.toStorageKey(),
                 requestedIds = requestedIds,
                 books = books,
                 fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
@@ -211,21 +227,21 @@ internal class BooksLocalDataSourceImpl(
     }
 
     override fun observeRecentBooks(window: RecentWindow): Flow<List<Book>> = dao
-        .observeTrendingBooks(period = window.toStorageKey())
+        .observeRankedBooks(listKey = window.toStorageKey())
         .distinctUntilChanged()
         .toModelsReusingUnchanged()
 
     override suspend fun getRecentBooks(window: RecentWindow): List<Book> = dao
-        .getTrendingBooks(period = window.toStorageKey())
+        .getRankedBooks(listKey = window.toStorageKey())
         .map { entity -> entity.toModel() }
 
     override fun observeRecentFetchedAt(window: RecentWindow): Flow<Instant?> = dao
-        .observeTrendingFetchedAt(period = window.toStorageKey())
+        .observeRankedListFetchedAt(listKey = window.toStorageKey())
         .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
         .distinctUntilChanged()
 
     override suspend fun getRecentFetchedAt(window: RecentWindow): Instant? = dao
-        .getTrendingFetchedAt(period = window.toStorageKey())
+        .getRankedListFetchedAt(listKey = window.toStorageKey())
         ?.let(Instant::fromEpochMilliseconds)
 
     override suspend fun replaceRecentBooks(
@@ -235,8 +251,41 @@ internal class BooksLocalDataSourceImpl(
         fetchedAt: Instant,
     ) {
         deleteStaleCovers(
-            dao.replaceTrendingBooks(
-                period = window.toStorageKey(),
+            dao.replaceRankedBooks(
+                listKey = window.toStorageKey(),
+                requestedIds = requestedIds,
+                books = books,
+                fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
+            ),
+        )
+    }
+
+    override fun observeSystemVibeBooks(vibe: SystemVibe): Flow<List<Book>> = dao
+        .observeRankedBooks(listKey = vibe.toStorageKey())
+        .distinctUntilChanged()
+        .toModelsReusingUnchanged()
+
+    override suspend fun getSystemVibeBookIds(vibe: SystemVibe): List<Int> = dao
+        .getRankedBookIds(listKey = vibe.toStorageKey())
+
+    override fun observeSystemVibeFetchedAt(vibe: SystemVibe): Flow<Instant?> = dao
+        .observeRankedListFetchedAt(listKey = vibe.toStorageKey())
+        .map { millis -> millis?.let(Instant::fromEpochMilliseconds) }
+        .distinctUntilChanged()
+
+    override suspend fun getSystemVibeFetchedAt(vibe: SystemVibe): Instant? = dao
+        .getRankedListFetchedAt(listKey = vibe.toStorageKey())
+        ?.let(Instant::fromEpochMilliseconds)
+
+    override suspend fun replaceSystemVibeBooks(
+        vibe: SystemVibe,
+        requestedIds: List<Int>,
+        books: List<Book>,
+        fetchedAt: Instant,
+    ) {
+        deleteStaleCovers(
+            dao.replaceRankedBooks(
+                listKey = vibe.toStorageKey(),
                 requestedIds = requestedIds,
                 books = books,
                 fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),
@@ -263,8 +312,8 @@ internal class BooksLocalDataSourceImpl(
         fetchedAt: Instant,
     ) {
         deleteStaleCovers(
-            dao.replaceTrendingBooks(
-                period = period.toStorageKey(),
+            dao.replaceRankedBooks(
+                listKey = period.toStorageKey(),
                 requestedIds = requestedIds,
                 books = books,
                 fetchedAtEpochMillis = fetchedAt.toEpochMilliseconds(),

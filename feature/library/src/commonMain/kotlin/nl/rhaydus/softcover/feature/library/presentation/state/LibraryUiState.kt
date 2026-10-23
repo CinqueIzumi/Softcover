@@ -29,6 +29,7 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
@@ -269,6 +270,17 @@ internal data class LibraryUiState(
     val chooseListsSheet: SheetSession<ChooseListsUiModel, CreateList> = SheetSession.Closed,
 
     val isChooseListsSheetRequested: Boolean = false,
+
+    val recommendedBooks: ImmutableList<Book> = persistentListOf(),
+    val loadingRecommendedBooks: Boolean = true,
+    val recommendedHeader: SectionHeaderUiModel = SystemVibe.Recommendations.toRecommendedHeader(isLoading = true),
+
+    val recommendedRailByTab: ImmutableMap<String, LibraryRecommendedRail> = persistentMapOf(),
+
+    /** The recommended book whose overflow menu is requested; the sheet in [recommendedMenu] follows it. */
+    val recommendedMenuBookId: Int? = null,
+
+    val recommendedMenu: SheetSession<RecommendedMenuSheetUiModel, PendingRecommendedHide> = SheetSession.Closed,
 ) : UiState {
     fun sortModeFor(tabId: String): LibrarySortMode =
         resolveSortMode(

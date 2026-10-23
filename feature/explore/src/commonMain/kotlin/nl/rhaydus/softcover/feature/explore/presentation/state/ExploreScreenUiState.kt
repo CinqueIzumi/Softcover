@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
@@ -29,6 +30,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.FEATURED_CARD_STAND_IN
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.FEATURED_HEADER
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.RECOMMENDED_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.SEARCH_RESULT_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.TRENDING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.UP_NEXT_STAND_IN_CARDS
@@ -38,6 +40,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSortPillButton
 import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreControlUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesMenuSheetUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardUiModel
+import nl.rhaydus.softcover.feature.explore.presentation.model.RecommendedMenuSheetUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreRail
 import nl.rhaydus.toad.UiState
 
@@ -51,6 +54,8 @@ internal data class ExploreScreenUiState(
     // Loading stand-ins until the surface has loaded.
     val trending: BookCardRailUiModel<Book> =
         ExploreRail.TRENDING.toRailModel(set = BookCardSet.standIns(TRENDING_STAND_IN_CARDS)),
+    val recommended: BookCardRailUiModel<Book> =
+        ExploreRail.RECOMMENDED.toRailModel(set = BookCardSet.standIns(RECOMMENDED_STAND_IN_CARDS)),
     val becauseYouRead: BookCardRailUiModel<Book> =
         ExploreRail.BECAUSE_YOU_READ.toRailModel(set = BookCardSet.standIns(BECAUSE_YOU_READ_STAND_IN_CARDS)),
     val upNext: BookCardRailUiModel<Book> =
@@ -71,6 +76,11 @@ internal data class ExploreScreenUiState(
         eyebrow = "Trending this week",
         headline = "What everyone's reading",
     ),
+    val recommendedBooks: ImmutableList<Book> = persistentListOf(),
+    val loadingRecommendedBooks: Boolean = true,
+    // Built off the recommended fields above by `BookCardModelsCollector`; false collapses the section.
+    val recommendedVisible: Boolean = true,
+    val recommendedHeader: SectionHeaderUiModel = SystemVibe.Recommendations.toRecommendedHeader(isLoading = true),
     val continueSeriesBooks: ImmutableList<Book> = persistentListOf(),
     val loadingContinueSeriesBooks: Boolean = true,
     val upNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
@@ -81,6 +91,10 @@ internal data class ExploreScreenUiState(
     val continueSeriesMenuBookId: Int? = null,
 
     val continueSeriesMenu: SheetSession<ContinueSeriesMenuSheetUiModel, PendingContinueSeriesDismissal> = SheetSession.Closed,
+
+    val recommendedMenuBookId: Int? = null,
+
+    val recommendedMenu: SheetSession<RecommendedMenuSheetUiModel, PendingRecommendedHide> = SheetSession.Closed,
     /** `null` until the library's offline copy has resolved. */
     val offlineEmptyState: EmptyStateUiModel? = null,
     val masthead: PageMastheadUiModel = PageMastheadUiModel(

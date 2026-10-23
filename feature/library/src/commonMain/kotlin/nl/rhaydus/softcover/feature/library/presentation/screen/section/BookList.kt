@@ -1,10 +1,15 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen.section
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +49,7 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnReorderShelfBo
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSelectBookRangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleBookSelectionAction
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.RecommendedRailPlacement
 import nl.rhaydus.softcover.feature.library.presentation.state.bookReorderStatusFor
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
@@ -60,17 +66,47 @@ internal fun BookList(
     val rawBooks = state.booksByTab[tab.id]
 
     if (rawBooks != null && rawBooks.isEmpty() && state.isLoading.not()) {
-        state.emptyStatesByTab[tab.id]?.let { emptyState ->
-            EmptyState(
-                model = emptyState,
+        val emptyState = state.emptyStatesByTab[tab.id]
+        val recommendedRail = state.recommendedRailByTab[tab.id]?.takeIf {
+            it.placement == RecommendedRailPlacement.UnderEmptyState
+        }
+
+        if (recommendedRail == null) {
+            emptyState?.let {
+                EmptyState(
+                    model = it,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = Spacing.gutter,
+                            end = Spacing.gutter,
+                            bottom = rememberBottomBarPadding(),
+                        ),
+                )
+            }
+        } else {
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(
-                        start = Spacing.gutter,
-                        end = Spacing.gutter,
-                        bottom = rememberBottomBarPadding(),
-                    ),
-            )
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = rememberBottomBarPadding()),
+            ) {
+                emptyState?.let {
+                    EmptyState(
+                        model = it,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(Spacing.section),
+                    )
+                }
+
+                RecommendedRail(
+                    header = state.recommendedHeader,
+                    rail = recommendedRail.rail,
+                    onBookClick = onBookClick,
+                    runAction = runAction,
+                )
+            }
         }
 
         return
@@ -383,6 +419,23 @@ internal fun BookList(
                         },
                     )
                 }
+            }
+        }
+
+        state.recommendedRailByTab[tab.id]?.takeIf {
+            it.placement == RecommendedRailPlacement.UnderGrid
+        }?.let { recommendedRail ->
+            item(
+                key = "recommended-rail",
+                span = { GridItemSpan(maxLineSpan) },
+                contentType = "recommended",
+            ) {
+                RecommendedRail(
+                    header = state.recommendedHeader,
+                    rail = recommendedRail.rail,
+                    onBookClick = onBookClick,
+                    runAction = runAction,
+                )
             }
         }
     }

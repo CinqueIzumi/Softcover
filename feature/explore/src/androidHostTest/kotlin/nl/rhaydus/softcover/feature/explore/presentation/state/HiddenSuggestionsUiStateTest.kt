@@ -46,6 +46,30 @@ class HiddenSuggestionsUiStateTest {
         }
 
         @Test
+        fun `reports recommendations not loading once real cards replace the stand-ins`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(hiddenRecommendations = setOf(3))
+
+            // ----- Act -----
+            val result = state.isLoadingRecommendations
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `keeps recommendations loading while only the books have landed`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(hiddenBooks = setOf(1))
+
+            // ----- Act -----
+            val result = state.isLoadingRecommendations
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
         fun `reports books not loading once real book cards replace the stand-ins`() {
             // ----- Arrange -----
             val state = HiddenSuggestionsUiState(hiddenBooks = setOf(1))
@@ -101,7 +125,10 @@ class HiddenSuggestionsUiStateTest {
         @Test
         fun `is true when only the books are still loading`() {
             // ----- Arrange -----
-            val state = HiddenSuggestionsUiState(hiddenSeries = BookCardSet.empty())
+            val state = HiddenSuggestionsUiState(
+                hiddenSeries = BookCardSet.empty(),
+                hiddenRecommendations = BookCardSet.empty(),
+            )
 
             // ----- Act -----
             val result = state.isLoading
@@ -113,7 +140,25 @@ class HiddenSuggestionsUiStateTest {
         @Test
         fun `is true when only the series are still loading`() {
             // ----- Arrange -----
-            val state = HiddenSuggestionsUiState(hiddenBooks = BookCardSet.empty())
+            val state = HiddenSuggestionsUiState(
+                hiddenBooks = BookCardSet.empty(),
+                hiddenRecommendations = BookCardSet.empty(),
+            )
+
+            // ----- Act -----
+            val result = state.isLoading
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `is true when only the recommendations are still loading`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(
+                hiddenBooks = BookCardSet.empty(),
+                hiddenSeries = BookCardSet.empty(),
+            )
 
             // ----- Act -----
             val result = state.isLoading
@@ -128,6 +173,7 @@ class HiddenSuggestionsUiStateTest {
             val state = HiddenSuggestionsUiState(
                 hiddenBooks = setOf(1),
                 hiddenSeries = BookCardSet.empty(),
+                hiddenRecommendations = BookCardSet.empty(),
             )
 
             // ----- Act -----
@@ -172,6 +218,7 @@ class HiddenSuggestionsUiStateTest {
             val state = HiddenSuggestionsUiState(
                 hiddenBooks = BookCardSet.empty(),
                 hiddenSeries = BookCardSet.empty(),
+                hiddenRecommendations = BookCardSet.empty(),
             )
 
             // ----- Act -----
@@ -182,11 +229,43 @@ class HiddenSuggestionsUiStateTest {
         }
 
         @Test
+        fun `is false while only the recommendations are still loading`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(
+                hiddenBooks = BookCardSet.empty(),
+                hiddenSeries = BookCardSet.empty(),
+            )
+
+            // ----- Act -----
+            val result = state.isEmpty
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `is false when everything has landed but a recommendation is hidden`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(
+                hiddenBooks = BookCardSet.empty(),
+                hiddenSeries = BookCardSet.empty(),
+                hiddenRecommendations = setOf(3),
+            )
+
+            // ----- Act -----
+            val result = state.isEmpty
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
         fun `is false when both have landed but a book is hidden`() {
             // ----- Arrange -----
             val state = HiddenSuggestionsUiState(
                 hiddenBooks = setOf(1),
                 hiddenSeries = BookCardSet.empty(),
+                hiddenRecommendations = BookCardSet.empty(),
             )
 
             // ----- Act -----
@@ -202,6 +281,7 @@ class HiddenSuggestionsUiStateTest {
             val state = HiddenSuggestionsUiState(
                 hiddenBooks = BookCardSet.empty(),
                 hiddenSeries = setOf(2),
+                hiddenRecommendations = BookCardSet.empty(),
             )
 
             // ----- Act -----

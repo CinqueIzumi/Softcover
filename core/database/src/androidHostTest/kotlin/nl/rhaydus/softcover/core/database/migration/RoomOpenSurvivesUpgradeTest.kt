@@ -343,6 +343,31 @@ class RoomOpenSurvivesUpgradeTest {
         }
 
         @Test
+        fun `a trending row and its fetch time arrive as a ranked row and list meta`() {
+            // ----- Arrange -----
+            val file = databaseFile()
+            writeOldDatabase(
+                file,
+                schema55,
+            )
+
+            // ----- Act -----
+            openThroughProductionBuilder(file)
+
+            // ----- Assert -----
+            withConnection(file) { connection ->
+                connection.snapshot(
+                    "ranked_books",
+                    listOf("listKey", "bookId", "rank"),
+                ) shouldContainExactly listOf(listOf("x", "1", "1"))
+                connection.snapshot(
+                    "ranked_list_meta",
+                    listOf("listKey", "fetchedAtEpochMillis"),
+                ) shouldContainExactly listOf(listOf("x", "1"))
+            }
+        }
+
+        @Test
         fun `the schema Room leaves behind is the exported latest schema`() {
             // ----- Arrange -----
             val file = databaseFile()

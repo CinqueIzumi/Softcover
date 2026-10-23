@@ -10,10 +10,12 @@ import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * A horizontal rail of [set]'s cards, each [cardWidth] wide; a rail of stand-ins renders as loading cards.
  *
+ * @property horizontalInset The row's content padding at both ends, so cards scroll through it rather than clip at it.
  * @property staggerKey Scopes the entry stagger, so a rail staggers its cards in once per screen visit.
  * @property canLoadMore The caller has a next page to fetch; only then does the rail raise [BookCardRailEvent.NearEnd].
  * @property isAppending A trailing progress card follows the cards while the next page is fetched.
@@ -25,6 +27,7 @@ data class BookCardRailUiModel<out P>(
     val staggerKey: String,
     val isAppending: Boolean = false,
     val canLoadMore: Boolean = false,
+    val horizontalInset: Dp = Spacing.gutter,
 ) {
     companion object : UiModelPreviews<BookCardRailUiModel<*>> {
         private val LOADED_CARDS = listOf(

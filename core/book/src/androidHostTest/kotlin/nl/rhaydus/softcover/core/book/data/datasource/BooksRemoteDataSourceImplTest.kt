@@ -32,6 +32,7 @@ import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
 import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
 import nl.rhaydus.softcover.GetLatestUnfinishedReadQuery
+import nl.rhaydus.softcover.GetSystemVibeBookIdsQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.InsertUserBookWithStatusMutation
@@ -49,6 +50,7 @@ import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.core.domain.exception.NoUserIdFoundException
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -57,10 +59,12 @@ import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.type.TrendingDuration
@@ -94,11 +98,13 @@ class BooksRemoteDataSourceImplTest {
 
     private lateinit var apolloClient: ApolloClient
     private lateinit var appDispatchers: AppDispatchers
+    private lateinit var getUserIdUseCase: GetUserIdUseCase
     private lateinit var dataSource: BooksRemoteDataSourceImpl
 
     @BeforeEach
     fun setUp() {
         apolloClient = mockk()
+        getUserIdUseCase = mockk()
 
         val dispatcher = UnconfinedTestDispatcher()
         appDispatchers = AppDispatchers(
@@ -110,6 +116,7 @@ class BooksRemoteDataSourceImplTest {
         dataSource = BooksRemoteDataSourceImpl(
             apolloClient = apolloClient,
             appDispatchers = appDispatchers,
+            getUserIdUseCase = getUserIdUseCase,
         )
 
         clearAllMocks(objectMocks = false)
@@ -995,6 +1002,115 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             val query = querySlot.captured.shouldBeInstanceOf<GetTrendingBookIdsQuery>()
             query.duration shouldBe TrendingDuration.three_month
+        }
+    }
+
+    @Nested
+    inner class FetchSystemVibeBookIds {
+        private fun vibeData(cachedBookIds: Any): GetSystemVibeBookIdsQuery.Data {
+            val row = mockk<GetSystemVibeBookIdsQuery.Data.Vibe> {
+                every {
+                    cached_book_ids
+                } returns cachedBookIds
+            }
+
+            return mockk {
+                every {
+                    vibes
+                } returns listOf(row)
+            }
+        }
+
+        private fun noVibeData(): GetSystemVibeBookIdsQuery.Data = mockk {
+            every {
+                vibes
+            } returns emptyList()
+        }
+
+        @BeforeEach
+        fun setUpUser() {
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(42)
+        }
+
+        @Test
+        fun `returns null when the reader has no row for the vibe`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                apolloClient.safeQuery(
+                    query = match<Query<GetSystemVibeBookIdsQuery.Data>> { it is GetSystemVibeBookIdsQuery },
+                    fetchPolicy = any(),
+                )
+            } returns noVibeData()
+
+            // ----- Act -----
+            val result = dataSource.fetchSystemVibeBookIds(
+                vibe = SystemVibe.Recommendations,
+                limit = 10,
+            )
+
+            // ----- Assert -----
+            result shouldBe null
+        }
+
+        @Test
+        fun `returns the parsed ids capped at the limit`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                apolloClient.safeQuery(
+                    query = match<Query<GetSystemVibeBookIdsQuery.Data>> { it is GetSystemVibeBookIdsQuery },
+                    fetchPolicy = any(),
+                )
+            } returns vibeData(cachedBookIds = listOf(9, "8", 9, "x", 7))
+
+            // ----- Act -----
+            val result = dataSource.fetchSystemVibeBookIds(
+                vibe = SystemVibe.Recommendations,
+                limit = 2,
+            )
+
+            // ----- Assert -----
+            result shouldBe listOf(9, 8)
+        }
+
+        @Test
+        fun `queries with the signed-in user id`() = runTest {
+            // ----- Arrange -----
+            val querySlot = slot<Query<GetSystemVibeBookIdsQuery.Data>>()
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = capture(querySlot),
+                    fetchPolicy = any(),
+                )
+            } returns noVibeData()
+
+            // ----- Act -----
+            dataSource.fetchSystemVibeBookIds(
+                vibe = SystemVibe.Recommendations,
+                limit = 10,
+            )
+
+            // ----- Assert -----
+            val query = querySlot.captured.shouldBeInstanceOf<GetSystemVibeBookIdsQuery>()
+            query.userId shouldBe 42
+        }
+
+        @Test
+        fun `throws when no user is signed in`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.failure(NoUserIdFoundException())
+
+            // ----- Act & Assert -----
+            shouldThrow<NoUserIdFoundException> {
+                dataSource.fetchSystemVibeBookIds(
+                    vibe = SystemVibe.Recommendations,
+                    limit = 10,
+                )
+            }
         }
     }
 

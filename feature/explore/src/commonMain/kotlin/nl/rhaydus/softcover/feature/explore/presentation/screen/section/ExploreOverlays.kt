@@ -12,9 +12,12 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnBecauseYouRead
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnBecauseYouReadGenreSheetVisibleChangeAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnContinueSeriesDismissalChosenAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnContinueSeriesMenuDismissedAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnRecommendedHideChosenAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnRecommendedMenuDismissedAction
 import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreControlUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreSheetEvent
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesMenuSheetUiModel
+import nl.rhaydus.softcover.feature.explore.presentation.model.RecommendedMenuSheetUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
 /**
@@ -47,6 +50,13 @@ internal fun ExploreOverlays(
 
     state.continueSeriesMenu.modelOrNull?.let { menu ->
         ContinueSeriesMenuSheet(
+            model = menu,
+            runAction = runAction,
+        )
+    }
+
+    state.recommendedMenu.modelOrNull?.let { menu ->
+        RecommendedMenuSheet(
             model = menu,
             runAction = runAction,
         )
@@ -85,6 +95,36 @@ private fun ContinueSeriesMenuSheet(
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun RecommendedMenuSheet(
+    model: RecommendedMenuSheetUiModel,
+    runAction: (ExploreAction) -> Unit,
+) {
+    SheetScaffold(
+        model = model.scaffold,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.Dismissed -> runAction(OnRecommendedMenuDismissedAction())
+
+                SheetScaffoldEvent.PrimaryClicked,
+                SheetScaffoldEvent.SecondaryClicked,
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
+            }
+        },
+    ) {
+        SheetActionRow(
+            model = model.hideOption,
+            onEvent = { event ->
+                when (event) {
+                    is SheetRowEvent.Selected -> runAction(
+                        OnRecommendedHideChosenAction(bookId = event.key),
+                    )
+                }
+            },
+        )
     }
 }
 

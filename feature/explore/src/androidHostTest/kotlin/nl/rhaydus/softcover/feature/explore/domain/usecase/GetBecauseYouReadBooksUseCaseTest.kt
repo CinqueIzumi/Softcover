@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
+import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveOwnedBookIdsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetBecauseYouReadGenreAsFlowUseCase
 import nl.rhaydus.softcover.feature.explore.domain.model.BecauseYouReadRecommendation
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
@@ -61,7 +62,10 @@ class GetBecauseYouReadBooksUseCaseTest {
 
         useCase = GetBecauseYouReadBooksUseCase(
             booksRepository = booksRepository,
-            listsRepository = listsRepository,
+            observeOwnedBookIds = ObserveOwnedBookIdsUseCase(
+                booksRepository = booksRepository,
+                listsRepository = listsRepository,
+            ),
             exploreRepository = exploreRepository,
             getBecauseYouReadGenreUseCase = getBecauseYouReadGenreUseCase,
         )

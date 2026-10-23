@@ -33,6 +33,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.RecentWindow
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
@@ -45,6 +46,7 @@ import kotlin.time.Instant
 
 private const val RECENT_BOOKS_LIMIT = 10
 private const val UPCOMING_BOOKS_LIMIT = 10
+private const val RECOMMENDED_BOOKS_LIMIT = 50
 
 internal class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
@@ -67,6 +69,8 @@ internal class BooksRepositoryImpl(
     private val trendingRefreshMutexes = TrendingPeriod.entries.associateWith { Mutex() }
 
     private val recentRefreshMutexes = RecentWindow.entries.associateWith { Mutex() }
+
+    private val systemVibeRefreshMutexes = SystemVibe.entries.associateWith { Mutex() }
 
     private val upcomingRefreshMutexes = UpcomingWindow.entries.associateWith { Mutex() }
 
@@ -396,6 +400,40 @@ internal class BooksRepositoryImpl(
         )
     }
 
+    override fun observeSystemVibeBooks(vibe: SystemVibe): Flow<List<Book>> =
+        booksLocalDataSource.observeSystemVibeBooks(vibe = vibe)
+
+    override fun observeSystemVibeFetchedAt(vibe: SystemVibe): Flow<Instant?> =
+        booksLocalDataSource.observeSystemVibeFetchedAt(vibe = vibe)
+
+    override suspend fun refreshSystemVibeBooks(
+        vibe: SystemVibe,
+        maxAge: Duration,
+    ) = systemVibeRefreshMutexes.getValue(vibe).withLock {
+        refreshRankedBooks(
+            maxAge = maxAge,
+            getFetchedAt = { booksLocalDataSource.getSystemVibeFetchedAt(vibe = vibe) },
+            fetchIds = {
+                booksRemoteDataSource
+                    .fetchSystemVibeBookIds(
+                        vibe = vibe,
+                        limit = RECOMMENDED_BOOKS_LIMIT,
+                    )
+                    .orEmpty()
+            },
+            idsToKeepOnEmptyResponse = { booksLocalDataSource.getSystemVibeBookIds(vibe = vibe) },
+            cachedRankedIds = { booksLocalDataSource.getSystemVibeBookIds(vibe = vibe) },
+            replace = { rankedIds, books, now ->
+                booksLocalDataSource.replaceSystemVibeBooks(
+                    vibe = vibe,
+                    requestedIds = rankedIds,
+                    books = books,
+                    fetchedAt = now,
+                )
+            },
+        )
+    }
+
     override fun observeUpcomingBooks(window: UpcomingWindow): Flow<List<Book>> =
         booksLocalDataSource.observeUpcomingBooks(window = window)
 
@@ -439,6 +477,7 @@ internal class BooksRepositoryImpl(
         getFetchedAt: suspend () -> Instant?,
         fetchIds: suspend () -> List<Int>,
         idsToKeepOnEmptyResponse: (suspend () -> List<Int>)? = null,
+        cachedRankedIds: (suspend () -> List<Int>)? = null,
         replace: suspend (rankedIds: List<Int>, books: List<Book>, now: Instant) -> Unit,
     ) {
         val now = Clock.System.now()
@@ -463,6 +502,16 @@ internal class BooksRepositoryImpl(
                     now,
                 )
             }
+
+            return
+        }
+
+        if (maxAge != Duration.ZERO && cachedRankedIds?.invoke() == rankedIds) {
+            replace(
+                rankedIds,
+                emptyList(),
+                now,
+            )
 
             return
         }

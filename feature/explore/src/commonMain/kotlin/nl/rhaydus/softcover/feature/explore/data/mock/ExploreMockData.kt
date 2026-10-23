@@ -24,10 +24,12 @@ internal object ExploreMockData {
         url = "",
         localImagePath = null,
         releaseYear = releaseYear,
-        authors = listOf(Author(
-            id = id,
-            name = author,
-        ),),
+        authors = listOf(
+            Author(
+                id = id,
+                name = author,
+            ),
+        ),
         format = "Hardcover",
         bookId = bookId,
         owned = false,
@@ -63,10 +65,12 @@ internal object ExploreMockData {
             description = "",
             releaseYear = releaseYear,
             coverUrl = "",
-            authors = listOf(Author(
-                id = id,
-                name = author,
-            ),),
+            authors = listOf(
+                Author(
+                    id = id,
+                    name = author,
+                ),
+            ),
             usersCount = usersCount,
             ratingsCount = ratingsCount,
             bookSeries = series,
@@ -130,6 +134,45 @@ internal object ExploreMockData {
             rating = 4.2,
             usersCount = 11023,
             ratingsCount = 4012,
+        ),
+    )
+
+    val recommended: List<Book> = listOf(
+        mockBook(
+            id = 9201,
+            title = "Piranesi",
+            author = "Susanna Clarke",
+            releaseYear = 2020,
+            rating = 4.3,
+            usersCount = 54210,
+            ratingsCount = 21044,
+        ),
+        mockBook(
+            id = 9202,
+            title = "The Night Circus",
+            author = "Erin Morgenstern",
+            releaseYear = 2011,
+            rating = 4.1,
+            usersCount = 88120,
+            ratingsCount = 35120,
+        ),
+        mockBook(
+            id = 9203,
+            title = "Tomorrow, and Tomorrow, and Tomorrow",
+            author = "Gabrielle Zevin",
+            releaseYear = 2022,
+            rating = 4.2,
+            usersCount = 61330,
+            ratingsCount = 24410,
+        ),
+        mockBook(
+            id = 9204,
+            title = "The House in the Cerulean Sea",
+            author = "TJ Klune",
+            releaseYear = 2020,
+            rating = 4.4,
+            usersCount = 70240,
+            ratingsCount = 29980,
         ),
     )
 

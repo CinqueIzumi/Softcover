@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.uibinding.book.toBylineColumnCard
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_STAND_IN_CARDS
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.RECOMMENDED_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.SEARCH_RESULT_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.TRENDING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.UP_NEXT_STAND_IN_CARDS
@@ -24,6 +25,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSearchResultCa
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toTrendingCard
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toUpNextCard
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_YOU_READ
+import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_RECOMMENDED
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_TRENDING
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_UP_NEXT
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreRail
@@ -33,12 +35,13 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiSt
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Maps the trending, because-you-read and up-next rails and the search results to [BookCardUiModel]s,
- * one list per surface: the same book
- * can sit on several surfaces, each stamping its own cover transition key.
+ * Maps the recommended, trending, because-you-read and up-next rails and the search results to
+ * [BookCardUiModel]s, one list per surface: the same book can sit on several surfaces, each stamping its
+ * own cover transition key.
  *
- * Also derives the because-you-read section's `visible` and `isLoading` in the same write as its card
- * set, so the section never renders a set that disagrees with whether it is shown.
+ * Also derives the recommended section's `recommendedVisible` and the because-you-read section's `visible`
+ * and `isLoading` in the same write as their card sets, so a section never renders a set that disagrees
+ * with whether it is shown.
  *
  * Derives from the books and [UnreleasedCoverOverlaysCollector]'s overlays, so it re-runs whenever
  * either changes.
@@ -52,12 +55,14 @@ internal class BookCardModelsCollector : ExploreCollector {
             .map {
                 BookCardModelsSnapshot(
                     trendingBooks = it.trendingBooks,
+                    recommendedBooks = it.recommendedBooks,
                     becauseYouReadBooks = it.becauseYouReadBooks,
                     becauseYouReadGenre = it.becauseYouReadGenre,
                     continueSeriesBooks = it.continueSeriesBooks,
                     queriedBooks = it.queriedBooks,
                     unreleasedCoverOverlays = it.unreleasedCoverOverlays,
                     loadingTrendingBooks = it.loadingTrendingBooks,
+                    loadingRecommendedBooks = it.loadingRecommendedBooks,
                     loadingBecauseYouReadBooks = it.loadingBecauseYouReadBooks,
                     loadingContinueSeriesBooks = it.loadingContinueSeriesBooks,
                     isLoading = it.isLoading,
@@ -75,6 +80,23 @@ internal class BookCardModelsCollector : ExploreCollector {
                             standIns = TRENDING_STAND_IN_CARDS,
                             map = Book::toTrendingCard,
                         ),
+                        recommended = snapshot.recommendedBooks.toRailModel(
+                            rail = ExploreRail.RECOMMENDED,
+                            loading = snapshot.loadingRecommendedBooks,
+                            coverSurface = SURFACE_RECOMMENDED,
+                            overlays = snapshot.unreleasedCoverOverlays,
+                            standIns = RECOMMENDED_STAND_IN_CARDS,
+                            map = { book, cover, overlay, surface ->
+                                book.toBylineColumnCard(
+                                    cover = cover,
+                                    coverBadge = overlay,
+                                    transitionSurface = surface,
+                                    hasMenu = true,
+                                )
+                            },
+                        ),
+                        recommendedVisible = snapshot.loadingRecommendedBooks ||
+                            snapshot.recommendedBooks.isNotEmpty(),
                         becauseYouRead = snapshot.becauseYouReadBooks.toRailModel(
                             rail = ExploreRail.BECAUSE_YOU_READ,
                             loading = snapshot.loadingBecauseYouReadBooks,

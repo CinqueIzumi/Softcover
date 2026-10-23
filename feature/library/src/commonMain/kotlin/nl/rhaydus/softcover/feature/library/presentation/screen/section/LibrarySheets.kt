@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.library.presentation.screen.section
 import androidx.compose.runtime.Composable
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
+import nl.rhaydus.softcover.core.component.sheet.SheetActionRow
+import nl.rhaydus.softcover.core.component.sheet.SheetRowEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.modelOrNull
@@ -20,6 +22,8 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftChi
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftClearAllAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftTagSearchChangedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnRecommendedHideChosenAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnRecommendedMenuDismissedAction
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryArrangeSheet
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetEvent
@@ -96,6 +100,30 @@ internal fun LibrarySheets(
             },
             content = {},
         )
+    }
+
+    state.recommendedMenu.modelOrNull?.let { menu ->
+        SheetScaffold(
+            model = menu.scaffold,
+            onEvent = { event ->
+                when (event) {
+                    SheetScaffoldEvent.Dismissed -> runAction(OnRecommendedMenuDismissedAction())
+
+                    SheetScaffoldEvent.PrimaryClicked,
+                    SheetScaffoldEvent.SecondaryClicked,
+                    SheetScaffoldEvent.HeaderActionClicked -> Unit
+                }
+            },
+        ) {
+            SheetActionRow(
+                model = menu.hideOption,
+                onEvent = { event ->
+                    when (event) {
+                        is SheetRowEvent.Selected -> runAction(OnRecommendedHideChosenAction(choice = event.key))
+                    }
+                },
+            )
+        }
     }
 
     state.chooseListsSheet.modelOrNull?.let { chooseListsSheet ->

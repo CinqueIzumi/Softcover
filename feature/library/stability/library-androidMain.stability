@@ -265,6 +265,16 @@ internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.Ma
     - onCollapsibleSized: STABLE (function type)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.RecommendedRail(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, rail: nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel<nl.rhaydus.softcover.core.domain.model.Book>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - header: STABLE (marked @Stable or @Immutable)
+    - rail: STABLE (marked @Stable or @Immutable)
+    - onBookClick: STABLE (function type)
+    - runAction: STABLE (function type)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.ScrollToTopOnVisibleSetChange(tabId: kotlin.String, sortMode: nl.rhaydus.softcover.core.domain.model.LibrarySortMode, sortDirection: nl.rhaydus.softcover.core.domain.model.SortDirection, filters: nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters, visibleItemsKey: kotlin.Int, gridState: androidx.compose.foundation.lazy.grid.LazyGridState): kotlin.Unit
   skippable: false
   restartable: true

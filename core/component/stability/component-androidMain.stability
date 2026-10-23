@@ -32,6 +32,19 @@ public fun nl.rhaydus.softcover.core.component.bookcard.BookCard(model: nl.rhayd
     - content: STABLE (composable function type)
 
 @Composable
+internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardCoverButton(icon: nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon, contentDescription: kotlin.String, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, corner: androidx.compose.ui.Alignment, enabled: kotlin.Boolean, checked: kotlin.Boolean?): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - icon: STABLE (class with no mutable properties)
+    - contentDescription: STABLE (String is immutable)
+    - onClick: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - corner: STABLE (marked @Stable or @Immutable)
+    - enabled: STABLE (primitive type)
+    - checked: STABLE (class with no mutable properties)
+
+@Composable
 internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardCoverLayout(cover: nl.rhaydus.softcover.core.component.bookcard.BookCardCover?, selection: nl.rhaydus.softcover.core.component.bookcard.BookCardSelection?, modifier: androidx.compose.ui.Modifier, lifted: kotlin.Boolean): kotlin.Unit
   skippable: true
   restartable: true
@@ -42,7 +55,7 @@ internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardCoverLayout(co
     - lifted: STABLE (primitive type)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.bookcard.BookCardCoverScaffold(model: nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel, cover: nl.rhaydus.softcover.core.component.bookcard.BookCardCover?, hasMenu: kotlin.Boolean, text: nl.rhaydus.softcover.core.component.bookcard.BookCardContent?, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>?): kotlin.Unit
+private fun nl.rhaydus.softcover.core.component.bookcard.BookCardCoverScaffold(model: nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel, cover: nl.rhaydus.softcover.core.component.bookcard.BookCardCover?, hasMenu: kotlin.Boolean, text: nl.rhaydus.softcover.core.component.bookcard.BookCardContent?, bookmark: nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing.Bookmark?, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>?): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -50,17 +63,10 @@ private fun nl.rhaydus.softcover.core.component.bookcard.BookCardCoverScaffold(m
     - cover: STABLE (marked @Stable or @Immutable)
     - hasMenu: STABLE (primitive type)
     - text: STABLE (marked @Stable or @Immutable)
+    - bookmark: STABLE (class with no mutable properties)
     - onEvent: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
     - content: STABLE (composable function type)
-
-@Composable
-internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardMenuButton(contentDescription: kotlin.String, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - contentDescription: STABLE (String is immutable)
-    - onClick: STABLE (function type)
 
 @Composable
 internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardProgressBar(progress: nl.rhaydus.softcover.core.component.bookcard.BookCardProgress, isLoading: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
