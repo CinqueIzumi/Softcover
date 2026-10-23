@@ -20,21 +20,26 @@ Everything you might want to record about a book, and every statistic that comes
 **Make a book yours:**
 - Log personal **moods**, overall or chapter-by-chapter, with how strongly you felt them.
 - Grade each book on **how it read**: pace, plot- or character-driven, its characters, its writing style.
-- Note **where you got it** — library, bought, borrowed, gifted, a subscription credit.
-- Keep **notes** on a book, synced with Hardcover, and tag the **representation** that matters to you.
-- **Export and import all of it** as a file you keep, from day one — so nothing you record is ever one lost phone away from gone.
+- Note **where you got it**: library, bought, borrowed, gifted, a subscription credit.
+- Keep **notes** on a book, synced with Hardcover.
+- Record **what you paid**, **who recommended it**, and, for a book you didn't finish, **why you stopped**.
+- **Export and import all of it** as a file you keep, from day one, so nothing you record is ever one lost phone away from gone.
 
 **Find it, and find it again:**
 - **Filter by your own tags**, and combine them: *mystery* and *dark*, but not *romance*.
 - A **Kobo** link next to Bookshop and Amazon.
 
-**And the payoff — a long editorial Stats Atlas:**
+**And the payoff, a long editorial Stats Atlas:**
 - **Pick your own window.** Read every stat below for the last 30 days, 6 months, 12 months, a single year, or all time.
 - **A year at a glance**: a full-year reading grid, a streak heatmap, and the time of day you actually read. Tap any day to see what you read.
 - **Your seasons, your authors, your records**: pages by month, the authors you return to, your format split, your longest haul and quickest read.
-- **Every genre, not just your top five** — one tap opens the full ranking.
+- **Every genre, not just your top five**: one tap opens the full ranking.
 - **How you read**: whether your year leaned plot- or character-driven, your pace and style mix, and the moods you reach for most.
-- **Diversity & publication**: your reading by author background and country, language and how much you read in translation, publication years, and where your books came from.
+- **Diversity & publication**: your reading by author background, how many books had diverse casts, language and how much you read in translation, publication years, and where your books came from.
+- **More of your reading**: the books you didn't finish, how long your books take, what you reviewed and quoted, your own tags, how your list grows, what you spent, and how your moods line up with your ratings.
+- **Your recommenders**: who recommended what, and how their picks turned out for you.
+
+**Recommended for you.** Hardcover's personal recommendations open Explore, right under the Featured card: books picked from what you've read, with anything already on your shelves left out. Nothing picked yet? You see Hardcover's Top picks instead. Mark a book **Not for me** and it stays gone, with a way back in Settings. And while your Want to read shelf holds fewer than five books, Library offers the same picks with a one-tap bookmark.
 
 **Sign in with Hardcover.** No more copying an API key: sign in through Hardcover itself, and stay signed in.
 
@@ -47,7 +52,8 @@ Everything you might want to record about a book, and every statistic that comes
 
 ## 3.5.0: Author pages, Series & Lists
 
-- A full **Author** page — their works, accolades and series — reached from any byline.
+- A full **Author** page with their works, accolades and series, reached from any byline.
+- **Correct an author's details** where Hardcover's data is wrong or missing, on their Author page.
 - A full **Series** page: a reading-order checklist and your progress through it. Finish the last book and it says so.
 - **Lists** as a first-class surface: rename, delete, reorder, share, and discover curated lists.
 - Create lists straight from your library, and track who you've lent books to.
