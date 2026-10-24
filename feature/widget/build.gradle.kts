@@ -22,6 +22,7 @@ kotlin {
             implementation(project(":core:component"))
             implementation(project(":core:uibinding"))
             implementation(project(":core:presentation"))
+            implementation(project(":core:progresssheet"))
 
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)

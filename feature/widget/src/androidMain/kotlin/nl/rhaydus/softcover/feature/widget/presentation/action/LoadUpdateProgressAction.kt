@@ -32,7 +32,7 @@ internal data class LoadUpdateProgressAction(val bookId: Int) : UpdateProgressAc
         scope.setState {
             it.copy(
                 bookToUpdate = book,
-                readAt = null,
+                progressSheet = it.progressSheet.opened(),
             )
         }
     }

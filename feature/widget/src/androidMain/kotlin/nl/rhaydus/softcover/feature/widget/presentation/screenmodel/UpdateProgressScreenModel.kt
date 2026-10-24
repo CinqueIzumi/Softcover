@@ -7,10 +7,9 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBook
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
+import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
 import nl.rhaydus.softcover.feature.widget.presentation.action.UpdateProgressAction
 import nl.rhaydus.softcover.feature.widget.presentation.collector.UpdateProgressCollector
 import nl.rhaydus.softcover.feature.widget.presentation.event.UpdateProgressEvent
@@ -24,8 +23,7 @@ internal class UpdateProgressScreenModel(
     getCurrentlyReadingUserBooks: GetCurrentlyReadingUserBooksUseCase,
     recordBookProgress: RecordBookProgressUseCase,
     markBookAsRead: MarkBookAsReadUseCase,
-    getLastUsedProgressUnitAsFlow: GetLastUsedProgressUnitAsFlowUseCase,
-    setLastUsedProgressUnit: SetLastUsedProgressUnitUseCase,
+    progressSheetSlice: ProgressSheetSlice,
     getThemeConfiguration: GetThemeConfigurationUseCase,
     appEntryPoint: AppEntryPoint,
     appDispatchers: AppDispatchers,
@@ -47,8 +45,7 @@ internal class UpdateProgressScreenModel(
         getCurrentlyReadingUserBooks = getCurrentlyReadingUserBooks,
         recordBookProgress = recordBookProgress,
         markBookAsRead = markBookAsRead,
-        getLastUsedProgressUnitAsFlow = getLastUsedProgressUnitAsFlow,
-        setLastUsedProgressUnit = setLastUsedProgressUnit,
+        progressSheetSlice = progressSheetSlice,
         getThemeConfiguration = getThemeConfiguration,
         appEntryPoint = appEntryPoint,
         coroutineScope = screenModelScope,

@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.widget.di
 
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.presentation.widget.HomeScreenWidgets
+import nl.rhaydus.softcover.core.progresssheet.di.progressSheetModule
 import nl.rhaydus.softcover.feature.widget.data.repository.CurrentlyReadingRepositoryImpl
 import nl.rhaydus.softcover.feature.widget.data.repository.QuoteWidgetRepositoryImpl
 import nl.rhaydus.softcover.feature.widget.data.repository.RandomPickRepositoryImpl
@@ -35,7 +36,6 @@ import nl.rhaydus.softcover.feature.widget.domain.usecase.ResolveRandomPickUseCa
 import nl.rhaydus.softcover.feature.widget.domain.usecase.SaveRandomPickSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.SaveTrendingSettingsUseCase
 import nl.rhaydus.softcover.feature.widget.domain.usecase.ShuffleRandomPickUseCase
-import nl.rhaydus.softcover.feature.widget.presentation.collector.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.widget.presentation.collector.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.widget.presentation.collector.RandomPickListsCollector
 import nl.rhaydus.softcover.feature.widget.presentation.collector.RandomPickThemeCollector
@@ -76,6 +76,8 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val widgetModule = module {
+    includes(progressSheetModule)
+
     single<CurrentlyReadingRepository> { CurrentlyReadingRepositoryImpl(context = androidContext()) }
 
     single<QuoteWidgetRepository> { QuoteWidgetRepositoryImpl(context = androidContext()) }
@@ -364,14 +366,12 @@ val widgetModule = module {
             getCurrentlyReadingUserBooks = get(),
             recordBookProgress = get(),
             markBookAsRead = get(),
-            getLastUsedProgressUnitAsFlow = get(),
-            setLastUsedProgressUnit = get(),
+            progressSheetSlice = get(),
             getThemeConfiguration = get(),
             appEntryPoint = get(),
             appDispatchers = get(),
             flows = listOf(
                 UpdateProgressThemeCollector(),
-                LastUsedProgressUnitCollector(),
                 ProgressSheetCollector(),
             ),
         )

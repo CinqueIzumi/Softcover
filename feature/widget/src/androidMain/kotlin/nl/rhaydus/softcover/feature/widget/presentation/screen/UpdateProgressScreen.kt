@@ -9,23 +9,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import nl.rhaydus.designsystem.util.ObserveAsEvents
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.uibinding.theme.toSchemeBrightness
 import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
-import nl.rhaydus.softcover.feature.widget.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.widget.presentation.action.LoadUpdateProgressAction
-import nl.rhaydus.softcover.feature.widget.presentation.action.OnMarkAsReadAction
-import nl.rhaydus.softcover.feature.widget.presentation.action.OnProgressMinutesSteppedAction
-import nl.rhaydus.softcover.feature.widget.presentation.action.OnProgressTabClickAction
-import nl.rhaydus.softcover.feature.widget.presentation.action.OnProgressTimeChangedAction
-import nl.rhaydus.softcover.feature.widget.presentation.action.OnUpdatePageProgressClickAction
-import nl.rhaydus.softcover.feature.widget.presentation.action.OnUpdatePercentageProgressClickAction
-import nl.rhaydus.softcover.feature.widget.presentation.action.OnUpdateTimeProgressClickAction
-import nl.rhaydus.softcover.feature.widget.presentation.action.OnWhenReadResetAction
-import nl.rhaydus.softcover.feature.widget.presentation.action.OnWhenReadShiftedAction
+import nl.rhaydus.softcover.feature.widget.presentation.action.OnProgressSheetEventAction
 import nl.rhaydus.softcover.feature.widget.presentation.event.UpdateProgressEvent
 import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.UpdateProgressScreenModel
 
@@ -54,53 +44,12 @@ internal class UpdateProgressScreen(private val bookId: Int) : Screen {
             brightness = themeConfiguration.themeMode.toSchemeBrightness(systemInDark = isSystemInDarkTheme()),
             dynamicColor = themeConfiguration.useDynamicColor,
         ) {
-            val sheet = state.progressSheet.modelOrNull
+            val sheet = state.progressSheet.session.modelOrNull
 
             if (sheet != null) {
                 UpdateProgressBottomSheet(
                     model = sheet,
-                    onEvent = { event ->
-                        when (event) {
-                            is ProgressSheetEvent.TabSelected -> screenModel.runAction(OnProgressTabClickAction(event.tab))
-
-                            is ProgressSheetEvent.PagesSubmitted -> screenModel.runAction(
-                                OnUpdatePageProgressClickAction(newPage = event.page),
-                            )
-
-                            is ProgressSheetEvent.PercentageSubmitted -> screenModel.runAction(
-                                OnUpdatePercentageProgressClickAction(newPercentage = event.percentage),
-                            )
-
-                            is ProgressSheetEvent.TimeChanged -> screenModel.runAction(
-                                OnProgressTimeChangedAction(
-                                    unit = event.unit,
-                                    text = event.text,
-                                ),
-                            )
-
-                            is ProgressSheetEvent.MinutesStepped -> screenModel.runAction(
-                                OnProgressMinutesSteppedAction(delta = event.delta),
-                            )
-
-                            is ProgressSheetEvent.TimeSubmitted -> screenModel.runAction(
-                                OnUpdateTimeProgressClickAction(
-                                    hours = event.hours,
-                                    minutes = event.minutes,
-                                    seconds = event.seconds,
-                                ),
-                            )
-
-                            ProgressSheetEvent.MarkAsReadRequested -> screenModel.runAction(OnMarkAsReadAction)
-
-                            is ProgressSheetEvent.WhenReadShifted -> screenModel.runAction(
-                                OnWhenReadShiftedAction(minutes = event.minutes),
-                            )
-
-                            ProgressSheetEvent.WhenReadReset -> screenModel.runAction(OnWhenReadResetAction())
-
-                            ProgressSheetEvent.Dismissed -> screenModel.runAction(DismissProgressSheetAction)
-                        }
-                    },
+                    onEvent = { screenModel.runAction(OnProgressSheetEventAction(event = it)) },
                 )
             }
         }

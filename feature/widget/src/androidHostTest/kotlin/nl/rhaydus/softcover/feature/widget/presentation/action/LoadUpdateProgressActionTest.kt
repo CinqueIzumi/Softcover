@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
+import kotlinx.datetime.LocalDateTime
+import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
 import nl.rhaydus.softcover.feature.widget.presentation.event.UpdateProgressEvent
 import nl.rhaydus.softcover.feature.widget.presentation.screenmodel.UpdateProgressDependencies
 import nl.rhaydus.softcover.feature.widget.presentation.state.UpdateProgressLocalVariables
@@ -105,7 +107,37 @@ class LoadUpdateProgressActionTest {
 
             // ----- Assert -----
             stateFlow.value.bookToUpdate shouldBe book
+            stateFlow.value.progressSheet.requested shouldBe true
             eventChannel.tryReceive().getOrNull().shouldBeNull()
+        }
+
+        @Test
+        fun `opening clears the previously chosen read time`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = UpdateProgressUiState(
+                progressSheet = ProgressSheetState(readAt = LocalDateTime(
+                    2020,
+                    1,
+                    2,
+                    9,
+                    15,
+                ),),
+            )
+            every {
+                dependencies.getUserIdAsFlow()
+            } returns flowOf(1)
+            every {
+                dependencies.getCurrentlyReadingUserBooks()
+            } returns flowOf(listOf(stubBook(id = 7)))
+
+            // ----- Act -----
+            LoadUpdateProgressAction(bookId = 7).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.progressSheet.readAt.shouldBeNull()
         }
 
         @Test
