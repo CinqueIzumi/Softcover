@@ -16,7 +16,7 @@ exact 4dp rounded primary bar / 12dp gap / uppercase eyebrow / headline / descri
 foundation's `EditorialSectionHeader` (`designsystem-editorial`, already used at ~40 call sites app-wide),
 solely to layer a `pulseKey` pulse animation the foundation version doesn't support. The right shape is to
 wrap/compose the foundation component and add the pulse as a decoration around it, or file an
-F-numbered upstream candidate in `docs/working/foundation-upstream-candidates.md` to add pulse support
+F-numbered upstream candidate in the foundation candidates backlog to add pulse support
 there — not carry a second full implementation of the same visual contract in the app.
 
 **How to apply:** when a new component's KDoc or the brief mentions matching a foundation component's

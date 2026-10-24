@@ -1,27 +1,25 @@
-# Foundation Upstream — Implementation Plan
+# Foundation — Implementation Plan
 
 > **Lifecycle.** Delete this directory in the PR that finishes step 5. The roadmap lives in GitHub Issues (see
 > `CLAUDE.md` § Roadmap); this is a working plan for one rollout.
 
-**Goal:** the foundation owns the generic agent layer and the shared `build-logic` gates, both apps build it from
-a submodule, and Maven Central publishing and the GitHub plugin marketplace are retired. Builds on
-[`../foundation-submodule/README.md`](../foundation-submodule/README.md), which puts Softcover on the submodule.
+**Goal:** Softcover builds `rhaydus-foundation` from the git submodule at `foundation/`, pinned on a tagged
+release; the foundation owns the generic agent layer and the shared `build-logic` gates; both apps build it from
+the submodule; Maven Central publishing and the GitHub plugin marketplace are retired.
 
 **Rollout model:** foundation-side work lands as PRs on `CinqueIzumi/rhaydus-foundation`, edited through
 Softcover's `foundation/` submodule; Softcover-side work is one branch, one PR per step; the second app adopts in
-its own repo (step 3). Every step boundary leaves every build green.
+its own repo (step 3). Every step boundary leaves every build green. Sibling files:
+[`agent-layer.md`](agent-layer.md) (the FU rows) and [`candidates.md`](candidates.md) (the F-numbered backlog).
 
 **Issue:** not filed yet — file a `kind:tech` issue (no milestone) when step 1 starts.
 
 ## Now
 
-- **State:** not started; deferred.
-- **Due when:** `../foundation-submodule/` is deleted, and `docs/working/architecture-review.md` and
-  `docs/working/compose-audit-report.md` are both deleted. When that holds, point `docs/working/ACTIVE.md` at
-  this file.
-- **Next:** step 1 (foundation guardrails).
+- **State:** the submodule switch is built, verified (the PR gate and the iOS compile pass) and committed
+  locally; nothing pushed.
+- **Next:** step 0, when the user decides to share it.
 - **Open questions:** none.
-- **Verification:** not run.
 - **Uncommitted:** none.
 
 ## How to run a step
@@ -36,11 +34,22 @@ its own repo (step 3). Every step boundary leaves every build green.
 
 | Step | Scope | Repo | Status |
 |---|---|---|---|
+| 0 | Ship the submodule switch | both | [ ] |
 | 1 | Foundation guardrails | foundation | [ ] |
 | 2 | A generic agent layer upstream (FU-1 to FU-13), adopted in Softcover | both | [ ] |
 | 3 | The second app adopts the submodule | second app | [ ] |
 | 4 | Retire Maven Central publishing and the GitHub marketplace; upstream the `build-logic` gates | both | [ ] |
 | 5 | Drain the foundation working docs and close out | both | [ ] |
+
+### 0 — Ship the submodule switch
+
+Softcover is on `chore/foundation-submodule`; the foundation is on its local `chore/softcover-submodule` branch
+(version 0.3.2, unpushed).
+
+- [ ] Push the foundation branch `chore/softcover-submodule`.
+- [ ] Tag `v0.3.2` (a `v*` tag publishes to Maven Central).
+- [ ] Move Softcover's submodule pointer onto the tag.
+- [ ] Push `chore/foundation-submodule` and open its PR.
 
 ### 1 — Guardrails
 
@@ -56,8 +65,8 @@ No change originating in an app lands in the foundation before this step is done
 
 ### 2 — Generic agent layer upstream
 
-Port every row of [`../foundation-token-hygiene.md`](../foundation-token-hygiene.md) into
-`claude/plugins/rhaydus-kotlin/`, generic enough that neither app needs a deny list; then adopt it in Softcover.
+Port every row of [`agent-layer.md`](agent-layer.md) into `claude/plugins/rhaydus-kotlin/`, generic enough that
+neither app needs a deny list; then adopt it in Softcover.
 
 - [ ] Decide the generic shape: what the project supplies (agent names, brief templates, doc paths, Gradle
       wrapper) and how `rhaydus-adopt` writes it. Record it under `## Decisions`.
@@ -90,21 +99,33 @@ Run in the second app's repo, by `rhaydus-adopt` from the step 2 tag.
 - [ ] Remove `com.vanniktech.maven.publish`, signing and the Central Portal configuration from the foundation;
       keep each module's `group` and artifact name (the included-build substitution coordinates).
 - [ ] Remove the marketplace manifest's GitHub install instructions from the foundation README.
-- [ ] F18, F20, F21 from [`../foundation-upstream-candidates.md`](../foundation-upstream-candidates.md): move
-      `checkModuleGraph`, the `dependencyAnalysis` policy and the shared `lint.xml` into the foundation's
-      `build-logic`; delete the Softcover copies.
+- [ ] F18, F20, F21 from [`candidates.md`](candidates.md): move `checkModuleGraph`, the `dependencyAnalysis`
+      policy and the shared `lint.xml` into `foundation/build-logic`, consumed through
+      `includeBuild("foundation/build-logic")`; delete the Softcover copies. Publishing them as Gradle plugins
+      is not needed.
 
 ### 5 — Close out
 
-- [ ] File every open entry of `../foundation-upstream-candidates.md` as an issue on the foundation repo; delete
-      the file.
-- [ ] Delete `../foundation-token-hygiene.md` (emptied by step 2).
+- [ ] File every open entry of [`candidates.md`](candidates.md) as an issue on the foundation repo; delete the
+      file.
+- [ ] Delete [`agent-layer.md`](agent-layer.md) (emptied by step 2).
 - [ ] `.claude/rules/docs.md`: the "Something the foundation should adopt" row points at foundation issues.
 - [ ] Softcover's submodule pointer sits on a tag; delete this directory and its `ACTIVE.md` line.
 
 ## Decisions
 
+- Softcover consumes the foundation as a submodule at `foundation/` via `includeBuild`.
+- Submodule over subtree: the foundation keeps its own history, PRs and tags.
+- Softcover merges to `main` only with its submodule pointer on a tagged foundation commit.
+- Softcover switched before the agent layer goes upstream; the upstream work follows in steps 1 to 5.
+- Maven Central publishing stays live until both apps build from the submodule (step 4 after step 3).
+- The foundation and every app that includes it build on the same AGP and Kotlin versions.
 - Upstream agents, hooks and skills are generic; app-specific names, briefs and doc paths stay in the app.
 - Each app enables the plugin per project from its own `foundation/` checkout.
-- An app merges to `main` only with its submodule pointer on a tagged foundation commit.
-- Publishing is retired only after both apps build from the submodule (step 4 after step 3).
+
+## Baseline
+
+| Metric | Before | After |
+|---|---|---|
+| Configuration time (`help --no-configuration-cache`) | 2.50 s | 3.09–3.19 s |
+| Cold `assembleDebug --no-build-cache --rerun-tasks` | 41.9 s | 30.9–40.9 s |

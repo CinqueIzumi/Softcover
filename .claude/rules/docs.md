@@ -21,7 +21,7 @@ paths:
   | Approved shape for one step | that step file's `## Approved shape`, deleted with it |
   | Why a change was made | the PR description (never a reference doc) |
   | Reviewer or agent learning | that agent's memory |
-  | Something the foundation should adopt | `docs/working/foundation-upstream-candidates.md` |
+  | Something the foundation should adopt | the foundation candidates backlog (`candidates.md` in the foundation working plan) |
 
 - **Rewrite, never append.** Rewrite the entry to the current truth and delete the sentence it replaces. Never
   add a change note ("that replaced…", "previously…"). One fact lives in one place; link to it elsewhere.

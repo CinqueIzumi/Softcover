@@ -1,47 +1,14 @@
-# Foundation upstream candidates
+# Foundation candidates
 
-Findings discovered while building Softcover that belong in the **nl.rhaydus foundation** rather than
-in this app — upstream bugs to fix, app-local mechanisms that should become shared foundation
-capabilities, and gates that should move from advisory (here) to blocking (in the foundation).
+The foundation backlog: findings from building Softcover that belong in the nl.rhaydus foundation, not in this
+app. The capability surface is indexed in [`CAPABILITIES.md`](../../../foundation/docs/CAPABILITIES.md).
+F-numbers are stable and never reused or renumbered.
 
-This is an **internal** working doc. It is the queue for the next foundation revision; nothing here is
-acted on automatically. Before reaching for a workaround in the app, check whether the right fix is
-upstream and record it here.
+**Process.** Fix it in `foundation/` on a branch, following `.claude/rules/foundation.md`, then move the
+pointer. Or record it here until it is done.
 
-**Process.** With `foundation.local=true` (includeBuild against `../rhaydus-foundation`), fix it at the
-source and bump the foundation. Otherwise file it against the foundation and track it here until a
-released version carries the fix, then re-run the `rhaydus-adopt` agent. `../rhaydus-foundation` is still on
-AGP 9.0.0 / Gradle 9.1.0 / Kotlin 2.3.21 and must be upgraded before `foundation.local=true` builds work with
-this app again. The capability surface these
-entries refer to is indexed in [`../rhaydus/0.3.1/CAPABILITIES.md`](../rhaydus/0.3.1/CAPABILITIES.md).
-
-Each entry: **type** (bug / enhancement / gate), **home** (target foundation module), **status**, and
-enough context for whoever picks it up. F-numbers are stable identifiers (referenced from commits and
-other docs) and are **never reused or renumbered**.
-
-> **Adopted items are pruned from this doc.** Everything that reached *Implemented & adopted* (F1–F17,
-> F19, F22, F23 — the core-common / core-platform / offline-sync / designsystem-core / toad /
-> ktlint-rules / detekt-rules work) has landed in the foundation and is live in Softcover, so its
-> entries were removed. What remains below is what still needs action: the not-yet-adopted build-logic
-> batch and newly-filed open candidates.
-
-## Still pending (context)
-
-Softcover runs on **published foundation `0.3.1`**, resolved from `mavenCentral()` (`foundation.local=false`
-in `local.properties`, the committed default). All nine `0.3.1` artifacts are live on Central and verified
-resolving. `foundation.local=true` remains available as an inner-loop switch (`includeBuild
-"../rhaydus-foundation"`) but is off by default.
-
-**Next up:**
-1. **Publish the foundation `build-logic` as Gradle plugins** — the only thing standing between
-   F18/F20/F21 and adoption.
-2. **Wire the foundation's own `detektCheck` into its `check`** — it is registered but attached to
-   nothing, so the foundation does not gate on the config it ships.
-3. **`RhaydusTheme` should provide `LocalHaptics` itself** — today it defaults to `NoOpHaptics` and nothing
-   provides it, so Softcover provides it in `SoftcoverTheme`.
-
-Agent, hook and session-loop changes to port into the `rhaydus-kotlin` plugin are tracked separately in
-[`foundation-token-hygiene.md`](foundation-token-hygiene.md).
+Each entry: **type** (bug / enhancement / gate), **home** (target foundation module), **status**, and enough
+context for whoever picks it up. Adopted items are pruned from this doc.
 
 ---
 
@@ -337,6 +304,14 @@ Filed but not yet implemented in the foundation.
 - **Impact in the app:** without it every app repeats that choice, and a call site that reads a scheme spec still animates under reduced motion.
 - **What to build:** `RhaydusTheme` provides a snapping `MotionScheme` itself when reduced motion is on, so `motionScheme` parameters default to the right scheme. Once adopted, drop the app-local `ReducedMotionScheme`.
 
+### F56 — `RhaydusTheme` should provide `LocalHaptics` itself
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Open.** `LocalHaptics` defaults to `NoOpHaptics` and nothing in the foundation provides it, so `SoftcoverTheme` provides it.
+- **Impact in the app:** every app has to know to provide it, and one that doesn't gets silent haptics.
+- **What to build:** `RhaydusTheme` provides `LocalHaptics` from `rememberHaptics()`. Once adopted, drop the app-local provider.
+
 ### F47 — `shakeOnError` ignores reduced motion and hand-writes its timing
 
 - **Type:** bug
@@ -403,15 +378,11 @@ Filed but not yet implemented in the foundation.
 
 An item is **implemented** once it lands in the foundation. *Implemented, not adopted* means it landed
 in the foundation but Softcover still ships its app-local copy and has **not** switched to the
-foundation symbol — it arrives on the next `rhaydus-adopt` pass (or once `foundation.local=true` is
-flipped and published).
+foundation symbol — it arrives on the next `rhaydus-adopt` pass.
 
-Only the **build-logic** batch remains. F18, F20 and F21 landed on the foundation `release/0.3.0` branch
-in `build-logic` (the convention plugins + root); each extracts a reusable gate mechanism from
-Softcover's inline build config, with the concrete app data left configurable. They are **hard-blocked
-on publishing**: the plugins resolve under `foundation.local=true` via
-`pluginManagement { includeBuild(...) }`, but `foundation.local` is gitignored, so a CI run or fresh
-clone would fail to *configure* — `build-logic` is not in the foundation's `mavenPublishing` set.
+Only the **build-logic** batch remains. F18, F20 and F21 landed in the foundation's `build-logic` (the
+convention plugins + root); each extracts a reusable gate mechanism from Softcover's inline build config, with
+the concrete app data left configurable. Softcover consumes them through `includeBuild("foundation/build-logic")`.
 
 ### F18 — `checkModuleGraph` tier-DAG + api-visibility enforcement
 
