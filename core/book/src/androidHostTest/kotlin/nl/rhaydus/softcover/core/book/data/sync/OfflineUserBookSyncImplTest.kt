@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.book.data.sync
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -240,7 +241,7 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `book with no userBook — enqueue is not called`() = runTest {
+        fun `book with no userBook — throws IllegalStateException and enqueues nothing`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {
                 every {
@@ -252,19 +253,20 @@ class OfflineUserBookSyncImplTest {
                 } returns stubUserBookRead(id = 1)
             }
 
-            // ----- Act -----
-            syncImpl.enqueueProgressUpdate(
-                book = book,
-                newPage = 10,
-                newSeconds = null,
-            )
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> {
+                syncImpl.enqueueProgressUpdate(
+                    book = book,
+                    newPage = 10,
+                    newSeconds = null,
+                )
+            }
 
-            // ----- Assert -----
             coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
         }
 
         @Test
-        fun `book with no userBookRead — enqueue is not called`() = runTest {
+        fun `book with no userBookRead — throws IllegalStateException and enqueues nothing`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {
                 every {
@@ -276,14 +278,15 @@ class OfflineUserBookSyncImplTest {
                 } returns null
             }
 
-            // ----- Act -----
-            syncImpl.enqueueProgressUpdate(
-                book = book,
-                newPage = 10,
-                newSeconds = null,
-            )
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> {
+                syncImpl.enqueueProgressUpdate(
+                    book = book,
+                    newPage = 10,
+                    newSeconds = null,
+                )
+            }
 
-            // ----- Assert -----
             coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
         }
 
@@ -399,7 +402,7 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `book with no userBook — enqueue is not called`() = runTest {
+        fun `book with no userBook — throws IllegalStateException and enqueues nothing`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {
                 every {
@@ -411,15 +414,16 @@ class OfflineUserBookSyncImplTest {
                 } returns stubUserBookRead(id = 1)
             }
 
-            // ----- Act -----
-            syncImpl.enqueueMarkAsRead(book = book)
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> {
+                syncImpl.enqueueMarkAsRead(book = book)
+            }
 
-            // ----- Assert -----
             coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
         }
 
         @Test
-        fun `book with no userBookRead — enqueue is not called`() = runTest {
+        fun `book with no userBookRead — enqueues MARK_AS_READ with read id 0 and null read fields`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {
                 every {
@@ -435,7 +439,19 @@ class OfflineUserBookSyncImplTest {
             syncImpl.enqueueMarkAsRead(book = book)
 
             // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
+            coVerify {
+                userBookWriteQueue.enqueue(
+                    payload = match { write ->
+                        write.kind == PendingUserBookWriteKind.MARK_AS_READ &&
+                            write.userBookId == 5 &&
+                            write.userBookReadId == 0 &&
+                            write.progressPages == null &&
+                            write.progressSeconds == null &&
+                            write.startedAt == null &&
+                            write.finishedAt == null
+                    },
+                )
+            }
         }
     }
 
@@ -495,17 +511,18 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `book with no userBook — enqueue is not called`() = runTest {
+        fun `book with no userBook — throws IllegalStateException and enqueues nothing`() = runTest {
             // ----- Arrange -----
             val book = stubBook(userBook = null)
 
-            // ----- Act -----
-            syncImpl.enqueueStatusUpdate(
-                book = book,
-                status = UserBookStatus.CURRENTLY_READING,
-            )
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> {
+                syncImpl.enqueueStatusUpdate(
+                    book = book,
+                    status = UserBookStatus.CURRENTLY_READING,
+                )
+            }
 
-            // ----- Assert -----
             coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
         }
     }
@@ -567,7 +584,7 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `book with no userBook — enqueue is not called`() = runTest {
+        fun `book with no userBook — throws IllegalStateException and enqueues nothing`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {
                 every {
@@ -575,13 +592,14 @@ class OfflineUserBookSyncImplTest {
                 } returns null
             }
 
-            // ----- Act -----
-            syncImpl.enqueueRatingUpdate(
-                book = book,
-                rating = 5.0,
-            )
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> {
+                syncImpl.enqueueRatingUpdate(
+                    book = book,
+                    rating = 5.0,
+                )
+            }
 
-            // ----- Assert -----
             coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
         }
     }
@@ -654,7 +672,7 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `book with no userBook — enqueue is not called`() = runTest {
+        fun `book with no userBook — throws IllegalStateException and enqueues nothing`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {
                 every {
@@ -662,14 +680,15 @@ class OfflineUserBookSyncImplTest {
                 } returns null
             }
 
-            // ----- Act -----
-            syncImpl.enqueueReviewUpdate(
-                book = book,
-                review = review,
-                hasSpoilers = false,
-            )
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> {
+                syncImpl.enqueueReviewUpdate(
+                    book = book,
+                    review = review,
+                    hasSpoilers = false,
+                )
+            }
 
-            // ----- Assert -----
             coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
         }
     }

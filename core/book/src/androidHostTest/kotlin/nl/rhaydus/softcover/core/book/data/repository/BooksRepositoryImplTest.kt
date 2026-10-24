@@ -40,6 +40,7 @@ import nl.rhaydus.softcover.core.book.data.sync.OfflineUserBookSyncImpl
 import nl.rhaydus.softcover.core.book.data.sync.UserBookCacheGate
 import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
+import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
@@ -5314,6 +5315,179 @@ class BooksRepositoryImplTest {
 
                 coVerify { offlineSync.enqueueMarkAsRead(book = any()) }
             }
+
+        private fun offShelfBook(): Book = baseBook.copy(userBook = null)
+
+        private fun wantToReadBookWithoutReads(): Book {
+            val userBook = baseBook.userBook.shouldNotBeNull()
+
+            return baseBook.copy(
+                userBook = userBook.copy(
+                    status = BookStatus.WantToRead,
+                    reads = emptyList(),
+                ),
+            )
+        }
+
+        @Test
+        fun `markBookAsRead for an off-shelf book is not queued when offline`() = runTest {
+            // ----- Arrange -----
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
+
+            val book = offShelfBook()
+            val remoteError = OfflineException()
+
+            coEvery {
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = any(),
+                    actionAt = any(),
+                )
+            } throws remoteError
+
+            // ----- Act -----
+            val caught = runCatching { repository.markBookAsRead(book = book) }
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe remoteError
+            coVerify(exactly = 0) {
+                offlineSync.enqueueMarkAsRead(
+                    book = any(),
+                    actionAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `markBookAsRead for an off-shelf book is not queued on a transient server error`() = runTest {
+            // ----- Arrange -----
+            val book = offShelfBook()
+            val remoteError = ServerUnavailableException("503")
+
+            coEvery {
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = any(),
+                    actionAt = any(),
+                )
+            } throws remoteError
+
+            // ----- Act -----
+            val caught = runCatching { repository.markBookAsRead(book = book) }
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe remoteError
+            coVerify(exactly = 0) {
+                offlineSync.enqueueMarkAsRead(
+                    book = any(),
+                    actionAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `markBookAsRead for an off-shelf book restores the snapshot and rethrows a non-transient error`() =
+            runTest {
+                // ----- Arrange -----
+                val book = offShelfBook()
+                val snapshot = baseBook
+                val remoteError = RuntimeException("rejected")
+
+                coEvery {
+                    booksLocalDataSource.getBookById(id = book.id)
+                } returns snapshot
+
+                coEvery {
+                    booksRemoteDataSource.markBookAsRead(
+                        book = book,
+                        editionId = any(),
+                        actionAt = any(),
+                    )
+                } throws remoteError
+
+                // ----- Act -----
+                val caught = runCatching { repository.markBookAsRead(book = book) }
+
+                // ----- Assert -----
+                caught.exceptionOrNull() shouldBe remoteError
+                coVerify(exactly = 1) { booksLocalDataSource.cacheBook(book = snapshot) }
+                coVerify(exactly = 0) {
+                    offlineSync.enqueueMarkAsRead(
+                        book = any(),
+                        actionAt = any(),
+                    )
+                }
+            }
+
+        @Test
+        fun `markBookAsRead for a shelved Want to Read book with no reads queues MARK_AS_READ when offline`() =
+            runTest {
+                // ----- Arrange -----
+                every {
+                    networkAvailability.isOnline
+                } returns MutableStateFlow(false)
+
+                val book = wantToReadBookWithoutReads()
+
+                // ----- Act -----
+                val result = repository.markBookAsRead(book = book)
+
+                // ----- Assert -----
+                result.userBook.shouldNotBeNull().status shouldBe BookStatus.Read
+                coVerify(exactly = 1) {
+                    offlineSync.enqueueMarkAsRead(
+                        book = result,
+                        actionAt = null,
+                    )
+                }
+                coVerify(exactly = 0) {
+                    booksRemoteDataSource.markBookAsRead(
+                        book = any(),
+                        editionId = any(),
+                        actionAt = any(),
+                    )
+                }
+            }
+
+        @Test
+        fun `markBookAsRead records the confirmed server book as a MARK_AS_READ write`() = runTest {
+            // ----- Arrange -----
+            val gate = mockk<UserBookCacheGate>(relaxed = true)
+            val gatedRepository = BooksRepositoryImpl(
+                booksRemoteDataSource = booksRemoteDataSource,
+                booksLocalDataSource = booksLocalDataSource,
+                userBookCacheGate = gate,
+                networkAvailability = networkAvailability,
+                offlineSync = offlineSync,
+                applicationScope = ApplicationScope(scope = testScope),
+                appDispatchers = appDispatchers,
+                progressHistoryLocalDataSource = progressHistoryLocalDataSource,
+            )
+            val book = offShelfBook()
+            val confirmed = baseBook
+
+            coEvery {
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = any(),
+                    actionAt = any(),
+                )
+            } returns confirmed
+
+            // ----- Act -----
+            val result = gatedRepository.markBookAsRead(book = book)
+
+            // ----- Assert -----
+            result shouldBe confirmed
+            coVerify(exactly = 1) {
+                gate.recordWrite(
+                    book = confirmed,
+                    kind = PendingUserBookWriteKind.MARK_AS_READ,
+                )
+            }
+        }
     }
 
     @Nested

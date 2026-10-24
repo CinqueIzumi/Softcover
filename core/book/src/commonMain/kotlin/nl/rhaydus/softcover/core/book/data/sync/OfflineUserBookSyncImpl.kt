@@ -60,8 +60,10 @@ internal class OfflineUserBookSyncImpl(
         actionAt: String?,
         progressHistoryId: Long?,
     ) {
-        val userBook = book.userBook ?: return
-        val userBookRead = book.currentRead ?: return
+        val userBook = checkNotNull(book.userBook) { "Cannot queue UPDATE_PROGRESS for book ${book.id}: no user book" }
+        val userBookRead = checkNotNull(book.currentRead) {
+            "Cannot queue UPDATE_PROGRESS for book ${book.id}: no user book read"
+        }
 
         // A placeholder's dates are local guesses; replay takes the server read's own instead.
         val startedAt = userBookRead.startedAt.takeUnless { userBookRead.isPlaceholder }
@@ -89,20 +91,20 @@ internal class OfflineUserBookSyncImpl(
         book: Book,
         actionAt: String?,
     ) {
-        val userBook = book.userBook ?: return
-        val userBookRead = book.currentRead ?: return
+        val userBook = checkNotNull(book.userBook) { "Cannot queue MARK_AS_READ for book ${book.id}: no user book" }
+        val userBookRead = book.currentRead
 
         enqueueAndScheduleRetry(
             PendingUserBookWrite(
                 kind = PendingUserBookWriteKind.MARK_AS_READ,
                 userBookId = userBook.id,
-                userBookReadId = userBookRead.id,
+                userBookReadId = userBookRead?.id ?: 0,
                 bookId = book.id,
                 editionId = userBook.editionId,
-                progressPages = userBookRead.currentPage,
-                progressSeconds = userBookRead.currentSeconds,
-                startedAt = userBookRead.startedAt,
-                finishedAt = userBookRead.finishedAt,
+                progressPages = userBookRead?.currentPage,
+                progressSeconds = userBookRead?.currentSeconds,
+                startedAt = userBookRead?.startedAt,
+                finishedAt = userBookRead?.finishedAt,
                 enqueuedAt = Clock.System.now().toString(),
                 actionAt = actionAt,
             ),
@@ -113,7 +115,7 @@ internal class OfflineUserBookSyncImpl(
         book: Book,
         status: UserBookStatus,
     ) {
-        val userBook = book.userBook ?: return
+        val userBook = checkNotNull(book.userBook) { "Cannot queue SET_STATUS for book ${book.id}: no user book" }
 
         enqueueAndScheduleRetry(
             PendingUserBookWrite(
@@ -138,7 +140,7 @@ internal class OfflineUserBookSyncImpl(
         book: Book,
         rating: Double,
     ) {
-        val userBook = book.userBook ?: return
+        val userBook = checkNotNull(book.userBook) { "Cannot queue UPDATE_RATING for book ${book.id}: no user book" }
 
         enqueueAndScheduleRetry(
             PendingUserBookWrite(
@@ -164,7 +166,7 @@ internal class OfflineUserBookSyncImpl(
         review: ReviewDocument,
         hasSpoilers: Boolean,
     ) {
-        val userBook = book.userBook ?: return
+        val userBook = checkNotNull(book.userBook) { "Cannot queue UPDATE_REVIEW for book ${book.id}: no user book" }
 
         enqueueAndScheduleRetry(
             PendingUserBookWrite(

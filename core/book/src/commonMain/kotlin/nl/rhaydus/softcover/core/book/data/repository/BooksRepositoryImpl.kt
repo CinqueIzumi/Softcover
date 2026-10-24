@@ -556,27 +556,25 @@ internal class BooksRepositoryImpl(
         book: Book,
         editionId: Int?,
     ): Book {
-        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsWantToRead()
 
-        if (optimistic !== book) {
-            userBookCacheGate.cacheBook(
-                book = optimistic,
-                kind = PendingUserBookWriteKind.SET_STATUS,
-            )
-        }
-
-        return writeStatus(
+        return writeShelfChange(
             book = book,
             optimistic = optimistic,
-            snapshot = snapshot,
-            status = UserBookStatus.WANT_TO_READ,
-        ) {
-            booksRemoteDataSource.markBookAsWantToRead(
-                bookId = book.id,
-                editionId = editionId,
-            )
-        }.also { updated ->
+            kind = PendingUserBookWriteKind.SET_STATUS,
+            enqueue = {
+                offlineSync.enqueueStatusUpdate(
+                    book = optimistic,
+                    status = UserBookStatus.WANT_TO_READ,
+                )
+            },
+            remoteWrite = {
+                booksRemoteDataSource.markBookAsWantToRead(
+                    bookId = book.id,
+                    editionId = editionId,
+                )
+            },
+        ).also { updated ->
             cacheBook(book = updated)
         }
     }
@@ -585,54 +583,50 @@ internal class BooksRepositoryImpl(
         book: Book,
         editionId: Int?,
     ): Book {
-        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsReading()
 
-        if (optimistic !== book) {
-            userBookCacheGate.cacheBook(
-                book = optimistic,
-                kind = PendingUserBookWriteKind.SET_STATUS,
-            )
-        }
-
-        return writeStatus(
+        return writeShelfChange(
             book = book,
             optimistic = optimistic,
-            snapshot = snapshot,
-            status = UserBookStatus.CURRENTLY_READING,
-        ) {
-            booksRemoteDataSource.markBookAsReading(
-                book = book,
-                editionId = editionId,
-            )
-        }
+            kind = PendingUserBookWriteKind.SET_STATUS,
+            enqueue = {
+                offlineSync.enqueueStatusUpdate(
+                    book = optimistic,
+                    status = UserBookStatus.CURRENTLY_READING,
+                )
+            },
+            remoteWrite = {
+                booksRemoteDataSource.markBookAsReading(
+                    book = book,
+                    editionId = editionId,
+                )
+            },
+        )
     }
 
     override suspend fun markBookAsPaused(
         book: Book,
         editionId: Int?,
     ): Book {
-        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsPaused()
 
-        if (optimistic !== book) {
-            userBookCacheGate.cacheBook(
-                book = optimistic,
-                kind = PendingUserBookWriteKind.SET_STATUS,
-            )
-        }
-
-        return writeStatus(
+        return writeShelfChange(
             book = book,
             optimistic = optimistic,
-            snapshot = snapshot,
-            status = UserBookStatus.PAUSED,
-        ) {
-            booksRemoteDataSource.markBookAsPaused(
-                book = book,
-                editionId = editionId,
-            )
-        }
+            kind = PendingUserBookWriteKind.SET_STATUS,
+            enqueue = {
+                offlineSync.enqueueStatusUpdate(
+                    book = optimistic,
+                    status = UserBookStatus.PAUSED,
+                )
+            },
+            remoteWrite = {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = book,
+                    editionId = editionId,
+                )
+            },
+        )
     }
 
     /**
@@ -642,20 +636,26 @@ internal class BooksRepositoryImpl(
      * Replay order relies on a queued status being unique per `(userBookId, kind)` (a newer write
      * REPLACEs the older) and on replay reading the queue `ORDER BY enqueuedAt`.
      */
-    private suspend fun writeStatus(
+    private suspend fun writeShelfChange(
         book: Book,
         optimistic: Book,
-        snapshot: Book?,
-        status: UserBookStatus,
+        kind: PendingUserBookWriteKind,
+        enqueue: suspend () -> Unit,
         remoteWrite: suspend () -> Book,
     ): Book {
+        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+
+        if (optimistic !== book) {
+            userBookCacheGate.cacheBook(
+                book = optimistic,
+                kind = kind,
+            )
+        }
+
         val isQueueable: Boolean = book.userBook != null
 
         if (isQueueable && networkAvailability.isOnline.value.not()) {
-            offlineSync.enqueueStatusUpdate(
-                book = optimistic,
-                status = status,
-            )
+            enqueue()
 
             return optimistic
         }
@@ -663,7 +663,7 @@ internal class BooksRepositoryImpl(
         return runCatching { remoteWrite() }.onSuccess { confirmed ->
             userBookCacheGate.recordWrite(
                 book = confirmed,
-                kind = PendingUserBookWriteKind.SET_STATUS,
+                kind = kind,
             )
         }.getOrElse { error ->
             when {
@@ -672,13 +672,10 @@ internal class BooksRepositoryImpl(
                 isQueueable && error is RetryableSyncException -> {
                     AppLog.w(
                         error,
-                        "Status change hit a transient error; queued for retry",
+                        "Shelf change ($kind) hit a transient error; queued for retry",
                     )
 
-                    offlineSync.enqueueStatusUpdate(
-                        book = optimistic,
-                        status = status,
-                    )
+                    enqueue()
                     optimistic
                 }
 
@@ -1018,58 +1015,26 @@ internal class BooksRepositoryImpl(
         editionId: Int?,
         actionAt: String?,
     ): Book {
-        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsRead(actionAt = actionAt)
 
-        if (optimistic !== book) {
-            userBookCacheGate.cacheBook(
-                book = optimistic,
-                kind = PendingUserBookWriteKind.MARK_AS_READ,
-            )
-        }
-
-        if (networkAvailability.isOnline.value) {
-            return runCatching {
+        return writeShelfChange(
+            book = book,
+            optimistic = optimistic,
+            kind = PendingUserBookWriteKind.MARK_AS_READ,
+            enqueue = {
+                offlineSync.enqueueMarkAsRead(
+                    book = optimistic,
+                    actionAt = actionAt,
+                )
+            },
+            remoteWrite = {
                 booksRemoteDataSource.markBookAsRead(
                     book = book,
                     editionId = editionId,
                     actionAt = actionAt,
                 )
-            }.onSuccess {
-                userBookCacheGate.recordWrite(
-                    book = optimistic,
-                    kind = PendingUserBookWriteKind.MARK_AS_READ,
-                )
-            }.getOrElse { error ->
-                when (error) {
-                    is CancellationException -> throw error
-
-                    is RetryableSyncException -> {
-                        AppLog.w(
-                            error,
-                            "Mark-as-read hit a transient error; queued for retry",
-                        )
-
-                        offlineSync.enqueueMarkAsRead(
-                            book = optimistic,
-                            actionAt = actionAt,
-                        )
-                        optimistic
-                    }
-
-                    else -> {
-                        restoreOptimisticWrite(snapshot = snapshot)
-                        throw error
-                    }
-                }
-            }
-        }
-
-        offlineSync.enqueueMarkAsRead(
-            book = optimistic,
-            actionAt = actionAt,
+            },
         )
-        return optimistic
     }
 
     private suspend fun restoreOptimisticWrite(snapshot: Book?) {
