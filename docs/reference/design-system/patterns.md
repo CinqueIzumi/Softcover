@@ -61,11 +61,11 @@ file under `patterns/`.
 
 - [Main Settings menu](patterns/settings.md#main-settings-menu-mobile) — flat icon-tile row groups.
 - [Settings rows](patterns/settings.md#settings-rows) — menu and choice row anatomy.
-- [Desktop settings master-detail](patterns/settings.md#desktop-settings-master-detail) — sidebar and inline pane on desktop.
+- [Desktop settings master-detail](patterns/settings.md#desktop-settings-master-detail) — sidebar and inline pane.
 - [Theme picker](patterns/settings.md#theme-picker-preview-tiles) — Light / Dark / Dim / System tiles.
 - [Spine-colour picker](patterns/settings.md#spine-colour-picker-the-featured-personalisation) — five palette tiles.
 - [Appearance settings rows](patterns/settings.md#appearance-settings-rows-flat-hairline-separated) — flat sections of Appearance.
-- [Desktop display scale](patterns/settings.md#desktop-display-scale) — desktop-only UI-scale selector.
+- [Desktop display scale](patterns/settings.md#desktop-display-scale) — UI-scale selector.
 - [About screen body](patterns/settings.md#about-screen-body) — Credits, Source, Contact and the one version line.
 - [Library tabs reorderable row](patterns/settings.md#library-tabs-reorderable-row) — reorder and show/hide Library tabs.
 
@@ -75,10 +75,11 @@ file under `patterns/`.
 
 ## Explore & Profile
 
-- [Profile screen](patterns/explore-profile.md#profile-screen) — reading-life section order.
-- [Statistics charts](patterns/explore-profile.md#statistics-charts) — which chart each Profile statistic uses.
-- [Profile share sheet](patterns/explore-profile.md#profile-share-sheet) — share-card preview with save and share.
-- [Log-out confirm sheet](patterns/explore-profile.md#log-out-confirm-sheet) — destructive confirm gating Log out.
+- [Profile screen](patterns/explore-profile.md#profile-screen) — section order.
+- [Stats Atlas](patterns/explore-profile.md#stats-atlas) — one page of numbered chapters.
+- [Statistics charts](patterns/explore-profile.md#statistics-charts) — which chart each stat uses.
+- [Profile share sheet](patterns/explore-profile.md#profile-share-sheet) — share-card preview.
+- [Log-out confirm sheet](patterns/explore-profile.md#log-out-confirm-sheet) — confirm gating Log out.
 - [Title-page sheet](patterns/explore-profile.md#title-page-sheet-create-list) — centred single-field naming sheet.
 - [Browse-by-mood grid](patterns/explore-profile.md#browse-by-mood-grid) — two-column mood tiles.
 - [Because-you-read genre picker](patterns/explore-profile.md#because-you-read-genre-picker) — genre anchor and sheet.

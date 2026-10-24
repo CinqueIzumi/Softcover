@@ -25,31 +25,31 @@ import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
-import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
-import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
-import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
+import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.RecentlyLovedEntry
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class RecentlyLovedCardsCollectorTest {
-    private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
-    private lateinit var eventChannel: Channel<ProfileEvent>
-    private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
+    private lateinit var stateFlow: MutableStateFlow<StatsAtlasUiState>
+    private lateinit var eventChannel: Channel<StatsAtlasEvent>
+    private lateinit var scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>
     private lateinit var libraryBooks: MutableStateFlow<List<Book>>
     private lateinit var observeBooksByIdsUseCase: ObserveBooksByIdsUseCase
-    private lateinit var dependencies: ProfileDependencies
+    private lateinit var dependencies: StatsAtlasDependencies
 
     @BeforeEach
     fun setUp() {
-        stateFlow = MutableStateFlow(ProfileUiState())
+        stateFlow = MutableStateFlow(StatsAtlasUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
-            localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
+            localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
             eventChannel = eventChannel,
         )
         libraryBooks = MutableStateFlow(emptyList())
@@ -159,7 +159,7 @@ class RecentlyLovedCardsCollectorTest {
         @Test
         fun `produces no cards once reading life has landed with nothing loved`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
+            stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
                 readingLife = readingLife(emptyList()),
             )
@@ -182,7 +182,7 @@ class RecentlyLovedCardsCollectorTest {
         @Test
         fun `keeps only the first three books in order when more are loved`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(5)))
+            stateFlow.value = StatsAtlasUiState(readingLife = readingLife(lovedBooks(5)))
             val collector = RecentlyLovedCardsCollector()
 
             // ----- Act -----
@@ -205,7 +205,7 @@ class RecentlyLovedCardsCollectorTest {
         @Test
         fun `returns to loading stand-ins when reading life becomes null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(2)))
+            stateFlow.value = StatsAtlasUiState(readingLife = readingLife(lovedBooks(2)))
             val collector = RecentlyLovedCardsCollector()
             val job = launch {
                 collector.onLaunch(
@@ -229,7 +229,7 @@ class RecentlyLovedCardsCollectorTest {
             val books = lovedBooks(5)
             val library = libraryBook(id = 2)
             libraryBooks.value = listOf(library)
-            stateFlow.value = ProfileUiState(readingLife = readingLife(books))
+            stateFlow.value = StatsAtlasUiState(readingLife = readingLife(books))
             val collector = RecentlyLovedCardsCollector()
 
             // ----- Act -----
@@ -258,7 +258,7 @@ class RecentlyLovedCardsCollectorTest {
         fun `maps the loved books rather than stand-ins while a refresh is still loading`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                stateFlow.value = ProfileUiState(
+                stateFlow.value = StatsAtlasUiState(
                     isLoading = true,
                     readingLife = readingLife(lovedBooks(2)),
                 )
@@ -284,7 +284,7 @@ class RecentlyLovedCardsCollectorTest {
         @Test
         fun `observes the library books of only the first three loved books`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(5)))
+            stateFlow.value = StatsAtlasUiState(readingLife = readingLife(lovedBooks(5)))
             val collector = RecentlyLovedCardsCollector()
 
             // ----- Act -----
@@ -309,7 +309,7 @@ class RecentlyLovedCardsCollectorTest {
                     editionUrl = "https://example.com/picked.jpg",
                 ),
             )
-            stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(1)))
+            stateFlow.value = StatsAtlasUiState(readingLife = readingLife(lovedBooks(1)))
             val collector = RecentlyLovedCardsCollector()
 
             // ----- Act -----
@@ -330,7 +330,7 @@ class RecentlyLovedCardsCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 libraryBooks.value = emptyList()
-                stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(1)))
+                stateFlow.value = StatsAtlasUiState(readingLife = readingLife(lovedBooks(1)))
                 val collector = RecentlyLovedCardsCollector()
 
                 // ----- Act -----
@@ -359,7 +359,7 @@ class RecentlyLovedCardsCollectorTest {
                         hasUserBook = false,
                     ),
                 )
-                stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(1)))
+                stateFlow.value = StatsAtlasUiState(readingLife = readingLife(lovedBooks(1)))
                 val collector = RecentlyLovedCardsCollector()
 
                 // ----- Act -----
@@ -386,7 +386,7 @@ class RecentlyLovedCardsCollectorTest {
                     editionUrl = "https://example.com/first.jpg",
                 ),
             )
-            stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(1)))
+            stateFlow.value = StatsAtlasUiState(readingLife = readingLife(lovedBooks(1)))
             val collector = RecentlyLovedCardsCollector()
             val job = launch {
                 collector.onLaunch(
@@ -416,7 +416,7 @@ class RecentlyLovedCardsCollectorTest {
                 libraryBook(id = 1),
                 libraryBook(id = 2),
             )
-            stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(3)))
+            stateFlow.value = StatsAtlasUiState(readingLife = readingLife(lovedBooks(3)))
             val collector = RecentlyLovedCardsCollector()
 
             // ----- Act -----

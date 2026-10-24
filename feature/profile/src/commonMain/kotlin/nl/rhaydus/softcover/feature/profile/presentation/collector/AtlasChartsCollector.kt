@@ -1,16 +1,16 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
 import kotlinx.coroutines.flow.combine
-import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
+import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
-import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
-import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.ActionScope
 
 /**
@@ -19,10 +19,10 @@ import nl.rhaydus.toad.ActionScope
  * collector sees all three: the charts load until both the reading life and the profile have arrived,
  * and the hide switch is applied once for charts and captions alike.
  */
-internal class ProfileChartsCollector : ProfileCollector {
+internal class AtlasChartsCollector : StatsAtlasCollector {
     override suspend fun onLaunch(
-        scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>,
-        dependencies: ProfileDependencies,
+        scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>,
+        dependencies: StatsAtlasDependencies,
     ) {
         combine(
             dependencies.observeReadingLifeUseCase(),

@@ -16,7 +16,6 @@ import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingAtlasUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
@@ -134,7 +133,6 @@ class UserInformationCollectorTest {
             // ----- Assert -----
             stateFlow.value.userProfileData shouldBe profileData
             stateFlow.value.isLoading shouldBe false
-            stateFlow.value.readingAtlas shouldBe readingAtlasUiModel(profileData)
             job.cancel()
         }
 

@@ -1,17 +1,17 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
-import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
-import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
-import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
+import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.softcover.feature.profile.presentation.state.hideUntaggedAuthorsToggleFor
 import nl.rhaydus.toad.ActionScope
 
-internal class HideUntaggedAuthorsCollector : ProfileCollector {
+internal class HideUntaggedAuthorsCollector : StatsAtlasCollector {
     override suspend fun onLaunch(
-        scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>,
-        dependencies: ProfileDependencies,
+        scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>,
+        dependencies: StatsAtlasDependencies,
     ) {
         dependencies.getHideUntaggedAuthorsAsFlowUseCase().collectLatest { hide ->
             scope.setState {

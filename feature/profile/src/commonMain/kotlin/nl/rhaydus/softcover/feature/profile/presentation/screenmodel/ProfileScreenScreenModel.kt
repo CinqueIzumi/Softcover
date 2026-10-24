@@ -1,11 +1,9 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import kotlinx.datetime.TimeZone
 import nl.rhaydus.common.AppDispatchers
-import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
@@ -15,15 +13,15 @@ import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import nl.rhaydus.toad.ToadScreenModel
+import kotlin.time.Clock
 
 internal class ProfileScreenScreenModel(
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     private val observeReadingLifeUseCase: ObserveReadingLifeUseCase,
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
-    private val getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
-    private val setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
-    private val observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,
+    private val clock: Clock,
+    private val timeZone: TimeZone,
     dispatchers: AppDispatchers,
     initializers: List<ProfileCollector>,
 ) : ToadScreenModel<ProfileUiState, ProfileEvent, ProfileDependencies, ProfileCollector, LocalProfileVariables>(
@@ -36,9 +34,8 @@ internal class ProfileScreenScreenModel(
         observeReadingLifeUseCase = observeReadingLifeUseCase,
         refreshUserProfileDataUseCase = refreshUserProfileDataUseCase,
         resetUserDataUseCase = resetUserDataUseCase,
-        getHideUntaggedAuthorsAsFlowUseCase = getHideUntaggedAuthorsAsFlowUseCase,
-        setHideUntaggedAuthorsUseCase = setHideUntaggedAuthorsUseCase,
-        observeBooksByIdsUseCase = observeBooksByIdsUseCase,
+        clock = clock,
+        timeZone = timeZone,
         mainDispatcher = dispatchers.main,
         coroutineScope = screenModelScope,
     )

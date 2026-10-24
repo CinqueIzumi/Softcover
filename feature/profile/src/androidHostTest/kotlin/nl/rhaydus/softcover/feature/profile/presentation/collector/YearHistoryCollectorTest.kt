@@ -11,12 +11,12 @@ import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
-import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
+import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryChartUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
-import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
-import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.softcover.feature.profile.presentation.state.YearMetric
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class YearHistoryCollectorTest {
-    private lateinit var dependencies: ProfileDependencies
-    private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
-    private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
+    private lateinit var dependencies: StatsAtlasDependencies
+    private lateinit var stateFlow: MutableStateFlow<StatsAtlasUiState>
+    private lateinit var scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>
 
     private val books = listOf(
         YearCount(
@@ -52,10 +52,10 @@ class YearHistoryCollectorTest {
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(ProfileUiState())
+        stateFlow = MutableStateFlow(StatsAtlasUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
-            localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
+            localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
     }
@@ -74,7 +74,7 @@ class YearHistoryCollectorTest {
         @Test
         fun `writes the loading chart while the reading life is loading`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
+            stateFlow.value = StatsAtlasUiState(
                 isLoading = true,
                 readingLife = buildReadingLife(),
             )
@@ -99,7 +99,7 @@ class YearHistoryCollectorTest {
         @Test
         fun `writes the loading chart when there is no reading life`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
+            stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
                 readingLife = null,
             )
@@ -123,7 +123,7 @@ class YearHistoryCollectorTest {
         @Test
         fun `uses the books series by default`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
+            stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
                 readingLife = buildReadingLife(),
             )
@@ -151,7 +151,7 @@ class YearHistoryCollectorTest {
         @Test
         fun `switches to the pages series when the selected metric changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
+            stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
                 readingLife = buildReadingLife(),
             )

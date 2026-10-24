@@ -2,13 +2,22 @@
 
 ### Profile screen
 
-- Reading life, top to bottom: the reader header; "Reading atlas" (hero pages card plus tiles); a share
-  entry row card; "The shape of the years" (`ColumnChart` behind a Books / Pages `SegmentedControl`,
-  `OnYearMetricSelectedAction`); "The genres you read most"; "Who you read"; "How you score" (headline
-  from the reader's rating band, never the bare average); "Recently loved" (up to three 4★+ reads); the
-  account foot (tonal Log out over a "— · —" colophon).
-- Chart sections open with eyebrow + italic headline (§3.2); the header and "Reading atlas" keep an
-  eyebrow-only `SectionHeader`. The hero pages card is the screen's one `primary`-filled surface.
+- Top to bottom: the reader header; the "Your reading" summary card (books and pages this year over an
+  "Open your Reading Atlas" link; the whole card opens the Stats Atlas); the share entry row card; the
+  account foot (tonal Log out over a "— · —" colophon). Profile holds no charts.
+
+### Stats Atlas
+
+- Pushed from Profile's summary card; one long scroll, never tabs. Top to bottom: a `PageMasthead`
+  ("Your reading record" / "Stats"); the opening tiles (hero "Pages read", the page's one
+  `primary`-filled surface, over a full-width "Books" tile); "In this atlas" contents; the chapters.
+- Contents rows (two-digit number, title, caption, chevron) scroll the page to their chapter's top. A
+  chapter opens with an eyebrow "01 · Title" numbered by position, so row and header always agree.
+- A stat the app holds no data source for yet (reading days, the time window) is left out, never a 0.
+- Today's only chapter, "Temporary", holds the former Profile charts: "The shape of the years" (a
+  `ColumnChart` behind a Books / Pages `SegmentedControl`); "The genres you read most"; "Who you read";
+  "How you score" (headline from the rating band, never the bare average); "Recently loved" (up to three
+  4★+ reads). Each opens with eyebrow + italic headline (§3.2).
 
 ### Statistics charts
 

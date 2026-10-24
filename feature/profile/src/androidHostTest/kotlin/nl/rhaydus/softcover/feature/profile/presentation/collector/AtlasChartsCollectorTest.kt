@@ -23,27 +23,27 @@ import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
-import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
+import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
-import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
-import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class ProfileChartsCollectorTest {
+class AtlasChartsCollectorTest {
     private lateinit var observeReadingLifeUseCase: ObserveReadingLifeUseCase
     private lateinit var observeUserProfileDataUseCase: ObserveUserProfileDataUseCase
     private lateinit var getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase
-    private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
-    private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
+    private lateinit var stateFlow: MutableStateFlow<StatsAtlasUiState>
+    private lateinit var scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>
     private lateinit var readingLifeFlow: MutableSharedFlow<ReadingLife?>
     private lateinit var profileDataFlow: MutableSharedFlow<UserProfileData?>
     private lateinit var hideFlow: MutableSharedFlow<Boolean>
@@ -56,10 +56,10 @@ class ProfileChartsCollectorTest {
         observeReadingLifeUseCase = mockk()
         observeUserProfileDataUseCase = mockk()
         getHideUntaggedAuthorsAsFlowUseCase = mockk()
-        stateFlow = MutableStateFlow(ProfileUiState())
+        stateFlow = MutableStateFlow(StatsAtlasUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
-            localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
+            localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
 
@@ -76,9 +76,9 @@ class ProfileChartsCollectorTest {
         } returns hideFlow
     }
 
-    private fun stubDependencies(testScope: TestScope): ProfileDependencies {
+    private fun stubDependencies(testScope: TestScope): StatsAtlasDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
-        return mockk<ProfileDependencies>(relaxed = true).also { mock ->
+        return mockk<StatsAtlasDependencies>(relaxed = true).also { mock ->
             every {
                 mock.observeReadingLifeUseCase
             } returns observeReadingLifeUseCase
@@ -179,7 +179,7 @@ class ProfileChartsCollectorTest {
                 val genres = buildGenres()
                 val dependencies = stubDependencies(this)
                 val job = launch {
-                    ProfileChartsCollector().onLaunch(
+                    AtlasChartsCollector().onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
@@ -225,7 +225,7 @@ class ProfileChartsCollectorTest {
                 )
                 val dependencies = stubDependencies(this)
                 val job = launch {
-                    ProfileChartsCollector().onLaunch(
+                    AtlasChartsCollector().onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
@@ -251,7 +251,7 @@ class ProfileChartsCollectorTest {
                 // ----- Arrange -----
                 val dependencies = stubDependencies(this)
                 val job = launch {
-                    ProfileChartsCollector().onLaunch(
+                    AtlasChartsCollector().onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
@@ -274,7 +274,7 @@ class ProfileChartsCollectorTest {
                 val initial = stateFlow.value
                 val dependencies = stubDependencies(this)
                 val job = launch {
-                    ProfileChartsCollector().onLaunch(
+                    AtlasChartsCollector().onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
@@ -301,7 +301,7 @@ class ProfileChartsCollectorTest {
                 val initial = stateFlow.value
                 val dependencies = stubDependencies(this)
                 val job = launch {
-                    ProfileChartsCollector().onLaunch(
+                    AtlasChartsCollector().onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
@@ -328,7 +328,7 @@ class ProfileChartsCollectorTest {
                 val initial = stateFlow.value
                 val dependencies = stubDependencies(this)
                 val job = launch {
-                    ProfileChartsCollector().onLaunch(
+                    AtlasChartsCollector().onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
@@ -353,7 +353,7 @@ class ProfileChartsCollectorTest {
                 val tagged = demographics.excludingUntaggedAuthors()
                 val dependencies = stubDependencies(this)
                 val job = launch {
-                    ProfileChartsCollector().onLaunch(
+                    AtlasChartsCollector().onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
@@ -387,7 +387,7 @@ class ProfileChartsCollectorTest {
                 val genres = buildGenres()
                 val dependencies = stubDependencies(this)
                 val job = launch {
-                    ProfileChartsCollector().onLaunch(
+                    AtlasChartsCollector().onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
@@ -411,7 +411,7 @@ class ProfileChartsCollectorTest {
                 val tagged = demographics.excludingUntaggedAuthors()
                 val dependencies = stubDependencies(this)
                 val job = launch {
-                    ProfileChartsCollector().onLaunch(
+                    AtlasChartsCollector().onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
@@ -445,7 +445,7 @@ class ProfileChartsCollectorTest {
                 // ----- Arrange -----
                 val dependencies = stubDependencies(this)
                 val job = launch {
-                    ProfileChartsCollector().onLaunch(
+                    AtlasChartsCollector().onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
@@ -469,7 +469,7 @@ class ProfileChartsCollectorTest {
                 val genres = buildGenres()
                 val dependencies = stubDependencies(this)
                 val job = launch {
-                    ProfileChartsCollector().onLaunch(
+                    AtlasChartsCollector().onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )

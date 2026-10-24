@@ -5,10 +5,10 @@ import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 
 // Pages the account's entire read-book history via fetchUserProfileSnapshot()
-// (GetReadUserBooksForStats, ceil(booksRead / 100) requests) to build the stats the Profile tab
+// (GetReadUserBooksForStats, ceil(booksRead / 100) requests) to build the stats the Stats Atlas
 // renders - booksByYear, pagesByYear, pagesByMonth, genres, ratings, trackedYears,
-// authorDemographics, totalPagesRead. Nothing else needs these, so this is called only from the
-// Profile tab's composed refresh, never at startup.
+// authorDemographics, totalPagesRead. Nothing else needs these, so this is called only from
+// Profile's composed refresh (which opens the Atlas), never at startup.
 class RefreshUserProfileStatsUseCase(
     private val profileRepository: ProfileRepository,
     private val statsRefreshGate: ProfileRefreshGate,

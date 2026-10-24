@@ -11,13 +11,10 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
@@ -69,13 +66,12 @@ class ReadingLifeCollectorTest {
 
     private fun buildReadingLife(
         trackedYears: Int = 3,
-        ratingBand: RatingBand = RatingBand.NEW_READER,
     ): ReadingLife = ReadingLife(
         booksByYear = emptyList(),
         pagesByYear = emptyList(),
         pagesByMonth = emptyList(),
         genres = GenreBreakdown(),
-        ratings = RatingsDistribution(band = ratingBand),
+        ratings = RatingsDistribution(),
         recentlyLoved = emptyList(),
         trackedYears = trackedYears,
     )
@@ -122,28 +118,5 @@ class ReadingLifeCollectorTest {
             stateFlow.value.readingLife shouldBe null
             job.cancel()
         }
-
-        @Test
-        fun `sets ratingsHistogramHeader and ratingsHistogramCaption from the emitted ratings band`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val readingLife = buildReadingLife(ratingBand = RatingBand.SUPERFAN)
-                val dependencies = stubDependencies(this)
-                val collector = ReadingLifeCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                readingLifeFlow.emit(readingLife)
-
-                // ----- Assert -----
-                stateFlow.value.ratingsHistogramHeader shouldBe RatingBand.SUPERFAN.toRatingsHistogramHeader()
-                stateFlow.value.ratingsHistogramCaption shouldBe RatingBand.SUPERFAN.toRatingsHistogramCaption()
-                job.cancel()
-            }
     }
 }

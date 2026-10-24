@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SchemeBrightness
@@ -27,9 +26,10 @@ import nl.rhaydus.softcover.feature.profile.presentation.action.OnShareSheetOpen
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AccountFootSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileIdentity
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileReadingLife
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileShareButton
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileSheets
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ReadingSummaryCard
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ShareEntryRow
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +38,7 @@ internal actual fun ProfileScreenLayout(
     state: ProfileUiState,
     runAction: (ProfileAction) -> Unit,
     onNavigateUp: () -> Unit,
-    onBookCardEvent: (BookCardEvent) -> Unit,
+    onOpenStatsAtlas: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier.testTag(ProfileTestTags.PROFILE_SCREEN),
@@ -75,11 +75,17 @@ internal actual fun ProfileScreenLayout(
 
             Spacer(modifier = Modifier.height(Spacing.section))
 
-            ProfileReadingLife(
-                state = state,
-                runAction = runAction,
-                onShareClick = { runAction(OnShareSheetOpenAction()) },
-                onBookCardEvent = onBookCardEvent,
+            ReadingSummaryCard(
+                summary = state.readingSummary,
+                onClick = onOpenStatsAtlas,
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            ShareEntryRow(
+                isLoading = state.isReadingLifeLoading,
+                enabled = state.canShare,
+                onClick = { runAction(OnShareSheetOpenAction()) },
             )
 
             Spacer(modifier = Modifier.height(Spacing.section))
@@ -106,7 +112,7 @@ private fun ProfileScreenLightPreview() {
             state = ProfileScreenPreviewState,
             runAction = {},
             onNavigateUp = {},
-            onBookCardEvent = {},
+            onOpenStatsAtlas = {},
         )
     }
 }
@@ -119,7 +125,7 @@ private fun ProfileScreenDarkPreview() {
             state = ProfileScreenPreviewState,
             runAction = {},
             onNavigateUp = {},
-            onBookCardEvent = {},
+            onOpenStatsAtlas = {},
         )
     }
 }

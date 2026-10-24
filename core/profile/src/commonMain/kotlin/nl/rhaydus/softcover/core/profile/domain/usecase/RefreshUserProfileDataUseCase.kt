@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.core.profile.domain.usecase
 import nl.rhaydus.common.runCatchingLogged
 
 // Composes both refresh halves for callers that need the whole profile at once: the Profile tab
-// (which renders the stats sections) and post-re-auth. Startup and the Reading screen call
+// (which opens the Stats Atlas that renders the stats) and post-re-auth. Startup and the Reading screen call
 // RefreshReadingActivityUseCase directly instead, so they never pay for the stats pages this pulls
 // in. The activity half shares its gate with those callers, so by the time this runs from the
 // Profile tab it has usually already been satisfied by startup and no-ops for free.

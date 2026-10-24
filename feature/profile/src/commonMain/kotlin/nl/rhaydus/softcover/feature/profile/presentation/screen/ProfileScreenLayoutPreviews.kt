@@ -1,10 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen
 
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreScopeCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingSummaryUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingLifePreview
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 
@@ -23,19 +20,8 @@ internal val ProfileScreenPreviewState = ProfileUiState(
         readingStreak = 31,
     ),
     readingLife = PreviewReadingLife,
-    genreRanking = genreRankingUiModel(PreviewReadingLife.genres),
-    hasGenres = true,
-    genreScopeCaption = genreScopeCaption(taggedBookCount = PreviewReadingLife.genres.taggedBookCount),
-    genderBreakdown = genderBreakdownUiModel(
-        demographics = PreviewReadingLife.authorDemographics,
-        hideUntaggedAuthors = false,
-    ),
-    bipocBreakdown = demographicBreakdownUiModel(
-        breakdown = PreviewReadingLife.authorDemographics.bipocBreakdown,
-        hideUntaggedAuthors = false,
-    ),
-    lgbtqBreakdown = demographicBreakdownUiModel(
-        breakdown = PreviewReadingLife.authorDemographics.lgbtqBreakdown,
-        hideUntaggedAuthors = false,
+    readingSummary = readingSummaryUiModel(
+        readingLife = PreviewReadingLife,
+        currentYear = 2025,
     ),
 )

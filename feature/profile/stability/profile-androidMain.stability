@@ -17,7 +17,35 @@ private fun nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScre
   params:
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreenLayout(state: nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction, kotlin.Unit>, onNavigateUp: kotlin.Function0<kotlin.Unit>, onBookCardEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreenLayout(state: nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction, kotlin.Unit>, onNavigateUp: kotlin.Function0<kotlin.Unit>, onOpenStatsAtlas: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - state: UNSTABLE (has mutable properties or unstable members)
+    - runAction: STABLE (function type)
+    - onNavigateUp: STABLE (function type)
+    - onOpenStatsAtlas: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreenLightPreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+public fun nl.rhaydus.softcover.feature.profile.presentation.screen.StatsAtlasScreen.Content(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.StatsAtlasScreenDarkPreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.StatsAtlasScreenLayout(state: nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction, kotlin.Unit>, onNavigateUp: kotlin.Function0<kotlin.Unit>, onBookCardEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
   skippable: false
   restartable: true
   params:
@@ -27,13 +55,13 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScr
     - onBookCardEvent: STABLE (function type)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreenLightPreview(): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.StatsAtlasScreenLightPreview(): kotlin.Unit
   skippable: true
   restartable: true
   params:
 
 @Composable
-private fun nl.rhaydus.softcover.feature.profile.presentation.screen.rememberRecentlyLovedEventHandler(state: nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState, navigator: cafe.adriel.voyager.navigator.Navigator): kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.rememberRecentlyLovedEventHandler(state: nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState, navigator: cafe.adriel.voyager.navigator.Navigator): kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>
   skippable: false
   restartable: true
   params:
@@ -47,6 +75,33 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Ac
   params:
     - onLogOutClick: STABLE (function type)
     - enabled: STABLE (primitive type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.AtlasContentsRow(model: nl.rhaydus.softcover.feature.profile.presentation.state.AtlasContentsRowUiModel, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - onClick: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.AtlasContentsSection(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, rows: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.feature.profile.presentation.state.AtlasContentsRowUiModel>, onRowClick: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - header: STABLE (marked @Stable or @Immutable)
+    - rows: STABLE (known stable type)
+    - onRowClick: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.AtlasOpeningSection(opening: nl.rhaydus.softcover.feature.profile.presentation.state.AtlasOpeningUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - opening: STABLE (class with no mutable properties)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -106,16 +161,6 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Pr
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileReadingLife(state: nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction, kotlin.Unit>, onShareClick: kotlin.Function0<kotlin.Unit>, onBookCardEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
-  skippable: false
-  restartable: true
-  params:
-    - state: UNSTABLE (has mutable properties or unstable members)
-    - runAction: STABLE (function type)
-    - onShareClick: STABLE (function type)
-    - onBookCardEvent: STABLE (function type)
-
-@Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileShareBottomSheet(model: nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
@@ -164,12 +209,12 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Ra
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.ReadingAtlasSection(readingAtlas: nl.rhaydus.softcover.feature.profile.presentation.state.ReadingAtlasUiModel, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.ReadingSummaryCard(summary: nl.rhaydus.softcover.feature.profile.presentation.state.ReadingSummaryUiModel, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:
-    - readingAtlas: STABLE (class with no mutable properties)
-    - header: STABLE (marked @Stable or @Immutable)
+    - summary: STABLE (class with no mutable properties)
+    - onClick: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -195,6 +240,32 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Sh
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.StatsAtlasBody(state: nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState, jumper: nl.rhaydus.softcover.feature.profile.presentation.screen.section.AtlasChapterJumper, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction, kotlin.Unit>, onBookCardEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - state: UNSTABLE (has mutable properties or unstable members)
+    - jumper: STABLE (marked @Stable or @Immutable)
+    - runAction: STABLE (function type)
+    - onBookCardEvent: STABLE (function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.TemporaryChapter(state: nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction, kotlin.Unit>, onBookCardEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.bookcard.BookCardEvent, kotlin.Unit>): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - state: UNSTABLE (has mutable properties or unstable members)
+    - runAction: STABLE (function type)
+    - onBookCardEvent: STABLE (function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.TrailingChevron(tint: androidx.compose.ui.graphics.Color): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - tint: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearColumnHistorySection(chart: nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel, caption: kotlin.String, isLoading: kotlin.Boolean, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, metricToggle: nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel<nl.rhaydus.softcover.feature.profile.presentation.state.YearMetric>, onMetricSelected: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.state.YearMetric, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
@@ -206,4 +277,11 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Ye
     - metricToggle: STABLE (marked @Stable or @Immutable)
     - onMetricSelected: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.rememberAtlasChapterJumper(scrollState: androidx.compose.foundation.ScrollState): nl.rhaydus.softcover.feature.profile.presentation.screen.section.AtlasChapterJumper
+  skippable: true
+  restartable: true
+  params:
+    - scrollState: STABLE (marked @Stable or @Immutable)
 

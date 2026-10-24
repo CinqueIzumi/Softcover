@@ -7,34 +7,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAuthorsToggledAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnYearMetricSelectedAction
-import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
-import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 
 @Composable
-internal fun ColumnScope.ProfileReadingLife(
-    state: ProfileUiState,
-    runAction: (ProfileAction) -> Unit,
-    onShareClick: () -> Unit,
+internal fun ColumnScope.TemporaryChapter(
+    state: StatsAtlasUiState,
+    runAction: (StatsAtlasAction) -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
 ) {
-    ReadingAtlasSection(
-        readingAtlas = state.readingAtlas,
-        header = state.readingAtlasHeader,
-        modifier = Modifier.fillMaxWidth(),
-    )
+    SectionHeader(model = state.temporaryChapterHeader)
 
     Spacer(modifier = Modifier.height(Spacing.md))
-
-    ShareEntryRow(
-        isLoading = state.isReadingLifeLoading,
-        enabled = state.canShare,
-        onClick = onShareClick,
-    )
-
-    Spacer(modifier = Modifier.height(Spacing.section))
 
     YearColumnHistorySection(
         chart = state.yearHistoryChart,
