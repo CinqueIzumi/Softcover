@@ -24,7 +24,7 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
                       #   reading, session, scan, settings, app_update, widget
 :core:*               # domain, database, network, designsystem, presentation, component, uibinding,
                       #   notification, preferences, identity, book, lists, deadlines, personal,
-                      #   profile, connectivity
+                      #   profile, connectivity, progresssheet
 ```
 
 ## TOAD — Softcover-specific notes

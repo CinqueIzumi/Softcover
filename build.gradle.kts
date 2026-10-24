@@ -469,6 +469,13 @@ val allowedApiDataEdges = setOf(
     // a public type" shape as the `:core:uibinding` row above, not a leak of the whole library.
     ":core:presentation" to ":core:component",
 
+    // `:core:progresssheet`'s public contract carries `SheetSession`, `ProgressSheetUiModel`,
+    // `ProgressSheetTab` and `ProgressSheetEvent` (`:core:component`) and `ProgressTimeDraft`
+    // (`:core:uibinding`), so a host that plugs the slice in must see them: the same "both sides of
+    // a public type" shape as the rows above.
+    ":core:progresssheet" to ":core:component",
+    ":core:progresssheet" to ":core:uibinding",
+
     // `:feature:book_detail` re-exports presentation types through its own public surface (its
     // `BookDetailScreen` is constructed by orchestration with a `BookInitialCover`), settled in § 5e.
     // Contrast `:core:component`, which it depends on with `implementation`: nothing public in that
