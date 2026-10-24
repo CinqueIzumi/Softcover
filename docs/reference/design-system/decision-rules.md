@@ -2,7 +2,7 @@
 
 ## 6. Decision rules
 
-Extends [fd §10](../../rhaydus/0.3.1/design-system-foundations.md#10-decision-rules-shared-core); walk both before reaching for novelty.
+Extends [fd §10](../../../foundation/docs/design-system-foundations.md#10-decision-rules-shared-core); walk both before reaching for novelty.
 
 - **Building a component rather than a screen?** Read the [component contract](component-contract.md) (§7) first.
 - **Need an action with a small set of variants?** Split button.

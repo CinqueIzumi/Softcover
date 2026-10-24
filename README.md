@@ -152,7 +152,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | `nl.rhaydus:ktlint-rules` | Custom ktlint ruleset (the mechanizable layout rules + gate) |
 | `nl.rhaydus:detekt-rules` | Custom type-resolved detekt ruleset + the shared detekt baseline config |
 
-These replace what was previously vendored in the app — the local TOAD runtime, the local `:ktlint-rules` module, and the duplicated design-system components/seams. Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `Cover`) on top. See [`docs/rhaydus/0.3.1/CAPABILITIES.md`](docs/rhaydus/0.3.1/CAPABILITIES.md).
+Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `Cover`) on top. See [`foundation/docs/CAPABILITIES.md`](foundation/docs/CAPABILITIES.md).
 
 #### Data & Networking
 | Technology | Version | Purpose |
@@ -301,7 +301,7 @@ Softcover is being actively redesigned. **What's coming, by version, lives in [R
 | [docs/reference/module-structure.md](docs/reference/module-structure.md) | Module tiers, allowed dependency directions, and where new code belongs |
 | [docs/reference/design-system.md](docs/reference/design-system.md) | Color roles, editorial typography, layout primitives, components, and patterns |
 | [docs/reference/code-style.md](docs/reference/code-style.md) | Naming, layout, and whitespace conventions |
-| [docs/rhaydus/0.3.1/](docs/rhaydus/0.3.1/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
+| [foundation/docs/](foundation/docs/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
 | [CHANGELOG.md](CHANGELOG.md) | Per-version release notes — the source for the in-app What's new page and each GitHub Release |
 | [ROADMAP.md](ROADMAP.md) | Public, user-facing roadmap — generated from the open GitHub milestones; never hand-edited |
 | [docs/working/](docs/working/) | Working notes — audits and reviews kept alongside the code (planned work lives in GitHub Issues) |

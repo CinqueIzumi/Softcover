@@ -13,13 +13,14 @@ leaves the build and CI green. Foundation-side edits, if any turn up, go on `cho
 
 ## Now
 
-- **State:** step 1 built and verified locally; everything stays local (no push, tag or issue) until the user
-  says otherwise.
-- **Next:** step 2 (docs and rules).
+- **State:** steps 1 and 2 committed locally. Everything stays local (no push, tag or
+  issue) until the user says otherwise. Foundation work happens in `foundation/`; `../rhaydus-foundation` is a
+  spare clone.
+- **Next:** step 3 (plugin from the submodule).
 - **Open questions:** none.
-- **Verification:** `assembleDebug`, `buildHealth`, `styleCheck` pass; `foundation/gradlew -p foundation build`
-  passes on JDK 26.
-- **Uncommitted:** all of step 1, in Softcover and in `foundation/`.
+- **Verification:** step 2: no `docs/rhaydus` references left; `checkDocBudgets styleCheck` pass; every changed
+  link and anchor resolves.
+- **Uncommitted:** none.
 
 ## How to run a step
 
@@ -32,8 +33,8 @@ leaves the build and CI green. Foundation-side edits, if any turn up, go on `cho
 
 | Step | Scope | Status |
 |---|---|---|
-| 1 | Submodule and build wiring | [ ] |
-| 2 | Docs and rules from the submodule | [ ] |
+| 1 | Submodule and build wiring | [x] |
+| 2 | Docs and rules from the submodule | [x] |
 | 3 | The plugin from the submodule | [ ] |
 
 ### 1 — Submodule and build wiring
@@ -56,15 +57,15 @@ One step, because CI breaks if the Gradle wiring lands without the submodule che
 
 ### 2 — Docs and rules
 
-- [ ] Delete `docs/rhaydus/0.3.1/`; repoint `CLAUDE.md`, `docs/reference/**` and `.claude/rules/docs.md` at
+- [x] Delete `docs/rhaydus/0.3.1/`; repoint `CLAUDE.md`, `docs/reference/**` and `.claude/rules/docs.md` at
       `foundation/docs/`; drop the vendored-docs line from `.claude/rules/docs.md`.
-- [ ] Rewrite the Rhaydus block in `CLAUDE.md` by hand: the version line names the submodule and its tag, not
+- [x] Rewrite the Rhaydus block in `CLAUDE.md` by hand: the version line names the submodule and its tag, not
       `mavenCentral()` and the `foundation.local` switch. It stays a local override until the managed block
       lands upstream.
-- [ ] `.claude/rules/foundation.md`, path-scoped to `foundation/**`: work on a branch inside the submodule, never
+- [x] `.claude/rules/foundation.md`, path-scoped to `foundation/**`: work on a branch inside the submodule, never
       a detached HEAD; push the foundation commit before moving the pointer; generic-only changes; ask before
       committing.
-- [ ] `.claude/rules/build-wiring.md` gets the submodule build gotchas found in step 1.
+- [x] `.claude/rules/build-wiring.md` gets the submodule build gotchas found in step 1.
 
 ### 3 — Plugin from the submodule
 

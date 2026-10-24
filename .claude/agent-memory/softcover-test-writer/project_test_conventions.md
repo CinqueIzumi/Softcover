@@ -7,7 +7,7 @@ metadata:
 
 Stack: JUnit 5, MockK, kotest assertions (`shouldBe`), kotlinx-coroutines-test (`runTest`), Turbine.
 `@Nested` structure, AAA markers (incl. the `// ----- Act & Assert -----` collapse) and stub layout are in
-`docs/rhaydus/0.3.1/code-style.md` §Test Class Organization / §Unit Test Structure — follow those.
+`foundation/docs/code-style.md` §Test Class Organization / §Unit Test Structure — follow those.
 Tests live in each module's `src/androidHostTest/kotlin/...`, mirroring the source package.
 
 - **Mock domain models, don't construct them.** `Book`, `UserBook`, `BookList`, `ListBook`, `BookEdition`

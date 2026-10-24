@@ -33,7 +33,7 @@ Open only the one you need, and only the section named:
 
 | Area | Source |
 |---|---|
-| TOAD shape, new screen or action | `docs/rhaydus/0.3.1/toad-architecture.md` § Adding a new feature - checklist |
+| TOAD shape, new screen or action | `foundation/docs/toad-architecture.md` § Adding a new feature - checklist |
 | Layering, DI, navigation, dispatchers | `docs/reference/architecture.md`, then the foundation `architecture.md` section it points to |
 | A component under `:core:component` | `docs/reference/design-system/component-contract.md` § 7.2 (only where that file exists) |
 | Brand, typography, layout, patterns | `docs/reference/design-system.md` (the index), then one section file |
@@ -45,7 +45,7 @@ for them.
 
 ## Reuse first
 
-Before you hand-roll a component, modifier or util, check `docs/rhaydus/0.3.1/CAPABILITIES.md` (grep it for
+Before you hand-roll a component, modifier or util, check `foundation/docs/CAPABILITIES.md` (grep it for
 the concept; do not read it whole). Do not read it for anything else.
 
 ## How to build

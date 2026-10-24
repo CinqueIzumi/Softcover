@@ -8,7 +8,7 @@ paths:
 # Compose UI and the design system
 
 - Before designing or modifying a UI surface, consult the foundation
-  `docs/rhaydus/0.3.1/design-system-foundations.md` (theme plumbing, layout primitives, shared component
+  `foundation/docs/design-system-foundations.md` (theme plumbing, layout primitives, shared component
   catalog, editorial role contract) and Softcover's brand layer behind `docs/reference/design-system.md`
   (color roles, editorial typography, brand components, patterns, decision rules). Read only the section file
   under `docs/reference/design-system/` that you need.
@@ -21,4 +21,4 @@ paths:
 - **Every user-facing string follows `docs/reference/design-system/voice.md`** (enforced by review). Read it
   before writing or changing any label, headline, gloss, caption, empty state, snackbar or dialog text.
 - `:core:presentation` is not a component home; shared components go in `:core:component`.
-- Check `docs/rhaydus/0.3.1/CAPABILITIES.md` before hand-rolling a component, modifier or util.
+- Check `foundation/docs/CAPABILITIES.md` before hand-rolling a component, modifier or util.

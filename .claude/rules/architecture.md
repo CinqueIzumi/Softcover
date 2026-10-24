@@ -7,7 +7,7 @@ paths:
 
 # Architecture quick reference
 
-Detail: `docs/rhaydus/0.3.1/architecture.md` and `toad-architecture.md`, then `docs/reference/architecture.md`
+Detail: `foundation/docs/architecture.md` and `toad-architecture.md`, then `docs/reference/architecture.md`
 (Apollo, Room, module overview, TOAD notes) and `docs/reference/module-structure.md` (roster, tiers).
 
 - **Modules:** `:app` (shell) → `:orchestration` (nav host + cross-feature use cases) → `:feature:*` → `:core:*`.

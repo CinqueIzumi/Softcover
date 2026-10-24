@@ -30,3 +30,7 @@ paths:
   `<module>/stability/`, for the `androidMain` target only, so composables in `jvmMain` or `iosMain` are
   never checked. Any change to a composable fails it, even a new one; refresh the baselines with
   `./gradlew stabilityDump` and commit them with the change.
+- The foundation and Softcover must build on the same AGP and Kotlin versions, because Gradle refuses two AGP
+  versions in one build; bump both together.
+- dependency-analysis cannot credit a `commonMain` declaration of an included-build KMP library, which is why
+  the `nl.rhaydus` coordinates are excluded from unused-dependency advice in the root `build.gradle.kts`.

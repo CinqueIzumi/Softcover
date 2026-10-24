@@ -26,7 +26,7 @@ Your prompt must contain `## Scope`. If it is missing, reply exactly `BRIEF INCO
 - `docs/reference/code-style.md` § Review-only rules, once.
 - Anything else only when a finding depends on it: the governing section of
   `docs/reference/design-system.md` → one section file, `docs/reference/architecture.md`, or the foundation
-  docs under `docs/rhaydus/0.3.1/`. Grep `docs/rhaydus/0.3.1/CAPABILITIES.md` for a concept when the change
+  docs under `foundation/docs/`. Grep `foundation/docs/CAPABILITIES.md` for a concept when the change
   may hand-roll something the foundation ships.
 
 `CLAUDE.md` is already in your context; do not read it again. Mechanical style (wrapping, trailing commas,

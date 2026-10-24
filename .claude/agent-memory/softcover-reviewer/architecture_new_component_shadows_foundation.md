@@ -7,7 +7,7 @@ metadata:
 
 When a new `:core:component` composable's render body (bar dimensions, colors, spacing, typography roles)
 matches an existing `nl.rhaydus.designsystem.*` component fixture-for-fixture, grep
-`docs/rhaydus/0.3.1/CAPABILITIES.md` and the app for that foundation symbol before accepting the new one —
+`foundation/docs/CAPABILITIES.md` and the app for that foundation symbol before accepting the new one —
 don't just trust that the new component is additive because it adds one thing (an animation, a variant) the
 foundation symbol doesn't have.
 

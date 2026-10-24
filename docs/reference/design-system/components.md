@@ -103,7 +103,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## From the foundation
 
-Foundation components are listed in [`docs/rhaydus/0.3.1/CAPABILITIES.md`](../../rhaydus/0.3.1/CAPABILITIES.md).
+Foundation components are listed in [`foundation/docs/CAPABILITIES.md`](../../../foundation/docs/CAPABILITIES.md).
 The app's own usage rules:
 
 - `Cover` for book covers; `RhaydusShimmerImage` for every other image.

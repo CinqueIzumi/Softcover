@@ -1,6 +1,6 @@
 # Code Style Guide
 
-The shared Kotlin code style is governed by the foundation [`docs/rhaydus/0.3.1/code-style.md`](../rhaydus/0.3.1/code-style.md) (enforced by the `nl.rhaydus:ktlint-rules` ruleset + the type-resolved `nl.rhaydus:detekt-rules` ruleset). Read it first — it is the source of truth for naming, project structure, one-declaration-per-file, enums, data classes, boolean negation, visibility, if/else, Compose, comments, code organization, argument/property layout, whitespace, import ordering, data flow, dependencies, and test class / unit test structure.
+The shared Kotlin code style is governed by the foundation [`foundation/docs/code-style.md`](../../foundation/docs/code-style.md) (enforced by the `nl.rhaydus:ktlint-rules` ruleset + the type-resolved `nl.rhaydus:detekt-rules` ruleset). Read it first — it is the source of truth for naming, project structure, one-declaration-per-file, enums, data classes, boolean negation, visibility, if/else, Compose, comments, code organization, argument/property layout, whitespace, import ordering, data flow, dependencies, and test class / unit test structure.
 
 This file keeps only Softcover-specific deltas.
 
@@ -59,7 +59,7 @@ once that rule lands it will auto-fix and gate the whole codebase.
 
 A feature's `UiEvent` variants are nested inside its sealed `<Name>Event.kt` and referenced as
 `<Name>Event.<Variant>Event`, never one file per variant. This picks the co-located option of
-[§Sealed hierarchy variants](../rhaydus/0.3.1/code-style.md#one-declaration-per-file).
+[§Sealed hierarchy variants](../../foundation/docs/code-style.md#one-declaration-per-file).
 
 ## Null safety
 
@@ -71,17 +71,17 @@ unwrap with Kotest `shouldNotBeNull()`. detekt `UnsafeCallOnNullableType` gates 
 No tool gates these, so review checks them by hand in every touched file. The reviewer does not run
 `styleCheck`; the brief states the gate result.
 
-- **Blank line between sibling composables, `Spacer` included** ([foundation §Compose](../rhaydus/0.3.1/code-style.md#compose)) — tooling misses it inside nested `Column` / `Row` / `Box` / `LazyColumn` scopes.
-- **Every multi-line construct is its own paragraph** ([§Paragraph rule](../rhaydus/0.3.1/code-style.md#paragraph-rule-for-multi-line-constructs)) — ktlint only handles the blank lines next to braces.
-- **Guard-clause spacing** ([§Guard clauses](../rhaydus/0.3.1/code-style.md#guard-clauses)) — blank line after the extraction, between guards, and after the last guard, so each guard reads as one step.
+- **Blank line between sibling composables, `Spacer` included** ([foundation §Compose](../../foundation/docs/code-style.md#compose)) — tooling misses it inside nested `Column` / `Row` / `Box` / `LazyColumn` scopes.
+- **Every multi-line construct is its own paragraph** ([§Paragraph rule](../../foundation/docs/code-style.md#paragraph-rule-for-multi-line-constructs)) — ktlint only handles the blank lines next to braces.
+- **Guard-clause spacing** ([§Guard clauses](../../foundation/docs/code-style.md#guard-clauses)) — blank line after the extraction, between guards, and after the last guard, so each guard reads as one step.
 - **No `) }` on a multi-line trailing-lambda body** ([above](#trailing-lambda-over-a-multi-line-body--no-brace-glomming)) — grep touched files for `^\s*\)\s*\}`, since ktlint's wrapping produces the glommed form itself.
-- **A 2+-argument `Modifier` call wraps one-per-line too**, e.g. `.padding(horizontal = …, vertical = …)` ([§Argument and Property Layout](../rhaydus/0.3.1/code-style.md#argument-and-property-layout)) — the ktlint rule exempts `Modifier` chains, but the guide has no such carve-out.
+- **A 2+-argument `Modifier` call wraps one-per-line too**, e.g. `.padding(horizontal = …, vertical = …)` ([§Argument and Property Layout](../../foundation/docs/code-style.md#argument-and-property-layout)) — the ktlint rule exempts `Modifier` chains, but the guide has no such carve-out.
 - **Spacing reads a `Spacing` token** — the dp passed to `padding`, `PaddingValues`, `contentPadding`, `Arrangement.spacedBy`, `offset` or a `Spacer`'s `height` / `width` / `size` (0, 64 and 96 stay literal); the `RawSpacingDp` detekt rule gates it once the sweep enables it. Component sizes, strokes and borders stay inline `.dp` at the use site and are never hoisted into file-level `private val` constants.
 - **Corners read a `Corners` token** — the radius of a corner shape (`RoundedCornerShape`, `CutCornerShape`, their `Absolute*` forms) or a `CornerSize`, including `percent = 50` pills (`0.dp` stays literal); true circles keep `CircleShape`, partial corners derive from a step via `.copy(...)`; the `RawCornerDp` detekt rule gates it. Sizes stay inline `.dp`.
 - **Haptics read `LocalHaptics.current`** — only `SoftcoverTheme` calls `rememberHaptics()`; the `RememberHapticsOutsideTheme` detekt rule gates importing it anywhere else.
-- **Imports follow the IDE layout `*,java.**,javax.**,kotlin.**,^`** (pinned as `ij_kotlin_imports_layout` in `.editorconfig`; replaces [§Import Ordering](../rhaydus/0.3.1/code-style.md#import-ordering)'s groups) — one ASCII-sorted block, then `java.*`, `javax.*`, `kotlin.*`, aliases last, no blank lines. ktlint only sorts `nl.rhaydus.*` among themselves; run Optimize Imports after a bulk import rewrite.
-- **Every `@Test` sits in a `@Nested inner class`, one per function under test** ([§Test Class Organization](../rhaydus/0.3.1/code-style.md#test-class-organization)) — keeps a test file navigable by function.
-- **AAA markers are exactly `// ----- Arrange -----` / `Act` / `Assert`** ([§Unit Test Structure](../rhaydus/0.3.1/code-style.md#unit-test-structure)) — every test then splits into its three phases at the same markers.
+- **Imports follow the IDE layout `*,java.**,javax.**,kotlin.**,^`** (pinned as `ij_kotlin_imports_layout` in `.editorconfig`; replaces [§Import Ordering](../../foundation/docs/code-style.md#import-ordering)'s groups) — one ASCII-sorted block, then `java.*`, `javax.*`, `kotlin.*`, aliases last, no blank lines. ktlint only sorts `nl.rhaydus.*` among themselves; run Optimize Imports after a bulk import rewrite.
+- **Every `@Test` sits in a `@Nested inner class`, one per function under test** ([§Test Class Organization](../../foundation/docs/code-style.md#test-class-organization)) — keeps a test file navigable by function.
+- **AAA markers are exactly `// ----- Arrange -----` / `Act` / `Assert`** ([§Unit Test Structure](../../foundation/docs/code-style.md#unit-test-structure)) — every test then splits into its three phases at the same markers.
 - **`kotlin.time.Instant`, never `kotlinx.datetime.Instant`.** The latter is a deprecated typealias; no
   gate catches the import, since both resolve and compile.
 - **A KDoc link to a symbol the file does not import is `[Symbol][fully.qualified.Name]`, never

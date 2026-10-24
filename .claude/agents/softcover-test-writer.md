@@ -31,7 +31,7 @@ Your prompt must contain `## Files` and `## Verify`. If either is missing, reply
 - Never read a test file over about 800 lines end to end: grep for the construction sites, symbols or
   `@Nested` blocks you need and read those windows.
 - Learn the conventions from one or two neighbouring test files, not from a sweep. Test structure (class
-  naming, `@Nested` grouping, AAA markers) is in `docs/rhaydus/0.3.1/code-style.md` § Test Class
+  naming, `@Nested` grouping, AAA markers) is in `foundation/docs/code-style.md` § Test Class
   Organization and § Unit Test Structure — read those two sections, not the file.
 - Check your memory index first: it holds this project's mocking gotchas (Apollo fragments, mockk defaults,
   coroutine timing).

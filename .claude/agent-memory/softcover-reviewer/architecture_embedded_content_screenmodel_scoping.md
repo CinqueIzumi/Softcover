@@ -5,7 +5,7 @@ metadata:
   type: architecture
 ---
 
-Canonical TOAD wiring (`docs/rhaydus/0.3.1/toad-architecture.md`): only a `Screen` calls
+Canonical TOAD wiring (`foundation/docs/toad-architecture.md`): only a `Screen` calls
 `koinScreenModel<XScreenModel>()` in its own `Content()`; that ties the model's lifetime to that Screen
 instance being on the backstack (disposed on pop). `koinNavigatorScreenModel` (`Navigator` receiver) instead
 ties the model to the Navigator's own lifetime — it survives across every Screen pushed/popped on that

@@ -66,27 +66,27 @@ descriptions — never hand-edit it. The full rules are in `.claude/rules/roadma
 
 | When you are … | Read |
 |---|---|
-| Adding a module, feature, ScreenModel / Action / Collector, or changing data flow | [`docs/rhaydus/0.3.1/architecture.md`](docs/rhaydus/0.3.1/architecture.md), [`toad-architecture.md`](docs/rhaydus/0.3.1/toad-architecture.md), then [`docs/reference/architecture.md`](docs/reference/architecture.md) |
+| Adding a module, feature, ScreenModel / Action / Collector, or changing data flow | [`foundation/docs/architecture.md`](foundation/docs/architecture.md), [`toad-architecture.md`](foundation/docs/toad-architecture.md), then [`docs/reference/architecture.md`](docs/reference/architecture.md) |
 | Deciding where a module / type belongs, or wiring a cross-feature dependency | [`docs/reference/module-structure.md`](docs/reference/module-structure.md) |
-| Designing or changing any UI surface | [`docs/rhaydus/0.3.1/design-system-foundations.md`](docs/rhaydus/0.3.1/design-system-foundations.md), then the one section you need behind [`docs/reference/design-system.md`](docs/reference/design-system.md) |
+| Designing or changing any UI surface | [`foundation/docs/design-system-foundations.md`](foundation/docs/design-system-foundations.md), then the one section you need behind [`docs/reference/design-system.md`](docs/reference/design-system.md) |
 | Building a component under `:core:component` | [`docs/reference/design-system/component-contract.md`](docs/reference/design-system/component-contract.md) |
 | Writing or changing any user-facing text | [`docs/reference/design-system/voice.md`](docs/reference/design-system/voice.md) |
-| Writing Kotlin | [`docs/rhaydus/0.3.1/code-style.md`](docs/rhaydus/0.3.1/code-style.md), then [`docs/reference/code-style.md`](docs/reference/code-style.md) |
-| Looking for an existing component, modifier or util | [`docs/rhaydus/0.3.1/CAPABILITIES.md`](docs/rhaydus/0.3.1/CAPABILITIES.md) |
+| Writing Kotlin | [`foundation/docs/code-style.md`](foundation/docs/code-style.md), then [`docs/reference/code-style.md`](docs/reference/code-style.md) |
+| Looking for an existing component, modifier or util | [`foundation/docs/CAPABILITIES.md`](foundation/docs/CAPABILITIES.md) |
 | Adding a manifest component, worker, widget, Screen argument, or anything reached by name / touching keep rules | [`docs/reference/r8.md`](docs/reference/r8.md) |
 
 ## Rhaydus foundation (local override — pending foundation FU-6; re-running rhaydus-adopt reverts this)
 
-- **Version:** nl.rhaydus foundation v0.3.1 from `mavenCentral()`. `foundation.local=true` in `local.properties`
-  switches to `includeBuild("../rhaydus-foundation")`; the committed state is `false`.
-- **Docs:** vendored and version-pinned at [`docs/rhaydus/0.3.1/`](docs/rhaydus/0.3.1) (architecture,
-  toad-architecture, code-style, design-system-foundations, CAPABILITIES). They are the source of truth; this
-  app's docs keep only its deltas.
+- **Version:** the nl.rhaydus foundation, built from the `foundation/` git submodule through an `includeBuild`
+  (version in `foundation/gradle.properties`); work inside it follows `.claude/rules/foundation.md`.
+- **Docs:** [`foundation/docs/`](foundation/docs) at the pinned commit (architecture, toad-architecture,
+  code-style, design-system-foundations, CAPABILITIES). They are the source of truth; this app's docs keep only
+  its deltas.
 - **Libraries consumed:**
   - State and logic: `toad`, `core-common`, `core-platform`, `offline-sync`.
   - Design system: `designsystem-core`, `designsystem-editorial`, `designsystem-image`.
   - Gates: `ktlint-rules`, `detekt-rules`.
 - **Routing:** implementation → `softcover-implementer`; review → `softcover-reviewer`; tests →
-  `softcover-test-writer`; style gates → the `style-check` skill. Foundation wiring changes (adding, removing
-  or re-versioning an `nl.rhaydus` dependency) → the `rhaydus-adopt` agent.
-- **Reuse-first:** check `CAPABILITIES.md` before hand-rolling a component, modifier or util.
+  `softcover-test-writer`; style gates → the `style-check` skill. A foundation version change moves the
+  submodule pointer (`.claude/rules/foundation.md`); never re-run `rhaydus-adopt`, which still wires Maven Central.
+- **Reuse-first:** check `foundation/docs/CAPABILITIES.md` before hand-rolling a component, modifier or util.
