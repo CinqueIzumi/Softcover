@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.database.dao.HiddenRecommendationDao
 import nl.rhaydus.softcover.core.database.model.HiddenRecommendationEntity
 
-interface HiddenRecommendationsLocalDataSource {
+internal interface HiddenRecommendationsLocalDataSource {
     val hiddenRecommendations: Flow<List<HiddenRecommendationEntity>>
 
     suspend fun hide(entity: HiddenRecommendationEntity)

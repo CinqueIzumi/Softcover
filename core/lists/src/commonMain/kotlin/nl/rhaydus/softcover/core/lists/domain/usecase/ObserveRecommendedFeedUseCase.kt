@@ -23,7 +23,7 @@ import kotlin.time.Duration.Companion.hours
  * Recommendations win; Top Picks fill in only when Recommendations leave nothing after the owned filter.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ObserveRecommendedFeedUseCase(
+class ObserveRecommendedFeedUseCase internal constructor(
     private val getRecommendedBooks: GetRecommendedBooksUseCase,
     private val observeSystemVibeFetchedAt: ObserveSystemVibeFetchedAtUseCase,
     private val refreshSystemVibeBooks: RefreshSystemVibeBooksUseCase,

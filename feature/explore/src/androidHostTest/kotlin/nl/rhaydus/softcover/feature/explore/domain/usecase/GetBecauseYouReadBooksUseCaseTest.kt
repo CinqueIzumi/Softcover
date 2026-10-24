@@ -14,11 +14,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
-import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import nl.rhaydus.softcover.core.lists.domain.usecase.ObserveOwnedBookIdsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetBecauseYouReadGenreAsFlowUseCase
 import nl.rhaydus.softcover.feature.explore.domain.model.BecauseYouReadRecommendation
@@ -33,7 +30,8 @@ private const val DISPLAY_LIMIT = 12
 
 class GetBecauseYouReadBooksUseCaseTest {
     private lateinit var booksRepository: BooksRepository
-    private lateinit var listsRepository: ListsRepository
+    private lateinit var observeOwnedBookIds: ObserveOwnedBookIdsUseCase
+    private lateinit var ownedBookIds: MutableStateFlow<Set<Int>>
     private lateinit var exploreRepository: ExploreRepository
     private lateinit var getBecauseYouReadGenreUseCase: GetBecauseYouReadGenreAsFlowUseCase
     private lateinit var useCase: GetBecauseYouReadBooksUseCase
@@ -41,14 +39,15 @@ class GetBecauseYouReadBooksUseCaseTest {
     @BeforeEach
     fun setUp() {
         booksRepository = mockk()
-        listsRepository = mockk()
+        observeOwnedBookIds = mockk()
+        ownedBookIds = MutableStateFlow(emptySet())
         exploreRepository = mockk()
         getBecauseYouReadGenreUseCase = mockk()
 
-        // No lists by default - tests that care about list-based exclusion override this.
+        // Nothing owned by default - tests that care about exclusion set ownedBookIds.
         every {
-            listsRepository.allUserLists
-        } returns flowOf(emptyList())
+            observeOwnedBookIds()
+        } returns ownedBookIds
 
         // No override by default - existing tests exercise the auto-derived genre.
         every {
@@ -62,10 +61,7 @@ class GetBecauseYouReadBooksUseCaseTest {
 
         useCase = GetBecauseYouReadBooksUseCase(
             booksRepository = booksRepository,
-            observeOwnedBookIds = ObserveOwnedBookIdsUseCase(
-                booksRepository = booksRepository,
-                listsRepository = listsRepository,
-            ),
+            observeOwnedBookIds = observeOwnedBookIds,
             exploreRepository = exploreRepository,
             getBecauseYouReadGenreUseCase = getBecauseYouReadGenreUseCase,
         )
@@ -239,6 +235,7 @@ class GetBecauseYouReadBooksUseCaseTest {
             every {
                 booksRepository.books
             } returns flowOf(listOf(shelvedBook))
+            ownedBookIds.value = setOf(10)
             coEvery {
                 exploreRepository.fetchBooksByGenre(
                     genre = any(),
@@ -258,19 +255,6 @@ class GetBecauseYouReadBooksUseCaseTest {
             // ----- Arrange -----
             val listedBook = stubBook(id = 20)
             val unlistedBook = stubBook(id = 21)
-            val listWithBook = BookList(
-                id = 1,
-                name = "To read",
-                slug = "to-read",
-                books = listOf(
-                    ListBook(
-                        listBookId = 0,
-                        listId = 1,
-                        bookId = 20,
-                        editionId = 0,
-                    ),
-                ),
-            )
 
             every {
                 booksRepository.books
@@ -281,9 +265,7 @@ class GetBecauseYouReadBooksUseCaseTest {
                     startId = 100,
                 ),
             )
-            every {
-                listsRepository.allUserLists
-            } returns flowOf(listOf(listWithBook))
+            ownedBookIds.value = setOf(20)
             coEvery {
                 exploreRepository.fetchBooksByGenre(
                     genre = any(),
@@ -384,7 +366,7 @@ class GetBecauseYouReadBooksUseCaseTest {
             useCase().test {
                 awaitSettled()?.books shouldBe listOf(fetchedBook)
 
-                booksFlow.value = booksFlow.value + fetchedBook
+                ownedBookIds.value = setOf(50)
 
                 var recommendation = awaitItem()
                 while (recommendation?.books?.contains(fetchedBook) == true) {
@@ -400,7 +382,6 @@ class GetBecauseYouReadBooksUseCaseTest {
         fun `drops a book from the result reactively once it is added to a list after the fetch settles`() = runTest {
             // ----- Arrange -----
             val listedBook = stubBook(id = 60)
-            val listsFlow = MutableStateFlow<List<BookList>>(emptyList())
 
             every {
                 booksRepository.books
@@ -410,9 +391,6 @@ class GetBecauseYouReadBooksUseCaseTest {
                     count = 5,
                 ),
             )
-            every {
-                listsRepository.allUserLists
-            } returns listsFlow
             coEvery {
                 exploreRepository.fetchBooksByGenre(
                     genre = "Romance",
@@ -424,21 +402,7 @@ class GetBecauseYouReadBooksUseCaseTest {
             useCase().test {
                 awaitSettled()?.books shouldBe listOf(listedBook)
 
-                listsFlow.value = listOf(
-                    BookList(
-                        id = 1,
-                        name = "To read",
-                        slug = "to-read",
-                        books = listOf(
-                            ListBook(
-                                listBookId = 0,
-                                listId = 1,
-                                bookId = 60,
-                                editionId = 0,
-                            ),
-                        ),
-                    ),
-                )
+                ownedBookIds.value = setOf(60)
 
                 var recommendation = awaitItem()
                 while (recommendation?.books?.contains(listedBook) == true) {

@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import kotlin.time.Duration
 
 /** Refreshes every [SystemVibe] the recommended feed can fall back to; fails if any of them failed. */
-class RefreshRecommendedFeedUseCase(
+class RefreshRecommendedFeedUseCase internal constructor(
     private val refreshSystemVibeBooks: RefreshSystemVibeBooksUseCase,
 ) {
     suspend operator fun invoke(maxAge: Duration): Result<Unit> = coroutineScope {
