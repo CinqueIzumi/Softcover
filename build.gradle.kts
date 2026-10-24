@@ -428,6 +428,7 @@ fun tierOf(path: String): String? = when {
 val apiSignOffModules = setOf(
     ":core:book",
     ":core:lists",
+    ":core:corpus",
     ":core:deadlines",
     ":core:personal",
     ":core:profile",

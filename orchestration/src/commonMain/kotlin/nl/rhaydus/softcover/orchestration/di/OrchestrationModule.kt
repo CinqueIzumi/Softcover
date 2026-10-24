@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.orchestration.di
 
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.connectivity.di.connectivityModule
+import nl.rhaydus.softcover.core.corpus.di.corpusModule
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
@@ -60,6 +61,7 @@ internal val orchestrationModule = module {
         identityModule,
         bookModule,
         listsModule,
+        corpusModule,
         deadlinesModule,
         personalModule,
         profileModule,

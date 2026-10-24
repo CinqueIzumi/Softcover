@@ -9,6 +9,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.dao.BookDeadlineDao
+import nl.rhaydus.softcover.core.database.dao.BookTraitsDao
 import nl.rhaydus.softcover.core.database.dao.DismissedContinueSeriesDao
 import nl.rhaydus.softcover.core.database.dao.HiddenRecommendationDao
 import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
@@ -28,6 +29,7 @@ import nl.rhaydus.softcover.core.database.model.BookEntity
 import nl.rhaydus.softcover.core.database.model.BookListEntity
 import nl.rhaydus.softcover.core.database.model.BookSeriesEntity
 import nl.rhaydus.softcover.core.database.model.BookTagCrossRef
+import nl.rhaydus.softcover.core.database.model.BookTraitsEntity
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesBookEntity
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesEntity
 import nl.rhaydus.softcover.core.database.model.EditionAuthorCrossRef
@@ -80,11 +82,12 @@ import kotlin.coroutines.CoroutineContext
         RankedBookEntity::class,
         RankedListMetaEntity::class,
         HiddenRecommendationEntity::class,
+        BookTraitsEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 60,
+    version = 61,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -99,6 +102,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun dismissedContinueSeriesDao(): DismissedContinueSeriesDao
 
     abstract fun hiddenRecommendationDao(): HiddenRecommendationDao
+
+    abstract fun bookTraitsDao(): BookTraitsDao
 
     abstract fun quoteDao(): QuoteDao
 
@@ -1516,6 +1521,33 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_60_61 = object : Migration(60, 61) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS book_traits (
+                            bookId INTEGER NOT NULL,
+                            pace TEXT,
+                            plotCharacterBalance INTEGER,
+                            likeable TEXT,
+                            believable TEXT,
+                            wellDeveloped TEXT,
+                            multiLayered TEXT,
+                            definedByFlaws TEXT,
+                            bipoc TEXT,
+                            lgbtq TEXT,
+                            writingStyle TEXT,
+                            vivid INTEGER NOT NULL,
+                            poetic INTEGER NOT NULL,
+                            unconventional INTEGER NOT NULL,
+                            updatedAt INTEGER NOT NULL,
+                            PRIMARY KEY(bookId)
+                        )
+                    """.trimIndent(),
+                )
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1577,6 +1609,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_57_58,
             MIGRATION_58_59,
             MIGRATION_59_60,
+            MIGRATION_60_61,
         )
     }
 }

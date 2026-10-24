@@ -23,7 +23,7 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
 :feature:*            # Leaf features: lists, profile, onboarding, explore, library, book_detail,
                       #   reading, session, scan, settings, app_update, widget
 :core:*               # domain, database, network, designsystem, presentation, component, uibinding,
-                      #   notification, preferences, identity, book, lists, deadlines, personal,
+                      #   notification, preferences, identity, book, lists, corpus, deadlines, personal,
                       #   profile, connectivity, progresssheet
 ```
 

@@ -32,6 +32,7 @@ kotlin {
             implementation(project(":core:identity"))
             implementation(project(":core:book"))
             implementation(project(":core:lists"))
+            implementation(project(":core:corpus"))
             implementation(project(":core:deadlines"))
             implementation(project(":core:personal"))
             implementation(project(":core:profile"))
