@@ -139,7 +139,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | [Compose Stability Analyzer](https://github.com/skydoves/compose-stability-analyzer) | 0.9.0 | Per-module Compose stability baselines, gated by `stabilityCheck` |
 | [Kover](https://github.com/Kotlin/kotlinx-kover) | 0.9.8 | Code-coverage reports, aggregated at the root for Codecov |
 
-#### Foundation ([`nl.rhaydus`](https://central.sonatype.com/search?q=nl.rhaydus), 0.3.1 — first-party shared libraries, resolved from Maven Central by default, or locally via `foundation.local=true`)
+#### Foundation (`nl.rhaydus`, v0.3.2 — first-party shared libraries, built from the `foundation/` git submodule)
 | Library | Purpose |
 |---|---|
 | `nl.rhaydus:toad` | TOAD presentation runtime — `ToadScreenModel`, `UiState` / `UiAction` / `UiEvent`, `Collector`, `ActionDependencies` |
@@ -234,6 +234,12 @@ flowchart LR
 - A Hardcover.app account and API token
 
 ### Build & Run
+The foundation lives in a git submodule, so clone with submodules (or fetch them in an existing clone):
+```bash
+git clone --recurse-submodules <repo-url>
+git submodule update --init      # existing clone
+```
+
 ```bash
 ./gradlew assembleDebug          # Build a debug APK
 ./gradlew assembleRelease        # Build a release APK

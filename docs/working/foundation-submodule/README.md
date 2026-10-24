@@ -11,15 +11,15 @@ are out of scope; they live in [`../foundation-upstream/README.md`](../foundatio
 leaves the build and CI green. Foundation-side edits, if any turn up, go on `chore/softcover-submodule` in the
 `rhaydus-foundation` checkout.
 
-**Issue:** not filed yet — file a `kind:tech` issue (no milestone) when step 1 starts.
-
 ## Now
 
-- **State:** tracker split; branches created in both repos; no code changed.
-- **Next:** step 1 (submodule and build wiring).
+- **State:** step 1 built and verified locally; everything stays local (no push, tag or issue) until the user
+  says otherwise.
+- **Next:** step 2 (docs and rules).
 - **Open questions:** none.
-- **Verification:** not run.
-- **Uncommitted:** this file and `../foundation-upstream/README.md`.
+- **Verification:** `assembleDebug`, `buildHealth`, `styleCheck` pass; `foundation/gradlew -p foundation build`
+  passes on JDK 26.
+- **Uncommitted:** all of step 1, in Softcover and in `foundation/`.
 
 ## How to run a step
 
@@ -40,15 +40,19 @@ leaves the build and CI green. Foundation-side edits, if any turn up, go on `cho
 
 One step, because CI breaks if the Gradle wiring lands without the submodule checkout.
 
-- [ ] Measure configuration time and a cold `assembleDebug` on the Maven Central build; record under `## Baseline`.
-- [ ] `git submodule add` the foundation at `foundation/`, checked out on `v0.3.1`.
-- [ ] `settings.gradle.kts`: `includeBuild("foundation")` unconditionally, and `foundation/build-logic` in
-      `pluginManagement`; delete the `foundation.local` switch and its `local.properties` key.
-- [ ] `gradle/libs.versions.toml`: drop `rhaydusFoundation`; the `rhaydus-*` entries stay version-less, as
+- [x] Measure configuration time and a cold `assembleDebug` on the Maven Central build; record under `## Baseline`.
+- [x] `git submodule add` the foundation at `foundation/`.
+- [x] Foundation, on its local `chore/softcover-submodule` branch: AGP 9.3.3, Kotlin 2.4.21, KSP 2.3.12,
+      Gradle 9.5.1, dependency-analysis 3.19.2, version 0.3.2; tests pinned to JDK 17 with the foojay resolver;
+      `checkModuleGraph` skips the `swiftPMDependencies*` configurations.
+- [x] `settings.gradle.kts`: `includeBuild("foundation")` unconditionally; the `foundation.local` switch is gone.
+- [x] `gradle/libs.versions.toml`: drop `rhaydusFoundation`; the `rhaydus-*` entries stay version-less, as
       substitution coordinates for the included build.
-- [ ] CI (`ci.yml`, `release.yml`) checks out submodules; the iOS / Xcode build resolves them too.
-- [ ] `README.md` clone instructions use `--recurse-submodules`.
-- [ ] Measure again; record under `## Baseline`.
+- [x] `buildHealth`: the `nl.rhaydus` coordinates are excluded from unused-dependency advice only.
+- [x] CI (`ci-fast`, `ci-full`, `r8-smoke`, `release`) checks out submodules; Xcode needs no change.
+- [x] `README.md` clone instructions use `--recurse-submodules`.
+- [x] Measure again; record under `## Baseline`.
+- [ ] Before pushing: push the foundation branch, tag `v0.3.2` (publishes to Maven Central), pin the pointer on it.
 
 ### 2 — Docs and rules
 
@@ -78,12 +82,11 @@ One step, because CI breaks if the Gradle wiring lands without the submodule che
 - Softcover merges to `main` only with its submodule pointer on a tagged foundation commit.
 - Softcover switches before the agent layer goes upstream; the upstream work follows in its own tracker.
 - Maven Central publishing stays live: the second app still consumes it.
+- The foundation and every app that includes it build on the same AGP and Kotlin versions.
 
 ## Baseline
 
-Filled in by step 1.
-
 | Metric | Before | After |
 |---|---|---|
-| Configuration time | | |
-| Cold `assembleDebug` | | |
+| Configuration time (`help --no-configuration-cache`) | 2.50 s | 3.09–3.19 s |
+| Cold `assembleDebug --no-build-cache --rerun-tasks` | 41.9 s | 30.9–40.9 s |

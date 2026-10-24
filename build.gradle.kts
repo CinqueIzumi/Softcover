@@ -6,7 +6,6 @@ import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.jetbrains.compose.resources.ResourcesExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -36,8 +35,6 @@ dependencies {
 
 // The foundation's shared detekt baseline (F19) ships INSIDE the `nl.rhaydus:detekt-rules` jar as
 // `config/detekt.yml`, so it has to be unpacked before detekt can point `config.setFrom(...)` at it.
-// Under `foundation.local=true` the coordinate substitutes to the included build's jar — the same path
-// the `ktlintRules` configuration takes.
 val rhaydusDetektConfig by configurations.creating { isTransitive = false }
 
 dependencies {
@@ -523,13 +520,6 @@ val conventionProvidedCoordinates = setOf(
     "org.jetbrains.kotlinx:kotlinx-coroutines-core",
 )
 
-// Mirrors settings.gradle.kts: true when developing against the local foundation checkout (the
-// nl.rhaydus:* coordinates are substituted by an includeBuild of ../rhaydus-foundation).
-val foundationLocal = Properties().apply {
-    val localProperties = rootDir.resolve("local.properties")
-    if (localProperties.exists()) localProperties.inputStream().use { load(it) }
-}.getProperty("foundation.local").toBoolean()
-
 // dependency-analysis (buildHealth) configuration. Gates on the high-value categories — genuinely
 // unused dependencies and wrong api/implementation exposure (MODULE_STRUCTURE_GUIDELINES §10) — while
 // staying out of the way of the convention-plugin design: the uniform runtime + test bundle provided
@@ -601,23 +591,16 @@ dependencyAnalysis {
                     "androidx.camera:camera-camera2", // CameraX runtime backend, loaded via ServiceLoader (no compile ref)
                     "com.google.mlkit:barcode-scanning", // MLKit barcode model + API used by the scanner; DA mis-resolves to a transitive
                     "com.google.android.material:material", // Material Components Theme.Material3.* XML themes (resource-only, no Kotlin ref)
+                    // The included foundation build has no published root/-android/-jvm split, which DA needs to
+                    // credit platform usage to a commonMain declaration, so every foundation dependency reads as unused.
+                    "nl.rhaydus:core-common",
+                    "nl.rhaydus:core-platform",
+                    "nl.rhaydus:offline-sync",
+                    "nl.rhaydus:toad",
+                    "nl.rhaydus:designsystem-core",
+                    "nl.rhaydus:designsystem-editorial",
+                    "nl.rhaydus:designsystem-image",
                 )
-
-                // With foundation.local=true the nl.rhaydus:* coordinates are substituted by an includeBuild
-                // of ../rhaydus-foundation; dependency-analysis cannot resolve the composite-build ABI and
-                // false-flags every foundation dependency as unused. Exclude them in local mode only — against
-                // the published artifacts (CI / normal builds) DA resolves them and the gate stays effective.
-                if (foundationLocal) {
-                    exclude(
-                        "nl.rhaydus:core-common",
-                        "nl.rhaydus:core-platform",
-                        "nl.rhaydus:toad",
-                        "nl.rhaydus:designsystem-core",
-                        "nl.rhaydus:designsystem-editorial",
-                        "nl.rhaydus:designsystem-image",
-                        "nl.rhaydus:offline-sync",
-                    )
-                }
             }
 
             onIncorrectConfiguration {

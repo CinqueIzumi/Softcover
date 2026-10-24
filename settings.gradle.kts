@@ -1,5 +1,3 @@
-import java.util.Properties
-
 pluginManagement {
     includeBuild("build-logic")
     repositories {
@@ -27,17 +25,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "Softcover"
 
-// Foundation inner-loop switch (see docs/rhaydus/0.3.1/CAPABILITIES.md "How a project consumes it"):
-// set `foundation.local=true` in local.properties to substitute the published nl.rhaydus coordinates
-// for a sibling `../rhaydus-foundation` checkout via an included build — no version bumps, instant
-// cross-repo edits. Off by default; the build resolves the published artifacts from mavenCentral.
-val foundationLocal = Properties().apply {
-    val localProperties = rootDir.resolve("local.properties")
-    if (localProperties.exists()) localProperties.inputStream().use { load(it) }
-}.getProperty("foundation.local").toBoolean()
-if (foundationLocal) {
-    includeBuild("../rhaydus-foundation")
-}
+includeBuild("foundation")
 
 include(":app")
 include(":smoketest")

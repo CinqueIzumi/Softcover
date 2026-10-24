@@ -7,7 +7,6 @@ agp = "9.3.3"
 kotlin = "2.4.21"
 # Compose Stability Analyzer: 0.9.0 is the first release that requires Kotlin 2.4.
 stabilityAnalyzer = "0.9.0"
-rhaydusFoundation = "0.3.1"
 ktlint = "1.7.1"
 coreKtx = "1.17.0"
 okio = "3.9.1"
@@ -70,17 +69,16 @@ sqlite = "2.6.2"
 ksafe = "2.1.2"
 
 [libraries]
-# rhaydus foundation — published nl.rhaydus:* artifacts, resolved from mavenCentral
-# (or substituted with the local ../rhaydus-foundation checkout when foundation.local=true)
-rhaydus-toad = { group = "nl.rhaydus", name = "toad", version.ref = "rhaydusFoundation" }
-rhaydus-coreCommon = { group = "nl.rhaydus", name = "core-common", version.ref = "rhaydusFoundation" }
-rhaydus-corePlatform = { group = "nl.rhaydus", name = "core-platform", version.ref = "rhaydusFoundation" }
-rhaydus-offlineSync = { group = "nl.rhaydus", name = "offline-sync", version.ref = "rhaydusFoundation" }
-rhaydus-designsystemCore = { group = "nl.rhaydus", name = "designsystem-core", version.ref = "rhaydusFoundation" }
-rhaydus-designsystemEditorial = { group = "nl.rhaydus", name = "designsystem-editorial", version.ref = "rhaydusFoundation" }
-rhaydus-designsystemImage = { group = "nl.rhaydus", name = "designsystem-image", version.ref = "rhaydusFoundation" }
-rhaydus-ktlintRules = { group = "nl.rhaydus", name = "ktlint-rules", version.ref = "rhaydusFoundation" }
-rhaydus-detektRules = { group = "nl.rhaydus", name = "detekt-rules", version.ref = "rhaydusFoundation" }
+# rhaydus foundation — nl.rhaydus:* coordinates, built from the foundation/ git submodule via includeBuild
+rhaydus-toad = { group = "nl.rhaydus", name = "toad" }
+rhaydus-coreCommon = { group = "nl.rhaydus", name = "core-common" }
+rhaydus-corePlatform = { group = "nl.rhaydus", name = "core-platform" }
+rhaydus-offlineSync = { group = "nl.rhaydus", name = "offline-sync" }
+rhaydus-designsystemCore = { group = "nl.rhaydus", name = "designsystem-core" }
+rhaydus-designsystemEditorial = { group = "nl.rhaydus", name = "designsystem-editorial" }
+rhaydus-designsystemImage = { group = "nl.rhaydus", name = "designsystem-image" }
+rhaydus-ktlintRules = { group = "nl.rhaydus", name = "ktlint-rules" }
+rhaydus-detektRules = { group = "nl.rhaydus", name = "detekt-rules" }
 
 # detekt rule API — consumed by the app-local :detekt-rules module
 detekt-api = { group = "io.gitlab.arturbosch.detekt", name = "detekt-api", version.ref = "detekt" }
