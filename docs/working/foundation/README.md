@@ -1,127 +1,106 @@
 # Foundation — Implementation Plan
 
-> **Lifecycle.** Delete this directory in the PR that finishes step 5. The roadmap lives in GitHub Issues (see
+> **Lifecycle.** Delete this README and `agent-layer.md` in the PR that finishes step 4; `candidates.md` stays. The roadmap lives in GitHub Issues (see
 > `CLAUDE.md` § Roadmap); this is a working plan for one rollout.
 
-**Goal:** Softcover builds `rhaydus-foundation` from the git submodule at `foundation/`, pinned on a tagged
-release; the foundation owns the generic agent layer and the shared `build-logic` gates; both apps build it from
-the submodule; Maven Central publishing and the GitHub plugin marketplace are retired.
+**Goal:** the foundation is finished before any other app adopts it. Softcover builds it from the git submodule at
+`foundation/`; the `rhaydus-kotlin` plugin carries a generic agent layer that any project can reuse, with
+project facts read from the project; the bugs and gaps in code the foundation already ships are fixed; then the
+whole thing is pushed and tagged in one go.
 
-**Rollout model:** foundation-side work lands as PRs on `CinqueIzumi/rhaydus-foundation`, edited through
-Softcover's `foundation/` submodule; Softcover-side work is one branch, one PR per step; the second app adopts in
-its own repo (step 3). Every step boundary leaves every build green. Sibling files:
-[`agent-layer.md`](agent-layer.md) (the FU rows) and [`candidates.md`](candidates.md) (the F-numbered backlog).
-
-**Issue:** not filed yet — file a `kind:tech` issue (no milestone) when step 1 starts.
+**Rollout model:** everything stays local until step 4. Foundation work is committed on the submodule's
+`chore/softcover-submodule` branch, Softcover work on `chore/foundation-submodule`; nothing is pushed, tagged or
+filed before step 4. Every step boundary leaves both builds green. Sibling files: [`agent-layer.md`](agent-layer.md)
+(the FU rows) and [`candidates.md`](candidates.md) (the F-numbered backlog).
 
 ## Now
 
 - **State:** the submodule switch is built, verified (the PR gate and the iOS compile pass) and committed
   locally; nothing pushed.
-- **Next:** step 0, when the user decides to share it.
+- **Next:** step 1 (audit Softcover's agent setup against the plugin).
 - **Open questions:** none.
 - **Uncommitted:** none.
 
 ## How to run a step
 
 1. Start a fresh session (`/clear`) and ask it to resume from this `## Now` block.
-2. Do the one step `## Now` names. Foundation-side items run in the `foundation/` submodule and follow the
-   foundation's own `CLAUDE.md`.
+2. Do the one step `## Now` names. Foundation-side items run in the `foundation/` submodule and follow
+   `.claude/rules/foundation.md`.
 3. Acceptance passes → tick the step below → update `## Now` → **ask the user before committing** (subject-only
    message, in each repo) → `/handoff` → the user types `/clear`.
 
 ## Steps
 
-| Step | Scope | Repo | Status |
-|---|---|---|---|
-| 0 | Ship the submodule switch | both | [ ] |
-| 1 | Foundation guardrails | foundation | [ ] |
-| 2 | A generic agent layer upstream (FU-1 to FU-13), adopted in Softcover | both | [ ] |
-| 3 | The second app adopts the submodule | second app | [ ] |
-| 4 | Retire Maven Central publishing and the GitHub marketplace; upstream the `build-logic` gates | both | [ ] |
-| 5 | Drain the foundation working docs and close out | both | [ ] |
+| Step | Scope | Status |
+|---|---|---|
+| 1 | Audit Softcover's agent setup against the plugin | [ ] |
+| 2 | A generic agent layer in `rhaydus-kotlin`, adopted in Softcover | [ ] |
+| 3 | Fix what the foundation already ships | [ ] |
+| 4 | Ship: push, tag, move the pointer | [ ] |
 
-### 0 — Ship the submodule switch
+### 1 — Audit
 
-Softcover is on `chore/foundation-submodule`; the foundation is on its local `chore/softcover-submodule` branch
-(version 0.3.2, unpushed).
+Read-only. The output is a decision per item, recorded in `agent-layer.md` and under `## Decisions`.
 
-- [ ] Push the foundation branch `chore/softcover-submodule`.
-- [ ] Tag `v0.3.2` (a `v*` tag publishes to Maven Central).
-- [ ] Move Softcover's submodule pointer onto the tag.
-- [ ] Push `chore/foundation-submodule` and open its PR.
+- [ ] Compare Softcover's `.claude/agents/softcover-*.md`, hooks, skills, rules and `docs/reference/agent-briefs.md`
+      with the plugin's agents, hook and skill in `foundation/claude/plugins/rhaydus-kotlin/`.
+- [ ] Mine `.claude/agent-memory/**` for lessons the generic agents should carry.
+- [ ] Check every finding against the existing FU rows in `agent-layer.md` and the entries in `candidates.md`;
+      one already covered updates that row or entry instead of adding a duplicate.
+- [ ] Per item: upstream (generic), stay in Softcover (project fact or personal preference), or drop.
+- [ ] Decide the generic shape: what the agents carry (process) and what each project supplies (doc paths, brief
+      templates, Gradle wrapper, module names) and where `rhaydus-adopt` writes it.
 
-### 1 — Guardrails
+### 2 — Generic agent layer
 
-No change originating in an app lands in the foundation before this step is done.
+- [ ] The implementer / reviewer / test-writer trio replaces `rhaydus-logic` / `rhaydus-ui` / `code-reviewer` /
+      `unit-test-writer` (FU-1, FU-7, FU-10).
+- [ ] The hooks, `/handoff` skill, quiet-Gradle script, token-usage script and doc-growth guards the audit marked
+      generic (FU-2 to FU-5, FU-11, FU-12).
+- [ ] The docs-first reminder names the new agents (FU-13).
+- [ ] `rhaydus-adopt` writes the catalogue-style managed `CLAUDE.md` block and the `.claude/rules/*.md` templates
+      (FU-6).
+- [ ] Split rule from rationale in `foundation/docs/` (FU-8).
+- [ ] Softcover adopts it: re-run `rhaydus-adopt`; delete the four deny rules, the duplicate
+      `.claude/skills/style-check/` and every local hook, script or agent the plugin now ships; the `CLAUDE.md`
+      local override becomes the managed block.
 
-- [ ] Wire `detektCheck` into the foundation's `check`.
-- [ ] Foundation CI runs `check` on every PR.
-- [ ] Kotlin binary-compatibility-validator API dumps on every library module, committed; a public API change
-      shows as a dump diff in review.
-- [ ] A `CHANGELOG.md` with one entry per breaking change, and a semver tagging policy in the foundation README —
-      the entries an app reads when it moves its pointer to a newer tag.
-- [ ] `.claude/rules/foundation.md` in Softcover: update the API dump and changelog with every foundation change.
+### 3 — Fix what the foundation already ships
 
-### 2 — Generic agent layer upstream
+Bugs and gaps in shared code only; new components, design tokens and house-style lint rules wait for a second app.
 
-Port every row of [`agent-layer.md`](agent-layer.md) into `claude/plugins/rhaydus-kotlin/`, generic enough that
-neither app needs a deny list; then adopt it in Softcover.
+- [ ] Component bugs: F26, F27, F31 + F46, F36, F45, F47, F48, F49, F51; delete Softcover's forks and the
+      detekt bans on the foundation versions.
+- [ ] Contract gaps: F42, F44, F56.
+- [ ] Tooling: F33, F37, F54; wire `detektCheck` into the foundation's `check`.
+- [ ] Data: F55.
+- [ ] Adopt F18, F20, F21 through `includeBuild("foundation/build-logic")`; delete the Softcover copies.
 
-- [ ] Decide the generic shape: what the project supplies (agent names, brief templates, doc paths, Gradle
-      wrapper) and how `rhaydus-adopt` writes it. Record it under `## Decisions`.
-- [ ] FU-1, FU-7, FU-10: replace `rhaydus-logic` / `rhaydus-ui` / `code-reviewer` / `unit-test-writer` with the
-      implementer / reviewer / test-writer trio.
-- [ ] FU-2 to FU-5, FU-11, FU-12: the hooks, `/handoff` skill, quiet-Gradle script, token-usage script and
-      doc-growth guards.
-- [ ] FU-6: the catalogue-style managed `CLAUDE.md` block and the `.claude/rules/*.md` templates in
-      `rhaydus-adopt`.
-- [x] `rhaydus-adopt` wires the submodule, docs in place and the project-scoped plugin instead of Maven
-      coordinates.
-- [ ] FU-13: the docs-first reminder names the new agents.
-- [ ] FU-8 and FU-9: split rule from rationale in `docs/`; the presentation file-size gate as a convention plugin.
-- [ ] Tag a foundation release carrying all of it; move Softcover's submodule pointer to it.
-- [ ] Softcover: re-run `rhaydus-adopt`; the `CLAUDE.md` local override becomes the managed block.
-- [ ] Softcover: delete the four `Agent(rhaydus-kotlin:…)` deny rules, the duplicate `.claude/skills/style-check/`,
-      and every local hook or script that now ships in the plugin.
-- [ ] Softcover: `softcover-*` agents shrink to the Softcover-specific layer the generic shape allows.
+### 4 — Ship
 
-### 3 — The second app adopts
+- [ ] Bump the foundation version for everything since 0.3.1 (`gradle.properties` and `plugin.json`).
+- [ ] Push the foundation branch, merge it, and tag the release (a `v*` tag publishes to Maven Central).
+- [ ] Move Softcover's submodule pointer onto the tag; push `chore/foundation-submodule` and open its PR.
+- [ ] Delete this README and `agent-layer.md` (emptied by step 2) and the `ACTIVE.md` line; `candidates.md` stays
+      as the foundation backlog.
 
-Run in the second app's repo, by `rhaydus-adopt` from the step 2 tag.
+## Later (not this plan)
 
-- [ ] Submodule at `foundation/` on the same tag as Softcover, `includeBuild` wiring, CI submodule checkout.
-- [ ] Plugin from the submodule at project scope; the managed `CLAUDE.md` block.
-- [ ] Its local workarounds for foundation gaps filed as foundation issues.
-
-### 4 — Retire publishing; upstream the gates
-
-- [ ] Remove `com.vanniktech.maven.publish`, signing and the Central Portal configuration from the foundation;
-      keep each module's `group` and artifact name (the included-build substitution coordinates).
-- [ ] Remove the marketplace manifest's GitHub install instructions from the foundation README.
-- [ ] F18, F20, F21 from [`candidates.md`](candidates.md): move `checkModuleGraph`, the `dependencyAnalysis`
-      policy and the shared `lint.xml` into `foundation/build-logic`, consumed through
-      `includeBuild("foundation/build-logic")`; delete the Softcover copies. Publishing them as Gradle plugins
-      is not needed.
-
-### 5 — Close out
-
-- [ ] File every open entry of [`candidates.md`](candidates.md) as an issue on the foundation repo; delete the
-      file.
-- [ ] Delete [`agent-layer.md`](agent-layer.md) (emptied by step 2).
-- [ ] `.claude/rules/docs.md`: the "Something the foundation should adopt" row points at foundation issues.
-- [ ] Softcover's submodule pointer sits on a tag; delete this directory and its `ACTIVE.md` line.
+- The second app adopts the submodule, once the foundation is finished.
+- Retire Maven Central publishing and the GitHub install instructions, after the second app builds from the
+  submodule.
+- Softcover-specific components, design tokens and house-style lint rules in `candidates.md`, extracted when a
+  second app wants them.
 
 ## Decisions
 
 - Softcover consumes the foundation as a submodule at `foundation/` via `includeBuild`.
 - Submodule over subtree: the foundation keeps its own history, PRs and tags.
 - Softcover merges to `main` only with its submodule pointer on a tagged foundation commit.
-- Softcover switched before the agent layer goes upstream; the upstream work follows in steps 1 to 5.
-- Maven Central publishing stays live until both apps build from the submodule (step 4 after step 3).
 - The foundation and every app that includes it build on the same AGP and Kotlin versions.
-- Upstream agents, hooks and skills are generic; app-specific names, briefs and doc paths stay in the app.
-- Each app enables the plugin per project from its own `foundation/` checkout.
+- One plugin, `rhaydus-kotlin`, loaded per project from its own `foundation/` checkout; no user-scope install.
+- The plugin ships process; project facts live in the project; personal preferences stay with the user.
+- Maven Central publishing stays live until the second app builds from the submodule.
 
 ## Baseline
 
