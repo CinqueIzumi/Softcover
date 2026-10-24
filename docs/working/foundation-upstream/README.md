@@ -66,7 +66,9 @@ Port every row of [`../foundation-token-hygiene.md`](../foundation-token-hygiene
 - [ ] FU-2 to FU-5, FU-11, FU-12: the hooks, `/handoff` skill, quiet-Gradle script, token-usage script and
       doc-growth guards.
 - [ ] FU-6: the catalogue-style managed `CLAUDE.md` block and the `.claude/rules/*.md` templates in
-      `rhaydus-adopt`; `rhaydus-adopt` wires the submodule instead of Maven coordinates.
+      `rhaydus-adopt`.
+- [x] `rhaydus-adopt` wires the submodule, docs in place and the project-scoped plugin instead of Maven
+      coordinates.
 - [ ] FU-13: the docs-first reminder names the new agents.
 - [ ] FU-8 and FU-9: split rule from rationale in `docs/`; the presentation file-size gate as a convention plugin.
 - [ ] Tag a foundation release carrying all of it; move Softcover's submodule pointer to it.
