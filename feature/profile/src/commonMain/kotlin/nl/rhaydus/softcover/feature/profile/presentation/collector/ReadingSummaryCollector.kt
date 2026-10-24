@@ -14,9 +14,10 @@ internal class ReadingSummaryCollector : ProfileCollector {
         scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>,
         dependencies: ProfileDependencies,
     ) {
-        dependencies.observeReadingLifeUseCase()
+        dependencies.observeReadingHistoryUseCase()
+            .untilBackfilled(dependencies.observeAuthorDemographicsBackfilledUseCase)
             .filterNotNull()
-            .collect { readingLife ->
+            .collect { history ->
                 val currentYear = dependencies.clock
                     .now()
                     .toLocalDateTime(dependencies.timeZone)
@@ -25,7 +26,7 @@ internal class ReadingSummaryCollector : ProfileCollector {
                 scope.setState {
                     it.copy(
                         readingSummary = readingSummaryUiModel(
-                            readingLife = readingLife,
+                            history = history,
                             currentYear = currentYear,
                         ),
                     )

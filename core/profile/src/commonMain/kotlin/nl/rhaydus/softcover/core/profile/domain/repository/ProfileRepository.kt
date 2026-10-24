@@ -12,7 +12,7 @@ interface ProfileRepository {
 
     fun streamReadingDaysDescending(userId: Int): Flow<LocalDate>
 
-    // Merges into whatever is cached without touching the stats half - see
+    // Merges into whatever is cached without touching the identity half - see
     // ProfileLocalDataSource for how the two halves are kept from clobbering each other.
     suspend fun cacheUserProfileActivity(
         readingStreak: Int,
@@ -20,7 +20,7 @@ interface ProfileRepository {
     )
 
     // Merges into whatever is cached without touching the activity half.
-    suspend fun cacheUserProfileStats(snapshot: UserProfileSnapshot)
+    suspend fun cacheUserProfileIdentity(snapshot: UserProfileSnapshot)
 
     suspend fun markActiveReadingDate(date: LocalDate)
 

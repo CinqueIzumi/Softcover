@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
@@ -27,6 +28,8 @@ import org.junit.jupiter.api.Test
 class UserInformationCollectorTest {
     private lateinit var observeUserProfileDataUseCase: ObserveUserProfileDataUseCase
     private lateinit var refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase
+    private lateinit var observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase
+    private lateinit var backfilledFlow: MutableStateFlow<Boolean>
     private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
     private lateinit var eventChannel: Channel<ProfileEvent>
     private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
@@ -35,6 +38,8 @@ class UserInformationCollectorTest {
     @BeforeEach
     fun setUp() {
         profileDataFlow = MutableSharedFlow()
+        backfilledFlow = MutableStateFlow(true)
+        observeAuthorDemographicsBackfilledUseCase = mockk()
         observeUserProfileDataUseCase = mockk()
         refreshUserProfileDataUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
@@ -48,6 +53,10 @@ class UserInformationCollectorTest {
         every {
             observeUserProfileDataUseCase()
         } returns profileDataFlow
+
+        every {
+            observeAuthorDemographicsBackfilledUseCase()
+        } returns backfilledFlow
     }
 
     private fun stubDependencies(testScope: TestScope): ProfileDependencies {
@@ -60,6 +69,10 @@ class UserInformationCollectorTest {
             every {
                 mock.refreshUserProfileDataUseCase
             } returns refreshUserProfileDataUseCase
+
+            every {
+                mock.observeAuthorDemographicsBackfilledUseCase
+            } returns observeAuthorDemographicsBackfilledUseCase
 
             every {
                 mock.coroutineScope
@@ -80,9 +93,6 @@ class UserInformationCollectorTest {
         name = "Jane Doe",
         username = "cinque",
         bio = "Avid reader",
-        booksRead = 42,
-        totalPagesRead = 12000,
-        averageRating = 4.2,
         readingStreak = 7,
     )
 
@@ -132,6 +142,55 @@ class UserInformationCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.userProfileData shouldBe profileData
+            stateFlow.value.isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps loading while the library is not yet backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
+            backfilledFlow.value = false
+            val dependencies = stubDependencies(this)
+            val initializer = UserInformationCollector()
+            val job = launch {
+                initializer.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            profileDataFlow.emit(buildProfileData())
+
+            // ----- Assert -----
+            stateFlow.value.isLoading shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `stops loading once the backfill flag turns true`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
+            backfilledFlow.value = false
+            val dependencies = stubDependencies(this)
+            val initializer = UserInformationCollector()
+            val job = launch {
+                initializer.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            profileDataFlow.emit(buildProfileData())
+
+            // ----- Act -----
+            backfilledFlow.value = true
+
+            // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
             job.cancel()
         }

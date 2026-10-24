@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnScopeSelectedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
 import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
@@ -23,6 +24,16 @@ internal fun ColumnScope.StatsAtlasBody(
     onBookCardEvent: (BookCardEvent) -> Unit,
 ) {
     PageMasthead(model = state.masthead)
+
+    Spacer(modifier = Modifier.height(Spacing.xl))
+
+    AtlasScopeSection(
+        scopeChips = state.scopeChips,
+        isHistoryLoaded = state.readingHistory != null,
+        scopeLine = state.scopeLine,
+        onScopeSelected = { runAction(OnScopeSelectedAction(statsScope = it)) },
+        modifier = Modifier.fillMaxWidth(),
+    )
 
     Spacer(modifier = Modifier.height(Spacing.xxxl))
 

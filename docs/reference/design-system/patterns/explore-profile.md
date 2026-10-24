@@ -9,11 +9,29 @@
 ### Stats Atlas
 
 - Pushed from Profile's summary card; one long scroll, never tabs. Top to bottom: a `PageMasthead`
-  ("Your reading record" / "Stats"); the opening tiles (hero "Pages read", the page's one
-  `primary`-filled surface, over a full-width "Books" tile); "In this atlas" contents; the chapters.
+  ("Your reading record" / "Stats"); the scope row and its line; the opening tiles (hero "Pages read", the
+  page's one `primary`-filled surface, over a full-width "Books" tile); "In this atlas" contents; the
+  chapters.
+- Scope row: single-select `Tonal` chips with the `Eyebrow` face, "Last 30 days", "Last 6 months", "Last 12
+  months", one per calendar year the reader finished a book in (newest first), "All time". Compact and
+  medium scroll sideways; expanded wraps. A tap gives selection haptics. The reader lands on this year when
+  they have finished a book in it, else on All time; the pick is not remembered, and a selected year that
+  leaves the row falls back to All time.
+- Beneath the row, a quiet italic line names the dates: "Showing 2026", "Showing 24 September to today"
+  (the year is added only when the window starts in an earlier one), "Showing every year".
+- The scope moves the opening tiles, "The genres you read most", "Who you read" (Hide untagged authors still
+  applies) and "How you score". "Recently loved" and the year chart ignore it. Values animate between scopes;
+  labels cross-fade, and reduced motion swaps them in place.
+- A scope with no finished books says so in each section's framing sentence ("No finished books in the last
+  30 days.") instead of drawing an empty chart; the opening tiles show 0 and say nothing was finished. In a
+  narrow scope with too few ratings to classify, "How you score" states the count ("3 rated books in the last
+  30 days") instead of "Too early to tell". Captions that say "your finished books" name the scope.
+- The year chart always shows every year. A selected calendar year lights its column `Lead` (the others
+  `Second`, zero years a `Fifth` stub) and the caption names that year and its count for the Books / Pages
+  metric; a rolling window or All time lights the busiest year.
 - Contents rows (two-digit number, title, caption, chevron) scroll the page to their chapter's top. A
   chapter opens with an eyebrow "01 · Title" numbered by position, so row and header always agree.
-- A stat the app holds no data source for yet (reading days, the time window) is left out, never a 0.
+- A stat the app holds no data source for yet (reading days) is left out, never a 0.
 - Today's only chapter, "Temporary", holds the former Profile charts: "The shape of the years" (a
   `ColumnChart` behind a Books / Pages `SegmentedControl`); "The genres you read most"; "Who you read";
   "How you score" (headline from the rating band, never the bare average); "Recently loved" (up to three

@@ -18,7 +18,7 @@ interface ProfileLocalDataSource {
         recentReadingDays: Set<LocalDate>,
     )
 
-    suspend fun cacheUserProfileStats(snapshot: UserProfileSnapshot)
+    suspend fun cacheUserProfileIdentity(snapshot: UserProfileSnapshot)
 
     suspend fun markActiveReadingDate(date: LocalDate)
 
@@ -32,9 +32,6 @@ private val emptyUserProfileData = UserProfileData(
     name = "",
     username = "",
     bio = "",
-    booksRead = 0,
-    totalPagesRead = 0,
-    averageRating = 0.0,
     readingStreak = 0,
 )
 
@@ -46,7 +43,7 @@ internal class ProfileLocalDataSourceImpl(
             .map { it.profile?.toModel() }
             .distinctUntilChanged()
 
-    // Merges into the current cache (or the neutral stand-in on a first-ever refresh) so a stats
+    // Merges into the current cache (or the neutral stand-in on a first-ever refresh) so an identity
     // refresh that hasn't run yet, or already ran, is left untouched.
     override suspend fun cacheUserProfileActivity(
         readingStreak: Int,
@@ -65,8 +62,8 @@ internal class ProfileLocalDataSourceImpl(
     }
 
     // Merges into the current cache, carrying the existing readingStreak/recentReadingDays forward
-    // untouched so a stats refresh never blanks activity data an earlier refresh already wrote.
-    override suspend fun cacheUserProfileStats(snapshot: UserProfileSnapshot) {
+    // untouched so an identity refresh never blanks activity data an earlier refresh already wrote.
+    override suspend fun cacheUserProfileIdentity(snapshot: UserProfileSnapshot) {
         profileCacheDataStore.store.updateData { cache ->
             val current = cache.profile?.toModel() ?: emptyUserProfileData
 
@@ -76,17 +73,6 @@ internal class ProfileLocalDataSourceImpl(
                     name = snapshot.name,
                     username = snapshot.username,
                     bio = snapshot.bio,
-                    booksRead = snapshot.booksRead,
-                    totalPagesRead = snapshot.totalPagesRead,
-                    averageRating = snapshot.averageRating,
-                    booksByYear = snapshot.booksByYear,
-                    pagesByYear = snapshot.pagesByYear,
-                    pagesByMonth = snapshot.pagesByMonth,
-                    genres = snapshot.genres,
-                    ratings = snapshot.ratings,
-                    recentlyLoved = snapshot.recentlyLoved,
-                    trackedYears = snapshot.trackedYears,
-                    authorDemographics = snapshot.authorDemographics,
                 ).toEntity(),
             )
         }

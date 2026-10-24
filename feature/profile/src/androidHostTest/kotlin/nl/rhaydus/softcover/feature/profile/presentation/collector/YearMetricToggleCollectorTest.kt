@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
@@ -38,11 +38,11 @@ class YearMetricToggleCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `disables the toggle while the reading life is loading`() = runTest(UnconfinedTestDispatcher()) {
+        fun `disables the toggle while the reading history is loading`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = StatsAtlasUiState(
                 isLoading = true,
-                readingLife = mockk<ReadingLife>(),
+                readingHistory = mockk<ReadingHistory>(),
             )
             val collector = YearMetricToggleCollector()
 
@@ -63,11 +63,11 @@ class YearMetricToggleCollectorTest {
         }
 
         @Test
-        fun `disables the toggle when loading finished without a reading life`() = runTest(UnconfinedTestDispatcher()) {
+        fun `disables the toggle when loading finished without a reading history`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
-                readingLife = null,
+                readingHistory = null,
             )
             val collector = YearMetricToggleCollector()
 
@@ -88,11 +88,11 @@ class YearMetricToggleCollectorTest {
         }
 
         @Test
-        fun `enables the toggle once the reading life has loaded`() = runTest(UnconfinedTestDispatcher()) {
+        fun `enables the toggle once the reading history has loaded`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
-                readingLife = mockk<ReadingLife>(),
+                readingHistory = mockk<ReadingHistory>(),
             )
             val collector = YearMetricToggleCollector()
 
@@ -117,7 +117,7 @@ class YearMetricToggleCollectorTest {
             // ----- Arrange -----
             stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
-                readingLife = mockk<ReadingLife>(),
+                readingHistory = mockk<ReadingHistory>(),
             )
             val collector = YearMetricToggleCollector()
             val job = launch {

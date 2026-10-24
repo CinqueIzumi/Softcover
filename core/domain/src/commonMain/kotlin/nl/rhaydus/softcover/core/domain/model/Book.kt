@@ -16,6 +16,7 @@ data class Book(
     val description: String,
     val releaseYear: Int,
     val releaseDate: LocalDate? = null,
+    val pages: Int? = null,
     val coverUrl: String,
     val authors: List<Author>,
     val usersCount: Int,

@@ -23,9 +23,6 @@ class ProfileLocalDataSourceImplTest {
         name = "",
         username = "",
         bio = "",
-        booksRead = 0,
-        totalPagesRead = 0,
-        averageRating = 0.0,
         readingStreak = 0,
         recentReadingDays = emptyList(),
     )

@@ -4,18 +4,16 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
-import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
-import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
@@ -28,12 +26,14 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 class ReadingSummaryCollectorTest {
-    private lateinit var observeReadingLifeUseCase: ObserveReadingLifeUseCase
+    private lateinit var observeReadingHistoryUseCase: ObserveReadingHistoryUseCase
+    private lateinit var observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase
     private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
     private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
-    private lateinit var readingLifeFlow: MutableSharedFlow<ReadingLife?>
+    private lateinit var readingHistoryFlow: MutableStateFlow<ReadingHistory>
+    private lateinit var backfilledFlow: MutableStateFlow<Boolean>
 
-    private val readingLife = ReadingLife(
+    private val readingHistory = ReadingHistory(
         booksByYear = listOf(
             YearCount(
                 year = 2024,
@@ -54,16 +54,14 @@ class ReadingSummaryCollectorTest {
                 count = 1_200,
             ),
         ),
-        pagesByMonth = emptyList(),
-        genres = GenreBreakdown(),
-        ratings = RatingsDistribution(),
-        recentlyLoved = emptyList(),
     )
 
     @BeforeEach
     fun setUp() {
-        readingLifeFlow = MutableSharedFlow()
-        observeReadingLifeUseCase = mockk()
+        readingHistoryFlow = MutableStateFlow(ReadingHistory())
+        backfilledFlow = MutableStateFlow(true)
+        observeReadingHistoryUseCase = mockk()
+        observeAuthorDemographicsBackfilledUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -72,8 +70,12 @@ class ReadingSummaryCollectorTest {
         )
 
         every {
-            observeReadingLifeUseCase()
-        } returns readingLifeFlow
+            observeReadingHistoryUseCase()
+        } returns readingHistoryFlow
+
+        every {
+            observeAuthorDemographicsBackfilledUseCase()
+        } returns backfilledFlow
     }
 
     private fun stubDependencies(
@@ -87,20 +89,23 @@ class ReadingSummaryCollectorTest {
         }
         return mockk<ProfileDependencies>(relaxed = true).also { mock ->
             every {
-            mock.observeReadingLifeUseCase
-        } returns observeReadingLifeUseCase
+                mock.observeReadingHistoryUseCase
+            } returns observeReadingHistoryUseCase
             every {
-            mock.clock
-        } returns fixedClock
+                mock.observeAuthorDemographicsBackfilledUseCase
+            } returns observeAuthorDemographicsBackfilledUseCase
             every {
-            mock.timeZone
-        } returns timeZone
+                mock.clock
+            } returns fixedClock
             every {
-            mock.coroutineScope
-        } returns testScope
+                mock.timeZone
+            } returns timeZone
             every {
-            mock.mainDispatcher
-        } returns dispatcher
+                mock.coroutineScope
+            } returns testScope
+            every {
+                mock.mainDispatcher
+            } returns dispatcher
         }
     }
 
@@ -123,7 +128,7 @@ class ReadingSummaryCollectorTest {
                 }
 
                 // ----- Act -----
-                readingLifeFlow.emit(readingLife)
+                readingHistoryFlow.value = readingHistory
 
                 // ----- Assert -----
                 stateFlow.value.readingSummary.stats.map { it.stat.value } shouldBe listOf(9.0, 800.0)
@@ -147,7 +152,7 @@ class ReadingSummaryCollectorTest {
                 }
 
                 // ----- Act -----
-                readingLifeFlow.emit(readingLife)
+                readingHistoryFlow.value = readingHistory
 
                 // ----- Assert -----
                 stateFlow.value.readingSummary.stats.map { it.stat.value } shouldBe listOf(4.0, 1_200.0)
@@ -171,7 +176,7 @@ class ReadingSummaryCollectorTest {
             }
 
             // ----- Act -----
-            readingLifeFlow.emit(readingLife)
+            readingHistoryFlow.value = readingHistory
 
             // ----- Assert -----
             stateFlow.value.readingSummary.stats.map { it.stat.value } shouldBe listOf(4.0, 1_200.0)
@@ -179,8 +184,9 @@ class ReadingSummaryCollectorTest {
         }
 
         @Test
-        fun `keeps the loading summary when observe emits null`() = runTest(UnconfinedTestDispatcher()) {
+        fun `keeps the loading summary while the library is not backfilled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
+            backfilledFlow.value = false
             val dependencies = stubDependencies(
                 this,
                 now = Instant.parse("2025-06-01T00:00:00Z"),
@@ -194,7 +200,7 @@ class ReadingSummaryCollectorTest {
             }
 
             // ----- Act -----
-            readingLifeFlow.emit(null)
+            readingHistoryFlow.value = readingHistory
 
             // ----- Assert -----
             stateFlow.value.readingSummary.stats.map { it.stat.isLoading } shouldBe listOf(true, true)

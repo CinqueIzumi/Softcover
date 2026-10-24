@@ -18,10 +18,14 @@ private const val COMPACT_COUNT_MILLION = 1_000_000
 private const val COMPACT_COUNT_ROUNDS_TO_MILLION = 999_950
 private const val EMPTY_CAPTION = "Finish a book and this chart starts filling in."
 
-/** The first busiest year leads; a null [series] yields the loading columns. */
+/**
+ * The first busiest year leads, or [litYear] does when the reader has picked a calendar year; a null
+ * [series] yields the loading columns.
+ */
 internal fun yearHistoryChartUiModel(
     series: List<YearCount>?,
     metric: YearMetric,
+    litYear: Int? = null,
 ): ColumnChartUiModel {
     if (series == null) {
         return ColumnChartUiModel(
@@ -40,7 +44,11 @@ internal fun yearHistoryChartUiModel(
     }
 
     val maxCount = series.maxOfOrNull { it.count } ?: 0
-    val peakIndex = if (maxCount > 0) series.indexOfFirst { it.count == maxCount } else -1
+    val leadIndex = when {
+        litYear != null -> series.indexOfFirst { it.year == litYear && it.count > 0 }
+        maxCount > 0 -> series.indexOfFirst { it.count == maxCount }
+        else -> -1
+    }
 
     return ColumnChartUiModel(
         columns = series
@@ -48,7 +56,7 @@ internal fun yearHistoryChartUiModel(
                 ColumnUiModel(
                     fraction = yearCount.count.toFloat() / maxCount.coerceAtLeast(1),
                     tone = when {
-                        index == peakIndex -> ChartTone.Lead
+                        index == leadIndex -> ChartTone.Lead
                         yearCount.count > 0 -> ChartTone.Second
                         else -> ChartTone.Fifth
                     },
@@ -80,10 +88,20 @@ private fun yearColumnDescription(
     return "${yearCount.year}, ${formatGroupedNumber(yearCount.count)} $unit"
 }
 
+/** Names [litYear] and its count when the reader has picked a calendar year, else the busiest year. */
 internal fun yearHistoryCaption(
     series: List<YearCount>?,
     metric: YearMetric,
+    litYear: Int? = null,
 ): String {
+    if (litYear != null && series != null) {
+        return litYearCaption(
+            year = litYear,
+            count = series.firstOrNull { it.year == litYear }?.count ?: 0,
+            metric = metric,
+        )
+    }
+
     val peak = series?.maxByOrNull { it.count }?.takeIf { it.count > 0 }
         ?: return EMPTY_CAPTION
 
@@ -93,6 +111,24 @@ internal fun yearHistoryCaption(
     }
 
     return "${peak.year} was your busiest year yet: ${formatGroupedNumber(peak.count)} $unit."
+}
+
+private fun litYearCaption(
+    year: Int,
+    count: Int,
+    metric: YearMetric,
+): String = when (metric) {
+    YearMetric.BOOKS -> when (count) {
+        0 -> "No finished books in $year."
+        1 -> "In $year you finished 1 book."
+        else -> "In $year you finished ${formatGroupedNumber(count)} books."
+    }
+
+    YearMetric.PAGES -> when (count) {
+        0 -> "No pages read in $year."
+        1 -> "In $year you read 1 page."
+        else -> "In $year you read ${formatGroupedNumber(count)} pages."
+    }
 }
 
 /** Full Pages counts (7,753) collide across eight narrow columns, so thousands collapse to "7.8k". */

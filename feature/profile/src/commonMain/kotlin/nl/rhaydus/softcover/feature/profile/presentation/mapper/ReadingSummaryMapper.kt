@@ -5,28 +5,28 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
 import nl.rhaydus.softcover.feature.profile.presentation.state.ReadingSummaryStatUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.ReadingSummaryUiModel
 
-/** A null [readingLife] yields loading stats; a year with no entry counts as zero. */
+/** A null [history] yields loading stats; a year with no entry counts as zero. */
 internal fun readingSummaryUiModel(
-    readingLife: ReadingLife?,
+    history: ReadingHistory?,
     currentYear: Int,
 ): ReadingSummaryUiModel {
-    val isLoading = readingLife == null
+    val isLoading = history == null
 
     return ReadingSummaryUiModel(
         header = SectionHeaderUiModel.Inline(eyebrow = "Your reading"),
         stats = persistentListOf(
             summaryStat(
-                count = readingLife?.booksByYear.countFor(currentYear),
+                count = history?.booksByYear.countFor(currentYear),
                 isLoading = isLoading,
                 caption = "books this year",
             ),
             summaryStat(
-                count = readingLife?.pagesByYear.countFor(currentYear),
+                count = history?.pagesByYear.countFor(currentYear),
                 isLoading = isLoading,
                 caption = "pages",
             ),

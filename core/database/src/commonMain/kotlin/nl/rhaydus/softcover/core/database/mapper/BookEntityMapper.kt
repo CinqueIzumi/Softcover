@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.Tag
@@ -51,6 +52,7 @@ internal fun Book.toEntity(): BookEntity = BookEntity(
     description = description,
     releaseYear = releaseYear,
     releaseDate = releaseDate?.toString(),
+    pages = pages,
     coverUrl = coverUrl,
     defaultEditionId = defaultEdition?.id,
     usersCount = usersCount,
@@ -114,24 +116,27 @@ internal fun BookEdition.toEntity(): BookEditionEntity = BookEditionEntity(
 internal fun Author.toEntity(): AuthorEntity = AuthorEntity(
     name = name,
     id = id,
+    isBipoc = isBipoc,
+    isLgbtq = isLgbtq,
+    genderId = gender.id,
 )
 
-internal fun Book.toBookAuthorRefs(authorIdsByName: Map<String, Int>): List<BookAuthorCrossRef> =
+internal fun Book.toBookAuthorRefs(): List<BookAuthorCrossRef> =
     authors.map {
         BookAuthorCrossRef(
             bookId = id,
-            authorId = authorIdsByName.getValue(it.name),
+            authorId = it.id,
         )
     }
 
-internal fun Book.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> =
-    editions.flatMap { it.toEditionAuthorRefs(authorIdsByName) }
+internal fun Book.toEditionAuthorRefs(): List<EditionAuthorCrossRef> =
+    editions.flatMap { it.toEditionAuthorRefs() }
 
-internal fun BookEdition.toEditionAuthorRefs(authorIdsByName: Map<String, Int>): List<EditionAuthorCrossRef> =
+internal fun BookEdition.toEditionAuthorRefs(): List<EditionAuthorCrossRef> =
     authors.map {
         EditionAuthorCrossRef(
             editionId = id,
-            authorId = authorIdsByName.getValue(it.name),
+            authorId = it.id,
         )
     }
 // endregion
@@ -139,6 +144,9 @@ internal fun BookEdition.toEditionAuthorRefs(authorIdsByName: Map<String, Int>):
 fun AuthorEntity.toModel(): Author = Author(
     name = name,
     id = id,
+    isBipoc = isBipoc,
+    isLgbtq = isLgbtq,
+    gender = Gender.fromId(genderId),
 )
 
 fun BookTagFull.toModel(): Tag = Tag(
@@ -235,6 +243,7 @@ fun BookFullEntity.toModel(): Book {
         description = book.description,
         releaseYear = book.releaseYear,
         releaseDate = book.releaseDate.toLocalDateOrNull(),
+        pages = book.pages,
         coverUrl = book.coverUrl,
         authors = bookAuthors.map { it.toModel() },
         usersCount = book.usersCount,

@@ -48,9 +48,6 @@ class ObserveRecentReadingActivityUseCaseTest {
         name = "Jane Doe",
         username = "cinque",
         bio = "Avid reader",
-        booksRead = 42,
-        totalPagesRead = 12000,
-        averageRating = 4.2,
         readingStreak = 5,
         recentReadingDays = dates,
     )

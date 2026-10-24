@@ -1,0 +1,7 @@
+query GetUserBookIdsByIds($ids: [Int!]!) {
+    me {
+        user_books(where: { id: { _in: $ids } }) {
+            id
+        }
+    }
+}

@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.FindTagsByUserAndTaggableQuery
 import nl.rhaydus.softcover.FindUserTagVocabularyQuery
 import nl.rhaydus.softcover.SaveTagsMutation
 import nl.rhaydus.softcover.core.domain.model.UserTag
-import nl.rhaydus.softcover.core.network.helper.fetchAllPages
+import nl.rhaydus.softcover.core.network.helper.fetchAllPagesOrThrow
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.feature.book_detail.data.mapper.toBasicTag
@@ -90,7 +90,10 @@ internal class UserTagsRemoteDataSourceImpl(
             }
 
     private suspend fun fetchAllTagRows(userId: Int): List<FindUserTagVocabularyQuery.Data.Tag> =
-        fetchAllPages { limit, offset ->
+        fetchAllPagesOrThrow(
+            pageSize = PAGE_SIZE,
+            maxPages = MAX_PAGES,
+        ) { limit, offset ->
             apolloClient.safeQuery(
                 query = FindUserTagVocabularyQuery(
                     userId = userId,
@@ -100,3 +103,8 @@ internal class UserTagsRemoteDataSourceImpl(
             ).tags
         }
 }
+
+// Request-multiplier budget: ceiling of PAGE_SIZE * MAX_PAGES rows before the fetch fails.
+private const val PAGE_SIZE: Int = 100
+
+private const val MAX_PAGES: Int = 100

@@ -28,6 +28,7 @@ import nl.rhaydus.softcover.GetSimilarBooksQuery
 import nl.rhaydus.softcover.GetSystemVibeBookIdsQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.GetUpcomingReleaseIdsQuery
+import nl.rhaydus.softcover.GetUserBookIdsByIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.GetUserBooksQuery.Data.Me.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.InsertUserBookWithStatusMutation
@@ -75,6 +76,8 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.util.localDateOf
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.core.network.helper.CountedPage
+import nl.rhaydus.softcover.core.network.helper.fetchAllPagesCounted
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.fragment.BookListFragment.Book_series.Companion.bookSeriesFragment
@@ -161,6 +164,9 @@ interface BooksRemoteDataSource {
         userBookIds: Set<Int> = emptySet(),
     ): List<Book>
 
+    /** Returns the subset of [ids] the signed-in user still has as user books; throws if the lookup fails. */
+    suspend fun fetchExistingUserBookIds(ids: List<Int>): Set<Int>
+
     suspend fun getEditionsByBookId(
         bookId: Int,
         forceNetwork: Boolean = false,
@@ -226,6 +232,11 @@ interface BooksRemoteDataSource {
 }
 
 private const val BATCH_ID_LIMIT: Int = 200
+
+// Request-multiplier budget for the library fetch: the page count is the server's row count divided by
+// this. The page is small because each row carries a deep selection and the server's row cap for it is
+// unverified.
+private const val USER_BOOKS_PAGE_SIZE: Int = 50
 
 /** Hardcover's ISBN external-book provider platform — `upsert_book` uses the ISBN as the external id. */
 private const val HARDCOVER_ISBN_PLATFORM_ID: Int = 8
@@ -697,20 +708,44 @@ internal class BooksRemoteDataSourceImpl(
         statusIds: Set<Int>?,
         userBookIds: Set<Int>,
     ): List<Book> = withContext(appDispatchers.io) {
-        val result = apolloClient.safeQuery(
-            query = GetUserBooksQuery(
-                statusIds = Optional.presentIfNotNull(statusIds?.toList()),
-                userBookIds = Optional.present(userBookIds.toList()),
-            ),
-        )
+        val userBooks = fetchAllPagesCounted(
+            pageSize = USER_BOOKS_PAGE_SIZE,
+            key = { it.id },
+        ) { limit, offset ->
+            val result = apolloClient.safeQuery(
+                query = GetUserBooksQuery(
+                    statusIds = Optional.presentIfNotNull(statusIds?.toList()),
+                    userBookIds = Optional.present(userBookIds.toList()),
+                    limit = limit,
+                    offset = offset,
+                ),
+            )
 
-        val userBooks = result.me.firstOrNull()?.user_books
-            ?: throw Exception("No books were found")
+            // A missing `me` must fail the fetch: an empty page would end the loop and read as complete.
+            val me = result.me.firstOrNull() ?: throw Exception("No books were found")
+
+            CountedPage(
+                rows = me.user_books,
+                total = me.total.aggregate?.count ?: 0,
+            )
+        }
 
         val mapped = userBooks.mapNotNull { it.userBookFragment()?.toBook() }
 
         resolveCanonicalMerges(books = mapped)
     }
+
+    override suspend fun fetchExistingUserBookIds(ids: List<Int>): Set<Int> =
+        withContext(appDispatchers.io) {
+            ids.chunked(BATCH_ID_LIMIT).flatMapTo(mutableSetOf()) { chunk ->
+                val result = apolloClient.safeQuery(query = GetUserBookIdsByIdsQuery(ids = chunk))
+
+                val userBooks = result.me.firstOrNull()?.user_books
+                    ?: throw Exception("No user was found")
+
+                userBooks.map { it.id }
+            }
+        }
 
     private suspend fun resolveCanonicalMerges(books: List<Book>): List<Book> {
         val canonicalIds = books.mapNotNull { it.canonicalId }.distinct()

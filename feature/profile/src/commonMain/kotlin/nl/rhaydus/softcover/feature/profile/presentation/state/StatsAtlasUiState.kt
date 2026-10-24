@@ -4,6 +4,7 @@ import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadSubtitle
@@ -11,22 +12,31 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
+import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_KEY
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_LINE
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasChapterHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsEmptyCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryCaption
@@ -35,8 +45,19 @@ import nl.rhaydus.toad.UiState
 
 internal data class StatsAtlasUiState(
     val userProfileData: UserProfileData? = null,
-    val readingLife: ReadingLife? = null,
+    val readingStats: ReadingStats? = null,
+    val readingHistory: ReadingHistory? = null,
     val isLoading: Boolean = true,
+
+    /** Built by `AtlasScopeChipsCollector`; the chip keyed [selectedScopeKey] is the selected one. */
+    val scopeChips: ChipSet<StatsScope> = atlasScopeChips(
+        yearsRead = emptyList(),
+        selectedKey = ALL_TIME_SCOPE_KEY,
+    ),
+    val selectedScopeKey: String = ALL_TIME_SCOPE_KEY,
+
+    /** Mapped by `AtlasScopedSectionsCollector` together with the sections it describes. */
+    val scopeLine: String = ALL_TIME_SCOPE_LINE,
     val recentlyLoved: BookCardSet<RecentlyLovedEntry> = BookCardSet.standIns(RECENTLY_LOVED_STAND_IN_CARDS),
     val hideUntaggedAuthors: Boolean = false,
 
@@ -44,7 +65,7 @@ internal data class StatsAtlasUiState(
     val hideUntaggedAuthorsToggle: ToggleRowUiModel<String> = hideUntaggedAuthorsToggleFor(hide = false),
     val selectedYearMetric: YearMetric = YearMetric.BOOKS,
 
-    /** Mapped by `YearMetricToggleCollector` off [selectedYearMetric] and whether the reading life has loaded. */
+    /** Mapped by `YearMetricToggleCollector` off [selectedYearMetric] and whether the reading history has loaded. */
     val yearMetricToggle: SegmentedControlUiModel<YearMetric> = yearMetricToggleFor(
         selected = YearMetric.BOOKS,
         enabled = false,
@@ -59,10 +80,11 @@ internal data class StatsAtlasUiState(
         metric = YearMetric.BOOKS,
     ),
 
-    /** Mapped by `AtlasChartsCollector`, which also decides when they stop loading. */
+    /** Mapped by `AtlasScopedSectionsCollector`, which also decides when they stop loading. */
     val genreRanking: RankedBarsUiModel = genreRankingUiModel(null),
     val hasGenres: Boolean = false,
     val genreScopeCaption: String = genreScopeCaption(taggedBookCount = 0),
+    val genreEmptyCaption: String = genreEmptyCaption(booksRead = 0),
 
     /**
      * Every author by default, or only the ones tagged for each attribute once [hideUntaggedAuthors]
@@ -80,10 +102,17 @@ internal data class StatsAtlasUiState(
         breakdown = null,
         hideUntaggedAuthors = false,
     ),
+    val authorsScopeCaption: String = authorsScopeCaption(hideUntaggedAuthors = false),
+    val authorsEmptyCaption: String = authorsEmptyCaption(
+        hideUntaggedAuthors = false,
+        booksRead = 0,
+    ),
     val ratingsChart: ColumnChartUiModel = ratingsChartUiModel(null),
     val ratingsAverage: StatNumberUiModel = ratingsAverageUiModel(null),
 
-    /** Mapped by `AtlasProfileDataCollector` off [userProfileData]. */
+    val ratingsEmptyCaption: String = ratingsEmptyCaption(booksRead = 0),
+
+    /** Mapped by `AtlasScopedSectionsCollector` off [readingStats]. */
     val opening: AtlasOpeningUiModel = atlasOpeningUiModel(null),
     val contentsHeader: SectionHeaderUiModel = atlasContentsHeader(),
     val contentsRows: ImmutableList<AtlasContentsRowUiModel> = atlasContentsRows(),
@@ -115,20 +144,24 @@ internal data class StatsAtlasUiState(
     val topBar: TopBarUiModel = TopBarUiModel(),
 ) : UiState {
     private val allAuthorDemographics: AuthorDemographics
-        get() = readingLife?.authorDemographics ?: AuthorDemographics()
+        get() = readingStats?.authorDemographics ?: AuthorDemographics()
+
+    /** The scope [selectedScopeKey] stands for; every year until the chip set holds it. */
+    val selectedScope: StatsScope
+        get() = scopeChips[selectedScopeKey] ?: StatsScope.AllTime
 
     val isReadingLifeLoading: Boolean
-        get() = isLoading || readingLife == null
+        get() = isLoading || readingStats == null || readingHistory == null
 
     val ratingsTotal: Int
-        get() = readingLife?.ratings?.totalRatings ?: 0
+        get() = readingStats?.ratings?.totalRatings ?: 0
 
     /**
-     * Whether the reader has any loved reads to show. Read from [readingLife] rather than the mapped
+     * Whether the reader has any loved reads to show. Read from [readingHistory] rather than the mapped
      * [recentlyLoved], which land a frame later and would flash the empty copy.
      */
     val hasRecentlyLoved: Boolean
-        get() = readingLife?.recentlyLoved.orEmpty().isNotEmpty()
+        get() = readingHistory?.recentlyLoved.orEmpty().isNotEmpty()
 
     /**
      * Whether any of the three breakdowns actually has an untagged bucket to drop. Reads the

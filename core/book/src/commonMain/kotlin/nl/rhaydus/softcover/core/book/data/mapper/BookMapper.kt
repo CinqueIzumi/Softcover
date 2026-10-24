@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.Tag
@@ -83,6 +84,9 @@ internal fun EditionDetailFragment.toBookEdition(): BookEdition {
         Author(
             name = author.name.toDisplayName(),
             id = author.id,
+            isBipoc = author.is_bipoc,
+            isLgbtq = author.is_lgbtq,
+            gender = Gender.fromId(author.gender_id),
         )
     }
     return (this as EditionFragment).toBookEdition(authors = authors)
@@ -143,6 +147,9 @@ private fun BookListFragment.authors(): List<Author> = contributions.mapNotNull 
     Author(
         name = author.name.toDisplayName(),
         id = author.id,
+        isBipoc = author.is_bipoc,
+        isLgbtq = author.is_lgbtq,
+        gender = Gender.fromId(author.gender_id),
     )
 }
 
@@ -230,6 +237,7 @@ internal fun UserBookFragment.toBook(): Book? {
         description = listFragment.description.orEmpty(),
         releaseYear = listFragment.release_year ?: -1,
         releaseDate = listFragment.release_date.toLocalDateOrNull(),
+        pages = listFragment.pages,
         coverUrl = listFragment.image?.url.orEmpty(),
         authors = bookAuthors,
         usersCount = listFragment.users_count,
@@ -261,6 +269,7 @@ fun BookDetailFragment.toBook(): Book? {
         description = description.orEmpty(),
         releaseYear = listFragment.release_year ?: -1,
         releaseDate = listFragment.release_date.toLocalDateOrNull(),
+        pages = listFragment.pages,
         coverUrl = listFragment.image?.url.orEmpty(),
         authors = bookAuthors,
         usersCount = users_count,

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.database.mapper
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -25,6 +24,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
@@ -286,6 +286,7 @@ class BookEntityMapperTest {
         description: String = "A great book.",
         releaseYear: Int = 2019,
         releaseDate: LocalDate? = null,
+        pages: Int? = null,
         coverUrl: String = "https://example.com/book.jpg",
         authors: List<Author> = emptyList(),
         usersCount: Int = 100,
@@ -332,6 +333,10 @@ class BookEntityMapperTest {
         } returns releaseDate
 
         every {
+            this@mockk.pages
+        } returns pages
+
+        every {
             this@mockk.coverUrl
         } returns coverUrl
 
@@ -371,6 +376,9 @@ class BookEntityMapperTest {
     ): AuthorEntity = AuthorEntity(
         id = id,
         name = name,
+        isBipoc = null,
+        isLgbtq = null,
+        genderId = null,
     )
 
     private fun stubBookEditionEntity(
@@ -446,6 +454,7 @@ class BookEntityMapperTest {
         description = description,
         releaseYear = releaseYear,
         releaseDate = releaseDate,
+        pages = null,
         coverUrl = coverUrl,
         usersCount = usersCount,
         ratingsCount = ratingsCount,
@@ -815,9 +824,48 @@ class BookEntityMapperTest {
     }
 
     @Nested
+    inner class AuthorRoundTrip {
+        @Test
+        fun `keeps the demographics through toEntity and back`() {
+            // ----- Arrange -----
+            val author = Author(
+                id = 7,
+                name = "Octavia Butler",
+                isBipoc = true,
+                isLgbtq = false,
+                gender = Gender.Female,
+            )
+
+            // ----- Act -----
+            val result = author.toEntity().toModel()
+
+            // ----- Assert -----
+            result shouldBe author
+        }
+
+        @Test
+        fun `keeps missing demographics as null and an unknown gender`() {
+            // ----- Arrange -----
+            val author = Author(
+                id = 8,
+                name = "Anonymous",
+                isBipoc = null,
+                isLgbtq = null,
+                gender = Gender.Unknown,
+            )
+
+            // ----- Act -----
+            val result = author.toEntity().toModel()
+
+            // ----- Assert -----
+            result shouldBe author
+        }
+    }
+
+    @Nested
     inner class BookToBookAuthorRefs {
         @Test
-        fun `produces one cross-ref per author using id from map`() {
+        fun `produces one cross-ref per author using the author id`() {
             // ----- Arrange -----
             val authorA = stubAuthor(
                 id = 1,
@@ -834,46 +882,28 @@ class BookEntityMapperTest {
                     authorB,
                 ),
             )
-            val authorIdsByName = mapOf(
-                "Alice" to 10,
-                "Bob" to 20,
-            )
 
             // ----- Act -----
-            val result = book.toBookAuthorRefs(authorIdsByName)
+            val result = book.toBookAuthorRefs()
 
             // ----- Assert -----
             result.size shouldBe 2
             result[0].bookId shouldBe 42
-            result[0].authorId shouldBe 10
+            result[0].authorId shouldBe 1
             result[1].bookId shouldBe 42
-            result[1].authorId shouldBe 20
+            result[1].authorId shouldBe 2
         }
 
         @Test
         fun `produces empty list when book has no authors`() {
             // ----- Arrange -----
             val book = stubBook(authors = emptyList())
-            val authorIdsByName = emptyMap<String, Int>()
 
             // ----- Act -----
-            val result = book.toBookAuthorRefs(authorIdsByName)
+            val result = book.toBookAuthorRefs()
 
             // ----- Assert -----
             result shouldBe emptyList()
-        }
-
-        @Test
-        fun `throws NoSuchElementException when author name is absent from map`() {
-            // ----- Arrange -----
-            val author = stubAuthor(name = "Unknown Author")
-            val book = stubBook(authors = listOf(author))
-            val authorIdsByName = emptyMap<String, Int>()
-
-            // ----- Act & Assert -----
-            shouldThrow<NoSuchElementException> {
-                book.toBookAuthorRefs(authorIdsByName)
-            }
         }
     }
 
@@ -904,57 +934,35 @@ class BookEntityMapperTest {
                     editionTwo,
                 ),
             )
-            val authorIdsByName = mapOf(
-                "Alice" to 10,
-                "Bob" to 20,
-            )
 
             // ----- Act -----
-            val result = book.toEditionAuthorRefs(authorIdsByName)
+            val result = book.toEditionAuthorRefs()
 
             // ----- Assert -----
             result.size shouldBe 2
             result[0].editionId shouldBe 10
-            result[0].authorId shouldBe 10
+            result[0].authorId shouldBe 1
             result[1].editionId shouldBe 11
-            result[1].authorId shouldBe 20
+            result[1].authorId shouldBe 2
         }
 
         @Test
         fun `produces empty list when book has no editions`() {
             // ----- Arrange -----
             val book = stubBook(editions = emptyList())
-            val authorIdsByName = emptyMap<String, Int>()
 
             // ----- Act -----
-            val result = book.toEditionAuthorRefs(authorIdsByName)
+            val result = book.toEditionAuthorRefs()
 
             // ----- Assert -----
             result shouldBe emptyList()
-        }
-
-        @Test
-        fun `throws NoSuchElementException when edition author name is absent from map`() {
-            // ----- Arrange -----
-            val author = stubAuthor(name = "Unknown Author")
-            val edition = stubBookEdition(
-                id = 10,
-                authors = listOf(author),
-            )
-            val book = stubBook(editions = listOf(edition))
-            val authorIdsByName = emptyMap<String, Int>()
-
-            // ----- Act & Assert -----
-            shouldThrow<NoSuchElementException> {
-                book.toEditionAuthorRefs(authorIdsByName)
-            }
         }
     }
 
     @Nested
     inner class BookEditionToEditionAuthorRefs {
         @Test
-        fun `produces one cross-ref per author using id from map`() {
+        fun `produces one cross-ref per author using the author id`() {
             // ----- Arrange -----
             val authorA = stubAuthor(
                 id = 1,
@@ -971,49 +979,28 @@ class BookEntityMapperTest {
                     authorB,
                 ),
             )
-            val authorIdsByName = mapOf(
-                "Alice" to 10,
-                "Bob" to 20,
-            )
 
             // ----- Act -----
-            val result = edition.toEditionAuthorRefs(authorIdsByName)
+            val result = edition.toEditionAuthorRefs()
 
             // ----- Assert -----
             result.size shouldBe 2
             result[0].editionId shouldBe 10
-            result[0].authorId shouldBe 10
+            result[0].authorId shouldBe 1
             result[1].editionId shouldBe 10
-            result[1].authorId shouldBe 20
+            result[1].authorId shouldBe 2
         }
 
         @Test
         fun `produces empty list when edition has no authors`() {
             // ----- Arrange -----
             val edition = stubBookEdition(authors = emptyList())
-            val authorIdsByName = emptyMap<String, Int>()
 
             // ----- Act -----
-            val result = edition.toEditionAuthorRefs(authorIdsByName)
+            val result = edition.toEditionAuthorRefs()
 
             // ----- Assert -----
             result shouldBe emptyList()
-        }
-
-        @Test
-        fun `throws NoSuchElementException when author name is absent from map`() {
-            // ----- Arrange -----
-            val author = stubAuthor(name = "Unknown Author")
-            val edition = stubBookEdition(
-                id = 10,
-                authors = listOf(author),
-            )
-            val authorIdsByName = emptyMap<String, Int>()
-
-            // ----- Act & Assert -----
-            shouldThrow<NoSuchElementException> {
-                edition.toEditionAuthorRefs(authorIdsByName)
-            }
         }
     }
 

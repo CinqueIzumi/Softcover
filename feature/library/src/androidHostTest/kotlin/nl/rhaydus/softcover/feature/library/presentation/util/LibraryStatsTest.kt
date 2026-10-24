@@ -263,14 +263,13 @@ class LibraryStatsTest {
         }
 
         @Test
-        fun `the latest finishedAt wins over an older lastReadDate, journal, and createdAt`() {
+        fun `the latest finishedAt wins over an older lastReadDate and journal`() {
             // ----- Arrange -----
             val journals = listOf(buildFinishedJournal("2019-06-01T00:00:00"))
             val book = buildBook(
                 userBook = buildUserBook(
                     journals = journals,
                     lastReadDate = "2020-03-15",
-                    createdAt = "2018-01-01T00:00:00",
                     reads = listOf(buildUserBookRead(finishedAt = "2022-05-10")),
                 ),
             )
@@ -290,7 +289,6 @@ class LibraryStatsTest {
                 userBook = buildUserBook(
                     journals = journals,
                     lastReadDate = "2020-03-15",
-                    createdAt = "2018-01-01T00:00:00",
                     reads = listOf(buildUserBookRead(finishedAt = null)),
                 ),
             )
@@ -303,32 +301,12 @@ class LibraryStatsTest {
         }
 
         @Test
-        fun `createdAt is used as final fallback when all earlier candidates are null`() {
-            // ----- Arrange -----
-            val book = buildBook(
-                userBook = buildUserBook(
-                    journals = emptyList(),
-                    lastReadDate = null,
-                    createdAt = "2017-11-20T08:30:00",
-                    reads = listOf(buildUserBookRead(finishedAt = null)),
-                ),
-            )
-
-            // ----- Act -----
-            val result = book.finishedYear()
-
-            // ----- Assert -----
-            result shouldBe 2017
-        }
-
-        @Test
         fun `unparseable finishedAt falls through to next valid candidate`() {
             // ----- Arrange -----
             val book = buildBook(
                 userBook = buildUserBook(
                     journals = emptyList(),
                     lastReadDate = "2021-08-22",
-                    createdAt = null,
                     reads = listOf(buildUserBookRead(finishedAt = "garbage")),
                 ),
             )
@@ -369,13 +347,12 @@ class LibraryStatsTest {
         }
 
         @Test
-        fun `createdAt at UTC year-end evening falls back to the next local year`() {
+        fun `returns null for an undated book even when it has a createdAt`() {
             // ----- Arrange -----
-            TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"))
             val book = buildBook(
                 userBook = buildUserBook(
                     journals = emptyList(),
-                    createdAt = "2025-12-31T23:30:00.000000",
+                    createdAt = "2017-11-20T08:30:00",
                 ),
             )
 
@@ -383,7 +360,7 @@ class LibraryStatsTest {
             val result = book.finishedYear()
 
             // ----- Assert -----
-            result shouldBe 2026
+            result shouldBe null
         }
 
         @Test
@@ -408,7 +385,6 @@ class LibraryStatsTest {
                 userBook = buildUserBook(
                     journals = emptyList(),
                     lastReadDate = null,
-                    createdAt = null,
                     reads = listOf(buildUserBookRead(finishedAt = null)),
                 ),
             )
@@ -464,6 +440,27 @@ class LibraryStatsTest {
 
             // ----- Assert -----
             result shouldBe listOf(2023, 2021)
+        }
+
+        @Test
+        fun `omits undated books from the available years`() {
+            // ----- Arrange -----
+            val books = listOf(
+                buildBook(
+                    id = 1,
+                    userBook = buildUserBook(createdAt = "2019-05-05T00:00:00"),
+                ),
+                buildBook(
+                    id = 2,
+                    userBook = buildUserBook(reads = listOf(buildUserBookRead(finishedAt = "2022-03-01"))),
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.availableFinishedYears()
+
+            // ----- Assert -----
+            result shouldBe listOf(2022)
         }
     }
 }

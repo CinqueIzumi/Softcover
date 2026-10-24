@@ -53,6 +53,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 
 /**
@@ -290,14 +291,19 @@ private fun ChipLabel(
     style: ChipStyle,
     padding: PaddingValues,
 ) {
-    val textStyle = MaterialTheme.typography.labelMedium.copy(
-        fontWeight = if (model.face == ChipFace.Bold) FontWeight.Bold else style.weight,
-        fontStyle = if (model.face == ChipFace.Italic) FontStyle.Italic else FontStyle.Normal,
-    )
+    val eyebrow = model.face == ChipFace.Eyebrow
+    val textStyle = if (eyebrow) {
+        MaterialTheme.editorialTypography.eyebrowSmall
+    } else {
+        MaterialTheme.typography.labelMedium.copy(
+            fontWeight = if (model.face == ChipFace.Bold) FontWeight.Bold else style.weight,
+            fontStyle = if (model.face == ChipFace.Italic) FontStyle.Italic else FontStyle.Normal,
+        )
+    }
     val spoilerWash = (model.leading as? ChipLeading.SpoilerToggle)?.marked == true
 
     SoftcoverText(
-        text = model.label,
+        text = if (eyebrow) model.label.uppercase() else model.label,
         style = textStyle,
         color = style.ink,
         maxLines = 1,

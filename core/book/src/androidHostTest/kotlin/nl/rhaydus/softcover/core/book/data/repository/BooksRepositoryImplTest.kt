@@ -103,6 +103,10 @@ class BooksRepositoryImplTest {
             networkAvailability.isOnline
         } returns MutableStateFlow(true)
 
+        coEvery {
+            booksRemoteDataSource.fetchExistingUserBookIds(ids = any())
+        } returns emptySet()
+
         repository = BooksRepositoryImpl(
             booksRemoteDataSource = booksRemoteDataSource,
             booksLocalDataSource = booksLocalDataSource,
@@ -741,6 +745,130 @@ class BooksRepositoryImplTest {
                     userId = userId,
                     statusIds = any(),
                 )
+            }
+        }
+    }
+
+    @Nested
+    inner class PruneConfirmation {
+        @Test
+        fun `keeps a missing local user book that the re-check finds on the server`() = runTest {
+            // ----- Arrange -----
+            stubRefresh(
+                fetchedUserBookId = 10,
+                localIds = listOf(10, 55, 56),
+            )
+
+            coEvery {
+                booksRemoteDataSource.fetchExistingUserBookIds(ids = listOf(55, 56))
+            } returns setOf(55)
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = 20,
+                statusFilter = null,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(56))
+            }
+        }
+
+        @Test
+        fun `removes nothing when every missing user book is confirmed present`() = runTest {
+            // ----- Arrange -----
+            stubRefresh(
+                fetchedUserBookId = 10,
+                localIds = listOf(10, 55),
+            )
+
+            coEvery {
+                booksRemoteDataSource.fetchExistingUserBookIds(ids = listOf(55))
+            } returns setOf(55)
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = 20,
+                statusFilter = null,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(55))
+            }
+        }
+
+        @Test
+        fun `removes nothing and does not fail the refresh when the re-check throws`() = runTest {
+            // ----- Arrange -----
+            stubRefresh(
+                fetchedUserBookId = 10,
+                localIds = listOf(10, 55),
+            )
+
+            coEvery {
+                booksRemoteDataSource.fetchExistingUserBookIds(ids = any())
+            } throws RuntimeException("offline")
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = 20,
+                statusFilter = null,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(55))
+            }
+        }
+
+        @Test
+        fun `skips the re-check when no local user book is missing from the fetch`() = runTest {
+            // ----- Arrange -----
+            stubRefresh(
+                fetchedUserBookId = 10,
+                localIds = listOf(10),
+            )
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = 20,
+                statusFilter = null,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.fetchExistingUserBookIds(ids = any())
+            }
+        }
+
+        private fun stubRefresh(
+            fetchedUserBookId: Int,
+            localIds: List<Int>,
+        ) {
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns localIds
+
+            coEvery {
+                booksRemoteDataSource.initializeBooks(
+                    userId = any(),
+                    statusIds = any(),
+                    userBookIds = any(),
+                )
+            } returns listOf(stubBook(userBookId = fetchedUserBookId))
+
+            coEvery {
+                offlineSync.drainReconcileAndCache(
+                    fetchFromServer = any(),
+                    selectBooksToCache = any(),
+                )
+            } coAnswers {
+                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
+                booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
+                fetched
             }
         }
     }
@@ -7318,6 +7446,104 @@ class BooksRepositoryImplTest {
                     reads = userBook.reads.map { it.copy(currentPage = page) },
                 ),
             )
+        }
+    }
+
+    @Nested
+    inner class HasSyncedReadBooksThisSession {
+        private val userId = 20
+
+        private fun arrangeSuccessfulRefresh() {
+            coEvery {
+                offlineSync.drainReconcileAndCache(
+                    fetchFromServer = any(),
+                    selectBooksToCache = any(),
+                )
+            } returns emptyList()
+        }
+
+        @Test
+        fun `is set after a refresh of every status`() = runTest {
+            // ----- Arrange -----
+            arrangeSuccessfulRefresh()
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = null,
+            )
+
+            // ----- Assert -----
+            repository.hasSyncedReadBooksThisSession shouldBe true
+        }
+
+        @Test
+        fun `is set after a refresh whose filter contains Read`() = runTest {
+            // ----- Arrange -----
+            arrangeSuccessfulRefresh()
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.READ),
+            )
+
+            // ----- Assert -----
+            repository.hasSyncedReadBooksThisSession shouldBe true
+        }
+
+        @Test
+        fun `stays unset after a refresh whose filter leaves out Read`() = runTest {
+            // ----- Arrange -----
+            arrangeSuccessfulRefresh()
+
+            // ----- Act -----
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = setOf(UserBookStatus.WANT_TO_READ, UserBookStatus.CURRENTLY_READING),
+            )
+
+            // ----- Assert -----
+            repository.hasSyncedReadBooksThisSession shouldBe false
+        }
+
+        @Test
+        fun `stays unset when the refresh fails`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                offlineSync.drainReconcileAndCache(
+                    fetchFromServer = any(),
+                    selectBooksToCache = any(),
+                )
+            } throws RuntimeException("network error")
+
+            // ----- Act -----
+            val outcome = runCatching {
+                repository.refreshUserBooks(
+                    userId = userId,
+                    statusFilter = null,
+                )
+            }
+
+            // ----- Assert -----
+            outcome.isFailure shouldBe true
+            repository.hasSyncedReadBooksThisSession shouldBe false
+        }
+
+        @Test
+        fun `is cleared by removeAllBooks`() = runTest {
+            // ----- Arrange -----
+            arrangeSuccessfulRefresh()
+            repository.refreshUserBooks(
+                userId = userId,
+                statusFilter = null,
+            )
+
+            // ----- Act -----
+            repository.removeAllBooks()
+
+            // ----- Assert -----
+            repository.hasSyncedReadBooksThisSession shouldBe false
         }
     }
 }

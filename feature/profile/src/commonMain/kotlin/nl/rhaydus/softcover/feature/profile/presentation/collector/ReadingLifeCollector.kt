@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
-import kotlinx.coroutines.flow.filterNotNull
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
@@ -12,10 +11,17 @@ internal class ReadingLifeCollector : ProfileCollector {
         scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>,
         dependencies: ProfileDependencies,
     ) {
-        dependencies.observeReadingLifeUseCase()
-            .filterNotNull()
-            .collect { readingLife ->
-                scope.setState { it.copy(readingLife = readingLife) }
+        observeLoadedReadingLife(
+            observeReadingStatsUseCase = dependencies.observeReadingStatsUseCase,
+            observeReadingHistoryUseCase = dependencies.observeReadingHistoryUseCase,
+            observeAuthorDemographicsBackfilledUseCase = dependencies.observeAuthorDemographicsBackfilledUseCase,
+        ).collect { loaded ->
+            scope.setState {
+                it.copy(
+                    readingStats = loaded?.stats,
+                    readingHistory = loaded?.history,
+                )
             }
+        }
     }
 }

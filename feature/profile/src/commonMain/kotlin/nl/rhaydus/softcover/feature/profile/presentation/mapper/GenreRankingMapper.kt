@@ -5,6 +5,7 @@ import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.softcover.core.component.chart.ChartSliceUiModel
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
+import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.uibinding.format.percentLabel
 
@@ -46,15 +47,34 @@ internal fun genreRankingUiModel(genres: GenreBreakdown?): RankedBarsUiModel {
  * Falls back to the scope-free wording when the count is 0 — that is either a genuinely empty library
  * or a profile cached by a build older than 3.1.1 (the stored count defaults to 0 and fills in on the
  * session's refresh), and naming "0 books" beneath five populated bars would be worse than saying
- * nothing.
+ * nothing. A [scope] other than every year names its books instead of "your finished books".
  */
-internal fun genreScopeCaption(taggedBookCount: Int): String {
-    val scope = when (taggedBookCount) {
-        0 -> "out of your finished books with genre tags"
-        1 -> "out of 1 finished book with genre tags"
-        else -> "out of ${formatGroupedNumber(taggedBookCount)} finished books with genre tags"
+internal fun genreScopeCaption(
+    taggedBookCount: Int,
+    scope: StatsScope = StatsScope.AllTime,
+): String {
+    val phrase = scope.scopePhrase()
+    val books = when {
+        phrase != null -> when (taggedBookCount) {
+            0 -> "the books you finished $phrase"
+            1 -> "the 1 book you finished $phrase"
+            else -> "the ${formatGroupedNumber(taggedBookCount)} books you finished $phrase"
+        }
+
+        else -> when (taggedBookCount) {
+            0 -> "your finished books"
+            1 -> "1 finished book"
+            else -> "${formatGroupedNumber(taggedBookCount)} finished books"
+        }
     }
 
-    return "Your top five genres, $scope. " +
+    return "Your top five genres, out of $books with genre tags. " +
         "Books can have more than one genre, so these add up to more than 100%."
 }
+
+/** What the genre section says in place of its bars: the scope has no finished books, or none with a tag. */
+internal fun genreEmptyCaption(
+    booksRead: Int,
+    scope: StatsScope = StatsScope.AllTime,
+): String = scope.noFinishedBooksSentence(booksRead = booksRead)
+    ?: "Finish a few books and your top genres show up here."

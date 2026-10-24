@@ -61,8 +61,8 @@ internal expect fun StatsAtlasScreenLayout(
 )
 
 /**
- * Opens book detail for a tapped "Recently loved" card and warms the detail on finger-down. A cached
- * library book seeds the destination in full; otherwise only the card's id, title and cover URL do.
+ * Opens book detail for a tapped "Recently loved" card and warms the detail on finger-down. The
+ * cached library book seeds the destination.
  */
 @Composable
 private fun rememberRecentlyLovedEventHandler(
@@ -76,16 +76,9 @@ private fun rememberRecentlyLovedEventHandler(
         set = state.recentlyLoved,
     ) { event, entry ->
         if (event is BookCardEvent.Clicked) {
-            val loved = entry.loved
             val destination = ScreenDestination.BookDetail(
-                id = loved.bookId,
-                initialCover = entry.libraryBook?.let { BookInitialCover.fromBook(it) }
-                    ?: BookInitialCover(
-                        currentEdition = null,
-                        defaultEdition = null,
-                        fallbackCoverUrl = loved.coverUrl.takeIf { it.isNotBlank() },
-                        title = loved.title,
-                    ),
+                id = entry.loved.bookId,
+                initialCover = BookInitialCover.fromBook(entry.libraryBook),
             )
 
             currentNavigator.push(item = appNavigator.screen(destination))

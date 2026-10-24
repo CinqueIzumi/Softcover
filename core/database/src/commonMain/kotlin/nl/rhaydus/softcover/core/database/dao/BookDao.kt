@@ -222,9 +222,6 @@ interface BookDao {
     @Query("SELECT id FROM book_editions WHERE id IN (:editionIds)")
     suspend fun getExistingEditionIds(editionIds: List<Int>): List<Int>
 
-    @Query("SELECT * FROM authors WHERE name IN (:names)")
-    suspend fun getAuthorsByName(names: List<String>): List<AuthorEntity>
-
     @Query("SELECT id, localImagePath, localImageUrl FROM book_editions WHERE id IN (:editionIds)")
     suspend fun getEditionImageRefsByEditionIds(editionIds: List<Int>): List<EditionImageRef>
 
@@ -326,24 +323,17 @@ interface BookDao {
         )
         insertEditions(editionPlan.entities)
 
-        // Insert authors (deduplicated)
+        // Insert authors (deduplicated by Hardcover id; book-level authors win over edition-level ones)
         val allAuthors = (book.authors + book.editions.flatMap { it.authors })
-            .distinctBy { it.name }
+            .distinctBy { it.id }
         insertAuthors(allAuthors.map { it.toEntity() })
-
-        // Resolve IDs
-        val authorEntities = getAuthorsByName(allAuthors.map { it.name })
-        val authorIdsByName = authorEntities.associateBy(
-            { it.name },
-            { it.id },
-        )
 
         // Cross references
         clearBookAuthors(book.id)
-        insertBookAuthors(book.toBookAuthorRefs(authorIdsByName))
+        insertBookAuthors(book.toBookAuthorRefs())
 
         clearEditionAuthorsByEditionIds(editionIds = book.editions.map { it.id })
-        insertEditionAuthors(book.toEditionAuthorRefs(authorIdsByName))
+        insertEditionAuthors(book.toEditionAuthorRefs())
 
         if (book.tags.isNotEmpty()) {
             insertTags(
@@ -445,18 +435,13 @@ interface BookDao {
         )
         insertEditions(plan.entities)
 
-        val allAuthors = editions.flatMap { it.authors }.distinctBy { it.name }
+        val allAuthors = editions.flatMap { it.authors }.distinctBy { it.id }
 
         if (allAuthors.isEmpty()) return plan.stalePaths
 
         insertAuthors(allAuthors.map { it.toEntity() })
-        val authorEntities = getAuthorsByName(allAuthors.map { it.name })
-        val authorIdsByName = authorEntities.associateBy(
-            { it.name },
-            { it.id },
-        )
 
-        val crossRefs = editions.flatMap { edition -> edition.toEditionAuthorRefs(authorIdsByName) }
+        val crossRefs = editions.flatMap { edition -> edition.toEditionAuthorRefs() }
         insertEditionAuthors(crossRefs)
 
         return plan.stalePaths

@@ -1,32 +1,41 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen.section
 
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
-import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
+import nl.rhaydus.softcover.core.profile.domain.model.RecentlyLovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
 
 /**
- * A representative [ReadingLife] sample (the redline spec's sample reader, Elena Marchetti) shared by
+ * A representative [ReadingStats] sample (the redline spec's sample reader, Elena Marchetti) shared by
  * both the mobile and desktop `@StandardPreview`s so the two stay in sync. Split into one builder per
  * field (below) purely to keep this assembly function short.
  */
-internal fun profileReadingLifePreview(): ReadingLife = ReadingLife(
-    booksByYear = previewBooksByYear(),
-    pagesByYear = previewPagesByYear(),
-    pagesByMonth = previewPagesByMonth(),
+internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
+    booksRead = 214,
+    totalPages = 128_406,
     genres = previewGenres(),
     ratings = previewRatings(),
-    recentlyLoved = previewRecentlyLoved(),
-    trackedYears = 8,
     authorDemographics = previewAuthorDemographics(),
+)
+
+/** The [ReadingHistory] half of the same sample reader. */
+internal fun profileReadingHistoryPreview(): ReadingHistory = ReadingHistory(
+    booksByYear = previewBooksByYear(),
+    pagesByYear = previewPagesByYear(),
+    yearsRead = (2025 downTo 2018).toList(),
+    trackedYears = 8,
+    pagesByMonth = previewPagesByMonth(),
+    recentlyLoved = previewRecentlyLoved(),
 )
 
 private fun previewBooksByYear(): List<YearCount> = listOf(
@@ -186,29 +195,32 @@ private fun previewRatings(): RatingsDistribution = RatingsDistribution(
     band = RatingBand.GENEROUS,
 )
 
-private fun previewRecentlyLoved(): List<LovedBook> = listOf(
-    LovedBook(
+private fun previewRecentlyLoved(): List<RecentlyLovedBook> = listOf(
+    RecentlyLovedBook(
         bookId = 1,
-        coverUrl = "",
-        title = "The Bee Sting",
-        author = "Paul Murray",
         ratingStars = 4.5,
-        monthLabel = "Jun 2026",
+        finishedOn = LocalDate(
+            2026,
+            6,
+            14,
+        ),
     ),
-    LovedBook(
+    RecentlyLovedBook(
         bookId = 2,
-        coverUrl = "",
-        title = "Cloud Cuckoo Land",
-        author = "Anthony Doerr",
         ratingStars = 4.0,
-        monthLabel = "May 2026",
+        finishedOn = LocalDate(
+            2026,
+            5,
+            9,
+        ),
     ),
-    LovedBook(
+    RecentlyLovedBook(
         bookId = 3,
-        coverUrl = "",
-        title = "Sea of Tranquility",
-        author = "Emily St John Mandel",
         ratingStars = 4.5,
-        monthLabel = "Apr 2026",
+        finishedOn = LocalDate(
+            2026,
+            4,
+            21,
+        ),
     ),
 )

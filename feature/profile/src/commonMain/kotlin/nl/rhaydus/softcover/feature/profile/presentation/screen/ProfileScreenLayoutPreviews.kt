@@ -2,10 +2,12 @@ package nl.rhaydus.softcover.feature.profile.presentation.screen
 
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingSummaryUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingLifePreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingHistoryPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingStatsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 
-private val PreviewReadingLife = profileReadingLifePreview()
+private val PreviewReadingStats = profileReadingStatsPreview()
+private val PreviewReadingHistory = profileReadingHistoryPreview()
 
 internal val ProfileScreenPreviewState = ProfileUiState(
     isLoading = false,
@@ -14,14 +16,12 @@ internal val ProfileScreenPreviewState = ProfileUiState(
         name = "Elena Marchetti",
         username = "elenam",
         bio = "Mostly literary fiction, the occasional doorstop fantasy.",
-        booksRead = 214,
-        totalPagesRead = 128_406,
-        averageRating = 4.2,
         readingStreak = 31,
     ),
-    readingLife = PreviewReadingLife,
+    readingStats = PreviewReadingStats,
+    readingHistory = PreviewReadingHistory,
     readingSummary = readingSummaryUiModel(
-        readingLife = PreviewReadingLife,
+        history = PreviewReadingHistory,
         currentYear = 2025,
     ),
 )

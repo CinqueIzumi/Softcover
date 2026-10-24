@@ -5,9 +5,9 @@ import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
-import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasChartsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasProfileDataCollector
-import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasReadingLifeCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasScopeChipsCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasScopedSectionsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.HideUntaggedAuthorsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingLifeCollector
@@ -38,7 +38,9 @@ val profileScreenModule = module {
             initializers = getAll(),
             resetUserDataUseCase = get(),
             observeUserProfileDataUseCase = get(),
-            observeReadingLifeUseCase = get(),
+            observeReadingStatsUseCase = get(),
+            observeReadingHistoryUseCase = get(),
+            observeAuthorDemographicsBackfilledUseCase = get(),
             refreshUserProfileDataUseCase = get(),
             clock = get(),
             timeZone = get(),
@@ -55,17 +57,20 @@ val profileScreenModule = module {
             dispatchers = get(),
             initializers = getAll(),
             observeUserProfileDataUseCase = get(),
-            observeReadingLifeUseCase = get(),
+            observeReadingStatsUseCase = get(),
+            observeReadingHistoryUseCase = get(),
+            observeAuthorDemographicsBackfilledUseCase = get(),
             getHideUntaggedAuthorsAsFlowUseCase = get(),
             setHideUntaggedAuthorsUseCase = get(),
             observeBooksByIdsUseCase = get(),
+            observeCurrentDateUseCase = get(),
         )
     }
 
     factory { AtlasProfileDataCollector() } bind StatsAtlasCollector::class
-    factory { AtlasReadingLifeCollector() } bind StatsAtlasCollector::class
+    factory { AtlasScopeChipsCollector() } bind StatsAtlasCollector::class
     factory { RecentlyLovedCardsCollector() } bind StatsAtlasCollector::class
-    factory { AtlasChartsCollector() } bind StatsAtlasCollector::class
+    factory { AtlasScopedSectionsCollector() } bind StatsAtlasCollector::class
     factory { HideUntaggedAuthorsCollector() } bind StatsAtlasCollector::class
     factory { YearMetricToggleCollector() } bind StatsAtlasCollector::class
     factory { YearHistoryCollector() } bind StatsAtlasCollector::class

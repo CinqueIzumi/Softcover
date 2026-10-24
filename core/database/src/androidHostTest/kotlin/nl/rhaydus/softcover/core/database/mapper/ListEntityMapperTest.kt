@@ -133,6 +133,7 @@ class ListEntityMapperTest {
         description = description,
         releaseYear = releaseYear,
         releaseDate = releaseDate,
+        pages = null,
         coverUrl = coverUrl,
         usersCount = usersCount,
         ratingsCount = ratingsCount,

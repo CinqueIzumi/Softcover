@@ -39,6 +39,7 @@ internal fun ColumnScope.TemporaryChapter(
     GenreRankingSection(
         hasGenres = state.hasGenres,
         genreScopeCaption = state.genreScopeCaption,
+        emptyCaption = state.genreEmptyCaption,
         genreRanking = state.genreRanking,
         isLoading = state.isReadingLifeLoading,
         header = state.genreRankingHeader,
@@ -51,7 +52,8 @@ internal fun ColumnScope.TemporaryChapter(
         genderBreakdown = state.genderBreakdown,
         bipocBreakdown = state.bipocBreakdown,
         lgbtqBreakdown = state.lgbtqBreakdown,
-        hideUntaggedAuthors = state.hideUntaggedAuthors,
+        scopeCaption = state.authorsScopeCaption,
+        emptyCaption = state.authorsEmptyCaption,
         hideUntaggedAuthorsToggle = state.hideUntaggedAuthorsToggle,
         canHideUntaggedAuthors = state.hasUntaggedAuthors,
         isLoading = state.isReadingLifeLoading,
@@ -70,6 +72,7 @@ internal fun ColumnScope.TemporaryChapter(
         isLoading = state.isReadingLifeLoading,
         header = state.ratingsHistogramHeader,
         caption = state.ratingsHistogramCaption,
+        emptyCaption = state.ratingsEmptyCaption,
         modifier = Modifier.fillMaxWidth(),
     )
 

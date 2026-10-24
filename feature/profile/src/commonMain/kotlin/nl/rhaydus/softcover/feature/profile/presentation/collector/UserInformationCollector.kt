@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
@@ -18,15 +19,20 @@ internal class UserInformationCollector : ProfileCollector {
                 .onApiFailure()
         }
 
-        dependencies.observeUserProfileDataUseCase()
-            .filterNotNull()
-            .collect { profileData ->
-                scope.setState {
-                    it.copy(
-                        userProfileData = profileData,
-                        isLoading = false,
-                    )
-                }
+        // The page keeps loading until the library is backfilled, so an unfilled library never reads as
+        // an empty one.
+        combine(
+            dependencies.observeUserProfileDataUseCase().filterNotNull(),
+            dependencies.observeAuthorDemographicsBackfilledUseCase(),
+        ) { profileData, isBackfilled ->
+            profileData to isBackfilled
+        }.collect { (profileData, isBackfilled) ->
+            scope.setState {
+                it.copy(
+                    userProfileData = profileData,
+                    isLoading = isBackfilled.not(),
+                )
             }
+        }
     }
 }

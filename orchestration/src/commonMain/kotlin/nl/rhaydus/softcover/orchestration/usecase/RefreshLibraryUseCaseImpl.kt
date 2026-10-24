@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
@@ -42,6 +43,15 @@ internal class RefreshLibraryUseCaseImpl(
                 )
             }
         }
+
+        if (scope.coversReadBooks()) settingsRepository.markAuthorDemographicsBackfilled()
+    }
+
+    // The reading stats need only the Read status, so any refresh that covers it completes the demographics backfill.
+    private fun RefreshScope.coversReadBooks(): Boolean = when (this) {
+        RefreshScope.All -> true
+        is RefreshScope.ByStatuses -> UserBookStatus.READ in statuses
+        is RefreshScope.ByList -> false
     }
 
     private suspend fun refreshAll(userId: Int) = coroutineScope {

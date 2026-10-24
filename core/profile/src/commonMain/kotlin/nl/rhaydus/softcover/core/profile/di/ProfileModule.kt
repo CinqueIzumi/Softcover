@@ -13,7 +13,8 @@ import nl.rhaydus.softcover.core.profile.data.repository.ProfileRepositoryImpl
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 import nl.rhaydus.softcover.core.profile.domain.usecase.MarkReadingActivityUseCaseImpl
-import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
@@ -40,7 +41,6 @@ val profileModule = module {
     single<ProfileRemoteDataSource> {
         ProfileRemoteDataSourceImpl(
             apolloClient = get(),
-            clock = get(),
             timeZone = get(),
         )
     }
@@ -63,10 +63,6 @@ val profileModule = module {
 
     factory {
         ObserveUserProfileDataUseCase(profileRepository = get())
-    }
-
-    factory {
-        ObserveReadingLifeUseCase(observeUserProfileDataUseCase = get())
     }
 
     factory {
@@ -99,6 +95,8 @@ val profileModule = module {
         RefreshUserProfileStatsUseCase(
             profileRepository = get(),
             statsRefreshGate = get(statsRefreshGateQualifier),
+            refreshLibraryUseCase = get(),
+            hasSyncedReadBooksThisSessionUseCase = get(),
         )
     }
 
@@ -106,6 +104,22 @@ val profileModule = module {
         RefreshUserProfileDataUseCase(
             refreshReadingActivityUseCase = get(),
             refreshUserProfileStatsUseCase = get(),
+        )
+    }
+
+    factory {
+        ObserveReadingStatsUseCase(
+            getReadUserBooksUseCase = get(),
+            appDispatchers = get(),
+        )
+    }
+
+    factory {
+        ObserveReadingHistoryUseCase(
+            getReadUserBooksUseCase = get(),
+            appDispatchers = get(),
+            clock = get(),
+            timeZone = get(),
         )
     }
 

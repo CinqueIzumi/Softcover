@@ -19,8 +19,9 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * Maps the reader's most recently loved books to book cards off the composition. Each card takes its
- * cover from the cached library book when there is one, and re-maps when that book changes. While the
- * reading life is still loading and there are none, the cards are loading stand-ins.
+ * cover, title and authors from the cached library book, and re-maps when that book changes; a loved book
+ * the library does not hold yet is left out. While the reading history is still loading and there are
+ * none, the cards are loading stand-ins.
  */
 internal class RecentlyLovedCardsCollector : StatsAtlasCollector {
     override suspend fun onLaunch(
@@ -30,7 +31,7 @@ internal class RecentlyLovedCardsCollector : StatsAtlasCollector {
         scope.state
             .map {
                 RecentlyLovedSnapshot(
-                    books = it.readingLife?.recentlyLoved.orEmpty(),
+                    books = it.readingHistory?.recentlyLoved.orEmpty(),
                     isLoading = it.isReadingLifeLoading,
                 )
             }
@@ -53,10 +54,12 @@ internal class RecentlyLovedCardsCollector : StatsAtlasCollector {
             val byId = libraryBooks.associateBy { it.id }
 
             loved
-                .map { book ->
+                .mapNotNull { book ->
+                    val libraryBook = byId[book.bookId]?.takeIf { it.userBook != null }
+                        ?: return@mapNotNull null
                     val entry = RecentlyLovedEntry(
                         loved = book,
-                        libraryBook = byId[book.bookId]?.takeIf { it.userBook != null },
+                        libraryBook = libraryBook,
                     )
 
                     entry.toRecentlyLovedCard() to entry

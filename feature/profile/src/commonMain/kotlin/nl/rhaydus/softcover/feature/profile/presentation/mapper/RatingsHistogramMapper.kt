@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
+import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 
@@ -95,6 +96,49 @@ internal fun RatingBand.toRatingsHistogramHeader(): SectionHeaderUiModel.Section
         eyebrow = RATINGS_HISTOGRAM_EYEBROW,
         headline = toRatingsHistogramHeadline(),
     )
+
+/**
+ * Inside a narrower [scope] a reader with too few ratings to classify is told the count instead of
+ * "Too early to tell"; every year keeps the band's own headline.
+ */
+internal fun ratingsHistogramHeader(
+    ratings: RatingsDistribution,
+    scope: StatsScope = StatsScope.AllTime,
+): SectionHeaderUiModel.Section {
+    val phrase = scope.scopePhrase()
+
+    if (phrase == null || ratings.band != RatingBand.NEW_READER) return ratings.band.toRatingsHistogramHeader()
+
+    val total = ratings.totalRatings
+    val rated = when (total) {
+        0 -> "No rated books"
+        1 -> "1 rated book"
+        else -> "$total rated books"
+    }
+
+    return SectionHeaderUiModel.Section(
+        eyebrow = RATINGS_HISTOGRAM_EYEBROW,
+        headline = "$rated $phrase",
+    )
+}
+
+/** The caption under the histogram; [ratingsHistogramHeader] already says what a narrow scope lacks. */
+internal fun ratingsHistogramCaption(
+    ratings: RatingsDistribution,
+    scope: StatsScope = StatsScope.AllTime,
+): String = if (scope == StatsScope.AllTime || ratings.band != RatingBand.NEW_READER) {
+    ratings.band.toRatingsHistogramCaption()
+} else {
+    "Half stars count."
+}
+
+/** What the section says in place of its histogram when nothing in [scope] is rated. */
+internal fun ratingsEmptyCaption(
+    booksRead: Int,
+    scope: StatsScope = StatsScope.AllTime,
+): String = scope.noFinishedBooksSentence(booksRead = booksRead)
+    ?: scope.scopePhrase()?.let { "You haven't rated any books you finished $it." }
+    ?: "Rate a few books you've finished and this fills in."
 
 internal fun RatingBand.toRatingsHistogramCaption(): String = when (this) {
     RatingBand.GENEROUS ->

@@ -2,10 +2,12 @@ package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import nl.rhaydus.softcover.core.component.chart.ChartTone
+import nl.rhaydus.softcover.core.domain.model.StatsScope
+import nl.rhaydus.softcover.core.domain.model.StatsWindow
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
-import io.kotest.matchers.string.shouldContain
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -175,6 +177,103 @@ class GenreRankingMapperTest {
 
             // ----- Assert -----
             result shouldContain "out of 12 finished books with genre tags"
+        }
+    }
+
+
+    @Nested
+    inner class ScopedGenreScopeCaption {
+        @Test
+        fun `a scope with no tagged books names the books finished in it`() {
+            // ----- Arrange -----
+            val scope = StatsScope.CalendarYear(2026)
+
+            // ----- Act -----
+            val result = genreScopeCaption(
+                taggedBookCount = 0,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            result shouldContain "out of the books you finished in 2026 with genre tags"
+        }
+
+        @Test
+        fun `a scope with one tagged book uses the singular wording`() {
+            // ----- Arrange -----
+            val scope = StatsScope.Rolling(StatsWindow.LAST_12_MONTHS)
+
+            // ----- Act -----
+            val result = genreScopeCaption(
+                taggedBookCount = 1,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            result shouldContain "out of the 1 book you finished in the last 12 months with genre tags"
+        }
+
+        @Test
+        fun `a scope with several tagged books names the count`() {
+            // ----- Arrange -----
+            val scope = StatsScope.Rolling(StatsWindow.LAST_30_DAYS)
+
+            // ----- Act -----
+            val result = genreScopeCaption(
+                taggedBookCount = 4,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            result shouldContain "out of the 4 books you finished in the last 30 days with genre tags"
+        }
+    }
+
+    @Nested
+    inner class GenreEmptyCaptionTests {
+        @Test
+        fun `a scope with no finished books says so`() {
+            // ----- Arrange -----
+            val scope = StatsScope.CalendarYear(2025)
+
+            // ----- Act -----
+            val result = genreEmptyCaption(
+                booksRead = 0,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            result shouldBe "No finished books in 2025."
+        }
+
+        @Test
+        fun `a scope with finished books but no genre tags keeps the generic prompt`() {
+            // ----- Arrange -----
+            val scope = StatsScope.CalendarYear(2025)
+
+            // ----- Act -----
+            val result = genreEmptyCaption(
+                booksRead = 3,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            result shouldBe "Finish a few books and your top genres show up here."
+        }
+
+        @Test
+        fun `all time keeps the generic prompt even with no finished books`() {
+            // ----- Arrange -----
+            val scope = StatsScope.AllTime
+
+            // ----- Act -----
+            val result = genreEmptyCaption(
+                booksRead = 0,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            result shouldBe "Finish a few books and your top genres show up here."
         }
     }
 }

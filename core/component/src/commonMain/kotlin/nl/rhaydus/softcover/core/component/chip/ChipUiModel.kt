@@ -155,6 +155,11 @@ data class ChipUiModel(
                 label = "Bold",
                 face = ChipFace.Bold,
             ),
+            "Eyebrow" to ChipUiModel(
+                key = "eyebrow",
+                label = "This year",
+                face = ChipFace.Eyebrow,
+            ),
             "Disabled" to ChipUiModel(
                 key = "disabled",
                 label = "Cozy mystery",

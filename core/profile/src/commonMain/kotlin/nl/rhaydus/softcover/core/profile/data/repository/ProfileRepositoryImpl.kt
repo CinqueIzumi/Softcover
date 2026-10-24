@@ -35,8 +35,8 @@ internal class ProfileRepositoryImpl(
         )
     }
 
-    override suspend fun cacheUserProfileStats(snapshot: UserProfileSnapshot) {
-        profileLocalDataSource.cacheUserProfileStats(snapshot = snapshot)
+    override suspend fun cacheUserProfileIdentity(snapshot: UserProfileSnapshot) {
+        profileLocalDataSource.cacheUserProfileIdentity(snapshot = snapshot)
     }
 
     override suspend fun markActiveReadingDate(date: LocalDate) {

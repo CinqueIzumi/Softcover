@@ -7,11 +7,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
+import nl.rhaydus.softcover.core.component.chart.ChartTone
+import nl.rhaydus.softcover.core.domain.model.StatsScope
+import nl.rhaydus.softcover.core.domain.model.StatsWindow
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.statsScopeKey
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
@@ -60,23 +63,19 @@ class YearHistoryCollectorTest {
         )
     }
 
-    private fun buildReadingLife(): ReadingLife = ReadingLife(
+    private fun buildReadingHistory(): ReadingHistory = ReadingHistory(
         booksByYear = books,
         pagesByYear = pages,
-        pagesByMonth = emptyList(),
-        genres = GenreBreakdown(),
-        ratings = RatingsDistribution(),
-        recentlyLoved = emptyList(),
     )
 
     @Nested
     inner class OnLaunch {
         @Test
-        fun `writes the loading chart while the reading life is loading`() = runTest(UnconfinedTestDispatcher()) {
+        fun `writes the loading chart while the reading history is loading`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = StatsAtlasUiState(
                 isLoading = true,
-                readingLife = buildReadingLife(),
+                readingHistory = buildReadingHistory(),
             )
 
             // ----- Act -----
@@ -97,11 +96,11 @@ class YearHistoryCollectorTest {
         }
 
         @Test
-        fun `writes the loading chart when there is no reading life`() = runTest(UnconfinedTestDispatcher()) {
+        fun `writes the loading chart when there is no reading history`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
-                readingLife = null,
+                readingHistory = null,
             )
 
             // ----- Act -----
@@ -125,7 +124,7 @@ class YearHistoryCollectorTest {
             // ----- Arrange -----
             stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
-                readingLife = buildReadingLife(),
+                readingHistory = buildReadingHistory(),
             )
 
             // ----- Act -----
@@ -153,7 +152,7 @@ class YearHistoryCollectorTest {
             // ----- Arrange -----
             stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
-                readingLife = buildReadingLife(),
+                readingHistory = buildReadingHistory(),
             )
             val job = launch {
                 YearHistoryCollector().onLaunch(
@@ -174,6 +173,99 @@ class YearHistoryCollectorTest {
                 series = pages,
                 metric = YearMetric.PAGES,
             )
+            job.cancel()
+        }
+    }
+
+    @Nested
+    inner class OnLaunchWithScope {
+        private fun scopedState(scope: StatsScope): StatsAtlasUiState {
+            val key = statsScopeKey(scope)
+
+            return StatsAtlasUiState(
+                isLoading = false,
+                readingHistory = buildReadingHistory(),
+                selectedScopeKey = key,
+                scopeChips = atlasScopeChips(
+                    yearsRead = listOf(2024, 2023),
+                    selectedKey = key,
+                ),
+            )
+        }
+
+        @Test
+        fun `lights the selected calendar year and names it with its count`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = scopedState(StatsScope.CalendarYear(2023))
+
+            // ----- Act -----
+            val job = launch {
+                YearHistoryCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.yearHistoryChart.columns.map { it.tone } shouldBe listOf(ChartTone.Lead, ChartTone.Second)
+            stateFlow.value.yearHistoryCaption shouldBe "In 2023 you finished 4 books."
+            job.cancel()
+        }
+
+        @Test
+        fun `a rolling scope keeps the busiest year as Lead`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = scopedState(StatsScope.Rolling(StatsWindow.LAST_12_MONTHS))
+
+            // ----- Act -----
+            val job = launch {
+                YearHistoryCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.yearHistoryChart.columns.map { it.tone } shouldBe listOf(ChartTone.Second, ChartTone.Lead)
+            stateFlow.value.yearHistoryCaption shouldBe "2024 was your busiest year yet: 9 books."
+            job.cancel()
+        }
+
+        @Test
+        fun `returns to the busiest year when the scope changes back to all time`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = scopedState(StatsScope.CalendarYear(2023))
+            val job = launch {
+                YearHistoryCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = scopedState(StatsScope.AllTime)
+
+            // ----- Assert -----
+            stateFlow.value.yearHistoryChart.columns.map { it.tone } shouldBe listOf(ChartTone.Second, ChartTone.Lead)
+            stateFlow.value.yearHistoryCaption shouldBe "2024 was your busiest year yet: 9 books."
+            job.cancel()
+        }
+
+        @Test
+        fun `a selected year switches the pages caption to pages`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = scopedState(StatsScope.CalendarYear(2024)).copy(selectedYearMetric = YearMetric.PAGES)
+
+            // ----- Act -----
+            val job = launch {
+                YearHistoryCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.yearHistoryCaption shouldBe "In 2024 you read 800 pages."
             job.cancel()
         }
     }

@@ -34,6 +34,7 @@ import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
 import nl.rhaydus.softcover.GetLatestUnfinishedReadQuery
 import nl.rhaydus.softcover.GetSystemVibeBookIdsQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
+import nl.rhaydus.softcover.GetUserBookIdsByIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.InsertUserBookWithStatusMutation
 import nl.rhaydus.softcover.MarkBookAsReadMutation
@@ -1815,6 +1816,14 @@ class BooksRemoteDataSourceImplTest {
             } returns listOf(userBookEntry)
 
             every {
+                userBookEntry.id
+            } returns 1
+
+            every {
+                meEntry.total
+            } returns totalOf(count = 1)
+
+            every {
                 userBookEntry.toBook()
             } returns expectedBook
 
@@ -1871,6 +1880,14 @@ class BooksRemoteDataSourceImplTest {
             } returns listOf(userBookEntry)
 
             every {
+                userBookEntry.id
+            } returns 1
+
+            every {
+                meEntry.total
+            } returns totalOf(count = 1)
+
+            every {
                 userBookEntry.toBook()
             } returns null
 
@@ -1907,6 +1924,14 @@ class BooksRemoteDataSourceImplTest {
             every {
                 meEntry.user_books
             } returns listOf(userBookEntry)
+
+            every {
+                userBookEntry.id
+            } returns 1
+
+            every {
+                meEntry.total
+            } returns totalOf(count = 1)
 
             every {
                 userBookEntry.toBook()
@@ -1982,18 +2007,22 @@ class BooksRemoteDataSourceImplTest {
             val first = baseBook.copy(
                 id = 10,
                 canonicalId = 20,
+                userBook = baseBook.userBook?.copy(id = 10),
             )
             val plain = baseBook.copy(
                 id = 11,
                 canonicalId = null,
+                userBook = baseBook.userBook?.copy(id = 11),
             )
             val second = baseBook.copy(
                 id = 12,
                 canonicalId = 20,
+                userBook = baseBook.userBook?.copy(id = 12),
             )
             val third = baseBook.copy(
                 id = 13,
                 canonicalId = 30,
+                userBook = baseBook.userBook?.copy(id = 13),
             )
             val canonical20 = baseBook.copy(id = 20)
             val canonical30 = baseBook.copy(id = 30)
@@ -2034,11 +2063,144 @@ class BooksRemoteDataSourceImplTest {
             result shouldBe listOf(book)
         }
 
+        @Test
+        fun `returns the rows of every page when the library spans several pages`() = runTest {
+            // ----- Arrange -----
+            val firstPage = userBooksWithIds(ids = 1..50)
+            val secondPage = userBooksWithIds(ids = 51..100)
+            val lastPage = userBooksWithIds(ids = 101..120)
+
+            stubUserBooksPage(
+                offset = 0,
+                books = firstPage,
+                total = 120,
+            )
+            stubUserBooksPage(
+                offset = 50,
+                books = secondPage,
+                total = 120,
+            )
+            stubUserBooksPage(
+                offset = 100,
+                books = lastPage,
+                total = 120,
+            )
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1)
+
+            // ----- Assert -----
+            result.map { it.userBook?.id } shouldBe (1..120).toList()
+        }
+
+        @Test
+        fun `throws when a later page has no me instead of treating it as the end`() = runTest {
+            // ----- Arrange -----
+            stubUserBooksPage(
+                offset = 0,
+                books = userBooksWithIds(ids = 1..50),
+                total = 120,
+            )
+
+            val emptyMeData = mockk<GetUserBooksQuery.Data> {
+                every {
+                    me
+                } returns emptyList()
+            }
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery && it.offset == 50 },
+                    fetchPolicy = any(),
+                )
+            } returns emptyMeData
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.initializeBooks(userId = 1)
+            }
+        }
+
+        @Test
+        fun `keeps one row when the same user book id appears on two pages`() = runTest {
+            // ----- Arrange -----
+            val firstPage = userBooksWithIds(ids = 1..50)
+            val secondPage = userBooksWithIds(ids = 50..60)
+
+            stubUserBooksPage(
+                offset = 0,
+                books = firstPage,
+                total = 60,
+            )
+            stubUserBooksPage(
+                offset = 50,
+                books = secondPage,
+                total = 60,
+            )
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1)
+
+            // ----- Assert -----
+            result.map { it.userBook?.id } shouldBe (1..60).toList()
+        }
+
+        private fun userBooksWithIds(ids: IntRange): List<Book> = ids.map { id ->
+            baseBook.copy(
+                id = id,
+                canonicalId = null,
+                userBook = baseBook.userBook?.copy(id = id),
+            )
+        }
+
+        private fun stubUserBooksPage(
+            offset: Int,
+            books: List<Book>,
+            total: Int,
+        ) {
+            val entries = books.map { book ->
+                mockk<GetUserBooksQuery.Data.Me.User_book> {
+                    every {
+                        id
+                    } returns checkNotNull(book.userBook?.id)
+
+                    every {
+                        toBook()
+                    } returns book
+                }
+            }
+            val meEntry = mockk<GetUserBooksQuery.Data.Me> {
+                every {
+                    user_books
+                } returns entries
+
+                every {
+                    this@mockk.total
+                } returns totalOf(count = total)
+            }
+            val queryData = mockk<GetUserBooksQuery.Data> {
+                every {
+                    me
+                } returns listOf(meEntry)
+            }
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery && it.offset == offset },
+                    fetchPolicy = any(),
+                )
+            } returns queryData
+        }
+
         private fun stubUserBooksQuery(userBooks: List<Book>) {
             val queryData = mockk<GetUserBooksQuery.Data>()
             val meEntry = mockk<GetUserBooksQuery.Data.Me>()
-            val entries = userBooks.map { book ->
+            val entries = userBooks.mapIndexed { index, book ->
                 mockk<GetUserBooksQuery.Data.Me.User_book> {
+                    every {
+                        id
+                    } returns index
+
                     every {
                         toBook()
                     } returns book
@@ -2059,7 +2221,19 @@ class BooksRemoteDataSourceImplTest {
             every {
                 meEntry.user_books
             } returns entries
+
+            every {
+                meEntry.total
+            } returns totalOf(count = userBooks.size)
         }
+
+        private fun totalOf(count: Int): GetUserBooksQuery.Data.Me.Total = GetUserBooksQuery.Data.Me.Total(
+            __typename = "user_books_aggregate",
+            aggregate = GetUserBooksQuery.Data.Me.Total.Aggregate(
+                __typename = "user_books_aggregate_fields",
+                count = count,
+            ),
+        )
 
         private fun stubCanonicalBooksQuery(canonicalBooks: List<Book>) {
             val queryData = mockk<GetBooksByIdsQuery.Data>()
@@ -2085,6 +2259,97 @@ class BooksRemoteDataSourceImplTest {
             every {
                 queryData.books
             } returns entries
+        }
+    }
+
+    @Nested
+    inner class FetchExistingUserBookIds {
+        @Test
+        fun `splits the ids into requests of 200 and returns the union of the ids found`() = runTest {
+            // ----- Arrange -----
+            val ids = (1..450).toList()
+
+            stubIdsLookup(
+                requested = ids.subList(
+                    0,
+                    200,
+                ),
+                found = listOf(1, 200),
+            )
+            stubIdsLookup(
+                requested = ids.subList(
+                    200,
+                    400,
+                ),
+                found = listOf(201),
+            )
+            stubIdsLookup(
+                requested = ids.subList(
+                    400,
+                    450,
+                ),
+                found = listOf(450),
+            )
+
+            // ----- Act -----
+            val result = dataSource.fetchExistingUserBookIds(ids = ids)
+
+            // ----- Assert -----
+            result shouldBe setOf(1, 200, 201, 450)
+        }
+
+        @Test
+        fun `throws when the lookup has no me`() = runTest {
+            // ----- Arrange -----
+            val queryData = mockk<GetUserBookIdsByIdsQuery.Data> {
+                every {
+                    me
+                } returns emptyList()
+            }
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetUserBookIdsByIdsQuery>(),
+                    fetchPolicy = any(),
+                )
+            } returns queryData
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.fetchExistingUserBookIds(ids = listOf(1, 2))
+            }
+        }
+
+        private fun stubIdsLookup(
+            requested: List<Int>,
+            found: List<Int>,
+        ) {
+            val entries = found.map { id ->
+                mockk<GetUserBookIdsByIdsQuery.Data.Me.User_book> {
+                    every {
+                        this@mockk.id
+                    } returns id
+                }
+            }
+            val meEntry = mockk<GetUserBookIdsByIdsQuery.Data.Me> {
+                every {
+                    user_books
+                } returns entries
+            }
+            val queryData = mockk<GetUserBookIdsByIdsQuery.Data> {
+                every {
+                    me
+                } returns listOf(meEntry)
+            }
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = match<Query<GetUserBookIdsByIdsQuery.Data>> {
+                        it is GetUserBookIdsByIdsQuery && it.ids == requested
+                    },
+                    fetchPolicy = any(),
+                )
+            } returns queryData
         }
     }
 

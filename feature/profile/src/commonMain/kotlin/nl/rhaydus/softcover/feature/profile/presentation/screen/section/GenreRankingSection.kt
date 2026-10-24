@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.core.component.chart.RankedBars
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.component.text.FadeThroughText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
@@ -35,6 +35,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 internal fun GenreRankingSection(
     hasGenres: Boolean,
     genreScopeCaption: String,
+    emptyCaption: String,
     genreRanking: RankedBarsUiModel,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
@@ -45,25 +46,27 @@ internal fun GenreRankingSection(
 
         Spacer(modifier = Modifier.height(Spacing.md))
 
-        if (hasGenres.not() && isLoading.not()) {
-            SoftcoverText(
-                text = "Finish a few books and your top genres show up here.",
-                style = MaterialTheme.editorialTypography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
-            RankedBars(model = genreRanking)
+        Column(modifier = Modifier.animateScopeContentSize()) {
+            if (hasGenres.not() && isLoading.not()) {
+                FadeThroughText(
+                    text = emptyCaption,
+                    style = MaterialTheme.editorialTypography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                RankedBars(model = genreRanking)
 
-            Spacer(modifier = Modifier.height(Spacing.md))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
-            SoftcoverText(
-                text = genreScopeCaption,
-                style = MaterialTheme.editorialTypography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                isLoading = isLoading,
-                standIn = "Your top five genres, out of your finished books with genre tags. Books can have more " +
-                    "than one genre, so these add up to more than 100%.",
-            )
+                FadeThroughText(
+                    text = genreScopeCaption,
+                    style = MaterialTheme.editorialTypography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    isLoading = isLoading,
+                    standIn = "Your top five genres, out of your finished books with genre tags. Books can have more " +
+                        "than one genre, so these add up to more than 100%.",
+                )
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ import com.apollographql.apollo.ApolloClient
 import nl.rhaydus.softcover.GetReadingJournalHistoryQuery
 import nl.rhaydus.softcover.core.database.model.ProgressHistoryEntity
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
-import nl.rhaydus.softcover.core.network.helper.fetchAllPages
+import nl.rhaydus.softcover.core.network.helper.fetchAllPagesOrThrow
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.core.personal.data.mapper.toProgressHistoryEntity
 
@@ -35,7 +35,10 @@ internal class ReadingJournalHistoryRemoteDataSourceImpl(
         bookId: Int,
         userId: Int,
     ): List<GetReadingJournalHistoryQuery.Data.Reading_journal> =
-        fetchAllPages { limit, offset ->
+        fetchAllPagesOrThrow(
+            pageSize = PAGE_SIZE,
+            maxPages = MAX_PAGES,
+        ) { limit, offset ->
             apolloClient.safeQuery(
                 query = GetReadingJournalHistoryQuery(
                     bookId = bookId,
@@ -46,3 +49,8 @@ internal class ReadingJournalHistoryRemoteDataSourceImpl(
             ).reading_journals
         }
 }
+
+// Request-multiplier budget: ceiling of PAGE_SIZE * MAX_PAGES rows before the fetch fails.
+private const val PAGE_SIZE: Int = 100
+
+private const val MAX_PAGES: Int = 100

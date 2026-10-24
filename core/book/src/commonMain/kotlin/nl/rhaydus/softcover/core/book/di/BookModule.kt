@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedBooksByStatusUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetWantToReadUserBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.HasSyncedReadBooksThisSessionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.LoadSimilarBooksPageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
@@ -223,6 +224,10 @@ val bookModule = module {
 
     factory {
         GetReadUserBooksUseCase(booksRepository = get())
+    }
+
+    factory {
+        HasSyncedReadBooksThisSessionUseCase(booksRepository = get())
     }
 
     factory {

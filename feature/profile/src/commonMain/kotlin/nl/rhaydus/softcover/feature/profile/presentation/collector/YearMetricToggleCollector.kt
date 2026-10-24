@@ -16,7 +16,7 @@ internal class YearMetricToggleCollector : StatsAtlasCollector {
         dependencies: StatsAtlasDependencies,
     ) {
         scope.state
-            .map { it.selectedYearMetric to (it.isLoading.not() && it.readingLife != null) }
+            .map { it.selectedYearMetric to (it.isLoading.not() && it.readingHistory != null) }
             .distinctUntilChanged()
             .collectLatest { (metric, ready) ->
                 val toggle = yearMetricToggleFor(

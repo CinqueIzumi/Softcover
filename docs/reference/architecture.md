@@ -150,9 +150,11 @@ and a change that breaks one is a defect even if it compiles:
 - **Fewer, fatter queries.** A top-level field costs the same regardless of payload, so adding a field
   to an existing query is free and **splitting one query into two doubles its cost**. This inverts the
   usual instinct toward small focused queries; flag any change that splits one.
-- **Page-size and fan-out constants are budget, not tuning.** `fetchAllPages`' `pageSize`/`maxPages`
-  (below) and `ProfileRemoteDataSource.MAX_PAGES` are request multipliers — one runaway loop is 100
-  requests, twenty full buckets. Every uncapped `async`/`awaitAll` fan-out is the same hazard with no
+- **Page-size and fan-out constants are budget, not tuning.** The library sync's `pageSize` is a request
+  multiplier, but its page count is bounded by the server's row count fetched in the same request
+  (`fetchAllPagesCounted`, below). `fetchAllPages`' `pageSize`/`maxPages` still guard the uncounted
+  callers, as does `ProfileRemoteDataSource.MAX_PAGES` — one runaway loop is 100 requests, twenty full
+  buckets. Every uncapped `async`/`awaitAll` fan-out is the same hazard with no
   ceiling at all.
 
 `search` accepts exactly one per request and cannot be merged with anything, so `GetIdsForQuery` is
@@ -187,7 +189,12 @@ books with more than 200 updates).
   row's own `id`) so offset windows don't overlap or skip rows. If a consumer depends on a meaningful
   order (e.g. chronological), make it a composite key with `id` as the tiebreaker
   (`order_by: [{ updated_at: asc }, { id: asc }]`).
-- Callers: `ProfileRemoteDataSource.fetchAllStatsBooks`, `UserTagsRemoteDataSource.fetchUserVocabulary`,
+- **`fetchAllPagesCounted`** bounds the library sync by data, not a constant: the query carries an aliased
+  `user_books_aggregate` count under the same `me` root (one billed request), paging runs until that many
+  rows arrive, and a short page below the count throws, so the prune never runs on an incomplete fetch.
+  `BooksRemoteDataSource.initializeBooks` is its only caller.
+- Callers: through the throwing `fetchAllPagesOrThrow` because their result feeds a prune or replace-all,
+  `UserTagsRemoteDataSource.fetchUserVocabulary`,
   `ReadingJournalHistoryRemoteDataSource.getReadingJournalHistory`,
   `QuoteRemoteDataSource.getQuotes` / `getAllQuotes`. A per-row lazily-cancellable
   `Flow` (e.g. `streamReadingDaysDescending`) stays a hand-rolled loop — it emits as it goes rather

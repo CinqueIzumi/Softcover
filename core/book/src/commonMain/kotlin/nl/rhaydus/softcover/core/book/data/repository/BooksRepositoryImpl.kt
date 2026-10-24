@@ -39,6 +39,7 @@ import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
+import kotlin.concurrent.Volatile
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -77,6 +78,10 @@ internal class BooksRepositoryImpl(
     private val stagedRemovalMutex = Mutex()
     private val stagedRemovalBookIds = mutableSetOf<Int>()
     private val inflightRefreshes = mutableMapOf<Set<UserBookStatus>?, Deferred<Unit>>()
+
+    @Volatile
+    override var hasSyncedReadBooksThisSession: Boolean = false
+        private set
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return booksLocalDataSource.getBooksFlowByStatus(status = status)
@@ -121,6 +126,10 @@ internal class BooksRepositoryImpl(
                     statusFilter = statusFilter,
                 )
             }
+        }
+
+        if (statusFilter == null || UserBookStatus.READ in statusFilter) {
+            hasSyncedReadBooksThisSession = true
         }
     }
 
@@ -181,10 +190,24 @@ internal class BooksRepositoryImpl(
 
         val fetchedBookUserBookIds: Set<Int> = booksToCache.mapNotNull { it.userBook?.id }.toSet()
 
-        val userBookIdsToRemove: List<Int> = locallyStoredUserBookIds
+        val missingUserBookIds: List<Int> = locallyStoredUserBookIds
             .filterNot { it in fetchedBookUserBookIds }
 
-        userBookCacheGate.removeUserBooks(ids = userBookIdsToRemove)
+        // Absence from the fetch is not proof of removal, so each candidate is confirmed gone with a
+        // targeted lookup; when the lookup fails the rows stay and the next refresh retries the prune.
+        val stillOnServer: Set<Int> = runCatching {
+            if (missingUserBookIds.isEmpty()) {
+                emptySet()
+            } else {
+                booksRemoteDataSource.fetchExistingUserBookIds(ids = missingUserBookIds)
+            }
+        }.getOrElse { error ->
+            if (error is CancellationException) throw error
+            AppLog.w("Skipping the prune of ${missingUserBookIds.size} user book(s): ${error.message}")
+            return
+        }
+
+        userBookCacheGate.removeUserBooks(ids = missingUserBookIds.filterNot { it in stillOnServer })
     }
 
     override suspend fun deleteOrphanBooks() {
@@ -253,6 +276,7 @@ internal class BooksRepositoryImpl(
 
     override suspend fun removeAllBooks() {
         booksLocalDataSource.removeAllBooks()
+        hasSyncedReadBooksThisSession = false
     }
 
     override suspend fun fetchBookById(id: Int): Book {

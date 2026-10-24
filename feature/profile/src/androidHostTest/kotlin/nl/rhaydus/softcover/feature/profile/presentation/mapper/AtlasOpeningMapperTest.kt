@@ -2,57 +2,53 @@ package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.statistic.StatTileVariant
-import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.core.domain.model.StatsScope
+import nl.rhaydus.softcover.core.domain.model.StatsWindow
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class AtlasOpeningMapperTest {
-    private fun buildProfileData(booksRead: Int = 42): UserProfileData = UserProfileData(
-        profileImageUrl = "https://example.com/avatar.png",
-        name = "Jane Doe",
-        username = "cinque",
-        bio = "Avid reader",
+    private fun buildStats(booksRead: Int = 42): ReadingStats = ReadingStats(
         booksRead = booksRead,
-        totalPagesRead = 12000,
-        averageRating = 4.2,
-        readingStreak = 7,
+        totalPages = 12000,
     )
 
     @Nested
     inner class AtlasOpeningUiModelMapping {
         @Test
-        fun `null profile data yields two zero-valued loading stats`() {
+        fun `null stats yields two zero-valued loading stats`() {
             // ----- Arrange -----
-            val profileData: UserProfileData? = null
+            val stats: ReadingStats? = null
 
             // ----- Act -----
-            val result = atlasOpeningUiModel(profileData)
+            val result = atlasOpeningUiModel(stats)
 
             // ----- Assert -----
-            val stats = listOf(result.hero.stat, result.books.stat)
-            stats.map { it.value } shouldBe listOf(0.0, 0.0)
-            stats.map { it.isLoading } shouldBe listOf(true, true)
+            val tiles = listOf(result.hero.stat, result.books.stat)
+            tiles.map { it.value } shouldBe listOf(0.0, 0.0)
+            tiles.map { it.isLoading } shouldBe listOf(true, true)
         }
 
         @Test
-        fun `null profile data gives the hero a caption that names no count`() {
+        fun `null stats gives the hero a caption that names no count`() {
             // ----- Arrange -----
-            val profileData: UserProfileData? = null
+            val stats: ReadingStats? = null
 
             // ----- Act -----
-            val result = atlasOpeningUiModel(profileData)
+            val result = atlasOpeningUiModel(stats)
 
             // ----- Assert -----
             (result.hero.variant as StatTileVariant.Hero).caption shouldBe "From your finished books."
         }
 
         @Test
-        fun `profile data fills the pages and books tiles and is not loading`() {
+        fun `stats fill the pages and books tiles and is not loading`() {
             // ----- Arrange -----
-            val profileData = buildProfileData()
+            val stats = buildStats()
 
             // ----- Act -----
-            val result = atlasOpeningUiModel(profileData)
+            val result = atlasOpeningUiModel(stats)
 
             // ----- Assert -----
             result.hero.stat.value shouldBe 12000.0
@@ -63,10 +59,10 @@ class AtlasOpeningMapperTest {
         @Test
         fun `a single finished book uses the singular caption`() {
             // ----- Arrange -----
-            val profileData = buildProfileData(booksRead = 1)
+            val stats = buildStats(booksRead = 1)
 
             // ----- Act -----
-            val result = atlasOpeningUiModel(profileData)
+            val result = atlasOpeningUiModel(stats)
 
             // ----- Assert -----
             (result.hero.variant as StatTileVariant.Hero).caption shouldBe "From 1 finished book."
@@ -75,25 +71,89 @@ class AtlasOpeningMapperTest {
         @Test
         fun `several finished books use the plural caption with the count`() {
             // ----- Arrange -----
-            val profileData = buildProfileData(booksRead = 42)
+            val stats = buildStats(booksRead = 42)
 
             // ----- Act -----
-            val result = atlasOpeningUiModel(profileData)
+            val result = atlasOpeningUiModel(stats)
 
             // ----- Assert -----
             (result.hero.variant as StatTileVariant.Hero).caption shouldBe "From 42 finished books."
         }
 
         @Test
-        fun `zero finished books use the plural caption`() {
+        fun `zero finished books state that none are finished yet`() {
             // ----- Arrange -----
-            val profileData = buildProfileData(booksRead = 0)
+            val stats = buildStats(booksRead = 0)
 
             // ----- Act -----
-            val result = atlasOpeningUiModel(profileData)
+            val result = atlasOpeningUiModel(stats)
 
             // ----- Assert -----
-            (result.hero.variant as StatTileVariant.Hero).caption shouldBe "From 0 finished books."
+            (result.hero.variant as StatTileVariant.Hero).caption shouldBe "No finished books yet."
+        }
+    }
+
+
+    @Nested
+    inner class ScopedHeroCaption {
+        @Test
+        fun `a scope with several finished books names the scope after the count`() {
+            // ----- Arrange -----
+            val stats = buildStats(booksRead = 5)
+
+            // ----- Act -----
+            val result = atlasOpeningUiModel(
+                stats = stats,
+                scope = StatsScope.CalendarYear(2026),
+            )
+
+            // ----- Assert -----
+            (result.hero.variant as StatTileVariant.Hero).caption shouldBe "From 5 finished books in 2026."
+        }
+
+        @Test
+        fun `a scope with a single finished book uses the singular count`() {
+            // ----- Arrange -----
+            val stats = buildStats(booksRead = 1)
+
+            // ----- Act -----
+            val result = atlasOpeningUiModel(
+                stats = stats,
+                scope = StatsScope.Rolling(StatsWindow.LAST_30_DAYS),
+            )
+
+            // ----- Assert -----
+            (result.hero.variant as StatTileVariant.Hero).caption shouldBe "From 1 finished book in the last 30 days."
+        }
+
+        @Test
+        fun `a scope with no finished books says so instead of counting zero`() {
+            // ----- Arrange -----
+            val stats = buildStats(booksRead = 0)
+
+            // ----- Act -----
+            val result = atlasOpeningUiModel(
+                stats = stats,
+                scope = StatsScope.Rolling(StatsWindow.LAST_6_MONTHS),
+            )
+
+            // ----- Assert -----
+            (result.hero.variant as StatTileVariant.Hero).caption shouldBe "No books finished in the last 6 months."
+        }
+
+        @Test
+        fun `loading stats keep the scope-free caption whatever the scope`() {
+            // ----- Arrange -----
+            val stats: ReadingStats? = null
+
+            // ----- Act -----
+            val result = atlasOpeningUiModel(
+                stats = stats,
+                scope = StatsScope.CalendarYear(2026),
+            )
+
+            // ----- Assert -----
+            (result.hero.variant as StatTileVariant.Hero).caption shouldBe "From your finished books."
         }
     }
 }

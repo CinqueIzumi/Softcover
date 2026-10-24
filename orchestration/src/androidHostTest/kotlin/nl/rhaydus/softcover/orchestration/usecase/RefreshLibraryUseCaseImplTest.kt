@@ -357,4 +357,117 @@ class RefreshLibraryUseCaseImplTest {
             }
         }
     }
+
+    @Nested
+    inner class AuthorDemographicsBackfill {
+        @BeforeEach
+        fun setUpUserId() {
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(55)
+            coEvery {
+                listsRepository.refreshUserLists(userId = 55)
+            } returns ListsRefreshResult(
+                changedLists = emptyList(),
+                serverListIds = emptySet(),
+            )
+        }
+
+        @Test
+        fun `an all-scope refresh marks the backfill`() = runTest {
+            // ----- Arrange -----
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.All)
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) { settingsRepository.markAuthorDemographicsBackfilled() }
+        }
+
+        @Test
+        fun `a statuses refresh containing read marks the backfill`() = runTest {
+            // ----- Arrange -----
+            val scope = RefreshScope.ByStatuses(
+                statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.READ),
+            )
+
+            // ----- Act -----
+            val result = useCase(scope = scope)
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) { settingsRepository.markAuthorDemographicsBackfilled() }
+        }
+
+        @Test
+        fun `a statuses refresh without read does not mark the backfill`() = runTest {
+            // ----- Arrange -----
+            val scope = RefreshScope.ByStatuses(
+                statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),
+            )
+
+            // ----- Act -----
+            val result = useCase(scope = scope)
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 0) { settingsRepository.markAuthorDemographicsBackfilled() }
+        }
+
+        @Test
+        fun `a single-list refresh does not mark the backfill`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                listsRepository.fetchUserLists(
+                    userId = 55,
+                    listIds = setOf(7),
+                )
+            } returns emptyList()
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.ByList(listId = 7))
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 0) { settingsRepository.markAuthorDemographicsBackfilled() }
+        }
+
+        @Test
+        fun `a failed read refresh does not mark the backfill`() = runTest {
+            // ----- Arrange -----
+            val scope = RefreshScope.ByStatuses(statuses = setOf(UserBookStatus.READ))
+            coEvery {
+                booksRepository.refreshUserBooks(
+                    userId = 55,
+                    statusFilter = setOf(UserBookStatus.READ),
+                )
+            } throws IllegalStateException("books refresh failed")
+
+            // ----- Act -----
+            val result = useCase(scope = scope)
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            coVerify(exactly = 0) { settingsRepository.markAuthorDemographicsBackfilled() }
+        }
+
+        @Test
+        fun `a failed all-scope refresh does not mark the backfill`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRepository.refreshUserBooks(
+                    userId = 55,
+                    statusFilter = null,
+                )
+            } throws IllegalStateException("books refresh failed")
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.All)
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            coVerify(exactly = 0) { settingsRepository.markAuthorDemographicsBackfilled() }
+        }
+    }
 }

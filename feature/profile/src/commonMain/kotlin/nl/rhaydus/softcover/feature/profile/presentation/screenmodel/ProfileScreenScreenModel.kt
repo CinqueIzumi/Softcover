@@ -4,7 +4,9 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.datetime.TimeZone
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
@@ -17,7 +19,9 @@ import kotlin.time.Clock
 
 internal class ProfileScreenScreenModel(
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
-    private val observeReadingLifeUseCase: ObserveReadingLifeUseCase,
+    private val observeReadingStatsUseCase: ObserveReadingStatsUseCase,
+    private val observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
+    private val observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase,
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
     private val clock: Clock,
@@ -31,7 +35,9 @@ internal class ProfileScreenScreenModel(
 ) {
     override val dependencies: ProfileDependencies = ProfileDependencies(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
-        observeReadingLifeUseCase = observeReadingLifeUseCase,
+        observeReadingStatsUseCase = observeReadingStatsUseCase,
+        observeReadingHistoryUseCase = observeReadingHistoryUseCase,
+        observeAuthorDemographicsBackfilledUseCase = observeAuthorDemographicsBackfilledUseCase,
         refreshUserProfileDataUseCase = refreshUserProfileDataUseCase,
         resetUserDataUseCase = resetUserDataUseCase,
         clock = clock,

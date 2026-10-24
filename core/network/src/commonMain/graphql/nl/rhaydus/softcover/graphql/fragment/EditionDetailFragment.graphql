@@ -4,6 +4,9 @@ fragment EditionDetailFragment on editions {
         author {
             id
             name
+            is_bipoc
+            is_lgbtq
+            gender_id
         }
     }
 }

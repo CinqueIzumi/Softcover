@@ -20,12 +20,21 @@ internal class ReadingLifeShareCardCollector : ProfileCollector {
     ) {
         scope.state
             .map { state ->
-                val readingLife = state.readingLife
+                val readingStats = state.readingStats
+                val readingHistory = state.readingHistory
                 val profile = state.userProfileData
 
                 ShareSheetSnapshot(
-                    card = if (state.isShareSheetRequested && readingLife != null && profile != null) {
-                        readingLife.toReadingLifeShareCardUiModel(profile)
+                    card = if (
+                        state.isShareSheetRequested &&
+                        readingStats != null &&
+                        readingHistory != null &&
+                        profile != null
+                    ) {
+                        readingStats.toReadingLifeShareCardUiModel(
+                            history = readingHistory,
+                            profile = profile,
+                        )
                     } else {
                         null
                     },

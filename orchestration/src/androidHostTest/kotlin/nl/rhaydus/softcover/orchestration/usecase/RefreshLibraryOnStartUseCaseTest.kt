@@ -21,6 +21,8 @@ class RefreshLibraryOnStartUseCaseTest {
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var useCase: RefreshLibraryOnStartUseCase
 
+    private val readScope = RefreshScope.ByStatuses(statuses = setOf(UserBookStatus.READ))
+
     private val activeScope = RefreshScope.ByStatuses(
         statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),
     )
@@ -44,6 +46,9 @@ class RefreshLibraryOnStartUseCaseTest {
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(false)
+            every {
+                settingsRepository.authorDemographicsBackfilled
+            } returns flowOf(true)
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.success(Unit)
@@ -68,6 +73,9 @@ class RefreshLibraryOnStartUseCaseTest {
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(false)
+            every {
+                settingsRepository.authorDemographicsBackfilled
+            } returns flowOf(true)
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.failure(expectedError)
@@ -86,6 +94,9 @@ class RefreshLibraryOnStartUseCaseTest {
             // ----- Arrange -----
             every {
                 settingsRepository.readThroughsBackfilled
+            } returns flowOf(true)
+            every {
+                settingsRepository.authorDemographicsBackfilled
             } returns flowOf(true)
             coEvery {
                 refreshLibraryUseCase(scope = any())
@@ -107,6 +118,9 @@ class RefreshLibraryOnStartUseCaseTest {
             every {
                 settingsRepository.readThroughsBackfilled
             } returns flowOf(true)
+            every {
+                settingsRepository.authorDemographicsBackfilled
+            } returns flowOf(true)
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.failure(expectedError)
@@ -125,6 +139,9 @@ class RefreshLibraryOnStartUseCaseTest {
             every {
                 settingsRepository.readThroughsBackfilled
             } returns emptyFlow()
+            every {
+                settingsRepository.authorDemographicsBackfilled
+            } returns emptyFlow()
             coEvery {
                 refreshLibraryUseCase(scope = any())
             } returns Result.success(Unit)
@@ -136,6 +153,77 @@ class RefreshLibraryOnStartUseCaseTest {
             result.isSuccess shouldBe true
             coVerify(exactly = 1) { refreshLibraryUseCase(scope = activeScope) }
             coVerify(exactly = 0) { settingsRepository.markReadThroughsBackfilled() }
+        }
+
+        @Test
+        fun `refreshes only the read status when demographics are not backfilled`() = runTest {
+            // ----- Arrange -----
+            every {
+                settingsRepository.readThroughsBackfilled
+            } returns flowOf(true)
+            every {
+                settingsRepository.authorDemographicsBackfilled
+            } returns flowOf(false)
+            coEvery {
+                refreshLibraryUseCase(scope = any())
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            val result = useCase()
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) { refreshLibraryUseCase(scope = readScope) }
+            coVerify(exactly = 0) { refreshLibraryUseCase(scope = activeScope) }
+            coVerify(exactly = 0) { settingsRepository.markReadThroughsBackfilled() }
+        }
+
+        @Test
+        fun `returns the failure when the read refresh fails`() = runTest {
+            // ----- Arrange -----
+            val expectedError = RuntimeException("refresh error")
+            every {
+                settingsRepository.readThroughsBackfilled
+            } returns flowOf(true)
+            every {
+                settingsRepository.authorDemographicsBackfilled
+            } returns flowOf(false)
+            coEvery {
+                refreshLibraryUseCase(scope = any())
+            } returns Result.failure(expectedError)
+
+            // ----- Act -----
+            val result = useCase()
+
+            // ----- Assert -----
+            result.exceptionOrNull() shouldBe expectedError
+        }
+
+        @Test
+        fun `one all-status refresh marks the read-throughs flag when demographics are also not backfilled`() = runTest {
+            // ----- Arrange -----
+            every {
+                settingsRepository.readThroughsBackfilled
+            } returns flowOf(false)
+            every {
+                settingsRepository.authorDemographicsBackfilled
+            } returns flowOf(false)
+            coEvery {
+                refreshLibraryUseCase(scope = any())
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            val result = useCase()
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) { refreshLibraryUseCase(scope = any()) }
+            coVerify(exactly = 1) {
+                refreshLibraryUseCase(
+                    scope = RefreshScope.ByStatuses(statuses = UserBookStatus.entries.toSet()),
+                )
+            }
+            coVerify(exactly = 1) { settingsRepository.markReadThroughsBackfilled() }
         }
     }
 }

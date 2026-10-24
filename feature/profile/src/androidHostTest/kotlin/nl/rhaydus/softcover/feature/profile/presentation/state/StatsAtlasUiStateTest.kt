@@ -1,25 +1,23 @@
 package nl.rhaydus.softcover.feature.profile.presentation.state
 
 import io.kotest.matchers.shouldBe
+import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
-import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
+import nl.rhaydus.softcover.core.profile.domain.model.RecentlyLovedBook
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_KEY
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.statsScopeKey
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class StatsAtlasUiStateTest {
-    private fun readingLifeWith(authorDemographics: AuthorDemographics): ReadingLife = ReadingLife(
-        booksByYear = emptyList(),
-        pagesByYear = emptyList(),
-        pagesByMonth = emptyList(),
-        genres = GenreBreakdown(),
-        ratings = RatingsDistribution(),
-        recentlyLoved = emptyList(),
-        authorDemographics = authorDemographics,
-    )
+    private fun statsWith(authorDemographics: AuthorDemographics): ReadingStats =
+        ReadingStats(authorDemographics = authorDemographics)
 
     @Nested
     inner class HasUntaggedAuthorsProperty {
@@ -40,7 +38,7 @@ class StatsAtlasUiStateTest {
                 ),
             )
             val state = StatsAtlasUiState(
-                readingLife = readingLifeWith(demographics),
+                readingStats = statsWith(demographics),
                 hideUntaggedAuthors = false,
             )
 
@@ -68,7 +66,7 @@ class StatsAtlasUiStateTest {
                 ),
             )
             val state = StatsAtlasUiState(
-                readingLife = readingLifeWith(demographics),
+                readingStats = statsWith(demographics),
                 hideUntaggedAuthors = false,
             )
 
@@ -96,7 +94,7 @@ class StatsAtlasUiStateTest {
                 ),
             )
             val state = StatsAtlasUiState(
-                readingLife = readingLifeWith(demographics),
+                readingStats = statsWith(demographics),
                 hideUntaggedAuthors = true,
             )
 
@@ -110,13 +108,13 @@ class StatsAtlasUiStateTest {
 
     @Nested
     inner class HasRecentlyLovedProperty {
-        private fun readingLifeLoving(recentlyLoved: List<LovedBook>): ReadingLife =
-            readingLifeWith(AuthorDemographics()).copy(recentlyLoved = recentlyLoved)
+        private fun historyLoving(recentlyLoved: List<RecentlyLovedBook>): ReadingHistory =
+            ReadingHistory(recentlyLoved = recentlyLoved)
 
         @Test
-        fun `is false when readingLife is null`() {
+        fun `is false when readingHistory is null`() {
             // ----- Arrange -----
-            val state = StatsAtlasUiState(readingLife = null)
+            val state = StatsAtlasUiState(readingHistory = null)
 
             // ----- Act -----
             val result = state.hasRecentlyLoved
@@ -126,9 +124,9 @@ class StatsAtlasUiStateTest {
         }
 
         @Test
-        fun `is false when readingLife has no loved books`() {
+        fun `is false when readingHistory has no loved books`() {
             // ----- Arrange -----
-            val state = StatsAtlasUiState(readingLife = readingLifeLoving(emptyList()))
+            val state = StatsAtlasUiState(readingHistory = historyLoving(emptyList()))
 
             // ----- Act -----
             val result = state.hasRecentlyLoved
@@ -138,17 +136,18 @@ class StatsAtlasUiStateTest {
         }
 
         @Test
-        fun `is true when readingLife has a loved book`() {
+        fun `is true when readingHistory has a loved book`() {
             // ----- Arrange -----
-            val loved = LovedBook(
+            val loved = RecentlyLovedBook(
                 bookId = 1,
-                coverUrl = "",
-                title = "Title",
-                author = "Author",
                 ratingStars = 5.0,
-                monthLabel = "May",
+                finishedOn = LocalDate(
+                    year = 2026,
+                    month = 5,
+                    day = 1,
+                ),
             )
-            val state = StatsAtlasUiState(readingLife = readingLifeLoving(listOf(loved)))
+            val state = StatsAtlasUiState(readingHistory = historyLoving(listOf(loved)))
 
             // ----- Act -----
             val result = state.hasRecentlyLoved
@@ -161,11 +160,12 @@ class StatsAtlasUiStateTest {
     @Nested
     inner class IsReadingLifeLoadingProperty {
         @Test
-        fun `is true while the profile is still loading even with a reading life`() {
+        fun `is true while the profile is still loading even with stats and history`() {
             // ----- Arrange -----
             val state = StatsAtlasUiState(
                 isLoading = true,
-                readingLife = readingLifeWith(AuthorDemographics()),
+                readingStats = ReadingStats(),
+                readingHistory = ReadingHistory(),
             )
 
             // ----- Act -----
@@ -176,11 +176,12 @@ class StatsAtlasUiStateTest {
         }
 
         @Test
-        fun `is true when the reading life is missing`() {
+        fun `is true when the reading stats are missing`() {
             // ----- Arrange -----
             val state = StatsAtlasUiState(
                 isLoading = false,
-                readingLife = null,
+                readingStats = null,
+                readingHistory = ReadingHistory(),
             )
 
             // ----- Act -----
@@ -191,11 +192,28 @@ class StatsAtlasUiStateTest {
         }
 
         @Test
-        fun `is false once both have loaded`() {
+        fun `is true when the reading history is missing`() {
             // ----- Arrange -----
             val state = StatsAtlasUiState(
                 isLoading = false,
-                readingLife = readingLifeWith(AuthorDemographics()),
+                readingStats = ReadingStats(),
+                readingHistory = null,
+            )
+
+            // ----- Act -----
+            val result = state.isReadingLifeLoading
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `is false once all of them have loaded`() {
+            // ----- Arrange -----
+            val state = StatsAtlasUiState(
+                isLoading = false,
+                readingStats = ReadingStats(),
+                readingHistory = ReadingHistory(),
             )
 
             // ----- Act -----
@@ -209,9 +227,9 @@ class StatsAtlasUiStateTest {
     @Nested
     inner class RatingsTotalProperty {
         @Test
-        fun `is zero while the reading life is missing`() {
+        fun `is zero while the reading stats are missing`() {
             // ----- Arrange -----
-            val state = StatsAtlasUiState(readingLife = null)
+            val state = StatsAtlasUiState(readingStats = null)
 
             // ----- Act -----
             val result = state.ratingsTotal
@@ -221,17 +239,56 @@ class StatsAtlasUiStateTest {
         }
 
         @Test
-        fun `reads the total from the reading life ratings`() {
+        fun `reads the total from the reading stats ratings`() {
             // ----- Arrange -----
-            val readingLife = readingLifeWith(AuthorDemographics())
-                .copy(ratings = RatingsDistribution(totalRatings = 17))
-            val state = StatsAtlasUiState(readingLife = readingLife)
+            val stats = ReadingStats(ratings = RatingsDistribution(totalRatings = 17))
+            val state = StatsAtlasUiState(readingStats = stats)
 
             // ----- Act -----
             val result = state.ratingsTotal
 
             // ----- Assert -----
             result shouldBe 17
+        }
+    }
+
+    @Nested
+    inner class SelectedScopeProperty {
+        @Test
+        fun `resolves the selected key through the chip set`() {
+            // ----- Arrange -----
+            val key = statsScopeKey(StatsScope.CalendarYear(2025))
+            val state = StatsAtlasUiState(
+                selectedScopeKey = key,
+                scopeChips = atlasScopeChips(
+                    yearsRead = listOf(2026, 2025),
+                    selectedKey = key,
+                ),
+            )
+
+            // ----- Act -----
+            val result = state.selectedScope
+
+            // ----- Assert -----
+            result shouldBe StatsScope.CalendarYear(2025)
+        }
+
+        @Test
+        fun `falls back to all time while the chip set does not hold the key`() {
+            // ----- Arrange -----
+            val state = StatsAtlasUiState(
+                selectedScopeKey = statsScopeKey(StatsScope.CalendarYear(2025)),
+                scopeChips = atlasScopeChips(
+                    yearsRead = emptyList(),
+                    selectedKey = ALL_TIME_SCOPE_KEY,
+                ),
+            )
+
+            // ----- Act -----
+            val result = state.selectedScope
+
+            // ----- Assert -----
+            result shouldBe StatsScope.AllTime
         }
     }
 }

@@ -1,36 +1,30 @@
 package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ReadingSummaryMapperTest {
-    private fun buildReadingLife(
+    private fun buildReadingHistory(
         books: List<YearCount> = emptyList(),
         pages: List<YearCount> = emptyList(),
-    ): ReadingLife = ReadingLife(
+    ): ReadingHistory = ReadingHistory(
         booksByYear = books,
         pagesByYear = pages,
-        pagesByMonth = emptyList(),
-        genres = GenreBreakdown(),
-        ratings = RatingsDistribution(),
-        recentlyLoved = emptyList(),
     )
 
     @Nested
     inner class ReadingSummaryUiModelMapping {
         @Test
-        fun `null reading life yields two zero-valued loading stats`() {
+        fun `null reading history yields two zero-valued loading stats`() {
             // ----- Arrange -----
-            val readingLife: ReadingLife? = null
+            val history: ReadingHistory? = null
 
             // ----- Act -----
             val result = readingSummaryUiModel(
-                readingLife = readingLife,
+                history = history,
                 currentYear = 2025,
             )
 
@@ -42,7 +36,7 @@ class ReadingSummaryMapperTest {
         @Test
         fun `picks the current year's books and pages and is not loading`() {
             // ----- Arrange -----
-            val readingLife = buildReadingLife(
+            val history = buildReadingHistory(
                 books = listOf(
                     YearCount(
                         year = 2024,
@@ -67,7 +61,7 @@ class ReadingSummaryMapperTest {
 
             // ----- Act -----
             val result = readingSummaryUiModel(
-                readingLife = readingLife,
+                history = history,
                 currentYear = 2025,
             )
 
@@ -79,7 +73,7 @@ class ReadingSummaryMapperTest {
         @Test
         fun `a current year with no entry counts as zero, not as another year`() {
             // ----- Arrange -----
-            val readingLife = buildReadingLife(
+            val history = buildReadingHistory(
                 books = listOf(
                     YearCount(
                         year = 2024,
@@ -96,7 +90,7 @@ class ReadingSummaryMapperTest {
 
             // ----- Act -----
             val result = readingSummaryUiModel(
-                readingLife = readingLife,
+                history = history,
                 currentYear = 2025,
             )
 

@@ -3,9 +3,12 @@ package nl.rhaydus.softcover.feature.profile.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
+import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
 import nl.rhaydus.softcover.feature.profile.presentation.collector.StatsAtlasCollector
@@ -16,10 +19,13 @@ import nl.rhaydus.toad.ToadScreenModel
 
 internal class StatsAtlasScreenModel(
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
-    private val observeReadingLifeUseCase: ObserveReadingLifeUseCase,
+    private val observeReadingStatsUseCase: ObserveReadingStatsUseCase,
+    private val observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
+    private val observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase,
     private val getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
     private val setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
     private val observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,
+    private val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     dispatchers: AppDispatchers,
     initializers: List<StatsAtlasCollector>,
 ) : ToadScreenModel<
@@ -35,10 +41,13 @@ internal class StatsAtlasScreenModel(
 ) {
     override val dependencies: StatsAtlasDependencies = StatsAtlasDependencies(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
-        observeReadingLifeUseCase = observeReadingLifeUseCase,
+        observeReadingStatsUseCase = observeReadingStatsUseCase,
+        observeReadingHistoryUseCase = observeReadingHistoryUseCase,
+        observeAuthorDemographicsBackfilledUseCase = observeAuthorDemographicsBackfilledUseCase,
         getHideUntaggedAuthorsAsFlowUseCase = getHideUntaggedAuthorsAsFlowUseCase,
         setHideUntaggedAuthorsUseCase = setHideUntaggedAuthorsUseCase,
         observeBooksByIdsUseCase = observeBooksByIdsUseCase,
+        observeCurrentDateUseCase = observeCurrentDateUseCase,
         mainDispatcher = dispatchers.main,
         coroutineScope = screenModelScope,
     )

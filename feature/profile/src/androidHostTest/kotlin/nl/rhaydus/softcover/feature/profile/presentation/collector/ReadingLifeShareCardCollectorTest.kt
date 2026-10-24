@@ -19,7 +19,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVaria
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareCard
 import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareProfile
-import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareReadingLife
+import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareReadingHistory
+import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareReadingStats
 import nl.rhaydus.softcover.feature.profile.presentation.state.profileShareSheetFor
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
@@ -60,7 +61,8 @@ class ReadingLifeShareCardCollectorTest {
         shareCapture: ShareCaptureState = ShareCaptureState(),
     ): ProfileUiState =
         ProfileUiState(
-            readingLife = buildShareReadingLife(),
+            readingStats = buildShareReadingStats(),
+            readingHistory = buildShareReadingHistory(),
             userProfileData = buildShareProfile(),
             isShareSheetRequested = true,
             shareSheet = shareSheet,
@@ -81,7 +83,8 @@ class ReadingLifeShareCardCollectorTest {
         fun `leaves a closed session closed while the sheet is not requested`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
-                readingLife = buildShareReadingLife(),
+                readingStats = buildShareReadingStats(),
+                readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
             )
 
@@ -107,10 +110,11 @@ class ReadingLifeShareCardCollectorTest {
         }
 
         @Test
-        fun `stays closed while only the reading life has arrived`() = runTest(UnconfinedTestDispatcher()) {
+        fun `stays closed while only the reading stats and history have arrived`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
-                readingLife = buildShareReadingLife(),
+                readingStats = buildShareReadingStats(),
+                readingHistory = buildShareReadingHistory(),
                 isShareSheetRequested = true,
             )
 
@@ -126,7 +130,8 @@ class ReadingLifeShareCardCollectorTest {
         fun `opens when the request arrives after the collector started`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
-                readingLife = buildShareReadingLife(),
+                readingStats = buildShareReadingStats(),
+                readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
             )
             val job = launchCollector()
@@ -154,13 +159,13 @@ class ReadingLifeShareCardCollectorTest {
         }
 
         @Test
-        fun `asks the open sheet to close when the reading life goes away`() = runTest(UnconfinedTestDispatcher()) {
+        fun `asks the open sheet to close when the reading stats go away`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = requestedState()
             val job = launchCollector()
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(readingLife = null)
+            stateFlow.value = stateFlow.value.copy(readingStats = null)
 
             // ----- Assert -----
             stateFlow.value.shareSheet shouldBe openSheet(closing = true)
@@ -228,7 +233,8 @@ class ReadingLifeShareCardCollectorTest {
         fun `keeps a closing sheet closing while the request stays cleared`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
-                readingLife = buildShareReadingLife(),
+                readingStats = buildShareReadingStats(),
+                readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
                 shareSheet = openSheet(closing = true),
             )

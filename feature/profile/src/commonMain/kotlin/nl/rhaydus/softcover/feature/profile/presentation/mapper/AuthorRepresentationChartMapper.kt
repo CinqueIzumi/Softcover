@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.component.chart.ChartSliceUiModel
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
@@ -39,6 +40,33 @@ internal fun demographicBreakdownUiModel(
     ),
     hasData = (breakdown?.total ?: 0) > 0,
 )
+
+/**
+ * What the two Yes/No/Unknown bars are a share *of* — the one line that changes meaning wholesale with
+ * the hide switch, since each bar's denominator drops to its own tagged subset.
+ */
+internal fun authorsScopeCaption(
+    hideUntaggedAuthors: Boolean,
+    scope: StatsScope = StatsScope.AllTime,
+): String {
+    if (hideUntaggedAuthors) return "Each bar counts only the authors tagged for it."
+
+    val phrase = scope.scopePhrase()?.let { " $it" }.orEmpty()
+
+    return "Shares of every author you've read$phrase, tagged or not."
+}
+
+/** What the section says in place of its charts when no author has data in [scope]. */
+internal fun authorsEmptyCaption(
+    hideUntaggedAuthors: Boolean,
+    booksRead: Int,
+    scope: StatsScope = StatsScope.AllTime,
+): String = scope.noFinishedBooksSentence(booksRead = booksRead)
+    ?: if (hideUntaggedAuthors) {
+        "None of your authors have this data yet. Turn off Hide untagged authors to see them."
+    } else {
+        "Author demographics will appear here as the authors you read get tagged."
+    }
 
 /**
  * Known genders take `Lead`, `Second`, `Third` in rank order; [Gender.Unknown] stays out of that indexing
