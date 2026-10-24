@@ -27,15 +27,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -112,6 +114,7 @@ private fun ChipScaffold(
             interaction = model.interaction,
             selectable = selectable,
             selected = model.selected,
+            tentative = model.tone == ChipTone.TonalDashed,
         ) {
             onEvent(ChipEvent.Clicked(key = model.key))
         }
@@ -173,7 +176,7 @@ private fun Modifier.thenChipBorder(
         color = scheme.outlineVariant,
         shape = Corners.pill,
     )
-    ChipTone.Dashed -> this.drawBehind {
+    ChipTone.Dashed, ChipTone.TonalDashed -> this.drawBehind {
         drawRoundRect(
             color = scheme.primary,
             style = Stroke(
@@ -191,9 +194,16 @@ private fun Modifier.chipInteraction(
     interaction: ChipInteraction,
     selectable: Boolean,
     selected: Boolean,
+    tentative: Boolean,
     onClick: () -> Unit,
 ): Modifier = when (interaction) {
-    ChipInteraction.Inert -> if (selectable) semantics { this.selected = selected } else this
+    ChipInteraction.Inert -> when {
+        selectable -> semantics { this.selected = selected }
+
+        tentative -> semantics { toggleableState = ToggleableState.Indeterminate }
+
+        else -> this
+    }
     ChipInteraction.Clickable, ChipInteraction.Disabled -> {
         val enabled = interaction == ChipInteraction.Clickable
 
@@ -208,6 +218,15 @@ private fun Modifier.chipInteraction(
                         enabled = enabled,
                         hoverShape = Corners.pill,
                     )
+                } else if (tentative) {
+                    base
+                        .tactileClickable(
+                            onClick = onClick,
+                            role = Role.Checkbox,
+                            enabled = enabled,
+                            hoverShape = Corners.pill,
+                        )
+                        .semantics { toggleableState = ToggleableState.Indeterminate }
                 } else {
                     base.tactileClickable(
                         onClick = onClick,

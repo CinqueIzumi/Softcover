@@ -53,6 +53,11 @@ internal fun ChipTone.style(
         weight = FontWeight.SemiBold,
     )
 
+    ChipTone.TonalDashed -> tonalStyle(
+        scheme = scheme,
+        selected = false,
+    )
+
     ChipTone.Spoiler -> ChipStyle(
         container = scheme.spoilerCover,
         ink = Color.Transparent,

@@ -18,12 +18,14 @@ import nl.rhaydus.softcover.showcase.live.sheet.screen.SheetLiveScreen
 import nl.rhaydus.softcover.showcase.live.sidebar.screen.SidebarLiveScreen
 import nl.rhaydus.softcover.showcase.live.snackbar.screen.SnackbarLiveScreen
 import nl.rhaydus.softcover.showcase.live.topbar.screen.TopbarLiveScreen
+import nl.rhaydus.softcover.showcase.live.traits.screen.HowItReadLiveScreen
 import nl.rhaydus.softcover.showcase.live.verdict.screen.VerdictLiveScreen
 
 internal fun GalleryFamily.liveScreen(): Screen? = when (this) {
     GalleryFamily.SHEET -> SheetLiveScreen()
     GalleryFamily.PROGRESS -> ProgressLiveScreen()
     GalleryFamily.VERDICT -> VerdictLiveScreen()
+    GalleryFamily.TRAITS -> HowItReadLiveScreen()
     GalleryFamily.QUOTE -> QuoteLiveScreen()
     GalleryFamily.LISTS -> ListsLiveScreen()
     GalleryFamily.SHARE -> ShareLiveScreen()

@@ -28,7 +28,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Chips
 
-- **Chip** — `chip` — the one chip, in eight tones with leading and trailing slots; a trailing `Disclosure` arrow flips while expanded.
+- **Chip** — `chip` — the one chip, in nine tones (`TonalDashed` the indeterminate third state) with leading and trailing slots; a trailing `Disclosure` arrow flips while expanded.
 - **ChipFlow** — `chip` — wraps a `ChipSet` in one flow row.
 
 ## Covers & cards
@@ -91,6 +91,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **MarkdownDocument** — `document` — a parsed markdown document as an editorial spread; links leave as `LinkClicked`.
 - **VerdictSheet** — `verdict` — the combined rating-and-review editor.
 - **VerdictBlock** — `verdict` — book-page rating and review card that opens the verdict sheet.
+- **HowItReadBlock / HowItReadSheet** — `traits` — the private reading-survey panel and the sheet that edits it.
 
 ## Modifiers & helpers
 

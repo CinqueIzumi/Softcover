@@ -83,6 +83,11 @@ data class ChipUiModel(
                 tone = ChipTone.Dashed,
                 leading = ChipLeading.Icon(icon = SoftcoverIcon.Add),
             ),
+            "Tentative" to ChipUiModel(
+                key = "tonal-dashed",
+                label = "Multi-layered",
+                tone = ChipTone.TonalDashed,
+            ),
             "Spoiler" to ChipUiModel(
                 key = "spoiler",
                 label = "Contains a major death",

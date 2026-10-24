@@ -3,7 +3,7 @@ CLAUDE.md                                      8500B
 .claude/rules/*.md                             40L
 .claude/agent-memory/*/MEMORY.md               40L
 .claude/agent-memory/*/*.md                    40L
-docs/reference/design-system/components.md     8KB
+docs/reference/design-system/components.md     9KB
 docs/reference/design-system/patterns.md       8KB
 docs/reference/design-system/patterns/*.md     20KB
 docs/reference/**/*.md                         30KB

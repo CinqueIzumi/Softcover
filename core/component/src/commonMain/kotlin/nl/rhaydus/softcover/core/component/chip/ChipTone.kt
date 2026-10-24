@@ -8,6 +8,10 @@ enum class ChipTone {
     Container,
     Outlined,
     Dashed,
+
+    /** The tonal idle container under a dashed primary outline: a third state between off and selected.
+     * [ChipUiModel.selected] is ignored for this tone. */
+    TonalDashed,
     Spoiler,
     OverMedia,
 }
