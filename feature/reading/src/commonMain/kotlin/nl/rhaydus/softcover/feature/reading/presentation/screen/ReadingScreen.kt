@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.screen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
@@ -23,6 +24,7 @@ import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
+import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import org.koin.compose.koinInject
@@ -41,8 +43,22 @@ object ReadingScreen : Screen {
 
         val haptics = LocalHaptics.current
 
+        val controller = rememberMarkAsReadController(
+            books = state.books,
+            runAction = screenModel::runAction,
+        )
+
+        val currentController by rememberUpdatedState(controller)
+
         ObserveAsEvents(flow = screenModel.events) { event ->
             if (event is FeedbackEvent) haptics.play(event.feedback)
+
+            if (event is ReadingScreenEvent.MarkAsReadRequestedEvent) {
+                currentController.requestMarkAsRead(
+                    book = event.book,
+                    actionAt = event.actionAt,
+                )
+            }
         }
 
         val prefetcher = if (LocalInspectionMode.current) null else rememberBookDetailPrefetcher()
@@ -51,6 +67,7 @@ object ReadingScreen : Screen {
             ReadingScreenLayout(
                 state = state,
                 runAction = screenModel::runAction,
+                controller = controller,
                 onBookClick = {
                     val destination = ScreenDestination.BookDetail(
                         id = it.id,
@@ -81,6 +98,7 @@ object ReadingScreen : Screen {
 internal expect fun ReadingScreenLayout(
     state: ReadingScreenUiState,
     runAction: (ReadingAction) -> Unit,
+    controller: MarkAsReadController,
     onBookClick: (Book) -> Unit,
     onNavigateToSearch: () -> Unit,
 )

@@ -18,12 +18,11 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHi
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
+import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
 import nl.rhaydus.toad.ActionDependencies
 
 internal data class ReadingScreenDependencies(
@@ -45,8 +44,7 @@ internal data class ReadingScreenDependencies(
     val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
     val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
     val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
-    val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
-    val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
+    val progressSheetSlice: ProgressSheetSlice,
     val observeReadingJournalHistoryUseCase: ObserveReadingJournalHistoryUseCase,
     val refreshReadingJournalHistoryUseCase: RefreshReadingJournalHistoryUseCase,
     override val coroutineScope: CoroutineScope,

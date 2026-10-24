@@ -59,6 +59,7 @@ private val booksListState = LazyListState()
 internal actual fun ReadingScreenLayout(
     state: ReadingScreenUiState,
     runAction: (ReadingAction) -> Unit,
+    controller: MarkAsReadController,
     onBookClick: (Book) -> Unit,
     onNavigateToSearch: () -> Unit,
 ) {
@@ -68,11 +69,6 @@ internal actual fun ReadingScreenLayout(
     )
 
     val pullToRefreshState = rememberPullToRefreshState()
-
-    val controller = rememberMarkAsReadController(
-        books = state.books,
-        runAction = runAction,
-    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -254,6 +250,10 @@ private fun ReadingScreenEmptyPreview() {
         ReadingScreenLayout(
             state = ReadingScreenUiState(isLoading = false),
             runAction = {},
+            controller = rememberMarkAsReadController(
+                books = persistentListOf(),
+                runAction = {},
+            ),
             onBookClick = {},
             onNavigateToSearch = {},
         )
@@ -287,6 +287,10 @@ private fun ReadingScreenEmptyWithPickUpNextPreview() {
         ReadingScreenLayout(
             state = previewEmptyWithPickUpNextState,
             runAction = {},
+            controller = rememberMarkAsReadController(
+                books = previewEmptyWithPickUpNextState.books,
+                runAction = {},
+            ),
             onBookClick = {},
             onNavigateToSearch = {},
         )
@@ -300,6 +304,10 @@ private fun ReadingScreenEmptyWithTrendingPreview() {
         ReadingScreenLayout(
             state = previewEmptyWithTrendingState,
             runAction = {},
+            controller = rememberMarkAsReadController(
+                books = previewEmptyWithTrendingState.books,
+                runAction = {},
+            ),
             onBookClick = {},
             onNavigateToSearch = {},
         )
@@ -313,6 +321,10 @@ private fun ReadingScreenLoadingPreview() {
         ReadingScreenLayout(
             state = ReadingScreenUiState(isLoading = true),
             runAction = {},
+            controller = rememberMarkAsReadController(
+                books = persistentListOf(),
+                runAction = {},
+            ),
             onBookClick = {},
             onNavigateToSearch = {},
         )
@@ -329,6 +341,10 @@ private fun ReadingScreenSingleBookPreview() {
                 isLoading = false,
             ),
             runAction = {},
+            controller = rememberMarkAsReadController(
+                books = persistentListOf(),
+                runAction = {},
+            ),
             onBookClick = {},
             onNavigateToSearch = {},
         )
@@ -345,6 +361,10 @@ private fun ReadingScreenPreview() {
                 isLoading = false,
             ),
             runAction = {},
+            controller = rememberMarkAsReadController(
+                books = persistentListOf(),
+                runAction = {},
+            ),
             onBookClick = {},
             onNavigateToSearch = {},
         )
@@ -381,6 +401,10 @@ private fun ReadingScreenWithStreakStripPreview() {
                 streakStrip = streakStripFor(activity = previewReadingActivity()),
             ),
             runAction = {},
+            controller = rememberMarkAsReadController(
+                books = persistentListOf(),
+                runAction = {},
+            ),
             onBookClick = {},
             onNavigateToSearch = {},
         )
@@ -431,6 +455,10 @@ private fun ReadingScreenWithDeadlineAndNudgePreview() {
                 deadlines = deadlines.toImmutableMap(),
             ),
             runAction = {},
+            controller = rememberMarkAsReadController(
+                books = persistentListOf(),
+                runAction = {},
+            ),
             onBookClick = {},
             onNavigateToSearch = {},
         )
@@ -467,6 +495,10 @@ private fun ReadingScreenExpiredDeadlinePreview() {
                 deadlines = deadlines.toImmutableMap(),
             ),
             runAction = {},
+            controller = rememberMarkAsReadController(
+                books = persistentListOf(),
+                runAction = {},
+            ),
             onBookClick = {},
             onNavigateToSearch = {},
         )
@@ -484,6 +516,10 @@ private fun ReadingScreenMutationFailedPreview() {
                 failedMutationBookIds = persistentSetOf(previewBooks[0].id, previewBooks[2].id),
             ),
             runAction = {},
+            controller = rememberMarkAsReadController(
+                books = persistentListOf(),
+                runAction = {},
+            ),
             onBookClick = {},
             onNavigateToSearch = {},
         )
@@ -517,6 +553,10 @@ private fun ReadingScreenAudiobookPreview() {
                 isLoading = false,
             ),
             runAction = {},
+            controller = rememberMarkAsReadController(
+                books = persistentListOf(),
+                runAction = {},
+            ),
             onBookClick = {},
             onNavigateToSearch = {},
         )

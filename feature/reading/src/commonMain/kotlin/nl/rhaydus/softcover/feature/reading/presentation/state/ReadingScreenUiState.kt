@@ -6,7 +6,6 @@ import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
-import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.button.PillButtonContent
@@ -21,9 +20,6 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadSubtitle
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateVariant
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
@@ -31,8 +27,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
-import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.feature.reading.presentation.collector.mastheadEyebrowFor
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.ALSO_READING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.FEATURED_STAND_IN_BOOK
@@ -55,15 +51,7 @@ internal data class ReadingScreenUiState(
         headline = "Also on your nightstand",
     ),
     val bookToUpdate: Book? = null,
-    val progressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
-
-    /** The reader's uncommitted time entry; `null` seeds the sheet's fields from the book. */
-    val progressTimeDraft: ProgressTimeDraft? = null,
-
-    /** The reader's backdate for the next logged action; `null` is "just now". */
-    val readAt: LocalDateTime? = null,
-
-    val progressSheet: SheetSession<ProgressSheetUiModel, Nothing> = SheetSession.Closed,
+    val progressSheet: ProgressSheetState = ProgressSheetState(),
 
     val deadlines: ImmutableMap<Int, BookDeadline> = persistentMapOf(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,

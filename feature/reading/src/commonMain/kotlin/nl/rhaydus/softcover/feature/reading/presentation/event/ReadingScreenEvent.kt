@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.event
 
 import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.component.haptics.FeedbackEvent
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.toad.UiEvent
 
 internal sealed interface ReadingScreenEvent : UiEvent {
@@ -12,4 +13,9 @@ internal sealed interface ReadingScreenEvent : UiEvent {
     class ProgressUpdatedEvent : ReadingScreenEvent, FeedbackEvent {
         override val feedback = Feedback.Routine
     }
+
+    class MarkAsReadRequestedEvent(
+        val book: Book,
+        val actionAt: String?,
+    ) : ReadingScreenEvent
 }

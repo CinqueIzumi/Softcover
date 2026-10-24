@@ -58,17 +58,13 @@ private val readingScrollState = ScrollState(initial = 0)
 internal actual fun ReadingScreenLayout(
     state: ReadingScreenUiState,
     runAction: (ReadingAction) -> Unit,
+    controller: MarkAsReadController,
     onBookClick: (Book) -> Unit,
     onNavigateToSearch: () -> Unit,
 ) {
     TabReselectScrollToTopEffect(
         tab = ReadingTab,
         state = readingScrollState,
-    )
-
-    val controller = rememberMarkAsReadController(
-        books = state.books,
-        runAction = runAction,
     )
 
     Box(modifier = Modifier.fillMaxSize()) {

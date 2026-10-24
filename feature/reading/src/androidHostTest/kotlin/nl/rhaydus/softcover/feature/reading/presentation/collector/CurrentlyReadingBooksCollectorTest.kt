@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -25,8 +26,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class CurrentlyReadingBooksCollectorTest {
-    private val openProgressSheet: SheetSession<ProgressSheetUiModel, Nothing> = SheetSession.Open(
-        model = ProgressSheetUiModel.previews.values.first(),
+    private val openProgressSheet = ProgressSheetState(
+        requested = true,
+        session = SheetSession.Open(model = ProgressSheetUiModel.previews.values.first()),
     )
 
     private lateinit var getCurrentlyReadingBooksUseCase: GetCurrentlyReadingUserBooksUseCase
