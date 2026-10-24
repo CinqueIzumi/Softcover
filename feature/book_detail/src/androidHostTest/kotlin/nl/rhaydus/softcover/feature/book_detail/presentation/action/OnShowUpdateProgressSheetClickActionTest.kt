@@ -7,9 +7,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
-import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -50,40 +49,7 @@ class OnShowUpdateProgressSheetClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.progressSheetRequested shouldBe true
-        }
-
-        @Test
-        fun `leaves the session to the collector`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = buildBookDetailUiState().copy(book = PreviewData.baseBook)
-
-            // ----- Act -----
-            OnShowUpdateProgressSheetClickAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.progressSheet shouldBe SheetSession.Closed
-        }
-
-        @Test
-        fun `keeps the stored tab`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = buildBookDetailUiState().copy(
-                book = PreviewData.baseBook,
-                selectedProgressSheetTab = ProgressSheetTab.PERCENTAGE,
-            )
-
-            // ----- Act -----
-            OnShowUpdateProgressSheetClickAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.selectedProgressSheetTab shouldBe ProgressSheetTab.PERCENTAGE
+            stateFlow.value.progressSheet.requested shouldBe true
         }
 
         @Test
@@ -91,12 +57,14 @@ class OnShowUpdateProgressSheetClickActionTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
                 book = PreviewData.baseBook,
-                readAt = LocalDateTime(
-                    2020,
-                    1,
-                    2,
-                    9,
-                    15,
+                progressSheet = ProgressSheetState(
+                    readAt = LocalDateTime(
+                        2020,
+                        1,
+                        2,
+                        9,
+                        15,
+                    ),
                 ),
             )
 
@@ -107,31 +75,7 @@ class OnShowUpdateProgressSheetClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.readAt.shouldBeNull()
-        }
-
-        @Test
-        fun `resets a leftover backdate even when there is no book`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = buildBookDetailUiState().copy(
-                book = null,
-                readAt = LocalDateTime(
-                    2020,
-                    1,
-                    2,
-                    9,
-                    15,
-                ),
-            )
-
-            // ----- Act -----
-            OnShowUpdateProgressSheetClickAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.readAt.shouldBeNull()
+            stateFlow.value.progressSheet.readAt.shouldBeNull()
         }
     }
 }

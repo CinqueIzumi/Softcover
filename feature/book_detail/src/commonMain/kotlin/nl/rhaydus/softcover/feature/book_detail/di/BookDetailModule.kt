@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.profile.di.profileModule
+import nl.rhaydus.softcover.core.progresssheet.di.progressSheetModule
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyLocalDataSource
@@ -46,7 +47,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSh
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EndSessionPauseSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ExternalLinksCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.InProgressCollector
-import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LensToggleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.OfflineStateCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
@@ -89,6 +89,7 @@ val bookDetailModule = module {
         databaseModule,
         apolloModule,
         personalModule,
+        progressSheetModule,
         presentationModule,
         currentDateModule,
         dispatcherModule,
@@ -110,7 +111,6 @@ val bookDetailModule = module {
     factory { UserListsFlowCollector() } bind BookDetailCollector::class
     factory { CurrentUserCollector() } bind BookDetailCollector::class
     factory { UserTagsCollector() } bind BookDetailCollector::class
-    factory { LastUsedProgressUnitCollector() } bind BookDetailCollector::class
     factory { ReadingPaceForecastCollector() } bind BookDetailCollector::class
     factory { TagSuggestionsCollector() } bind BookDetailCollector::class
     factory { TagChipModelsCollector() } bind BookDetailCollector::class
@@ -238,8 +238,7 @@ val bookDetailModule = module {
             observeUserProfileDataUseCase = get(),
             getUserTagsUseCase = get(),
             saveUserTagsUseCase = get(),
-            getLastUsedProgressUnitAsFlowUseCase = get(),
-            setLastUsedProgressUnitUseCase = get(),
+            progressSheetSlice = get(),
             observeUserTagVocabularyUseCase = get(),
             syncUserTagVocabularyUseCase = get(),
             recordAppliedTagsUseCase = get(),

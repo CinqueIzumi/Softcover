@@ -8,7 +8,6 @@ import nl.rhaydus.softcover.core.component.dialog.SoftcoverDatePickerDialog
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.lists.ListMembership
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.component.quote.QuoteSheet
 import nl.rhaydus.softcover.core.component.quote.QuoteSheetEvent
@@ -18,14 +17,12 @@ import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
-import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeleteReviewAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissProgressSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissQuoteSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissTagEditorAction
@@ -36,11 +33,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSel
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionPauseClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionPauseSheetDismissedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLookUpEditionByIsbnClickAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressMinutesSteppedAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTimeChangedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressSheetEventAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteDeleteConfirmedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteDeleteSheetDismissedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuotePositionChangedAction
@@ -67,11 +61,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagEditorC
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagSuggestionSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleUserTagSpoilerAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnWhenReadResetAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnWhenReadShiftedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
@@ -255,61 +244,12 @@ internal fun BookDetailOverlays(
         )
     }
 
-    val bookToUpdate = state.book
-    val progressSheet = state.progressSheet.modelOrNull
+    val progressSheet = state.progressSheet.session.modelOrNull
 
-    if (bookToUpdate != null && progressSheet != null) {
+    if (state.book != null && progressSheet != null) {
         UpdateProgressBottomSheet(
             model = progressSheet,
-            onEvent = { event ->
-                when (event) {
-                    is ProgressSheetEvent.TabSelected -> runAction(OnProgressTabClickAction(tab = event.tab))
-
-                    is ProgressSheetEvent.PagesSubmitted -> runAction(
-                        OnUpdatePageProgressClickAction(
-                            newPage = event.page,
-                        ),
-                    )
-
-                    is ProgressSheetEvent.PercentageSubmitted -> runAction(
-                        OnUpdatePercentageProgressClickAction(
-                            newPercentage = event.percentage,
-                        ),
-                    )
-
-                    is ProgressSheetEvent.TimeChanged -> runAction(
-                        OnProgressTimeChangedAction(
-                            unit = event.unit,
-                            text = event.text,
-                        ),
-                    )
-
-                    is ProgressSheetEvent.MinutesStepped -> runAction(OnProgressMinutesSteppedAction(delta = event.delta))
-
-                    is ProgressSheetEvent.TimeSubmitted -> runAction(
-                        OnUpdateTimeProgressClickAction(
-                            hours = event.hours,
-                            minutes = event.minutes,
-                            seconds = event.seconds,
-                        ),
-                    )
-
-                    ProgressSheetEvent.MarkAsReadRequested -> {
-                        runAction(
-                            OnMarkBookAsReadClickAction(
-                                book = bookToUpdate,
-                                actionAt = state.readAt.toActionAt(),
-                            ),
-                        )
-                    }
-
-                    is ProgressSheetEvent.WhenReadShifted -> runAction(OnWhenReadShiftedAction(minutes = event.minutes))
-
-                    ProgressSheetEvent.WhenReadReset -> runAction(OnWhenReadResetAction())
-
-                    ProgressSheetEvent.Dismissed -> runAction(OnDismissProgressSheetAction())
-                }
-            },
+            onEvent = { runAction(OnProgressSheetEventAction(event = it)) },
         )
     }
 

@@ -31,12 +31,11 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHi
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
+import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
@@ -87,8 +86,7 @@ internal class BookDetailScreenScreenModel(
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     private val getUserTagsUseCase: GetUserTagsUseCase,
     private val saveUserTagsUseCase: SaveUserTagsUseCase,
-    private val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
-    private val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
+    private val progressSheetSlice: ProgressSheetSlice,
     private val observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase,
     private val syncUserTagVocabularyUseCase: SyncUserTagVocabularyUseCase,
     private val recordAppliedTagsUseCase: RecordAppliedTagsUseCase,
@@ -143,8 +141,7 @@ internal class BookDetailScreenScreenModel(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
         getUserTagsUseCase = getUserTagsUseCase,
         saveUserTagsUseCase = saveUserTagsUseCase,
-        getLastUsedProgressUnitAsFlowUseCase = getLastUsedProgressUnitAsFlowUseCase,
-        setLastUsedProgressUnitUseCase = setLastUsedProgressUnitUseCase,
+        progressSheetSlice = progressSheetSlice,
         observeUserTagVocabularyUseCase = observeUserTagVocabularyUseCase,
         syncUserTagVocabularyUseCase = syncUserTagVocabularyUseCase,
         recordAppliedTagsUseCase = recordAppliedTagsUseCase,

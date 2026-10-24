@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.quote.QuotePositionTab
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
+import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildBookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -84,7 +85,7 @@ class OnQuoteWhenReadShiftedActionTest {
                 0,
             )
             stateFlow.value = buildBookDetailUiState().copy(
-                readAt = progressReadAt,
+                progressSheet = ProgressSheetState(readAt = progressReadAt),
                 quoteDraft = draft(
                     readAt = LocalDateTime(
                         2020,
@@ -104,7 +105,7 @@ class OnQuoteWhenReadShiftedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.readAt shouldBe progressReadAt
+            stateFlow.value.progressSheet.readAt shouldBe progressReadAt
         }
     }
 }

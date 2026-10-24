@@ -17,6 +17,7 @@ kotlin {
             implementation(project(":core:profile"))
             api(project(":core:identity"))
             implementation(project(":core:preferences"))
+            implementation(project(":core:progresssheet"))
             implementation(project(":core:database"))
             implementation(project(":core:network"))
             api(project(":core:personal"))

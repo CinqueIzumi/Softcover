@@ -31,11 +31,10 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHi
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
+import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
@@ -73,8 +72,7 @@ internal class BookDetailDependencies(
     val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     val getUserTagsUseCase: GetUserTagsUseCase,
     val saveUserTagsUseCase: SaveUserTagsUseCase,
-    val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
-    val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
+    val progressSheetSlice: ProgressSheetSlice,
     val observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase,
     val syncUserTagVocabularyUseCase: SyncUserTagVocabularyUseCase,
     val recordAppliedTagsUseCase: RecordAppliedTagsUseCase,
