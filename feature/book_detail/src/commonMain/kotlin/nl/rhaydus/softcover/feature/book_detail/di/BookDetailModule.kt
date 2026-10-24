@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.di
 
 import nl.rhaydus.softcover.core.book.di.bookModule
+import nl.rhaydus.softcover.core.corpus.di.corpusModule
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
@@ -46,6 +47,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSe
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EndSessionPauseSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ExternalLinksCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.HowItReadSectionCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.HowItReadSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.InProgressCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LensToggleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.OfflineStateCollector
@@ -83,6 +86,7 @@ val bookDetailModule = module {
         bookModule,
         listsModule,
         deadlinesModule,
+        corpusModule,
         profileModule,
         identityModule,
         preferencesModule,
@@ -135,6 +139,8 @@ val bookDetailModule = module {
     factory { QuotesRefreshCollector() } bind BookDetailCollector::class
     factory { QuoteSheetCollector() } bind BookDetailCollector::class
     factory { QuoteDeleteSheetCollector() } bind BookDetailCollector::class
+    factory { HowItReadSectionCollector() } bind BookDetailCollector::class
+    factory { HowItReadSheetCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())
@@ -248,6 +254,9 @@ val bookDetailModule = module {
             refreshBookQuotesUseCase = get(),
             loadSimilarBooksPageUseCase = get(),
             observeShelvedBookIdsUseCase = get(),
+            observeBookTraitsUseCase = get(),
+            getBookTraitsUseCase = get(),
+            saveBookTraitsUseCase = get(),
         )
     }
 }

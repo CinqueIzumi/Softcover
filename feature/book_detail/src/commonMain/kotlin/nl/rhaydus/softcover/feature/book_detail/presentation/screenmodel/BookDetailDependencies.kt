@@ -16,6 +16,9 @@ import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
+import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookTraitsUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
@@ -82,6 +85,9 @@ internal class BookDetailDependencies(
     val refreshBookQuotesUseCase: RefreshBookQuotesUseCase,
     val loadSimilarBooksPageUseCase: LoadSimilarBooksPageUseCase,
     val observeShelvedBookIdsUseCase: ObserveShelvedBookIdsUseCase,
+    val observeBookTraitsUseCase: ObserveBookTraitsUseCase,
+    val getBookTraitsUseCase: GetBookTraitsUseCase,
+    val saveBookTraitsUseCase: SaveBookTraitsUseCase,
     val offlineCopy: OfflineCopy,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,

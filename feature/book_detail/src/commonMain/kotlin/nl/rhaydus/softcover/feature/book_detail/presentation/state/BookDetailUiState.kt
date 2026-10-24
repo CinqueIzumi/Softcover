@@ -34,6 +34,8 @@ import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
+import nl.rhaydus.softcover.core.component.traits.HowItReadBlockUiModel
+import nl.rhaydus.softcover.core.component.traits.HowItReadSheetUiModel
 import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
@@ -116,6 +118,16 @@ internal data class BookDetailUiState(
     /** What the quote sheet renders, derived from [book] and [quoteDraft] by `QuoteSheetCollector`. */
     val quoteSheet: SheetSession<QuoteSheetUiModel, Nothing> = SheetSession.Closed,
 
+    /** The Yours lens "How it read" panel, mapped by `HowItReadSectionCollector`; null hides the section. */
+    val howItRead: HowItReadBlockUiModel? = null,
+    val howItReadExpanded: Boolean = false,
+
+    /** Non-null exactly while the how-it-read sheet is requested; its edits are the only writer of the draft. */
+    val howItReadDraft: HowItReadDraft? = null,
+
+    /** What the how-it-read sheet renders, derived from [book] and [howItReadDraft] by `HowItReadSheetCollector`. */
+    val howItReadSheet: SheetSession<HowItReadSheetUiModel, Nothing> = SheetSession.Closed,
+
     /** The local id of the quote awaiting its delete confirm; `null` when none is. */
     val quoteDeleteRequestId: Long? = null,
 
@@ -137,6 +149,7 @@ internal data class BookDetailUiState(
     val findItLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Find it"),
     val tagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Tags"),
     val yourTagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Your tags"),
+    val howItReadLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "How it read"),
 
     /** The "Shelve this book" opener; the retry label when the last shelve write for this book failed. */
     val shelveControlHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(eyebrow = "Shelve this book"),

@@ -16,6 +16,9 @@ import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
+import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookTraitsUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
@@ -96,6 +99,9 @@ internal class BookDetailScreenScreenModel(
     private val refreshBookQuotesUseCase: RefreshBookQuotesUseCase,
     private val loadSimilarBooksPageUseCase: LoadSimilarBooksPageUseCase,
     private val observeShelvedBookIdsUseCase: ObserveShelvedBookIdsUseCase,
+    private val observeBookTraitsUseCase: ObserveBookTraitsUseCase,
+    private val getBookTraitsUseCase: GetBookTraitsUseCase,
+    private val saveBookTraitsUseCase: SaveBookTraitsUseCase,
     offlineCopy: OfflineCopy,
     flows: List<BookDetailCollector>,
     appDispatchers: AppDispatchers,
@@ -151,6 +157,9 @@ internal class BookDetailScreenScreenModel(
         refreshBookQuotesUseCase = refreshBookQuotesUseCase,
         loadSimilarBooksPageUseCase = loadSimilarBooksPageUseCase,
         observeShelvedBookIdsUseCase = observeShelvedBookIdsUseCase,
+        observeBookTraitsUseCase = observeBookTraitsUseCase,
+        getBookTraitsUseCase = getBookTraitsUseCase,
+        saveBookTraitsUseCase = saveBookTraitsUseCase,
         offlineCopy = offlineCopy,
     )
 

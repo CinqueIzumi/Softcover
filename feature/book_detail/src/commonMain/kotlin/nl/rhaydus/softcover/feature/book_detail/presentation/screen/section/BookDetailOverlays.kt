@@ -14,6 +14,8 @@ import nl.rhaydus.softcover.core.component.quote.QuoteSheetEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.modelOrNull
+import nl.rhaydus.softcover.core.component.traits.HowItReadSheet
+import nl.rhaydus.softcover.core.component.traits.HowItReadSheetEvent
 import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
@@ -23,6 +25,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeleteRevi
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissDeadlinePickerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissEditEditionSheetClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissHowItReadSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissQuoteSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissShareSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissTagEditorAction
@@ -32,6 +35,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSea
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionPauseClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEndSessionPauseSheetDismissedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnHowItReadBalanceChangedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnHowItReadChipClickedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLookUpEditionByIsbnClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressSheetEventAction
@@ -47,6 +52,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteWhenR
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnQuoteWhenReadShiftedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRequestCreateListAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveBookTraitsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveQuoteAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveVerdictAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareCaptureEventAction
@@ -292,6 +298,29 @@ internal fun BookDetailOverlays(
                     QuoteSheetEvent.SaveRequested -> runAction(OnSaveQuoteAction())
 
                     QuoteSheetEvent.Dismissed -> runAction(OnDismissQuoteSheetAction())
+                }
+            },
+        )
+    }
+
+    state.howItReadSheet.modelOrNull?.let { howItReadSheet ->
+        HowItReadSheet(
+            model = howItReadSheet,
+            onEvent = { event ->
+                when (event) {
+                    is HowItReadSheetEvent.ChipClicked -> runAction(OnHowItReadChipClickedAction(key = event.key))
+
+                    is HowItReadSheetEvent.BalanceChanged -> runAction(
+                        OnHowItReadBalanceChangedAction(value = event.value),
+                    )
+
+                    HowItReadSheetEvent.BalanceCleared -> runAction(OnHowItReadBalanceChangedAction(value = null))
+
+                    HowItReadSheetEvent.SaveRequested -> runAction(OnSaveBookTraitsAction())
+
+                    HowItReadSheetEvent.CancelRequested -> Unit
+
+                    HowItReadSheetEvent.Dismissed -> runAction(OnDismissHowItReadSheetAction())
                 }
             },
         )

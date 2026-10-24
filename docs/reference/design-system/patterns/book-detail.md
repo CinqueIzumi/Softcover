@@ -34,9 +34,23 @@
 - The row ends with a `ChipTone.Dashed` chip, "Edit tags" (or "+ Add tags" with no tags yet), opening the
   tag editor sheet. Edits are optimistic and roll back on failure.
 
+### How it read
+
+- The Yours lens, between the verdict and Your quotes, for a book that is Reading, Paused, Read or Did not
+  finish: a bar-less `HOW IT READ` label over `HowItReadBlock`. Answers are private, stay on the device and
+  are wiped on sign-out.
+- Collapsed, one summary line ("Variable pace, mostly character, demanding writing") with a chevron; expanded, a row
+  per answered question (Pace, Plot or character, Characters, Complicated, Writing) and an "Edit" link. With
+  no answers, an invitation line, "Add the pace, the characters and the writing.", opens the sheet.
+- `HowItReadSheet`, hosted by `HowItReadSheetCollector` from `BookDetailUiState.howItReadDraft`: Pace, a
+  Plot or character slider with Clear, the characters and the writing style. Pace and style are single
+  choice, and re-tapping the chosen one clears it.
+- A character chip cycles off, yes, complicated (dashed), off; the sheet's caption says so. Save with every
+  answer cleared deletes the stored answers.
+
 ### Your quotes section
 
-- The Yours lens, between the verdict and the your-tags section, only for a shelved book: a bar-less
+- The Yours lens, between How it read and the your-tags section, only for a shelved book: a bar-less
   `YOUR QUOTES` label over the reader's quotes for this book, newest first, as `QuoteCard`s spaced
   `Spacing.sm`. Each byline reads "p. 214 · 12 Oct · Private" (page, "53%" or "1:02:03" first).
 - With none, a `bodySmall` `onSurfaceVariant` line, "Quotes you save from this book show up here.", sits
