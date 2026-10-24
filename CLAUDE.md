@@ -88,5 +88,5 @@ descriptions — never hand-edit it. The full rules are in `.claude/rules/roadma
   - Gates: `ktlint-rules`, `detekt-rules`.
 - **Routing:** implementation → `softcover-implementer`; review → `softcover-reviewer`; tests →
   `softcover-test-writer`; style gates → the `style-check` skill. A foundation version change moves the
-  submodule pointer (`.claude/rules/foundation.md`); never re-run `rhaydus-adopt`, which still wires Maven Central.
+  submodule pointer (`.claude/rules/foundation.md`); never re-run `rhaydus-adopt`, whose managed block routes to the agents denied here.
 - **Reuse-first:** check `foundation/docs/CAPABILITIES.md` before hand-rolling a component, modifier or util.

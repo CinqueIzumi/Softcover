@@ -1,5 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "permissions": {
+    "deny": [
+      "Agent(rhaydus-kotlin:rhaydus-logic)",
+      "Agent(rhaydus-kotlin:rhaydus-ui)",
+      "Agent(rhaydus-kotlin:code-reviewer)",
+      "Agent(rhaydus-kotlin:unit-test-writer)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -59,12 +67,15 @@
       }
     ]
   },
-  "permissions": {
-    "deny": [
-      "Agent(rhaydus-kotlin:rhaydus-logic)",
-      "Agent(rhaydus-kotlin:rhaydus-ui)",
-      "Agent(rhaydus-kotlin:code-reviewer)",
-      "Agent(rhaydus-kotlin:unit-test-writer)"
-    ]
+  "enabledPlugins": {
+    "rhaydus-kotlin@rhaydus": true
+  },
+  "extraKnownMarketplaces": {
+    "rhaydus": {
+      "source": {
+        "source": "directory",
+        "path": "./foundation"
+      }
+    }
   }
 }

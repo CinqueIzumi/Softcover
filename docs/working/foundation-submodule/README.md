@@ -13,10 +13,11 @@ leaves the build and CI green. Foundation-side edits, if any turn up, go on `cho
 
 ## Now
 
-- **State:** steps 1 and 2 committed locally. Everything stays local (no push, tag or
+- **State:** steps 1 to 3 committed locally. Everything stays local (no push, tag or
   issue) until the user says otherwise. Foundation work happens in `foundation/`; `../rhaydus-foundation` is a
   spare clone.
-- **Next:** step 3 (plugin from the submodule).
+- **Next:** when the user decides to share it: push the foundation branch, tag `v0.3.2` (publishes to Maven
+  Central), move the pointer onto the tag, push the Softcover branch; then delete this directory.
 - **Open questions:** none.
 - **Verification:** step 2: no `docs/rhaydus` references left; `checkDocBudgets styleCheck` pass; every changed
   link and anchor resolves.
@@ -35,7 +36,7 @@ leaves the build and CI green. Foundation-side edits, if any turn up, go on `cho
 |---|---|---|
 | 1 | Submodule and build wiring | [x] |
 | 2 | Docs and rules from the submodule | [x] |
-| 3 | The plugin from the submodule | [ ] |
+| 3 | The plugin from the submodule | [x] |
 
 ### 1 — Submodule and build wiring
 
@@ -69,11 +70,12 @@ One step, because CI breaks if the Gradle wiring lands without the submodule che
 
 ### 3 — Plugin from the submodule
 
-- [ ] Project-scoped marketplace pointing at `foundation/` in `.claude/settings.json`; drop the user-scope
+- [x] Project-scoped marketplace pointing at `foundation/` in `.claude/settings.json`; drop the user-scope
       GitHub install.
-- [ ] Confirm how plugin edits take effect (live, `/plugin update`, or a restart) and write it into
+- [x] Confirm how plugin edits take effect (live, `/plugin update`, or a restart) and write it into
       `.claude/rules/foundation.md`.
-- [ ] The four `Agent(rhaydus-kotlin:…)` deny rules, the duplicate `.claude/skills/style-check/` and the local
+- [x] `rhaydus-adopt` wires the submodule, docs in place and the project-scoped plugin for any app.
+- [x] The four `Agent(rhaydus-kotlin:…)` deny rules, the duplicate `.claude/skills/style-check/` and the local
       hooks stay; removing them waits for the upstream agent layer.
 
 ## Decisions

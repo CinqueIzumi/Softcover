@@ -17,3 +17,7 @@ paths:
 - Softcover merges to `main` only with the pointer on a tagged foundation commit; pushing a `v*` tag publishes
   to Maven Central.
 - Ask before committing in either repo.
+- The `rhaydus-kotlin` plugin loads in place from `foundation/` through the project-scoped `rhaydus` marketplace
+  in `.claude/settings.json`, registered once per machine (`foundation/claude/plugins/rhaydus-kotlin/README.md`
+  § Install); an edit to its agents, hooks or skills applies after `/reload-plugins` or in the
+  next session, with no version bump.
