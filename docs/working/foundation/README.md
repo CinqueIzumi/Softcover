@@ -15,16 +15,15 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** step 1 (audit) is done: every FU row in `agent-layer.md` has a decision, with FU-14 (slow-Gradle
-  blocker) added, the generic shape, the plugin lines to keep and the agent-memory triage recorded there;
-  F57–F59 added to `candidates.md`. Both repos committed locally up to the submodule switch; nothing pushed,
-  tagged or filed.
-- **Next:** step 2 (generic agent layer) in the foundation submodule, starting with FU-1 (the agent trio) and
-  FU-13 (plugin text naming the old agents), driven by `agent-layer.md` § Generic shape.
+- **State:** step 2 is under way. The plugin's `implementer` / `reviewer` / `test-writer` replace the four old
+  agents (FU-1, FU-7 lessons), and no plugin or foundation text names the old agents (FU-13). They read
+  project facts from the `## Agent parameters` table, which adopt does not write yet (FU-6). Softcover still
+  runs its local `softcover-*` agents until the adoption item.
+- **Next:** step 2, the hooks and scripts the audit marked generic (FU-2 to FU-5, FU-11, FU-12, FU-14).
 - **Open questions:** none.
-- **Verification:** `check koverXmlReport :build-logic:test -x lint` and the iOS compile passed after the last
-  Kotlin change; step 1 changed docs only.
-- **Uncommitted:** this README, `agent-layer.md`, `candidates.md`.
+- **Verification:** the old-name grep, `bash -n` and `jq` are clean; `softcover-reviewer` findings applied.
+  Docs only since the last Gradle gate.
+- **Uncommitted:** foundation: the agent trio and text edits. Softcover: this README, `agent-layer.md`.
 
 ## How to run a step
 
@@ -58,11 +57,11 @@ Read-only. The output is a decision per item, recorded in `agent-layer.md` and u
 
 ### 2 — Generic agent layer
 
-- [ ] The implementer / reviewer / test-writer trio replaces `rhaydus-logic` / `rhaydus-ui` / `code-reviewer` /
+- [x] The implementer / reviewer / test-writer trio replaces `rhaydus-logic` / `rhaydus-ui` / `code-reviewer` /
       `unit-test-writer` (FU-1, FU-7, FU-10).
 - [ ] The hooks, `/handoff` skill, quiet-Gradle script, token-usage script and doc-growth guards the audit marked
       generic (FU-2 to FU-5, FU-11, FU-12, FU-14).
-- [ ] The plugin text names the new agents and no longer cites the sibling-checkout docs path (FU-13).
+- [x] The plugin text names the new agents and no longer cites the sibling-checkout docs path (FU-13).
 - [ ] `rhaydus-adopt` writes the catalogue-style managed `CLAUDE.md` block and the `.claude/rules/*.md` templates
       (FU-6).
 - [ ] Split rule from rationale in `foundation/docs/` (FU-8).
