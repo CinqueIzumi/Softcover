@@ -64,6 +64,12 @@ internal fun ChipTone.style(
         weight = FontWeight.Medium,
     )
 
+    ChipTone.Excluded -> ChipStyle(
+        container = Color.Transparent,
+        ink = scheme.onSurfaceVariant,
+        weight = FontWeight.Medium,
+    )
+
     ChipTone.OverMedia -> ChipStyle(
         container = OverMediaScrim.copy(alpha = 0.4f),
         ink = OverMediaInk,

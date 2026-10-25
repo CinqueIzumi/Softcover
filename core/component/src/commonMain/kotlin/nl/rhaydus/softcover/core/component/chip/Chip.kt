@@ -40,6 +40,7 @@ import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -120,6 +121,13 @@ private fun ChipScaffold(
             onEvent(ChipEvent.Clicked(key = model.key))
         }
         .then(
+            if (model.contentDescription != null) {
+                Modifier.semantics { contentDescription = model.contentDescription }
+            } else {
+                Modifier
+            },
+        )
+        .then(
             if (model.tone == ChipTone.Spoiler) {
                 Modifier.clearAndSetSemantics {
                     contentDescription = "Spoiler, tap to reveal"
@@ -175,6 +183,11 @@ private fun Modifier.thenChipBorder(
     ChipTone.Outlined -> this.border(
         width = 1.dp,
         color = scheme.outlineVariant,
+        shape = Corners.pill,
+    )
+    ChipTone.Excluded -> this.border(
+        width = 1.dp,
+        color = scheme.outline,
         shape = Corners.pill,
     )
     ChipTone.Dashed, ChipTone.TonalDashed -> this.drawBehind {
@@ -298,6 +311,7 @@ private fun ChipLabel(
         MaterialTheme.typography.labelMedium.copy(
             fontWeight = if (model.face == ChipFace.Bold) FontWeight.Bold else style.weight,
             fontStyle = if (model.face == ChipFace.Italic) FontStyle.Italic else FontStyle.Normal,
+            textDecoration = if (model.tone == ChipTone.Excluded) TextDecoration.LineThrough else null,
         )
     }
     val spoilerWash = (model.leading as? ChipLeading.SpoilerToggle)?.marked == true

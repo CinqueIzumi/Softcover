@@ -102,6 +102,15 @@ internal fun BookCardTextBlock(
                     .padding(top = Spacing.xxs),
             )
         }
+
+        content.tagStrip?.takeIf { it.chips.isNotEmpty() }?.let { strip ->
+            BookCardTagStripRow(
+                strip = strip,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.xxs),
+            )
+        }
     }
 }
 

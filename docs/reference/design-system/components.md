@@ -28,7 +28,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Chips
 
-- **Chip** — `chip` — the one chip, in nine tones (`TonalDashed` the indeterminate third state) with leading and trailing slots; `Disclosure` flips while expanded; `Eyebrow` face sets caps.
+- **Chip** — `chip` — the one chip, in ten tones (`TonalDashed` the indeterminate third state) with leading and trailing slots; `Disclosure` flips while expanded; `Eyebrow` face sets caps.
 - **ChipFlow** — `chip` — wraps a `ChipSet` in one flow row.
 
 ## Covers & cards

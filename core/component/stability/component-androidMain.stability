@@ -120,6 +120,14 @@ internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardSeriesStack(fr
     - isLoading: STABLE (primitive type)
 
 @Composable
+internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardTagStripRow(strip: nl.rhaydus.softcover.core.component.bookcard.BookCardTagStrip, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - strip: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardTextBlock(content: nl.rhaydus.softcover.core.component.bookcard.BookCardContent, titleStyle: androidx.compose.ui.text.TextStyle, titleMinLines: kotlin.Int, titleMaxLines: kotlin.Int, isLoading: kotlin.Boolean, modifier: androidx.compose.ui.Modifier, progress: nl.rhaydus.softcover.core.component.bookcard.BookCardProgress?): kotlin.Unit
   skippable: true
   restartable: true

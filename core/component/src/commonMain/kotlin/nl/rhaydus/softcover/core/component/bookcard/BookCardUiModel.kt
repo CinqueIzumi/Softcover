@@ -9,6 +9,9 @@ import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipSize
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
@@ -232,6 +235,48 @@ data class BookCardUiModel(
                     shakeOnError = true,
                 ),
             ),
+            "Row Standard, tag strip" to BookCardUiModel(
+                key = BookCardKey.Book(bookId = 17),
+                variant = BookCardVariant.Row(
+                    size = BookCardVariant.Row.Size.Standard,
+                    lead = BookCardLead.Cover(cover = bookCover(title = "The Goblin Emperor")),
+                    text = BookCardContent(
+                        title = "The Goblin Emperor",
+                        byline = "By Katherine Addison",
+                        tagStrip = BookCardTagStrip(
+                            chips = persistentListOf(
+                                tagStripChip(
+                                    key = "cozy",
+                                    label = "Cozy",
+                                ),
+                                tagStripChip(
+                                    key = "court-intrigue",
+                                    label = "Court intrigue",
+                                ),
+                                tagStripChip(
+                                    key = "found-family",
+                                    label = "Found family",
+                                ),
+                            ),
+                            overflowChips = persistentListOf(
+                                tagStripChip(
+                                    key = "more-1",
+                                    label = "+1",
+                                ),
+                                tagStripChip(
+                                    key = "more-2",
+                                    label = "+2",
+                                ),
+                                tagStripChip(
+                                    key = "more-3",
+                                    label = "+3",
+                                ),
+                            ),
+                            contentDescription = "Your tags: Cozy, Court intrigue, Found family",
+                        ),
+                    ),
+                ),
+            ),
             "Row Large, cover badge, Badge" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 8),
                 variant = BookCardVariant.Row(
@@ -326,6 +371,16 @@ data class BookCardUiModel(
         ) = BookCardCover(
             model = cover(title = title),
             badge = badge,
+        )
+
+        private fun tagStripChip(
+            key: String,
+            label: String,
+        ) = ChipUiModel(
+            key = key,
+            label = label,
+            size = ChipSize.Compact,
+            interaction = ChipInteraction.Inert,
         )
 
         private fun loadingCover() = CoverUiModel(

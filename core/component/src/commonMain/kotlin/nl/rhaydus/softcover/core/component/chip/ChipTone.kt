@@ -14,4 +14,5 @@ enum class ChipTone {
     TonalDashed,
     Spoiler,
     OverMedia,
+    Excluded,
 }
