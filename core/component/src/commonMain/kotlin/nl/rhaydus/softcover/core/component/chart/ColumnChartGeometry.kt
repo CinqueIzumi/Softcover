@@ -1,6 +1,10 @@
 package nl.rhaydus.softcover.core.component.chart
 
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Constraints
 import kotlin.math.floor
+import kotlin.math.roundToInt
 
 /**
  * Index of the column under [x] in a row of [count] equal-width columns separated by [gap], or -1 when
@@ -32,4 +36,39 @@ internal fun columnCenterX(
     val columnWidth = (rowWidth - gap * (count - 1)) / count
 
     return index * (columnWidth + gap) + columnWidth / 2f
+}
+
+/**
+ * Valid only inside the [index]th of [count] equal-width columns separated by [gap]: the incoming max width
+ * is taken as the column's width to work out where the row's edges are.
+ */
+internal fun Modifier.keepInsideRow(
+    index: Int,
+    count: Int,
+    gap: Float,
+): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(
+        constraints.copy(
+            minWidth = 0,
+            maxWidth = Constraints.Infinity,
+        ),
+    )
+    val columnWidth = constraints.maxWidth
+    val columnLeft = index * (columnWidth + gap)
+    val rowWidth = count * columnWidth + (count - 1) * gap
+    val centredLeft = columnLeft + (columnWidth - placeable.width) / 2f
+    val left = centredLeft.coerceIn(
+        0f,
+        (rowWidth - placeable.width).coerceAtLeast(0f),
+    )
+
+    layout(
+        columnWidth,
+        placeable.height,
+    ) {
+        placeable.place(
+            x = (left - columnLeft).roundToInt(),
+            y = 0,
+        )
+    }
 }

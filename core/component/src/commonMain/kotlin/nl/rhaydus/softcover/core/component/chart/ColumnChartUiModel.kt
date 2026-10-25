@@ -25,6 +25,10 @@ data class ColumnChartUiModel(
         private const val RATING_STEP_COUNT = 9
         private const val ZERO_RATING_STEP = 1
         private const val LOADING_COLUMN_COUNT = 8
+        private const val YEAR_MONTH_COUNT = 12
+        private const val LABEL_STRIDE = 3
+        private val MONTH_LABELS = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+        private val MONTH_FRACTIONS = listOf(0.4f, 0.2f, 1f, 0.5f, 0.1f, 0f, 0.3f, 0.6f, 0.45f, 0.7f, 0.35f, 0.25f)
         private val RATING_FRACTIONS = listOf(0.05f, 0f, 0.1f, 0.15f, 0.2f, 0.45f, 0.4f, 1f, 0.7f)
 
         override val previews: ImmutableMap<String, ColumnChartUiModel> = persistentMapOf(
@@ -111,6 +115,8 @@ data class ColumnChartUiModel(
                 }.toImmutableList(),
                 showsValues = false,
             ),
+            "12 months" to monthColumns(count = YEAR_MONTH_COUNT),
+            "13 months" to monthColumns(count = YEAR_MONTH_COUNT + 1),
             "Loading" to ColumnChartUiModel(
                 columns = List(LOADING_COLUMN_COUNT) {
                     ColumnUiModel(
@@ -124,6 +130,25 @@ data class ColumnChartUiModel(
                 showsValues = true,
                 isLoading = true,
             ),
+        )
+
+        private fun monthColumns(count: Int): ColumnChartUiModel = ColumnChartUiModel(
+            columns = List(count) { index ->
+                val fraction = MONTH_FRACTIONS[index % YEAR_MONTH_COUNT]
+
+                ColumnUiModel(
+                    fraction = fraction,
+                    tone = when {
+                        fraction == 1f -> ChartTone.Lead
+                        fraction == 0f -> ChartTone.Fifth
+                        else -> ChartTone.Third
+                    },
+                    label = MONTH_LABELS[index % YEAR_MONTH_COUNT].takeIf { index % LABEL_STRIDE == 0 },
+                    value = "1,480".takeIf { fraction == 1f },
+                    contentDescription = MONTH_LABELS[index % YEAR_MONTH_COUNT],
+                )
+            }.toImmutableList(),
+            showsValues = true,
         )
     }
 }
