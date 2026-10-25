@@ -20,16 +20,16 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
   local hooks, scripts, `/handoff` and doc-budgets gate are deleted, `.claude/rhaydus.json` holds its facts,
   and `checkDocBudgets` is the foundation's `rhaydus.doc-budgets` (build-logic now in `nl.rhaydus.buildlogic`).
   Softcover still spawns its `softcover-*` agents.
-- **Next:** step 2, FU-6 plus the agent switch in one go: `rhaydus-adopt` writes the managed block, the
-  `## Agent parameters` table and the rules templates; Softcover routes to `rhaydus-kotlin:implementer` /
-  `reviewer` / `test-writer`, moves their agent memory, and deletes the `softcover-*` agents, the local
-  `style-check` and the deny rules.
+- **Next:** step 2, FU-6 plus the agent switch in one go (FU-6 row and § Generic shape in `agent-layer.md`):
+  `rhaydus-adopt` writes the managed block, the `## Agent parameters` table and the rules templates; Softcover
+  routes to `rhaydus-kotlin:implementer` / `reviewer` / `test-writer`, moves their agent memory, and deletes
+  the `softcover-*` agents, the local `style-check` and the deny rules. A plugin edit applies only after a
+  reinstall (`.claude/rules/foundation.md`).
 - **Open questions:** none.
-- **Verification:** build-logic `test`, the five plugin hook case runners, `./gradlew help`, `checkDocBudgets`
-  and `:core:domain:compileKotlinJvm` passed; plugin reinstalled so its cache holds the hooks; both
-  `softcover-reviewer` rounds applied. No app Kotlin changed, so no `styleCheck`.
-- **Uncommitted:** foundation: hooks, scripts, skill, doc-budgets plugin, build-logic package, docs. Softcover:
-  the switch-over, `rhaydus.json`, tracker.
+- **Verification:** `styleCheck` passed (after `ktlintFormat` on the foundation build-logic doc-budgets files);
+  glommed-closer grep and AAA markers clean; build-logic `test` and the five hook case runners passed.
+- **Uncommitted:** foundation: `ktlintFormat` layout fixes in build-logic doc-budgets main and test files.
+  Softcover: the submodule pointer and this tracker.
 
 ## How to run a step
 
