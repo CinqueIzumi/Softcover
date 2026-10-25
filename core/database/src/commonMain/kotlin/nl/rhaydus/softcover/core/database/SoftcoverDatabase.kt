@@ -90,7 +90,7 @@ import kotlin.coroutines.CoroutineContext
     views = [
         BookEditionView::class
     ],
-    version = 63,
+    version = 64,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -1562,6 +1562,14 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        // Existing rows get pagesRead 0 rather than a backfill from consecutive positions: the library
+        // sync now refetches every book's journal and replaces its synced rows with computed values.
+        private val MIGRATION_63_64 = object : Migration(63, 64) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE progress_history ADD COLUMN pagesRead INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         private val MIGRATION_62_63 = object : Migration(62, 63) {
             override fun migrate(connection: SQLiteConnection) {
                 connection.execSQL(
@@ -1646,6 +1654,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_60_61,
             MIGRATION_61_62,
             MIGRATION_62_63,
+            MIGRATION_63_64,
         )
     }
 }

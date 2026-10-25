@@ -32,6 +32,7 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHi
 import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveSessionsForBookUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.PauseReadingSessionUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshAllQuotesUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshAllReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.ResumeReadingSessionUseCase
@@ -83,6 +84,7 @@ val personalModule = module {
 
     factory { ObserveReadingJournalHistoryUseCase(repository = get()) }
     factory { RefreshReadingJournalHistoryUseCase(repository = get()) }
+    factory { RefreshAllReadingJournalHistoryUseCase(repository = get()) }
 
     single<QuoteLocalDataSource> {
         QuoteLocalDataSourceImpl(dao = get<SoftcoverDatabase>().quoteDao())

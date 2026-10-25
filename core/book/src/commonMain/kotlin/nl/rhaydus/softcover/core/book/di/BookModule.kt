@@ -11,11 +11,13 @@ import nl.rhaydus.softcover.core.book.data.datasource.UserTagsLocalDataSourceImp
 import nl.rhaydus.softcover.core.book.data.datasource.UserTagsRemoteDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.UserTagsRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.repository.BooksRepositoryImpl
+import nl.rhaydus.softcover.core.book.data.repository.ProgressHistoryRepositoryImpl
 import nl.rhaydus.softcover.core.book.data.repository.SimilarBooksRepositoryImpl
 import nl.rhaydus.softcover.core.book.data.repository.UserTagsRepositoryImpl
 import nl.rhaydus.softcover.core.book.data.sync.OfflineUserBookSyncImpl
 import nl.rhaydus.softcover.core.book.data.sync.UserBookCacheGate
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.book.domain.repository.ProgressHistoryRepository
 import nl.rhaydus.softcover.core.book.domain.repository.SimilarBooksRepository
 import nl.rhaydus.softcover.core.book.domain.repository.UserTagsRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
@@ -37,6 +39,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveProgressUpdatesUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecentBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveRecentFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveShelvedBookIdsUseCase
@@ -177,6 +180,14 @@ val bookModule = module {
             appDispatchers = get(),
             progressHistoryLocalDataSource = get(),
         )
+    }
+
+    single<ProgressHistoryRepository> {
+        ProgressHistoryRepositoryImpl(progressHistoryLocalDataSource = get())
+    }
+
+    factory {
+        ObserveProgressUpdatesUseCase(progressHistoryRepository = get())
     }
 
     single<ProgressHistoryLocalDataSource> {

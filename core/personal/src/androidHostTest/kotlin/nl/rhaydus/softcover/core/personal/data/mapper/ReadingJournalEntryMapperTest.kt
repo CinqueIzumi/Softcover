@@ -47,6 +47,79 @@ class ReadingJournalEntryMapperTest {
         }
 
         @Test
+        fun `pages read is the move from the previous page to the new page`() {
+            // ----- Arrange -----
+            val metadata = mapOf(
+                "progress_pages" to 120,
+                "progress_pages_was" to 90,
+            )
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull().pagesRead shouldBe 30
+        }
+
+        @Test
+        fun `pages read counts from page zero when the previous page is missing`() {
+            // ----- Arrange -----
+            val metadata = mapOf("progress_pages" to 120)
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull().pagesRead shouldBe 120
+        }
+
+        @Test
+        fun `pages read is zero for a seconds-only audiobook update`() {
+            // ----- Arrange -----
+            val metadata = mapOf(
+                "progress_seconds" to 900,
+                "progress_seconds_was" to 300,
+            )
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull().pagesRead shouldBe 0
+        }
+
+        @Test
+        fun `pages read is zero when the position moved backwards`() {
+            // ----- Arrange -----
+            val metadata = mapOf(
+                "progress_pages" to 40,
+                "progress_pages_was" to 90,
+            )
+
+            // ----- Act -----
+            val result = toProgressHistoryEntity(
+                bookId = 1,
+                actionAt = hasuraInstant,
+                metadata = metadata,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull().pagesRead shouldBe 0
+        }
+
+        @Test
         fun `parses a Hasura timestamptz with offset and fractional seconds into epoch millis`() {
             // ----- Arrange -----
             val metadata = mapOf("progress_pages" to 1)

@@ -75,6 +75,7 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
         pages = pages,
         seconds = null,
         pending = false,
+        pagesRead = pages,
     )
 
     @Nested

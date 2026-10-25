@@ -4271,6 +4271,22 @@ class BooksRepositoryImplTest {
             } returns 42
         }
 
+        private fun historyBookAtPage(currentPage: Int?): Book = mockk(relaxed = true) {
+            every {
+                this@mockk.id
+            } returns 42
+            every {
+                this@mockk.currentRead
+            } returns UserBookRead(
+                id = 1,
+                currentPage = currentPage,
+                currentSeconds = null,
+                progress = 0f,
+                startedAt = "2026-07-21",
+                finishedAt = null,
+            )
+        }
+
         private fun stubInsertPending(localId: Long) {
             coEvery {
                 progressHistoryLocalDataSource.insertPending(
@@ -4278,6 +4294,7 @@ class BooksRepositoryImplTest {
                     actionAtEpochMillis = any(),
                     pages = any(),
                     seconds = any(),
+                    pagesRead = any(),
                 )
             } returns localId
         }
@@ -4312,6 +4329,106 @@ class BooksRepositoryImplTest {
                     actionAtEpochMillis = 1784667600000L,
                     pages = 120,
                     seconds = 3000,
+                    pagesRead = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `records the pages gained since the previous position as pages read`() = runTest {
+            // ----- Arrange -----
+            val book = historyBookAtPage(currentPage = 50)
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } returns stubBook(userBookId = 1)
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = 80,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = 42,
+                    actionAtEpochMillis = any(),
+                    pages = 80,
+                    seconds = null,
+                    pagesRead = 30,
+                )
+            }
+        }
+
+        @Test
+        fun `records zero pages read when the progress goes back`() = runTest {
+            // ----- Arrange -----
+            val book = historyBookAtPage(currentPage = 80)
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } returns stubBook(userBookId = 1)
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = 50,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = 42,
+                    actionAtEpochMillis = any(),
+                    pages = 50,
+                    seconds = null,
+                    pagesRead = 0,
+                )
+            }
+        }
+
+        @Test
+        fun `records every page as read when the book had no previous page`() = runTest {
+            // ----- Arrange -----
+            val book = historyBookAtPage(currentPage = null)
+            stubInsertPending(localId = 9L)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } returns stubBook(userBookId = 1)
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = 80,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = 42,
+                    actionAtEpochMillis = any(),
+                    pages = 80,
+                    seconds = null,
+                    pagesRead = 80,
                 )
             }
         }
@@ -4347,6 +4464,7 @@ class BooksRepositoryImplTest {
                     actionAtEpochMillis = capture(actionAtSlot),
                     pages = 10,
                     seconds = null,
+                    pagesRead = any(),
                 )
             }
 
@@ -4450,6 +4568,7 @@ class BooksRepositoryImplTest {
                     actionAtEpochMillis = any(),
                     pages = 10,
                     seconds = null,
+                    pagesRead = any(),
                 )
             }
 
@@ -4532,6 +4651,7 @@ class BooksRepositoryImplTest {
                     actionAtEpochMillis = any(),
                     pages = any(),
                     seconds = any(),
+                    pagesRead = any(),
                 )
             }
 
@@ -4579,6 +4699,7 @@ class BooksRepositoryImplTest {
                     actionAtEpochMillis = capture(millisSlot),
                     pages = 10,
                     seconds = null,
+                    pagesRead = any(),
                 )
             }
 
@@ -4623,6 +4744,7 @@ class BooksRepositoryImplTest {
                     actionAtEpochMillis = capture(millisSlot),
                     pages = 10,
                     seconds = null,
+                    pagesRead = any(),
                 )
             }
 
@@ -4678,6 +4800,7 @@ class BooksRepositoryImplTest {
                     actionAtEpochMillis = 1784667600000L,
                     pages = 10,
                     seconds = null,
+                    pagesRead = any(),
                 )
             }
 
@@ -5002,6 +5125,7 @@ class BooksRepositoryImplTest {
                     actionAtEpochMillis = any(),
                     pages = 25,
                     seconds = null,
+                    pagesRead = any(),
                 )
             }
 
@@ -7407,6 +7531,7 @@ class BooksRepositoryImplTest {
                     actionAtEpochMillis = any(),
                     pages = any(),
                     seconds = any(),
+                    pagesRead = any(),
                 )
             } returns 9L
 

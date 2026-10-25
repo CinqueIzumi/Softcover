@@ -1,0 +1,20 @@
+query GetAllReadingJournalHistory(
+    $userId: Int!,
+    $limit: Int!,
+    $offset: Int!,
+) {
+    reading_journals(
+        where: {
+            user_id: { _eq: $userId }
+            event: { _eq: "progress_updated" }
+        }
+        # id breaks action_at ties so every offset window is a fixed, non-overlapping slice.
+        order_by: [{ action_at: asc }, { id: asc }]
+        limit: $limit
+        offset: $offset
+    ) {
+        book_id
+        action_at
+        metadata
+    }
+}

@@ -10,6 +10,7 @@ import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
@@ -96,7 +97,7 @@ class RoomOpenSurvivesUpgradeTest {
         )
 
         try {
-            runBlocking { database.progressHistoryDao().getSyncedIdsForBook(bookId = 1) }
+            runBlocking { database.progressHistoryDao().observeByBookId(bookId = 1).first() }
         } finally {
             database.close()
         }
@@ -185,6 +186,27 @@ class RoomOpenSurvivesUpgradeTest {
                     "progress_history",
                     "book_deadlines",
                 ).forEach { connection.countRows(it) shouldBe 1 }
+            }
+        }
+
+        @Test
+        fun `a progress history row from before the pages read column ends the chain with zero pages read`() {
+            // ----- Arrange -----
+            val file = databaseFile()
+            writeOldDatabase(
+                file,
+                schema52,
+            )
+
+            // ----- Act -----
+            openThroughProductionBuilder(file)
+
+            // ----- Assert -----
+            withConnection(file) { connection ->
+                connection.snapshot(
+                    "progress_history",
+                    listOf("pagesRead"),
+                ) shouldBe listOf(listOf("0"))
             }
         }
 

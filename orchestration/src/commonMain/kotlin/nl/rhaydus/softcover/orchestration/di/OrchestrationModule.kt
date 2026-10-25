@@ -164,6 +164,8 @@ internal val orchestrationModule = module {
             booksRepository = get(),
             listsRepository = get(),
             settingsRepository = get(),
+            refreshAllReadingJournalHistoryUseCase = get(),
+            applicationScope = get(),
             dispatchers = get(),
         )
     }

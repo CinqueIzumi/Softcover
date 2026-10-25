@@ -966,6 +966,10 @@ internal class BooksRepositoryImpl(
             actionAtEpochMillis = readAt.toEpochMilliseconds(),
             pages = newPage,
             seconds = newSeconds,
+            pagesRead = pagesReadBy(
+                before = book.currentRead?.currentPage,
+                after = newPage,
+            ),
         )
 
         // A placeholder read has no server id yet, so the write can only wait for replay to resolve one.
@@ -1092,3 +1096,8 @@ internal class BooksRepositoryImpl(
         )
     }
 }
+
+private fun pagesReadBy(
+    before: Int?,
+    after: Int?,
+): Int = if (after == null) 0 else (after - (before ?: 0)).coerceAtLeast(0)
