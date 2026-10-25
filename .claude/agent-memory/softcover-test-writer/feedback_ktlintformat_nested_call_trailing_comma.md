@@ -10,7 +10,7 @@ metadata:
 output: `outer.set(inner(\n arg1,\n arg2,\n),)` — a stray `),)` on the closing line, which does not compile
 cleanly / reads as broken.
 
-**Why:** hit this in `build-logic/src/test/kotlin/CheckDocBudgetsTaskTest.kt` after running `ktlintFormat` to
+**Why:** hit this in `foundation/build-logic/src/test/kotlin/CheckDocBudgetsTaskTest.kt` after running `ktlintFormat` to
 clear `rhaydus:multi-arg-wrapping` violations — one call site (`task.activeFile.set(write(...))`) came out
 malformed and needed a manual second wrap.
 

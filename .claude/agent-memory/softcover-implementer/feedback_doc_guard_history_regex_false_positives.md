@@ -5,7 +5,7 @@ metadata:
   type: feedback
 ---
 
-`.claude/hooks/doc-guard.sh`'s `check_history` denies any new line under `docs/reference/**` matching
+`foundation/claude/plugins/rhaydus-kotlin/hooks/scripts/doc-guard.sh`'s `check_history` denies any new line under `docs/reference/**` matching
 `\b(used to|previously|no longer|was (changed|replaced|renamed)|we decided|(that|this|which) replaced|originally)\b`,
 case-insensitively, on the whole line (docs/reference paragraphs are one unwrapped line each).
 

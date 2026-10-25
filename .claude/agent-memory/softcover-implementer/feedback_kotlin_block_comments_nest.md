@@ -11,7 +11,7 @@ even mid-sentence — opens a nested comment the lexer expects to be closed, and
 `Syntax error: Unclosed comment` pointing at a much later line (the file's true end), not the offending
 one.
 
-**Why:** hit this writing KDoc for a helper (`kotlinStyleComment` in `CheckDocBudgetsTask.kt`) that finds
+**Why:** hit this writing KDoc for a helper (`kotlinStyleComment` in `foundation/build-logic/src/main/kotlin/CheckDocBudgetsTask.kt`) that finds
 "the first `//` or `/*` in a line" — the literal `` `/*` `` inside the enclosing `/** ... */` opened a
 nested comment with no matching close, and the reported error line was the last line of the file, not
 the KDoc.

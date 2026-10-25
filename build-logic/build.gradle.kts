@@ -51,9 +51,5 @@ gradlePlugin {
             id = "softcover.android.r8-keep-contract"
             implementationClass = "AndroidR8KeepContractConventionPlugin"
         }
-        register("docBudgets") {
-            id = "softcover.doc-budgets"
-            implementationClass = "DocBudgetsConventionPlugin"
-        }
     }
 }

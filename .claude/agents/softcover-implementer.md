@@ -62,7 +62,7 @@ the concept; do not read it whole). Do not read it for anything else.
 - A manifest component, worker, widget, `Screen` argument or class reached by name follows the implementer
   checklist in `docs/reference/r8.md`.
 - Adding, removing or changing a composable's signature in `androidMain` or `commonMain`: run
-  `scripts/gradle-quiet.sh :<module>:stabilityDump` and list `<module>/stability/*.stability` under Files changed.
+  `./gradlew :<module>:stabilityDump` and list `<module>/stability/*.stability` under Files changed.
 - Comments and KDoc follow the `document-code` skill standard: document only what the code cannot say; no
   comment that restates the code.
 
@@ -78,7 +78,7 @@ Past about 40 tool calls, stop and report what is done and what is left instead 
 
 ## Verify
 
-Run exactly the `## Verify` command (it uses `scripts/gradle-quiet.sh`, which prints a summary and the path
+Run exactly the `## Verify` command (the plugin hook runs it through a quiet wrapper, which prints a summary and the path
 to the full log). On failure, grep the log for the `e:` lines, fix, and re-run — at most twice. Still failing
 after that: stop and report the errors.
 

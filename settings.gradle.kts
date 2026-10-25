@@ -1,5 +1,6 @@
 pluginManagement {
     includeBuild("build-logic")
+    includeBuild("foundation/build-logic") { name = "foundation-build-logic" }
     repositories {
         google {
             content {

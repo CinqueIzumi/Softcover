@@ -13,7 +13,7 @@ tree before Verify, and fix what it finds.
 `docs/working/` / decision-number / plan-step citations in comments, "confirm with a grep". A grep with a
 hand-written pattern missed real violations that the actual detekt/hook regex caught:
 a committed `BookDao.kt` comment citing a plan directory, an uncommitted `WhenReadRow.kt` KDoc citing a plan
-step id, and `DocBudgetsConventionPlugin.kt` KDoc citing `docs/working/ACTIVE.md` (forbidden for Kotlin even
+step id, and the foundation `DocBudgetsConventionPlugin.kt` KDoc citing `docs/working/ACTIVE.md` (forbidden for Kotlin even
 though the hook's markdown-specific rule allows top-level `docs/working/*.md` files — the two mechanisms are
 intentionally not symmetric).
 

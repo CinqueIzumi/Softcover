@@ -1,0 +1,54 @@
+{
+  "briefCheck": {
+    "briefDoc": "docs/reference/agent-briefs.md",
+    "agents": {
+      "softcover-implementer": "implementer",
+      "softcover-test-writer": "testWriter",
+      "softcover-reviewer": "reviewer"
+    },
+    "verify": {
+      "implementer": "./gradlew :module:compileKotlinJvm",
+      "testWriter": "./gradlew :module:testAndroidHostTest --tests \"nl.rhaydus.softcover.feature.x.YTest\""
+    }
+  },
+  "slowGradle": {
+    "blockedTasks": [
+      "build",
+      "assemble.*",
+      ".*(linkrelease|linkdebug|releaseframework|binaries|embedandsign|bundlerelease|publish).*",
+      ".*ios(arm64|simulatorarm64|x64).*",
+      ".*iosmain.*"
+    ],
+    "allowedTasks": [
+      "assembleDebug.*",
+      "compileKotlinIos.*",
+      "compileIosMainKotlinMetadata.*"
+    ],
+    "hint": "Use a lightweight task instead: ./gradlew assembleDebug (Android debug across all modules); ./gradlew :<module>:compileDebug* (one module); ./gradlew :<module>:test*HostTest (host unit tests); ./gradlew :<module>:compileKotlinIosSimulatorArm64 (verifies iOS actuals, allowed)."
+  },
+  "largeReadGuard": {
+    "maxLines": 600
+  },
+  "session": {
+    "activeFile": "docs/working/ACTIVE.md",
+    "contextBudget": 150000,
+    "closeOutGates": [
+      "./gradlew styleCheck",
+      "grep the changed *.kt files for the glommed closer: ^\\s*\\)\\s*\\}",
+      "every @Test in the changed test files has the Arrange / Act / Assert markers"
+    ]
+  },
+  "docGuard": {
+    "budgetsFile": "docs/doc-budgets.txt",
+    "activeFile": "docs/working/ACTIVE.md",
+    "referenceDocs": ["docs/reference/"],
+    "workingDocs": ["docs/working/"],
+    "permanentDocs": ["CLAUDE.md", "docs/reference/", ".claude/rules/", ".claude/agents/", ".claude/skills/", ".claude/agent-memory/"],
+    "routing": [
+      {"path": "docs/reference/design-system/components.md", "hint": "a component contract goes in KDoc on its UI model; components.md keeps one line per component"},
+      {"path": "docs/reference/design-system/", "hint": "rewrite the entry to the current truth (≤12 lines)"},
+      {"path": "docs/working/", "hint": "working docs hold state and one-line decisions; reasoning goes in the PR description"}
+    ],
+    "defaultHint": "see the routing table in .claude/rules/docs.md"
+  }
+}

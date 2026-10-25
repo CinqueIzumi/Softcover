@@ -21,7 +21,7 @@ plugins {
     alias(libs.plugins.stability.analyzer) apply false
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.kover)
-    id("softcover.doc-budgets")
+    id("rhaydus.doc-budgets")
 }
 
 // Code coverage. Kover is applied to every shipped module (below) and aggregated into a single XML

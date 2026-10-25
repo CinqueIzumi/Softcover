@@ -64,10 +64,10 @@ the act, e.g. a Turbine `test { }` or `shouldThrow`). An existing test that brea
 
 ## Running
 
-- Run exactly the `## Verify` command. It uses `scripts/gradle-quiet.sh`, which prints a summary and the path
+- Run exactly the `## Verify` command. The plugin hook runs it through a quiet wrapper, which prints a summary and the path
   to the full log; grep that log for failures instead of reading it.
 - Unit tests live in `src/androidHostTest/`; the task is `:<module>:testAndroidHostTest`. If a task name in
-  the brief does not exist, confirm with `scripts/gradle-quiet.sh :<module>:tasks --all` and grep for
+  the brief does not exist, confirm with `./gradlew :<module>:tasks --all` and grep for
   `AndroidHostTest`; do not guess further variants.
 - Do not run the broader suite.
 - Device suite (minified): follow `.claude/rules/tests.md` § Device suite (minified).

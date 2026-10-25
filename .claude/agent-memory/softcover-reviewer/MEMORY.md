@@ -2,12 +2,11 @@
 - [Full-height sheet pinning is safe](architecture_full_height_sheet_pinning.md) — pinned rows + `weight(1f)+verticalScroll` body in AdaptiveModalSheet fills height on both forms; don't re-litigate
 - [Design-system doc drift](project_design_system_doc_drift_pattern.md) — one UI fact/component is stated in several sections incl. patterns/*.md; grep the old value/name everywhere
 - [Staged vs unstaged review scope](feedback_staged_vs_unstaged_review_scope.md) — "unstaged changes" may mean everything uncommitted; reconcile `git diff HEAD` against the brief's prose
-- [Hook script not registered](project_hook_script_not_registered.md) — a new `.claude/hooks/*.sh` does nothing until `.claude/settings.json` wires its matcher; always check both
+- [Hook script not registered](project_hook_script_not_registered.md) — a new plugin hook script does nothing until the plugin `hooks/hooks.json` wires its matcher; always check both
 - [File-split KDoc link scope](project_file_split_kdoc_link_scope.md) — a token-hygiene split can legitimately downgrade a `[Symbol]` doc-link to backticks when the target left the file's import scope; a stale unresolvable link left behind is the real finding
 - [File-split body/import drift](project_file_split_body_and_import_drift.md) — a "pure move" split can drop a statement inside a body; diff line-by-line, don't just skim
 - [Gradle *Main suffix is case-sensitive](architecture_gradle_main_suffix_case_sensitive.md) — a source-dir scan gate silently skips classic lowercase `src/main` modules (`:app`, `:desktopApp`); confirm they have nothing to catch
 - [Arrange/Filter draft-commit pattern traps](project_arrange_filter_draft_commit_pattern.md) — a live nudge into an open draft needs its own failure rollback; async collector-derived chips can blank-flash on sheet open
-- [Dual gate predicate parity](architecture_dual_gate_predicate_parity.md) — doc-guard.sh vs CheckDocBudgetsTask.kt predicates must match; an unconditional (non-ratcheted) scan can retroactively fail untouched files when widened
 - [ChipSet double `.chips` field](project_chipset_double_chips_field.md) — a wrapper's own `chips`/`fooChips` field holding a `ChipSet<P>` forces `.chips.chips` at render sites; flag readability, suggest Iterable/isEmpty on ChipSet
 - [New component shadows foundation](architecture_new_component_shadows_foundation.md) — grep CAPABILITIES.md for a matching foundation anatomy before accepting a new :core:component that just bolts on one extra behavior
 - [R10 computed-getter trap](project_r10_computed_getter_trap.md) — a UiState `get()` property that builds a UI model still violates R10; only a stored field/default counts

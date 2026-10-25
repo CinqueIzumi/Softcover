@@ -11,7 +11,7 @@ book tracking platform, on Android (SDK 26+), iOS and desktop (JVM). Shared UI a
 
 ## Working in this repo
 
-- **Session loop:** `docs/working/ACTIVE.md` → the active tracker's `## Now` block → do one step → `/handoff`
+- **Session loop:** `docs/working/ACTIVE.md` → the active tracker's `## Now` block → do one step → `/rhaydus-kotlin:handoff`
   → the user runs `/clear`. One step per session.
 - **Routing:** a change touching ≤3 existing files, with no new file and no public API change, is done in the
   main conversation. Anything bigger goes to `softcover-implementer`. Tests always go to

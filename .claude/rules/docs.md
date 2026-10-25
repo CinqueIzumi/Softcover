@@ -29,11 +29,11 @@ paths:
   KDoc, permanent config (`config/**`, `*.yml`/`*.yaml`, `*.kts`), permanent docs and agent memory
   (`.claude/agent-memory/**`) never cite one, its steps or its decision numbers. A decision is deleted once
   built; the code is then the record and the reason goes in the PR description. Enforced by detekt's
-  `ForbiddenComment` and `doc-guard.sh` at write time, and by `checkDocBudgets` in CI.
+  `ForbiddenComment` and the plugin doc-guard hook at write time, and by `checkDocBudgets` in CI.
 - **Entry lengths:** a decision is one line; an index line is one sentence; a pattern or component entry is ≤12 lines; a `## Now`
   block is ≤40 lines.
 - **Budgets.** Every file has a size budget in `docs/doc-budgets.txt`. A file over budget may shrink but never
-  grow. `.claude/hooks/doc-guard.sh` enforces this at write time and `checkDocBudgets` enforces it in CI.
+  grow. The `rhaydus-kotlin` plugin's doc-guard hook (configured in `.claude/rhaydus.json`) enforces this at write time and `checkDocBudgets` enforces it in CI.
   Changing a budget is a deliberate, reviewed diff, never a way past the gate.
 - **Edit markdown with Edit / Write only**, never Bash redirection, heredocs or scripts, so the write-time
   hook sees every change.

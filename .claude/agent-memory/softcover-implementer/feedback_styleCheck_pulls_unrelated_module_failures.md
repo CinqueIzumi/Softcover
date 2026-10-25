@@ -18,7 +18,7 @@ therefore failed there, nothing in the current brief's own diff.
 
 **How to apply:** when Verify fails on a module the brief's `## Files` never lists, isolate before
 treating it as your own bug — rerun just the failing task in isolation
-(`scripts/gradle-quiet.sh :failing:module:task`) to confirm it fails the same way with none of your
+(`./gradlew :failing:module:task`) to confirm it fails the same way with none of your
 edits in play (compile it standalone; you don't need to revert anything to prove this). If it does,
 it's pre-existing breakage — do not fix it (boundary: never edit tests, never widen the task).
 Report the isolated Verify result for your own module (e.g. append `-x

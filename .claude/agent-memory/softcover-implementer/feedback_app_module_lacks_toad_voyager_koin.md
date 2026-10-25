@@ -22,6 +22,6 @@ yourself).
 
 Separately: the detekt task name for `:app` is `detektDebug`/`detektRelease` (Android Gradle plugin
 per-variant naming), not `detektAndroidDebug` — the latter is the AGP-provided one for KMP library
-modules with an `androidMain` source set. Run `./gradlew :app:tasks --all` (via `gradle-quiet.sh`, which
+modules with an `androidMain` source set. Run `./gradlew :app:tasks --all` (the plugin hook's quiet wrapper, which
 still prints the full log path even on `BUILD SUCCESSFUL` for a bare `tasks` invocation) if a guessed
 detekt task name 404s.

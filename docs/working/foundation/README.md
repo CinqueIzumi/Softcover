@@ -15,15 +15,21 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** step 2 is under way. The plugin's `implementer` / `reviewer` / `test-writer` replace the four old
-  agents (FU-1, FU-7 lessons), and no plugin or foundation text names the old agents (FU-13). They read
-  project facts from the `## Agent parameters` table, which adopt does not write yet (FU-6). Softcover still
-  runs its local `softcover-*` agents until the adoption item.
-- **Next:** step 2, the hooks and scripts the audit marked generic (FU-2 to FU-5, FU-11, FU-12, FU-14).
+- **State:** step 2 is under way. The agent trio (FU-1, FU-7, FU-13) and the generic hooks, scripts and
+  `/handoff` skill (FU-2 to FU-5, FU-11, FU-12, FU-14) are in the plugin. Softcover already runs them: its
+  local hooks, scripts, `/handoff` and doc-budgets gate are deleted, `.claude/rhaydus.json` holds its facts,
+  and `checkDocBudgets` is the foundation's `rhaydus.doc-budgets` (build-logic now in `nl.rhaydus.buildlogic`).
+  Softcover still spawns its `softcover-*` agents.
+- **Next:** step 2, FU-6 plus the agent switch in one go: `rhaydus-adopt` writes the managed block, the
+  `## Agent parameters` table and the rules templates; Softcover routes to `rhaydus-kotlin:implementer` /
+  `reviewer` / `test-writer`, moves their agent memory, and deletes the `softcover-*` agents, the local
+  `style-check` and the deny rules.
 - **Open questions:** none.
-- **Verification:** the old-name grep, `bash -n` and `jq` are clean; `softcover-reviewer` findings applied.
-  Docs only since the last Gradle gate.
-- **Uncommitted:** foundation: the agent trio and text edits. Softcover: this README, `agent-layer.md`.
+- **Verification:** build-logic `test`, the five plugin hook case runners, `./gradlew help`, `checkDocBudgets`
+  and `:core:domain:compileKotlinJvm` passed; plugin reinstalled so its cache holds the hooks; both
+  `softcover-reviewer` rounds applied. No app Kotlin changed, so no `styleCheck`.
+- **Uncommitted:** foundation: hooks, scripts, skill, doc-budgets plugin, build-logic package, docs. Softcover:
+  the switch-over, `rhaydus.json`, tracker.
 
 ## How to run a step
 
@@ -59,7 +65,7 @@ Read-only. The output is a decision per item, recorded in `agent-layer.md` and u
 
 - [x] The implementer / reviewer / test-writer trio replaces `rhaydus-logic` / `rhaydus-ui` / `code-reviewer` /
       `unit-test-writer` (FU-1, FU-7, FU-10).
-- [ ] The hooks, `/handoff` skill, quiet-Gradle script, token-usage script and doc-growth guards the audit marked
+- [x] The hooks, `/handoff` skill, quiet-Gradle script, token-usage script and doc-growth guards the audit marked
       generic (FU-2 to FU-5, FU-11, FU-12, FU-14).
 - [x] The plugin text names the new agents and no longer cites the sibling-checkout docs path (FU-13).
 - [ ] `rhaydus-adopt` writes the catalogue-style managed `CLAUDE.md` block and the `.claude/rules/*.md` templates
@@ -109,6 +115,7 @@ Bugs and gaps in shared code only; new components, design tokens and house-style
 - Plugin hooks register in the plugin `hooks.json`; the quiet-Gradle script ships in the plugin, not via adopt.
 - The plugin agents drop the `softcover-` prefix; Softcover uses the plugin names after step 2.
 - Commit style and engineering principles move to user scope, not into the plugin.
+- Plugin hooks read project facts from `.claude/rhaydus.json`; a missing key means a default or the hook off.
 
 ## Baseline
 

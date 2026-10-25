@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-Techniques for `.claude/hooks/doc-guard.sh` and `build-logic/.../CheckDocBudgetsTask.kt`:
+Techniques for `foundation/claude/plugins/rhaydus-kotlin/hooks/scripts/doc-guard.sh` and `foundation/build-logic/src/main/kotlin/CheckDocBudgetsTask.kt`:
 
 - **Bash hook test harness.** A base64-encoded TSV cases file (name, tool, relpath, old content, arg1, arg2,
   replace_all, expected, reason-substring) plus a runner that decodes each field, builds the `tool_input` JSON
