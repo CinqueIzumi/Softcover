@@ -29,10 +29,12 @@ import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
+import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
@@ -48,6 +50,7 @@ import org.junit.jupiter.api.Test
 
 class AtlasScopedSectionsCollectorTest {
     private lateinit var observeReadingStatsUseCase: ObserveReadingStatsUseCase
+    private lateinit var observeMonthlyPagesReadUseCase: ObserveMonthlyPagesReadUseCase
     private lateinit var observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase
     private lateinit var getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase
     private lateinit var backfilledFlow: MutableStateFlow<Boolean>
@@ -64,6 +67,7 @@ class AtlasScopedSectionsCollectorTest {
         observedRanges.clear()
         statsFor = { ReadingStats() }
         observeReadingStatsUseCase = mockk()
+        observeMonthlyPagesReadUseCase = mockk()
         observeAuthorDemographicsBackfilledUseCase = mockk()
         getHideUntaggedAuthorsAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(stateFor(StatsScope.AllTime))
@@ -80,6 +84,10 @@ class AtlasScopedSectionsCollectorTest {
             observedRanges += range
             flowOf(statsFor(range))
         }
+
+        every {
+            observeMonthlyPagesReadUseCase(any())
+        } returns flowOf(MonthlyPages.AcrossYears(pages = List(12) { 0 }))
 
         every {
             observeAuthorDemographicsBackfilledUseCase()
@@ -129,6 +137,10 @@ class AtlasScopedSectionsCollectorTest {
         every {
             dependencies.observeReadingStatsUseCase
         } returns observeReadingStatsUseCase
+
+        every {
+            dependencies.observeMonthlyPagesReadUseCase
+        } returns observeMonthlyPagesReadUseCase
 
         every {
             dependencies.observeAuthorDemographicsBackfilledUseCase

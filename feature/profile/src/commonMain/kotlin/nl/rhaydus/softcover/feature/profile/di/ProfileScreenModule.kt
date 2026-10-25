@@ -58,6 +58,7 @@ val profileScreenModule = module {
             initializers = getAll(),
             observeUserProfileDataUseCase = get(),
             observeReadingStatsUseCase = get(),
+            observeMonthlyPagesReadUseCase = get(),
             observeReadingHistoryUseCase = get(),
             observeAuthorDemographicsBackfilledUseCase = get(),
             getHideUntaggedAuthorsAsFlowUseCase = get(),

@@ -19,8 +19,8 @@
   leaves the row falls back to All time.
 - Beneath the row, a quiet italic line names the dates: "Showing 2026", "Showing 24 September to today"
   (the year is added only when the window starts in an earlier one), "Showing every year".
-- The scope moves the opening tiles, "The genres you read most", "Who you read" (Hide untagged authors still
-  applies) and "How you score". "Recently loved" and the year chart ignore it. Values animate between scopes;
+- The scope moves the opening tiles, the pages-by-month chart, "The genres you read most", "Who you read"
+  (Hide untagged authors still applies) and "How you score". "Recently loved" and the year chart ignore it. Values animate between scopes;
   labels cross-fade, and reduced motion swaps them in place.
 - A scope with no finished books says so in each section's framing sentence ("No finished books in the last
   30 days.") instead of drawing an empty chart; the opening tiles show 0 and say nothing was finished. In a
@@ -30,9 +30,23 @@
   `Second`, zero years a `Fifth` stub) and the caption names that year and its count for the Books / Pages
   metric; a rolling window or All time lights the busiest year.
 - Contents rows (two-digit number, title, caption, chevron) scroll the page to their chapter's top. A
-  chapter opens with an eyebrow "01 · Title" numbered by position, so row and header always agree.
+  chapter opens with an eyebrow "02 · Title". Numbers are fixed per chapter (02 and 99), following the
+  design's chapter list rather than position, so row and header always agree; the other chapters land with
+  later 3.3.0 issues.
 - A stat the app holds no data source for yet (reading days) is left out, never a 0.
-- Today's only chapter, "Temporary", holds the former Profile charts: "The shape of the years" (a
+- Chapter 02, "Seasons and records" (caption "Pages by month, authors and records."), opens with a
+  headline naming the busiest month ("A March to remember", "An April to remember"; "A year in pages" when
+  nothing was read) over a scoped pages-by-month `ColumnChart`. Pages are the pages read in each month,
+  summed from the progress updates logged that month, so a book read across March and April counts in both
+  and unfinished books count. When a book is finished in the scope and its last recorded position is short of
+  its page count, the remainder lands on its finish date; a finished book with no updates puts all its pages
+  there. It has a column for every calendar month the scope touches, so a rolling window shows 12 or 13
+  months, 6 months 6 or 7, 30 days 1 to 3, a calendar year 12, and the first column of a window that starts
+  mid-month is a partial month ("From 27 October 2025, 412 pages"). All time sums each calendar month across
+  every year. Month labels are three letters, on every third column. The chart cross-fades only when the
+  set of months changes (year to all time animates in place). A month after today with no pages is a "still
+  to come" stub, named in the description.
+- Chapter 99, "Temporary" (removed later), holds the former Profile charts: "The shape of the years" (a
   `ColumnChart` behind a Books / Pages `SegmentedControl`); "The genres you read most"; "Who you read";
   "How you score" (headline from the rating band, never the bare average); "Recently loved" (up to three
   4★+ reads). Each opens with eyebrow + italic headline (§3.2).
@@ -43,7 +57,9 @@
 - `ProportionChart` only for exclusive, exhaustive categories (gender: up to three ranked slices plus
   `Unknown` last, muted). `RankedBars` for overlapping ones (top five genres, each a share of genre-tagged
   books, track always 100%); the caption names the denominator.
-- `ColumnChart`: books per year (peak `Lead`, others `Second`, zero a `Fifth` stub) and the half-star
+- `ColumnChart`: books per year (peak `Lead`, others `Second`, zero a `Fifth` stub); pages per month (the
+  peak `Lead` and the only column with a value, the next two `Second`, other non-zero `Third`, zero or
+  future `Fifth`; ties go to the earliest month; labels on every third column); and the half-star
   ratings histogram (whole stars `Lead`, halves `Fourth`, labels under whole stars only).
 - "Who you read" BIPOC / LGBTQ+ bars: fixed Yes / No / Unknown, a zero bucket draws nothing, caption
   "Yes 2 · No 5 · Unknown 23 · of 30 authors". The persisted "Hide untagged authors" `ToggleRow`

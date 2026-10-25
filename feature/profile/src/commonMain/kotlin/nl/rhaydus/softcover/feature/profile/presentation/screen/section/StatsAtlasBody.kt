@@ -53,6 +53,17 @@ internal fun ColumnScope.StatsAtlasBody(
 
     Spacer(modifier = Modifier.height(Spacing.section))
 
+    Column(modifier = jumper.chapter(AtlasChapter.SEASONS_AND_RECORDS)) {
+        SeasonsAndRecordsChapter(
+            header = state.monthlyPagesHeader,
+            chart = state.monthlyPagesChart,
+            monthSetKey = state.monthlyPagesMonthSetKey,
+            hasMonthlyPages = state.hasMonthlyPages,
+        )
+    }
+
+    Spacer(modifier = Modifier.height(Spacing.section))
+
     Column(modifier = jumper.chapter(AtlasChapter.TEMPORARY)) {
         TemporaryChapter(
             state = state,

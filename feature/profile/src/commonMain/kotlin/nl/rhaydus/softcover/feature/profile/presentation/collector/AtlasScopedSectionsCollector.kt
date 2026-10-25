@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.resolve
+import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiModel
@@ -20,6 +21,10 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownU
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreScopeCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
@@ -33,7 +38,7 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * The only writer of every section that answers for the selected scope: the opening tiles, genres, who
- * you read and how you score, with their framing copy and the scope line.
+ * you read, how you score and pages by month, with their framing copy and the scope line.
  *
  * It stays idle until the history has landed, because the history decides the default scope and
  * observing the placeholder one first would flash the wrong numbers. Switching scope re-observes the
@@ -62,15 +67,19 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
 
     private fun StatsAtlasDependencies.observeSections(scope: StatsScope): Flow<ScopedSections> {
         return observeCurrentDateUseCase().flatMapLatest { today ->
+            val range = scope.resolve(today)
+
             combine(
-                observeReadingStatsUseCase(scope.resolve(today))
+                observeReadingStatsUseCase(range)
                     .untilBackfilled(observeAuthorDemographicsBackfilledUseCase),
+                observeMonthlyPagesReadUseCase(range),
                 getHideUntaggedAuthorsAsFlowUseCase(),
-            ) { stats, hideUntaggedAuthors ->
+            ) { stats, monthlyPages, hideUntaggedAuthors ->
                 ScopedSections(
                     scope = scope,
                     today = today,
                     stats = stats,
+                    monthlyPages = monthlyPages,
                     hideUntaggedAuthors = hideUntaggedAuthors,
                 )
             }
@@ -81,6 +90,7 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val scope = sections.scope
         val hideUntaggedAuthors = sections.hideUntaggedAuthors
         val stats = sections.stats
+        val monthlyPages = sections.monthlyPages
         val genres = stats?.genres
         val ratings = stats?.ratings
         val booksRead = stats?.booksRead ?: 0
@@ -149,6 +159,18 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                 booksRead = booksRead,
                 scope = scope,
             ),
+            monthlyPagesHeader = monthlyPagesHeader(
+                monthlyPages = monthlyPages,
+                scope = scope,
+                today = sections.today,
+            ),
+            monthlyPagesChart = monthlyPagesChartUiModel(
+                monthlyPages = monthlyPages,
+                scope = scope,
+                today = sections.today,
+            ),
+            hasMonthlyPages = hasMonthlyPages(monthlyPages),
+            monthlyPagesMonthSetKey = monthlyPagesMonthSetKey(monthlyPages),
         )
     }
 
@@ -161,6 +183,7 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val scope: StatsScope,
         val today: LocalDate,
         val stats: ReadingStats?,
+        val monthlyPages: MonthlyPages,
         val hideUntaggedAuthors: Boolean,
     )
 }

@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
+import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
@@ -26,6 +27,11 @@ internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
     genres = previewGenres(),
     ratings = previewRatings(),
     authorDemographics = previewAuthorDemographics(),
+)
+
+/** The pages-read-per-month half of the same sample reader, summed across every year. */
+internal fun profileMonthlyPagesPreview(): MonthlyPages = MonthlyPages.AcrossYears(
+    pages = listOf(9_200, 7_800, 14_800, 11_400, 8_600, 6_900, 12_100, 13_500, 10_300, 12_700, 9_800, 11_300),
 )
 
 /** The [ReadingHistory] half of the same sample reader. */

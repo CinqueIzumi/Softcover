@@ -33,6 +33,10 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownU
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreScopeCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPagesChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPagesHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
@@ -111,6 +115,12 @@ internal data class StatsAtlasUiState(
     val ratingsAverage: StatNumberUiModel = ratingsAverageUiModel(null),
 
     val ratingsEmptyCaption: String = ratingsEmptyCaption(booksRead = 0),
+
+    /** Mapped by `AtlasScopedSectionsCollector`; [monthlyPagesMonthSetKey] is null while loading. */
+    val monthlyPagesHeader: SectionHeaderUiModel = loadingMonthlyPagesHeader(),
+    val monthlyPagesChart: ColumnChartUiModel = loadingMonthlyPagesChartUiModel(),
+    val hasMonthlyPages: Boolean = hasMonthlyPages(null),
+    val monthlyPagesMonthSetKey: String? = monthlyPagesMonthSetKey(null),
 
     /** Mapped by `AtlasScopedSectionsCollector` off [readingStats]. */
     val opening: AtlasOpeningUiModel = atlasOpeningUiModel(null),

@@ -38,20 +38,18 @@ class AtlasContentsMapperTest {
         }
 
         @Test
-        fun `numbers rows by position as two digits starting at 01`() {
+        fun `gives each chapter its fixed number`() {
             // ----- Arrange -----
-            val expected = AtlasChapter.entries.indices.map { index ->
-                (index + 1).toString().padStart(
-                    length = 2,
-                    padChar = '0',
-                )
-            }
+            val expected = mapOf(
+                AtlasChapter.SEASONS_AND_RECORDS to "02",
+                AtlasChapter.TEMPORARY to "99",
+            )
 
             // ----- Act -----
             val result = atlasContentsRows()
 
             // ----- Assert -----
-            result.map { it.number } shouldBe expected
+            result.associate { it.chapter to it.number } shouldBe expected
         }
     }
 
@@ -67,6 +65,21 @@ class AtlasContentsMapperTest {
 
             // ----- Assert -----
             headers.map { it.eyebrow } shouldBe rows.map { "${it.number} · ${it.title}" }
+        }
+
+        @Test
+        fun `titles each chapter eyebrow with its number and name`() {
+            // ----- Arrange -----
+            val chapters = AtlasChapter.entries
+
+            // ----- Act -----
+            val result = chapters.map { atlasChapterEyebrow(it) }
+
+            // ----- Assert -----
+            result shouldBe listOf(
+                "02 · Seasons and records",
+                "99 · Temporary",
+            )
         }
     }
 }

@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.chart.ColumnChart
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
-import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
@@ -50,50 +49,36 @@ internal fun RatingsHistogramSection(
 
         Spacer(modifier = Modifier.height(Spacing.md))
 
-        Column(modifier = Modifier.animateScopeContentSize()) {
-            if (totalRatings == 0 && isLoading.not()) {
+        ScopeEmptySwitch(
+            isEmpty = totalRatings == 0 && isLoading.not(),
+            empty = {
                 FadeThroughText(
                     text = emptyCaption,
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-            } else {
-                RatingsAverageRow(
-                    average = average,
-                    averageLabel = averageLabel,
-                    isLoading = isLoading,
-                )
+            },
+            filled = {
+                Column {
+                    RatingsAverageRow(
+                        average = average,
+                        averageLabel = averageLabel,
+                        isLoading = isLoading,
+                    )
 
-                Spacer(modifier = Modifier.height(Spacing.xl))
+                    Spacer(modifier = Modifier.height(Spacing.xl))
 
-                ColumnChart(model = chart)
+                    ColumnChart(model = chart)
 
-                Spacer(modifier = Modifier.height(Spacing.md))
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
-                FadeThroughText(
-                    text = caption,
-                    style = MaterialTheme.editorialTypography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
-
-/**
- * [SectionHeader] crossfaded between scopes. The lambda reads [modifier] so the compiler emits it as a
- * capturing instance; a capture-free one would be hoisted into a public `ComposableSingletons` class
- * whose signature leaks [SectionHeaderUiModel] into this module's ABI.
- */
-@Composable
-private fun ScopedSectionHeader(
-    header: SectionHeaderUiModel,
-    modifier: Modifier = Modifier,
-) {
-    ScopeCrossfade(target = header) { scopedHeader ->
-        SectionHeader(
-            model = scopedHeader,
-            modifier = modifier,
+                    FadeThroughText(
+                        text = caption,
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
         )
     }
 }

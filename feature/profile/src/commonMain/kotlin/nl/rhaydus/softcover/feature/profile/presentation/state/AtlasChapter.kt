@@ -1,6 +1,13 @@
 package nl.rhaydus.softcover.feature.profile.presentation.state
 
-/** The Atlas chapters in reading order; the contents list and the chapter headers number from it. */
+/**
+ * The Atlas chapters in reading order, which the contents list follows. The chapter numbers are fixed
+ * per chapter rather than positional: they follow the design's chapter list, and the other chapters land
+ * with later 3.3.0 issues.
+ */
 internal enum class AtlasChapter {
+    SEASONS_AND_RECORDS,
+
+    /** Numbered 99, because it goes when the real chapters replace it. */
     TEMPORARY,
 }

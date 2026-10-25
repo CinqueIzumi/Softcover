@@ -27,19 +27,24 @@ internal fun atlasContentsRows(): ImmutableList<AtlasContentsRowUiModel> =
         }
         .toImmutableList()
 
-/** Numbered from the same order as [atlasContentsRows], so a chapter and its contents row agree. */
+/** Numbered like [atlasContentsRows], so a chapter and its contents row agree. */
 internal fun atlasChapterHeader(chapter: AtlasChapter): SectionHeaderUiModel =
-    SectionHeaderUiModel.Section(eyebrow = "${chapter.number()} · ${chapter.title()}")
+    SectionHeaderUiModel.Section(eyebrow = atlasChapterEyebrow(chapter))
 
-private fun AtlasChapter.number(): String = (ordinal + 1).toString().padStart(
-    length = 2,
-    padChar = '0',
-)
+/** The "02 · Seasons and records" line a chapter's header opens with, so a header and its contents row agree. */
+internal fun atlasChapterEyebrow(chapter: AtlasChapter): String = "${chapter.number()} · ${chapter.title()}"
+
+private fun AtlasChapter.number(): String = when (this) {
+    AtlasChapter.SEASONS_AND_RECORDS -> "02"
+    AtlasChapter.TEMPORARY -> "99"
+}
 
 private fun AtlasChapter.title(): String = when (this) {
+    AtlasChapter.SEASONS_AND_RECORDS -> "Seasons and records"
     AtlasChapter.TEMPORARY -> "Temporary"
 }
 
 private fun AtlasChapter.caption(): String = when (this) {
+    AtlasChapter.SEASONS_AND_RECORDS -> "Pages by month, authors and records."
     AtlasChapter.TEMPORARY -> "Year by year, genres, authors, ratings and favourites."
 }
