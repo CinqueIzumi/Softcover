@@ -35,10 +35,12 @@ import nl.rhaydus.softcover.core.book.baseBook
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.FakeUserTagsLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
 import nl.rhaydus.softcover.core.book.data.sync.OfflineUserBookSyncImpl
 import nl.rhaydus.softcover.core.book.data.sync.UserBookCacheGate
 import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
+import nl.rhaydus.softcover.core.book.domain.model.UserBooksSnapshot
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
@@ -110,7 +112,10 @@ class BooksRepositoryImplTest {
         repository = BooksRepositoryImpl(
             booksRemoteDataSource = booksRemoteDataSource,
             booksLocalDataSource = booksLocalDataSource,
-            userBookCacheGate = UserBookCacheGate(booksLocalDataSource = booksLocalDataSource),
+            userBookCacheGate = UserBookCacheGate(
+                booksLocalDataSource = booksLocalDataSource,
+                userTagsLocalDataSource = FakeUserTagsLocalDataSource(),
+            ),
             networkAvailability = networkAvailability,
             offlineSync = offlineSync,
             applicationScope = ApplicationScope(scope = testScope),
@@ -123,6 +128,11 @@ class BooksRepositoryImplTest {
     fun tearDown() {
         testScope.cancel()
     }
+
+    private fun snapshotOf(books: List<Book>): UserBooksSnapshot = UserBooksSnapshot(
+        books = books,
+        userTagsByBookId = emptyMap(),
+    )
 
     private fun stubBook(userBookId: Int?): Book = mockk(relaxed = true) {
         every {
@@ -168,7 +178,7 @@ class BooksRepositoryImplTest {
                     userId = userId,
                     statusIds = any(),
                 )
-            } returns fetchedBooks
+            } returns snapshotOf(fetchedBooks)
 
             coEvery {
                 booksLocalDataSource.getAllUserBookIds()
@@ -180,7 +190,7 @@ class BooksRepositoryImplTest {
                     selectBooksToCache = any(),
                 )
             } coAnswers {
-                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val fetched = firstArg<suspend () -> UserBooksSnapshot>().invoke().books
                 val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
                 booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
                 fetched
@@ -206,7 +216,7 @@ class BooksRepositoryImplTest {
                     userId = userId,
                     statusIds = any(),
                 )
-            } returns listOf(stubBook(userBookId = 42))
+            } returns snapshotOf(listOf(stubBook(userBookId = 42)))
 
             coEvery {
                 booksLocalDataSource.getAllUserBookIds()
@@ -249,7 +259,7 @@ class BooksRepositoryImplTest {
                         UserBookStatus.DID_NOT_FINISH.code,
                     ),
                 )
-            } returns emptyList()
+            } returns snapshotOf(emptyList())
 
             coEvery {
                 booksLocalDataSource.getAllUserBookIds()
@@ -261,7 +271,7 @@ class BooksRepositoryImplTest {
                     selectBooksToCache = any(),
                 )
             } coAnswers {
-                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val fetched = firstArg<suspend () -> UserBooksSnapshot>().invoke().books
                 val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
                 booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
                 fetched
@@ -302,7 +312,7 @@ class BooksRepositoryImplTest {
                     statusIds = setOf(status.code),
                     userBookIds = setOf(10, staleLocalId),
                 )
-            } returns listOf(fetchedBook)
+            } returns snapshotOf(listOf(fetchedBook))
 
             coEvery {
                 booksLocalDataSource.getUserBookIdsByStatuses(statuses = setOf(status))
@@ -314,7 +324,7 @@ class BooksRepositoryImplTest {
                     selectBooksToCache = any(),
                 )
             } coAnswers {
-                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val fetched = firstArg<suspend () -> UserBooksSnapshot>().invoke().books
                 val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
                 booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
                 fetched
@@ -360,7 +370,7 @@ class BooksRepositoryImplTest {
                     statusIds = any(),
                     userBookIds = any(),
                 )
-            } returns emptyList()
+            } returns snapshotOf(emptyList())
 
             coEvery {
                 offlineSync.drainReconcileAndCache(
@@ -368,7 +378,7 @@ class BooksRepositoryImplTest {
                     selectBooksToCache = any(),
                 )
             } coAnswers {
-                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val fetched = firstArg<suspend () -> UserBooksSnapshot>().invoke().books
                 val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
                 booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
                 fetched
@@ -420,7 +430,7 @@ class BooksRepositoryImplTest {
                     statusIds = setOf(status.code),
                     userBookIds = setOf(movedUserBookId),
                 )
-            } returns listOf(movedBook)
+            } returns snapshotOf(listOf(movedBook))
 
             coEvery {
                 offlineSync.drainReconcileAndCache(
@@ -428,7 +438,7 @@ class BooksRepositoryImplTest {
                     selectBooksToCache = any(),
                 )
             } coAnswers {
-                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val fetched = firstArg<suspend () -> UserBooksSnapshot>().invoke().books
                 val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
                 booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
                 fetched
@@ -474,7 +484,7 @@ class BooksRepositoryImplTest {
                     statusIds = setOf(status.code),
                     userBookIds = setOf(keptId, deletedId),
                 )
-            } returns listOf(stubBook(userBookId = keptId))
+            } returns snapshotOf(listOf(stubBook(userBookId = keptId)))
 
             coEvery {
                 offlineSync.drainReconcileAndCache(
@@ -482,7 +492,7 @@ class BooksRepositoryImplTest {
                     selectBooksToCache = any(),
                 )
             } coAnswers {
-                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val fetched = firstArg<suspend () -> UserBooksSnapshot>().invoke().books
                 val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
                 booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
                 fetched
@@ -518,7 +528,7 @@ class BooksRepositoryImplTest {
                     statusIds = any(),
                     userBookIds = any(),
                 )
-            } returns emptyList()
+            } returns snapshotOf(emptyList())
 
             coEvery {
                 offlineSync.drainReconcileAndCache(
@@ -526,7 +536,7 @@ class BooksRepositoryImplTest {
                     selectBooksToCache = any(),
                 )
             } coAnswers {
-                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val fetched = firstArg<suspend () -> UserBooksSnapshot>().invoke().books
                 val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
                 booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
                 fetched
@@ -569,7 +579,7 @@ class BooksRepositoryImplTest {
                     statusIds = any(),
                     userBookIds = any(),
                 )
-            } returns listOf(stubBook(userBookId = keptId))
+            } returns snapshotOf(listOf(stubBook(userBookId = keptId)))
 
             coEvery {
                 offlineSync.drainReconcileAndCache(
@@ -577,7 +587,7 @@ class BooksRepositoryImplTest {
                     selectBooksToCache = any(),
                 )
             } coAnswers {
-                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val fetched = firstArg<suspend () -> UserBooksSnapshot>().invoke().books
                 val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
                 booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
                 fetched
@@ -614,7 +624,7 @@ class BooksRepositoryImplTest {
                     statusIds = any(),
                     userBookIds = any(),
                 )
-            } returns listOf(stubBook(userBookId = 1))
+            } returns snapshotOf(listOf(stubBook(userBookId = 1)))
 
             coEvery {
                 offlineSync.drainReconcileAndCache(
@@ -622,7 +632,7 @@ class BooksRepositoryImplTest {
                     selectBooksToCache = any(),
                 )
             } coAnswers {
-                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val fetched = firstArg<suspend () -> UserBooksSnapshot>().invoke().books
                 val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
                 booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
                 fetched
@@ -665,7 +675,7 @@ class BooksRepositoryImplTest {
                 )
             } coAnswers {
                 gate.await()
-                emptyList()
+                snapshotOf(emptyList())
             }
 
             coEvery {
@@ -678,7 +688,7 @@ class BooksRepositoryImplTest {
                     selectBooksToCache = any(),
                 )
             } coAnswers {
-                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val fetched = firstArg<suspend () -> UserBooksSnapshot>().invoke().books
                 val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
                 booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
                 fetched
@@ -717,7 +727,7 @@ class BooksRepositoryImplTest {
                     userId = userId,
                     statusIds = any(),
                 )
-            } returns emptyList()
+            } returns snapshotOf(emptyList())
 
             coEvery {
                 booksLocalDataSource.getAllUserBookIds()
@@ -729,7 +739,7 @@ class BooksRepositoryImplTest {
                     selectBooksToCache = any(),
                 )
             } coAnswers {
-                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val fetched = firstArg<suspend () -> UserBooksSnapshot>().invoke().books
                 val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
                 booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
                 fetched
@@ -857,7 +867,7 @@ class BooksRepositoryImplTest {
                     statusIds = any(),
                     userBookIds = any(),
                 )
-            } returns listOf(stubBook(userBookId = fetchedUserBookId))
+            } returns snapshotOf(listOf(stubBook(userBookId = fetchedUserBookId)))
 
             coEvery {
                 offlineSync.drainReconcileAndCache(
@@ -865,7 +875,7 @@ class BooksRepositoryImplTest {
                     selectBooksToCache = any(),
                 )
             } coAnswers {
-                val fetched = firstArg<suspend () -> List<Book>>().invoke()
+                val fetched = firstArg<suspend () -> UserBooksSnapshot>().invoke().books
                 val selectBooksToCache = secondArg<suspend (List<Book>) -> List<Book>>()
                 booksLocalDataSource.cacheBooks(books = selectBooksToCache(fetched))
                 fetched
@@ -7278,7 +7288,10 @@ class BooksRepositoryImplTest {
 
         @BeforeEach
         fun setUpRacingRepository() {
-            gate = UserBookCacheGate(booksLocalDataSource = booksLocalDataSource)
+            gate = UserBookCacheGate(
+                booksLocalDataSource = booksLocalDataSource,
+                userTagsLocalDataSource = FakeUserTagsLocalDataSource(),
+            )
 
             racingRepository = BooksRepositoryImpl(
                 booksRemoteDataSource = booksRemoteDataSource,
@@ -7351,7 +7364,7 @@ class BooksRepositoryImplTest {
                 )
             } coAnswers {
                 localUserBookIds += createdDuringFetch
-                listOf(fetchedBook)
+                snapshotOf(listOf(fetchedBook))
             }
 
             // ----- Act -----
@@ -7415,7 +7428,7 @@ class BooksRepositoryImplTest {
                     userBookIds = any(),
                 )
             } coAnswers {
-                fetchGate.await()
+                snapshotOf(fetchGate.await())
             }
 
             val update = async {

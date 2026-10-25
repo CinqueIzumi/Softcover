@@ -320,7 +320,8 @@ internal data class BookDetailUiState(
 
     val chooseListsSheet: ChooseListsUiModel? = null,
 
-    val userTags: UserTagsLoad = UserTagsLoad.Loading,
+    val userTags: ImmutableList<UserTag> = persistentListOf(),
+    val userTagsLoad: UserTagsLoad = UserTagsLoad.Loading,
     val showTagEditorSheet: Boolean = false,
     val tagEditorCategory: TagCategory = TagCategory.TAG,
     val tagEditorInput: String = "",

@@ -20,19 +20,15 @@ import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemot
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyLocalDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyLocalDataSourceImpl
-import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSource
-import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSourceImpl
+import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyRemoteDataSource
+import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.repository.BookReviewsRepositoryImpl
 import nl.rhaydus.softcover.feature.book_detail.data.repository.UserTagVocabularyRepositoryImpl
-import nl.rhaydus.softcover.feature.book_detail.data.repository.UserTagsRepositoryImpl
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.BookReviewsRepository
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagVocabularyRepository
-import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagsRepository
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
-import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.RecordAppliedTagsUseCase
-import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ActiveSessionBookCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDeadlineCollector
@@ -154,23 +150,8 @@ val bookDetailModule = module {
         GetTopBookReviewsUseCase(bookReviewsRepository = get())
     }
 
-    single<UserTagsRemoteDataSource> {
-        UserTagsRemoteDataSourceImpl(apolloClient = get())
-    }
-
-    single<UserTagsRepository> {
-        UserTagsRepositoryImpl(userTagsRemoteDataSource = get())
-    }
-
-    factory {
-        GetUserTagsUseCase(
-            userTagsRepository = get(),
-            getUserIdUseCase = get(),
-        )
-    }
-
-    factory {
-        SaveUserTagsUseCase(userTagsRepository = get())
+    single<UserTagVocabularyRemoteDataSource> {
+        UserTagVocabularyRemoteDataSourceImpl(apolloClient = get())
     }
 
     single { get<SoftcoverDatabase>().userTagVocabularyDao() }
@@ -242,7 +223,8 @@ val bookDetailModule = module {
             refreshReadingJournalHistoryUseCase = get(),
             updateBookReviewUseCase = get(),
             observeUserProfileDataUseCase = get(),
-            getUserTagsUseCase = get(),
+            observeUserTagsForBookUseCase = get(),
+            refreshUserTagsForBookUseCase = get(),
             saveUserTagsUseCase = get(),
             progressSheetSlice = get(),
             observeUserTagVocabularyUseCase = get(),

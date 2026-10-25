@@ -6,12 +6,18 @@ import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.ProgressHistoryLocalDataSourceImpl
+import nl.rhaydus.softcover.core.book.data.datasource.UserTagsLocalDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.UserTagsLocalDataSourceImpl
+import nl.rhaydus.softcover.core.book.data.datasource.UserTagsRemoteDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.UserTagsRemoteDataSourceImpl
 import nl.rhaydus.softcover.core.book.data.repository.BooksRepositoryImpl
 import nl.rhaydus.softcover.core.book.data.repository.SimilarBooksRepositoryImpl
+import nl.rhaydus.softcover.core.book.data.repository.UserTagsRepositoryImpl
 import nl.rhaydus.softcover.core.book.data.sync.OfflineUserBookSyncImpl
 import nl.rhaydus.softcover.core.book.data.sync.UserBookCacheGate
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.book.domain.repository.SimilarBooksRepository
+import nl.rhaydus.softcover.core.book.domain.repository.UserTagsRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.CommitBookRemovalUseCase
@@ -41,6 +47,8 @@ import nl.rhaydus.softcover.core.book.domain.usecase.ObserveTrendingFetchedAtUse
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUpcomingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUpcomingFetchedAtUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserTagsByBookUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserTagsForBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
@@ -48,10 +56,12 @@ import nl.rhaydus.softcover.core.book.domain.usecase.RefreshRecentBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshSystemVibeBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RefreshUpcomingBooksUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshUserTagsForBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResumeIfPausedUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.StageBookRemovalUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UndoBookRemovalUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
@@ -60,6 +70,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.dao.BookDao
+import nl.rhaydus.softcover.core.database.dao.BookUserTagDao
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
@@ -84,7 +95,49 @@ val bookModule = module {
     }
 
     single {
-        UserBookCacheGate(booksLocalDataSource = get())
+        UserBookCacheGate(
+            booksLocalDataSource = get(),
+            userTagsLocalDataSource = get(),
+        )
+    }
+
+    single<BookUserTagDao> {
+        get<SoftcoverDatabase>().bookUserTagDao()
+    }
+
+    single<UserTagsRemoteDataSource> {
+        UserTagsRemoteDataSourceImpl(apolloClient = get())
+    }
+
+    single<UserTagsLocalDataSource> {
+        UserTagsLocalDataSourceImpl(dao = get())
+    }
+
+    single<UserTagsRepository> {
+        UserTagsRepositoryImpl(
+            userTagsRemoteDataSource = get(),
+            userTagsLocalDataSource = get(),
+            userBookCacheGate = get(),
+        )
+    }
+
+    factory {
+        ObserveUserTagsByBookUseCase(userTagsRepository = get())
+    }
+
+    factory {
+        ObserveUserTagsForBookUseCase(userTagsRepository = get())
+    }
+
+    factory {
+        RefreshUserTagsForBookUseCase(
+            userTagsRepository = get(),
+            getUserIdUseCase = get(),
+        )
+    }
+
+    factory {
+        SaveUserTagsUseCase(userTagsRepository = get())
     }
 
     single<OfflineUserBookSync> {

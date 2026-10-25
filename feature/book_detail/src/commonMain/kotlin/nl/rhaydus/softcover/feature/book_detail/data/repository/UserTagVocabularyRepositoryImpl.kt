@@ -4,13 +4,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyLocalDataSource
-import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSource
+import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.mapper.toUserTag
 import nl.rhaydus.softcover.feature.book_detail.data.mapper.toVocabularyEntity
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagVocabularyRepository
 
 internal class UserTagVocabularyRepositoryImpl(
-    private val remoteDataSource: UserTagsRemoteDataSource,
+    private val remoteDataSource: UserTagVocabularyRemoteDataSource,
     private val localDataSource: UserTagVocabularyLocalDataSource,
 ) : UserTagVocabularyRepository {
     override fun observe(userId: Int): Flow<List<UserTag>> =

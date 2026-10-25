@@ -61,6 +61,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.SystemVibe
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
@@ -1796,42 +1797,13 @@ class BooksRemoteDataSourceImplTest {
             // ----- Arrange -----
             val userId = 1
             val expectedBook = stubBook()
-            val queryData = mockk<GetUserBooksQuery.Data>()
-            val meEntry = mockk<GetUserBooksQuery.Data.Me>()
-            val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
-
-            coEvery {
-                apolloClient.safeQuery(
-                    query = any<GetUserBooksQuery>(),
-                    fetchPolicy = any(),
-                )
-            } returns queryData
-
-            every {
-                queryData.me
-            } returns listOf(meEntry)
-
-            every {
-                meEntry.user_books
-            } returns listOf(userBookEntry)
-
-            every {
-                userBookEntry.id
-            } returns 1
-
-            every {
-                meEntry.total
-            } returns totalOf(count = 1)
-
-            every {
-                userBookEntry.toBook()
-            } returns expectedBook
+            stubUserBookEntries(entries = listOf(stubUserBookEntry(book = expectedBook)))
 
             // ----- Act -----
             val result = dataSource.initializeBooks(userId = userId)
 
             // ----- Assert -----
-            result shouldBe listOf(expectedBook)
+            result.books shouldBe listOf(expectedBook)
         }
 
         @Test
@@ -1860,42 +1832,13 @@ class BooksRemoteDataSourceImplTest {
         fun `filters out entries whose toBook maps to null`() = runTest {
             // ----- Arrange -----
             val userId = 1
-            val queryData = mockk<GetUserBooksQuery.Data>()
-            val meEntry = mockk<GetUserBooksQuery.Data.Me>()
-            val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
-
-            coEvery {
-                apolloClient.safeQuery(
-                    query = any<GetUserBooksQuery>(),
-                    fetchPolicy = any(),
-                )
-            } returns queryData
-
-            every {
-                queryData.me
-            } returns listOf(meEntry)
-
-            every {
-                meEntry.user_books
-            } returns listOf(userBookEntry)
-
-            every {
-                userBookEntry.id
-            } returns 1
-
-            every {
-                meEntry.total
-            } returns totalOf(count = 1)
-
-            every {
-                userBookEntry.toBook()
-            } returns null
+            stubUserBookEntries(entries = listOf(stubUserBookEntry(book = null)))
 
             // ----- Act -----
             val result = dataSource.initializeBooks(userId = userId)
 
             // ----- Assert -----
-            result shouldBe emptyList()
+            result.books shouldBe emptyList()
         }
 
         @Test
@@ -1906,42 +1849,13 @@ class BooksRemoteDataSourceImplTest {
                 id = 10,
                 canonicalId = null,
             )
-            val queryData = mockk<GetUserBooksQuery.Data>()
-            val meEntry = mockk<GetUserBooksQuery.Data.Me>()
-            val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
-
-            coEvery {
-                apolloClient.safeQuery(
-                    query = any<GetUserBooksQuery>(),
-                    fetchPolicy = any(),
-                )
-            } returns queryData
-
-            every {
-                queryData.me
-            } returns listOf(meEntry)
-
-            every {
-                meEntry.user_books
-            } returns listOf(userBookEntry)
-
-            every {
-                userBookEntry.id
-            } returns 1
-
-            every {
-                meEntry.total
-            } returns totalOf(count = 1)
-
-            every {
-                userBookEntry.toBook()
-            } returns bookWithoutCanonical
+            stubUserBookEntries(entries = listOf(stubUserBookEntry(book = bookWithoutCanonical)))
 
             // ----- Act -----
             val result = dataSource.initializeBooks(userId = userId)
 
             // ----- Assert -----
-            result shouldBe listOf(bookWithoutCanonical)
+            result.books shouldBe listOf(bookWithoutCanonical)
             coVerify(exactly = 0) {
                 apolloClient.safeQuery(
                     query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
@@ -1983,7 +1897,7 @@ class BooksRemoteDataSourceImplTest {
             stubCanonicalBooksQuery(canonicalBooks = listOf(canonical))
 
             // ----- Act -----
-            val result = dataSource.initializeBooks(userId = 1).single()
+            val result = dataSource.initializeBooks(userId = 1).books.single()
 
             // ----- Assert -----
             result.id shouldBe canonical.id
@@ -2034,7 +1948,7 @@ class BooksRemoteDataSourceImplTest {
             val result = dataSource.initializeBooks(userId = 1)
 
             // ----- Assert -----
-            result.map { it.id } shouldBe listOf(20, 11, 20, 30)
+            result.books.map { it.id } shouldBe listOf(20, 11, 20, 30)
             coVerify(exactly = 1) {
                 apolloClient.safeQuery(
                     query = match<Query<GetBooksByIdsQuery.Data>> {
@@ -2060,7 +1974,180 @@ class BooksRemoteDataSourceImplTest {
             val result = dataSource.initializeBooks(userId = 1)
 
             // ----- Assert -----
-            result shouldBe listOf(book)
+            result.books shouldBe listOf(book)
+        }
+
+        @Test
+        fun `maps each book's taggings by category, name and spoiler flag, keyed by book id`() = runTest {
+            // ----- Arrange -----
+            val first = baseBook.copy(id = 10)
+            val second = baseBook.copy(id = 11)
+
+            stubUserBookEntries(
+                entries = listOf(
+                    stubUserBookEntry(
+                        book = first,
+                        taggings = listOf(
+                            tagging(
+                                name = "Cozy",
+                                category = "Mood",
+                            ),
+                            tagging(
+                                name = "Violence",
+                                category = "Content Warning",
+                                spoiler = true,
+                            ),
+                        ),
+                    ),
+                    stubUserBookEntry(
+                        book = second,
+                        taggings = listOf(
+                            tagging(
+                                name = "Fantasy",
+                                category = "Genre",
+                            ),
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1)
+
+            // ----- Assert -----
+            result.userTagsByBookId.keys shouldBe setOf(10, 11)
+            result.userTagsByBookId[10].shouldNotBeNull().map { tag ->
+                Triple(
+                    tag.category,
+                    tag.name,
+                    tag.spoiler,
+                )
+            } shouldBe listOf(
+                Triple(
+                    TagCategory.MOOD,
+                    "Cozy",
+                    false,
+                ),
+                Triple(
+                    TagCategory.CONTENT_WARNING,
+                    "Violence",
+                    true,
+                ),
+            )
+            result.userTagsByBookId[11].shouldNotBeNull().map { tag ->
+                Triple(
+                    tag.category,
+                    tag.name,
+                    tag.spoiler,
+                )
+            } shouldBe listOf(
+                Triple(
+                    TagCategory.GENRE,
+                    "Fantasy",
+                    false,
+                ),
+            )
+        }
+
+        @Test
+        fun `maps a book without taggings to an empty list`() = runTest {
+            // ----- Arrange -----
+            val untagged = baseBook.copy(id = 10)
+
+            stubUserBooksQuery(userBooks = listOf(untagged))
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1)
+
+            // ----- Assert -----
+            result.userTagsByBookId shouldBe mapOf(10 to emptyList())
+        }
+
+        @Test
+        fun `a merged book takes the canonical book's taggings under the canonical id`() = runTest {
+            // ----- Arrange -----
+            val original = baseBook.copy(
+                id = 10,
+                canonicalId = 20,
+            )
+            val canonical = baseBook.copy(id = 20)
+
+            stubUserBookEntries(
+                entries = listOf(
+                    stubUserBookEntry(
+                        book = original,
+                        taggings = listOf(
+                            tagging(
+                                name = "Own copy tag",
+                                category = "Tag",
+                            ),
+                        ),
+                        canonicalTaggings = listOf(
+                            canonicalTagging(
+                                name = "Slow burn",
+                                category = "Mood",
+                                spoiler = true,
+                            ),
+                        ),
+                    ),
+                ),
+            )
+            stubCanonicalBooksQuery(canonicalBooks = listOf(canonical))
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1)
+
+            // ----- Assert -----
+            result.userTagsByBookId.keys shouldBe setOf(20)
+            result.userTagsByBookId[20].shouldNotBeNull().map { tag ->
+                Triple(
+                    tag.category,
+                    tag.name,
+                    tag.spoiler,
+                )
+            } shouldBe listOf(
+                Triple(
+                    TagCategory.MOOD,
+                    "Slow burn",
+                    true,
+                ),
+            )
+        }
+
+        @Test
+        fun `a book whose canonical is missing from the response keeps its own taggings`() = runTest {
+            // ----- Arrange -----
+            val book = baseBook.copy(
+                id = 10,
+                canonicalId = 20,
+            )
+
+            stubUserBookEntries(
+                entries = listOf(
+                    stubUserBookEntry(
+                        book = book,
+                        taggings = listOf(
+                            tagging(
+                                name = "Own copy tag",
+                                category = "Tag",
+                            ),
+                        ),
+                        canonicalTaggings = listOf(
+                            canonicalTagging(
+                                name = "Slow burn",
+                                category = "Mood",
+                            ),
+                        ),
+                    ),
+                ),
+            )
+            stubCanonicalBooksQuery(canonicalBooks = emptyList())
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1)
+
+            // ----- Assert -----
+            result.userTagsByBookId[10].shouldNotBeNull().map { it.name } shouldBe listOf("Own copy tag")
         }
 
         @Test
@@ -2090,7 +2177,7 @@ class BooksRemoteDataSourceImplTest {
             val result = dataSource.initializeBooks(userId = 1)
 
             // ----- Assert -----
-            result.map { it.userBook?.id } shouldBe (1..120).toList()
+            result.books.map { it.userBook?.id } shouldBe (1..120).toList()
         }
 
         @Test
@@ -2142,7 +2229,7 @@ class BooksRemoteDataSourceImplTest {
             val result = dataSource.initializeBooks(userId = 1)
 
             // ----- Assert -----
-            result.map { it.userBook?.id } shouldBe (1..60).toList()
+            result.books.map { it.userBook?.id } shouldBe (1..60).toList()
         }
 
         private fun userBooksWithIds(ids: IntRange): List<Book> = ids.map { id ->
@@ -2159,14 +2246,10 @@ class BooksRemoteDataSourceImplTest {
             total: Int,
         ) {
             val entries = books.map { book ->
-                mockk<GetUserBooksQuery.Data.Me.User_book> {
+                stubUserBookEntry(book = book).also { entry ->
                     every {
-                        id
+                        entry.id
                     } returns checkNotNull(book.userBook?.id)
-
-                    every {
-                        toBook()
-                    } returns book
                 }
             }
             val meEntry = mockk<GetUserBooksQuery.Data.Me> {
@@ -2193,19 +2276,44 @@ class BooksRemoteDataSourceImplTest {
         }
 
         private fun stubUserBooksQuery(userBooks: List<Book>) {
+            stubUserBookEntries(entries = userBooks.map { stubUserBookEntry(book = it) })
+        }
+
+        private fun stubUserBookEntry(
+            book: Book?,
+            taggings: List<GetUserBooksQuery.Data.Me.User_book.Book.Tagging> = emptyList(),
+            canonicalTaggings: List<GetUserBooksQuery.Data.Me.User_book.Book.Canonical.Tagging>? = null,
+        ): GetUserBooksQuery.Data.Me.User_book {
+            val canonicalEntry: GetUserBooksQuery.Data.Me.User_book.Book.Canonical? = canonicalTaggings?.let {
+                GetUserBooksQuery.Data.Me.User_book.Book.Canonical(
+                    __typename = "books",
+                    id = book?.canonicalId ?: 0,
+                    taggings = it,
+                )
+            }
+
+            val bookEntry = mockk<GetUserBooksQuery.Data.Me.User_book.Book> {
+                every {
+                    this@mockk.taggings
+                } returns taggings
+                every {
+                    canonical
+                } returns canonicalEntry
+            }
+
+            return mockk {
+                every {
+                    toBook()
+                } returns book
+                every {
+                    this@mockk.book
+                } returns bookEntry
+            }
+        }
+
+        private fun stubUserBookEntries(entries: List<GetUserBooksQuery.Data.Me.User_book>) {
             val queryData = mockk<GetUserBooksQuery.Data>()
             val meEntry = mockk<GetUserBooksQuery.Data.Me>()
-            val entries = userBooks.mapIndexed { index, book ->
-                mockk<GetUserBooksQuery.Data.Me.User_book> {
-                    every {
-                        id
-                    } returns index
-
-                    every {
-                        toBook()
-                    } returns book
-                }
-            }
 
             coEvery {
                 apolloClient.safeQuery(
@@ -2218,13 +2326,19 @@ class BooksRemoteDataSourceImplTest {
                 queryData.me
             } returns listOf(meEntry)
 
+            entries.forEachIndexed { index, entry ->
+                every {
+                    entry.id
+                } returns index
+            }
+
             every {
                 meEntry.user_books
             } returns entries
 
             every {
                 meEntry.total
-            } returns totalOf(count = userBooks.size)
+            } returns totalOf(count = entries.size)
         }
 
         private fun totalOf(count: Int): GetUserBooksQuery.Data.Me.Total = GetUserBooksQuery.Data.Me.Total(
@@ -2234,6 +2348,47 @@ class BooksRemoteDataSourceImplTest {
                 count = count,
             ),
         )
+
+        private fun tagging(
+            name: String,
+            category: String?,
+            spoiler: Boolean = false,
+        ): GetUserBooksQuery.Data.Me.User_book.Book.Tagging = GetUserBooksQuery.Data.Me.User_book.Book.Tagging(
+            __typename = "taggings",
+            id = 1L,
+            spoiler = spoiler,
+            tag = GetUserBooksQuery.Data.Me.User_book.Book.Tagging.Tag(
+                __typename = "tags",
+                id = 1L,
+                tag = name,
+                count = 9,
+                tag_category = GetUserBooksQuery.Data.Me.User_book.Book.Tagging.Tag.Tag_category(
+                    __typename = "tag_categories",
+                    category = category,
+                ),
+            ),
+        )
+
+        private fun canonicalTagging(
+            name: String,
+            category: String?,
+            spoiler: Boolean = false,
+        ): GetUserBooksQuery.Data.Me.User_book.Book.Canonical.Tagging =
+            GetUserBooksQuery.Data.Me.User_book.Book.Canonical.Tagging(
+                __typename = "taggings",
+                id = 1L,
+                spoiler = spoiler,
+                tag = GetUserBooksQuery.Data.Me.User_book.Book.Canonical.Tagging.Tag(
+                    __typename = "tags",
+                    id = 1L,
+                    tag = name,
+                    count = 9,
+                    tag_category = GetUserBooksQuery.Data.Me.User_book.Book.Canonical.Tagging.Tag.Tag_category(
+                        __typename = "tag_categories",
+                        category = category,
+                    ),
+                ),
+            )
 
         private fun stubCanonicalBooksQuery(canonicalBooks: List<Book>) {
             val queryData = mockk<GetBooksByIdsQuery.Data>()

@@ -21,6 +21,8 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.FakeUserTagsLocalDataSource
+import nl.rhaydus.softcover.core.book.domain.model.UserBooksSnapshot
 import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
@@ -52,7 +54,10 @@ class OfflineUserBookSyncImplTest {
         userBookWriteQueue = mockk(relaxed = true)
         userBookWriteDrainer = mockk(relaxed = true)
         booksLocalDataSource = mockk(relaxed = true)
-        userBookCacheGate = UserBookCacheGate(booksLocalDataSource = booksLocalDataSource)
+        userBookCacheGate = UserBookCacheGate(
+            booksLocalDataSource = booksLocalDataSource,
+            userTagsLocalDataSource = FakeUserTagsLocalDataSource(),
+        )
         networkAvailability = mockk()
         isOnline = MutableStateFlow(true)
 
@@ -81,7 +86,12 @@ class OfflineUserBookSyncImplTest {
     private suspend fun OfflineUserBookSyncImpl.drainAndReconcile(
         fetchFromServer: suspend () -> List<Book>,
     ): List<Book> = drainReconcileAndCache(
-        fetchFromServer = fetchFromServer,
+        fetchFromServer = {
+            UserBooksSnapshot(
+                books = fetchFromServer(),
+                userTagsByBookId = emptyMap(),
+            )
+        },
         selectBooksToCache = { it },
     )
 

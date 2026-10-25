@@ -12,7 +12,7 @@ import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyLocalDataSource
-import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSource
+import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.mapper.toUserTag
 import nl.rhaydus.softcover.feature.book_detail.data.mapper.toVocabularyEntity
 import org.junit.jupiter.api.BeforeEach
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UserTagVocabularyRepositoryImplTest {
-    private lateinit var remoteDataSource: UserTagsRemoteDataSource
+    private lateinit var remoteDataSource: UserTagVocabularyRemoteDataSource
     private lateinit var localDataSource: UserTagVocabularyLocalDataSource
     private lateinit var repository: UserTagVocabularyRepositoryImpl
 

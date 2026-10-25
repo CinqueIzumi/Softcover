@@ -5,8 +5,11 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.UserTagsLocalDataSource
+import nl.rhaydus.softcover.core.book.domain.model.UserBooksSnapshot
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.UserTag
 
 /**
  * The path for the repository's optimistic, confirmation, removal and refresh writes of user-book rows;
@@ -25,16 +28,21 @@ import nl.rhaydus.softcover.core.domain.model.Book
  */
 internal class UserBookCacheGate(
     private val booksLocalDataSource: BooksLocalDataSource,
+    private val userTagsLocalDataSource: UserTagsLocalDataSource,
 ) {
-    /** Writes and removals seen since one refresh began; read and mutated only while the gate mutex is held. */
+    /** Writes, removals and tag writes seen since one refresh began; read and mutated only while the gate mutex is held. */
     class RefreshWindow {
         private val mutableWrites: MutableMap<Int, Set<PendingUserBookWriteKind>> = mutableMapOf()
 
         private val mutableRemovedUserBookIds: MutableSet<Int> = mutableSetOf()
 
+        private val mutableTaggedBookIds: MutableSet<Int> = mutableSetOf()
+
         val writes: Map<Int, Set<PendingUserBookWriteKind>> get() = mutableWrites
 
         val removedUserBookIds: Set<Int> get() = mutableRemovedUserBookIds
+
+        val taggedBookIds: Set<Int> get() = mutableTaggedBookIds
 
         internal fun record(
             userBookId: Int,
@@ -49,6 +57,10 @@ internal class UserBookCacheGate(
 
         internal fun clearRemoved(userBookId: Int) {
             mutableRemovedUserBookIds.remove(userBookId)
+        }
+
+        internal fun markTagged(bookId: Int) {
+            mutableTaggedBookIds += bookId
         }
     }
 
@@ -112,13 +124,86 @@ internal class UserBookCacheGate(
         }
     }
 
+    /** Replaces a book's own tags, marking the book tagged in every open window so a stale fetch skips it. */
+    suspend fun writeUserTags(
+        bookId: Int,
+        rows: List<UserTag>,
+    ) {
+        mutex.withLock {
+            userTagsLocalDataSource.replaceForBook(
+                bookId = bookId,
+                tags = rows,
+            )
+
+            openWindows.forEach { window -> window.markTagged(bookId) }
+        }
+    }
+
+    /**
+     * Puts [previous] back for a failed save, but only while the book still holds exactly [written]; any
+     * other content came from a later write or refresh and must stay.
+     */
+    suspend fun restoreUserTags(
+        bookId: Int,
+        written: List<UserTag>,
+        previous: List<UserTag>,
+    ) {
+        mutex.withLock {
+            val current: Set<UserTag> = userTagsLocalDataSource
+                .getForBook(bookId = bookId)
+                .toSet()
+
+            if (current != written.withoutCounts()) return@withLock
+
+            userTagsLocalDataSource.replaceForBook(
+                bookId = bookId,
+                tags = previous,
+            )
+
+            openWindows.forEach { window -> window.markTagged(bookId) }
+        }
+    }
+
+    /**
+     * Opens a window, runs [fetch] outside the mutex, then under it stores the result unless
+     * [writeUserTags] touched the book meanwhile, since the fetch would overwrite that newer write.
+     */
+    suspend fun refreshUserTags(
+        bookId: Int,
+        fetch: suspend () -> List<UserTag>,
+    ) {
+        val window = RefreshWindow()
+
+        mutex.withLock { openWindows += window }
+
+        try {
+            val fetched: List<UserTag> = fetch()
+
+            mutex.withLock {
+                if (bookId in window.taggedBookIds) return@withLock
+
+                userTagsLocalDataSource.replaceForBook(
+                    bookId = bookId,
+                    tags = fetched,
+                )
+            }
+        } finally {
+            withContext(NonCancellable) {
+                mutex.withLock { openWindows -= window }
+            }
+        }
+    }
+
+    private fun List<UserTag>.withoutCounts(): Set<UserTag> = map { it.copy(count = 0) }.toSet()
+
     /**
      * Opens a window, runs [fetch] outside the mutex, then under the mutex lets [reconcile] fold the
-     * window's records into the fetched books and saves what [selectToCache] keeps of the result.
+     * window's records into the fetched books and saves what [selectToCache] keeps of the result, along
+     * with the snapshot's tags for those books except any tagged during the fetch.
      * The window closes on every exit, including failure and cancellation. Returns the reconciled books.
      */
     suspend fun refresh(
-        fetch: suspend () -> List<Book>,
+        fetch: suspend () -> UserBooksSnapshot,
         reconcile: suspend (fetched: List<Book>, window: RefreshWindow) -> List<Book>,
         selectToCache: suspend (List<Book>) -> List<Book>,
     ): List<Book> {
@@ -127,15 +212,21 @@ internal class UserBookCacheGate(
         mutex.withLock { openWindows += window }
 
         try {
-            val fetched: List<Book> = fetch()
+            val fetched: UserBooksSnapshot = fetch()
 
             return mutex.withLock {
                 val reconciled: List<Book> = reconcile(
-                    fetched,
+                    fetched.books,
                     window,
                 )
+                val toCache: List<Book> = selectToCache(reconciled)
 
-                booksLocalDataSource.cacheBooks(books = selectToCache(reconciled))
+                booksLocalDataSource.cacheBooks(books = toCache)
+
+                userTagsLocalDataSource.replaceForBooks(
+                    bookIds = toCache.map { it.id }.toSet() - window.taggedBookIds,
+                    tagsByBookId = fetched.userTagsByBookId,
+                )
 
                 reconciled
             }

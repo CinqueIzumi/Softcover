@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.book.domain.sync
 
+import nl.rhaydus.softcover.core.book.domain.model.UserBooksSnapshot
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -47,10 +48,11 @@ interface OfflineUserBookSync {
      * only the fields that write owns, covering read-after-write lag without clobbering any field the
      * server changed underneath; books removed locally during the fetch are dropped. Merge and save run
      * serialised against other local user-book writes, so [selectBooksToCache] must not write user books.
+     * The snapshot's tags are stored for the cached books, except books tagged during the fetch.
      * Returns the reconciled books.
      */
     suspend fun drainReconcileAndCache(
-        fetchFromServer: suspend () -> List<Book>,
+        fetchFromServer: suspend () -> UserBooksSnapshot,
         selectBooksToCache: suspend (List<Book>) -> List<Book>,
     ): List<Book>
 }

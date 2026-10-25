@@ -10,9 +10,12 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveShelvedBookIdsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserTagsForBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshUserTagsForBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
@@ -41,10 +44,8 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUs
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
-import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.RecordAppliedTagsUseCase
-import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
@@ -87,7 +88,8 @@ internal class BookDetailScreenScreenModel(
     private val refreshReadingJournalHistoryUseCase: RefreshReadingJournalHistoryUseCase,
     private val updateBookReviewUseCase: UpdateBookReviewUseCase,
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
-    private val getUserTagsUseCase: GetUserTagsUseCase,
+    private val observeUserTagsForBookUseCase: ObserveUserTagsForBookUseCase,
+    private val refreshUserTagsForBookUseCase: RefreshUserTagsForBookUseCase,
     private val saveUserTagsUseCase: SaveUserTagsUseCase,
     private val progressSheetSlice: ProgressSheetSlice,
     private val observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase,
@@ -145,7 +147,8 @@ internal class BookDetailScreenScreenModel(
         refreshReadingJournalHistoryUseCase = refreshReadingJournalHistoryUseCase,
         updateBookReviewUseCase = updateBookReviewUseCase,
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
-        getUserTagsUseCase = getUserTagsUseCase,
+        observeUserTagsForBookUseCase = observeUserTagsForBookUseCase,
+        refreshUserTagsForBookUseCase = refreshUserTagsForBookUseCase,
         saveUserTagsUseCase = saveUserTagsUseCase,
         progressSheetSlice = progressSheetSlice,
         observeUserTagVocabularyUseCase = observeUserTagVocabularyUseCase,

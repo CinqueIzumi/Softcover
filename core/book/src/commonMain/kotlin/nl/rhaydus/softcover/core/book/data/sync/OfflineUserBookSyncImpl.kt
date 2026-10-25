@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
+import nl.rhaydus.softcover.core.book.domain.model.UserBooksSnapshot
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
@@ -255,7 +256,7 @@ internal class OfflineUserBookSyncImpl(
     }
 
     override suspend fun drainReconcileAndCache(
-        fetchFromServer: suspend () -> List<Book>,
+        fetchFromServer: suspend () -> UserBooksSnapshot,
         selectBooksToCache: suspend (List<Book>) -> List<Book>,
     ): List<Book> {
         val drained: Map<Int, Set<PendingUserBookWriteKind>> = userBookWriteDrainer.drain()

@@ -54,6 +54,7 @@ import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
 import nl.rhaydus.softcover.core.book.data.mapper.toDatePeriod
 import nl.rhaydus.softcover.core.book.data.mapper.toMonths
 import nl.rhaydus.softcover.core.book.data.mapper.toTrendingDuration
+import nl.rhaydus.softcover.core.book.data.mapper.toUserTag
 import nl.rhaydus.softcover.core.book.data.mapper.toVibeSlug
 import nl.rhaydus.softcover.core.book.data.mapper.toVibeType
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
@@ -61,6 +62,7 @@ import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.model.SimilarBookCandidate
 import nl.rhaydus.softcover.core.book.domain.model.SimilarBookSeed
 import nl.rhaydus.softcover.core.book.domain.model.UnfinishedRead
+import nl.rhaydus.softcover.core.book.domain.model.UserBooksSnapshot
 import nl.rhaydus.softcover.core.database.mapper.reviewSlateFromDocument
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -74,6 +76,7 @@ import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.domain.util.localDateOf
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.network.helper.CountedPage
@@ -162,7 +165,7 @@ interface BooksRemoteDataSource {
         userId: Int,
         statusIds: Set<Int>? = null,
         userBookIds: Set<Int> = emptySet(),
-    ): List<Book>
+    ): UserBooksSnapshot
 
     /** Returns the subset of [ids] the signed-in user still has as user books; throws if the lookup fails. */
     suspend fun fetchExistingUserBookIds(ids: List<Int>): Set<Int>
@@ -707,13 +710,14 @@ internal class BooksRemoteDataSourceImpl(
         userId: Int,
         statusIds: Set<Int>?,
         userBookIds: Set<Int>,
-    ): List<Book> = withContext(appDispatchers.io) {
+    ): UserBooksSnapshot = withContext(appDispatchers.io) {
         val userBooks = fetchAllPagesCounted(
             pageSize = USER_BOOKS_PAGE_SIZE,
             key = { it.id },
         ) { limit, offset ->
             val result = apolloClient.safeQuery(
                 query = GetUserBooksQuery(
+                    userId = userId,
                     statusIds = Optional.presentIfNotNull(statusIds?.toList()),
                     userBookIds = Optional.present(userBookIds.toList()),
                     limit = limit,
@@ -730,9 +734,33 @@ internal class BooksRemoteDataSourceImpl(
             )
         }
 
-        val mapped = userBooks.mapNotNull { it.userBookFragment()?.toBook() }
+        val mapped: List<Pair<Book, GetUserBooksQuery.Data.Me.User_book>> = userBooks.mapNotNull { userBook ->
+            userBook.userBookFragment()?.toBook()?.let { it to userBook }
+        }
 
-        resolveCanonicalMerges(books = mapped)
+        val merged: List<Book> = resolveCanonicalMerges(books = mapped.map { it.first })
+
+        UserBooksSnapshot(
+            books = merged,
+            userTagsByBookId = merged
+                .zip(mapped)
+                .associate { (mergedBook, original) ->
+                    val (originalBook, userBook) = original
+
+                    mergedBook.id to userBook.userTagsFor(wasMerged = mergedBook.id != originalBook.id)
+                },
+        )
+    }
+
+    // A merged book shows the canonical book's tags, which is where the user's tagging lives after a merge.
+    private fun GetUserBooksQuery.Data.Me.User_book.userTagsFor(wasMerged: Boolean): List<UserTag> {
+        val canonical = book.canonical
+
+        return if (wasMerged && canonical != null) {
+            canonical.taggings.map { it.toUserTag(tag = it.tag) }
+        } else {
+            book.taggings.map { it.toUserTag(tag = it.tag) }
+        }
     }
 
     override suspend fun fetchExistingUserBookIds(ids: List<Int>): Set<Int> =

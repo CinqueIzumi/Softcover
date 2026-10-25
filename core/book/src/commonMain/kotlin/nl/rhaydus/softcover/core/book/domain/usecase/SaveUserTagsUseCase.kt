@@ -1,8 +1,8 @@
-package nl.rhaydus.softcover.feature.book_detail.domain.usecase
+package nl.rhaydus.softcover.core.book.domain.usecase
 
 import nl.rhaydus.common.runCatchingLogged
+import nl.rhaydus.softcover.core.book.domain.repository.UserTagsRepository
 import nl.rhaydus.softcover.core.domain.model.UserTag
-import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagsRepository
 
 /**
  * Persists the user's complete tag set for a book. The backend upsert replaces the whole set, so
@@ -15,7 +15,7 @@ class SaveUserTagsUseCase(
         bookId: Int,
         tags: List<UserTag>,
     ): Result<List<UserTag>> = runCatchingLogged {
-        userTagsRepository.saveTags(
+        userTagsRepository.save(
             bookId = bookId,
             tags = tags,
         )
