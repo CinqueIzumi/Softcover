@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.profile.data.repository.ProfileRepositoryImpl
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 import nl.rhaydus.softcover.core.profile.domain.usecase.MarkReadingActivityUseCaseImpl
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
@@ -112,6 +113,14 @@ val profileModule = module {
         ObserveReadingStatsUseCase(
             getReadUserBooksUseCase = get(),
             observeUserTagsByBookUseCase = get(),
+            appDispatchers = get(),
+        )
+    }
+
+    factory {
+        ObserveHourlyPagesReadUseCase(
+            observeProgressUpdatesUseCase = get(),
+            timeZone = get(),
             appDispatchers = get(),
         )
     }

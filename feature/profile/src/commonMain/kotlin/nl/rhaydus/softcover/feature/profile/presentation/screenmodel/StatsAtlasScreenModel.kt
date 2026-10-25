@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
@@ -22,6 +23,7 @@ internal class StatsAtlasScreenModel(
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     private val observeReadingStatsUseCase: ObserveReadingStatsUseCase,
     private val observeMonthlyPagesReadUseCase: ObserveMonthlyPagesReadUseCase,
+    private val observeHourlyPagesReadUseCase: ObserveHourlyPagesReadUseCase,
     private val observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
     private val observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase,
     private val getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
@@ -45,6 +47,7 @@ internal class StatsAtlasScreenModel(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
         observeReadingStatsUseCase = observeReadingStatsUseCase,
         observeMonthlyPagesReadUseCase = observeMonthlyPagesReadUseCase,
+        observeHourlyPagesReadUseCase = observeHourlyPagesReadUseCase,
         observeReadingHistoryUseCase = observeReadingHistoryUseCase,
         observeAuthorDemographicsBackfilledUseCase = observeAuthorDemographicsBackfilledUseCase,
         getHideUntaggedAuthorsAsFlowUseCase = getHideUntaggedAuthorsAsFlowUseCase,

@@ -8,10 +8,13 @@ sealed interface StatsRange {
     data class Bounded(
         val start: LocalDate,
         val endInclusive: LocalDate,
-    ) : StatsRange {
-        operator fun contains(date: LocalDate): Boolean = date >= start && date <= endInclusive
-    }
+    ) : StatsRange
 
     /** Covers every book, including those with no finish date. */
     data object Unbounded : StatsRange
+
+    operator fun contains(date: LocalDate): Boolean = when (this) {
+        Unbounded -> true
+        is Bounded -> date >= start && date <= endInclusive
+    }
 }

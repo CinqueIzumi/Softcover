@@ -19,7 +19,7 @@
   leaves the row falls back to All time.
 - Beneath the row, a quiet italic line names the dates: "Showing 2026", "Showing 24 September to today"
   (the year is added only when the window starts in an earlier one), "Showing every year".
-- The scope moves the opening tiles, the pages-by-month chart, the genre ranking, "Who you read"
+- The scope moves the opening tiles, the time-of-day chart, the pages-by-month chart, the genre ranking, "Who you read"
   (Hide untagged authors still applies) and "How you score". "Recently loved" and the year chart ignore
   it. Values animate between scopes; labels cross-fade, and reduced motion swaps them in place.
 - A scope with no finished books says so in each section's framing sentence ("No finished books in the last
@@ -30,10 +30,25 @@
   `Second`, zero years a `Fifth` stub) and the caption names that year and its count for the Books / Pages
   metric; a rolling window or All time lights the busiest year.
 - Contents rows (two-digit number, title, caption, chevron) scroll the page to their chapter's top. A
-  chapter opens with an eyebrow "02 · Title". Numbers are fixed per chapter (02, 03 and 99), following the
+  chapter opens with an eyebrow "02 · Title". Numbers are fixed per chapter (01, 02, 03 and 99), following the
   design's chapter list rather than position, so row and header always agree; the other chapters land with
   later 3.3.0 issues.
 - A stat the app holds no data source for yet (reading days) is left out, never a 0.
+- Chapter 01, "A year at a glance" (caption "Every day you read, and when."), opens with the header "Day by
+  day" ("Each square is a day of 2026. Darker days held more pages. Tap one to see what you read."; the year
+  is the selected calendar year, else today's), which describes the day grid that lands ahead of its first
+  section. That section, "When you read", is a scoped `ColumnChart` of the share of pages read in each
+  three-hour block of the day, with the footnote "Each column covers three hours from the time shown.". Pages
+  are the logged progress updates summed by local hour; a finished book's unlogged remainder has no time of
+  day and is left out. Eight blocks start at 06 and are labelled "06" to "03". The busiest block is `Lead`,
+  the next two `Second`, other non-zero `Third`, empty `Fifth`; ties go to the earliest block from 06. Every
+  column shows its whole-percent share ("0%" for an empty block, "<1%" for a share that rounds to 0, ">99%"
+  for one that rounds to 100 while another block has pages) and reads out as "21:00 to 00:00, 38% of your
+  pages". The caption names the busiest block ("You read most after 21:00."; "early, before 09:00", "in the
+  morning", "around midday", "in the afternoon", "in the early evening", "after 21:00", "after midnight", "in
+  the small hours"). With no pages it drops the chart and says "No pages read in 2026." for a scope, or
+  "Update your progress and your hours start to show." for All time. The labels never change, so the chart
+  does not cross-fade.
 - Chapter 02, "Seasons and records" (caption "Pages by month, authors and records."), opens with a
   headline naming the busiest month ("A March to remember", "An April to remember"; "A year in pages" when
   nothing was read) over a scoped pages-by-month `ColumnChart`. Pages are the pages read in each month,
@@ -71,7 +86,8 @@
   description names what the shares count.
 - `ColumnChart`: books per year (peak `Lead`, others `Second`, zero a `Fifth` stub); pages per month (the
   peak `Lead` and the only column with a value, the next two `Second`, other non-zero `Third`, zero or
-  future `Fifth`; ties go to the earliest month; labels on every third column); and the half-star
+  future `Fifth`; ties go to the earliest month; labels on every third column); time of day (eight
+  three-hour blocks, every column labelled and valued with its share); and the half-star
   ratings histogram (whole stars `Lead`, halves `Fourth`, labels under whole stars only).
 - "Who you read" BIPOC / LGBTQ+ bars: fixed Yes / No / Unknown, a zero bucket draws nothing, caption
   "Yes 2 · No 5 · Unknown 23 · of 30 authors". The persisted "Hide untagged authors" `ToggleRow`

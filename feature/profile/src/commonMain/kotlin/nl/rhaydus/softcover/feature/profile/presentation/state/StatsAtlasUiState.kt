@@ -23,6 +23,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_K
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_LINE
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.COLLAPSED_GENRE_COUNT
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_STAND_IN_CARDS
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.TIME_OF_DAY_FOOTNOTE
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.TIME_OF_DAY_TITLE
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasChapterHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsRows
@@ -35,9 +37,13 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownU
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingGenreHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPagesHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingTimeOfDayCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingTimeOfDayChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingYearAtAGlanceHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
@@ -124,6 +130,14 @@ internal data class StatsAtlasUiState(
     val ratingsAverage: StatNumberUiModel = ratingsAverageUiModel(null),
 
     val ratingsEmptyCaption: String = ratingsEmptyCaption(booksRead = 0),
+
+    /** Mapped by `AtlasScopedSectionsCollector`. */
+    val yearAtAGlanceHeader: SectionHeaderUiModel = loadingYearAtAGlanceHeader(),
+    val timeOfDayTitle: String = TIME_OF_DAY_TITLE,
+    val timeOfDayCaption: String = loadingTimeOfDayCaption(),
+    val timeOfDayChart: ColumnChartUiModel = loadingTimeOfDayChartUiModel(),
+    val timeOfDayFootnote: String = TIME_OF_DAY_FOOTNOTE,
+    val hasTimeOfDayPages: Boolean = hasTimeOfDayPages(null),
 
     /** Mapped by `AtlasScopedSectionsCollector`; [monthlyPagesMonthSetKey] is null while loading. */
     val monthlyPagesHeader: SectionHeaderUiModel = loadingMonthlyPagesHeader(),

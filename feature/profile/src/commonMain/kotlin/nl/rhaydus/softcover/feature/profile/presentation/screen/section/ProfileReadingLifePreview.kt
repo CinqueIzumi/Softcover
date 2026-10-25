@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
+import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
@@ -32,6 +33,16 @@ internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
 /** The pages-read-per-month half of the same sample reader, summed across every year. */
 internal fun profileMonthlyPagesPreview(): MonthlyPages = MonthlyPages.AcrossYears(
     pages = listOf(9_200, 7_800, 14_800, 11_400, 8_600, 6_900, 12_100, 13_500, 10_300, 12_700, 9_800, 11_300),
+)
+
+/** The pages-read-per-hour half of the same sample reader, mostly in the evening. */
+internal fun profileHourlyPagesPreview(): HourlyPages = HourlyPages(
+    pages = listOf(
+        2_400, 700, 100, 0, 0, 200,
+        900, 1_300, 1_100, 1_700, 1_900, 2_300,
+        2_000, 1_800, 1_400, 2_100, 2_800, 4_600,
+        6_900, 9_800, 14_200, 17_500, 12_100, 6_300,
+    ),
 )
 
 /** The [ReadingHistory] half of the same sample reader. */

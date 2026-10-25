@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.resolve
+import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
@@ -20,6 +21,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreak
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
@@ -29,6 +31,9 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiMo
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsHistogramHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHeader
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
@@ -36,9 +41,9 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * The only writer of every section that answers for the selected scope: the opening tiles, who you
- * read, how you score and pages by month, with their framing copy and the scope line. For genres it
- * writes only whether any exist and the empty sentence; `GenreRankingCollector` maps the rest off the
- * stats written here.
+ * read, how you score, pages by month and pages by time of day, with their framing copy and the scope
+ * line. For genres it writes only whether any exist and the empty sentence; `GenreRankingCollector` maps
+ * the rest off the stats written here.
  *
  * It stays idle until the history has landed, because the history decides the default scope and
  * observing the placeholder one first would flash the wrong numbers. Switching scope re-observes the
@@ -73,13 +78,15 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                 observeReadingStatsUseCase(range)
                     .untilBackfilled(observeAuthorDemographicsBackfilledUseCase),
                 observeMonthlyPagesReadUseCase(range),
+                observeHourlyPagesReadUseCase(range),
                 getHideUntaggedAuthorsAsFlowUseCase(),
-            ) { stats, monthlyPages, hideUntaggedAuthors ->
+            ) { stats, monthlyPages, hourlyPages, hideUntaggedAuthors ->
                 ScopedSections(
                     scope = scope,
                     today = today,
                     stats = stats,
                     monthlyPages = monthlyPages,
+                    hourlyPages = hourlyPages,
                     hideUntaggedAuthors = hideUntaggedAuthors,
                 )
             }
@@ -91,6 +98,7 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val hideUntaggedAuthors = sections.hideUntaggedAuthors
         val stats = sections.stats
         val monthlyPages = sections.monthlyPages
+        val hourlyPages = sections.hourlyPages
         val genres = stats?.genres
         val ratings = stats?.ratings
         val booksRead = stats?.booksRead ?: 0
@@ -153,6 +161,16 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                 booksRead = booksRead,
                 scope = scope,
             ),
+            yearAtAGlanceHeader = yearAtAGlanceHeader(
+                scope = scope,
+                today = sections.today,
+            ),
+            timeOfDayCaption = timeOfDayCaption(
+                hourly = hourlyPages,
+                scope = scope,
+            ),
+            timeOfDayChart = timeOfDayChartUiModel(hourlyPages),
+            hasTimeOfDayPages = hasTimeOfDayPages(hourlyPages),
             monthlyPagesHeader = monthlyPagesHeader(
                 monthlyPages = monthlyPages,
                 scope = scope,
@@ -178,6 +196,7 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val today: LocalDate,
         val stats: ReadingStats?,
         val monthlyPages: MonthlyPages,
+        val hourlyPages: HourlyPages,
         val hideUntaggedAuthors: Boolean,
     )
 }

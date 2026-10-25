@@ -55,6 +55,19 @@ internal fun ColumnScope.StatsAtlasBody(
 
     Spacer(modifier = Modifier.height(Spacing.section))
 
+    Column(modifier = jumper.chapter(AtlasChapter.YEAR_AT_A_GLANCE)) {
+        YearAtAGlanceChapter(
+            header = state.yearAtAGlanceHeader,
+            title = state.timeOfDayTitle,
+            caption = state.timeOfDayCaption,
+            chart = state.timeOfDayChart,
+            footnote = state.timeOfDayFootnote,
+            hasTimeOfDayPages = state.hasTimeOfDayPages,
+        )
+    }
+
+    Spacer(modifier = Modifier.height(Spacing.section))
+
     Column(modifier = jumper.chapter(AtlasChapter.SEASONS_AND_RECORDS)) {
         SeasonsAndRecordsChapter(
             header = state.monthlyPagesHeader,

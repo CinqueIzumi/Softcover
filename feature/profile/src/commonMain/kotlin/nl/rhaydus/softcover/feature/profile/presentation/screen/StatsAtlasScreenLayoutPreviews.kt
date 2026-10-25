@@ -14,9 +14,14 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingShowLess
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingShowMore
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHeader
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileHourlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileMonthlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingHistoryPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingStatsPreview
@@ -25,6 +30,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 private val PreviewReadingStats = profileReadingStatsPreview()
 private val PreviewReadingHistory = profileReadingHistoryPreview()
 private val PreviewMonthlyPages = profileMonthlyPagesPreview()
+private val PreviewHourlyPages = profileHourlyPagesPreview()
 
 private val PreviewToday = LocalDate(
     year = 2026,
@@ -50,6 +56,16 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
         yearsRead = PreviewReadingHistory.yearsRead,
         selectedKey = ALL_TIME_SCOPE_KEY,
     ),
+    yearAtAGlanceHeader = yearAtAGlanceHeader(
+        scope = StatsScope.AllTime,
+        today = PreviewToday,
+    ),
+    timeOfDayCaption = timeOfDayCaption(
+        hourly = PreviewHourlyPages,
+        scope = StatsScope.AllTime,
+    ),
+    timeOfDayChart = timeOfDayChartUiModel(PreviewHourlyPages),
+    hasTimeOfDayPages = hasTimeOfDayPages(PreviewHourlyPages),
     monthlyPagesHeader = monthlyPagesHeader(
         monthlyPages = PreviewMonthlyPages,
         scope = StatsScope.AllTime,

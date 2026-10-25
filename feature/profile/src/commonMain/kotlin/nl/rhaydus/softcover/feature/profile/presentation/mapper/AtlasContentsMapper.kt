@@ -35,18 +35,21 @@ internal fun atlasChapterHeader(chapter: AtlasChapter): SectionHeaderUiModel =
 internal fun atlasChapterEyebrow(chapter: AtlasChapter): String = "${chapter.number()} · ${chapter.title()}"
 
 private fun AtlasChapter.number(): String = when (this) {
+    AtlasChapter.YEAR_AT_A_GLANCE -> "01"
     AtlasChapter.SEASONS_AND_RECORDS -> "02"
     AtlasChapter.GENRES_AND_HOW_YOU_READ -> "03"
     AtlasChapter.TEMPORARY -> "99"
 }
 
 private fun AtlasChapter.title(): String = when (this) {
+    AtlasChapter.YEAR_AT_A_GLANCE -> "A year at a glance"
     AtlasChapter.SEASONS_AND_RECORDS -> "Seasons and records"
     AtlasChapter.GENRES_AND_HOW_YOU_READ -> "Genres and how you read"
     AtlasChapter.TEMPORARY -> "Temporary"
 }
 
 private fun AtlasChapter.caption(): String = when (this) {
+    AtlasChapter.YEAR_AT_A_GLANCE -> "Every day you read, and when."
     AtlasChapter.SEASONS_AND_RECORDS -> "Pages by month, authors and records."
     AtlasChapter.GENRES_AND_HOW_YOU_READ -> "What you reach for, and how it reads."
     AtlasChapter.TEMPORARY -> "Year by year, authors, ratings and favourites."

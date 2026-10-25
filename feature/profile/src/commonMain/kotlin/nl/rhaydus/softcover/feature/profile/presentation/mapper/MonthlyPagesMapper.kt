@@ -25,7 +25,6 @@ private val VOWEL_MONTHS = setOf(4, 8, 10)
 private const val LOADING_COLUMN_COUNT = 12
 private const val LOADING_COLUMN_FRACTION = 0.5f
 private const val LABEL_STRIDE = 3
-private const val SECOND_TONE_COUNT = 2
 private const val ALL_TIME_MONTH_SET_KEY = "1/12"
 
 /** One chart column, whichever shape the stats carry. [year] is null across every year. */
@@ -98,7 +97,7 @@ internal fun monthlyPagesChartUiModel(
         today = today,
     )
     val peak = columns.maxOfOrNull { it.pages } ?: 0
-    val tones = columns.tones()
+    val tones = rankedColumnTones(columns.map { it.pages })
 
     return ColumnChartUiModel(
         columns = columns
@@ -165,23 +164,6 @@ private fun MonthlyPages.monthColumns(
     }
 }
 
-// Ties go to the earliest column, so the order is stable between scopes.
-private fun List<MonthColumn>.tones(): List<ChartTone> {
-    val ranked = withIndex()
-        .filter { it.value.pages > 0 }
-        .sortedWith(compareByDescending<IndexedValue<MonthColumn>> { it.value.pages }.thenBy { it.index })
-        .map { it.index }
-
-    return indices.map { index ->
-        when (ranked.indexOf(index)) {
-            -1 -> ChartTone.Fifth
-            0 -> ChartTone.Lead
-            in 1..SECOND_TONE_COUNT -> ChartTone.Second
-            else -> ChartTone.Third
-        }
-    }
-}
-
 private fun MonthColumn.shortName(): String = MonthNames.ENGLISH_ABBREVIATED.names[month - 1]
 
 private fun MonthColumn.fullName(): String = MonthNames.ENGLISH_FULL.names[month - 1]
@@ -199,10 +181,7 @@ private fun MonthColumn.readout(): String {
 
 private fun pagesPhrase(pages: Int): String = if (pages == 1) "1 page" else "${formatGroupedNumber(pages)} pages"
 
-private fun List<MonthColumn>.busiest(): MonthColumn? = withIndex()
-    .filter { it.value.pages > 0 }
-    .minWithOrNull(compareByDescending<IndexedValue<MonthColumn>> { it.value.pages }.thenBy { it.index })
-    ?.value
+private fun List<MonthColumn>.busiest(): MonthColumn? = peakIndex(map { it.pages })?.let { get(it) }
 
 private fun MonthColumn.headline(): String {
     val article = if (month in VOWEL_MONTHS) "An" else "A"

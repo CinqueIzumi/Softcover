@@ -116,6 +116,16 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.At
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.AtlasSubhead(title: kotlin.String, caption: kotlin.String, isLoading: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - title: STABLE (String is immutable)
+    - caption: STABLE (String is immutable)
+    - isLoading: STABLE (primitive type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.AuthorRepresentationSection(genderBreakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, bipocBreakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, lgbtqBreakdown: nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakdownUiModel, scopeCaption: kotlin.String, emptyCaption: kotlin.String, hideUntaggedAuthorsToggle: nl.rhaydus.softcover.core.component.control.ToggleRowUiModel<kotlin.String>, canHideUntaggedAuthors: kotlin.Boolean, isLoading: kotlin.Boolean, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, onHideUntaggedAuthorsChange: kotlin.Function1<kotlin.Boolean, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
@@ -327,6 +337,19 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Tr
   restartable: true
   params:
     - tint: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearAtAGlanceChapter(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, title: kotlin.String, caption: kotlin.String, chart: nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel, footnote: kotlin.String, hasTimeOfDayPages: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - header: STABLE (marked @Stable or @Immutable)
+    - title: STABLE (String is immutable)
+    - caption: STABLE (String is immutable)
+    - chart: STABLE (marked @Stable or @Immutable)
+    - footnote: STABLE (String is immutable)
+    - hasTimeOfDayPages: STABLE (primitive type)
+    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearColumnHistorySection(chart: nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel, caption: kotlin.String, isLoading: kotlin.Boolean, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, metricToggle: nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel<nl.rhaydus.softcover.feature.profile.presentation.state.YearMetric>, onMetricSelected: kotlin.Function1<nl.rhaydus.softcover.feature.profile.presentation.state.YearMetric, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit

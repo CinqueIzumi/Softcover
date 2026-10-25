@@ -29,11 +29,13 @@ import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
+import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
@@ -51,6 +53,7 @@ import org.junit.jupiter.api.Test
 class AtlasScopedSectionsCollectorTest {
     private lateinit var observeReadingStatsUseCase: ObserveReadingStatsUseCase
     private lateinit var observeMonthlyPagesReadUseCase: ObserveMonthlyPagesReadUseCase
+    private lateinit var observeHourlyPagesReadUseCase: ObserveHourlyPagesReadUseCase
     private lateinit var observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase
     private lateinit var getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase
     private lateinit var backfilledFlow: MutableStateFlow<Boolean>
@@ -68,6 +71,7 @@ class AtlasScopedSectionsCollectorTest {
         statsFor = { ReadingStats() }
         observeReadingStatsUseCase = mockk()
         observeMonthlyPagesReadUseCase = mockk()
+        observeHourlyPagesReadUseCase = mockk()
         observeAuthorDemographicsBackfilledUseCase = mockk()
         getHideUntaggedAuthorsAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(stateFor(StatsScope.AllTime))
@@ -88,6 +92,10 @@ class AtlasScopedSectionsCollectorTest {
         every {
             observeMonthlyPagesReadUseCase(any())
         } returns flowOf(MonthlyPages.AcrossYears(pages = List(12) { 0 }))
+
+        every {
+            observeHourlyPagesReadUseCase(any())
+        } returns flowOf(HourlyPages(List(24) { 0 }))
 
         every {
             observeAuthorDemographicsBackfilledUseCase()
@@ -141,6 +149,10 @@ class AtlasScopedSectionsCollectorTest {
         every {
             dependencies.observeMonthlyPagesReadUseCase
         } returns observeMonthlyPagesReadUseCase
+
+        every {
+            dependencies.observeHourlyPagesReadUseCase
+        } returns observeHourlyPagesReadUseCase
 
         every {
             dependencies.observeAuthorDemographicsBackfilledUseCase
@@ -492,6 +504,42 @@ class AtlasScopedSectionsCollectorTest {
                 breakdown = breakdown,
                 hideUntaggedAuthors = false,
             )
+            job.cancel()
+        }
+
+        @Test
+        fun `charts the hourly pages queried for the selected scope`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val ranges = mutableListOf<StatsRange>()
+            every {
+                observeHourlyPagesReadUseCase(any())
+            } answers {
+                ranges += firstArg<StatsRange>()
+                flowOf(HourlyPages(List(24) { if (it == 22) 10 else 0 }))
+            }
+            stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            ranges.shouldContainExactly(
+                StatsRange.Bounded(
+                    start = LocalDate(
+                        year = 2025,
+                        month = 1,
+                        day = 1,
+                    ),
+                    endInclusive = LocalDate(
+                        year = 2025,
+                        month = 12,
+                        day = 31,
+                    ),
+                ),
+            )
+            stateFlow.value.hasTimeOfDayPages shouldBe true
+            stateFlow.value.timeOfDayChart.isLoading shouldBe false
+            stateFlow.value.timeOfDayChart.columns[5].value shouldBe "100%"
             job.cancel()
         }
     }

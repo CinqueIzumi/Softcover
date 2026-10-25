@@ -41,6 +41,7 @@ class AtlasContentsMapperTest {
         fun `gives each chapter its fixed number`() {
             // ----- Arrange -----
             val expected = mapOf(
+                AtlasChapter.YEAR_AT_A_GLANCE to "01",
                 AtlasChapter.SEASONS_AND_RECORDS to "02",
                 AtlasChapter.GENRES_AND_HOW_YOU_READ to "03",
                 AtlasChapter.TEMPORARY to "99",
@@ -78,6 +79,7 @@ class AtlasContentsMapperTest {
 
             // ----- Assert -----
             result shouldBe listOf(
+                "01 · A year at a glance",
                 "02 · Seasons and records",
                 "03 · Genres and how you read",
                 "99 · Temporary",

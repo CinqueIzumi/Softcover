@@ -6,6 +6,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.state
  * with later 3.3.0 issues.
  */
 internal enum class AtlasChapter {
+    YEAR_AT_A_GLANCE,
     SEASONS_AND_RECORDS,
     GENRES_AND_HOW_YOU_READ,
 

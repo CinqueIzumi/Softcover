@@ -35,7 +35,7 @@ internal fun toMonthlyPages(
         date: LocalDate,
         pages: Int,
     ) {
-        if (pages > 0 && date.isIn(range)) {
+        if (pages > 0 && date in range) {
             pagesPerMonth[date.yearMonth] = (pagesPerMonth[date.yearMonth] ?: 0) + pages
         }
     }
@@ -87,9 +87,4 @@ internal fun toMonthlyPages(
                 .toList(),
         )
     }
-}
-
-private fun LocalDate.isIn(range: StatsRange): Boolean = when (range) {
-    StatsRange.Unbounded -> true
-    is StatsRange.Bounded -> this in range
 }
