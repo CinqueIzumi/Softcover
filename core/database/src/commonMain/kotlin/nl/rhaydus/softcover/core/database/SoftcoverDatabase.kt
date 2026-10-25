@@ -10,6 +10,7 @@ import androidx.sqlite.execSQL
 import nl.rhaydus.softcover.core.database.dao.BookDao
 import nl.rhaydus.softcover.core.database.dao.BookDeadlineDao
 import nl.rhaydus.softcover.core.database.dao.BookTraitsDao
+import nl.rhaydus.softcover.core.database.dao.BookUserTagDao
 import nl.rhaydus.softcover.core.database.dao.DismissedContinueSeriesDao
 import nl.rhaydus.softcover.core.database.dao.HiddenRecommendationDao
 import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
@@ -30,6 +31,7 @@ import nl.rhaydus.softcover.core.database.model.BookListEntity
 import nl.rhaydus.softcover.core.database.model.BookSeriesEntity
 import nl.rhaydus.softcover.core.database.model.BookTagCrossRef
 import nl.rhaydus.softcover.core.database.model.BookTraitsEntity
+import nl.rhaydus.softcover.core.database.model.BookUserTagEntity
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesBookEntity
 import nl.rhaydus.softcover.core.database.model.DismissedContinueSeriesEntity
 import nl.rhaydus.softcover.core.database.model.EditionAuthorCrossRef
@@ -77,6 +79,7 @@ import kotlin.coroutines.CoroutineContext
         BookTagCrossRef::class,
         ShelfManualOrderEntity::class,
         UserTagVocabularyEntity::class,
+        BookUserTagEntity::class,
         PublishedDocumentEntity::class,
         ProgressHistoryEntity::class,
         RankedBookEntity::class,
@@ -87,7 +90,7 @@ import kotlin.coroutines.CoroutineContext
     views = [
         BookEditionView::class
     ],
-    version = 62,
+    version = 63,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -112,6 +115,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun readingSessionDao(): ReadingSessionDao
 
     abstract fun userTagVocabularyDao(): UserTagVocabularyDao
+
+    abstract fun bookUserTagDao(): BookUserTagDao
 
     abstract fun publishedDocumentDao(): PublishedDocumentDao
 
@@ -1557,6 +1562,26 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_62_63 = object : Migration(62, 63) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS book_user_tags (
+                            bookId INTEGER NOT NULL,
+                            category TEXT NOT NULL,
+                            name TEXT NOT NULL,
+                            spoiler INTEGER NOT NULL,
+                            PRIMARY KEY(bookId, category, name),
+                            FOREIGN KEY(bookId) REFERENCES books(id) ON UPDATE NO ACTION ON DELETE CASCADE
+                        )
+                    """.trimIndent(),
+                )
+                connection.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_book_user_tags_bookId ON book_user_tags (bookId)",
+                )
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1620,6 +1645,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_59_60,
             MIGRATION_60_61,
             MIGRATION_61_62,
+            MIGRATION_62_63,
         )
     }
 }

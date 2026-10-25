@@ -580,6 +580,25 @@ interface BookDao {
     @Query("DELETE FROM ranked_books")
     suspend fun deleteAllRankedBooks()
 
+    @Query("DELETE FROM book_user_tags")
+    suspend fun deleteAllBookUserTags()
+
+    @Query(
+        """
+            INSERT OR IGNORE INTO book_user_tags (bookId, category, name, spoiler)
+            SELECT :newId, category, name, spoiler
+            FROM book_user_tags
+            WHERE bookId = :oldId
+        """,
+    )
+    suspend fun copyBookUserTags(
+        oldId: Int,
+        newId: Int,
+    )
+
+    @Query("DELETE FROM book_user_tags WHERE bookId = :bookId")
+    suspend fun deleteBookUserTagsForBook(bookId: Int)
+
     @Query("DELETE FROM ranked_books WHERE listKey = :listKey")
     suspend fun deleteRankedBooks(listKey: String)
 
@@ -774,13 +793,18 @@ interface BookDao {
 
         val newIdHasBook = getExistingBookIds(bookIds = listOf(newId)).isNotEmpty()
 
-        // user_books and ranked_books reference books(id); re-pointing at a missing row violates
+        // user_books, book_user_tags and ranked_books reference books(id); re-pointing at a missing row violates
         // the foreign key. A user book stays on its old id; cached ranked rows are only a cache.
         if (newIdHasBook) {
             redirectUserBooksBookId(
                 oldId = oldId,
                 newId = newId,
             )
+            copyBookUserTags(
+                oldId = oldId,
+                newId = newId,
+            )
+            deleteBookUserTagsForBook(bookId = oldId)
         }
 
         redirectListBooksBookId(
@@ -872,6 +896,7 @@ interface BookDao {
         deleteAllProgressHistory()
         deleteAllRankedBooks()
         deleteAllRankedListMeta()
+        deleteAllBookUserTags()
 
         deleteAllUserBooks()
         deleteAllBookEditions()
