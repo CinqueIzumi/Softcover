@@ -4,15 +4,21 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.collections.immutable.persistentSetOf
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
-import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryActiveFilterChipsBuilderTest {
-    private val tagFiction = Tag(
+    private val tagFiction = HardcoverTagKey(
         id = 1,
         name = "Fiction",
+    )
+    private val tagCozy = UserTagKey(
+        category = TagCategory.MOOD,
+        name = "cozy",
     )
 
     @Nested
@@ -60,10 +66,11 @@ class LibraryActiveFilterChipsBuilderTest {
         }
 
         @Test
-        fun `chips are ordered tags, formats, releaseYears, readYear, owned, rating`() {
+        fun `chips are ordered Yours tags, Hardcover tags, formats, releaseYears, readYear, owned, rating`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
-                tags = persistentSetOf(tagFiction),
+                hardcoverTags = TagSelection(included = persistentSetOf(tagFiction)),
+                yourTags = TagSelection(included = persistentSetOf(tagCozy)),
                 formats = persistentSetOf("ebook"),
                 releaseYears = persistentSetOf(2021),
                 readYear = 2020,
@@ -76,13 +83,79 @@ class LibraryActiveFilterChipsBuilderTest {
 
             // ----- Assert -----
             result.chips.chips.map { it.key } shouldBe listOf(
-                "tag:1",
+                "yours:include:MOOD:cozy",
+                "hardcover:include:1",
                 "format:ebook",
                 "releaseYear:2021",
                 "readYear:2020",
                 "owned:true",
                 "rating:4.0",
             )
+        }
+
+        @Test
+        fun `an included tag is labelled with its name`() {
+            // ----- Arrange -----
+            val filters = LibraryFilters(hardcoverTags = TagSelection(included = persistentSetOf(tagFiction)))
+
+            // ----- Act -----
+            val result = buildLibraryActiveFilterChips(filters = filters)
+
+            // ----- Assert -----
+            result.chips.chips.single().label shouldBe "Fiction"
+        }
+
+        @Test
+        fun `an excluded Hardcover tag is labelled Not followed by its name`() {
+            // ----- Arrange -----
+            val filters = LibraryFilters(hardcoverTags = TagSelection(excluded = persistentSetOf(tagFiction)))
+
+            // ----- Act -----
+            val result = buildLibraryActiveFilterChips(filters = filters)
+
+            // ----- Assert -----
+            result.chips.chips.single().label shouldBe "Not Fiction"
+            result.chips["hardcover:exclude:1"] shouldBe LibraryFilterValue.HardcoverTag(
+                key = tagFiction,
+                direction = TagDirection.EXCLUDE,
+            )
+        }
+
+        @Test
+        fun `an excluded Yours tag is labelled Not followed by its name`() {
+            // ----- Arrange -----
+            val filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(tagCozy)))
+
+            // ----- Act -----
+            val result = buildLibraryActiveFilterChips(filters = filters)
+
+            // ----- Assert -----
+            result.chips.chips.single().label shouldBe "Not cozy"
+            result.chips["yours:exclude:MOOD:cozy"] shouldBe LibraryFilterValue.YourTag(
+                key = tagCozy,
+                direction = TagDirection.EXCLUDE,
+            )
+        }
+
+        @Test
+        fun `an included and an excluded tag each get their own chip`() {
+            // ----- Arrange -----
+            val slow = UserTagKey(
+                category = TagCategory.MOOD,
+                name = "slow",
+            )
+            val filters = LibraryFilters(
+                yourTags = TagSelection(
+                    included = persistentSetOf(tagCozy),
+                    excluded = persistentSetOf(slow),
+                ),
+            )
+
+            // ----- Act -----
+            val result = buildLibraryActiveFilterChips(filters = filters)
+
+            // ----- Assert -----
+            result.chips.chips.map { it.label } shouldBe listOf("cozy", "Not slow")
         }
 
         @Test
@@ -147,10 +220,10 @@ class LibraryActiveFilterChipsBuilderTest {
         }
 
         @Test
-        fun `every chip's trailing close action names the filter it removes`() {
+        fun `every facet chip's trailing close action names the filter it removes`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
-                tags = persistentSetOf(tagFiction),
+                releaseYears = persistentSetOf(2020),
                 formats = persistentSetOf("ebook"),
             )
 
@@ -165,10 +238,66 @@ class LibraryActiveFilterChipsBuilderTest {
         }
 
         @Test
+        fun `a Your tag chip carries the tag glyph and a Hardcover tag chip carries none`() {
+            // ----- Arrange -----
+            val filters = LibraryFilters(
+                yourTags = TagSelection(included = persistentSetOf(tagCozy)),
+                hardcoverTags = TagSelection(included = persistentSetOf(tagFiction)),
+            )
+
+            // ----- Act -----
+            val result = buildLibraryActiveFilterChips(filters = filters)
+
+            // ----- Assert -----
+            val leadings = result.chips.chips.associate { it.label to it.leading }
+            leadings["cozy"] shouldBe ChipLeading.Icon(icon = SoftcoverIcon.Sell)
+            leadings["Fiction"] shouldBe null
+        }
+
+        @Test
+        fun `a tag chip's remove description names its source and direction`() {
+            // ----- Arrange -----
+            val filters = LibraryFilters(
+                yourTags = TagSelection(
+                    included = persistentSetOf(tagCozy),
+                    excluded = persistentSetOf(
+                        UserTagKey(
+                            category = TagCategory.GENRE,
+                            name = "gloomy",
+                        ),
+                    ),
+                ),
+                hardcoverTags = TagSelection(
+                    included = persistentSetOf(tagFiction),
+                    excluded = persistentSetOf(
+                        HardcoverTagKey(
+                            id = 2,
+                            name = "Romance",
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = buildLibraryActiveFilterChips(filters = filters)
+
+            // ----- Assert -----
+            result.chips.chips.map { chip ->
+                chip.trailing.shouldBeInstanceOf<ChipTrailing.Icon>().description
+            } shouldBe listOf(
+                "Your tag cozy. Remove filter",
+                "Excluding your tag gloomy. Remove filter",
+                "Hardcover tag Fiction. Remove filter",
+                "Excluding hardcover tag Romance. Remove filter",
+            )
+        }
+
+        @Test
         fun `the ChipSet resolves every chip key back to the LibraryFilterValue that built it`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
-                tags = persistentSetOf(tagFiction),
+                hardcoverTags = TagSelection(included = persistentSetOf(tagFiction)),
+                yourTags = TagSelection(included = persistentSetOf(tagCozy)),
                 formats = persistentSetOf("ebook"),
                 releaseYears = persistentSetOf(2021),
                 readYear = 2020,
@@ -181,7 +310,14 @@ class LibraryActiveFilterChipsBuilderTest {
 
             // ----- Assert -----
             result.chips.chips.forEach { chip -> (result.chips[chip.key] != null) shouldBe true }
-            result.chips["tag:1"] shouldBe LibraryFilterValue.Tag(tag = tagFiction)
+            result.chips["hardcover:include:1"] shouldBe LibraryFilterValue.HardcoverTag(
+                key = tagFiction,
+                direction = TagDirection.INCLUDE,
+            )
+            result.chips["yours:include:MOOD:cozy"] shouldBe LibraryFilterValue.YourTag(
+                key = tagCozy,
+                direction = TagDirection.INCLUDE,
+            )
             result.chips["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
             result.chips["releaseYear:2021"] shouldBe LibraryFilterValue.ReleaseYear(year = 2021)
             result.chips["readYear:2020"] shouldBe LibraryFilterValue.ReadYear(year = 2020)

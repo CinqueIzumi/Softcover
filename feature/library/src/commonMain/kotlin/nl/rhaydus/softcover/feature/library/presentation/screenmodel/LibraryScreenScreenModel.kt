@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedBooksByStatusUseCa
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserTagsByBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
@@ -49,6 +50,7 @@ internal class LibraryScreenScreenModel(
     private val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,
     private val getLibrarySortSettingsAsFlowUseCase: GetLibrarySortSettingsAsFlowUseCase,
     private val setLibrarySortUseCase: SetLibrarySortUseCase,
+    private val observeUserTagsByBookUseCase: ObserveUserTagsByBookUseCase,
     private val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
@@ -86,6 +88,7 @@ internal class LibraryScreenScreenModel(
         setLibraryGridLayoutUseCase = setLibraryGridLayoutUseCase,
         getLibrarySortSettingsAsFlowUseCase = getLibrarySortSettingsAsFlowUseCase,
         setLibrarySortUseCase = setLibrarySortUseCase,
+        observeUserTagsByBookUseCase = observeUserTagsByBookUseCase,
         observeAllBookDeadlinesUseCase = observeAllBookDeadlinesUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         getEnabledStatusCodesAsFlowUseCase = getEnabledStatusCodesAsFlowUseCase,

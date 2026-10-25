@@ -65,6 +65,7 @@ internal class BookCardModelsCollector : LibraryCollector {
                     displayEditionsByTab = state.displayEditionsByTab,
                     gridLayout = state.gridLayout,
                     deadlines = state.deadlines,
+                    userTagsByBookId = state.userTagsByBookId,
                     dateStyle = state.dateStyle,
                     selectionMode = state.selectionMode,
                     selectedBookIds = state.selectedBookIds,
@@ -147,6 +148,7 @@ private fun BookCardModelsSnapshot.toBookCards(
         val inputs = BookTabInputs(
             books = books,
             deadlines = books.map { deadlines[it.id] },
+            userTags = books.map { userTagsByBookId[it.id].orEmpty() },
             dateStyle = dateStyle,
             selections = books.map { book ->
                 if (selectionMode) {
@@ -181,6 +183,7 @@ private fun BookCardModelsSnapshot.toBookCards(
                         selection = inputs.selections[index],
                         deadline = inputs.deadlines[index],
                         dateStyle = inputs.dateStyle,
+                        userTags = inputs.userTags[index],
                     )
                 }
             },
@@ -210,6 +213,7 @@ private fun BookCardModelsSnapshot.toEditionCards(
 
         val inputs = EditionTabInputs(
             editions = editions,
+            userTags = editions.map { userTagsByBookId[it.bookId].orEmpty() },
             press = press,
             layout = gridLayout,
         )
@@ -221,10 +225,11 @@ private fun BookCardModelsSnapshot.toEditionCards(
                 inputs = inputs,
                 layout = inputs.layout,
             ) {
-                editions.map { edition ->
+                editions.mapIndexed { index, edition ->
                     edition to edition.toEditionCard(
                         layout = inputs.layout,
                         press = press,
+                        userTags = inputs.userTags[index],
                     )
                 }
             },

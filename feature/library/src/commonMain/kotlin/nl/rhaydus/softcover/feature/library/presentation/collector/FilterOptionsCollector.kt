@@ -29,6 +29,7 @@ internal class FilterOptionsCollector : LibraryCollector {
                     booksByTab = state.booksByTab,
                     editionsByTab = state.editionsByTab,
                     bookByBookId = state.bookByBookId,
+                    userTagsByBookId = state.userTagsByBookId,
                 )
             }
             .distinctUntilChanged()

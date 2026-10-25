@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
@@ -11,8 +12,9 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
-import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -50,6 +52,7 @@ class LibraryUiStateTest {
         booksByTab: Map<String, List<Book>> = emptyMap(),
         editionsByTab: Map<String, List<BookEdition>> = emptyMap(),
         bookByBookId: Map<Int, Book> = emptyMap(),
+        userTagsByBookId: Map<Int, List<UserTag>> = emptyMap(),
         searchQuery: String = "",
         sortModeByTab: Map<String, LibrarySortMode> = emptyMap(),
         sortDirectionByTab: Map<String, SortDirection> = emptyMap(),
@@ -66,6 +69,7 @@ class LibraryUiStateTest {
             sortDirectionByTab = sortDirectionByTab,
             addedAtByTab = addedAtByTab,
             bookByBookId = bookByBookId,
+            userTagsByBookId = userTagsByBookId,
         ).compute(
             prevBooksByTab = emptyMap(),
             prevEditionsByTab = emptyMap(),
@@ -74,6 +78,7 @@ class LibraryUiStateTest {
             booksByTab = booksByTab.mapValues { (_, books) -> books.toImmutableList() }.toImmutableMap(),
             editionsByTab = editionsByTab.mapValues { (_, editions) -> editions.toImmutableList() }.toImmutableMap(),
             bookByBookId = bookByBookId.toImmutableMap(),
+            userTagsByBookId = userTagsByBookId.toImmutableMap(),
             searchQuery = searchQuery,
             sortModeByTab = sortModeByTab.toImmutableMap(),
             sortDirectionByTab = sortDirectionByTab.toImmutableMap(),
@@ -229,6 +234,43 @@ class LibraryUiStateTest {
             // Output mirrors booksByTab input order regardless of sort settings.
             result.shouldNotBeNull().map { it.title } shouldBe listOf("Zebra", "Apple", "Mango")
         }
+
+        @Test
+        fun `applies the tab's Yours tag filter using the user's own tags`() {
+            // ----- Arrange -----
+            val cozyKey = UserTagKey(
+                category = TagCategory.MOOD,
+                name = "cozy",
+            )
+            val tagged = buildBook(
+                id = 1,
+                title = "Tagged",
+            )
+            val untagged = buildBook(
+                id = 2,
+                title = "Untagged",
+            )
+            val state = buildState(
+                booksByTab = mapOf(otherTabId to listOf(tagged, untagged)),
+                userTagsByBookId = mapOf(
+                    1 to listOf(
+                        UserTag(
+                            name = "cozy",
+                            category = TagCategory.MOOD,
+                        ),
+                    ),
+                ),
+                filtersByTab = mapOf(
+                    otherTabId to LibraryFilters(yourTags = TagSelection(included = persistentSetOf(cozyKey))),
+                ),
+            )
+
+            // ----- Act -----
+            val result = state.displayBooksFor(otherTabId)
+
+            // ----- Assert -----
+            result.shouldNotBeNull().map { it.title } shouldBe listOf("Tagged")
+        }
     }
 
     @Nested
@@ -249,10 +291,14 @@ class LibraryUiStateTest {
     @Nested
     inner class AvailableFilterOptionsFor {
         private val sampleOptions = LibraryFilterOptions(
-            tags = persistentListOf(
-                Tag(
-                    id = 1,
-                    name = "Fiction",
+            hardcoverTags = persistentListOf(
+                LibraryTagOption(
+                    key = HardcoverTagKey(
+                        id = 1,
+                        name = "Fiction",
+                    ),
+                    category = TagCategory.GENRE,
+                    count = 1,
                 ),
             ),
             formats = persistentListOf("ebook"),

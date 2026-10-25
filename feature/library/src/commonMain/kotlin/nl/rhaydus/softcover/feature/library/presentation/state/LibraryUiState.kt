@@ -31,6 +31,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.SystemVibe
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.core.uibinding.session.ConfirmedPause
@@ -146,7 +147,6 @@ internal data class LibraryUiState(
             filtersActive = false,
         ),
         selection = null,
-        tagSearchField = tagSearchFieldFor(query = ""),
     ),
 
     /**
@@ -208,6 +208,10 @@ internal data class LibraryUiState(
     val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = true),
 
     val deadlines: ImmutableMap<Int, BookDeadline> = persistentMapOf(),
+
+    /** The user's own tags by book id, observed by `UserTagsCollector`; books with none are absent. */
+    val userTagsByBookId: ImmutableMap<Int, List<UserTag>> = persistentMapOf(),
+
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
 
     val searchQuery: String = "",

@@ -4,6 +4,7 @@ import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.tagValueFor
 import nl.rhaydus.softcover.feature.library.presentation.state.toggle
 import nl.rhaydus.toad.ActionScope
 
@@ -17,7 +18,12 @@ internal class OnFilterDraftChipToggledAction(
     ) {
         scope.setState { state ->
             val draft = state.filterDraft ?: return@setState state
-            val value = state.filterChipsFor(draft.tabId)[key] ?: return@setState state
+            val value = state.filterChipsFor(draft.tabId)[key]
+                ?: state.availableFilterOptionsFor(draft.tabId).tagValueFor(
+                    key = key,
+                    filters = draft.filters,
+                )
+                ?: return@setState state
 
             state.copy(filterDraft = draft.copy(filters = draft.filters.toggle(value = value)))
         }

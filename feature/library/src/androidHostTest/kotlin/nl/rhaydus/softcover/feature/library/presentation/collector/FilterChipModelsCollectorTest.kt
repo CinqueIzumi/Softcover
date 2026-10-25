@@ -10,14 +10,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.HardcoverTagKey
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterOptions
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryTagOption
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.UserTagKey
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -30,10 +32,21 @@ class FilterChipModelsCollectorTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val tagFiction = Tag(
-        id = 1,
-        name = "Fiction",
+    private val tagFiction = LibraryTagOption(
+        key = HardcoverTagKey(
+            id = 1,
+            name = "Fiction",
+        ),
         category = TagCategory.GENRE,
+        count = 2,
+    )
+    private val tagCozy = LibraryTagOption(
+        key = UserTagKey(
+            category = TagCategory.MOOD,
+            name = "cozy",
+        ),
+        category = TagCategory.MOOD,
+        count = 1,
     )
 
     @BeforeEach
@@ -92,7 +105,8 @@ class FilterChipModelsCollectorTest {
                     formats = persistentListOf("ebook"),
                     releaseYears = persistentListOf(2020),
                     readYears = persistentListOf(2019),
-                    tags = persistentListOf(tagFiction),
+                    hardcoverTags = persistentListOf(tagFiction),
+                    yourTags = persistentListOf(tagCozy),
                     ratingBuckets = persistentListOf(4.0),
                 )
                 val collector = FilterChipModelsCollector()
@@ -109,15 +123,13 @@ class FilterChipModelsCollectorTest {
                 // ----- Assert -----
                 val chips = stateFlow.value.filterChipsFor("all")
                 val allChips = chips.ownershipChips.chips + chips.formatChips.chips +
-                    chips.releaseYearChips.chips + chips.readYearChips.chips + chips.tagChips.chips +
-                    chips.ratingChips.chips
+                    chips.releaseYearChips.chips + chips.readYearChips.chips + chips.ratingChips.chips
 
                 allChips.forEach { chip -> (chips[chip.key] != null) shouldBe true }
                 chips["owned:true"] shouldBe LibraryFilterValue.Owned(owned = true)
                 chips["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
                 chips["releaseYear:2020"] shouldBe LibraryFilterValue.ReleaseYear(year = 2020)
                 chips["readYear:2019"] shouldBe LibraryFilterValue.ReadYear(year = 2019)
-                chips["tag:1"] shouldBe LibraryFilterValue.Tag(tag = tagFiction)
                 chips["rating:4.0"] shouldBe LibraryFilterValue.RatingMin(threshold = 4.0)
                 job.cancel()
             }

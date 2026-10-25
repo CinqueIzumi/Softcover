@@ -11,11 +11,30 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryDisplayDerivationTest {
+    private val keyFiction = HardcoverTagKey(
+        id = 1,
+        name = "Fiction",
+    )
+    private val keyScifi = HardcoverTagKey(
+        id = 1,
+        name = "Sci-Fi",
+    )
+    private val userCozy = UserTag(
+        name = "cozy",
+        category = TagCategory.MOOD,
+    )
+    private val keyCozy = UserTagKey(
+        category = TagCategory.MOOD,
+        name = "cozy",
+    )
+
     private fun buildEdition(
         id: Int = 1,
         bookId: Int = 1,
@@ -112,6 +131,7 @@ class LibraryDisplayDerivationTest {
                 raw = books,
                 query = "",
                 filters = LibraryFilters(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -137,6 +157,7 @@ class LibraryDisplayDerivationTest {
                 raw = books,
                 query = "   ",
                 filters = LibraryFilters(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -160,6 +181,7 @@ class LibraryDisplayDerivationTest {
                 raw = listOf(matching, nonMatching),
                 query = "kotlin",
                 filters = LibraryFilters(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -189,6 +211,7 @@ class LibraryDisplayDerivationTest {
                 raw = listOf(matching, nonMatching),
                 query = "ROBERT",
                 filters = LibraryFilters(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -214,6 +237,7 @@ class LibraryDisplayDerivationTest {
                 raw = books,
                 query = "xyzzy",
                 filters = LibraryFilters(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -237,6 +261,7 @@ class LibraryDisplayDerivationTest {
                 raw = listOf(book2023, book2022),
                 query = "",
                 filters = LibraryFilters(readYear = null),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -264,6 +289,7 @@ class LibraryDisplayDerivationTest {
                 raw = listOf(book2023, book2022, bookNoDate),
                 query = "",
                 filters = LibraryFilters(readYear = 2023),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -295,6 +321,7 @@ class LibraryDisplayDerivationTest {
                 raw = listOf(ebookBook, paperbackBook),
                 query = "",
                 filters = LibraryFilters(formats = persistentSetOf("ebook")),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -332,13 +359,58 @@ class LibraryDisplayDerivationTest {
                 raw = listOf(matchingBook, wrongYearBook, wrongTagBook),
                 query = "kotlin",
                 filters = LibraryFilters(
-                    tags = persistentSetOf(tagFiction),
+                    hardcoverTags = TagSelection(included = persistentSetOf(keyFiction)),
                     readYear = 2023,
                 ),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
             result shouldBe listOf(matchingBook)
+        }
+
+        @Test
+        fun `Yours include keeps only books whose own tags carry the tag`() {
+            // ----- Arrange -----
+            val tagged = buildBook(id = 1)
+            val untagged = buildBook(id = 2)
+            val unshelved = buildBook(id = 3)
+
+            // ----- Act -----
+            val result = computeDisplayBooks(
+                raw = listOf(tagged, untagged, unshelved),
+                query = "",
+                filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(keyCozy))),
+                userTagsByBookId = mapOf(
+                    1 to listOf(userCozy),
+                    2 to emptyList(),
+                ),
+            )
+
+            // ----- Assert -----
+            result shouldBe listOf(tagged)
+        }
+
+        @Test
+        fun `Yours exclude drops books carrying the tag and keeps those with none`() {
+            // ----- Arrange -----
+            val tagged = buildBook(id = 1)
+            val untagged = buildBook(id = 2)
+            val unshelved = buildBook(id = 3)
+
+            // ----- Act -----
+            val result = computeDisplayBooks(
+                raw = listOf(tagged, untagged, unshelved),
+                query = "",
+                filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(keyCozy))),
+                userTagsByBookId = mapOf(
+                    1 to listOf(userCozy),
+                    2 to emptyList(),
+                ),
+            )
+
+            // ----- Assert -----
+            result shouldBe listOf(untagged, unshelved)
         }
     }
 
@@ -365,6 +437,7 @@ class LibraryDisplayDerivationTest {
                 addedAtByEditionId = emptyMap(),
                 filters = LibraryFilters(),
                 bookByBookId = emptyMap(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -392,6 +465,7 @@ class LibraryDisplayDerivationTest {
                 addedAtByEditionId = emptyMap(),
                 filters = LibraryFilters(),
                 bookByBookId = emptyMap(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -424,6 +498,7 @@ class LibraryDisplayDerivationTest {
                 addedAtByEditionId = emptyMap(),
                 filters = LibraryFilters(),
                 bookByBookId = emptyMap(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -447,6 +522,7 @@ class LibraryDisplayDerivationTest {
                 addedAtByEditionId = emptyMap(),
                 filters = LibraryFilters(),
                 bookByBookId = emptyMap(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -478,6 +554,7 @@ class LibraryDisplayDerivationTest {
                 addedAtByEditionId = emptyMap(),
                 filters = LibraryFilters(),
                 bookByBookId = emptyMap(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -507,6 +584,7 @@ class LibraryDisplayDerivationTest {
                 addedAtByEditionId = emptyMap(),
                 filters = LibraryFilters(owned = true),
                 bookByBookId = emptyMap(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -547,8 +625,9 @@ class LibraryDisplayDerivationTest {
                 mode = LibrarySortMode.TITLE,
                 direction = SortDirection.ASCENDING,
                 addedAtByEditionId = emptyMap(),
-                filters = LibraryFilters(tags = persistentSetOf(tagScifi)),
+                filters = LibraryFilters(hardcoverTags = TagSelection(included = persistentSetOf(keyScifi))),
                 bookByBookId = mapOf(100 to scifiBook, 200 to nonScifiBook),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
@@ -575,12 +654,68 @@ class LibraryDisplayDerivationTest {
                 mode = LibrarySortMode.TITLE,
                 direction = SortDirection.ASCENDING,
                 addedAtByEditionId = emptyMap(),
-                filters = LibraryFilters(tags = persistentSetOf(tagScifi)),
+                filters = LibraryFilters(hardcoverTags = TagSelection(included = persistentSetOf(keyScifi))),
                 bookByBookId = emptyMap(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Assert -----
             result shouldBe emptyList()
+        }
+
+        @Test
+        fun `Yours filters resolve through the edition's parent book id`() {
+            // ----- Arrange -----
+            val taggedEdition = buildEdition(
+                id = 1,
+                bookId = 100,
+                title = "Tagged Ed",
+            )
+            val untaggedEdition = buildEdition(
+                id = 2,
+                bookId = 200,
+                title = "Untagged Ed",
+            )
+
+            // ----- Act -----
+            val result = computeDisplayEditions(
+                raw = listOf(taggedEdition, untaggedEdition),
+                query = "",
+                mode = LibrarySortMode.TITLE,
+                direction = SortDirection.ASCENDING,
+                addedAtByEditionId = emptyMap(),
+                filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(keyCozy))),
+                bookByBookId = emptyMap(),
+                userTagsByBookId = mapOf(100 to listOf(userCozy)),
+            )
+
+            // ----- Assert -----
+            result shouldBe listOf(taggedEdition)
+        }
+
+        @Test
+        fun `an edition whose parent book is missing passes a Yours exclusion`() {
+            // ----- Arrange -----
+            val orphanEdition = buildEdition(
+                id = 1,
+                bookId = 999,
+                title = "Orphan",
+            )
+
+            // ----- Act -----
+            val result = computeDisplayEditions(
+                raw = listOf(orphanEdition),
+                query = "",
+                mode = LibrarySortMode.TITLE,
+                direction = SortDirection.ASCENDING,
+                addedAtByEditionId = emptyMap(),
+                filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(keyCozy))),
+                bookByBookId = emptyMap(),
+                userTagsByBookId = emptyMap(),
+            )
+
+            // ----- Assert -----
+            result shouldBe listOf(orphanEdition)
         }
     }
 
@@ -795,6 +930,69 @@ class LibraryDisplayDerivationTest {
 
             // ----- Assert -----
             result shouldBe 3
+        }
+
+        @Test
+        fun `Yours filters on a book tab give the same count as the applied result`() {
+            // ----- Arrange -----
+            val tabId = "status-read"
+            val tagged = buildBook(id = 1)
+            val untagged = buildBook(id = 2)
+            val unshelved = buildBook(id = 3)
+            val userTags = persistentMapOf(
+                1 to listOf(userCozy),
+                2 to emptyList(),
+            )
+            val state = LibraryUiState(
+                booksByTab = persistentMapOf(tabId to persistentListOf(tagged, untagged, unshelved)),
+                userTagsByBookId = userTags,
+            )
+            val filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(keyCozy)))
+
+            // ----- Act -----
+            val preview = libraryPreviewCount(
+                state = state,
+                tabId = tabId,
+                draftFilters = filters,
+            )
+            val applied = computeDisplayBooks(
+                raw = listOf(tagged, untagged, unshelved),
+                query = "",
+                filters = filters,
+                userTagsByBookId = userTags,
+            )
+
+            // ----- Assert -----
+            preview shouldBe applied.size
+            preview shouldBe 2
+        }
+
+        @Test
+        fun `Yours filters on an edition tab count editions through their parent book`() {
+            // ----- Arrange -----
+            val tabId = "list-1"
+            val taggedEdition = buildEdition(
+                id = 1,
+                bookId = 100,
+            )
+            val untaggedEdition = buildEdition(
+                id = 2,
+                bookId = 200,
+            )
+            val state = LibraryUiState(
+                editionsByTab = persistentMapOf(tabId to persistentListOf(taggedEdition, untaggedEdition)),
+                userTagsByBookId = persistentMapOf(100 to listOf(userCozy)),
+            )
+
+            // ----- Act -----
+            val result = libraryPreviewCount(
+                state = state,
+                tabId = tabId,
+                draftFilters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(keyCozy))),
+            )
+
+            // ----- Assert -----
+            result shouldBe 1
         }
     }
 }

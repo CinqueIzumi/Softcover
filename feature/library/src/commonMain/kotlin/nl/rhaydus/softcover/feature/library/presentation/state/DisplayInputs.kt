@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
 
@@ -24,6 +25,7 @@ internal data class DisplayInputs(
     val sortDirectionByTab: Map<String, SortDirection>,
     val addedAtByTab: Map<String, Map<Int, String?>>,
     val bookByBookId: Map<Int, Book>,
+    val userTagsByBookId: Map<Int, List<UserTag>>,
 ) {
     /**
      * Runs the search + filter (+ edition sort) derivation for every tab. Year-finished narrowing is
@@ -43,6 +45,7 @@ internal data class DisplayInputs(
                 raw = raw,
                 query = searchQuery,
                 filters = filtersByTab[tabId] ?: LibraryFilters(),
+                userTagsByBookId = userTagsByBookId,
             )
             val prev = prevBooksByTab[tabId]
             val stable = if (computed == prev) prev else computed
@@ -65,6 +68,7 @@ internal data class DisplayInputs(
                 addedAtByEditionId = addedAtByTab[tabId].orEmpty(),
                 filters = filtersByTab[tabId] ?: LibraryFilters(),
                 bookByBookId = bookByBookId,
+                userTagsByBookId = userTagsByBookId,
             )
             val prev = prevEditionsByTab[tabId]
             val stable = if (computed == prev) prev else computed

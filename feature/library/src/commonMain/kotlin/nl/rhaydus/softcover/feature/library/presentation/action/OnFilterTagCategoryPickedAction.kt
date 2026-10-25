@@ -1,14 +1,16 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.TagSource
 import nl.rhaydus.toad.ActionScope
 
-/** The open Filter sheet's tag search field — mutates [LibraryUiState.filterDraft] only. */
-internal class OnFilterDraftTagSearchChangedAction(
-    private val query: String,
+internal class OnFilterTagCategoryPickedAction(
+    private val source: TagSource,
+    private val key: String,
 ) : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
@@ -16,11 +18,12 @@ internal class OnFilterDraftTagSearchChangedAction(
     ) {
         scope.setState { state ->
             val draft = state.filterDraft ?: return@setState state
+            val category = TagCategory.entries.firstOrNull { it.name == key }
 
             state.copy(
-                filterDraft = draft.copy(tagSearch = query),
-                filterSheet = state.filterSheet.copy(
-                    tagSearchField = state.filterSheet.tagSearchField.copy(text = query),
+                filterDraft = draft.withSection(
+                    source = source,
+                    section = draft.sectionFor(source = source).copy(category = category),
                 ),
             )
         }

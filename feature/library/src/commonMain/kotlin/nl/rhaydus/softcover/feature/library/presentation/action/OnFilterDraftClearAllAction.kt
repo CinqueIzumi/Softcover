@@ -9,7 +9,7 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * The open Filter sheet's in-sheet "Clear all" — resets [LibraryUiState.filterDraft]'s facet
- * selections only, leaving its tag search query untouched.
+ * selections only, leaving the tag sections' search as it is.
  */
 internal class OnFilterDraftClearAllAction : LibraryAction {
     override suspend fun execute(

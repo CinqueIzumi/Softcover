@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 
 /**
@@ -14,6 +15,7 @@ internal data class FilterOptionsInputs(
     val booksByTab: Map<String, List<Book>>,
     val editionsByTab: Map<String, List<BookEdition>>,
     val bookByBookId: Map<Int, Book>,
+    val userTagsByBookId: Map<Int, List<UserTag>>,
 ) {
     fun compute(): Map<String, LibraryFilterOptions> {
         val readTabId = LibraryTab.Status.of(UserBookStatus.READ).id
@@ -21,6 +23,7 @@ internal data class FilterOptionsInputs(
         val bookSide = booksByTab.mapValues { (tabId, books) ->
             buildBookFilterOptions(
                 books = books,
+                userTagsByBookId = userTagsByBookId,
                 isReadTab = tabId == readTabId,
             )
         }
@@ -29,6 +32,7 @@ internal data class FilterOptionsInputs(
             buildEditionFilterOptions(
                 editions = editions,
                 bookByBookId = bookByBookId,
+                userTagsByBookId = userTagsByBookId,
             )
         }
 

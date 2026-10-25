@@ -1,12 +1,13 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.chip.toChipSet
-import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
@@ -14,15 +15,13 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryFilterSheetSelectionTest {
-    private val tagFiction = Tag(
+    private val tagFiction = HardcoverTagKey(
         id = 1,
         name = "Fiction",
-        category = TagCategory.GENRE,
     )
-    private val tagScifi = Tag(
-        id = 2,
-        name = "Sci-Fi",
-        category = TagCategory.GENRE,
+    private val tagCozy = UserTagKey(
+        category = TagCategory.MOOD,
+        name = "cozy",
     )
 
     @Nested
@@ -50,6 +49,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -81,6 +81,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -112,6 +113,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -143,43 +145,13 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
 
             // ----- Assert -----
             selection.readYearChips.map { it.selected } shouldBe listOf(true, false)
-        }
-
-        @Test
-        fun `tag chip resolves selected when the draft's tags set contains its tag by id`() {
-            // ----- Arrange -----
-            val chips = LibraryFilterChips(
-                tagChips = listOf(
-                    ChipUiModel(
-                        key = "tag:1",
-                        label = "Fiction",
-                    ) to LibraryFilterValue.Tag(tag = tagFiction),
-                    ChipUiModel(
-                        key = "tag:2",
-                        label = "Sci-Fi",
-                    ) to LibraryFilterValue.Tag(tag = tagScifi),
-                ).toChipSet(),
-            )
-            val draft = LibraryFilterDraft(
-                tabId = LibraryTab.All.id,
-                filters = LibraryFilters(tags = persistentSetOf(tagFiction)),
-            )
-
-            // ----- Act -----
-            val selection = buildLibraryFilterSheetSelection(
-                chips = chips,
-                draft = draft,
-                resultCount = 0,
-            )
-
-            // ----- Assert -----
-            selection.tagChips.map { it.selected } shouldBe listOf(true, false)
         }
 
         @Test
@@ -205,6 +177,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -231,74 +204,13 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
 
             // ----- Assert -----
             selection.formatChips shouldBe listOf(untouchedChip)
-        }
-
-        @Test
-        fun `tagChips narrows to labels matching the draft's tagSearch, case-insensitively`() {
-            // ----- Arrange -----
-            val chips = LibraryFilterChips(
-                tagChips = listOf(
-                    ChipUiModel(
-                        key = "tag:1",
-                        label = "Fiction",
-                    ) to LibraryFilterValue.Tag(tag = tagFiction),
-                    ChipUiModel(
-                        key = "tag:2",
-                        label = "Sci-Fi",
-                    ) to LibraryFilterValue.Tag(tag = tagScifi),
-                ).toChipSet(),
-            )
-            val draft = LibraryFilterDraft(
-                tabId = LibraryTab.All.id,
-                tagSearch = "FIC",
-            )
-
-            // ----- Act -----
-            val selection = buildLibraryFilterSheetSelection(
-                chips = chips,
-                draft = draft,
-                resultCount = 0,
-            )
-
-            // ----- Assert -----
-            selection.tagChips.map { it.key } shouldBe listOf("tag:1")
-        }
-
-        @Test
-        fun `an empty tagSearch keeps every tag chip`() {
-            // ----- Arrange -----
-            val chips = LibraryFilterChips(
-                tagChips = listOf(
-                    ChipUiModel(
-                        key = "tag:1",
-                        label = "Fiction",
-                    ) to LibraryFilterValue.Tag(tag = tagFiction),
-                    ChipUiModel(
-                        key = "tag:2",
-                        label = "Sci-Fi",
-                    ) to LibraryFilterValue.Tag(tag = tagScifi),
-                ).toChipSet(),
-            )
-            val draft = LibraryFilterDraft(
-                tabId = LibraryTab.All.id,
-                tagSearch = "",
-            )
-
-            // ----- Act -----
-            val selection = buildLibraryFilterSheetSelection(
-                chips = chips,
-                draft = draft,
-                resultCount = 0,
-            )
-
-            // ----- Assert -----
-            selection.tagChips.map { it.key } shouldBe listOf("tag:1", "tag:2")
         }
 
         @Test
@@ -312,6 +224,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = LibraryFilterChips(),
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -328,6 +241,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = LibraryFilterChips(),
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -345,6 +259,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -369,6 +284,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -394,6 +310,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -419,6 +336,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -444,37 +362,13 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
 
             // ----- Assert -----
             selection.showReadYear shouldBe true
-            selection.isEmpty shouldBe false
-        }
-
-        @Test
-        fun `showTags is true and isEmpty false when only the tag facet has chips`() {
-            // ----- Arrange -----
-            val chips = LibraryFilterChips(
-                tagChips = listOf(
-                    ChipUiModel(
-                        key = "k",
-                        label = "Label",
-                    ) to LibraryFilterValue.Tag(tag = tagFiction),
-                ).toChipSet(),
-            )
-            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
-
-            // ----- Act -----
-            val selection = buildLibraryFilterSheetSelection(
-                chips = chips,
-                draft = draft,
-                resultCount = 0,
-            )
-
-            // ----- Assert -----
-            selection.showTags shouldBe true
             selection.isEmpty shouldBe false
         }
 
@@ -494,6 +388,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -512,6 +407,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -521,9 +417,8 @@ class LibraryFilterSheetSelectionTest {
                 selection.showOwnershipFormat,
                 selection.showReleaseYear,
                 selection.showReadYear,
-                selection.showTags,
                 selection.showRating,
-            ) shouldBe List(5) { false }
+            ) shouldBe List(4) { false }
         }
 
         @Test
@@ -542,6 +437,7 @@ class LibraryFilterSheetSelectionTest {
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
+                options = LibraryFilterOptions(),
                 draft = draft,
                 resultCount = 0,
             )
@@ -551,38 +447,175 @@ class LibraryFilterSheetSelectionTest {
                 selection.showOwnershipFormat,
                 selection.showReleaseYear,
                 selection.showReadYear,
-                selection.showTags,
                 selection.showRating,
-            ) shouldBe listOf(false, false, false, false, true)
+            ) shouldBe listOf(false, false, false, true)
         }
 
         @Test
-        fun `showTags stays true and isEmpty false when the tag search narrows the chips to none`() {
+        fun `each tag source's chosen chips resolve from that source's own selection`() {
             // ----- Arrange -----
-            val chips = LibraryFilterChips(
-                tagChips = listOf(
-                    ChipUiModel(
-                        key = "k",
-                        label = "Label",
-                    ) to LibraryFilterValue.Tag(tag = tagFiction),
-                ).toChipSet(),
+            val options = LibraryFilterOptions(
+                hardcoverTags = persistentListOf(
+                    LibraryTagOption(
+                        key = tagFiction,
+                        category = TagCategory.GENRE,
+                        count = 3,
+                    ),
+                ),
+                yourTags = persistentListOf(
+                    LibraryTagOption(
+                        key = tagCozy,
+                        category = TagCategory.MOOD,
+                        count = 2,
+                    ),
+                ),
             )
             val draft = LibraryFilterDraft(
                 tabId = LibraryTab.All.id,
-                tagSearch = "zzz",
+                filters = LibraryFilters(
+                    hardcoverTags = TagSelection(included = persistentSetOf(tagFiction)),
+                    yourTags = TagSelection(excluded = persistentSetOf(tagCozy)),
+                ),
             )
 
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
-                chips = chips,
+                chips = LibraryFilterChips(),
+                options = options,
                 draft = draft,
                 resultCount = 0,
             )
 
             // ----- Assert -----
-            selection.tagChips shouldBe emptyList()
-            selection.showTags shouldBe true
+            selection.hardcoverTags?.chosenChips?.map { it.key } shouldBe listOf("hardcover:exclude:1")
+            selection.yourTags?.chosenChips?.map { it.key } shouldBe listOf("yours:include:MOOD:cozy")
+        }
+
+        @Test
+        fun `a source with no tags on the shelf has no summary while the other keeps its own`() {
+            // ----- Arrange -----
+            val options = LibraryFilterOptions(
+                hardcoverTags = persistentListOf(
+                    LibraryTagOption(
+                        key = tagFiction,
+                        category = TagCategory.GENRE,
+                        count = 3,
+                    ),
+                ),
+            )
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = LibraryFilterChips(),
+                options = options,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            selection.yourTags shouldBe null
+            selection.hardcoverTags.shouldNotBeNull()
+        }
+
+        @Test
+        fun `a source's section draft narrows only that source's tag chips`() {
+            // ----- Arrange -----
+            val options = LibraryFilterOptions(
+                yourTags = persistentListOf(
+                    LibraryTagOption(
+                        key = tagCozy,
+                        category = TagCategory.MOOD,
+                        count = 2,
+                    ),
+                ),
+                hardcoverTags = persistentListOf(
+                    LibraryTagOption(
+                        key = tagFiction,
+                        category = TagCategory.GENRE,
+                        count = 5,
+                    ),
+                ),
+            )
+            val draft = LibraryFilterDraft(
+                tabId = LibraryTab.All.id,
+                yourTagsSection = TagSectionDraft(search = "coz"),
+            )
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = LibraryFilterChips(),
+                options = options,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            selection.yourTags?.matchHeader.shouldNotBeNull()
+            selection.hardcoverTags?.matchHeader.shouldBeNull()
+        }
+
+        @Test
+        fun `isEmpty is false when only a tag summary has content`() {
+            // ----- Arrange -----
+            val options = LibraryFilterOptions(
+                yourTags = persistentListOf(
+                    LibraryTagOption(
+                        key = tagCozy,
+                        category = TagCategory.MOOD,
+                        count = 1,
+                    ),
+                ),
+            )
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = LibraryFilterChips(),
+                options = options,
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
             selection.isEmpty shouldBe false
+        }
+
+        @Test
+        fun `isEmpty is false when only a chosen tag the shelf no longer carries remains`() {
+            // ----- Arrange -----
+            val draft = LibraryFilterDraft(
+                tabId = LibraryTab.All.id,
+                filters = LibraryFilters(hardcoverTags = TagSelection(included = persistentSetOf(tagFiction))),
+            )
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = LibraryFilterChips(),
+                options = LibraryFilterOptions(),
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            selection.isEmpty shouldBe false
+        }
+
+        @Test
+        fun `isEmpty is true when no facet chips and no tags are on offer or chosen`() {
+            // ----- Arrange -----
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
+
+            // ----- Act -----
+            val selection = buildLibraryFilterSheetSelection(
+                chips = LibraryFilterChips(),
+                options = LibraryFilterOptions(),
+                draft = draft,
+                resultCount = 0,
+            )
+
+            // ----- Assert -----
+            selection.isEmpty shouldBe true
         }
     }
 }

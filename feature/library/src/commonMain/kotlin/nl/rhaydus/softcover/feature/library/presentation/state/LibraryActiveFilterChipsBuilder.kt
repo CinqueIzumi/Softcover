@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
 import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
@@ -10,11 +11,43 @@ internal fun buildLibraryActiveFilterChips(
     filters: LibraryFilters,
 ): LibraryActiveFilterChips {
     val entries = buildList {
-        filters.tags.forEach { tag ->
+        filters.yourTags.entries().forEach { (key, direction) ->
             add(
                 activeFilterChipEntry(
-                    value = LibraryFilterValue.Tag(tag = tag),
-                    label = tag.name,
+                    value = LibraryFilterValue.YourTag(
+                        key = key,
+                        direction = direction,
+                    ),
+                    label = activeTagLabel(
+                        name = key.name,
+                        direction = direction,
+                    ),
+                    leading = ChipLeading.Icon(icon = SoftcoverIcon.Sell),
+                    removeDescription = removeTagDescription(
+                        source = "Your tag",
+                        name = key.name,
+                        direction = direction,
+                    ),
+                ),
+            )
+        }
+
+        filters.hardcoverTags.entries().forEach { (key, direction) ->
+            add(
+                activeFilterChipEntry(
+                    value = LibraryFilterValue.HardcoverTag(
+                        key = key,
+                        direction = direction,
+                    ),
+                    label = activeTagLabel(
+                        name = key.name,
+                        direction = direction,
+                    ),
+                    removeDescription = removeTagDescription(
+                        source = "Hardcover tag",
+                        name = key.name,
+                        direction = direction,
+                    ),
                 ),
             )
         }
@@ -80,17 +113,37 @@ internal fun buildLibraryActiveFilterChips(
     )
 }
 
+private fun activeTagLabel(
+    name: String,
+    direction: TagDirection,
+): String = when (direction) {
+    TagDirection.INCLUDE -> name
+    TagDirection.EXCLUDE -> "Not $name"
+}
+
+private fun removeTagDescription(
+    source: String,
+    name: String,
+    direction: TagDirection,
+): String = when (direction) {
+    TagDirection.INCLUDE -> "$source $name. Remove filter"
+    TagDirection.EXCLUDE -> "Excluding ${source.replaceFirstChar { it.lowercase() }} $name. Remove filter"
+}
+
 private fun activeFilterChipEntry(
     value: LibraryFilterValue,
     label: String,
+    leading: ChipLeading? = null,
+    removeDescription: String = "Remove filter $label",
 ): Pair<ChipUiModel, LibraryFilterValue> {
     val chip = ChipUiModel(
         key = value.chipKey(),
         label = label,
         tone = ChipTone.Container,
+        leading = leading,
         trailing = ChipTrailing.Icon(
             icon = SoftcoverIcon.Close,
-            description = "Remove filter $label",
+            description = removeDescription,
         ),
     )
 

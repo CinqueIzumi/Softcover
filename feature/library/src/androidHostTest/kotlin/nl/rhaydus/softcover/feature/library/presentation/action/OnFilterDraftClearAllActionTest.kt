@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraf
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.TagSectionDraft
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -53,7 +54,7 @@ class OnFilterDraftClearAllActionTest {
         }
 
         @Test
-        fun `resets the draft's facet selections and keeps its tag search query`() = runTest {
+        fun `resets the draft's facet selections and keeps the tag sections' search`() = runTest {
             // ----- Arrange -----
             val draft = LibraryFilterDraft(
                 tabId = tabId,
@@ -62,7 +63,7 @@ class OnFilterDraftClearAllActionTest {
                     owned = true,
                     ratingMin = 4.0,
                 ),
-                tagSearch = "kotlin",
+                yourTagsSection = TagSectionDraft(search = "kotlin"),
             )
             stateFlow.value = LibraryUiState(filterDraft = draft)
 

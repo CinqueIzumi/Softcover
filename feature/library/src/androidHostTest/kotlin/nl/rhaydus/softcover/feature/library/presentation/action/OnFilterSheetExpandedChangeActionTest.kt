@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryTabStats
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.TagSectionDraft
 import nl.rhaydus.softcover.feature.library.presentation.state.filterSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
@@ -39,7 +40,7 @@ class OnFilterSheetExpandedChangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `opening seeds the draft and sheet from the selected tab and clears stale tag search text`() = runTest {
+        fun `opening seeds the draft and sheet from the selected tab`() = runTest {
             // ----- Arrange -----
             val selectedTabId = "list-42"
             val committedFilters = LibraryFilters(formats = persistentSetOf("ebook"))
@@ -52,9 +53,6 @@ class OnFilterSheetExpandedChangeActionTest {
                         itemCount = 11,
                         totalPages = 0,
                     ),
-                ),
-                filterSheet = initial.filterSheet.copy(
-                    tagSearchField = initial.filterSheet.tagSearchField.copy(text = "stale"),
                 ),
             )
 
@@ -74,7 +72,6 @@ class OnFilterSheetExpandedChangeActionTest {
                 resultCount = 11,
                 filtersActive = true,
             )
-            stateFlow.value.filterSheet.tagSearchField.text shouldBe ""
         }
 
         @Test
@@ -96,7 +93,27 @@ class OnFilterSheetExpandedChangeActionTest {
         }
 
         @Test
-        fun `closing discards the draft and tag search text and keeps the existing filterSheet`() = runTest {
+        fun `opening starts with empty tag sections even when an earlier draft had a search`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                filterDraft = LibraryFilterDraft(
+                    tabId = "all",
+                    hardcoverTagsSection = TagSectionDraft(search = "cosy"),
+                ),
+            )
+
+            // ----- Act -----
+            OnFilterSheetExpandedChangeAction(expanded = true).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.filterDraft?.hardcoverTagsSection shouldBe TagSectionDraft()
+        }
+
+        @Test
+        fun `closing discards the draft and its tag section state and keeps the existing filterSheet`() = runTest {
             // ----- Arrange -----
             val existingSheet = filterSheetScaffoldFor(
                 resultCount = 7,
@@ -107,12 +124,11 @@ class OnFilterSheetExpandedChangeActionTest {
                 isFilterSheetExpanded = true,
                 filterSheet = initial.filterSheet.copy(
                     scaffold = existingSheet,
-                    tagSearchField = initial.filterSheet.tagSearchField.copy(text = "kotlin"),
                 ),
                 filterDraft = LibraryFilterDraft(
                     tabId = "list-42",
                     filters = LibraryFilters(formats = persistentSetOf("ebook")),
-                    tagSearch = "kotlin",
+                    yourTagsSection = TagSectionDraft(search = "kotlin"),
                 ),
             )
 
@@ -125,7 +141,6 @@ class OnFilterSheetExpandedChangeActionTest {
             // ----- Assert -----
             stateFlow.value.isFilterSheetExpanded shouldBe false
             stateFlow.value.filterDraft shouldBe null
-            stateFlow.value.filterSheet.tagSearchField.text shouldBe ""
             stateFlow.value.filterSheet.scaffold shouldBe existingSheet
         }
     }

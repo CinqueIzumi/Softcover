@@ -6,15 +6,19 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetSelection
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.TagSource
 import nl.rhaydus.softcover.feature.library.presentation.state.filterSheetScaffoldFor
+import nl.rhaydus.softcover.feature.library.presentation.state.withSearchText
 import nl.rhaydus.toad.ActionScope
 
 /**
  * Derives the Filter sheet's resolved facet chips (`component-contract.md` § 7.2 R9) off
- * [LibraryUiState.filterDraft] — recomputes on every draft edit (facet toggle, tag search
- * keystroke), and clears to `null` while the sheet is closed.
+ * [LibraryUiState.filterDraft] — recomputes on every draft edit (facet toggle, category
+ * pick, search keystroke), and clears to `null` while the sheet is closed.
  */
 internal class FilterDraftChipsCollector : LibraryCollector {
     override suspend fun onLaunch(
@@ -26,10 +30,12 @@ internal class FilterDraftChipsCollector : LibraryCollector {
                 FilterDraftChipsSnapshot(
                     draft = state.filterDraft,
                     filterChipsByTab = state.filterChipsByTab,
+                    filterOptionsByTab = state.filterOptionsByTab,
                     booksByTab = state.booksByTab,
                     editionsByTab = state.editionsByTab,
                     addedAtByTab = state.addedAtByTab,
                     bookByBookId = state.bookByBookId,
+                    userTagsByBookId = state.userTagsByBookId,
                     sortModeByTab = state.sortModeByTab,
                     sortDirectionByTab = state.sortDirectionByTab,
                     searchQuery = state.searchQuery,
@@ -52,10 +58,22 @@ internal class FilterDraftChipsCollector : LibraryCollector {
                                     filtersActive = selection.clearAllEnabled,
                                 )
                             },
-                            selection = selection,
+                            selection = selection?.withCurrentSearch(draft = state.filterDraft),
                         ),
                     )
                 }
             }
+    }
+}
+
+/** A stale pass must not revert the search text an action already wrote for the caret. */
+private fun LibraryFilterSheetSelection.withCurrentSearch(draft: LibraryFilterDraft?): LibraryFilterSheetSelection {
+    if (draft == null) return this
+
+    return TagSource.entries.fold(this) { selection, source ->
+        selection.withSearchText(
+            source = source,
+            text = draft.sectionFor(source = source).search,
+        )
     }
 }

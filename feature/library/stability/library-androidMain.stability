@@ -13,6 +13,13 @@ private fun nl.rhaydus.softcover.feature.library.presentation.component.EmptyFac
     - body: STABLE (String is immutable)
 
 @Composable
+internal fun nl.rhaydus.softcover.feature.library.presentation.component.FacetChipLine(chips: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - chips: STABLE (composable function type)
+
+@Composable
 private fun nl.rhaydus.softcover.feature.library.presentation.component.FacetSection(label: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, chips: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
@@ -21,30 +28,20 @@ private fun nl.rhaydus.softcover.feature.library.presentation.component.FacetSec
     - chips: STABLE (composable function type)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.library.presentation.component.FacetSections(selection: nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetSelection, tagSearchField: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, onChipEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>, onTagSearchEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.library.presentation.component.LibraryArrangeSheet(state: nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>, onDismissRequest: kotlin.Function0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
-    - selection: STABLE (class with no mutable properties)
-    - tagSearchField: STABLE (marked @Stable or @Immutable)
-    - onChipEvent: STABLE (function type)
-    - onTagSearchEvent: STABLE (function type)
-
-@Composable
-internal fun nl.rhaydus.softcover.feature.library.presentation.component.LibraryArrangeSheet(state: nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>, onDismissRequest: kotlin.Function0<kotlin.Unit>): kotlin.Unit
-  skippable: false
-  restartable: true
-  params:
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
     - onDismissRequest: STABLE (function type)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.library.presentation.component.LibraryControlLine(state: nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState, tab: nl.rhaydus.softcover.core.presentation.model.LibraryTab?, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - tab: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
@@ -99,24 +96,40 @@ internal fun nl.rhaydus.softcover.feature.library.presentation.component.ShelfNe
 
 @Composable
 private fun nl.rhaydus.softcover.feature.library.presentation.component.SortLabelControl(state: nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState, tab: nl.rhaydus.softcover.core.presentation.model.LibraryTab, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - tab: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
 
 @Composable
-private fun nl.rhaydus.softcover.feature.library.presentation.component.TagsFacetSection(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, availableLabel: kotlin.String, tagSearchField: nl.rhaydus.softcover.core.component.field.TextFieldUiModel, visibleChips: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.chip.ChipUiModel>, onChipEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>, onTagSearchEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.field.TextFieldEvent, kotlin.Unit>): kotlin.Unit
+private fun nl.rhaydus.softcover.feature.library.presentation.component.TagSourceBody(modifier: androidx.compose.ui.Modifier, summary: nl.rhaydus.softcover.feature.library.presentation.state.TagSourceSummary, onChipEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>, onCategoryClick: kotlin.Function1<kotlin.String, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
-    - header: STABLE (marked @Stable or @Immutable)
-    - availableLabel: STABLE (String is immutable)
-    - tagSearchField: STABLE (marked @Stable or @Immutable)
-    - visibleChips: STABLE (known stable type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - summary: STABLE (class with no mutable properties)
     - onChipEvent: STABLE (function type)
-    - onTagSearchEvent: STABLE (function type)
+    - onCategoryClick: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.library.presentation.component.TagSourceTop(modifier: androidx.compose.ui.Modifier, summary: nl.rhaydus.softcover.feature.library.presentation.state.TagSourceSummary, leadingDivider: kotlin.Boolean, onChipEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>, onEvent: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - modifier: STABLE (marked @Stable or @Immutable)
+    - summary: STABLE (class with no mutable properties)
+    - leadingDivider: STABLE (primitive type)
+    - onChipEvent: STABLE (function type)
+    - onEvent: STABLE (function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.library.presentation.component.hapticChipEvents(onChipEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>): kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>
+  skippable: true
+  restartable: true
+  params:
+    - onChipEvent: STABLE (function type)
 
 @Composable
 private fun nl.rhaydus.softcover.feature.library.presentation.screen.LibraryEmptyScreenPreview(): kotlin.Unit
@@ -132,10 +145,10 @@ public fun nl.rhaydus.softcover.feature.library.presentation.screen.LibraryScree
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.library.presentation.screen.LibraryScreenLayout(state: nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, onEditionClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.BookEdition, kotlin.Unit>, onTabLongPress: kotlin.Function0<kotlin.Unit>, gridStateFor: kotlin.Function1<kotlin.String, androidx.compose.foundation.lazy.grid.LazyGridState>, topAppBarState: androidx.compose.material3.TopAppBarState): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
     - onBookClick: STABLE (function type)
     - onEditionClick: STABLE (function type)
@@ -163,11 +176,11 @@ public fun nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab.o
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.BookList(tab: nl.rhaydus.softcover.core.presentation.model.LibraryTab, state: nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState, gridState: androidx.compose.foundation.lazy.grid.LazyGridState, onBookClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.Book, kotlin.Unit>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>, columnsOverride: androidx.compose.foundation.lazy.grid.GridCells?): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
     - tab: STABLE (class with no mutable properties)
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - gridState: STABLE (marked @Stable or @Immutable)
     - onBookClick: STABLE (function type)
     - runAction: STABLE (function type)
@@ -183,11 +196,11 @@ internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.Dr
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.EditionList(tab: nl.rhaydus.softcover.core.presentation.model.LibraryTab.CustomList, state: nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState, gridState: androidx.compose.foundation.lazy.grid.LazyGridState, onEditionClick: kotlin.Function1<nl.rhaydus.softcover.core.domain.model.BookEdition, kotlin.Unit>, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>, columnsOverride: androidx.compose.foundation.lazy.grid.GridCells?): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
     - tab: STABLE (class with no mutable properties)
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - gridState: STABLE (marked @Stable or @Immutable)
     - onEditionClick: STABLE (function type)
     - runAction: STABLE (function type)
@@ -223,10 +236,10 @@ internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.Li
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.LibrarySearchAndControls(state: nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState, tab: nl.rhaydus.softcover.core.presentation.model.LibraryTab?, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - tab: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
 
@@ -242,10 +255,10 @@ internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.Li
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.LibrarySheets(state: nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState, currentTabId: kotlin.String?, runAction: kotlin.Function1<nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction, kotlin.Unit>): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
-    - state: RUNTIME (requires runtime check)
+    - state: STABLE (class with no mutable properties)
     - currentTabId: STABLE (class with no mutable properties)
     - runAction: STABLE (function type)
 
@@ -276,13 +289,13 @@ internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.Re
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.library.presentation.screen.section.ScrollToTopOnVisibleSetChange(tabId: kotlin.String, sortMode: nl.rhaydus.softcover.core.domain.model.LibrarySortMode, sortDirection: nl.rhaydus.softcover.core.domain.model.SortDirection, filters: nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters, visibleItemsKey: kotlin.Int, gridState: androidx.compose.foundation.lazy.grid.LazyGridState): kotlin.Unit
-  skippable: false
+  skippable: true
   restartable: true
   params:
     - tabId: STABLE (String is immutable)
     - sortMode: STABLE (class with no mutable properties)
     - sortDirection: STABLE (class with no mutable properties)
-    - filters: RUNTIME (requires runtime check)
+    - filters: STABLE (class with no mutable properties)
     - visibleItemsKey: STABLE (primitive type)
     - gridState: STABLE (marked @Stable or @Immutable)
 

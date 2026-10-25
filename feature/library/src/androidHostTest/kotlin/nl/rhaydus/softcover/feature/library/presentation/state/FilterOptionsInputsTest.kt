@@ -5,9 +5,11 @@ import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -110,6 +112,7 @@ class FilterOptionsInputsTest {
                 booksByTab = mapOf(readTabId to listOf(book)),
                 editionsByTab = emptyMap(),
                 bookByBookId = emptyMap(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Act -----
@@ -130,6 +133,7 @@ class FilterOptionsInputsTest {
                 booksByTab = mapOf("all" to listOf(book)),
                 editionsByTab = emptyMap(),
                 bookByBookId = emptyMap(),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Act -----
@@ -154,6 +158,7 @@ class FilterOptionsInputsTest {
                 booksByTab = emptyMap(),
                 editionsByTab = mapOf(readTabId to listOf(edition)),
                 bookByBookId = mapOf(1 to book),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Act -----
@@ -176,6 +181,7 @@ class FilterOptionsInputsTest {
                 booksByTab = mapOf("all" to listOf(book)),
                 editionsByTab = mapOf("list-1" to listOf(edition)),
                 bookByBookId = mapOf(2 to editionBook),
+                userTagsByBookId = emptyMap(),
             )
 
             // ----- Act -----
@@ -183,6 +189,58 @@ class FilterOptionsInputsTest {
 
             // ----- Assert -----
             result.keys shouldBe setOf("all", "list-1")
+        }
+
+        @Test
+        fun `Yours options on a book-side tab count the user's tags per book`() {
+            // ----- Arrange -----
+            val book1 = buildBook(id = 1)
+            val book2 = buildBook(id = 2)
+            val cozy = UserTag(
+                name = "cozy",
+                category = TagCategory.MOOD,
+            )
+            val inputs = FilterOptionsInputs(
+                booksByTab = mapOf("all" to listOf(book1, book2)),
+                editionsByTab = emptyMap(),
+                bookByBookId = emptyMap(),
+                userTagsByBookId = mapOf(
+                    1 to listOf(cozy),
+                    2 to listOf(cozy),
+                ),
+            )
+
+            // ----- Act -----
+            val result = inputs.compute()
+
+            // ----- Assert -----
+            result.getValue("all").yourTags.map { it.key.name to it.count } shouldBe listOf("cozy" to 2)
+        }
+
+        @Test
+        fun `Yours options on an edition-side tab resolve the user's tags through the parent book`() {
+            // ----- Arrange -----
+            val book = buildBook(id = 2)
+            val edition = buildEdition(
+                id = 5,
+                bookId = 2,
+            )
+            val slow = UserTag(
+                name = "slow",
+                category = TagCategory.MOOD,
+            )
+            val inputs = FilterOptionsInputs(
+                booksByTab = emptyMap(),
+                editionsByTab = mapOf("list-1" to listOf(edition)),
+                bookByBookId = mapOf(2 to book),
+                userTagsByBookId = mapOf(2 to listOf(slow)),
+            )
+
+            // ----- Act -----
+            val result = inputs.compute()
+
+            // ----- Assert -----
+            result.getValue("list-1").yourTags.map { it.key.name } shouldBe listOf("slow")
         }
     }
 }

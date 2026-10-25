@@ -2,21 +2,26 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
 import kotlinx.collections.immutable.persistentListOf
-import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LibraryFilterChipsBuilderTest {
-    private val tagFiction = Tag(
-        id = 1,
-        name = "Fiction",
+    private val tagFiction = LibraryTagOption(
+        key = HardcoverTagKey(
+            id = 1,
+            name = "Fiction",
+        ),
         category = TagCategory.GENRE,
+        count = 3,
     )
-    private val tagScifi = Tag(
-        id = 2,
-        name = "Sci-Fi",
-        category = TagCategory.GENRE,
+    private val tagCozy = LibraryTagOption(
+        key = UserTagKey(
+            category = TagCategory.MOOD,
+            name = "cozy",
+        ),
+        category = TagCategory.MOOD,
+        count = 1,
     )
 
     @Nested
@@ -101,20 +106,6 @@ class LibraryFilterChipsBuilderTest {
         }
 
         @Test
-        fun `builds one tag chip per option in source order`() {
-            // ----- Arrange -----
-            val options = LibraryFilterOptions(tags = persistentListOf(tagScifi, tagFiction))
-
-            // ----- Act -----
-            val chips = buildLibraryFilterChips(options = options)
-
-            // ----- Assert -----
-            chips.tagChips.chips.map { it.key } shouldBe listOf("tag:2", "tag:1")
-            chips.tagChips.chips.map { it.label } shouldBe listOf("Sci-Fi", "Fiction")
-            chips.tagChips["tag:2"] shouldBe LibraryFilterValue.Tag(tag = tagScifi)
-        }
-
-        @Test
         fun `builds one rating chip per bucket in source order`() {
             // ----- Arrange -----
             val options = LibraryFilterOptions(ratingBuckets = persistentListOf(4.0, 3.5, 3.0))
@@ -182,7 +173,8 @@ class LibraryFilterChipsBuilderTest {
                 formats = persistentListOf("ebook"),
                 releaseYears = persistentListOf(2020),
                 readYears = persistentListOf(2020),
-                tags = persistentListOf(tagFiction),
+                hardcoverTags = persistentListOf(tagFiction),
+                yourTags = persistentListOf(tagCozy),
                 ratingBuckets = persistentListOf(4.0),
             )
 
@@ -191,7 +183,7 @@ class LibraryFilterChipsBuilderTest {
 
             // ----- Assert -----
             val allChips = chips.ownershipChips.chips + chips.formatChips.chips + chips.releaseYearChips.chips +
-                chips.readYearChips.chips + chips.tagChips.chips + chips.ratingChips.chips
+                chips.readYearChips.chips + chips.ratingChips.chips
             allChips.map { it.selected } shouldBe allChips.map { false }
         }
     }

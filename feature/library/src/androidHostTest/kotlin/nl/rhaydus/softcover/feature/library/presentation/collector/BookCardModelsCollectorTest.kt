@@ -50,8 +50,10 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.mapper.standInCards
@@ -452,6 +454,79 @@ class BookCardModelsCollectorTest {
                 edition.variant.shouldBeInstanceOf<BookCardVariant.Row>().size shouldBe size
                 job.cancel()
             }
+        }
+    }
+
+    @Nested
+    inner class TagStrips {
+        private val cozy = UserTag(
+            name = "cozy",
+            category = TagCategory.MOOD,
+        )
+
+        private fun BookCardUiModel.stripLabels(): List<String>? =
+            variant.shouldBeInstanceOf<BookCardVariant.Row>().text.tagStrip?.chips?.map { it.label }
+
+        @Test
+        fun `a book row carries the tags the user gave that book`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = bookState(
+                books = listOf(
+                    stubBook(id = 1),
+                    stubBook(id = 2),
+                ),
+                layout = LibraryGridLayout.LIST_COMPACT,
+            ).copy(userTagsByBookId = persistentMapOf(1 to listOf(cozy)))
+
+            // ----- Assert -----
+            val cards = stateFlow.value.bookCardsByTab.getValue("all").set.cards
+            cards.cardWithId(1).stripLabels() shouldBe listOf("cozy")
+            cards.cardWithId(2).stripLabels() shouldBe null
+            job.cancel()
+        }
+
+        @Test
+        fun `an edition row carries the tags of its parent book`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+            val edition = stubEdition(id = 9).also {
+                every {
+                    it.bookId
+                } returns 1
+            }
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = persistentListOf(listTab),
+                editionsByTab = persistentMapOf(listTab.id to persistentListOf(edition)),
+                gridLayout = LibraryGridLayout.LIST_LARGE,
+                userTagsByBookId = persistentMapOf(1 to listOf(cozy)),
+            )
+
+            // ----- Assert -----
+            val card = stateFlow.value.editionCardsByTab.getValue(listTab.id).set.cards.cardWithId(9)
+            card.stripLabels() shouldBe listOf("cozy")
+            job.cancel()
+        }
+
+        @Test
+        fun `grid layouts carry no strip even when the book has tags`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = bookState(
+                books = listOf(stubBook(id = 1)),
+                layout = LibraryGridLayout.GRID_TWO_COLUMNS,
+            ).copy(userTagsByBookId = persistentMapOf(1 to listOf(cozy)))
+
+            // ----- Assert -----
+            val card = stateFlow.value.bookCardsByTab.getValue("all").set.cards.cardWithId(1)
+            card.variant.shouldBeInstanceOf<BookCardVariant.Column>().text.tagStrip shouldBe null
+            job.cancel()
         }
     }
 
