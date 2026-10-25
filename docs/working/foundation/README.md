@@ -15,21 +15,20 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** step 2 is under way. The agent trio (FU-1, FU-7, FU-13) and the generic hooks, scripts and
-  `/handoff` skill (FU-2 to FU-5, FU-11, FU-12, FU-14) are in the plugin. Softcover already runs them: its
-  local hooks, scripts, `/handoff` and doc-budgets gate are deleted, `.claude/rhaydus.json` holds its facts,
-  and `checkDocBudgets` is the foundation's `rhaydus.doc-budgets` (build-logic now in `nl.rhaydus.buildlogic`).
-  Softcover still spawns its `softcover-*` agents.
-- **Next:** step 2, FU-6 plus the agent switch in one go (FU-6 row and § Generic shape in `agent-layer.md`):
-  `rhaydus-adopt` writes the managed block, the `## Agent parameters` table and the rules templates; Softcover
-  routes to `rhaydus-kotlin:implementer` / `reviewer` / `test-writer`, moves their agent memory, and deletes
-  the `softcover-*` agents, the local `style-check` and the deny rules. A plugin edit applies only after a
-  reinstall (`.claude/rules/foundation.md`).
+- **State:** step 2 is done except FU-8. Every FU row but FU-8 is upstreamed; Softcover runs only the plugin's
+  agents, hooks and skills, carries the managed `CLAUDE.md` block with `## Agent parameters`, and keeps its
+  agent memory in `.claude/agent-memory/rhaydus-kotlin-*`.
+- **Next:** FU-8 (row in `agent-layer.md`, box in § 2 below): split rule from rationale in
+  `foundation/docs/code-style.md`, `architecture.md` and `design-system-foundations.md`, in the submodule.
 - **Open questions:** none.
-- **Verification:** `styleCheck` passed (after `ktlintFormat` on the foundation build-logic doc-budgets files);
-  glommed-closer grep and AAA markers clean; build-logic `test` and the five hook case runners passed.
-- **Uncommitted:** foundation: `ktlintFormat` layout fixes in build-logic doc-budgets main and test files.
-  Softcover: the submodule pointer and this tracker.
+- **Verification:** close-out gates not run: no `.kt` changed this session (markdown and JSON only).
+  `checkDocBudgets` passed; plugin hook case runners passed; plugin app-name grep clean; plugin-half review
+  blockers fixed.
+- **Uncommitted:** foundation: `rhaydus-adopt`, implementer, style-check skill, README, new `templates/`
+  (user-staged; the `kotlin-style.md` template line unstaged). Softcover: `CLAUDE.md` managed block,
+  `.claude/{settings,rhaydus}.json`, rule files, deleted `softcover-*` agents and local `style-check`, agent
+  memory moved to `rhaydus-kotlin-*`, agent names in `agent-briefs.md` and three plan READMEs, this tracker,
+  `agent-layer.md`, `candidates.md` (F60), the submodule pointer.
 
 ## How to run a step
 
@@ -68,10 +67,10 @@ Read-only. The output is a decision per item, recorded in `agent-layer.md` and u
 - [x] The hooks, `/handoff` skill, quiet-Gradle script, token-usage script and doc-growth guards the audit marked
       generic (FU-2 to FU-5, FU-11, FU-12, FU-14).
 - [x] The plugin text names the new agents and no longer cites the sibling-checkout docs path (FU-13).
-- [ ] `rhaydus-adopt` writes the catalogue-style managed `CLAUDE.md` block and the `.claude/rules/*.md` templates
+- [x] `rhaydus-adopt` writes the catalogue-style managed `CLAUDE.md` block and the `.claude/rules/*.md` templates
       (FU-6).
 - [ ] Split rule from rationale in `foundation/docs/` (FU-8).
-- [ ] Softcover adopts it: re-run `rhaydus-adopt`; delete the four deny rules, the duplicate
+- [x] Softcover adopts it: re-run `rhaydus-adopt`; delete the four deny rules, the duplicate
       `.claude/skills/style-check/` and every local hook, script or agent the plugin now ships; the `CLAUDE.md`
       local override becomes the managed block.
 
@@ -82,7 +81,7 @@ Bugs and gaps in shared code only; new components, design tokens and house-style
 - [ ] Component bugs: F26, F27, F31 + F46, F36, F45, F47, F48, F49, F51; delete Softcover's forks and the
       detekt bans on the foundation versions.
 - [ ] Contract gaps: F42, F44, F56.
-- [ ] Tooling: F33, F37, F54; wire `detektCheck` into the foundation's `check`.
+- [ ] Tooling: F33, F37, F54, F60; wire `detektCheck` into the foundation's `check`.
 - [ ] Data: F55.
 - [ ] Adopt F18, F20, F21 through `includeBuild("foundation/build-logic")`; delete the Softcover copies.
 

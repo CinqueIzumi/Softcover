@@ -60,8 +60,8 @@ they rework the same mappers and models. C1 is independent and can run beside A2
 ## Per-step routine
 
 1. Implementer brief (Goal / Files / Verify / Report); A1 lands the shared DI and manifest wiring.
-2. Build, then `softcover-test-writer` for the new logic (store naming / pruning / provider path checks,
-   mapper emission order, pool and chip filtering), then `styleCheck`, then `softcover-reviewer`.
+2. Build, then `rhaydus-kotlin:test-writer` for the new logic (store naming / pruning / provider path checks,
+   mapper emission order, pool and chip filtering), then `styleCheck`, then `rhaydus-kotlin:reviewer`.
 3. Install the minified variant on Medium_Phone and repeat the reproduction; stop for the user's go-ahead.
 
 ## Risks

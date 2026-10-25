@@ -1,0 +1,8 @@
+- [Full-height sheet pinning is safe](architecture_full_height_sheet_pinning.md) — pinned rows + `weight(1f)+verticalScroll` body in AdaptiveModalSheet fills height on both forms; don't re-litigate
+- [Gradle *Main suffix is case-sensitive](architecture_gradle_main_suffix_case_sensitive.md) — a source-dir scan gate silently skips classic lowercase `src/main` modules (`:app`, `:desktopApp`); confirm they have nothing to catch
+- [Arrange/Filter draft-commit pattern traps](project_arrange_filter_draft_commit_pattern.md) — a live nudge into an open draft needs its own failure rollback; async collector-derived chips can blank-flash on sheet open
+- [ChipSet double `.chips` field](project_chipset_double_chips_field.md) — a wrapper's own `chips`/`fooChips` field holding a `ChipSet<P>` forces `.chips.chips` at render sites; flag readability, suggest Iterable/isEmpty on ChipSet
+- [R10 computed-getter trap](project_r10_computed_getter_trap.md) — a UiState `get()` property that builds a UI model still violates R10; only a stored field/default counts
+- [Embedded-content ScreenModel scoping](architecture_embedded_content_screenmodel_scoping.md) — koinNavigatorScreenModel from a non-Screen composable ties the model to the whole Navigator, not the embedding Screen
+- [R9 citation covers R10 ground](architecture_r9_citation_covers_r10_ground.md) — "off the composition (R9)" on a stored UiState model list is house shorthand, not a wrong rule number
+- [Self-emitting click modifiers](architecture_foundation_self_emitting_modifiers.md) — clickable already emits hover; an extra hoverable on the same source doubles up

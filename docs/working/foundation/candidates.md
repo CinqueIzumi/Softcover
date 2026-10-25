@@ -377,6 +377,15 @@ Filed but not yet implemented in the foundation.
   - `toad-architecture.md`: a composable embedded in another Screen receives its ScreenModel from the owning
     `Screen`; `koinNavigatorScreenModel` widens the scope to the Navigator's lifetime.
 
+### F60 — `no-fully-qualified-reference` hard-codes an Apollo exemption
+
+- **Type:** bug (app-specific behaviour in a shared rule)
+- **Home:** `nl.rhaydus:ktlint-rules` (`InlineFullyQualifiedReferenceRule`)
+- **Status:** **Open.** The rule exempts `nl.rhaydus.<app>.fragment.*` because one app's generated GraphQL
+  fragment types collide by name; an app without Apollo inherits the hole.
+- **What to build:** a configurable list of exempt package segments (`.editorconfig` property), empty by
+  default; the consuming app sets `fragment` and the KDoc drops the Apollo wording.
+
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
 - **Type:** gate (custom Gradle task)

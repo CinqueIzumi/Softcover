@@ -1,11 +1,6 @@
 {
   "briefCheck": {
     "briefDoc": "docs/reference/agent-briefs.md",
-    "agents": {
-      "softcover-implementer": "implementer",
-      "softcover-test-writer": "testWriter",
-      "softcover-reviewer": "reviewer"
-    },
     "verify": {
       "implementer": "./gradlew :module:compileKotlinJvm",
       "testWriter": "./gradlew :module:testAndroidHostTest --tests \"nl.rhaydus.softcover.feature.x.YTest\""

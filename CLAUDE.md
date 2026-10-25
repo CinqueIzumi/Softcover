@@ -13,13 +13,10 @@ book tracking platform, on Android (SDK 26+), iOS and desktop (JVM). Shared UI a
 
 - **Session loop:** `docs/working/ACTIVE.md` → the active tracker's `## Now` block → do one step → `/rhaydus-kotlin:handoff`
   → the user runs `/clear`. One step per session.
-- **Routing:** a change touching ≤3 existing files, with no new file and no public API change, is done in the
-  main conversation. Anything bigger goes to `softcover-implementer`. Tests always go to
-  `softcover-test-writer`. Before reporting substantial work done (a new file or module, a multi-file change,
-  or any layout / state / data-flow change), run `softcover-reviewer` after the build succeeds. Briefs follow
-  [`docs/reference/agent-briefs.md`](docs/reference/agent-briefs.md) (enforced by a hook).
 - **The main conversation directs.** No multi-step Gradle loops and no paging through large files in it. Gradle
   output is summarised automatically; the full log is at the printed path.
+- Routing, tests and the doc map are in the Rhaydus block below; work inside `foundation/` follows
+  `.claude/rules/foundation.md`.
 
 ## Build & test
 
@@ -38,15 +35,6 @@ book tracking platform, on Android (SDK 26+), iOS and desktop (JVM). Shared UI a
 ./gradlew check buildHealth      # Full gate: CI on every push to main, release/*, hotfix/* and chore/*
 ```
 
-## Tests
-
-- **Always delegate test writing to `softcover-test-writer`**, however small the change — never write or modify
-  unit tests in the main conversation. No exceptions. The agent runs the tests it writes.
-- Relaying its report: if all pass, say the suite was executed and passed. If any fail, give the failing test
-  names and the agent's diagnosis verbatim. When the diagnosis points at production behaviour, **stop** and
-  wait for the user to approve a fix round. When it is test-side fallout from an intended change (setup the
-  change now correctly rejects, a style gate on the test file), send the fix round straight away.
-
 ## Commit messages
 
 **A commit message is a single subject line. Nothing else.** No body, no bullet list, no explanatory paragraphs,
@@ -62,31 +50,54 @@ breakdown"). No conventional-commits prefixes.
 The roadmap lives in GitHub Issues (work via `gh`), not in this repo. `ROADMAP.md` is generated from milestone
 descriptions — never hand-edit it. The full rules are in `.claude/rules/roadmap.md`.
 
-## Where things live
+<!-- rhaydus:start -->
+## Rhaydus foundation (managed by rhaydus-adopt - do not hand-edit)
 
-| When you are … | Read |
+- **Version:** the nl.rhaydus foundation, built from the `foundation/` git submodule through an `includeBuild`, pinned at 0.3.2 (branch `chore/softcover-submodule`, untagged).
+- **Docs:** `foundation/docs/` at the pinned commit (CAPABILITIES, architecture, toad-architecture, code-style, design-system-foundations). They are the source of truth; this app's docs keep only its deltas.
+- **Libraries consumed:** state and logic `toad`, `core-common`, `core-platform`, `offline-sync`; design system `designsystem-core`, `designsystem-editorial`, `designsystem-image`; gates `ktlint-rules`, `detekt-rules`.
+- **This app's design system:** `docs/reference/design-system.md`.
+
+### Where things live
+
+| When you are ... | Read |
 |---|---|
-| Adding a module, feature, ScreenModel / Action / Collector, or changing data flow | [`foundation/docs/architecture.md`](foundation/docs/architecture.md), [`toad-architecture.md`](foundation/docs/toad-architecture.md), then [`docs/reference/architecture.md`](docs/reference/architecture.md) |
-| Deciding where a module / type belongs, or wiring a cross-feature dependency | [`docs/reference/module-structure.md`](docs/reference/module-structure.md) |
-| Designing or changing any UI surface | [`foundation/docs/design-system-foundations.md`](foundation/docs/design-system-foundations.md), then the one section you need behind [`docs/reference/design-system.md`](docs/reference/design-system.md) |
-| Building a component under `:core:component` | [`docs/reference/design-system/component-contract.md`](docs/reference/design-system/component-contract.md) |
-| Writing or changing any user-facing text | [`docs/reference/design-system/voice.md`](docs/reference/design-system/voice.md) |
-| Writing Kotlin | [`foundation/docs/code-style.md`](foundation/docs/code-style.md), then [`docs/reference/code-style.md`](docs/reference/code-style.md) |
-| Looking for an existing component, modifier or util | [`foundation/docs/CAPABILITIES.md`](foundation/docs/CAPABILITIES.md) |
-| Adding a manifest component, worker, widget, Screen argument, or anything reached by name / touching keep rules | [`docs/reference/r8.md`](docs/reference/r8.md) |
+| Adding a module, feature, ScreenModel / Action / Collector, or changing data flow | `foundation/docs/architecture.md`, `toad-architecture.md`, then `docs/reference/architecture.md` |
+| Deciding where a module / type belongs, or wiring a cross-feature dependency | `docs/reference/module-structure.md` |
+| Designing or changing any UI surface | `foundation/docs/design-system-foundations.md`, then the one section you need behind `docs/reference/design-system.md` |
+| Building a component under `:core:component` | `docs/reference/design-system/component-contract.md` |
+| Writing or changing any user-facing text | `docs/reference/design-system/voice.md` |
+| Writing Kotlin | `foundation/docs/code-style.md`, then `docs/reference/code-style.md` |
+| Looking for an existing component, modifier or util | `foundation/docs/CAPABILITIES.md` |
+| Adding a manifest component, worker, widget, Screen argument, or anything reached by name / touching keep rules | `docs/reference/r8.md` |
 
-## Rhaydus foundation (local override — pending foundation FU-6; re-running rhaydus-adopt reverts this)
+### Routing
 
-- **Version:** the nl.rhaydus foundation, built from the `foundation/` git submodule through an `includeBuild`
-  (version in `foundation/gradle.properties`); work inside it follows `.claude/rules/foundation.md`.
-- **Docs:** [`foundation/docs/`](foundation/docs) at the pinned commit (architecture, toad-architecture,
-  code-style, design-system-foundations, CAPABILITIES). They are the source of truth; this app's docs keep only
-  its deltas.
-- **Libraries consumed:**
-  - State and logic: `toad`, `core-common`, `core-platform`, `offline-sync`.
-  - Design system: `designsystem-core`, `designsystem-editorial`, `designsystem-image`.
-  - Gates: `ktlint-rules`, `detekt-rules`.
-- **Routing:** implementation → `softcover-implementer`; review → `softcover-reviewer`; tests →
-  `softcover-test-writer`; style gates → the `style-check` skill. A foundation version change moves the
-  submodule pointer (`.claude/rules/foundation.md`); never re-run `rhaydus-adopt`, whose managed block routes to the agents denied here.
-- **Reuse-first:** check `foundation/docs/CAPABILITIES.md` before hand-rolling a component, modifier or util.
+- A change touching 3 or fewer existing files, with no new file and no public API change, is done in the main conversation. Anything bigger goes to `rhaydus-kotlin:implementer`, one per vertical slice.
+- Tests always go to `rhaydus-kotlin:test-writer`, however small. Never write or modify unit tests in the main conversation.
+- Before reporting substantial work done (a new file or module, a multi-file change, or any layout / state / data-flow change), run `rhaydus-kotlin:reviewer` after the build succeeds.
+- Briefs follow `docs/reference/agent-briefs.md` (enforced by the brief-check hook).
+- Style gates: `/rhaydus-kotlin:style-check`.
+- Reuse-first: check `foundation/docs/CAPABILITIES.md` before hand-rolling a component, modifier or util.
+- A foundation version change moves the submodule pointer: fetch in `foundation/`, check out the new tag, `git add foundation`.
+
+### Relaying the test-writer's report
+
+- All pass: say the suite was executed and passed.
+- Any fail: give the failing test names and the agent's diagnosis verbatim.
+- The diagnosis points at production behaviour: stop and wait for the user to approve a fix round.
+- The failure is test-side fallout from an intended change (setup the change now correctly rejects, a style gate on the test file): send the fix round straight away.
+
+### Agent parameters
+
+| Parameter | Value |
+|---|---|
+| Compile verify task | `compileKotlinJvm` |
+| Unit test task / source set | `testAndroidHostTest` / `src/androidHostTest` |
+| Full gate / auto-fix | `check buildHealth` / `ktlintFormat lintFix` |
+| Test package prefix | `nl.rhaydus.softcover` |
+| Doc paths | review-only rules `docs/reference/code-style.md`, tests rules `.claude/rules/tests.md`, R8 `docs/reference/r8.md`, design system `docs/reference/design-system.md`, voice `docs/reference/design-system/voice.md` |
+| Foundation docs | `foundation/docs/` |
+| Module roles | database home `:core:database`, component home `:core:component` |
+| Stability task | `stabilityDump` |
+<!-- rhaydus:end -->

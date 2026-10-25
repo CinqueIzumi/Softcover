@@ -8,7 +8,8 @@ paths:
 - **Doc types.** `docs/reference/**` holds present-tense rules and facts only, with no history or
   justification. `docs/working/**` holds state (a `## Now` block) plus checkboxes, and one line per decision.
   KDoc follows the `document-code` skill. Agent memory follows the keep / promote / never-save criteria in each
-  `softcover-*` agent's `## Memory` section. `foundation/**` is the foundation submodule, and changes there follow `.claude/rules/foundation.md`.
+  `rhaydus-kotlin` plugin agent's `## Memory` section (memory lives in `.claude/agent-memory/rhaydus-kotlin-*`).
+  `foundation/**` is the foundation submodule, and changes there follow `.claude/rules/foundation.md`.
 - **Where content goes:**
 
   | Content | Goes to |

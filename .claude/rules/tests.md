@@ -7,7 +7,7 @@ paths:
 
 # Tests
 
-- Test code is written only by `softcover-test-writer`, from a brief following `docs/reference/agent-briefs.md`.
+- Test code is written only by `rhaydus-kotlin:test-writer`, from a brief following `docs/reference/agent-briefs.md`.
 - Structure: foundation `foundation/docs/code-style.md` § Test Class Organization and § Unit Test Structure;
   the review-only test rules are in `docs/reference/code-style.md` § Review-only rules.
 - A test earns its place only when input decides output: a mapper, formatter, collector, a `resolve` with a
@@ -25,9 +25,9 @@ paths:
   - **Keep what guards production harm,** even if the test is plain: auth and tokens, database migrations,
     offline-sync merges, and mutations written to Hardcover.
   - **Fast.** Agents rerun the suite on every retry. Use virtual time (`runTest`, test dispatchers), never a
-    real `delay`, real dispatcher or wall-clock wait. Keep a class under ~1 s with the smallest fixture that
-    covers the branch.
+    real `delay`, dispatcher or wall-clock wait; keep a class under ~1 s with the smallest covering fixture.
 - Test sources are gated by ktlint and detekt like main sources; see `.claude/rules/kotlin-style.md`.
+- Never write `!!`; unwrap with `shouldNotBeNull()`.
 - Fakes are MockK stubs of only the public surface the code under test calls (e.g. `safeQuery`/
   `safeMutation` via `mockkStatic`) — never MockServer, WireMock, embedded servers, or new test
   dependencies.

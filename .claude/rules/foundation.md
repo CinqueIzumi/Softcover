@@ -7,8 +7,7 @@ paths:
 
 - Work on a branch inside `foundation/`, never on a detached HEAD.
 - Changes are generic and name no consuming app (`foundation/CLAUDE.md`).
-- Softcover's agents do the work there (`softcover-implementer` / `-reviewer` / `-test-writer`), not the
-  foundation CLAUDE.md's `code-reviewer` / `unit-test-writer`.
+- The `rhaydus-kotlin` plugin agents do the work there.
 - Build with `foundation/gradlew -p foundation <task>`; the Gradle hook rewrites a bare `./gradlew` to
   Softcover's root.
 - Commit in the foundation first, then record the pointer in Softcover with `git add foundation`.

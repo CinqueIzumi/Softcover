@@ -15,15 +15,7 @@ Without (2) and (3), MockK throws `no answer found for CompiledField.argumentVal
 
 **Why:** `FieldPolicyCacheResolver` calls the `argumentValues(vars, filter)` overload (not `argumentValue`) to extract `@fieldPolicy` key args, then falls through to `DefaultCacheResolver` which uses `nameWithArguments` as the map key.
 
-**How to apply:** Add a `stubForDelegation(responseName: String)` helper in any `CacheResolver` test that exercises the fall-through path:
-
-```kotlin
-private fun stubForDelegation(responseName: String) {
-    every { field.responseName } returns responseName
-    every { field.argumentValues(any(), any()) } returns emptyMap()
-    every { field.nameWithArguments(any()) } returns responseName
-}
-```
+**How to apply:** add a `stubForDelegation(responseName: String)` helper in any `CacheResolver` test that exercises the fall-through path, stubbing `field.responseName`, `argumentValues` (→ `emptyMap()`) and `nameWithArguments` (→ `responseName`).
 
 `CompiledField.argumentValues` is `@ApolloExperimental` — the compiler emits a warning but it compiles fine.
 
@@ -31,14 +23,10 @@ private fun stubForDelegation(responseName: String) {
 
 ```kotlin
 val context = ResolverContext(
-    field = field,
-    variables = variables,
-    parent = parent,
+    field = field, variables = variables, parent = parent,
     parentKey = CacheKey.QUERY_ROOT,   // or CacheKey("books", "1") for non-root
-    parentType = "Query",
-    cacheHeaders = CacheHeaders.NONE,
-    fieldKeyGenerator = DefaultFieldKeyGenerator,
-    path = emptyList(),
+    parentType = "Query", cacheHeaders = CacheHeaders.NONE,
+    fieldKeyGenerator = DefaultFieldKeyGenerator, path = emptyList(),
 )
 SoftcoverCacheResolver.resolveField(context)
 ```
