@@ -39,7 +39,7 @@ internal class ReadingJournalHistoryRemoteDataSourceImpl(
         val userId = getUserIdUseCase().getOrThrow()
 
         return fetchAllPagesOrThrow(
-            pageSize = ALL_BOOKS_PAGE_SIZE,
+            pageSize = PAGE_SIZE,
             maxPages = ALL_BOOKS_MAX_PAGES,
         ) { limit, offset ->
             apolloClient.safeQuery(
@@ -79,12 +79,9 @@ internal class ReadingJournalHistoryRemoteDataSourceImpl(
         }
 }
 
-// Request-multiplier budget: ceiling of PAGE_SIZE * MAX_PAGES rows before the fetch fails.
+// Hardcover returns at most 100 rows per request, and a short page ends paging, so a larger size truncates silently.
 private const val PAGE_SIZE: Int = 100
 
 private const val MAX_PAGES: Int = 100
 
-// A whole account's updates span many books: larger pages keep the request count down, for a ceiling of 50,000 rows.
-private const val ALL_BOOKS_PAGE_SIZE: Int = 500
-
-private const val ALL_BOOKS_MAX_PAGES: Int = 100
+private const val ALL_BOOKS_MAX_PAGES: Int = 500
