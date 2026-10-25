@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnGenreRankingShowLessAction
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnGenreRankingShowMoreAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnScopeSelectedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
 import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
@@ -59,6 +61,23 @@ internal fun ColumnScope.StatsAtlasBody(
             chart = state.monthlyPagesChart,
             monthSetKey = state.monthlyPagesMonthSetKey,
             hasMonthlyPages = state.hasMonthlyPages,
+        )
+    }
+
+    Spacer(modifier = Modifier.height(Spacing.section))
+
+    Column(modifier = jumper.chapter(AtlasChapter.GENRES_AND_HOW_YOU_READ)) {
+        GenresChapter(
+            header = state.genreHeader,
+            ranking = state.genreRanking,
+            showMore = state.genreRankingShowMore,
+            showLess = state.genreRankingShowLess,
+            onShowMore = {
+                runAction(OnGenreRankingShowMoreAction())
+            },
+            onShowLess = {
+                runAction(OnGenreRankingShowLessAction())
+            },
         )
     }
 

@@ -42,6 +42,7 @@ class AtlasContentsMapperTest {
             // ----- Arrange -----
             val expected = mapOf(
                 AtlasChapter.SEASONS_AND_RECORDS to "02",
+                AtlasChapter.GENRES_AND_HOW_YOU_READ to "03",
                 AtlasChapter.TEMPORARY to "99",
             )
 
@@ -78,6 +79,7 @@ class AtlasContentsMapperTest {
             // ----- Assert -----
             result shouldBe listOf(
                 "02 · Seasons and records",
+                "03 · Genres and how you read",
                 "99 · Temporary",
             )
         }

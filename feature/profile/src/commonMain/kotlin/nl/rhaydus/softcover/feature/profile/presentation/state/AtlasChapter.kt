@@ -7,6 +7,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.state
  */
 internal enum class AtlasChapter {
     SEASONS_AND_RECORDS,
+    GENRES_AND_HOW_YOU_READ,
 
     /** Numbered 99, because it goes when the real chapters replace it. */
     TEMPORARY,

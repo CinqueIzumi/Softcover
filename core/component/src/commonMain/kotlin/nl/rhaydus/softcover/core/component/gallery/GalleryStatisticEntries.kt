@@ -18,8 +18,8 @@ internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "RankedBars",
         family = GalleryFamily.CHART,
-        blurb = "Horizontal bars, each measured against its own full-width track; while loading " +
-            "the rows keep their layout and mask.",
+        blurb = "Numbered bars filled relative to the lead row, with the share at the end; while " +
+            "loading the rows keep their layout and mask.",
         previews = RankedBarsUiModel,
         content = { model, modifier ->
             RankedBars(

@@ -19,8 +19,6 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsScopeCapt
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
@@ -37,8 +35,10 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.ActionScope
 
 /**
- * The only writer of every section that answers for the selected scope: the opening tiles, genres, who
- * you read, how you score and pages by month, with their framing copy and the scope line.
+ * The only writer of every section that answers for the selected scope: the opening tiles, who you
+ * read, how you score and pages by month, with their framing copy and the scope line. For genres it
+ * writes only whether any exist and the empty sentence; `GenreRankingCollector` maps the rest off the
+ * stats written here.
  *
  * It stays idle until the history has landed, because the history decides the default scope and
  * observing the placeholder one first would flash the wrong numbers. Switching scope re-observes the
@@ -106,12 +106,6 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             ),
             opening = atlasOpeningUiModel(
                 stats = stats,
-                scope = scope,
-            ),
-            genreRanking = genreRankingUiModel(genres),
-            hasGenres = genres?.slices.orEmpty().isNotEmpty(),
-            genreScopeCaption = genreScopeCaption(
-                taggedBookCount = genres?.taggedBookCount ?: 0,
                 scope = scope,
             ),
             genreEmptyCaption = genreEmptyCaption(

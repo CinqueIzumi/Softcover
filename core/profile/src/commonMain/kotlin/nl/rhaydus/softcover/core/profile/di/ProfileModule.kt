@@ -111,6 +111,7 @@ val profileModule = module {
     factory {
         ObserveReadingStatsUseCase(
             getReadUserBooksUseCase = get(),
+            observeUserTagsByBookUseCase = get(),
             appDispatchers = get(),
         )
     }

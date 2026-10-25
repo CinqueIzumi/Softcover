@@ -56,10 +56,12 @@ class ReadingHistoryMapperTest {
         @Test
         fun `is not capped at eight years`() {
             // ----- Arrange -----
-            val books = listOf(readBook(
-                id = 1,
-                finishedAt = "2010-05-01",
-            ),)
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2010-05-01",
+                ),
+            )
 
             // ----- Act -----
             val history = books.toReadingHistory(today)
@@ -73,10 +75,12 @@ class ReadingHistoryMapperTest {
         @Test
         fun `extends past the current year when a book finished later`() {
             // ----- Arrange -----
-            val books = listOf(readBook(
-                id = 1,
-                finishedAt = "2027-01-02",
-            ),)
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2027-01-02",
+                ),
+            )
 
             // ----- Act -----
             val history = books.toReadingHistory(today)
@@ -125,10 +129,12 @@ class ReadingHistoryMapperTest {
                     id = 2,
                     finishedAt = "2025-06-01",
                     pages = 100,
-                    editions = listOf(edition(
-                        id = 5,
-                        pages = 250,
-                    ),),
+                    editions = listOf(
+                        edition(
+                            id = 5,
+                            pages = 250,
+                        ),
+                    ),
                     editionId = 5,
                 ),
             )

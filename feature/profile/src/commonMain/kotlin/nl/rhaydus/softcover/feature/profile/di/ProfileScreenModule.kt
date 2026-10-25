@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasProfileDataCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasScopeChipsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasScopedSectionsCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.GenreRankingCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.HideUntaggedAuthorsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingLifeCollector
@@ -75,4 +76,5 @@ val profileScreenModule = module {
     factory { HideUntaggedAuthorsCollector() } bind StatsAtlasCollector::class
     factory { YearMetricToggleCollector() } bind StatsAtlasCollector::class
     factory { YearHistoryCollector() } bind StatsAtlasCollector::class
+    factory { GenreRankingCollector() } bind StatsAtlasCollector::class
 }

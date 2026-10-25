@@ -344,7 +344,7 @@ class AtlasScopedSectionsCollectorTest {
         }
 
         @Test
-        fun `writes the stats of the scope into the opening tiles and genres`() = runTest(UnconfinedTestDispatcher()) {
+        fun `writes the stats of the scope into the opening tiles and the genre flag`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
             statsFor = {
@@ -359,7 +359,6 @@ class AtlasScopedSectionsCollectorTest {
                                 fraction = 0.6,
                             ),
                         ),
-                        taggedBookCount = 5,
                     ),
                 )
             }
@@ -370,13 +369,11 @@ class AtlasScopedSectionsCollectorTest {
             // ----- Assert -----
             stateFlow.value.opening.hero.stat.value shouldBe 1_500.0
             stateFlow.value.heroCaption() shouldBe "From 5 finished books in 2025."
-            stateFlow.value.hasGenres shouldBe true
-            stateFlow.value.genreRanking.rows.map { it.label } shouldBe listOf("Fantasy")
             job.cancel()
         }
 
         @Test
-        fun `an empty scope yields the empty framing sentences`() = runTest(UnconfinedTestDispatcher()) {
+        fun `an empty scope yields the empty captions`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFor(StatsScope.CalendarYear(2025))
             statsFor = { ReadingStats() }
@@ -385,7 +382,6 @@ class AtlasScopedSectionsCollectorTest {
             val job = launchCollector()
 
             // ----- Assert -----
-            stateFlow.value.hasGenres shouldBe false
             stateFlow.value.genreEmptyCaption shouldBe "No finished books in 2025."
             stateFlow.value.ratingsEmptyCaption shouldBe "No finished books in 2025."
             stateFlow.value.authorsEmptyCaption shouldBe "No finished books in 2025."

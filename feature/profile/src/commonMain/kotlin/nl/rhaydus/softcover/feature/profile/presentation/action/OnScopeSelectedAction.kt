@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.action
 
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.COLLAPSED_GENRE_COUNT
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.statsScopeKey
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
@@ -20,6 +21,11 @@ internal class OnScopeSelectedAction(val statsScope: StatsScope) : StatsAtlasAct
         val selectedKey = statsScopeKey(statsScope)
 
         scope.setLocalVariables { it.copy(hasUserPickedScope = true) }
-        scope.setState { it.copy(selectedScopeKey = selectedKey) }
+        scope.setState {
+            it.copy(
+                selectedScopeKey = selectedKey,
+                genreRankingShownCount = COLLAPSED_GENRE_COUNT,
+            )
+        }
     }
 }

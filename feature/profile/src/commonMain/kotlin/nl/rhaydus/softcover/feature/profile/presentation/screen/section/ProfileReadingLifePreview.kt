@@ -154,7 +154,6 @@ private fun previewGenres(): GenreBreakdown = GenreBreakdown(
             fraction = 0.128,
         ),
     ),
-    taggedBookCount = 148,
 )
 
 private fun previewAuthorDemographics(): AuthorDemographics = AuthorDemographics(

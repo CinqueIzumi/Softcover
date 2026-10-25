@@ -142,16 +142,16 @@ private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Dem
     - isLoading: STABLE (primitive type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.GenreRankingSection(hasGenres: kotlin.Boolean, genreScopeCaption: kotlin.String, emptyCaption: kotlin.String, genreRanking: nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel, isLoading: kotlin.Boolean, header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.GenresChapter(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, ranking: nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel, showMore: nl.rhaydus.softcover.core.component.button.PillButtonUiModel?, showLess: nl.rhaydus.softcover.core.component.button.PillButtonUiModel?, onShowMore: kotlin.Function0<kotlin.Unit>, onShowLess: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:
-    - hasGenres: STABLE (primitive type)
-    - genreScopeCaption: STABLE (String is immutable)
-    - emptyCaption: STABLE (String is immutable)
-    - genreRanking: STABLE (marked @Stable or @Immutable)
-    - isLoading: STABLE (primitive type)
     - header: STABLE (marked @Stable or @Immutable)
+    - ranking: STABLE (marked @Stable or @Immutable)
+    - showMore: STABLE (marked @Stable or @Immutable)
+    - showLess: STABLE (marked @Stable or @Immutable)
+    - onShowMore: STABLE (function type)
+    - onShowLess: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -241,6 +241,16 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Re
     - isLoading: STABLE (primitive type)
     - header: STABLE (marked @Stable or @Immutable)
     - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.RevealButton(model: nl.rhaydus.softcover.core.component.button.PillButtonUiModel?, playMotion: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - playMotion: STABLE (primitive type)
+    - onClick: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable

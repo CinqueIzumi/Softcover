@@ -18,10 +18,14 @@ internal fun readBook(
     editionId: Int? = null,
     authors: List<Author> = emptyList(),
     tags: List<Tag> = emptyList(),
-    reads: List<UserBookRead> = listOfNotNull(finishedAt?.let { finishedRead(
-        id = id,
-        finishedAt = it,
-    ) },),
+    reads: List<UserBookRead> = listOfNotNull(
+        finishedAt?.let {
+            finishedRead(
+                id = id,
+                finishedAt = it,
+            )
+        },
+    ),
 ): Book = Book(
     id = id,
     title = "Book $id",

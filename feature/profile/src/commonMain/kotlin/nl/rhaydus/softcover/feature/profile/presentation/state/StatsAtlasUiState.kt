@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
+import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
@@ -20,6 +21,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_KEY
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_LINE
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.COLLAPSED_GENRE_COUNT
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasChapterHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsHeader
@@ -32,8 +34,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreak
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingGenreHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
@@ -84,10 +86,17 @@ internal data class StatsAtlasUiState(
         metric = YearMetric.BOOKS,
     ),
 
-    /** Mapped by `AtlasScopedSectionsCollector`, which also decides when they stop loading. */
-    val genreRanking: RankedBarsUiModel = genreRankingUiModel(null),
-    val hasGenres: Boolean = false,
-    val genreScopeCaption: String = genreScopeCaption(taggedBookCount = 0),
+    /** Mapped by `GenreRankingCollector` off [readingStats], [genreRankingShownCount] and [genreEmptyCaption]. */
+    val genreHeader: SectionHeaderUiModel.Section = loadingGenreHeader(),
+    val genreRanking: RankedBarsUiModel = genreRankingUiModel(
+        slices = null,
+        shownCount = COLLAPSED_GENRE_COUNT,
+    ),
+    val genreRankingShowMore: PillButtonUiModel? = null,
+    val genreRankingShowLess: PillButtonUiModel? = null,
+    val genreRankingShownCount: Int = COLLAPSED_GENRE_COUNT,
+
+    /** Mapped by `AtlasScopedSectionsCollector` together with the stats it describes. */
     val genreEmptyCaption: String = genreEmptyCaption(booksRead = 0),
 
     /**
@@ -130,10 +139,6 @@ internal data class StatsAtlasUiState(
     val authorRepresentationHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Who you read",
         headline = "Who you've been reading",
-    ),
-    val genreRankingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "What you reach for",
-        headline = "The genres you read most",
     ),
     val recentlyLovedHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Recently loved",

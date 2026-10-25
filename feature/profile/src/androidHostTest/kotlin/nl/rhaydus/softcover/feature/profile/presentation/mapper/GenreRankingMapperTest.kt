@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import nl.rhaydus.softcover.core.component.chart.ChartTone
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.StatsScope
-import nl.rhaydus.softcover.core.domain.model.StatsWindow
-import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -21,211 +21,341 @@ class GenreRankingMapperTest {
         fraction = fraction,
     )
 
+    private fun SectionHeaderUiModel.Section.descriptionOrEmpty(): String =
+        description.orEmpty().joinToString(separator = "") { it.text }
+
+    private fun slices(count: Int): List<GenreSlice> = List(count) { index ->
+        slice(
+            name = "Genre $index",
+            fraction = 0.8 - index * 0.05,
+        )
+    }
+
     @Nested
-    inner class GenreRankingUiModelTests {
+    inner class GenreHeaderTests {
         @Test
-        fun `returns the loading model with three masked rows when genres is null`() {
+        fun `headlines the top genre in lowercase with its share`() {
             // ----- Arrange -----
-            val genres: GenreBreakdown? = null
-
-            // ----- Act -----
-            val result = genreRankingUiModel(genres)
-
-            // ----- Assert -----
-            result.isLoading shouldBe true
-            result.rows shouldHaveSize 3
-            result.rows.map { it.tone } shouldBe listOf(ChartTone.Lead, ChartTone.Second, ChartTone.Third)
-            result.rows.map { it.label }.toSet() shouldBe setOf("")
-        }
-
-        @Test
-        fun `returns no rows and is not loading when there are no slices`() {
-            // ----- Arrange -----
-            val genres = GenreBreakdown()
-
-            // ----- Act -----
-            val result = genreRankingUiModel(genres)
-
-            // ----- Assert -----
-            result.isLoading shouldBe false
-            result.rows shouldHaveSize 0
-        }
-
-        @Test
-        fun `maps a single slice to a Lead row with a rounded share`() {
-            // ----- Arrange -----
-            val fantasy = slice(
-                name = "Fantasy",
-                fraction = 0.625,
-            )
-            val genres = GenreBreakdown(slices = listOf(fantasy))
-
-            // ----- Act -----
-            val result = genreRankingUiModel(genres)
-
-            // ----- Assert -----
-            result.isLoading shouldBe false
-            result.rows.single().label shouldBe "Fantasy"
-            result.rows.single().share shouldBe "63%"
-            result.rows.single().fraction shouldBe 0.625f
-            result.rows.single().tone shouldBe ChartTone.Lead
-        }
-
-        @Test
-        fun `assigns tones Lead to Fifth by position`() {
-            // ----- Arrange -----
-            val genres = GenreBreakdown(
-                slices = listOf(
-                    slice(
-                        name = "A",
-                        fraction = 0.5,
-                    ),
-                    slice(
-                        name = "B",
-                        fraction = 0.4,
-                    ),
-                    slice(
-                        name = "C",
-                        fraction = 0.3,
-                    ),
-                    slice(
-                        name = "D",
-                        fraction = 0.2,
-                    ),
-                    slice(
-                        name = "E",
-                        fraction = 0.1,
-                    ),
+            val genres = listOf(
+                slice(
+                    name = "Science Fiction",
+                    fraction = 0.62,
+                ),
+                slice(
+                    name = "Fantasy",
+                    fraction = 0.4,
                 ),
             )
 
             // ----- Act -----
-            val result = genreRankingUiModel(genres)
+            val result = genreHeader(
+                slices = genres,
+                emptyCaption = "empty",
+            )
 
             // ----- Assert -----
-            result.rows.map { it.label } shouldBe listOf("A", "B", "C", "D", "E")
-            result.rows.map { it.tone } shouldBe listOf(
-                ChartTone.Lead,
-                ChartTone.Second,
-                ChartTone.Third,
-                ChartTone.Fourth,
-                ChartTone.Fifth,
-            )
+            result.headlineText shouldBe "Mostly science fiction"
+            result.descriptionOrEmpty() shouldContain "62% of your books were science fiction."
         }
 
         @Test
-        fun `keeps only the top five slices when there are more`() {
+        fun `keeps an all-caps word in the headline`() {
             // ----- Arrange -----
-            val genres = GenreBreakdown(
-                slices = listOf(
-                    "A",
-                    "B",
-                    "C",
-                    "D",
-                    "E",
-                    "F",
-                    "G",
-                ).map {
-                    slice(
-                        name = it,
-                        fraction = 0.1,
-                    )
-                },
+            val genres = listOf(
+                slice(
+                    name = "LGBTQ+ Fiction",
+                    fraction = 0.3,
+                ),
             )
 
             // ----- Act -----
-            val result = genreRankingUiModel(genres)
+            val result = genreHeader(
+                slices = genres,
+                emptyCaption = "empty",
+            )
 
             // ----- Assert -----
-            result.rows.map { it.label } shouldBe listOf("A", "B", "C", "D", "E")
+            result.headlineText shouldBe "Mostly LGBTQ+ fiction"
+        }
+
+        @Test
+        fun `a tie at the top picks the first genre of the ranking`() {
+            // ----- Arrange -----
+            val genres = listOf(
+                slice(
+                    name = "Mystery",
+                    fraction = 0.5,
+                ),
+                slice(
+                    name = "Romance",
+                    fraction = 0.5,
+                ),
+            )
+
+            // ----- Act -----
+            val result = genreHeader(
+                slices = genres,
+                emptyCaption = "empty",
+            )
+
+            // ----- Assert -----
+            result.headlineText shouldBe "Mostly mystery"
+        }
+
+        @Test
+        fun `an empty ranking says the empty caption under the generic headline`() {
+            // ----- Arrange -----
+            val caption = "No finished books in 2025."
+
+            // ----- Act -----
+            val result = genreHeader(
+                slices = emptyList(),
+                emptyCaption = caption,
+            )
+
+            // ----- Assert -----
+            result.headlineText shouldBe "The genres you read most"
+            result.descriptionOrEmpty() shouldBe caption
+            result.isLoading shouldBe false
+        }
+
+        @Test
+        fun `null slices yield the masked header`() {
+            // ----- Arrange -----
+            val genres = null
+
+            // ----- Act -----
+            val result = genreHeader(
+                slices = genres,
+                emptyCaption = "empty",
+            )
+
+            // ----- Assert -----
+            result.isLoading shouldBe true
         }
     }
 
     @Nested
-    inner class GenreScopeCaptionTests {
+    inner class GenreRankingUiModelTests {
         @Test
-        fun `falls back to the scope-free wording when the count is zero`() {
+        fun `null slices yield three masked loading rows, all visible`() {
             // ----- Arrange -----
-            val taggedBookCount = 0
+            val genres = null
 
             // ----- Act -----
-            val result = genreScopeCaption(taggedBookCount)
+            val result = genreRankingUiModel(
+                slices = genres,
+                shownCount = 5,
+            )
 
             // ----- Assert -----
-            result shouldContain "out of your finished books with genre tags"
+            result.isLoading shouldBe true
+            result.rows shouldHaveSize 3
+            result.visibleCount shouldBe 3
         }
 
         @Test
-        fun `uses the singular wording for a single book`() {
+        fun `no slices yield no rows and no loading`() {
             // ----- Arrange -----
-            val taggedBookCount = 1
+            val genres = emptyList<GenreSlice>()
 
             // ----- Act -----
-            val result = genreScopeCaption(taggedBookCount)
+            val result = genreRankingUiModel(
+                slices = genres,
+                shownCount = 5,
+            )
 
             // ----- Assert -----
-            result shouldContain "out of 1 finished book with genre tags"
+            result.isLoading shouldBe false
+            result.rows shouldHaveSize 0
+            result.visibleCount shouldBe 0
         }
 
         @Test
-        fun `names the count for several books`() {
+        fun `every genre is a row while only the shown count is visible`() {
             // ----- Arrange -----
-            val taggedBookCount = 12
+            val genres = slices(8)
 
             // ----- Act -----
-            val result = genreScopeCaption(taggedBookCount)
+            val result = genreRankingUiModel(
+                slices = genres,
+                shownCount = 5,
+            )
 
             // ----- Assert -----
-            result shouldContain "out of 12 finished books with genre tags"
+            result.rows.map { it.label } shouldBe genres.map { it.name }
+            result.visibleCount shouldBe 5
+        }
+
+        @Test
+        fun `a shown count above the ranking size shows every genre`() {
+            // ----- Arrange -----
+            val genres = slices(8)
+
+            // ----- Act -----
+            val result = genreRankingUiModel(
+                slices = genres,
+                shownCount = 15,
+            )
+
+            // ----- Assert -----
+            result.visibleCount shouldBe 8
+        }
+
+        @Test
+        fun `fills are relative to the lead and the share is rounded`() {
+            // ----- Arrange -----
+            val genres = listOf(
+                slice(
+                    name = "Fantasy",
+                    fraction = 0.625,
+                ),
+                slice(
+                    name = "Romance",
+                    fraction = 0.3125,
+                ),
+            )
+
+            // ----- Act -----
+            val result = genreRankingUiModel(
+                slices = genres,
+                shownCount = 5,
+            )
+
+            // ----- Assert -----
+            result.rows.map { it.fill } shouldBe listOf(1f, 0.5f)
+            result.rows.first().share shouldBe "63%"
         }
     }
 
+    @Nested
+    inner class GenreRankingShowMoreTests {
+        @Test
+        fun `is offered while genres remain hidden`() {
+            // ----- Arrange -----
+            val genres = slices(9)
+
+            // ----- Act -----
+            val result = genreRankingShowMore(
+                slices = genres,
+                shownCount = 5,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull()
+        }
+
+        @Test
+        fun `is gone once every genre is shown`() {
+            // ----- Arrange -----
+            val genres = slices(9)
+
+            // ----- Act -----
+            val exact = genreRankingShowMore(
+                slices = genres,
+                shownCount = 9,
+            )
+            val beyond = genreRankingShowMore(
+                slices = genres,
+                shownCount = 15,
+            )
+
+            // ----- Assert -----
+            exact.shouldBeNull()
+            beyond.shouldBeNull()
+        }
+
+        @Test
+        fun `null slices have none`() {
+            // ----- Arrange -----
+            val genres = null
+
+            // ----- Act -----
+            val result = genreRankingShowMore(
+                slices = genres,
+                shownCount = 5,
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+    }
 
     @Nested
-    inner class ScopedGenreScopeCaption {
+    inner class GenreRankingShowLessTests {
         @Test
-        fun `a scope with no tagged books names the books finished in it`() {
+        fun `is offered once more than five genres are shown`() {
             // ----- Arrange -----
-            val scope = StatsScope.CalendarYear(2026)
+            val genres = slices(20)
 
             // ----- Act -----
-            val result = genreScopeCaption(
-                taggedBookCount = 0,
-                scope = scope,
+            val result = genreRankingShowLess(
+                slices = genres,
+                shownCount = 15,
             )
 
             // ----- Assert -----
-            result shouldContain "out of the books you finished in 2026 with genre tags"
+            result.shouldNotBeNull()
         }
 
         @Test
-        fun `a scope with one tagged book uses the singular wording`() {
+        fun `is gone at the collapsed five`() {
             // ----- Arrange -----
-            val scope = StatsScope.Rolling(StatsWindow.LAST_12_MONTHS)
+            val genres = slices(20)
 
             // ----- Act -----
-            val result = genreScopeCaption(
-                taggedBookCount = 1,
-                scope = scope,
+            val result = genreRankingShowLess(
+                slices = genres,
+                shownCount = 5,
             )
 
             // ----- Assert -----
-            result shouldContain "out of the 1 book you finished in the last 12 months with genre tags"
+            result.shouldBeNull()
         }
 
         @Test
-        fun `a scope with several tagged books names the count`() {
+        fun `a ranking of five or fewer has none even with a larger shown count`() {
             // ----- Arrange -----
-            val scope = StatsScope.Rolling(StatsWindow.LAST_30_DAYS)
+            val genres = slices(4)
 
             // ----- Act -----
-            val result = genreScopeCaption(
-                taggedBookCount = 4,
-                scope = scope,
+            val result = genreRankingShowLess(
+                slices = genres,
+                shownCount = 15,
             )
 
             // ----- Assert -----
-            result shouldContain "out of the 4 books you finished in the last 30 days with genre tags"
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `a shown count above a longer ranking still offers it`() {
+            // ----- Arrange -----
+            val genres = slices(8)
+
+            // ----- Act -----
+            val result = genreRankingShowLess(
+                slices = genres,
+                shownCount = 25,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull()
+        }
+
+        @Test
+        fun `null slices have none`() {
+            // ----- Arrange -----
+            val genres = null
+
+            // ----- Act -----
+            val result = genreRankingShowLess(
+                slices = genres,
+                shownCount = 15,
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
         }
     }
 

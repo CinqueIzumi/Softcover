@@ -62,6 +62,22 @@ class OnScopeSelectedActionTest {
         }
 
         @Test
+        fun `collapses the genre ranking back to five when a scope is selected`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = StatsAtlasUiState(genreRankingShownCount = 25)
+            val action = OnScopeSelectedAction(statsScope = StatsScope.CalendarYear(2025))
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.genreRankingShownCount shouldBe 5
+        }
+
+        @Test
         fun `records that the reader picked a scope`() = runTest {
             // ----- Arrange -----
             val action = OnScopeSelectedAction(statsScope = StatsScope.AllTime)

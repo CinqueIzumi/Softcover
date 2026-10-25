@@ -36,18 +36,6 @@ internal fun ColumnScope.TemporaryChapter(
 
     Spacer(modifier = Modifier.height(Spacing.section))
 
-    GenreRankingSection(
-        hasGenres = state.hasGenres,
-        genreScopeCaption = state.genreScopeCaption,
-        emptyCaption = state.genreEmptyCaption,
-        genreRanking = state.genreRanking,
-        isLoading = state.isReadingLifeLoading,
-        header = state.genreRankingHeader,
-        modifier = Modifier.fillMaxWidth(),
-    )
-
-    Spacer(modifier = Modifier.height(Spacing.section))
-
     AuthorRepresentationSection(
         genderBreakdown = state.genderBreakdown,
         bipocBreakdown = state.bipocBreakdown,

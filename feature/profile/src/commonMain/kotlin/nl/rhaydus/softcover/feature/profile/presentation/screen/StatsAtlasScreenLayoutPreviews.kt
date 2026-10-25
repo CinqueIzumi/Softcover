@@ -4,12 +4,16 @@ import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_KEY
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.COLLAPSED_GENRE_COUNT
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingShowLess
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingShowMore
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
@@ -58,9 +62,22 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
     ),
     hasMonthlyPages = true,
     monthlyPagesMonthSetKey = monthlyPagesMonthSetKey(PreviewMonthlyPages),
-    genreRanking = genreRankingUiModel(PreviewReadingStats.genres),
-    hasGenres = true,
-    genreScopeCaption = genreScopeCaption(taggedBookCount = PreviewReadingStats.genres.taggedBookCount),
+    genreHeader = genreHeader(
+        slices = PreviewReadingStats.genres.slices,
+        emptyCaption = genreEmptyCaption(booksRead = PreviewReadingStats.booksRead),
+    ),
+    genreRanking = genreRankingUiModel(
+        slices = PreviewReadingStats.genres.slices,
+        shownCount = COLLAPSED_GENRE_COUNT,
+    ),
+    genreRankingShowMore = genreRankingShowMore(
+        slices = PreviewReadingStats.genres.slices,
+        shownCount = COLLAPSED_GENRE_COUNT,
+    ),
+    genreRankingShowLess = genreRankingShowLess(
+        slices = PreviewReadingStats.genres.slices,
+        shownCount = COLLAPSED_GENRE_COUNT,
+    ),
     genderBreakdown = genderBreakdownUiModel(
         demographics = PreviewReadingStats.authorDemographics,
         hideUntaggedAuthors = false,

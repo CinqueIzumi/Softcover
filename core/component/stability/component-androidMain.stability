@@ -475,6 +475,17 @@ public fun nl.rhaydus.softcover.core.component.chart.ProportionChart(model: nl.r
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+private fun nl.rhaydus.softcover.core.component.chart.RankedBarRow(row: nl.rhaydus.softcover.core.component.chart.RankedBarUiModel, position: kotlin.Int, isLoading: kotlin.Boolean, positionWidth: androidx.compose.ui.unit.Dp, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - row: STABLE (marked @Stable or @Immutable)
+    - position: STABLE (primitive type)
+    - isLoading: STABLE (primitive type)
+    - positionWidth: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 public fun nl.rhaydus.softcover.core.component.chart.RankedBars(model: nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true

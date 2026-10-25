@@ -19,9 +19,9 @@
   leaves the row falls back to All time.
 - Beneath the row, a quiet italic line names the dates: "Showing 2026", "Showing 24 September to today"
   (the year is added only when the window starts in an earlier one), "Showing every year".
-- The scope moves the opening tiles, the pages-by-month chart, "The genres you read most", "Who you read"
-  (Hide untagged authors still applies) and "How you score". "Recently loved" and the year chart ignore it. Values animate between scopes;
-  labels cross-fade, and reduced motion swaps them in place.
+- The scope moves the opening tiles, the pages-by-month chart, the genre ranking, "Who you read"
+  (Hide untagged authors still applies) and "How you score". "Recently loved" and the year chart ignore
+  it. Values animate between scopes; labels cross-fade, and reduced motion swaps them in place.
 - A scope with no finished books says so in each section's framing sentence ("No finished books in the last
   30 days.") instead of drawing an empty chart; the opening tiles show 0 and say nothing was finished. In a
   narrow scope with too few ratings to classify, "How you score" states the count ("3 rated books in the last
@@ -30,7 +30,7 @@
   `Second`, zero years a `Fifth` stub) and the caption names that year and its count for the Books / Pages
   metric; a rolling window or All time lights the busiest year.
 - Contents rows (two-digit number, title, caption, chevron) scroll the page to their chapter's top. A
-  chapter opens with an eyebrow "02 · Title". Numbers are fixed per chapter (02 and 99), following the
+  chapter opens with an eyebrow "02 · Title". Numbers are fixed per chapter (02, 03 and 99), following the
   design's chapter list rather than position, so row and header always agree; the other chapters land with
   later 3.3.0 issues.
 - A stat the app holds no data source for yet (reading days) is left out, never a 0.
@@ -46,8 +46,19 @@
   every year. Month labels are three letters, on every third column. The chart cross-fades only when the
   set of months changes (year to all time animates in place). A month after today with no pages is a "still
   to come" stub, named in the description.
+- Chapter 03, "Genres and how you read" (caption "What you reach for, and how it reads."), opens with a
+  headline naming the top genre ("Mostly fantasy", each word lowercased unless it is all capitals, like
+  "LGBTQ+"; a tie goes to the ranking's order) over a `RankedBars` ranking of the top five genres. A
+  "Show more" outlined `PillButton` under the rows, present while genres remain hidden, reveals ten more
+  per tap with a light haptic tick, and a "Show less" button beside it, present while more than five are
+  shown, first scrolls the Atlas to the top of the chapter and then folds the ranking back to five. Each
+  row past the visible count unfolds its own height and fades in, or folds its height, so the buttons
+  ride the list's bottom edge; rows off screen when the fold starts drop out at once. The buttons fade
+  and slide in and out. The header and its description stay the same throughout, so a tap animates only
+  the rows and the buttons. Rows visible at first data, the loading swap and a scope switch do not
+  animate in. A scope switch folds the ranking back to five. A scope with no genres says "The genres you read most" over its empty sentence, with no rows.
 - Chapter 99, "Temporary" (removed later), holds the former Profile charts: "The shape of the years" (a
-  `ColumnChart` behind a Books / Pages `SegmentedControl`); "The genres you read most"; "Who you read";
+  `ColumnChart` behind a Books / Pages `SegmentedControl`); "Who you read";
   "How you score" (headline from the rating band, never the bare average); "Recently loved" (up to three
   4★+ reads). Each opens with eyebrow + italic headline (§3.2).
 
@@ -55,8 +66,9 @@
 
 - Monochrome `primary` with `ChartTone` alphas; shape carries the data. Flat bars, never the wavy indicator.
 - `ProportionChart` only for exclusive, exhaustive categories (gender: up to three ranked slices plus
-  `Unknown` last, muted). `RankedBars` for overlapping ones (top five genres, each a share of genre-tagged
-  books, track always 100%); the caption names the denominator.
+  `Unknown` last, muted). `RankedBars` for overlapping ones (genres, each a share of books; position,
+  name over a track, share, with each bar filled relative to the lead row, which is always full); the
+  description names what the shares count.
 - `ColumnChart`: books per year (peak `Lead`, others `Second`, zero a `Fifth` stub); pages per month (the
   peak `Lead` and the only column with a value, the next two `Second`, other non-zero `Third`, zero or
   future `Fifth`; ties go to the earliest month; labels on every third column); and the half-star
