@@ -344,6 +344,39 @@ Filed but not yet implemented in the foundation.
 - **Impact in the app:** both buttons pass `icon.contentDescription` to the leading `Icon`, so a screen reader reads the label twice ("Update progress, Update progress"): Reading's `FeaturedSessionButton` and `FeaturedBackdropCard`, and every other labelled button with an icon.
 - **What to build:** render the leading icon with `contentDescription = null` in `RhaydusButton` and in `RhaydusSplitButton`'s leading half, because the label already names the button. The split button's trailing toggle keeps its description. Note the ignored description in both KDocs.
 
+### F57 — detekt rule: a `UiState` getter that builds a UI model
+
+- **Type:** gate (detekt rule)
+- **Home:** `nl.rhaydus:detekt-rules`
+- **Status:** **Open.** Caught by review only, and the reviewer has it in agent memory.
+- **The trap:** `val header: FooUiModel get() = FooUiModel(...)` on a `UiState` looks like a stored field but
+  runs the constructor on every render read, the same as building the model in the composable.
+- **What to build:** flag a `get()`-bodied property on a `*UiState` class that constructs a `*UiModel`. The fix is
+  a stored field with a default, with collectors `copy()` into it.
+
+### F58 — `ktlintFormat` leaves `),)` when it wraps a nested call
+
+- **Type:** bug (formatter)
+- **Home:** `nl.rhaydus:ktlint-rules` (`multi-arg-wrapping`)
+- **Status:** **Open.** The test-writer greps for `),)` after every `ktlintFormat` run.
+- **Repro:** `outer.set(inner(arg1, arg2))` with `inner`'s arguments over the line limit formats to
+  `outer.set(inner(\n arg1,\n arg2,\n),)`.
+- **What to build:** the auto-fix also wraps the outer call, so the output is `outer.set(\n inner(\n …\n ),\n)`.
+
+### F59 — Foundation API behaviour that lives only in reviewer memory
+
+- **Type:** doc (KDoc + `toad-architecture.md`)
+- **Home:** `nl.rhaydus:designsystem-core`, `nl.rhaydus:toad`, foundation `docs/toad-architecture.md`
+- **Status:** **Open.** Three facts about foundation APIs that Softcover's reviewer keeps in memory. Once they
+  are documented, delete those memory files.
+- **What to document:**
+  - `AdaptiveModalSheet` KDoc: a body of pinned rows plus one `weight(1f)` scrolling region fills the available
+    height in both forms; `imePadding()` belongs on the outer column.
+  - `hoverHighlight` / `pressScale` KDoc: `clickable` and its siblings already emit `HoverInteraction`, so an
+    added `hoverable(source)` on the same source is a second emitter.
+  - `toad-architecture.md`: a composable embedded in another Screen receives its ScreenModel from the owning
+    `Screen`; `koinNavigatorScreenModel` widens the scope to the Navigator's lifetime.
+
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
 - **Type:** gate (custom Gradle task)

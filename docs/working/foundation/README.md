@@ -15,11 +15,16 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** the submodule switch is built, verified (the PR gate and the iOS compile pass) and committed
-  locally; nothing pushed.
-- **Next:** step 1 (audit Softcover's agent setup against the plugin).
+- **State:** step 1 (audit) is done: every FU row in `agent-layer.md` has a decision, with FU-14 (slow-Gradle
+  blocker) added, the generic shape, the plugin lines to keep and the agent-memory triage recorded there;
+  F57–F59 added to `candidates.md`. Both repos committed locally up to the submodule switch; nothing pushed,
+  tagged or filed.
+- **Next:** step 2 (generic agent layer) in the foundation submodule, starting with FU-1 (the agent trio) and
+  FU-13 (plugin text naming the old agents), driven by `agent-layer.md` § Generic shape.
 - **Open questions:** none.
-- **Uncommitted:** none.
+- **Verification:** `check koverXmlReport :build-logic:test -x lint` and the iOS compile passed after the last
+  Kotlin change; step 1 changed docs only.
+- **Uncommitted:** this README, `agent-layer.md`, `candidates.md`.
 
 ## How to run a step
 
@@ -33,7 +38,7 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 | Step | Scope | Status |
 |---|---|---|
-| 1 | Audit Softcover's agent setup against the plugin | [ ] |
+| 1 | Audit Softcover's agent setup against the plugin | [x] |
 | 2 | A generic agent layer in `rhaydus-kotlin`, adopted in Softcover | [ ] |
 | 3 | Fix what the foundation already ships | [ ] |
 | 4 | Ship: push, tag, move the pointer | [ ] |
@@ -42,13 +47,13 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 Read-only. The output is a decision per item, recorded in `agent-layer.md` and under `## Decisions`.
 
-- [ ] Compare Softcover's `.claude/agents/softcover-*.md`, hooks, skills, rules and `docs/reference/agent-briefs.md`
+- [x] Compare Softcover's `.claude/agents/softcover-*.md`, hooks, skills, rules and `docs/reference/agent-briefs.md`
       with the plugin's agents, hook and skill in `foundation/claude/plugins/rhaydus-kotlin/`.
-- [ ] Mine `.claude/agent-memory/**` for lessons the generic agents should carry.
-- [ ] Check every finding against the existing FU rows in `agent-layer.md` and the entries in `candidates.md`;
+- [x] Mine `.claude/agent-memory/**` for lessons the generic agents should carry.
+- [x] Check every finding against the existing FU rows in `agent-layer.md` and the entries in `candidates.md`;
       one already covered updates that row or entry instead of adding a duplicate.
-- [ ] Per item: upstream (generic), stay in Softcover (project fact or personal preference), or drop.
-- [ ] Decide the generic shape: what the agents carry (process) and what each project supplies (doc paths, brief
+- [x] Per item: upstream (generic), stay in Softcover (project fact or personal preference), or drop.
+- [x] Decide the generic shape: what the agents carry (process) and what each project supplies (doc paths, brief
       templates, Gradle wrapper, module names) and where `rhaydus-adopt` writes it.
 
 ### 2 — Generic agent layer
@@ -56,8 +61,8 @@ Read-only. The output is a decision per item, recorded in `agent-layer.md` and u
 - [ ] The implementer / reviewer / test-writer trio replaces `rhaydus-logic` / `rhaydus-ui` / `code-reviewer` /
       `unit-test-writer` (FU-1, FU-7, FU-10).
 - [ ] The hooks, `/handoff` skill, quiet-Gradle script, token-usage script and doc-growth guards the audit marked
-      generic (FU-2 to FU-5, FU-11, FU-12).
-- [ ] The docs-first reminder names the new agents (FU-13).
+      generic (FU-2 to FU-5, FU-11, FU-12, FU-14).
+- [ ] The plugin text names the new agents and no longer cites the sibling-checkout docs path (FU-13).
 - [ ] `rhaydus-adopt` writes the catalogue-style managed `CLAUDE.md` block and the `.claude/rules/*.md` templates
       (FU-6).
 - [ ] Split rule from rationale in `foundation/docs/` (FU-8).
@@ -101,6 +106,10 @@ Bugs and gaps in shared code only; new components, design tokens and house-style
 - One plugin, `rhaydus-kotlin`, loaded per project from its own `foundation/` checkout; no user-scope install.
 - The plugin ships process; project facts live in the project; personal preferences stay with the user.
 - Maven Central publishing stays live until the second app builds from the submodule.
+- Project facts reach the plugin agents through an `## Agent parameters` table in the managed `CLAUDE.md` block.
+- Plugin hooks register in the plugin `hooks.json`; the quiet-Gradle script ships in the plugin, not via adopt.
+- The plugin agents drop the `softcover-` prefix; Softcover uses the plugin names after step 2.
+- Commit style and engineering principles move to user scope, not into the plugin.
 
 ## Baseline
 
