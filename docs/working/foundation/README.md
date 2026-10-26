@@ -15,20 +15,14 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** step 2 is done except FU-8. Every FU row but FU-8 is upstreamed; Softcover runs only the plugin's
-  agents, hooks and skills, carries the managed `CLAUDE.md` block with `## Agent parameters`, and keeps its
-  agent memory in `.claude/agent-memory/rhaydus-kotlin-*`.
-- **Next:** FU-8 (row in `agent-layer.md`, box in § 2 below): split rule from rationale in
-  `foundation/docs/code-style.md`, `architecture.md` and `design-system-foundations.md`, in the submodule.
+- **State:** step 2 is done; every FU row is upstreamed. The three large foundation docs hold rules and facts
+  only (96KB to 79KB), headings unchanged so every cited anchor resolves.
+- **Next:** step 3, component bugs (first box in § 3 below).
 - **Open questions:** none.
-- **Verification:** close-out gates not run: no `.kt` changed this session (markdown and JSON only).
-  `checkDocBudgets` passed; plugin hook case runners passed; plugin app-name grep clean; plugin-half review
-  blockers fixed.
-- **Uncommitted:** foundation: `rhaydus-adopt`, implementer, style-check skill, README, new `templates/`
-  (user-staged; the `kotlin-style.md` template line unstaged). Softcover: `CLAUDE.md` managed block,
-  `.claude/{settings,rhaydus}.json`, rule files, deleted `softcover-*` agents and local `style-check`, agent
-  memory moved to `rhaydus-kotlin-*`, agent names in `agent-briefs.md` and three plan READMEs, this tracker,
-  `agent-layer.md`, `candidates.md` (F60), the submodule pointer.
+- **Verification:** markdown only, no Kotlin gates. Heading lists diff clean against the pre-edit copies;
+  no em-dashes; code-fence counts unchanged; dropped must/never phrasings spot-checked as rewrites.
+- **Uncommitted:** foundation: `docs/{code-style,architecture,design-system-foundations}.md`. Softcover: this
+  tracker, `agent-layer.md`, the submodule pointer once the foundation commit lands.
 
 ## How to run a step
 
@@ -69,7 +63,7 @@ Read-only. The output is a decision per item, recorded in `agent-layer.md` and u
 - [x] The plugin text names the new agents and no longer cites the sibling-checkout docs path (FU-13).
 - [x] `rhaydus-adopt` writes the catalogue-style managed `CLAUDE.md` block and the `.claude/rules/*.md` templates
       (FU-6).
-- [ ] Split rule from rationale in `foundation/docs/` (FU-8).
+- [x] Split rule from rationale in `foundation/docs/` (FU-8).
 - [x] Softcover adopts it: re-run `rhaydus-adopt`; delete the four deny rules, the duplicate
       `.claude/skills/style-check/` and every local hook, script or agent the plugin now ships; the `CLAUDE.md`
       local override becomes the managed block.
