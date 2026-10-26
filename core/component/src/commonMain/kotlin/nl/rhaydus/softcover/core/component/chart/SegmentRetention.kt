@@ -1,9 +1,11 @@
 package nl.rhaydus.softcover.core.component.chart
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
+@Stable
 internal class SegmentRetention(
     live: List<ChartSliceUiModel>,
     initialLoading: Boolean,

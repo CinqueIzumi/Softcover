@@ -170,7 +170,7 @@ component/
 +              SkeletonMask (Modifier.skeletonMask)
 +              · ErrorState
 + chart/       ChartTone  RankedBars(+UiModel, +BarUiModel)
-+              ProportionChart(+UiModel, +SegmentUiModel)
++              ProportionChart(+UiModel, +Variant, +ChartSliceUiModel)
 +              ColumnChart(+UiModel)  ColumnUiModel
 + statistic/   StatNumber  StatNumberUiModel  StatNumberFormat
 +              StatTile(+UiModel, +Variant)

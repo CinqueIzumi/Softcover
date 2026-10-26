@@ -77,7 +77,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **ColumnChart** — `chart` — vertical columns on one baseline with a per-column readout.
 - **RankedBars** — `chart` — numbered rows, each a name over a bar filled relative to the lead row, with its share.
   Rows from `visibleCount` on fold in and out one by one.
-- **ProportionChart** — `chart` — one stacked bar of parts of a whole, with its legend.
+- **ProportionChart** — `chart` — one slim stacked bar of parts of a whole, with its legend as rows or inline keys (`ProportionChartVariant`).
 
 ## Share
 

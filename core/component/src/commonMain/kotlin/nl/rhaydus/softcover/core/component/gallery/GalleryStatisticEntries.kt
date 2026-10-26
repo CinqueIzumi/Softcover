@@ -44,8 +44,8 @@ internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "ProportionChart",
         family = GalleryFamily.CHART,
-        blurb = "A stacked bar of parts of a whole with its legend beneath; an Unknown segment " +
-            "renders muted and a zero segment draws nothing.",
+        blurb = "A stacked bar of parts of a whole with its legend beneath, as rows or as inline keys; " +
+            "an Unknown segment renders muted and a zero segment draws nothing.",
         previews = ProportionChartUiModel,
         content = { model, modifier ->
             ProportionChart(
