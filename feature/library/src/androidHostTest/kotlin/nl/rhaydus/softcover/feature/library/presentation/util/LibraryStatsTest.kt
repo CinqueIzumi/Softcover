@@ -227,32 +227,9 @@ class LibraryStatsTest {
         }
 
         @Test
-        fun `returns year from latest journal when multiple finished journals exist`() {
+        fun `a book with only a finished journal has no finished year`() {
             // ----- Arrange -----
-            val journals = listOf(
-                buildFinishedJournal("2021-01-01T00:00:00"),
-                buildFinishedJournal("2023-12-31T23:59:59"),
-            )
-
-            val book = buildBook(userBook = buildUserBook(journals = journals))
-
-            // ----- Act -----
-            val result = book.finishedYear()
-
-            // ----- Assert -----
-            result shouldBe 2023
-        }
-
-        @Test
-        fun `returns null for malformed updatedAt date`() {
-            // ----- Arrange -----
-            val journals = listOf(
-                ReadingJournal(
-                    updatedAt = "not-a-date",
-                    event = JournalEventType.StatusFinished.eventName,
-                ),
-            )
-
+            val journals = listOf(buildFinishedJournal("2023-12-31T23:59:59"))
             val book = buildBook(userBook = buildUserBook(journals = journals))
 
             // ----- Act -----
@@ -260,6 +237,25 @@ class LibraryStatsTest {
 
             // ----- Assert -----
             result shouldBe null
+        }
+
+        @Test
+        fun `the newest finished read decides the year among several reads`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                userBook = buildUserBook(
+                    reads = listOf(
+                        buildUserBookRead(finishedAt = "2021-01-01"),
+                        buildUserBookRead(finishedAt = "2023-12-31"),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2023
         }
 
         @Test
@@ -316,34 +312,6 @@ class LibraryStatsTest {
 
             // ----- Assert -----
             result shouldBe 2021
-        }
-
-        @Test
-        fun `a journal at UTC year-end evening counts toward the next year in a zone ahead of UTC`() {
-            // ----- Arrange -----
-            TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"))
-            val journals = listOf(buildFinishedJournal("2025-12-31T23:30:00.000000"))
-            val book = buildBook(userBook = buildUserBook(journals = journals))
-
-            // ----- Act -----
-            val result = book.finishedYear()
-
-            // ----- Assert -----
-            result shouldBe 2026
-        }
-
-        @Test
-        fun `a journal at UTC new-year morning counts toward the previous year in a zone behind UTC`() {
-            // ----- Arrange -----
-            TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Pago_Pago"))
-            val journals = listOf(buildFinishedJournal("2026-01-01T05:00:00.000000"))
-            val book = buildBook(userBook = buildUserBook(journals = journals))
-
-            // ----- Act -----
-            val result = book.finishedYear()
-
-            // ----- Assert -----
-            result shouldBe 2025
         }
 
         @Test
@@ -418,19 +386,19 @@ class LibraryStatsTest {
                 buildBook(
                     id = 1,
                     userBook = buildUserBook(
-                        journals = listOf(buildFinishedJournal("2021-06-01T00:00:00")),
+                        reads = listOf(buildUserBookRead(finishedAt = "2021-06-01")),
                     ),
                 ),
                 buildBook(
                     id = 2,
                     userBook = buildUserBook(
-                        journals = listOf(buildFinishedJournal("2023-01-01T00:00:00")),
+                        reads = listOf(buildUserBookRead(finishedAt = "2023-01-01")),
                     ),
                 ),
                 buildBook(
                     id = 3,
                     userBook = buildUserBook(
-                        journals = listOf(buildFinishedJournal("2021-12-31T00:00:00")),
+                        reads = listOf(buildUserBookRead(finishedAt = "2021-12-31")),
                     ),
                 ),
             )

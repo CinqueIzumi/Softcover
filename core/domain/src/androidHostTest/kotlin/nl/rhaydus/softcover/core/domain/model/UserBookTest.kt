@@ -73,10 +73,14 @@ class UserBookTest {
             val userBook = buildUserBook(
                 journals = emptyList(),
                 status = BookStatus.Reading,
-                reads = listOf(read(id = 1), read(id = 3), read(
-                    id = 2,
-                    finishedAt = "2026-01-01",
-                ),),
+                reads = listOf(
+                    read(id = 1),
+                    read(id = 3),
+                    read(
+                        id = 2,
+                        finishedAt = "2026-01-01",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -92,10 +96,13 @@ class UserBookTest {
             val userBook = buildUserBook(
                 journals = emptyList(),
                 status = BookStatus.Reading,
-                reads = listOf(read(id = 1), read(
-                    id = 2,
-                    finishedAt = "2026-01-01",
-                ),),
+                reads = listOf(
+                    read(id = 1),
+                    read(
+                        id = 2,
+                        finishedAt = "2026-01-01",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -136,10 +143,13 @@ class UserBookTest {
             val userBook = buildUserBook(
                 journals = emptyList(),
                 status = BookStatus.Paused,
-                reads = listOf(read(id = 1), read(
-                    id = 2,
-                    finishedAt = "2026-01-01",
-                ),),
+                reads = listOf(
+                    read(id = 1),
+                    read(
+                        id = 2,
+                        finishedAt = "2026-01-01",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -241,10 +251,13 @@ class UserBookTest {
             val userBook = buildUserBook(
                 journals = emptyList(),
                 status = BookStatus.DidNotFinish,
-                reads = listOf(read(id = 1), read(
-                    id = 2,
-                    finishedAt = "2026-01-01",
-                ),),
+                reads = listOf(
+                    read(id = 1),
+                    read(
+                        id = 2,
+                        finishedAt = "2026-01-01",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -352,13 +365,17 @@ class UserBookTest {
             // ----- Arrange -----
             val userBook = buildUserBook(
                 journals = emptyList(),
-                reads = listOf(read(
-                    id = 1,
-                    finishedAt = "2026-01-01",
-                ), read(id = 2), read(
-                    id = 3,
-                    finishedAt = "2025-01-01",
-                ),),
+                reads = listOf(
+                    read(
+                        id = 1,
+                        finishedAt = "2026-01-01",
+                    ),
+                    read(id = 2),
+                    read(
+                        id = 3,
+                        finishedAt = "2025-01-01",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -417,13 +434,16 @@ class UserBookTest {
             // ----- Arrange -----
             val userBook = buildUserBook(
                 journals = emptyList(),
-                reads = listOf(read(
-                    id = 1,
-                    finishedAt = "garbage",
-                ), read(
-                    id = 2,
-                    finishedAt = "2025-02-02",
-                ),),
+                reads = listOf(
+                    read(
+                        id = 1,
+                        finishedAt = "garbage",
+                    ),
+                    read(
+                        id = 2,
+                        finishedAt = "2025-02-02",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -447,10 +467,12 @@ class UserBookTest {
             val userBook = buildUserBook(
                 journals = listOf(journalFinished),
                 lastReadDate = "2026-03-11",
-                reads = listOf(read(
-                    id = 1,
-                    finishedAt = "2026-04-01",
-                ),),
+                reads = listOf(
+                    read(
+                        id = 1,
+                        finishedAt = "2026-04-01",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -470,10 +492,12 @@ class UserBookTest {
             val userBook = buildUserBook(
                 journals = listOf(journalFinished),
                 lastReadDate = "2026-05-01",
-                reads = listOf(read(
-                    id = 1,
-                    finishedAt = "2026-04-01",
-                ),),
+                reads = listOf(
+                    read(
+                        id = 1,
+                        finishedAt = "2026-04-01",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -488,15 +512,17 @@ class UserBookTest {
         }
 
         @Test
-        fun `the finished journal wins when it is the latest source`() {
+        fun `a finished journal later than the read does not change the finish date`() {
             // ----- Arrange -----
             val userBook = buildUserBook(
                 journals = listOf(journalFinished),
                 lastReadDate = "2026-03-01",
-                reads = listOf(read(
-                    id = 1,
-                    finishedAt = "2026-02-01",
-                ),),
+                reads = listOf(
+                    read(
+                        id = 1,
+                        finishedAt = "2026-02-01",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -506,8 +532,20 @@ class UserBookTest {
             result shouldBe LocalDate(
                 2026,
                 3,
-                10,
+                1,
             )
+        }
+
+        @Test
+        fun `a read book with only a finished journal has no finish date`() {
+            // ----- Arrange -----
+            val userBook = buildUserBook(journals = listOf(journalFinished))
+
+            // ----- Act -----
+            val result = userBook.finishDate
+
+            // ----- Assert -----
+            result.shouldBeNull()
         }
 
         @Test
@@ -525,68 +563,6 @@ class UserBookTest {
 
     @Nested
     inner class GetReadDateString {
-        @Test
-        fun `a finished event in the UTC late evening shows the next local day`() {
-            // ----- Arrange -----
-            val userBook = buildUserBook(
-                journals = listOf(
-                    journal(
-                        event = JournalEventType.StatusFinished,
-                        updatedAt = "2026-07-01T22:30:00.000000",
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val result = userBook.getReadDateString(style = DateStyle.YEAR_MONTH_DAY)
-
-            // ----- Assert -----
-            result shouldBe "2026/07/02"
-        }
-
-        @Test
-        fun `a zone behind UTC shows the previous day for an early UTC morning`() {
-            // ----- Arrange -----
-            TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Pago_Pago"))
-            val userBook = buildUserBook(
-                journals = listOf(
-                    journal(
-                        event = JournalEventType.StatusFinished,
-                        updatedAt = "2026-07-01T05:00:00.000000",
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val result = userBook.getReadDateString(style = DateStyle.YEAR_MONTH_DAY)
-
-            // ----- Assert -----
-            result shouldBe "2026/06/30"
-        }
-
-        @Test
-        fun `the most recent finished event wins across mixed server and local timestamps`() {
-            // ----- Arrange -----
-            val userBook = buildUserBook(
-                journals = listOf(
-                    journal(
-                        event = JournalEventType.StatusFinished,
-                        updatedAt = "2026-07-01T10:00:00.123456",
-                    ),
-                    journal(
-                        event = JournalEventType.StatusFinished,
-                        updatedAt = "2026-07-03T22:30:00.000000",
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val result = userBook.getReadDateString(style = DateStyle.YEAR_MONTH_DAY)
-
-            // ----- Assert -----
-            result shouldBe "2026/07/04"
-        }
-
         @Test
         fun `a later finished read takes precedence over an earlier journal`() {
             // ----- Arrange -----
@@ -614,25 +590,6 @@ class UserBookTest {
 
             // ----- Assert -----
             result shouldBe "2026/07/09"
-        }
-
-        @Test
-        fun `an unparseable journal timestamp returns null`() {
-            // ----- Arrange -----
-            val userBook = buildUserBook(
-                journals = listOf(
-                    journal(
-                        event = JournalEventType.StatusFinished,
-                        updatedAt = "garbage",
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val result = userBook.getReadDateString(style = DateStyle.YEAR_MONTH_DAY)
-
-            // ----- Assert -----
-            result.shouldBeNull()
         }
 
         @Test

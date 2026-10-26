@@ -26,6 +26,8 @@
   30 days.") instead of drawing an empty chart; the opening tiles show 0 and say nothing was finished. In a
   narrow scope with too few ratings to classify, "How you score" states the count ("3 rated books in the last
   30 days") instead of "Too early to tell". Captions that say "your finished books" name the scope.
+- A finish date comes from the read or the user book, never from the "finished" journal event, which dates
+  when a book was shelved as read. A read book without one counts in All time only, in no dated scope or chart.
 - The year chart always shows every year. A selected calendar year lights its column `Lead` (the others
   `Second`, zero years a `Fifth` stub) and the caption names that year and its count for the Books / Pages
   metric; a rolling window or All time lights the busiest year.
