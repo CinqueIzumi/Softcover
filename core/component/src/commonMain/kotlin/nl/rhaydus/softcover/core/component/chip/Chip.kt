@@ -27,9 +27,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -42,10 +42,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.modifier.pressScaleToggleable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
-import nl.rhaydus.softcover.core.component.modifier.tactileToggleable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -201,7 +201,7 @@ private fun Modifier.chipInteraction(
             .let { base -> if (enabled) base else base.alpha(DISABLED_ALPHA) }
             .let { base ->
                 if (selectable) {
-                    base.tactileToggleable(
+                    base.pressScaleToggleable(
                         value = selected,
                         onValueChange = { onClick() },
                         role = Role.Checkbox,
@@ -209,7 +209,7 @@ private fun Modifier.chipInteraction(
                         hoverShape = Corners.pill,
                     )
                 } else {
-                    base.tactileClickable(
+                    base.pressScaleClickable(
                         onClick = onClick,
                         enabled = enabled,
                         hoverShape = Corners.pill,
@@ -382,7 +382,7 @@ private fun ChipIconSlot(
                 if (onClick != null) {
                     base
                         .fillMaxHeight()
-                        .tactileClickable(
+                        .pressScaleClickable(
                             onClick = onClick,
                             hoverShape = Corners.pill,
                         )

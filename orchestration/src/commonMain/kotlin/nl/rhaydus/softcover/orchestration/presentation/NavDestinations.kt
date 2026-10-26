@@ -14,7 +14,8 @@ import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.nav.NavPulse
-import nl.rhaydus.softcover.core.component.modifier.rememberPulseScale
+import nl.rhaydus.designsystem.nav.NavPulseKey
+import nl.rhaydus.designsystem.nav.rememberPulseScale
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.LibraryNavPulseKey
 import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
@@ -59,9 +60,9 @@ internal expect val wideGridTabsUseDetailPane: Boolean
 
 /**
  * The `NavPulse` key for [tab]'s icon. Library keeps the shared [LibraryNavPulseKey] that Reading
- * pulses on mark-as-read; every other tab is keyed by its own [Tab] object.
+ * pulses on mark-as-read; every other tab by a [TabNavPulseKey].
  */
-internal fun navPulseKeyFor(tab: Tab): Any = if (tab == LibraryTab) LibraryNavPulseKey else tab
+internal fun navPulseKeyFor(tab: Tab): NavPulseKey = if (tab == LibraryTab) LibraryNavPulseKey else TabNavPulseKey(tab)
 
 /**
  * Resolves [appNavTabs] into render-ready [NavItemUi]s: current selection (from the tab navigator),
@@ -92,7 +93,7 @@ internal fun rememberNavItems(): List<NavItemUi> {
 internal class NavItemClickResolver(
     private val selectTab: (Tab) -> Unit,
     private val reselect: suspend (Tab) -> Boolean,
-    private val pulse: (Any) -> Unit,
+    private val pulse: (NavPulseKey) -> Unit,
 ) {
     fun onClick(
         item: NavItemUi,

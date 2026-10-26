@@ -58,7 +58,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Sheets & dialogs
 
-- **AdaptiveModalSheet** — `sheet` — bottom sheet, or an animated panel when expanded.
+- **AdaptiveModalSheet** — `sheet` — foundation sheet plus the snackbar host and `Corners.xxl` panel.
 - **SheetScaffold** — `sheet` — chrome every modal sheet shares: header, body, footer and close; `SheetSession` holds its lifetime.
 - **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss the sheet on selection.
 - **SheetActionRow** — `sheet` — a plain tappable menu row that acts at once.
@@ -93,10 +93,8 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Modifiers & helpers
 
-- **`tactileClickable` / `Selectable` / `Toggleable`** — `modifier` — the one ripple-less interaction modifier.
-- **`shakeOnError`** — `modifier` — shakes a node and plays *reject* on a failure trigger.
+- **`pressScaleClickable` / `Selectable` / `Toggleable`** — foundation `modifier` — the one ripple-less interaction modifier.
 - **`navSharedBounds`** — `modifier` — the one way to make a node a navigation shared element.
-- **`rememberPulseScale`** — `modifier` — a one-shot scale pulse each time a trigger changes.
 - **`ExitingItems`** — `transition` — keeps removed items of a non-lazy container composed, inert, while a caller-supplied exit (default fade) plays.
 - **`rememberReorderHaptics`** — `haptics` — lift, per-target tick and drop haptics for drag-to-reorder.
 - **`Haptics.play(Feedback)`** — `haptics` — plays the outcome haptic a `FeedbackEvent` carries.
@@ -117,4 +115,4 @@ The app's own usage rules:
 - Pull-to-refresh draws `PullToRefreshDefaults.LoadingIndicator`, the one exception to wavy progress, under a `PullToRefreshEyebrow`.
 - `DesktopTooltip` on every icon-only desktop control; `DesktopContextMenu` mirrors a touch long-press.
 - Haptics go through `LocalHaptics.current`, never `performHapticFeedback`.
-- Press feedback goes through `tactileClickable`, never the foundation `pressScale` modifiers (detekt `ForbiddenImport`).
+- Press feedback goes through the foundation `pressScaleClickable` family; the bare `pressScale` only drives a shared `interactionSource`.

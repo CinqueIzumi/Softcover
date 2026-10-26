@@ -27,8 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -126,7 +126,7 @@ private fun <K> SidebarRow(
                 horizontal = Spacing.sm,
                 vertical = Spacing.xxxs,
             )
-            .tactileClickable(
+            .pressScaleCombinedClickable(
                 onClick = { onEvent(SidebarEvent.Clicked(key = model.key)) },
                 role = rowRole,
                 onLongClick = onLongClick,

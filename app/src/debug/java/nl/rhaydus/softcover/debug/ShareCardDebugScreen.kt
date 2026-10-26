@@ -119,6 +119,8 @@ object ShareCardDebugScreen : Screen {
                         }
 
                         is SaveOutcome.Cached -> Unit
+
+                        is SaveOutcome.Cancelled -> Unit
                     }
                 }.onFailure { throwable ->
                     AppLog.e(

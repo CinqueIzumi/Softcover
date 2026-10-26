@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.grayscale
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
@@ -47,7 +48,6 @@ import nl.rhaydus.softcover.core.component.cover.shape
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.modifier.navSharedBounds
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
@@ -126,7 +126,7 @@ internal fun GeneralBookInfoSection(
         ) {
             Box(
                 modifier = if (isLoading.not()) {
-                    Modifier.testTag(BookDetailTestTags.COVER).tactileClickable(
+                    Modifier.testTag(BookDetailTestTags.COVER).pressScaleClickable(
                         onClick = onCoverClick,
                         hoverShape = heroCover?.variant?.shape() ?: RectangleShape,
                     )

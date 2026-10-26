@@ -1056,105 +1056,6 @@ public fun nl.rhaydus.softcover.core.component.modifier.navSharedBounds(key: nl.
     - resizeMode: UNSTABLE (has mutable properties or unstable members)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.modifier.rememberPulseScale(trigger: kotlin.Int, peakScale: kotlin.Float): kotlin.Float
-  skippable: true
-  restartable: true
-  params:
-    - trigger: STABLE (primitive type)
-    - peakScale: STABLE (primitive type)
-
-@Composable
-public fun nl.rhaydus.softcover.core.component.modifier.rememberPulseScale(pulse: nl.rhaydus.designsystem.nav.NavPulse, key: kotlin.Any, peakScale: kotlin.Float): kotlin.Float
-  skippable: false
-  restartable: true
-  params:
-    - pulse: STABLE (marked @Stable or @Immutable)
-    - key: UNKNOWN (interface or non-final class; concrete implementation unknown)
-    - peakScale: STABLE (primitive type)
-
-@Composable
-public fun nl.rhaydus.softcover.core.component.modifier.rememberPulseScaleProvider(trigger: kotlin.Int, peakScale: kotlin.Float): kotlin.Function0<kotlin.Float>
-  skippable: true
-  restartable: true
-  params:
-    - trigger: STABLE (primitive type)
-    - peakScale: STABLE (primitive type)
-
-@Composable
-public fun nl.rhaydus.softcover.core.component.modifier.rememberShakeTrigger(): nl.rhaydus.softcover.core.component.modifier.ShakeTrigger
-  skippable: true
-  restartable: true
-  params:
-
-@Composable
-public fun nl.rhaydus.softcover.core.component.modifier.shakeOnError(trigger: kotlin.Boolean, onShakeEnd: kotlin.Function0<kotlin.Unit>): androidx.compose.ui.Modifier
-  skippable: true
-  restartable: true
-  params:
-    - trigger: STABLE (primitive type)
-    - onShakeEnd: STABLE (function type)
-
-@Composable
-public fun nl.rhaydus.softcover.core.component.modifier.shakeOnError(trigger: nl.rhaydus.softcover.core.component.modifier.ShakeTrigger, onShakeEnd: kotlin.Function0<kotlin.Unit>): androidx.compose.ui.Modifier
-  skippable: true
-  restartable: true
-  params:
-    - trigger: STABLE (marked @Stable or @Immutable)
-    - onShakeEnd: STABLE (function type)
-
-@Composable
-public fun nl.rhaydus.softcover.core.component.modifier.tactileClickable(onClick: kotlin.Function0<kotlin.Unit>, role: androidx.compose.ui.semantics.Role?, enabled: kotlin.Boolean, onLongClick: kotlin.Function0<kotlin.Unit>?, hoverShape: androidx.compose.ui.graphics.Shape?, interactionSource: androidx.compose.foundation.interaction.MutableInteractionSource?): androidx.compose.ui.Modifier
-  skippable: true
-  restartable: true
-  params:
-    - onClick: STABLE (function type)
-    - role: STABLE (marked @Stable or @Immutable)
-    - enabled: STABLE (primitive type)
-    - onLongClick: STABLE (function type)
-    - hoverShape: STABLE (marked @Stable or @Immutable)
-    - interactionSource: STABLE (marked @Stable or @Immutable)
-
-@Composable
-private fun nl.rhaydus.softcover.core.component.modifier.tactileFeedback(interactionSource: androidx.compose.foundation.interaction.MutableInteractionSource, enabled: kotlin.Boolean, hoverShape: androidx.compose.ui.graphics.Shape?): androidx.compose.ui.Modifier
-  skippable: true
-  restartable: true
-  params:
-    - interactionSource: STABLE (marked @Stable or @Immutable)
-    - enabled: STABLE (primitive type)
-    - hoverShape: STABLE (marked @Stable or @Immutable)
-
-@Composable
-internal fun nl.rhaydus.softcover.core.component.modifier.tactilePressScale(interactionSource: androidx.compose.foundation.interaction.MutableInteractionSource): androidx.compose.ui.Modifier
-  skippable: true
-  restartable: true
-  params:
-    - interactionSource: STABLE (marked @Stable or @Immutable)
-
-@Composable
-public fun nl.rhaydus.softcover.core.component.modifier.tactileSelectable(selected: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>, role: androidx.compose.ui.semantics.Role?, enabled: kotlin.Boolean, hoverShape: androidx.compose.ui.graphics.Shape?, interactionSource: androidx.compose.foundation.interaction.MutableInteractionSource?): androidx.compose.ui.Modifier
-  skippable: true
-  restartable: true
-  params:
-    - selected: STABLE (primitive type)
-    - onClick: STABLE (function type)
-    - role: STABLE (marked @Stable or @Immutable)
-    - enabled: STABLE (primitive type)
-    - hoverShape: STABLE (marked @Stable or @Immutable)
-    - interactionSource: STABLE (marked @Stable or @Immutable)
-
-@Composable
-public fun nl.rhaydus.softcover.core.component.modifier.tactileToggleable(value: kotlin.Boolean, onValueChange: kotlin.Function1<kotlin.Boolean, kotlin.Unit>, role: androidx.compose.ui.semantics.Role?, enabled: kotlin.Boolean, hoverShape: androidx.compose.ui.graphics.Shape?, interactionSource: androidx.compose.foundation.interaction.MutableInteractionSource?): androidx.compose.ui.Modifier
-  skippable: true
-  restartable: true
-  params:
-    - value: STABLE (primitive type)
-    - onValueChange: STABLE (function type)
-    - role: STABLE (marked @Stable or @Immutable)
-    - enabled: STABLE (primitive type)
-    - hoverShape: STABLE (marked @Stable or @Immutable)
-    - interactionSource: STABLE (marked @Stable or @Immutable)
-
-@Composable
 public fun nl.rhaydus.softcover.core.component.mood.MoodTile(model: nl.rhaydus.softcover.core.component.mood.MoodTileUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.mood.MoodTileEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
@@ -1554,11 +1455,11 @@ internal fun nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardBod
     - model: STABLE (class with no mutable properties)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.share.ScaledShareCardPreview(capture: nl.rhaydus.softcover.core.component.share.ShareCardCapture, modifier: androidx.compose.ui.Modifier, maxWidth: androidx.compose.ui.unit.Dp, maxHeight: androidx.compose.ui.unit.Dp, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
-  skippable: true
+public fun nl.rhaydus.softcover.core.component.share.ScaledShareCardPreview(capture: nl.rhaydus.designsystem.share.ShareCardCapture, modifier: androidx.compose.ui.Modifier, maxWidth: androidx.compose.ui.unit.Dp, maxHeight: androidx.compose.ui.unit.Dp, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
+  skippable: false
   restartable: true
   params:
-    - capture: STABLE (marked @Stable or @Immutable)
+    - capture: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - modifier: STABLE (marked @Stable or @Immutable)
     - maxWidth: STABLE (marked @Stable or @Immutable)
     - maxHeight: STABLE (marked @Stable or @Immutable)
@@ -1573,12 +1474,12 @@ public fun nl.rhaydus.softcover.core.component.share.ShareCard(model: nl.rhaydus
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.core.component.share.ShareCardSheetBody(model: nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel, capture: nl.rhaydus.softcover.core.component.share.ShareCardCapture, modifier: androidx.compose.ui.Modifier, previewModifier: androidx.compose.ui.Modifier, aboveCard: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>, belowCard: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>): kotlin.Unit
-  skippable: true
+internal fun nl.rhaydus.softcover.core.component.share.ShareCardSheetBody(model: nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel, capture: nl.rhaydus.designsystem.share.ShareCardCapture, modifier: androidx.compose.ui.Modifier, previewModifier: androidx.compose.ui.Modifier, aboveCard: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>, belowCard: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>): kotlin.Unit
+  skippable: false
   restartable: true
   params:
     - model: STABLE (class with no mutable properties)
-    - capture: STABLE (marked @Stable or @Immutable)
+    - capture: UNKNOWN (interface or non-final class; concrete implementation unknown)
     - modifier: STABLE (marked @Stable or @Immutable)
     - previewModifier: STABLE (marked @Stable or @Immutable)
     - aboveCard: STABLE (composable function type)
@@ -1624,13 +1525,6 @@ internal fun nl.rhaydus.softcover.core.component.share.YearRecapShareCardBody(co
     - content: STABLE (class with no mutable properties)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.share.rememberShareCardCapture(config: nl.rhaydus.designsystem.share.ShareCardCaptureConfig): nl.rhaydus.softcover.core.component.share.ShareCardCapture
-  skippable: true
-  restartable: true
-  params:
-    - config: STABLE (class with no mutable properties)
-
-@Composable
 public fun nl.rhaydus.softcover.core.component.sheet.AdaptiveModalSheet(onDismissRequest: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, dismissOnTapOutside: kotlin.Boolean, dismissOnBackPress: kotlin.Boolean, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
@@ -1639,31 +1533,6 @@ public fun nl.rhaydus.softcover.core.component.sheet.AdaptiveModalSheet(onDismis
     - modifier: STABLE (marked @Stable or @Immutable)
     - dismissOnTapOutside: STABLE (primitive type)
     - dismissOnBackPress: STABLE (primitive type)
-    - content: STABLE (composable function type)
-
-@Composable
-private fun nl.rhaydus.softcover.core.component.sheet.AnimatedSheetPanel(onDismissRequest: kotlin.Function0<kotlin.Unit>, maxHeight: androidx.compose.ui.unit.Dp, sheetLevel: kotlin.Int, dismissOnTapOutside: kotlin.Boolean, dismissOnBackPress: kotlin.Boolean, modifier: androidx.compose.ui.Modifier, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - onDismissRequest: STABLE (function type)
-    - maxHeight: STABLE (marked @Stable or @Immutable)
-    - sheetLevel: STABLE (primitive type)
-    - dismissOnTapOutside: STABLE (primitive type)
-    - dismissOnBackPress: STABLE (primitive type)
-    - modifier: STABLE (marked @Stable or @Immutable)
-    - content: STABLE (composable function type)
-
-@Composable
-private fun nl.rhaydus.softcover.core.component.sheet.BottomSheetForm(onDismissRequest: kotlin.Function0<kotlin.Unit>, sheetLevel: kotlin.Int, dismissOnTapOutside: kotlin.Boolean, dismissOnBackPress: kotlin.Boolean, modifier: androidx.compose.ui.Modifier, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - onDismissRequest: STABLE (function type)
-    - sheetLevel: STABLE (primitive type)
-    - dismissOnTapOutside: STABLE (primitive type)
-    - dismissOnBackPress: STABLE (primitive type)
-    - modifier: STABLE (marked @Stable or @Immutable)
     - content: STABLE (composable function type)
 
 @Composable
@@ -1725,15 +1594,6 @@ internal fun nl.rhaydus.softcover.core.component.sheet.LoadingSheetBody(model: n
   params:
     - model: STABLE (marked @Stable or @Immutable)
     - onEvent: STABLE (function type)
-
-@Composable
-internal fun nl.rhaydus.softcover.core.component.sheet.ScrimlessDialog(onDismissRequest: kotlin.Function0<kotlin.Unit>, dismissOnBackPress: kotlin.Boolean, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - onDismissRequest: STABLE (function type)
-    - dismissOnBackPress: STABLE (primitive type)
-    - content: STABLE (composable function type)
 
 @Composable
 public fun nl.rhaydus.softcover.core.component.sheet.SheetActionRow(model: nl.rhaydus.softcover.core.component.sheet.SheetActionRowUiModel<K of nl.rhaydus.softcover.core.component.sheet.SheetActionRow>, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.sheet.SheetRowEvent<K of nl.rhaydus.softcover.core.component.sheet.SheetActionRow>, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
@@ -1824,12 +1684,11 @@ internal fun nl.rhaydus.softcover.core.component.sheet.SheetScaffoldModal(model:
     - content: STABLE (composable function type)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.sheet.SheetSnackbar(modifier: androidx.compose.ui.Modifier, insetNavigationBars: kotlin.Boolean): kotlin.Unit
+private fun nl.rhaydus.softcover.core.component.sheet.SheetSnackbar(footerInset: androidx.compose.runtime.MutableIntState): kotlin.Unit
   skippable: true
   restartable: true
   params:
-    - modifier: STABLE (marked @Stable or @Immutable)
-    - insetNavigationBars: STABLE (primitive type)
+    - footerInset: STABLE (marked @Stable or @Immutable)
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.sheet.SheetTop(model: nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel, chrome: nl.rhaydus.softcover.core.component.sheet.SheetChrome, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent, kotlin.Unit>): kotlin.Unit

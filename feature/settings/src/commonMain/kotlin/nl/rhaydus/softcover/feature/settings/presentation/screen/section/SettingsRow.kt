@@ -29,7 +29,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
  * slot, at 16dp vertical / 4dp horizontal padding with a 4dp title→secondary gap and a 16dp gap before
  * [trailing]. [interactionSource] doubles as the row's selectability switch: `null` renders no press
  * treatment (the Copyable menu row); non-null drives an animated `surfaceContainer` wash and wraps the
- * caller's [semantics] modifier (`tactileSelectable` / `tactileClickable`, built against the same
+ * caller's [semantics] modifier (`pressScaleSelectable` / `pressScaleClickable`, built against the same
  * [interactionSource]).
  * [selectionContainer] wraps [title] for the row whose only affordance is copying its text.
  */

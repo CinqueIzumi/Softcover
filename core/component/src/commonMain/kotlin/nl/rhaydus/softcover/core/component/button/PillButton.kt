@@ -25,8 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -121,7 +121,7 @@ private fun Modifier.pillButtonInteraction(
     onClick: () -> Unit,
 ): Modifier = this
     .let { base -> if (enabled) base else base.alpha(DISABLED_ALPHA) }
-    .tactileClickable(
+    .pressScaleClickable(
         onClick = onClick,
         enabled = enabled,
         hoverShape = Corners.pill,

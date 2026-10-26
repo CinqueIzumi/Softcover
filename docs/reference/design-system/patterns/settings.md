@@ -5,7 +5,7 @@
 - `feature/settings`, internal. `SettingsRow` is the anatomy behind `SettingsMenuRow` and
   `SettingsSelectableRow`: an optional 42dp `surfaceContainerHigh` leading tile, a `titleMedium` title
   (`primary` when selected) over an optional italic `bodySmall` secondary that wraps, an optional trailing
-  slot. Interactive rows press through `tactileClickable` / `tactileSelectable`; a row with no interaction
+  slot. Interactive rows press through `pressScaleClickable` / `pressScaleSelectable`; a row with no interaction
   wraps its title in `SelectionContainer`.
 - `SettingsMenuRowTarget`: `SubPage` (chevron), `ExternalLink` (`OpenInNew`), `Copyable` (no interaction).
   `SettingsSelectableRow` reserves its check slot when unselected.

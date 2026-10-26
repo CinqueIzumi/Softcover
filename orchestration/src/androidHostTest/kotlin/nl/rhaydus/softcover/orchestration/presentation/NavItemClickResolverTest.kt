@@ -103,7 +103,7 @@ class NavItemClickResolverTest {
             launchedBlocks.forEach { it() }
 
             // ----- Assert -----
-            pulsedKeys shouldBe listOf(ExploreTab)
+            pulsedKeys shouldBe listOf(TabNavPulseKey(ExploreTab))
             selectedTabs shouldBe emptyList()
         }
 
@@ -188,7 +188,7 @@ class NavItemClickResolverTest {
         }
 
         @Test
-        fun `any other tab maps to itself`() {
+        fun `any other tab maps to a pulse key wrapping that tab`() {
             // ----- Arrange -----
             val tab: Tab = ReadingTab
 
@@ -196,7 +196,7 @@ class NavItemClickResolverTest {
             val result = navPulseKeyFor(tab)
 
             // ----- Assert -----
-            result shouldBe ReadingTab
+            result shouldBe TabNavPulseKey(ReadingTab)
         }
     }
 }

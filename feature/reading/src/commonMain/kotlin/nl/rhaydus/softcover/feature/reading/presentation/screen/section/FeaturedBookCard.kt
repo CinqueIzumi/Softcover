@@ -9,14 +9,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.callout.Banner
 import nl.rhaydus.softcover.core.component.callout.BannerEvent
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
-import nl.rhaydus.softcover.core.component.modifier.shakeOnError
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
@@ -57,7 +57,7 @@ internal fun FeaturedBookCard(
             .fillMaxWidth()
             .padding(horizontal = Spacing.gutter)
             .then(if (isLoading) Modifier else Modifier.prefetchBookDetailOnPress(book.id))
-            .tactileClickable(
+            .pressScaleClickable(
                 onClick = onClick,
                 enabled = isLoading.not(),
                 hoverShape = null,

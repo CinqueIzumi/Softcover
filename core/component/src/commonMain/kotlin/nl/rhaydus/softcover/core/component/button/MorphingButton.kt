@@ -29,7 +29,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.model.ButtonSize
-import nl.rhaydus.softcover.core.component.modifier.tactilePressScale
+import nl.rhaydus.designsystem.modifier.pressScale
 
 /**
  * A [nl.rhaydus.designsystem.component.RhaydusButton] that animates when [tone] changes: container and
@@ -83,7 +83,7 @@ fun MorphingButton(
             .height(height = size.height)
             .then(
                 if (isFilled) {
-                    Modifier.tactilePressScale(interactionSource)
+                    Modifier.pressScale(interactionSource)
                 } else {
                     Modifier
                 },

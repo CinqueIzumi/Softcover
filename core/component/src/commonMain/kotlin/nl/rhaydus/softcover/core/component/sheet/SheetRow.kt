@@ -20,8 +20,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pressScaleSelectable
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.modifier.tactileSelectable
 import nl.rhaydus.softcover.core.component.selection.SelectionCheck
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -40,7 +40,7 @@ internal fun <K> SheetRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .tactileSelectable(
+                .pressScaleSelectable(
                     selected = model.selected,
                     role = Role.RadioButton,
                     onClick = {

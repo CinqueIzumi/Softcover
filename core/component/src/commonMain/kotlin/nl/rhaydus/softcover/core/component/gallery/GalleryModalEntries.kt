@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import nl.rhaydus.softcover.core.component.dialog.toPickerMillis
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
@@ -21,7 +22,6 @@ import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.ShareCardSheetBody
 import nl.rhaydus.softcover.core.component.share.ShareCardSheetUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
-import nl.rhaydus.softcover.core.component.share.rememberShareCardCapture
 import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.component.sheet.LazySheetBody
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetBody

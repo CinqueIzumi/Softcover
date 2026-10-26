@@ -24,8 +24,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.softcover.core.component.modifier.shakeOnError
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
+import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
+import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -171,7 +171,7 @@ internal fun Modifier.bookCardInteraction(
         selection = selection,
     )
     val press = if (interactive) {
-        Modifier.tactileClickable(
+        Modifier.pressScaleCombinedClickable(
             role = semantics.role,
             onClick = {
                 if (selection is BookCardSelection.Multiple) haptics.select()

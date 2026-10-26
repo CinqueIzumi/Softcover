@@ -20,12 +20,16 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.modifier.rememberShakeTrigger
+import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.designsystem.share.SaveOutcome
+import nl.rhaydus.designsystem.share.ShareCardCapture
+import nl.rhaydus.designsystem.share.ShareOutcome
+import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.component.haptics.play
-import nl.rhaydus.softcover.core.component.modifier.rememberShakeTrigger
-import nl.rhaydus.softcover.core.component.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 

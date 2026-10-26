@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
-import nl.rhaydus.designsystem.modifier.dismissOnEscape
+import nl.rhaydus.designsystem.modifier.onEscape
 import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -62,19 +62,13 @@ internal actual fun ExploreScreenLayout(
     // dispatches rather than OnClearSearchAction, whose focus drop means nothing to a field that is
     // never focus-driven.
     //
-    // Held enabled unconditionally rather than gated on `hasActiveSearch`, which is what it looks
-    // like it wants: `dismissOnEscape` takes focus on the disabled -> enabled flip, and here that
-    // flip *is* the user typing their first character - gating it would pull focus straight out of
-    // the field being typed into. So the guard sits inside the callback instead, and an Esc on the
-    // resting discovery wall is a no-op. Filed upstream as F26 (a listen-without-taking-focus
-    // variant), which would let this gate the modifier properly.
+    // `onEscape`, not `dismissOnEscape`: the gate follows the typed query, and a focus grab would
+    // pull focus out of the field being typed into.
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .dismissOnEscape {
-                if (state.hasActiveSearch) {
-                    runAction(OnQueryChangeAction(newQuery = ""))
-                }
+            .onEscape(enabled = state.hasActiveSearch) {
+                runAction(OnQueryChangeAction(newQuery = ""))
             },
     ) {
         DesktopExploreHeader(

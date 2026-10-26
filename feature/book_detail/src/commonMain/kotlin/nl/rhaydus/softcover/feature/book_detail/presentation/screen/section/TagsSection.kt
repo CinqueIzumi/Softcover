@@ -80,6 +80,8 @@ internal fun TagsSection(
                     Spacer(modifier = Modifier.height(Spacing.sm))
 
                     ExpandableFlowRow(
+                        itemCount = group.chips.size,
+                        key = { index -> group.chips[index].key },
                         modifier = Modifier.animateContentSize(
                             animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
                         ),
@@ -108,19 +110,15 @@ internal fun TagsSection(
                                 },
                             )
                         },
-                    ) {
-                        group.chips.forEach { chip ->
-                            key(chip.key) {
-                                Chip(
-                                    model = chip,
-                                    onEvent = { event ->
-                                        if (event is ChipEvent.Clicked) {
-                                            runAction(OnRevealTagSpoilerAction(key = event.key))
-                                        }
-                                    },
-                                )
-                            }
-                        }
+                    ) { index ->
+                        Chip(
+                            model = group.chips[index],
+                            onEvent = { event ->
+                                if (event is ChipEvent.Clicked) {
+                                    runAction(OnRevealTagSpoilerAction(key = event.key))
+                                }
+                            },
+                        )
                     }
                 }
             }

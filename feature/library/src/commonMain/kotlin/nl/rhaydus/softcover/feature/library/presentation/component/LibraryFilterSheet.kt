@@ -116,40 +116,31 @@ private fun FacetSections(
     onTagSearchEvent: (TextFieldEvent) -> Unit,
 ) {
     if (selection.showOwnershipFormat) {
-        FacetSection(label = selection.ownershipFormatHeader) {
-            (selection.ownershipChips + selection.formatChips).forEach { chip ->
-                Chip(
-                    model = chip,
-                    onEvent = onChipEvent,
-                )
-            }
-        }
+        FacetSection(
+            label = selection.ownershipFormatHeader,
+            chips = selection.ownershipChips + selection.formatChips,
+            onChipEvent = onChipEvent,
+        )
 
         Spacer(modifier = Modifier.height(Spacing.xl))
     }
 
     if (selection.showReleaseYear) {
-        FacetSection(label = selection.releaseYearHeader) {
-            selection.releaseYearChips.forEach { chip ->
-                Chip(
-                    model = chip,
-                    onEvent = onChipEvent,
-                )
-            }
-        }
+        FacetSection(
+            label = selection.releaseYearHeader,
+            chips = selection.releaseYearChips,
+            onChipEvent = onChipEvent,
+        )
 
         Spacer(modifier = Modifier.height(Spacing.xl))
     }
 
     if (selection.showReadYear) {
-        FacetSection(label = selection.readYearHeader) {
-            selection.readYearChips.forEach { chip ->
-                Chip(
-                    model = chip,
-                    onEvent = onChipEvent,
-                )
-            }
-        }
+        FacetSection(
+            label = selection.readYearHeader,
+            chips = selection.readYearChips,
+            onChipEvent = onChipEvent,
+        )
 
         Spacer(modifier = Modifier.height(Spacing.xl))
     }
@@ -168,14 +159,11 @@ private fun FacetSections(
     }
 
     if (selection.showRating) {
-        FacetSection(label = selection.ratingHeader) {
-            selection.ratingChips.forEach { chip ->
-                Chip(
-                    model = chip,
-                    onEvent = onChipEvent,
-                )
-            }
-        }
+        FacetSection(
+            label = selection.ratingHeader,
+            chips = selection.ratingChips,
+            onChipEvent = onChipEvent,
+        )
     }
 }
 
@@ -216,13 +204,14 @@ private fun TagsFacetSection(
         Spacer(modifier = Modifier.height(Spacing.sm))
 
         if (LocalModalSheetForm.current == ModalSheetForm.PANEL) {
-            ExpandableFlowRow {
-                visibleChips.forEach { chip ->
-                    Chip(
-                        model = chip,
-                        onEvent = onChipEvent,
-                    )
-                }
+            ExpandableFlowRow(
+                itemCount = visibleChips.size,
+                key = { index -> visibleChips[index].key },
+            ) { index ->
+                Chip(
+                    model = visibleChips[index],
+                    onEvent = onChipEvent,
+                )
             }
         } else {
             Row(
@@ -244,7 +233,8 @@ private fun TagsFacetSection(
 @Composable
 private fun FacetSection(
     label: SectionHeaderUiModel,
-    chips: @Composable () -> Unit,
+    chips: List<ChipUiModel>,
+    onChipEvent: (ChipEvent) -> Unit,
 ) {
     Column {
         SectionHeader(model = label)
@@ -255,8 +245,14 @@ private fun FacetSection(
         // wrap and collapse behind a "show more" (a long tag set never buries the facets below it); the
         // narrow bottom sheet keeps each facet on one horizontally scrolling line.
         if (LocalModalSheetForm.current == ModalSheetForm.PANEL) {
-            ExpandableFlowRow {
-                chips()
+            ExpandableFlowRow(
+                itemCount = chips.size,
+                key = { index -> chips[index].key },
+            ) { index ->
+                Chip(
+                    model = chips[index],
+                    onEvent = onChipEvent,
+                )
             }
         } else {
             Row(
@@ -264,7 +260,12 @@ private fun FacetSection(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                chips()
+                chips.forEach { chip ->
+                    Chip(
+                        model = chip,
+                        onEvent = onChipEvent,
+                    )
+                }
             }
         }
     }

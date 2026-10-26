@@ -30,8 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.hoverHighlight
+import nl.rhaydus.designsystem.modifier.pressScaleSelectable
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
-import nl.rhaydus.softcover.core.component.modifier.tactileSelectable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -124,7 +124,7 @@ private fun <K> RowScope.TrackSegment(
             .weight(1f)
             .alpha(disabledAlpha)
             .minimumInteractiveComponentSize()
-            .tactileSelectable(
+            .pressScaleSelectable(
                 selected = isSelected,
                 onClick = { if (isSelected.not()) onSelect() },
                 role = Role.RadioButton,
@@ -231,7 +231,7 @@ private fun ProseWord(
         modifier = modifier
             .minimumInteractiveComponentSize()
             .alpha(disabledAlpha)
-            .tactileSelectable(
+            .pressScaleSelectable(
                 selected = isSelected,
                 onClick = { if (isSelected.not()) onSelect() },
                 role = Role.RadioButton,

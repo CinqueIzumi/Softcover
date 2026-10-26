@@ -15,14 +15,18 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** step 2 is done; every FU row is upstreamed. The three large foundation docs hold rules and facts
-  only (96KB to 79KB), headings unchanged so every cited anchor resolves.
-- **Next:** step 3, component bugs (first box in § 3 below).
-- **Open questions:** none.
-- **Verification:** markdown only, no Kotlin gates. Heading lists diff clean against the pre-edit copies;
-  no em-dashes; code-fence counts unchanged; dropped must/never phrasings spot-checked as rewrites.
-- **Uncommitted:** foundation: `docs/{code-style,architecture,design-system-foundations}.md`. Softcover: this
-  tracker, `agent-layer.md`, the submodule pointer once the foundation commit lands.
+- **State:** step 3 first box built: F26, F27, F31 + F46 (+ F35 folded in), F36, F45, F47, F48, F49, F51
+  fixed in `foundation/`; Softcover's forks and detekt bans deleted. `AdaptiveModalSheet` stays in
+  `:core:component` as a thin wrapper (snackbar overlay, footer inset, tokens). Reviewer findings fixed;
+  the adopted entries are pruned from `candidates.md`.
+- **Next:** step 3, second box in § 3 below: the contract gaps F42, F44, F56.
+- **Open questions:** none. F49 makes two components read `LocalHaptics` (no-op default); F56 makes
+  `RhaydusTheme` provide it.
+- **Verification:** foundation `build` green; Softcover `compileKotlinJvm`, `styleCheck`, `testAndroidHostTest`
+  green after the last fix; stability baselines refreshed. Untested (no Compose UI harness): sheet latch,
+  press feedback, `onEscape`, JVM capture outcomes, pulse replay.
+- **Uncommitted:** all of the above, both repos; much is staged by agents (reset before committing). Not
+  pushed: foundation `441c2d9`, Softcover `cdab3599f`.
 
 ## How to run a step
 
@@ -72,7 +76,7 @@ Read-only. The output is a decision per item, recorded in `agent-layer.md` and u
 
 Bugs and gaps in shared code only; new components, design tokens and house-style lint rules wait for a second app.
 
-- [ ] Component bugs: F26, F27, F31 + F46, F36, F45, F47, F48, F49, F51; delete Softcover's forks and the
+- [x] Component bugs: F26, F27, F31 + F46, F36, F45, F47, F48, F49, F51; delete Softcover's forks and the
       detekt bans on the foundation versions.
 - [ ] Contract gaps: F42, F44, F56.
 - [ ] Tooling: F33, F37, F54, F60; wire `detektCheck` into the foundation's `check`.

@@ -26,7 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.hoverHighlight
-import nl.rhaydus.softcover.core.component.modifier.tactileSelectable
+import nl.rhaydus.designsystem.modifier.pressScaleSelectable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -85,7 +85,7 @@ internal fun PreviewTileFrame(
     Column(
         modifier = modifier
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
-            .tactileSelectable(
+            .pressScaleSelectable(
                 selected = selected,
                 onClick = onClick,
                 role = Role.RadioButton,

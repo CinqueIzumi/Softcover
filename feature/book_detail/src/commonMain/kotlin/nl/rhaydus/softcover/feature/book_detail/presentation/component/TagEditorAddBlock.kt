@@ -61,17 +61,15 @@ internal fun TagEditorAddBlock(
             // part-unfurled to the same depth, having never asked for it.
             key(selectedCategoryKey) {
                 ExpandableFlowRow(
+                    itemCount = suggestionChips.size,
+                    key = { index -> suggestionChips[index].key },
                     expansion = FlowRowExpansion.Progressive(linesPerExpand = 3),
                     collapsible = true,
-                ) {
-                    suggestionChips.forEach { chip ->
-                        key(chip.key) {
-                            Chip(
-                                model = chip,
-                                onEvent = onSuggestionChipEvent,
-                            )
-                        }
-                    }
+                ) { index ->
+                    Chip(
+                        model = suggestionChips[index],
+                        onEvent = onSuggestionChipEvent,
+                    )
                 }
             }
         }

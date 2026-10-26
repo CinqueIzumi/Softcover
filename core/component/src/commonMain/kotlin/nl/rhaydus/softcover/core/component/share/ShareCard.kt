@@ -32,13 +32,15 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
  * variant body and the card's size; a variant never overrides those dimensions at the call site.
  *
  * [ShareCard] only draws pixels — it takes no position on exporting them. Show it through
- * [ScaledShareCardPreview] with a [ShareCardCapture] from [rememberShareCardCapture], passing
+ * [ScaledShareCardPreview] with a [nl.rhaydus.designsystem.share.ShareCardCapture] from
+ * [nl.rhaydus.designsystem.share.rememberShareCardCapture], passing
  * [softcoverShareCardCaptureConfig] as the brand config, and drive the capture's
  * `saveToGallery(displayName)` / `saveToCache(displayName)` / `share(displayName)`. The last presents
  * the **platform** share sheet (an Android `ACTION_SEND` chooser or an iOS `UIActivityViewController`),
  * or copies to the clipboard on desktop, rather than the caller building one. Branch on the returned
- * [ShareOutcome] and [SaveOutcome]: a dismissed share sheet or save dialog is `Cancelled`, a no-op and
- * not a failure. Legacy gallery-write permission (API 26–28) goes through the foundation's
+ * [nl.rhaydus.designsystem.share.ShareOutcome] and [nl.rhaydus.designsystem.share.SaveOutcome]:
+ * a dismissed share sheet or save dialog is `Cancelled`, a no-op and not a failure. Legacy gallery-write permission
+ * (API 26–28) goes through the foundation's
  * `rememberGalleryWritePermissionRequester`, a synchronous pass-through from API 29 on; the iOS gallery
  * save is not yet wired.
  */

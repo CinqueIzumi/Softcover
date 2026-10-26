@@ -57,9 +57,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -378,7 +378,7 @@ private fun SearchChromeBarcodeButton(onClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .size(48.dp)
-            .tactileClickable(
+            .pressScaleClickable(
                 onClick = onClick,
                 hoverShape = Corners.lg,
             ),

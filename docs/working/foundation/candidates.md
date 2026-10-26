@@ -96,64 +96,6 @@ Filed but not yet implemented in the foundation.
 - **Scope note:** Softcover inlines its existing 66 sites (30 files) as a tracked migration step. The rule
   then gates them at zero, with no baseline.
 
-### F26 — `dismissOnEscape` that listens without taking focus
-
-- **Type:** enhancement
-- **Home:** `nl.rhaydus:designsystem-core` (`jvmMain`, `nl.rhaydus.designsystem.modifier.DesktopKeyboard`)
-- **Status:** **Open.** `Modifier.dismissOnEscape(enabled, onDismiss)` requests focus on the node
-  whenever `enabled` flips false → true (`LaunchedEffect(enabled) { … requestFocus() }`). That is right
-  for the surfaces it was built for — a mode entered by a gesture (bulk-select, rearrange) or a viewer
-  pushed over the page — where nothing is being typed at the moment of the flip. It makes the modifier
-  **unusable gated** on any condition a *text field* drives: desktop Explore's Esc-clears-search wants
-  `enabled = state.hasActiveSearch`, but that condition flips on the first typed character, so enabling
-  it would pull focus out of the very field being typed into and swallow the rest of the word.
-- **Workaround in the app:** desktop Explore holds the modifier unconditionally enabled and guards
-  inside the callback (`ExploreScreenLayout.jvm.kt`). Correct, but it consumes every Esc keydown on the
-  screen — harmless there (no other Esc consumer; the sheets are `Dialog`/`Popup` with their own focus
-  scope), and not something to repeat on a surface that has one.
-- **What to build:** separate "catch Esc" from "grab focus" — either a `grabsFocus: Boolean = true`
-  parameter, or a sibling `Modifier.onEscape(enabled, onEscape)` that installs only the
-  `onPreviewKeyEvent` handler and leaves focus alone (it still fires whenever focus sits anywhere inside
-  the subtree, which is the persistent-field case). The gated form should also stop consuming the event
-  when it does nothing, so a disabled rung leaves Esc for whatever else wants it.
-- **Doc impact:** the foundation design-system §"Desktop Esc-to-dismiss" gains the gate-vs-guard rule;
-  Softcover's own copy carries it today (`docs/reference/design-system/foundations.md` §2.5, and
-  "Explore search Esc (desktop)" in `design-system/patterns/explore-profile.md`).
-
-### F27 — `ExpandableFlowRow` composes every item, including the ones it never places
-
-- **Type:** enhancement
-- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.layout.ExpandableFlowRow`)
-- **Status:** **Open.** `FlowRow`'s `content` slot is composed and measured in full up front — `maxLines`
-  and the overflow indicator affect *placement* only, not composition (verified against the Compose
-  Foundation measure pass in `FlowLayout.kt`). So a collapsed `ExpandableFlowRow` showing two lines still
-  composes and lays out **every** item behind the fold. That was harmless while every call site fed it a
-  bounded set, but the tag editor's suggestion cloud (`B.4.25`, 3.1.1) now hands it the user's entire
-  per-category vocabulary uncapped, and the cloud re-derives on every keystroke in the naming field — so
-  each character recomposes the whole filtered candidate set rather than the two visible lines.
-- **Assessment:** not a live problem. `PillChip` is a cheap `Surface` + `Text`, and a realistic personal
-  vocabulary in one category runs to tens of tags. It is a genuine scaling risk only for a power user with
-  100+ tags in a single category. Filed rather than fixed because the right fix is a lazy/windowed
-  implementation in the shared component, not a cap at the call site — a cap is exactly what `B.4.25`
-  removed, and reintroducing one here would put the ceiling back by another route.
-- **What to build:** a windowed `ExpandableFlowRow` that composes only what it will place (plus the
-  indicator), so the collapsed cost is bounded by `collapsedLines` rather than by item count. Blocked in
-  practice on the same thing as the deprecation cleanup: there is no maintained Compose overflow API to
-  build it on (`FlowRowOverflow` is deprecated, `ContextualFlowRow` likewise).
-
-### F31 — `AdaptiveModalSheet` cannot be made non-dismissible by swipe
-
-- **Type:** bug
-- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.component.AdaptiveModalSheet`)
-- **Status:** **Open — forked locally (F46).** The bottom-sheet form builds `rememberModalBottomSheetState(skipPartiallyExpanded =
-  true)` with no `confirmValueChange` and passes no `sheetGesturesEnabled`, so a drag-down hides the sheet
-  and fires `onDismissRequest` even when `dismissOnTapOutside` and `dismissOnBackPress` are both false.
-- **Impact in the app:** Softcover's re-auth sheet and `LoadingSheet` are meant to be non-dismissible; a
-  swipe closes them, and the re-auth sheet's `Dismissed` resets the re-auth state.
-- **What to build:** a `dismissible`-style gate that also refuses the `Hidden` target in
-  `confirmValueChange` (and leaves programmatic `LocalModalSheetDismiss` working), or a `dismissOnSwipe`
-  flag beside the existing two.
-
 ### F32 — A skeleton mask modifier that shimmers over real content
 
 - **Type:** enhancement
@@ -192,47 +134,6 @@ Filed but not yet implemented in the foundation.
   fully-qualified-call check alongside the import check; release, then enable it in Softcover with one
   entry: `androidx.compose.material3.Text`, allowed only in `SoftcoverText.kt`. The swap itself is done,
   so the gate passes on enable.
-
-### F35 — `AdaptiveModalSheet`'s panel form has no motion or depth
-
-- **Type:** enhancement
-- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.component.AdaptiveModalSheet`)
-- **Status:** **Open — built locally first.** The panel form (expanded width) is a bare `Dialog`: no enter
-  or exit animation, an instant dismiss, a 1 dp outline and no elevation, while the compact bottom sheet
-  animates both ways. Softcover's `:core:component` `sheet/AdaptiveModalSheet` (same signature) delegates
-  compact widths to the foundation and renders an animated panel itself on expanded widths.
-- **What to build:** move the local panel into the foundation unchanged in behaviour (scale and fade in,
-  a fading scrim, the exit played before `onDismissRequest` for outside tap, back, Esc and
-  `LocalModalSheetDismiss`, specs from the motion scheme, `shadowElevation` 6 dp instead of the outline),
-  release, swap Softcover's imports back and delete the local copy.
-
-### F36 — Desktop share-card capture reports a cancel as a failure and hides the clipboard copy
-
-- **Type:** bug
-- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.share.JvmShareCardCapture`)
-- **Status:** **Open — built locally first.** `saveToGallery` returns `SaveOutcome.Failure("Save cancelled")`
-  when the save dialog is cancelled, and `share` copies to the clipboard but returns a plain
-  `ShareOutcome.Shared`. Softcover's `:core:component` `share/` carries its own `ShareCardCapture`,
-  outcomes and `rememberShareCardCapture` (foundation names), wrapping the foundation on Android and iOS
-  and copying `JvmShareCardCapture` on desktop.
-- **What to build:** a `SaveOutcome.Cancelled`, and a `ShareOutcome.CopiedToClipboard`, so the caller can
-  confirm "Copied to clipboard"; release, swap Softcover's imports back and delete the local copy.
-
-### F45 — `pressScale` ignores the motion scheme and `pressScaleClickable` has no hover
-
-- **Type:** enhancement
-- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.modifier`)
-- **Status:** **Open — built locally first.** The foundation `pressScale` animates on a default spring, not
-  `MaterialTheme.motionScheme`, and is gated by `playDecorativeMotion()`. `pressScaleClickable` /
-  `pressScaleCombinedClickable` hide their interaction source, so `hoverHighlight` cannot share it, and they
-  have no role, enabled, selectable or toggleable forms. Softcover forked it as `tactileClickable` /
-  `tactileSelectable` / `tactileToggleable` in `:core:component` `modifier/Tactile.kt`, and the detekt
-  `ForbiddenImport` rule bans the three foundation names there.
-- **What to build:** a `pressScale` driven by `motionScheme.fastSpatialSpec()` with no decorative-motion gate
-  (the reduced-motion scheme already snaps); click, selectable and toggleable forms taking `role`, `enabled`,
-  `hoverShape` and an optional shared `interactionSource`, bundling press scale, `hoverHighlight` and the hand
-  cursor. Release, swap the `tactile*` imports back to the foundation names, delete `Tactile.kt` and the
-  `ForbiddenImport` entries.
 
 ### F37 — ktlint-rules has no unused-imports rule
 
@@ -311,38 +212,6 @@ Filed but not yet implemented in the foundation.
 - **Status:** **Open.** `LocalHaptics` defaults to `NoOpHaptics` and nothing in the foundation provides it, so `SoftcoverTheme` provides it.
 - **Impact in the app:** every app has to know to provide it, and one that doesn't gets silent haptics.
 - **What to build:** `RhaydusTheme` provides `LocalHaptics` from `rememberHaptics()`. Once adopted, drop the app-local provider.
-
-### F47 — `shakeOnError` ignores reduced motion and hand-writes its timing
-
-- **Type:** bug
-- **Home:** `nl.rhaydus:designsystem-core`
-- **Status:** **Open.** Softcover forks it as `Modifier.shakeOnError` plus `rememberShakeTrigger()` in `:core:component`'s `modifier/`, and a detekt `ForbiddenImport` entry bans the foundation import in the core modules. `ForbiddenMethodCall` cannot ban it app-wide: detekt does not resolve foundation symbols, so it never matches them.
-- **Impact in the app:** the foundation shake plays under reduced motion and times its half-periods with hand-written `tween`s, so it ignores the motion scheme. It also reads `rememberHaptics()` instead of `LocalHaptics`, and every caller keeps its own latch flag so a shake finishes after the error clears.
-- **What to build:** take the half-period specs from `MaterialTheme.motionScheme`, skip the offsets under reduced motion while still firing `reject` and calling `onShakeEnd`, read `LocalHaptics`, and ship the latch as `rememberShakeTrigger()`. Once adopted, drop the fork and the ban.
-
-### F48 — `rememberPulseScale` hand-writes its timing, only takes a `NavPulse`, and `NavPulse` keys by `Any`
-
-- **Type:** bug
-- **Home:** `nl.rhaydus:designsystem-core`
-- **Status:** **Open.** Softcover forks it as `rememberPulseScale` in `:core:component`'s `modifier/`, and a detekt `ForbiddenImport` entry bans the foundation import.
-- **Impact in the app:** the peak and settle use hand-written `tween`s (180 ms and 240 ms) instead of the motion scheme, and the pulse cannot be driven by a plain counter, so a row celebration hand-rolls its own scale. `NavPulse.pulse` and `countFor` take `key: Any`, so the fork's `rememberPulseScale(pulse, key)` carries an unstable `Any` param in the stability baseline.
-- **What to build:** peak and settle from `MaterialTheme.motionScheme`'s spatial specs, plus an overload that pulses whenever an `Int` trigger changes. Key `NavPulse` by a stable type (a `NavPulseKey` marker interface the app's keys implement) instead of `Any`. Once adopted, drop the fork and the ban, and type the fork's key param.
-
-### F49 — `StarRatingInput` and `PullToRefreshEyebrow` read `rememberHaptics()` instead of `LocalHaptics`
-
-- **Type:** bug
-- **Home:** `nl.rhaydus:designsystem-core`, `nl.rhaydus:designsystem-editorial`
-- **Status:** **Open.** No fork: the theme provides the same platform haptics, so a copy would carry no behaviour change.
-- **Impact in the app:** none today. Both components build their own haptics rather than reading the one the theme provides, so a test or preview that supplies a different `LocalHaptics` does not reach them.
-- **What to build:** read `LocalHaptics.current` in both components, as `Modifier.shakeOnError` and every other call site do.
-
-### F51 — Labelled buttons announce their leading icon as well as their label
-
-- **Type:** bug (accessibility)
-- **Home:** `nl.rhaydus:designsystem-core` (`RhaydusButton`, `RhaydusSplitButton`)
-- **Status:** **Open.** No app workaround: the semantics are set inside the foundation's `Icon` call.
-- **Impact in the app:** both buttons pass `icon.contentDescription` to the leading `Icon`, so a screen reader reads the label twice ("Update progress, Update progress"): Reading's `FeaturedSessionButton` and `FeaturedBackdropCard`, and every other labelled button with an icon.
-- **What to build:** render the leading icon with `contentDescription = null` in `RhaydusButton` and in `RhaydusSplitButton`'s leading half, because the label already names the button. The split button's trailing toggle keeps its description. Note the ignored description in both KDocs.
 
 ### F57 — detekt rule: a `UiState` getter that builds a UI model
 
@@ -466,24 +335,6 @@ the concrete app data left configurable. Softcover consumes them through `includ
   (`NewerVersionAvailable` / `GradleDependency` / `AndroidGradlePluginVersion` = `informational`) so a newer
   upstream release never breaks a build pinned to the foundation catalog. Softcover already had the freshness
   policy in its own `lint.xml`; adoption is a no-op on the app side beyond inheriting the shared helper.
-
-### F46 — `AdaptiveModalSheet`'s bottom sheet ignores its dismiss flags on swipe and can notify twice
-
-- **Type:** bug
-- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.component.AdaptiveModalSheet`)
-- **Status:** **Open — forked locally.** Beyond F31 (a swipe closes a sheet whose tap-outside and back are
-  off), `dismiss` sends `onDismissRequest` from `invokeOnCompletion`, so a second call or the sheet's own
-  dismiss can send it twice, and nothing tells the body a close has started. Softcover's `:core:component`
-  `AdaptiveModalSheet` (same signature) owns the bottom sheet: `sheetGesturesEnabled` follows
-  `dismissOnTapOutside`, `onDismissRequest` is latched to once (also when `hide()` is cancelled), and a
-  closing signal reaches the scaffold so scrim, back and swipe lock its chrome. That signal is derived
-  (explicit close requested, dismiss sent, or the sheet moving from visible to `Hidden`), never latched
-  from `confirmValueChange`: Material3 queries `Hidden` while the sheet opens or the IME closes without
-  hiding, and a latch from that query turned the later explicit close into a no-op. A detekt
-  `ForbiddenImport` bans the foundation symbol in every module.
-- **What to build:** move the fork into the foundation (swipe gate, one-shot latch, a
-  `LocalModalSheetClosing` beside `LocalModalSheetDismiss`), release, swap the imports back, and delete the
-  local copy and the ban.
 
 ### F50 — Compose stability gate in the convention plugins
 
