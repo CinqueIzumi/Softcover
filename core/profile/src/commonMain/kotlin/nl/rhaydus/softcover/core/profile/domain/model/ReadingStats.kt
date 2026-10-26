@@ -7,4 +7,5 @@ data class ReadingStats(
     val genres: GenreBreakdown = GenreBreakdown(),
     val ratings: RatingsDistribution = RatingsDistribution(),
     val authorDemographics: AuthorDemographics = AuthorDemographics(),
+    val topAuthors: List<AuthorRanking> = emptyList(),
 )

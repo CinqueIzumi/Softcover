@@ -816,4 +816,330 @@ class ReadingStatsMapperTest {
             demographics.knownGenderCount shouldBe 0
         }
     }
+
+    @Nested
+    inner class TopAuthors {
+        private fun author(
+            id: Int,
+            name: String = "Author $id",
+        ) = Author(
+            id = id,
+            name = name,
+        )
+
+        @Test
+        fun `a co-authored book counts for each co-author`() {
+            // ----- Arrange -----
+            val first = author(1)
+            val second = author(2)
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-01-10",
+                    authors = listOf(
+                        first,
+                        second,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val topAuthors = books.toStats(StatsRange.Unbounded).topAuthors
+
+            // ----- Assert -----
+            topAuthors.map { it.author.id }.toSet() shouldBe setOf(1, 2)
+            topAuthors.map { it.booksRead } shouldBe listOf(1, 1)
+        }
+
+        @Test
+        fun `a contributor outside the primary authors is never ranked`() {
+            // ----- Arrange -----
+            val writer = author(1)
+            val translator = author(2)
+            val book = readBook(
+                id = 1,
+                finishedAt = "2026-01-10",
+                authors = listOf(
+                    writer,
+                    translator,
+                ),
+            ).copy(nonPrimaryAuthorIds = setOf(2))
+
+            // ----- Act -----
+            val topAuthors = listOf(book).toStats(StatsRange.Unbounded).topAuthors
+
+            // ----- Assert -----
+            topAuthors.map { it.author.id } shouldBe listOf(1)
+        }
+
+        @Test
+        fun `average rating is the mean of the rated books only`() {
+            // ----- Arrange -----
+            val writer = author(1)
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-01-10",
+                    rating = 4.0,
+                    authors = listOf(writer),
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2026-01-11",
+                    rating = 5.0,
+                    authors = listOf(writer),
+                ),
+                readBook(
+                    id = 3,
+                    finishedAt = "2026-01-12",
+                    authors = listOf(writer),
+                ),
+            )
+
+            // ----- Act -----
+            val ranking = books.toStats(StatsRange.Unbounded).topAuthors.single()
+
+            // ----- Assert -----
+            ranking.booksRead shouldBe 3
+            ranking.averageRating shouldBe 4.5
+        }
+
+        @Test
+        fun `average rating is null when none of the books is rated`() {
+            // ----- Arrange -----
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-01-10",
+                    authors = listOf(author(1)),
+                ),
+            )
+
+            // ----- Act -----
+            val ranking = books.toStats(StatsRange.Unbounded).topAuthors.single()
+
+            // ----- Assert -----
+            ranking.averageRating shouldBe null
+        }
+
+        @Test
+        fun `lead book is the latest finished book`() {
+            // ----- Arrange -----
+            val writer = author(1)
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-03-01",
+                    authors = listOf(writer),
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2026-05-01",
+                    authors = listOf(writer),
+                ),
+                readBook(
+                    id = 3,
+                    finishedAt = "2026-04-01",
+                    authors = listOf(writer),
+                ),
+            )
+
+            // ----- Act -----
+            val ranking = books.toStats(StatsRange.Unbounded).topAuthors.single()
+
+            // ----- Assert -----
+            ranking.leadBook.id shouldBe 2
+        }
+
+        @Test
+        fun `an undated book loses the lead to a dated one`() {
+            // ----- Arrange -----
+            val writer = author(1)
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    authors = listOf(writer),
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2020-01-01",
+                    authors = listOf(writer),
+                ),
+            )
+
+            // ----- Act -----
+            val ranking = books.toStats(StatsRange.Unbounded).topAuthors.single()
+
+            // ----- Assert -----
+            ranking.booksRead shouldBe 2
+            ranking.leadBook.id shouldBe 2
+        }
+
+        @Test
+        fun `an author with more books ranks first`() {
+            // ----- Arrange -----
+            val prolific = author(1)
+            val occasional = author(2)
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-01-10",
+                    rating = 5.0,
+                    authors = listOf(occasional),
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2026-01-11",
+                    authors = listOf(prolific),
+                ),
+                readBook(
+                    id = 3,
+                    finishedAt = "2026-01-12",
+                    authors = listOf(prolific),
+                ),
+            )
+
+            // ----- Act -----
+            val topAuthors = books.toStats(StatsRange.Unbounded).topAuthors
+
+            // ----- Assert -----
+            topAuthors.map { it.author.id } shouldContainExactly listOf(1, 2)
+        }
+
+        @Test
+        fun `equal book counts rank the higher average first and unrated last`() {
+            // ----- Arrange -----
+            val unrated = author(1)
+            val low = author(2)
+            val high = author(3)
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-06-01",
+                    authors = listOf(unrated),
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2026-01-01",
+                    rating = 3.0,
+                    authors = listOf(low),
+                ),
+                readBook(
+                    id = 3,
+                    finishedAt = "2026-01-01",
+                    rating = 5.0,
+                    authors = listOf(high),
+                ),
+            )
+
+            // ----- Act -----
+            val topAuthors = books.toStats(StatsRange.Unbounded).topAuthors
+
+            // ----- Assert -----
+            topAuthors.map { it.author.id } shouldContainExactly listOf(3, 2, 1)
+        }
+
+        @Test
+        fun `equal counts and averages rank the later lead finish first`() {
+            // ----- Arrange -----
+            val earlier = author(1)
+            val later = author(2)
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-01-01",
+                    authors = listOf(earlier),
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2026-02-01",
+                    authors = listOf(later),
+                ),
+            )
+
+            // ----- Act -----
+            val topAuthors = books.toStats(StatsRange.Unbounded).topAuthors
+
+            // ----- Assert -----
+            topAuthors.map { it.author.id } shouldContainExactly listOf(2, 1)
+        }
+
+        @Test
+        fun `a full tie ranks by author name`() {
+            // ----- Arrange -----
+            val zed = author(
+                id = 1,
+                name = "Zed",
+            )
+            val abe = author(
+                id = 2,
+                name = "Abe",
+            )
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-01-01",
+                    authors = listOf(zed),
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2026-01-01",
+                    authors = listOf(abe),
+                ),
+            )
+
+            // ----- Act -----
+            val topAuthors = books.toStats(StatsRange.Unbounded).topAuthors
+
+            // ----- Assert -----
+            topAuthors.map { it.author.name } shouldContainExactly listOf("Abe", "Zed")
+        }
+
+        @Test
+        fun `only the top five authors are kept`() {
+            // ----- Arrange -----
+            val books = (1..7).map { id ->
+                readBook(
+                    id = id,
+                    finishedAt = "2026-01-0$id",
+                    authors = listOf(author(id)),
+                )
+            }
+
+            // ----- Act -----
+            val topAuthors = books.toStats(StatsRange.Unbounded).topAuthors
+
+            // ----- Assert -----
+            topAuthors.map { it.author.id } shouldContainExactly listOf(7, 6, 5, 4, 3)
+        }
+
+        @Test
+        fun `a bounded range leaves out books finished outside it and undated books`() {
+            // ----- Arrange -----
+            val writer = author(1)
+            val books = listOf(
+                readBook(
+                    id = 1,
+                    finishedAt = "2026-02-01",
+                    authors = listOf(writer),
+                ),
+                readBook(
+                    id = 2,
+                    finishedAt = "2020-02-01",
+                    authors = listOf(writer),
+                ),
+                readBook(
+                    id = 3,
+                    authors = listOf(writer),
+                ),
+            )
+
+            // ----- Act -----
+            val ranking = books.toStats(bounded).topAuthors.single()
+
+            // ----- Assert -----
+            ranking.booksRead shouldBe 1
+            ranking.leadBook.id shouldBe 1
+        }
+    }
 }
