@@ -158,7 +158,7 @@ private fun nl.rhaydus.softcover.core.component.bookcard.ProgressLabel(label: ko
     - isLoading: STABLE (primitive type)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.bookcard.RatingLabel(label: kotlin.String, contentDescription: kotlin.String, transitionKey: nl.rhaydus.softcover.core.component.transition.BookTransitionKey?, style: androidx.compose.ui.text.TextStyle, color: androidx.compose.ui.graphics.Color, isLoading: kotlin.Boolean): kotlin.Unit
+internal fun nl.rhaydus.softcover.core.component.bookcard.RatingLabel(label: kotlin.String, contentDescription: kotlin.String, transitionKey: nl.rhaydus.softcover.core.component.transition.BookTransitionKey?, style: androidx.compose.ui.text.TextStyle, color: androidx.compose.ui.graphics.Color, isLoading: kotlin.Boolean, iconSize: androidx.compose.ui.unit.Dp): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -168,6 +168,7 @@ private fun nl.rhaydus.softcover.core.component.bookcard.RatingLabel(label: kotl
     - style: STABLE (marked @Stable or @Immutable)
     - color: STABLE (marked @Stable or @Immutable)
     - isLoading: STABLE (primitive type)
+    - iconSize: STABLE (marked @Stable or @Immutable)
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.bookcard.RestoreLabel(label: kotlin.String): kotlin.Unit

@@ -46,6 +46,16 @@ internal fun BookCardTrailingControl(
         when (trailing) {
             is BookCardTrailing.Badge -> Badge(model = trailing.model)
 
+            is BookCardTrailing.Rating -> RatingLabel(
+                label = trailing.label,
+                contentDescription = trailing.contentDescription,
+                transitionKey = null,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                isLoading = false,
+                iconSize = 14.dp,
+            )
+
             is BookCardTrailing.Restore -> RestoreLabel(label = "Restore")
 
             is BookCardTrailing.Bookmark -> Toggle(

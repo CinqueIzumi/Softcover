@@ -74,6 +74,10 @@ internal fun ColumnScope.StatsAtlasBody(
             chart = state.monthlyPagesChart,
             monthSetKey = state.monthlyPagesMonthSetKey,
             hasMonthlyPages = state.hasMonthlyPages,
+            topAuthorsTitle = state.topAuthorsTitle,
+            topAuthorsCaption = state.topAuthorsCaption,
+            topAuthorRows = state.topAuthorRows,
+            hasTopAuthors = state.hasTopAuthors,
         )
     }
 

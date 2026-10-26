@@ -292,7 +292,7 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Sc
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.SeasonsAndRecordsChapter(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, chart: nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel, monthSetKey: kotlin.String?, hasMonthlyPages: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.SeasonsAndRecordsChapter(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, chart: nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel, monthSetKey: kotlin.String?, hasMonthlyPages: kotlin.Boolean, topAuthorsTitle: kotlin.String, topAuthorsCaption: kotlin.String, topAuthorRows: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel>, hasTopAuthors: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -300,6 +300,10 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Se
     - chart: STABLE (marked @Stable or @Immutable)
     - monthSetKey: STABLE (class with no mutable properties)
     - hasMonthlyPages: STABLE (primitive type)
+    - topAuthorsTitle: STABLE (String is immutable)
+    - topAuthorsCaption: STABLE (String is immutable)
+    - topAuthorRows: STABLE (known stable type)
+    - hasTopAuthors: STABLE (primitive type)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable

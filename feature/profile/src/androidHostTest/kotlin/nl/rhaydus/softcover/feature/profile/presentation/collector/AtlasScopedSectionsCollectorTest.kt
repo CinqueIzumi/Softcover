@@ -17,8 +17,11 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatTileVariant
+import nl.rhaydus.softcover.core.domain.model.Author
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.StatsRange
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.StatsWindow
@@ -26,6 +29,7 @@ import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
@@ -542,5 +546,42 @@ class AtlasScopedSectionsCollectorTest {
             stateFlow.value.timeOfDayChart.columns[5].value shouldBe "100%"
             job.cancel()
         }
+
+        @Test
+        fun `maps the scoped top authors into rows, the has flag and the caption`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val leadBook = mockk<Book>(relaxed = true)
+                every {
+                    leadBook.id
+                } returns 31
+                statsFor = {
+                    ReadingStats(
+                        booksRead = 4,
+                        topAuthors = listOf(
+                            AuthorRanking(
+                                author = Author(
+                                    id = 1,
+                                    name = "Ursula K. Le Guin",
+                                ),
+                                booksRead = 4,
+                                averageRating = 4.5,
+                                leadBook = leadBook,
+                            ),
+                        ),
+                    )
+                }
+
+                // ----- Act -----
+                val job = launchCollector()
+
+                // ----- Assert -----
+                stateFlow.value.hasTopAuthors shouldBe true
+                stateFlow.value.topAuthorRows.map { it.key } shouldBe listOf(BookCardKey.Book(bookId = 31))
+                stateFlow.value.topAuthorRows.none { it.isLoading } shouldBe true
+                stateFlow.value.topAuthorsCaption shouldBe
+                    "Your five most-read authors, with your average rating of their books."
+                job.cancel()
+            }
     }
 }

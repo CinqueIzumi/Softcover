@@ -2,7 +2,9 @@ package nl.rhaydus.softcover.feature.profile.presentation.screen.section
 
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
@@ -28,6 +30,64 @@ internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
     genres = previewGenres(),
     ratings = previewRatings(),
     authorDemographics = previewAuthorDemographics(),
+    topAuthors = previewTopAuthors(),
+)
+
+private fun previewTopAuthors(): List<AuthorRanking> = listOf(
+    previewRanking(
+        id = 1,
+        name = "Ursula K. Le Guin",
+        leadTitle = "The Left Hand of Darkness",
+        booksRead = 4,
+        averageRating = 4.6,
+    ),
+    previewRanking(
+        id = 2,
+        name = "Terry Pratchett",
+        leadTitle = "Guards! Guards!",
+        booksRead = 3,
+        averageRating = 4.3,
+    ),
+    previewRanking(
+        id = 3,
+        name = "Becky Chambers",
+        leadTitle = "A Psalm for the Wild-Built",
+        booksRead = 3,
+        averageRating = 4.1,
+    ),
+    previewRanking(
+        id = 4,
+        name = "Susanna Clarke",
+        leadTitle = "Piranesi",
+        booksRead = 2,
+        averageRating = 4.8,
+    ),
+    previewRanking(
+        id = 5,
+        name = "Kazuo Ishiguro",
+        leadTitle = "Klara and the Sun",
+        booksRead = 2,
+        averageRating = 3.9,
+    ),
+)
+
+private fun previewRanking(
+    id: Int,
+    name: String,
+    leadTitle: String,
+    booksRead: Int,
+    averageRating: Double,
+): AuthorRanking = AuthorRanking(
+    author = PreviewData.baseAuthor.copy(
+        id = id,
+        name = name,
+    ),
+    booksRead = booksRead,
+    averageRating = averageRating,
+    leadBook = PreviewData.baseBook.copy(
+        id = id,
+        title = leadTitle,
+    ),
 )
 
 /** The pages-read-per-month half of the same sample reader, summed across every year. */

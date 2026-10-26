@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
@@ -25,6 +26,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.COLLAPSED_GENRE_
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.TIME_OF_DAY_FOOTNOTE
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.TIME_OF_DAY_TITLE
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.TOP_AUTHORS_TITLE
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasChapterHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasContentsRows
@@ -38,6 +40,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaptio
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingGenreHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPagesHeader
@@ -51,6 +54,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiMo
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryChartUiModel
 import nl.rhaydus.toad.UiState
@@ -144,6 +149,16 @@ internal data class StatsAtlasUiState(
     val monthlyPagesChart: ColumnChartUiModel = loadingMonthlyPagesChartUiModel(),
     val hasMonthlyPages: Boolean = hasMonthlyPages(null),
     val monthlyPagesMonthSetKey: String? = monthlyPagesMonthSetKey(null),
+
+    /** Mapped by `AtlasScopedSectionsCollector`; the rows are masked stand-ins while loading. */
+    val topAuthorsTitle: String = TOP_AUTHORS_TITLE,
+    val topAuthorsCaption: String = topAuthorsCaption(
+        topAuthors = null,
+        booksRead = 0,
+        scope = StatsScope.AllTime,
+    ),
+    val topAuthorRows: ImmutableList<BookCardUiModel> = topAuthorRows(null),
+    val hasTopAuthors: Boolean = hasTopAuthors(null),
 
     /** Mapped by `AtlasScopedSectionsCollector` off [readingStats]. */
     val opening: AtlasOpeningUiModel = atlasOpeningUiModel(null),

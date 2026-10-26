@@ -10,12 +10,17 @@ import nl.rhaydus.softcover.core.component.control.ToggleVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
- * [Badge] and [Restore] are read-only — a hidden row restores through the card's own tap. [Bookmark] and
+ * [Badge], [Rating] and [Restore] are read-only — a hidden row restores through the card's own tap. [Bookmark] and
  * [SetProgress] are their own tap targets and emit [BookCardEvent.TrailingClicked].
  */
 @Immutable
 sealed interface BookCardTrailing {
     data class Badge(val model: BadgeUiModel) : BookCardTrailing
+
+    data class Rating(
+        val label: String,
+        val contentDescription: String,
+    ) : BookCardTrailing
 
     data object Restore : BookCardTrailing
 

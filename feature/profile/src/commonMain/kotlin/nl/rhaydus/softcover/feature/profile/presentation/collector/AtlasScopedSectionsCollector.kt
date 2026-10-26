@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownU
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
@@ -33,6 +34,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsHistogram
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsHistogramHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHeader
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
@@ -183,6 +186,13 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             ),
             hasMonthlyPages = hasMonthlyPages(monthlyPages),
             monthlyPagesMonthSetKey = monthlyPagesMonthSetKey(monthlyPages),
+            topAuthorsCaption = topAuthorsCaption(
+                topAuthors = stats?.topAuthors,
+                booksRead = booksRead,
+                scope = scope,
+            ),
+            topAuthorRows = topAuthorRows(stats?.topAuthors),
+            hasTopAuthors = hasTopAuthors(stats?.topAuthors),
         )
     }
 

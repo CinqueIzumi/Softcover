@@ -19,9 +19,9 @@
   leaves the row falls back to All time.
 - Beneath the row, a quiet italic line names the dates: "Showing 2026", "Showing 24 September to today"
   (the year is added only when the window starts in an earlier one), "Showing every year".
-- The scope moves the opening tiles, the time-of-day chart, the pages-by-month chart, the genre ranking, "Who you read"
-  (Hide untagged authors still applies) and "How you score". "Recently loved" and the year chart ignore
-  it. Values animate between scopes; labels cross-fade, and reduced motion swaps them in place.
+- The scope moves the opening tiles, the time-of-day chart, the pages-by-month chart, the authors list, the genre
+  ranking, "Who you read" (Hide untagged authors still applies) and "How you score". "Recently loved" and
+  the year chart ignore it. Values animate between scopes; labels cross-fade, and reduced motion swaps them in place.
 - A scope with no finished books says so in each section's framing sentence ("No finished books in the last
   30 days.") instead of drawing an empty chart; the opening tiles show 0 and say nothing was finished. In a
   narrow scope with too few ratings to classify, "How you score" states the count ("3 rated books in the last
@@ -63,6 +63,14 @@
   every year. Month labels are three letters, on every third column. The chart cross-fades only when the
   set of months changes (year to all time animates in place). A month after today with no pages is a "still
   to come" stub, named in the description.
+  Under the chart, "Authors you return to" (caption "Your five most-read authors, with your average rating
+  of their books.") lists up to five rows, ranked by books read in the scope. Only primary authors count:
+  translators, illustrators, narrators, editors and cover artists are left out. Each row is a compact
+  `BookCard` with the cover of the author's most recently finished book, the author's name, "N books" ("1
+  book") and, trailing, a bare gold star with your average rating of those books ("4.6"), left out when none
+  is rated. The rows are not tappable. With no finished books the caption gives the scope's sentence, or
+  "Finish a few books and the authors you read most show up here." for All time; when books were finished
+  but none lists an author it reads "None of these books lists an author." and the rows are dropped.
 - Chapter 03, "Genres and how you read" (caption "What you reach for, and how it reads."), opens with a
   headline naming the top genre ("Mostly fantasy", each word lowercased unless it is all capitals, like
   "LGBTQ+"; a tie goes to the ranking's order) over a `RankedBars` ranking of the top five genres. A

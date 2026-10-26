@@ -308,6 +308,24 @@ data class BookCardUiModel(
                 ),
                 decorations = BookCardDecorations(pressBehaviour = BookCardDecorations.Press.TapAndLongPress),
             ),
+            "Row Compact, Rating" to BookCardUiModel(
+                key = BookCardKey.Book(bookId = 11),
+                variant = BookCardVariant.Row(
+                    size = BookCardVariant.Row.Size.Compact,
+                    lead = BookCardLead.Cover(cover = bookCover(title = "Piranesi")),
+                    text = BookCardContent(
+                        title = "Susanna Clarke",
+                        supportingLines = persistentListOf(
+                            persistentListOf(BookCardLinePart.Text(text = "4 books")),
+                        ),
+                    ),
+                    trailing = BookCardTrailing.Rating(
+                        label = "4.6",
+                        contentDescription = "Your average rating, 4.6",
+                    ),
+                ),
+                decorations = BookCardDecorations(pressBehaviour = BookCardDecorations.Press.None),
+            ),
             "Row Standard, series stack, Restore" to BookCardUiModel(
                 key = BookCardKey.Series(seriesId = 9),
                 variant = BookCardVariant.Row(

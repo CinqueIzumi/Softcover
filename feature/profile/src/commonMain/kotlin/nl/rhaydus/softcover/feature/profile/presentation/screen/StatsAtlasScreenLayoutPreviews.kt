@@ -15,11 +15,14 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingShow
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingShowMore
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHeader
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileHourlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileMonthlyPagesPreview
@@ -78,6 +81,13 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
     ),
     hasMonthlyPages = true,
     monthlyPagesMonthSetKey = monthlyPagesMonthSetKey(PreviewMonthlyPages),
+    topAuthorsCaption = topAuthorsCaption(
+        topAuthors = PreviewReadingStats.topAuthors,
+        booksRead = PreviewReadingStats.booksRead,
+        scope = StatsScope.AllTime,
+    ),
+    topAuthorRows = topAuthorRows(PreviewReadingStats.topAuthors),
+    hasTopAuthors = hasTopAuthors(PreviewReadingStats.topAuthors),
     genreHeader = genreHeader(
         slices = PreviewReadingStats.genres.slices,
         emptyCaption = genreEmptyCaption(booksRead = PreviewReadingStats.booksRead),
