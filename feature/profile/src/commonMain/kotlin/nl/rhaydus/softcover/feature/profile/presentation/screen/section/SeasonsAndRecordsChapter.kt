@@ -11,6 +11,8 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.chart.ColumnChart
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
+import nl.rhaydus.softcover.core.component.chart.ProportionChart
+import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
@@ -18,7 +20,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
  * The scoped pages-by-month chart under its [header]. The chart cross-fades only when [monthSetKey]
  * changes, because the month labels are then different; otherwise the bars animate in place. When
  * [hasMonthlyPages] is false the chart is dropped and the header's description says why. Below it the
- * [topAuthorRows] sit under their own subhead, and are dropped when [hasTopAuthors] is false.
+ * [topAuthorRows] sit under their own subhead, and are dropped when [hasTopAuthors] is false. The
+ * [formatSplitChart] follows under its own subhead and animates in place across scopes.
  */
 @Composable
 internal fun SeasonsAndRecordsChapter(
@@ -30,6 +33,10 @@ internal fun SeasonsAndRecordsChapter(
     topAuthorsCaption: String,
     topAuthorRows: ImmutableList<BookCardUiModel>,
     hasTopAuthors: Boolean,
+    formatSplitTitle: String,
+    formatSplitCaption: String,
+    formatSplitChart: ProportionChartUiModel,
+    hasFormatSplit: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val isLoadingAuthors = topAuthorRows.any { it.isLoading }
@@ -79,6 +86,26 @@ internal fun SeasonsAndRecordsChapter(
                             }
                         }
                     }
+                }
+            },
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.xl))
+
+        AtlasSubhead(
+            title = formatSplitTitle,
+            caption = formatSplitCaption,
+            isLoading = formatSplitChart.isLoading,
+        )
+
+        ScopeEmptySwitch(
+            isEmpty = hasFormatSplit.not() && formatSplitChart.isLoading.not(),
+            empty = {},
+            filled = {
+                Column {
+                    Spacer(modifier = Modifier.height(Spacing.md))
+
+                    ProportionChart(model = formatSplitChart)
                 }
             },
         )

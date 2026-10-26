@@ -78,6 +78,10 @@ internal fun ColumnScope.StatsAtlasBody(
             topAuthorsCaption = state.topAuthorsCaption,
             topAuthorRows = state.topAuthorRows,
             hasTopAuthors = state.hasTopAuthors,
+            formatSplitTitle = state.formatSplitTitle,
+            formatSplitCaption = state.formatSplitCaption,
+            formatSplitChart = state.formatSplitChart,
+            hasFormatSplit = state.hasFormatSplit,
         )
     }
 

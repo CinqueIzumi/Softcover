@@ -19,7 +19,7 @@
   leaves the row falls back to All time.
 - Beneath the row, a quiet italic line names the dates: "Showing 2026", "Showing 24 September to today"
   (the year is added only when the window starts in an earlier one), "Showing every year".
-- The scope moves the opening tiles, the time-of-day chart, the pages-by-month chart, the authors list, the genre
+- The scope moves the opening tiles, the time-of-day chart, the pages-by-month chart, the authors list, the format split, the genre
   ranking, "Who you read" (Hide untagged authors still applies) and "How you score". "Recently loved" and
   the year chart ignore it. Values animate between scopes; labels cross-fade, and reduced motion swaps them in place.
 - A scope with no finished books says so in each section's framing sentence ("No finished books in the last
@@ -71,6 +71,15 @@
   is rated. The rows are not tappable. With no finished books the caption gives the scope's sentence, or
   "Finish a few books and the authors you read most show up here." for All time; when books were finished
   but none lists an author it reads "None of these books lists an author." and the rows are dropped.
+  Under that, "Print, ebook or audio" shows what share of the books finished in the scope were read in
+  print, as an ebook, as an audiobook or in print and audio, as a `ProportionChart` with inline keys. A book
+  counts once, under your own edition's format; books with no known format form a muted "Unknown" segment.
+  The caption names the lead: "Mostly paper, with a third on a screen.", "Mostly ebooks.", "Only
+  audiobooks.", or "Split between paper and ebooks." when no format passes half. When half or more of the
+  books have no known format it reads "At least half of these books have no known format.", and with none known "None
+  of these books has a known format.". With no finished books the caption gives the scope's sentence, or
+  "Finish a few books and the formats you read in show up here." for All time, and the chart is dropped.
+  The chart animates in place across scopes rather than cross-fading.
 - Chapter 03, "Genres and how you read" (caption "What you reach for, and how it reads."), opens with a
   headline naming the top genre ("Mostly fantasy", each word lowercased unless it is all capitals, like
   "LGBTQ+"; a tie goes to the ranking's order) over a `RankedBars` ranking of the top five genres. A
@@ -94,6 +103,9 @@
   `Unknown` last, muted). `RankedBars` for overlapping ones (genres, each a share of books; position,
   name over a track, share, with each bar filled relative to the lead row, which is always full); the
   description names what the shares count.
+- The format split is a `Keys` `ProportionChart` with a fixed format order and tones (Print `Lead`, Ebook
+  `Second`, Audiobook `Third`, Print and audio `Fourth`), zero formats dropped and `Unknown` muted last.
+  Shares are whole percents that sum to 100; a non-zero share never shows 0%.
 - `ColumnChart`: books per year (peak `Lead`, others `Second`, zero a `Fifth` stub); pages per month (the
   peak `Lead` and the only column with a value, the next two `Second`, other non-zero `Third`, zero or
   future `Fifth`; ties go to the earliest month; labels on every third column); time of day (eight

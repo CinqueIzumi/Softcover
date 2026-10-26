@@ -8,12 +8,15 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.COLLAPSED_GENRE_
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitChart
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingShowLess
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingShowMore
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
@@ -88,6 +91,13 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
     ),
     topAuthorRows = topAuthorRows(PreviewReadingStats.topAuthors),
     hasTopAuthors = hasTopAuthors(PreviewReadingStats.topAuthors),
+    formatSplitCaption = formatSplitCaption(
+        split = PreviewReadingStats.formatSplit,
+        booksRead = PreviewReadingStats.booksRead,
+        scope = StatsScope.AllTime,
+    ),
+    formatSplitChart = formatSplitChart(PreviewReadingStats.formatSplit),
+    hasFormatSplit = hasFormatSplit(PreviewReadingStats.formatSplit),
     genreHeader = genreHeader(
         slices = PreviewReadingStats.genres.slices,
         emptyCaption = genreEmptyCaption(booksRead = PreviewReadingStats.booksRead),

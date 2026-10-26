@@ -2,10 +2,12 @@ package nl.rhaydus.softcover.feature.profile.presentation.screen.section
 
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
@@ -31,6 +33,15 @@ internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
     ratings = previewRatings(),
     authorDemographics = previewAuthorDemographics(),
     topAuthors = previewTopAuthors(),
+    formatSplit = previewFormatSplit(),
+)
+
+private fun previewFormatSplit(): FormatSplit = FormatSplit(
+    counts = mapOf(
+        ReadingFormat.Physical to 111,
+        ReadingFormat.Ebook to 66,
+        ReadingFormat.Audio to 37,
+    ),
 )
 
 private fun previewTopAuthors(): List<AuthorRanking> = listOf(

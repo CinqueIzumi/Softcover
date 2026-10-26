@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatTileVariant
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.StatsRange
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.StatsWindow
@@ -31,6 +32,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsB
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
@@ -581,6 +583,33 @@ class AtlasScopedSectionsCollectorTest {
                 stateFlow.value.topAuthorRows.none { it.isLoading } shouldBe true
                 stateFlow.value.topAuthorsCaption shouldBe
                     "Your five most-read authors, with your average rating of their books."
+                job.cancel()
+            }
+
+        @Test
+        fun `maps the scoped format split into the caption, chart and has flag`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                statsFor = {
+                    ReadingStats(
+                        booksRead = 4,
+                        formatSplit = FormatSplit(
+                            counts = mapOf(
+                                ReadingFormat.Physical to 3,
+                                ReadingFormat.Ebook to 1,
+                            ),
+                        ),
+                    )
+                }
+
+                // ----- Act -----
+                val job = launchCollector()
+
+                // ----- Assert -----
+                stateFlow.value.hasFormatSplit shouldBe true
+                stateFlow.value.formatSplitChart.isLoading shouldBe false
+                stateFlow.value.formatSplitChart.segments.map { it.label } shouldBe listOf("Print", "Ebook")
+                stateFlow.value.formatSplitCaption shouldBe "Mostly paper, with a quarter on a screen."
                 job.cancel()
             }
     }

@@ -18,8 +18,11 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeLine
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitChart
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
@@ -44,7 +47,7 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * The only writer of every section that answers for the selected scope: the opening tiles, who you
- * read, how you score, pages by month and pages by time of day, with their framing copy and the scope
+ * read, how you score, the format split, pages by month and pages by time of day, with their framing copy and the scope
  * line. For genres it writes only whether any exist and the empty sentence; `GenreRankingCollector` maps
  * the rest off the stats written here.
  *
@@ -193,6 +196,13 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             ),
             topAuthorRows = topAuthorRows(stats?.topAuthors),
             hasTopAuthors = hasTopAuthors(stats?.topAuthors),
+            formatSplitCaption = formatSplitCaption(
+                split = stats?.formatSplit,
+                booksRead = booksRead,
+                scope = scope,
+            ),
+            formatSplitChart = formatSplitChart(stats?.formatSplit),
+            hasFormatSplit = hasFormatSplit(stats?.formatSplit),
         )
     }
 

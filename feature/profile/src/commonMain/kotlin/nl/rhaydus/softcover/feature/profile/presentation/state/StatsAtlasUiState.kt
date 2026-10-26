@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
+import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
@@ -23,6 +24,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_KEY
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_LINE
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.COLLAPSED_GENRE_COUNT
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.FORMAT_SPLIT_TITLE
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.TIME_OF_DAY_FOOTNOTE
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.TIME_OF_DAY_TITLE
@@ -35,9 +37,12 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsScopeCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitChart
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasMonthlyPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
@@ -159,6 +164,16 @@ internal data class StatsAtlasUiState(
     ),
     val topAuthorRows: ImmutableList<BookCardUiModel> = topAuthorRows(null),
     val hasTopAuthors: Boolean = hasTopAuthors(null),
+
+    /** Mapped by `AtlasScopedSectionsCollector`; the chart is a masked stand-in while loading. */
+    val formatSplitTitle: String = FORMAT_SPLIT_TITLE,
+    val formatSplitCaption: String = formatSplitCaption(
+        split = null,
+        booksRead = 0,
+        scope = StatsScope.AllTime,
+    ),
+    val formatSplitChart: ProportionChartUiModel = formatSplitChart(null),
+    val hasFormatSplit: Boolean = hasFormatSplit(null),
 
     /** Mapped by `AtlasScopedSectionsCollector` off [readingStats]. */
     val opening: AtlasOpeningUiModel = atlasOpeningUiModel(null),
