@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
@@ -42,12 +43,21 @@ internal fun List<Book>.toReadingStats(
         ratings = inRange.toRatingsDistribution(),
         authorDemographics = inRange.toAuthorDemographics(),
         topAuthors = inRange.toTopAuthors(),
+        formatSplit = inRange.toFormatSplit(),
     )
 }
 
 /** The reader's own edition decides the page count, then the book's, since editions differ widely. */
-internal fun Book.statsPages(): Int =
-    editions.firstOrNull { it.id == userBook?.editionId }?.pages ?: pages ?: 0
+internal fun Book.statsPages(): Int = readerEdition?.pages ?: pages ?: 0
+
+private fun List<Book>.toFormatSplit(): FormatSplit {
+    val formats = map { it.readerEdition?.readingFormat }
+
+    return FormatSplit(
+        counts = formats.filterNotNull().groupingBy { it }.eachCount(),
+        unknownCount = formats.count { it == null },
+    )
+}
 
 private fun Book.isFinishedIn(range: StatsRange): Boolean = when (range) {
     StatsRange.Unbounded -> true

@@ -8,6 +8,7 @@ import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.StatsRange
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
@@ -1140,6 +1141,168 @@ class ReadingStatsMapperTest {
             // ----- Assert -----
             ranking.booksRead shouldBe 1
             ranking.leadBook.id shouldBe 1
+        }
+    }
+
+    @Nested
+    inner class FormatSplitCounts {
+        private fun formatBook(
+            id: Int,
+            format: ReadingFormat?,
+            finishedAt: String = "2026-02-01",
+        ) = readBook(
+            id = id,
+            finishedAt = finishedAt,
+            editions = listOf(
+                edition(
+                    id = id * 10,
+                    pages = null,
+                ).copy(readingFormat = format),
+            ),
+            editionId = id * 10,
+        )
+
+        @Test
+        fun `each book counts once under its reader edition format`() {
+            // ----- Arrange -----
+            val books = listOf(
+                formatBook(
+                    id = 1,
+                    format = ReadingFormat.Physical,
+                ),
+                formatBook(
+                    id = 2,
+                    format = ReadingFormat.Physical,
+                ),
+                formatBook(
+                    id = 3,
+                    format = ReadingFormat.Ebook,
+                ),
+                formatBook(
+                    id = 4,
+                    format = ReadingFormat.Audio,
+                ),
+            )
+
+            // ----- Act -----
+            val split = books.toStats(StatsRange.Unbounded).formatSplit
+
+            // ----- Assert -----
+            split.counts shouldBe mapOf(
+                ReadingFormat.Physical to 2,
+                ReadingFormat.Ebook to 1,
+                ReadingFormat.Audio to 1,
+            )
+            split.unknownCount shouldBe 0
+        }
+
+        @Test
+        fun `both formats count under their own key`() {
+            // ----- Arrange -----
+            val books = listOf(
+                formatBook(
+                    id = 1,
+                    format = ReadingFormat.Both,
+                ),
+                formatBook(
+                    id = 2,
+                    format = ReadingFormat.Physical,
+                ),
+            )
+
+            // ----- Act -----
+            val split = books.toStats(StatsRange.Unbounded).formatSplit
+
+            // ----- Assert -----
+            split.counts shouldBe mapOf(
+                ReadingFormat.Both to 1,
+                ReadingFormat.Physical to 1,
+            )
+        }
+
+        @Test
+        fun `books without a resolvable format count as unknown`() {
+            // ----- Arrange -----
+            val noEditionId = readBook(
+                id = 1,
+                finishedAt = "2026-02-01",
+            )
+            val uncachedEdition = readBook(
+                id = 2,
+                finishedAt = "2026-02-01",
+                editionId = 99,
+            )
+            val nullFormat = formatBook(
+                id = 3,
+                format = null,
+            )
+
+            // ----- Act -----
+            val split = listOf(noEditionId, uncachedEdition, nullFormat)
+                .toStats(StatsRange.Unbounded)
+                .formatSplit
+
+            // ----- Assert -----
+            split.counts shouldBe emptyMap()
+            split.unknownCount shouldBe 3
+        }
+
+        @Test
+        fun `an edition that is not the readers does not decide the format`() {
+            // ----- Arrange -----
+            val book = readBook(
+                id = 1,
+                finishedAt = "2026-02-01",
+                editions = listOf(
+                    edition(
+                        id = 10,
+                        pages = null,
+                    ).copy(
+                        readingFormat = ReadingFormat.Audio,
+                        owned = true,
+                    ),
+                    edition(
+                        id = 11,
+                        pages = null,
+                    ).copy(readingFormat = ReadingFormat.Ebook),
+                ),
+                editionId = 11,
+            )
+
+            // ----- Act -----
+            val split = listOf(book).toStats(StatsRange.Unbounded).formatSplit
+
+            // ----- Assert -----
+            split.counts shouldBe mapOf(ReadingFormat.Ebook to 1)
+        }
+
+        @Test
+        fun `a book finished outside a bounded range is not counted`() {
+            // ----- Arrange -----
+            val books = listOf(
+                formatBook(
+                    id = 1,
+                    format = ReadingFormat.Physical,
+                    finishedAt = "2026-06-01",
+                ),
+                formatBook(
+                    id = 2,
+                    format = ReadingFormat.Audio,
+                    finishedAt = "2025-06-01",
+                ),
+                formatBook(
+                    id = 3,
+                    format = null,
+                    finishedAt = "2025-06-01",
+                ),
+            )
+
+            // ----- Act -----
+            val split = books.toStats(bounded).formatSplit
+
+            // ----- Assert -----
+            split.counts shouldBe mapOf(ReadingFormat.Physical to 1)
+            split.unknownCount shouldBe 0
         }
     }
 }

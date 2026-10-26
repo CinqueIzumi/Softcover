@@ -8,4 +8,5 @@ data class ReadingStats(
     val ratings: RatingsDistribution = RatingsDistribution(),
     val authorDemographics: AuthorDemographics = AuthorDemographics(),
     val topAuthors: List<AuthorRanking> = emptyList(),
+    val formatSplit: FormatSplit = FormatSplit(),
 )
