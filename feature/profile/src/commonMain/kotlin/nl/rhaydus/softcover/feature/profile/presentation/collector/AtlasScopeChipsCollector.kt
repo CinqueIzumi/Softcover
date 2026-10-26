@@ -30,7 +30,7 @@ internal class AtlasScopeChipsCollector : StatsAtlasCollector {
 
         combine(
             dependencies.observeReadingHistoryUseCase()
-                .untilBackfilled(dependencies.observeAuthorDemographicsBackfilledUseCase),
+                .untilBackfilled(dependencies.observeReadingStatsBackfilledUseCase),
             scope.state.map { it.selectedScopeKey }.distinctUntilChanged(),
         ) { history, selectedKey ->
             history to selectedKey

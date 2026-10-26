@@ -76,7 +76,7 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
 
             combine(
                 observeReadingStatsUseCase(range)
-                    .untilBackfilled(observeAuthorDemographicsBackfilledUseCase),
+                    .untilBackfilled(observeReadingStatsBackfilledUseCase),
                 observeMonthlyPagesReadUseCase(range),
                 observeHourlyPagesReadUseCase(range),
                 getHideUntaggedAuthorsAsFlowUseCase(),

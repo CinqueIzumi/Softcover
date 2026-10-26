@@ -460,6 +460,7 @@ class RefreshLibraryUseCaseImplTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             coVerify(exactly = 1) { settingsRepository.markAuthorDemographicsBackfilled() }
+            coVerify(exactly = 1) { settingsRepository.markAuthorRolesBackfilled() }
         }
 
         @Test
@@ -475,6 +476,7 @@ class RefreshLibraryUseCaseImplTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             coVerify(exactly = 1) { settingsRepository.markAuthorDemographicsBackfilled() }
+            coVerify(exactly = 1) { settingsRepository.markAuthorRolesBackfilled() }
         }
 
         @Test
@@ -490,6 +492,7 @@ class RefreshLibraryUseCaseImplTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             coVerify(exactly = 0) { settingsRepository.markAuthorDemographicsBackfilled() }
+            coVerify(exactly = 0) { settingsRepository.markAuthorRolesBackfilled() }
         }
 
         @Test
@@ -508,6 +511,7 @@ class RefreshLibraryUseCaseImplTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             coVerify(exactly = 0) { settingsRepository.markAuthorDemographicsBackfilled() }
+            coVerify(exactly = 0) { settingsRepository.markAuthorRolesBackfilled() }
         }
 
         @Test
@@ -527,6 +531,7 @@ class RefreshLibraryUseCaseImplTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             coVerify(exactly = 0) { settingsRepository.markAuthorDemographicsBackfilled() }
+            coVerify(exactly = 0) { settingsRepository.markAuthorRolesBackfilled() }
         }
 
         @Test
@@ -545,6 +550,7 @@ class RefreshLibraryUseCaseImplTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             coVerify(exactly = 0) { settingsRepository.markAuthorDemographicsBackfilled() }
+            coVerify(exactly = 0) { settingsRepository.markAuthorRolesBackfilled() }
         }
     }
 }

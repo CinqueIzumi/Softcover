@@ -1886,6 +1886,7 @@ class BooksRemoteDataSourceImplTest {
                         name = "Canonical Author",
                     ),
                 ),
+                nonPrimaryAuthorIds = setOf(2),
                 usersCount = 500,
                 ratingsCount = 999,
                 positionsInSeries = listOf(1.0),
@@ -1908,6 +1909,7 @@ class BooksRemoteDataSourceImplTest {
             result.releaseYear shouldBe canonical.releaseYear
             result.coverUrl shouldBe canonical.coverUrl
             result.authors shouldBe canonical.authors
+            result.nonPrimaryAuthorIds shouldBe canonical.nonPrimaryAuthorIds
             result.usersCount shouldBe canonical.usersCount
             result.ratingsCount shouldBe canonical.ratingsCount
             result.positionsInSeries shouldBe canonical.positionsInSeries

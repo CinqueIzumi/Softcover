@@ -19,6 +19,9 @@ data class Book(
     val pages: Int? = null,
     val coverUrl: String,
     val authors: List<Author>,
+
+    /** Contributors in [authors] credited only in another role, such as translator or narrator. */
+    val nonPrimaryAuthorIds: Set<Int> = emptySet(),
     val usersCount: Int,
     val ratingsCount: Int,
     val bookSeries: BookSeries?,
@@ -28,6 +31,9 @@ data class Book(
 
     val userBook: UserBook?,
 ) {
+    val primaryAuthors: List<Author>
+        get() = authors.filter { it.id !in nonPrimaryAuthorIds }
+
     val currentRead: UserBookRead?
         get() = userBook?.currentRead
 

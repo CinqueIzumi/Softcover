@@ -11,8 +11,8 @@ import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepositor
  * Start-up library refresh. Covers only Currently Reading and Paused, because a full refetch of a
  * large library exhausts the API's per-minute budget. Until one all-status refresh has succeeded it
  * covers every status instead, so books cached before every read was synced pick up their full read history.
- * Until author demographics and page counts have been refilled it covers the Read status, the only one
- * the reading stats need.
+ * Until author demographics, page counts and contributor roles have been refilled it covers the Read
+ * status, the only one the reading stats need.
  */
 internal class RefreshLibraryOnStartUseCase(
     private val settingsRepository: SettingsRepository,
@@ -22,6 +22,7 @@ internal class RefreshLibraryOnStartUseCase(
         // Each flag defaults to true on an empty read so an unreadable preference never triggers a wide sync.
         val readThroughsBackfilled: Boolean = settingsRepository.readThroughsBackfilled.firstOrNull() ?: true
         val demographicsBackfilled: Boolean = settingsRepository.authorDemographicsBackfilled.firstOrNull() ?: true
+        val rolesBackfilled: Boolean = settingsRepository.authorRolesBackfilled.firstOrNull() ?: true
 
         if (readThroughsBackfilled.not()) {
             refreshLibraryUseCase(scope = RefreshScope.ByStatuses(statuses = UserBookStatus.entries.toSet()))
@@ -31,7 +32,7 @@ internal class RefreshLibraryOnStartUseCase(
             return@runCatchingLogged
         }
 
-        if (demographicsBackfilled.not()) {
+        if (demographicsBackfilled.not() || rolesBackfilled.not()) {
             refreshLibraryUseCase(scope = READ_SCOPE).getOrThrow()
             return@runCatchingLogged
         }

@@ -126,6 +126,7 @@ internal fun Book.toBookAuthorRefs(): List<BookAuthorCrossRef> =
         BookAuthorCrossRef(
             bookId = id,
             authorId = it.id,
+            isPrimaryAuthor = it.id !in nonPrimaryAuthorIds,
         )
     }
 
@@ -215,8 +216,9 @@ fun ReadingJournalEntity.toModel(): ReadingJournal = ReadingJournal(
 )
 
 fun BookFullEntity.toModel(): Book {
+    val bookAuthorEntities = bookAuthors.mapNotNull { it.author }
     val uiEditions = editions.map { editionWithAuthors ->
-        val editionAuthors = editionWithAuthors.authors.ifEmpty { bookAuthors }
+        val editionAuthors = editionWithAuthors.authors.ifEmpty { bookAuthorEntities }
         editionWithAuthors.edition.edition.toModel(
             authors = editionAuthors,
             owned = editionWithAuthors.edition.isOwned,
@@ -245,7 +247,11 @@ fun BookFullEntity.toModel(): Book {
         releaseDate = book.releaseDate.toLocalDateOrNull(),
         pages = book.pages,
         coverUrl = book.coverUrl,
-        authors = bookAuthors.map { it.toModel() },
+        authors = bookAuthorEntities.map { it.toModel() },
+        nonPrimaryAuthorIds = bookAuthors
+            .filterNot { it.crossRef.isPrimaryAuthor }
+            .map { it.crossRef.authorId }
+            .toSet(),
         usersCount = book.usersCount,
         ratingsCount = book.ratingsCount,
         userBook = userBookWithJournals?.userBook?.toModel(

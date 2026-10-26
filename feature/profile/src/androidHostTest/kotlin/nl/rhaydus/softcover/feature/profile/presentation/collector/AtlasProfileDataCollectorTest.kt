@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test
 
 class AtlasProfileDataCollectorTest {
     private lateinit var observeUserProfileDataUseCase: ObserveUserProfileDataUseCase
-    private lateinit var observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase
+    private lateinit var observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase
     private lateinit var stateFlow: MutableStateFlow<StatsAtlasUiState>
     private lateinit var scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>
     private lateinit var profileDataFlow: MutableSharedFlow<UserProfileData?>
@@ -35,7 +35,7 @@ class AtlasProfileDataCollectorTest {
         profileDataFlow = MutableSharedFlow()
         backfilledFlow = MutableStateFlow(true)
         observeUserProfileDataUseCase = mockk()
-        observeAuthorDemographicsBackfilledUseCase = mockk()
+        observeReadingStatsBackfilledUseCase = mockk()
         stateFlow = MutableStateFlow(StatsAtlasUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -48,7 +48,7 @@ class AtlasProfileDataCollectorTest {
         } returns profileDataFlow
 
         every {
-            observeAuthorDemographicsBackfilledUseCase()
+            observeReadingStatsBackfilledUseCase()
         } returns backfilledFlow
     }
 
@@ -60,8 +60,8 @@ class AtlasProfileDataCollectorTest {
             } returns observeUserProfileDataUseCase
 
             every {
-                mock.observeAuthorDemographicsBackfilledUseCase
-            } returns observeAuthorDemographicsBackfilledUseCase
+                mock.observeReadingStatsBackfilledUseCase
+            } returns observeReadingStatsBackfilledUseCase
 
             every {
                 mock.coroutineScope

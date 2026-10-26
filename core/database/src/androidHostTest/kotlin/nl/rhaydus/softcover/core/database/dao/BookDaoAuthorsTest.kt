@@ -80,6 +80,7 @@ class BookDaoAuthorsTest {
     private fun book(
         id: Int,
         authors: List<Author> = emptyList(),
+        nonPrimaryAuthorIds: Set<Int> = emptySet(),
         editions: List<BookEdition> = emptyList(),
     ) = Book(
         id = id,
@@ -91,6 +92,7 @@ class BookDaoAuthorsTest {
         releaseYear = 2020,
         coverUrl = "",
         authors = authors,
+        nonPrimaryAuthorIds = nonPrimaryAuthorIds,
         usersCount = 0,
         ratingsCount = 0,
         bookSeries = null,
@@ -103,6 +105,7 @@ class BookDaoAuthorsTest {
         dao.observeBookById(id = bookId).first()
             .shouldNotBeNull()
             .bookAuthors
+            .mapNotNull { it.author }
             .map { it.toModel() }
 
     private suspend fun editionAuthors(editionId: Int): List<Author> =
@@ -110,6 +113,35 @@ class BookDaoAuthorsTest {
 
     @Nested
     inner class CacheBook {
+        @Test
+        fun `a cached book reads back with the same non-primary authors`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val writer = author(
+                id = 1,
+                name = "Writer",
+            )
+            val translator = author(
+                id = 2,
+                name = "Translator",
+            )
+
+            // ----- Act -----
+            dao.cacheBook(
+                book = book(
+                    id = 100,
+                    authors = listOf(writer, translator),
+                    nonPrimaryAuthorIds = setOf(2),
+                ),
+            )
+            val result = dao.observeBookById(id = 100).first()
+                .shouldNotBeNull()
+                .toModel()
+
+            // ----- Assert -----
+            result.nonPrimaryAuthorIds shouldBe setOf(2)
+            result.primaryAuthors shouldBe listOf(writer)
+        }
+
         @Test
         fun `two authors sharing a name stay two rows with their own demographics`() = runTest(testDispatcher) {
             // ----- Arrange -----

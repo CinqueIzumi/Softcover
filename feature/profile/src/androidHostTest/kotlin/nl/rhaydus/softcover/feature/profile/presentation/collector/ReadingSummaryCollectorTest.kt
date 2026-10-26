@@ -10,7 +10,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
-import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
@@ -27,7 +27,7 @@ import kotlin.time.Instant
 
 class ReadingSummaryCollectorTest {
     private lateinit var observeReadingHistoryUseCase: ObserveReadingHistoryUseCase
-    private lateinit var observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase
+    private lateinit var observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase
     private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
     private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
     private lateinit var readingHistoryFlow: MutableStateFlow<ReadingHistory>
@@ -61,7 +61,7 @@ class ReadingSummaryCollectorTest {
         readingHistoryFlow = MutableStateFlow(ReadingHistory())
         backfilledFlow = MutableStateFlow(true)
         observeReadingHistoryUseCase = mockk()
-        observeAuthorDemographicsBackfilledUseCase = mockk()
+        observeReadingStatsBackfilledUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -74,7 +74,7 @@ class ReadingSummaryCollectorTest {
         } returns readingHistoryFlow
 
         every {
-            observeAuthorDemographicsBackfilledUseCase()
+            observeReadingStatsBackfilledUseCase()
         } returns backfilledFlow
     }
 
@@ -92,8 +92,8 @@ class ReadingSummaryCollectorTest {
                 mock.observeReadingHistoryUseCase
             } returns observeReadingHistoryUseCase
             every {
-                mock.observeAuthorDemographicsBackfilledUseCase
-            } returns observeAuthorDemographicsBackfilledUseCase
+                mock.observeReadingStatsBackfilledUseCase
+            } returns observeReadingStatsBackfilledUseCase
             every {
                 mock.clock
             } returns fixedClock

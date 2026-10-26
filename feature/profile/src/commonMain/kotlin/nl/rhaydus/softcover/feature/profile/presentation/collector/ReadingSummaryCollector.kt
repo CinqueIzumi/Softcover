@@ -15,7 +15,7 @@ internal class ReadingSummaryCollector : ProfileCollector {
         dependencies: ProfileDependencies,
     ) {
         dependencies.observeReadingHistoryUseCase()
-            .untilBackfilled(dependencies.observeAuthorDemographicsBackfilledUseCase)
+            .untilBackfilled(dependencies.observeReadingStatsBackfilledUseCase)
             .filterNotNull()
             .collect { history ->
                 val currentYear = dependencies.clock

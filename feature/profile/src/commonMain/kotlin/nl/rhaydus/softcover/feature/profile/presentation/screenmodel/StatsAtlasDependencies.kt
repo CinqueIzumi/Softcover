@@ -5,7 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
@@ -20,7 +20,7 @@ internal data class StatsAtlasDependencies(
     val observeMonthlyPagesReadUseCase: ObserveMonthlyPagesReadUseCase,
     val observeHourlyPagesReadUseCase: ObserveHourlyPagesReadUseCase,
     val observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
-    val observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase,
+    val observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase,
     val getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
     val setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
     val observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,

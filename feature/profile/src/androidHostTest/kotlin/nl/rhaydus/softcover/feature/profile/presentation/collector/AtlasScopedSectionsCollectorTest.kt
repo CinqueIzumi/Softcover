@@ -24,7 +24,7 @@ import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.StatsWindow
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
@@ -54,7 +54,7 @@ class AtlasScopedSectionsCollectorTest {
     private lateinit var observeReadingStatsUseCase: ObserveReadingStatsUseCase
     private lateinit var observeMonthlyPagesReadUseCase: ObserveMonthlyPagesReadUseCase
     private lateinit var observeHourlyPagesReadUseCase: ObserveHourlyPagesReadUseCase
-    private lateinit var observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase
+    private lateinit var observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase
     private lateinit var getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase
     private lateinit var backfilledFlow: MutableStateFlow<Boolean>
     private lateinit var hideFlow: MutableStateFlow<Boolean>
@@ -72,7 +72,7 @@ class AtlasScopedSectionsCollectorTest {
         observeReadingStatsUseCase = mockk()
         observeMonthlyPagesReadUseCase = mockk()
         observeHourlyPagesReadUseCase = mockk()
-        observeAuthorDemographicsBackfilledUseCase = mockk()
+        observeReadingStatsBackfilledUseCase = mockk()
         getHideUntaggedAuthorsAsFlowUseCase = mockk()
         stateFlow = MutableStateFlow(stateFor(StatsScope.AllTime))
         scope = ActionScope(
@@ -98,7 +98,7 @@ class AtlasScopedSectionsCollectorTest {
         } returns flowOf(HourlyPages(List(24) { 0 }))
 
         every {
-            observeAuthorDemographicsBackfilledUseCase()
+            observeReadingStatsBackfilledUseCase()
         } returns backfilledFlow
 
         every {
@@ -155,8 +155,8 @@ class AtlasScopedSectionsCollectorTest {
         } returns observeHourlyPagesReadUseCase
 
         every {
-            dependencies.observeAuthorDemographicsBackfilledUseCase
-        } returns observeAuthorDemographicsBackfilledUseCase
+            dependencies.observeReadingStatsBackfilledUseCase
+        } returns observeReadingStatsBackfilledUseCase
 
         every {
             dependencies.getHideUntaggedAuthorsAsFlowUseCase

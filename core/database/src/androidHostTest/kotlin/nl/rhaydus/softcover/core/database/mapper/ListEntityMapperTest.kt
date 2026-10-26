@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
+import nl.rhaydus.softcover.core.database.model.BookAuthorFull
 import nl.rhaydus.softcover.core.database.model.BookEditionEntity
 import nl.rhaydus.softcover.core.database.model.BookEditionView
 import nl.rhaydus.softcover.core.database.model.BookEditionWithAuthors
@@ -184,7 +185,7 @@ class ListEntityMapperTest {
 
     private fun stubBookFullEntity(
         book: BookEntity = stubBookEntity(),
-        bookAuthors: List<AuthorEntity> = emptyList(),
+        bookAuthors: List<BookAuthorFull> = emptyList(),
         series: BookSeriesEntity? = null,
         editions: List<BookEditionWithAuthors> = emptyList(),
         userBookWithJournals: UserBookWithJournals? = null,

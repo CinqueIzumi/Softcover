@@ -17,7 +17,7 @@ import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.StatsWindow
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test
 
 class AtlasScopeChipsCollectorTest {
     private lateinit var observeReadingHistoryUseCase: ObserveReadingHistoryUseCase
-    private lateinit var observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase
+    private lateinit var observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase
     private lateinit var historyFlow: MutableStateFlow<ReadingHistory>
     private lateinit var backfilledFlow: MutableStateFlow<Boolean>
     private lateinit var stateFlow: MutableStateFlow<StatsAtlasUiState>
@@ -45,7 +45,7 @@ class AtlasScopeChipsCollectorTest {
         historyFlow = MutableStateFlow(ReadingHistory())
         backfilledFlow = MutableStateFlow(true)
         observeReadingHistoryUseCase = mockk()
-        observeAuthorDemographicsBackfilledUseCase = mockk()
+        observeReadingStatsBackfilledUseCase = mockk()
         stateFlow = MutableStateFlow(StatsAtlasUiState())
         scope = buildScope(StatsAtlasLocalVariables())
 
@@ -54,7 +54,7 @@ class AtlasScopeChipsCollectorTest {
         } returns historyFlow
 
         every {
-            observeAuthorDemographicsBackfilledUseCase()
+            observeReadingStatsBackfilledUseCase()
         } returns backfilledFlow
     }
 
@@ -85,8 +85,8 @@ class AtlasScopeChipsCollectorTest {
             } returns observeReadingHistoryUseCase
 
             every {
-                mock.observeAuthorDemographicsBackfilledUseCase
-            } returns observeAuthorDemographicsBackfilledUseCase
+                mock.observeReadingStatsBackfilledUseCase
+            } returns observeReadingStatsBackfilledUseCase
 
             every {
                 mock.observeCurrentDateUseCase

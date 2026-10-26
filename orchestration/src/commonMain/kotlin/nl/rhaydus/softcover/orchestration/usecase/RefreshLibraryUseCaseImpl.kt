@@ -48,7 +48,10 @@ internal class RefreshLibraryUseCaseImpl(
             }
         }
 
-        if (scope.coversReadBooks()) settingsRepository.markAuthorDemographicsBackfilled()
+        if (scope.coversReadBooks()) {
+            settingsRepository.markAuthorDemographicsBackfilled()
+            settingsRepository.markAuthorRolesBackfilled()
+        }
 
         if (scope !is RefreshScope.ByList) refreshReadingJournalInBackground()
     }

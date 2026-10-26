@@ -135,6 +135,43 @@ class BookMapperTest {
         )
     }
 
+    private fun stubContribution(
+        authorId: Int,
+        name: String,
+        roleId: Int?,
+        contributionText: String?,
+    ): BookListFragment.Contribution {
+        val author = mockk<BookListFragment.Contribution.Author> {
+            every {
+                id
+            } returns authorId
+            every {
+                this@mockk.name
+            } returns name
+            every {
+                is_bipoc
+            } returns null
+            every {
+                is_lgbtq
+            } returns null
+            every {
+                gender_id
+            } returns null
+        }
+
+        return mockk {
+            every {
+                this@mockk.author
+            } returns author
+            every {
+                contributor_role_id
+            } returns roleId
+            every {
+                contribution
+            } returns contributionText
+        }
+    }
+
     private fun stubBookListFragment(
         id: Int = 100,
         canonicalId: Int? = null,
@@ -702,6 +739,154 @@ class BookMapperTest {
     @Nested
     inner class UserBookFragmentToBook {
         @Test
+        fun `a person listed as author and translator is one primary author`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                bookListFragment = stubBookListFragment(
+                    contributions = listOf(
+                        stubContribution(
+                            authorId = 1,
+                            name = "Jane Doe",
+                            roleId = 1,
+                            contributionText = null,
+                        ),
+                        stubContribution(
+                            authorId = 1,
+                            name = "Jane Doe",
+                            roleId = 2,
+                            contributionText = "Translator",
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.authors.map { it.id } shouldBe listOf(1)
+            result.nonPrimaryAuthorIds shouldBe emptySet()
+        }
+
+        @Test
+        fun `a translator-only person stays in authors but is not primary`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                bookListFragment = stubBookListFragment(
+                    contributions = listOf(
+                        stubContribution(
+                            authorId = 1,
+                            name = "Jane Doe",
+                            roleId = 1,
+                            contributionText = null,
+                        ),
+                        stubContribution(
+                            authorId = 2,
+                            name = "Tom Translator",
+                            roleId = 2,
+                            contributionText = "Translator",
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.authors.map { it.id } shouldBe listOf(1, 2)
+            result.nonPrimaryAuthorIds shouldBe setOf(2)
+            result.primaryAuthors.map { it.id } shouldBe listOf(1)
+        }
+
+        @Test
+        fun `a contribution with no role id and no description counts as a primary author`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                bookListFragment = stubBookListFragment(
+                    contributions = listOf(
+                        stubContribution(
+                            authorId = 1,
+                            name = "Jane Doe",
+                            roleId = null,
+                            contributionText = null,
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.nonPrimaryAuthorIds shouldBe emptySet()
+        }
+
+        @Test
+        fun `a contribution with no role id but a description is not primary`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                bookListFragment = stubBookListFragment(
+                    contributions = listOf(
+                        stubContribution(
+                            authorId = 1,
+                            name = "Jane Doe",
+                            roleId = null,
+                            contributionText = "Illustrator",
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.nonPrimaryAuthorIds shouldBe setOf(1)
+        }
+
+        @Test
+        fun `keeps authors in the order they were first listed`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                bookListFragment = stubBookListFragment(
+                    contributions = listOf(
+                        stubContribution(
+                            authorId = 3,
+                            name = "Third",
+                            roleId = 1,
+                            contributionText = null,
+                        ),
+                        stubContribution(
+                            authorId = 1,
+                            name = "First",
+                            roleId = 1,
+                            contributionText = null,
+                        ),
+                        stubContribution(
+                            authorId = 3,
+                            name = "Third",
+                            roleId = 2,
+                            contributionText = "Editor",
+                        ),
+                        stubContribution(
+                            authorId = 2,
+                            name = "Second",
+                            roleId = 1,
+                            contributionText = null,
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.authors.map { it.id } shouldBe listOf(3, 1, 2)
+        }
+
+        @Test
         fun `returns null when the book list fragment is missing`() {
             // ----- Arrange -----
             val fragment = stubUserBookFragment(bookListFragment = null)
@@ -737,10 +922,22 @@ class BookMapperTest {
                 every {
                     this@mockk.author
                 } returns author
+                every {
+                    contributor_role_id
+                } returns 1
+                every {
+                    contribution
+                } returns null
             }
             val withoutAuthor = mockk<BookListFragment.Contribution> {
                 every {
                     this@mockk.author
+                } returns null
+                every {
+                    contributor_role_id
+                } returns 1
+                every {
+                    contribution
                 } returns null
             }
             val fragment = stubUserBookFragment(
@@ -814,6 +1011,12 @@ class BookMapperTest {
                 every {
                     this@mockk.author
                 } returns author
+                every {
+                    contributor_role_id
+                } returns 1
+                every {
+                    contribution
+                } returns null
             }
             val fragment = stubUserBookFragment(
                 bookListFragment = stubBookListFragment(contributions = listOf(contribution)),
@@ -860,6 +1063,12 @@ class BookMapperTest {
                     every {
                         this@mockk.author
                     } returns author
+                    every {
+                        contributor_role_id
+                    } returns 1
+                    every {
+                        contribution
+                    } returns null
                 }
             }
             val fragment = stubUserBookFragment(
@@ -937,6 +1146,12 @@ class BookMapperTest {
                 every {
                     this@mockk.author
                 } returns author
+                every {
+                    contributor_role_id
+                } returns 1
+                every {
+                    contribution
+                } returns null
             }
             val fragment = stubUserBookFragment(
                 bookListFragment = stubBookListFragment(

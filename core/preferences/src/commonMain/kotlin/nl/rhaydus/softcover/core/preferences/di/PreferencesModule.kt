@@ -26,8 +26,8 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetDesktopWindowStateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
@@ -89,7 +89,7 @@ val preferencesModule = module {
 
     factory { ObservePlanTodayDismissalsUseCase(settingsRepository = get()) }
 
-    factory { ObserveAuthorDemographicsBackfilledUseCase(settingsRepository = get()) }
+    factory { ObserveReadingStatsBackfilledUseCase(settingsRepository = get()) }
 
     factory { SetLibraryGridLayoutUseCase(settingsRepository = get()) }
 

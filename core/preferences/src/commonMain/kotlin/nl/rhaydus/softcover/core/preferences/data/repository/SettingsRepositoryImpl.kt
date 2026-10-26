@@ -115,6 +115,12 @@ internal class SettingsRepositoryImpl(
         settingsLocalDataSource.markAuthorDemographicsBackfilled()
     }
 
+    override val authorRolesBackfilled: Flow<Boolean> = settingsLocalDataSource.authorRolesBackfilled
+
+    override suspend fun markAuthorRolesBackfilled() {
+        settingsLocalDataSource.markAuthorRolesBackfilled()
+    }
+
     override suspend fun seedEnabledListIds(ids: Set<Int>) {
         settingsLocalDataSource.seedEnabledListIds(ids = ids)
     }

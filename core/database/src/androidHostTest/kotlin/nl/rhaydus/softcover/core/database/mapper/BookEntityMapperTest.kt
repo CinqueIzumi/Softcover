@@ -6,6 +6,8 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
+import nl.rhaydus.softcover.core.database.model.BookAuthorCrossRef
+import nl.rhaydus.softcover.core.database.model.BookAuthorFull
 import nl.rhaydus.softcover.core.database.model.BookEditionEntity
 import nl.rhaydus.softcover.core.database.model.BookEditionView
 import nl.rhaydus.softcover.core.database.model.BookEditionWithAuthors
@@ -289,6 +291,7 @@ class BookEntityMapperTest {
         pages: Int? = null,
         coverUrl: String = "https://example.com/book.jpg",
         authors: List<Author> = emptyList(),
+        nonPrimaryAuthorIds: Set<Int> = emptySet(),
         usersCount: Int = 100,
         ratingsCount: Int = 0,
         bookSeries: BookSeries? = null,
@@ -345,6 +348,10 @@ class BookEntityMapperTest {
         } returns authors
 
         every {
+            this@mockk.nonPrimaryAuthorIds
+        } returns nonPrimaryAuthorIds
+
+        every {
             this@mockk.usersCount
         } returns usersCount
 
@@ -379,6 +386,20 @@ class BookEntityMapperTest {
         isBipoc = null,
         isLgbtq = null,
         genderId = null,
+    )
+
+    private fun stubBookAuthorFull(
+        bookId: Int = 1,
+        author: AuthorEntity?,
+        authorId: Int = author?.id ?: 1,
+        isPrimaryAuthor: Boolean = true,
+    ): BookAuthorFull = BookAuthorFull(
+        crossRef = BookAuthorCrossRef(
+            bookId = bookId,
+            authorId = authorId,
+            isPrimaryAuthor = isPrimaryAuthor,
+        ),
+        author = author,
     )
 
     private fun stubBookEditionEntity(
@@ -545,7 +566,7 @@ class BookEntityMapperTest {
 
     private fun stubBookFullEntity(
         book: BookEntity = stubBookEntity(),
-        bookAuthors: List<AuthorEntity> = emptyList(),
+        bookAuthors: List<BookAuthorFull> = emptyList(),
         series: BookSeriesEntity? = null,
         editions: List<BookEditionWithAuthors> = emptyList(),
         userBookWithJournals: UserBookWithJournals? = null,
@@ -892,6 +913,34 @@ class BookEntityMapperTest {
             result[0].authorId shouldBe 1
             result[1].bookId shouldBe 42
             result[1].authorId shouldBe 2
+        }
+
+        @Test
+        fun `marks only the non-primary author ids as not primary`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                id = 42,
+                authors = listOf(
+                    stubAuthor(
+                        id = 1,
+                        name = "Alice",
+                    ),
+                    stubAuthor(
+                        id = 2,
+                        name = "Bob",
+                    ),
+                ),
+                nonPrimaryAuthorIds = setOf(2),
+            )
+
+            // ----- Act -----
+            val result = book.toBookAuthorRefs()
+
+            // ----- Assert -----
+            result.map { it.authorId to it.isPrimaryAuthor } shouldBe listOf(
+                1 to true,
+                2 to false,
+            )
         }
 
         @Test
@@ -1439,7 +1488,9 @@ class BookEntityMapperTest {
                 id = 1,
                 name = "Jane Austen",
             )
-            val entity = stubBookFullEntity(bookAuthors = listOf(authorEntity))
+            val entity = stubBookFullEntity(
+                bookAuthors = listOf(stubBookAuthorFull(author = authorEntity)),
+            )
 
             // ----- Act -----
             val result = entity.toModel()
@@ -1448,6 +1499,61 @@ class BookEntityMapperTest {
             result.authors.size shouldBe 1
             result.authors[0].id shouldBe 1
             result.authors[0].name shouldBe "Jane Austen"
+            result.nonPrimaryAuthorIds shouldBe emptySet()
+        }
+
+        @Test
+        fun `authors flagged as not primary are rebuilt into nonPrimaryAuthorIds`() {
+            // ----- Arrange -----
+            val writer = stubAuthorEntity(
+                id = 1,
+                name = "Writer",
+            )
+            val translator = stubAuthorEntity(
+                id = 2,
+                name = "Translator",
+            )
+            val entity = stubBookFullEntity(
+                bookAuthors = listOf(
+                    stubBookAuthorFull(author = writer),
+                    stubBookAuthorFull(
+                        author = translator,
+                        isPrimaryAuthor = false,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.authors.map { it.id } shouldBe listOf(1, 2)
+            result.nonPrimaryAuthorIds shouldBe setOf(2)
+            result.primaryAuthors.map { it.id } shouldBe listOf(1)
+        }
+
+        @Test
+        fun `a cross-ref whose author row is missing is skipped`() {
+            // ----- Arrange -----
+            val writer = stubAuthorEntity(
+                id = 1,
+                name = "Writer",
+            )
+            val entity = stubBookFullEntity(
+                bookAuthors = listOf(
+                    stubBookAuthorFull(author = writer),
+                    stubBookAuthorFull(
+                        author = null,
+                        authorId = 9,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.authors.map { it.id } shouldBe listOf(1)
         }
 
         @Test

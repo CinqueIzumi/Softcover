@@ -31,6 +31,9 @@ class RefreshLibraryOnStartUseCaseTest {
     fun setUp() {
         settingsRepository = mockk(relaxed = true)
         refreshLibraryUseCase = mockk()
+        every {
+            settingsRepository.authorRolesBackfilled
+        } returns flowOf(true)
 
         useCase = RefreshLibraryOnStartUseCase(
             settingsRepository = settingsRepository,
@@ -176,6 +179,31 @@ class RefreshLibraryOnStartUseCaseTest {
             coVerify(exactly = 1) { refreshLibraryUseCase(scope = readScope) }
             coVerify(exactly = 0) { refreshLibraryUseCase(scope = activeScope) }
             coVerify(exactly = 0) { settingsRepository.markReadThroughsBackfilled() }
+        }
+
+        @Test
+        fun `refreshes only the read status when contributor roles are not backfilled`() = runTest {
+            // ----- Arrange -----
+            every {
+                settingsRepository.readThroughsBackfilled
+            } returns flowOf(true)
+            every {
+                settingsRepository.authorDemographicsBackfilled
+            } returns flowOf(true)
+            every {
+                settingsRepository.authorRolesBackfilled
+            } returns flowOf(false)
+            coEvery {
+                refreshLibraryUseCase(scope = any())
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            val result = useCase()
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) { refreshLibraryUseCase(scope = readScope) }
+            coVerify(exactly = 0) { refreshLibraryUseCase(scope = activeScope) }
         }
 
         @Test

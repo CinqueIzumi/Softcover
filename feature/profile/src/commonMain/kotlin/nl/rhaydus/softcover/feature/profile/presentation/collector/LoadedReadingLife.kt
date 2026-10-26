@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.collector
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.core.domain.model.StatsRange
-import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
@@ -19,7 +19,7 @@ internal data class LoadedReadingLife(
 internal fun observeLoadedReadingLife(
     observeReadingStatsUseCase: ObserveReadingStatsUseCase,
     observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
-    observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase,
+    observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase,
 ): Flow<LoadedReadingLife?> = combine(
     observeReadingStatsUseCase(StatsRange.Unbounded),
     observeReadingHistoryUseCase(),
@@ -28,4 +28,4 @@ internal fun observeLoadedReadingLife(
         stats = stats,
         history = history,
     )
-}.untilBackfilled(observeAuthorDemographicsBackfilledUseCase)
+}.untilBackfilled(observeReadingStatsBackfilledUseCase)

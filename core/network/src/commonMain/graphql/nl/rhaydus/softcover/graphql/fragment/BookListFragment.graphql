@@ -20,6 +20,8 @@ fragment BookListFragment on books {
         ...BookSeriesFragment
     }
     contributions {
+        contribution
+        contributor_role_id
         author {
             id
             name

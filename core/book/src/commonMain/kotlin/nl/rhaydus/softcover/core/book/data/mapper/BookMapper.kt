@@ -141,15 +141,40 @@ private fun UserBookReadFragment.toUserBookRead(): UserBookRead = UserBookRead(
     finishedAt = finished_at,
 )
 
-private fun BookListFragment.authors(): List<Author> = contributions.mapNotNull { contribution ->
-    val author = contribution.author ?: return@mapNotNull null
+private const val PRIMARY_AUTHOR_ROLE_ID = 1
 
-    Author(
-        name = author.name.toDisplayName(),
-        id = author.id,
-        isBipoc = author.is_bipoc,
-        isLgbtq = author.is_lgbtq,
-        gender = Gender.fromId(author.gender_id),
+private data class BookContributors(
+    val authors: List<Author>,
+    val nonPrimaryAuthorIds: Set<Int>,
+)
+
+private fun BookListFragment.contributors(): BookContributors {
+    val authorsById = LinkedHashMap<Int, Author>()
+    val primaryIds = mutableSetOf<Int>()
+
+    contributions.forEach { contribution ->
+        val author = contribution.author ?: return@forEach
+
+        authorsById.getOrPut(author.id) {
+            Author(
+                name = author.name.toDisplayName(),
+                id = author.id,
+                isBipoc = author.is_bipoc,
+                isLgbtq = author.is_lgbtq,
+                gender = Gender.fromId(author.gender_id),
+            )
+        }
+
+        val roleId = contribution.contributor_role_id
+        val isAuthorRole = roleId == PRIMARY_AUTHOR_ROLE_ID ||
+            (roleId == null && contribution.contribution == null)
+
+        if (isAuthorRole) primaryIds += author.id
+    }
+
+    return BookContributors(
+        authors = authorsById.values.toList(),
+        nonPrimaryAuthorIds = authorsById.keys - primaryIds,
     )
 }
 
@@ -219,7 +244,8 @@ private fun BookListFragment.tags(): List<Tag> =
 internal fun UserBookFragment.toBook(): Book? {
     val listFragment = book.bookListFragment() ?: return null
 
-    val bookAuthors = listFragment.authors()
+    val contributors = listFragment.contributors()
+    val bookAuthors = contributors.authors
     val selectedEdition = edition?.editionFragment()
         ?.toBookEdition(authors = bookAuthors)
         ?.copy(bookId = listFragment.id)
@@ -240,6 +266,7 @@ internal fun UserBookFragment.toBook(): Book? {
         pages = listFragment.pages,
         coverUrl = listFragment.image?.url.orEmpty(),
         authors = bookAuthors,
+        nonPrimaryAuthorIds = contributors.nonPrimaryAuthorIds,
         usersCount = listFragment.users_count,
         ratingsCount = listFragment.ratings_count,
         bookSeries = listFragment.bookSeries(),
@@ -252,7 +279,8 @@ internal fun UserBookFragment.toBook(): Book? {
 
 fun BookDetailFragment.toBook(): Book? {
     val listFragment: BookListFragment = this
-    val bookAuthors = listFragment.authors()
+    val contributors = listFragment.contributors()
+    val bookAuthors = contributors.authors
     val defaultEdition = default_cover_edition?.editionFragment()
         ?.toBookEdition(authors = bookAuthors)
         ?.copy(bookId = listFragment.id)
@@ -272,6 +300,7 @@ fun BookDetailFragment.toBook(): Book? {
         pages = listFragment.pages,
         coverUrl = listFragment.image?.url.orEmpty(),
         authors = bookAuthors,
+        nonPrimaryAuthorIds = contributors.nonPrimaryAuthorIds,
         usersCount = users_count,
         ratingsCount = listFragment.ratings_count,
         bookSeries = listFragment.bookSeries(),

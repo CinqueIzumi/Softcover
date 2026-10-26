@@ -23,7 +23,7 @@ internal class UserInformationCollector : ProfileCollector {
         // an empty one.
         combine(
             dependencies.observeUserProfileDataUseCase().filterNotNull(),
-            dependencies.observeAuthorDemographicsBackfilledUseCase(),
+            dependencies.observeReadingStatsBackfilledUseCase(),
         ) { profileData, isBackfilled ->
             profileData to isBackfilled
         }.collect { (profileData, isBackfilled) ->

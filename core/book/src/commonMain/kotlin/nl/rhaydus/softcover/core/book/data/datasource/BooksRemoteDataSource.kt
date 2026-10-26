@@ -807,6 +807,7 @@ internal class BooksRemoteDataSourceImpl(
         releaseDate = canonical.releaseDate,
         coverUrl = canonical.coverUrl,
         authors = canonical.authors,
+        nonPrimaryAuthorIds = canonical.nonPrimaryAuthorIds,
         usersCount = canonical.usersCount,
         ratingsCount = canonical.ratingsCount,
         bookSeries = canonical.bookSeries,

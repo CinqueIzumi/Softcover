@@ -10,7 +10,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.StatsRange
-import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test
 class ReadingLifeCollectorTest {
     private lateinit var observeReadingStatsUseCase: ObserveReadingStatsUseCase
     private lateinit var observeReadingHistoryUseCase: ObserveReadingHistoryUseCase
-    private lateinit var observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase
+    private lateinit var observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase
     private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
     private lateinit var eventChannel: Channel<ProfileEvent>
     private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
@@ -42,7 +42,7 @@ class ReadingLifeCollectorTest {
         backfilledFlow = MutableStateFlow(true)
         observeReadingStatsUseCase = mockk()
         observeReadingHistoryUseCase = mockk()
-        observeAuthorDemographicsBackfilledUseCase = mockk()
+        observeReadingStatsBackfilledUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
@@ -60,7 +60,7 @@ class ReadingLifeCollectorTest {
         } returns readingHistoryFlow
 
         every {
-            observeAuthorDemographicsBackfilledUseCase()
+            observeReadingStatsBackfilledUseCase()
         } returns backfilledFlow
     }
 
@@ -76,8 +76,8 @@ class ReadingLifeCollectorTest {
             } returns observeReadingHistoryUseCase
 
             every {
-                mock.observeAuthorDemographicsBackfilledUseCase
-            } returns observeAuthorDemographicsBackfilledUseCase
+                mock.observeReadingStatsBackfilledUseCase
+            } returns observeReadingStatsBackfilledUseCase
 
             every {
                 mock.coroutineScope

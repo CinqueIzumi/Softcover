@@ -5,7 +5,7 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
@@ -25,7 +25,7 @@ internal class StatsAtlasScreenModel(
     private val observeMonthlyPagesReadUseCase: ObserveMonthlyPagesReadUseCase,
     private val observeHourlyPagesReadUseCase: ObserveHourlyPagesReadUseCase,
     private val observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
-    private val observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase,
+    private val observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase,
     private val getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
     private val setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
     private val observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,
@@ -49,7 +49,7 @@ internal class StatsAtlasScreenModel(
         observeMonthlyPagesReadUseCase = observeMonthlyPagesReadUseCase,
         observeHourlyPagesReadUseCase = observeHourlyPagesReadUseCase,
         observeReadingHistoryUseCase = observeReadingHistoryUseCase,
-        observeAuthorDemographicsBackfilledUseCase = observeAuthorDemographicsBackfilledUseCase,
+        observeReadingStatsBackfilledUseCase = observeReadingStatsBackfilledUseCase,
         getHideUntaggedAuthorsAsFlowUseCase = getHideUntaggedAuthorsAsFlowUseCase,
         setHideUntaggedAuthorsUseCase = setHideUntaggedAuthorsUseCase,
         observeBooksByIdsUseCase = observeBooksByIdsUseCase,

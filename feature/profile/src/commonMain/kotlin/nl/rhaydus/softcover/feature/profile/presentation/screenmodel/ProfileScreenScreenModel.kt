@@ -4,7 +4,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.datetime.TimeZone
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveAuthorDemographicsBackfilledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
@@ -21,7 +21,7 @@ internal class ProfileScreenScreenModel(
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     private val observeReadingStatsUseCase: ObserveReadingStatsUseCase,
     private val observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
-    private val observeAuthorDemographicsBackfilledUseCase: ObserveAuthorDemographicsBackfilledUseCase,
+    private val observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase,
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
     private val clock: Clock,
@@ -37,7 +37,7 @@ internal class ProfileScreenScreenModel(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
         observeReadingStatsUseCase = observeReadingStatsUseCase,
         observeReadingHistoryUseCase = observeReadingHistoryUseCase,
-        observeAuthorDemographicsBackfilledUseCase = observeAuthorDemographicsBackfilledUseCase,
+        observeReadingStatsBackfilledUseCase = observeReadingStatsBackfilledUseCase,
         refreshUserProfileDataUseCase = refreshUserProfileDataUseCase,
         resetUserDataUseCase = resetUserDataUseCase,
         clock = clock,

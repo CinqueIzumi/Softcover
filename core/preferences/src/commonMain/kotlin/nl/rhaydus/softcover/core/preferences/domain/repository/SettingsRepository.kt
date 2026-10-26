@@ -70,6 +70,10 @@ interface SettingsRepository {
 
     suspend fun markAuthorDemographicsBackfilled()
 
+    val authorRolesBackfilled: Flow<Boolean>
+
+    suspend fun markAuthorRolesBackfilled()
+
     suspend fun seedEnabledListIds(ids: Set<Int>)
 
     suspend fun resetLibraryVisibilityPreferences()
