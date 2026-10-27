@@ -180,15 +180,6 @@ Filed but not yet implemented in the foundation.
 - **Impact in the app:** without it, corner radii drift back to per-screen numbers after the token sweep.
 - **What to build:** the rule in the shared ruleset.
 
-### F42 — `RhaydusButton` takes only a `String` label
-
-- **Type:** enhancement
-- **Home:** `nl.rhaydus:designsystem-core`
-- **Status:** **Open — blocks the Library footer's "Show N titles".** `RhaydusButton(label: String, …)` has no content slot.
-- **Impact in the app:** that count cannot render through `StatNumber`, so it jumps while every other changing number springs.
-- **What to build:** an overload taking `content: @Composable RowScope.() -> Unit` in place of `label`, with the same
-  shapes, sizes, colours and icon handling. Once adopted, `SheetFooterButton` carries a `StatNumberUiModel` count.
-
 ### F43 — The expressive `MotionScheme` has no readable value-change spec
 
 - **Type:** enhancement
@@ -196,22 +187,6 @@ Filed but not yet implemented in the foundation.
 - **Status:** **Open.** Softcover defines `Motion.valueChange` itself: a slow, no-bounce spring (critically damped, `StiffnessVeryLow`) that count-ups and chart geometry share. `Motion` is theme-provided: `SoftcoverTheme` supplies a full and a snapping instance, read through `MaterialTheme.motion`.
 - **Impact in the app:** the default spring settles 0 to 24,092 in about 250 ms, too fast to read as a count.
 - **What to build:** a named slow, no-bounce value-change spring alongside the scheme's specs. Once adopted, drop the app-local one.
-
-### F44 — `RhaydusTheme` should resolve reduced motion itself
-
-- **Type:** enhancement
-- **Home:** `nl.rhaydus:designsystem-core`
-- **Status:** **Open.** `SoftcoverTheme` calls `playDecorativeMotion()` once and passes `RhaydusTheme` either `MotionScheme.expressive()` or a scheme whose six specs all `snap()`.
-- **Impact in the app:** without it every app repeats that choice, and a call site that reads a scheme spec still animates under reduced motion.
-- **What to build:** `RhaydusTheme` provides a snapping `MotionScheme` itself when reduced motion is on, so `motionScheme` parameters default to the right scheme. Once adopted, drop the app-local `ReducedMotionScheme`.
-
-### F56 — `RhaydusTheme` should provide `LocalHaptics` itself
-
-- **Type:** enhancement
-- **Home:** `nl.rhaydus:designsystem-core`
-- **Status:** **Open.** `LocalHaptics` defaults to `NoOpHaptics` and nothing in the foundation provides it, so `SoftcoverTheme` provides it.
-- **Impact in the app:** every app has to know to provide it, and one that doesn't gets silent haptics.
-- **What to build:** `RhaydusTheme` provides `LocalHaptics` from `rememberHaptics()`. Once adopted, drop the app-local provider.
 
 ### F57 — detekt rule: a `UiState` getter that builds a UI model
 

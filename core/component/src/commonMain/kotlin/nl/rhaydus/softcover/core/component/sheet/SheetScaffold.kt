@@ -22,7 +22,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -52,6 +54,7 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
@@ -419,7 +422,6 @@ private fun FooterButton(
         contentAlignment = if (fillWidth) Alignment.CenterEnd else Alignment.Center,
     ) {
         RhaydusButton(
-            label = button.label,
             style = when {
                 button.emphasis == SheetFooterEmphasis.Outlined -> ButtonStyle.OUTLINED
                 primary -> ButtonStyle.FILLED
@@ -443,7 +445,17 @@ private fun FooterButton(
             modifier = if (fillWidth) Modifier.fillMaxWidth() else Modifier.alpha(labelAlpha),
             enabled = button.enabled && chrome.busy.not() && chrome.unlocked,
             size = ButtonSize.M,
-        )
+        ) {
+            Text(text = button.label)
+
+            button.count?.let { count ->
+                StatNumber(
+                    model = count,
+                    style = LocalTextStyle.current,
+                    autoSize = null,
+                )
+            }
+        }
 
         AnimatedVisibility(
             visible = button.running,

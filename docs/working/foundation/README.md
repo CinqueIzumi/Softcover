@@ -15,18 +15,19 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** step 3 first box built: F26, F27, F31 + F46 (+ F35 folded in), F36, F45, F47, F48, F49, F51
-  fixed in `foundation/`; Softcover's forks and detekt bans deleted. `AdaptiveModalSheet` stays in
-  `:core:component` as a thin wrapper (snackbar overlay, footer inset, tokens). Reviewer findings fixed;
-  the adopted entries are pruned from `candidates.md`.
-- **Next:** step 3, second box in § 3 below: the contract gaps F42, F44, F56.
-- **Open questions:** none. F49 makes two components read `LocalHaptics` (no-op default); F56 makes
-  `RhaydusTheme` provide it.
-- **Verification:** foundation `build` green; Softcover `compileKotlinJvm`, `styleCheck`, `testAndroidHostTest`
-  green after the last fix; stability baselines refreshed. Untested (no Compose UI harness): sheet latch,
-  press feedback, `onEscape`, JVM capture outcomes, pulse replay.
-- **Uncommitted:** all of the above, both repos; much is staged by agents (reset before committing). Not
-  pushed: foundation `441c2d9`, Softcover `cdab3599f`.
+- **State:** step 3's second box (contract gaps) is done. F42: `RhaydusButton` has a `content` slot
+  overload; `SheetFooterButton.count` springs the Library "Show N titles" count through `StatNumber`.
+  F44 + F56: `RhaydusTheme` swaps in a snapping `MotionScheme` under reduced motion and provides
+  `LocalHaptics`; Softcover's `ReducedMotionScheme` and haptics provider are deleted. Entries pruned from
+  `candidates.md`.
+- **Next:** step 3, third box in § 3 below: tooling F33, F37, F54, F60, and `detektCheck` in the
+  foundation's `check`.
+- **Open questions:** none.
+- **Verification:** foundation `build` and Softcover `compileKotlinJvm styleCheck testAndroidHostTest`
+  green; test audit clean. Untested (no Compose UI harness): the footer count's spring, the snapping
+  scheme, the theme-provided haptics.
+- **Uncommitted:** all of the above, both repos. Not pushed: foundation `66fa1dd`, Softcover `c8b9b016f`;
+  push the foundation first.
 
 ## How to run a step
 
@@ -78,7 +79,7 @@ Bugs and gaps in shared code only; new components, design tokens and house-style
 
 - [x] Component bugs: F26, F27, F31 + F46, F36, F45, F47, F48, F49, F51; delete Softcover's forks and the
       detekt bans on the foundation versions.
-- [ ] Contract gaps: F42, F44, F56.
+- [x] Contract gaps: F42, F44, F56.
 - [ ] Tooling: F33, F37, F54, F60; wire `detektCheck` into the foundation's `check`.
 - [ ] Data: F55.
 - [ ] Adopt F18, F20, F21 through `includeBuild("foundation/build-logic")`; delete the Softcover copies.

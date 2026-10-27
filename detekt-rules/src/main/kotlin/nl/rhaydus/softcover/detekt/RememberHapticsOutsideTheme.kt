@@ -37,6 +37,6 @@ class RememberHapticsOutsideTheme(config: Config = Config.empty) : Rule(config) 
 
     private companion object {
         const val REMEMBER_HAPTICS = "nl.rhaydus.designsystem.haptics.rememberHaptics"
-        const val MESSAGE = "Use LocalHaptics.current, which SoftcoverTheme provides, instead of rememberHaptics."
+        const val MESSAGE = "Use LocalHaptics.current, which RhaydusTheme provides, instead of rememberHaptics."
     }
 }

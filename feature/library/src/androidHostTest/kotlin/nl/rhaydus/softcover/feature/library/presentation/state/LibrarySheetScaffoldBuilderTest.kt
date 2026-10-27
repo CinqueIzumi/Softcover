@@ -81,22 +81,22 @@ class LibrarySheetScaffoldBuilderTest {
     @Nested
     inner class ShowResultsButton {
         @Test
-        fun `arrange label singularises for one result`() {
+        fun `arrange count carries a single result`() {
             // ----- Arrange -----
             val resultCount = 1
 
             // ----- Act -----
-            val label = arrangeSheetScaffoldFor(resultCount = resultCount)
+            val count = arrangeSheetScaffoldFor(resultCount = resultCount)
                 .footer.shouldNotBeNull()
                 .primary.shouldNotBeNull()
-                .label
+                .count
 
             // ----- Assert -----
-            label shouldBe "Show 1 title"
+            count.shouldNotBeNull().value shouldBe 1.0
         }
 
         @Test
-        fun `filter label pluralises for zero and many results`() {
+        fun `filter count carries zero and many results`() {
             // ----- Arrange -----
             val noResults = 0
             val manyResults = 12
@@ -105,15 +105,15 @@ class LibrarySheetScaffoldBuilderTest {
             val none = filterSheetScaffoldFor(
                 resultCount = noResults,
                 filtersActive = true,
-            ).footer.shouldNotBeNull().primary.shouldNotBeNull().label
+            ).footer.shouldNotBeNull().primary.shouldNotBeNull().count
             val many = filterSheetScaffoldFor(
                 resultCount = manyResults,
                 filtersActive = true,
-            ).footer.shouldNotBeNull().primary.shouldNotBeNull().label
+            ).footer.shouldNotBeNull().primary.shouldNotBeNull().count
 
             // ----- Assert -----
-            none shouldBe "Show 0 titles"
-            many shouldBe "Show 12 titles"
+            none.shouldNotBeNull().value shouldBe 0.0
+            many.shouldNotBeNull().value shouldBe 12.0
         }
     }
 
