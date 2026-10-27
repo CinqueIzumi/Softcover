@@ -172,6 +172,7 @@ component/
 + chart/       ChartTone  RankedBars(+UiModel, +BarUiModel)
 +              ProportionChart(+UiModel, +Variant, +ChartSliceUiModel)
 +              ColumnChart(+UiModel)  ColumnUiModel
++              YearGrid(+UiModel, +MonthUiModel, +Cell, +Step, +Event)
 + statistic/   StatNumber  StatNumberUiModel  StatNumberFormat
 +              StatTile(+UiModel, +Variant)
 + text/        SoftcoverText   FadeThroughText

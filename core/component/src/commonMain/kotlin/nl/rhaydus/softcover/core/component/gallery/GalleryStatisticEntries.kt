@@ -8,6 +8,8 @@ import nl.rhaydus.softcover.core.component.chart.ProportionChart
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBars
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
+import nl.rhaydus.softcover.core.component.chart.YearGrid
+import nl.rhaydus.softcover.core.component.chart.YearGridUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
@@ -50,6 +52,20 @@ internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
         content = { model, modifier ->
             ProportionChart(
                 model = model,
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
+        name = "YearGrid",
+        family = GalleryFamily.CHART,
+        blurb = "A year of day squares in a row per month, tinted by pages read on four steps; " +
+            "tapping a read day emits an event, and while loading the grid keeps its layout and masks.",
+        previews = YearGridUiModel,
+        content = { model, modifier ->
+            YearGrid(
+                model = model,
+                onEvent = {},
                 modifier = modifier,
             )
         },

@@ -78,6 +78,8 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **RankedBars** — `chart` — numbered rows, each a name over a bar filled relative to the lead row, with its share.
   Rows from `visibleCount` on fold in and out one by one.
 - **ProportionChart** — `chart` — one slim stacked bar of parts of a whole, with its legend as rows or inline keys (`ProportionChartVariant`).
+- **YearGrid** — `chart` — a year of day squares, a row per month, tinted by pages read on four steps with a
+  "Fewer pages → More" key; tapping a read day emits `YearGridEvent.DayTapped`.
 
 ## Share
 
