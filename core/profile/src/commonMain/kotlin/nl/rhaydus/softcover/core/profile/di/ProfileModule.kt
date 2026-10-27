@@ -13,8 +13,10 @@ import nl.rhaydus.softcover.core.profile.data.repository.ProfileRepositoryImpl
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 import nl.rhaydus.softcover.core.profile.domain.usecase.MarkReadingActivityUseCaseImpl
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDailyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
@@ -127,6 +129,24 @@ val profileModule = module {
 
     factory {
         ObserveMonthlyPagesReadUseCase(
+            observeProgressUpdatesUseCase = get(),
+            getReadUserBooksUseCase = get(),
+            timeZone = get(),
+            appDispatchers = get(),
+        )
+    }
+
+    factory {
+        ObserveDailyPagesReadUseCase(
+            observeProgressUpdatesUseCase = get(),
+            getReadUserBooksUseCase = get(),
+            timeZone = get(),
+            appDispatchers = get(),
+        )
+    }
+
+    factory {
+        ObserveReadingDayUseCase(
             observeProgressUpdatesUseCase = get(),
             getReadUserBooksUseCase = get(),
             timeZone = get(),
