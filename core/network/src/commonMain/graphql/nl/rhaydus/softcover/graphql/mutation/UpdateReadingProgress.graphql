@@ -6,6 +6,8 @@ mutation UpdateReadingProgress(
         id: $id,
         object: $datesReadInput
     ) {
+        error
+        id
         user_book_read {
             ...UserBookReadFragment
             user_book {

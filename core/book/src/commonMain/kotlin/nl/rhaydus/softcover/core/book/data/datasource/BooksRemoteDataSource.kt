@@ -29,6 +29,7 @@ import nl.rhaydus.softcover.GetSystemVibeBookIdsQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.GetUpcomingReleaseIdsQuery
 import nl.rhaydus.softcover.GetUserBookIdsByIdsQuery
+import nl.rhaydus.softcover.GetUserBookStateQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.GetUserBooksQuery.Data.Me.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.InsertUserBookWithStatusMutation
@@ -59,11 +60,15 @@ import nl.rhaydus.softcover.core.book.data.mapper.toVibeSlug
 import nl.rhaydus.softcover.core.book.data.mapper.toVibeType
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.core.book.domain.model.ServerUserBookRead
+import nl.rhaydus.softcover.core.book.domain.model.ServerUserBookState
 import nl.rhaydus.softcover.core.book.domain.model.SimilarBookCandidate
 import nl.rhaydus.softcover.core.book.domain.model.SimilarBookSeed
 import nl.rhaydus.softcover.core.book.domain.model.UnfinishedRead
 import nl.rhaydus.softcover.core.book.domain.model.UserBooksSnapshot
+import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromSlate
 import nl.rhaydus.softcover.core.database.mapper.reviewSlateFromDocument
+import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
@@ -77,6 +82,7 @@ import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.domain.util.localDateOf
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.network.helper.CountedPage
@@ -95,6 +101,9 @@ interface BooksRemoteDataSource {
     suspend fun fetchBookIdForEdition(editionId: Int): Int?
 
     suspend fun fetchLatestUnfinishedRead(userBookId: Int): UnfinishedRead?
+
+    /** Null when the user has no user book for [bookId] on the server. */
+    suspend fun fetchUserBookState(bookId: Int): ServerUserBookState?
 
     suspend fun fetchEditionMatchesForIsbns(isbns: List<String>): Map<String, IsbnEditionMatch>
 
@@ -296,6 +305,27 @@ internal class BooksRemoteDataSourceImpl(
             UnfinishedRead(
                 id = read.id,
                 startedAt = read.started_at,
+            )
+        }
+    }
+
+    override suspend fun fetchUserBookState(bookId: Int): ServerUserBookState? {
+        val result = apolloClient.safeQuery(query = GetUserBookStateQuery(bookId = bookId))
+
+        return result.me.firstOrNull()?.user_books?.firstOrNull()?.let { userBook ->
+            ServerUserBookState(
+                statusCode = userBook.status_id,
+                rating = userBook.rating,
+                reviewDocument = reviewDocumentFromSlate(slate = userBook.review_slate).takeUnless { it.isBlank() },
+                reviewHasSpoilers = userBook.review_has_spoilers,
+                reads = userBook.user_book_reads.map { read ->
+                    ServerUserBookRead(
+                        id = read.id,
+                        progressPages = read.progress_pages,
+                        progressSeconds = read.progress_seconds,
+                        finishedAt = read.finished_at,
+                    )
+                },
             )
         }
     }
@@ -848,9 +878,15 @@ internal class BooksRemoteDataSourceImpl(
             datesReadInput = dataObject,
         )
 
-        val userBookFragment = apolloClient
+        val result = apolloClient
             .safeMutation(mutation = mutation)
             .update_user_book_read
+
+        result?.error?.let { message ->
+            throw UnexpectedApiException(message = "Progress update rejected: $message")
+        }
+
+        val userBookFragment = result
             ?.user_book_read
             ?.user_book
             ?.userBookFragment()
@@ -946,12 +982,22 @@ internal class BooksRemoteDataSourceImpl(
             },
         )
 
-        apolloClient.safeMutation(
-            mutation = UpdateReadingProgressMutation(
-                id = userBookReadId,
-                datesReadInput = dataObject,
-            ),
-        )
+        val result = apolloClient
+            .safeMutation(
+                mutation = UpdateReadingProgressMutation(
+                    id = userBookReadId,
+                    datesReadInput = dataObject,
+                ),
+            )
+            .update_user_book_read
+
+        result?.error?.let { message ->
+            throw UnexpectedApiException(message = "Progress update rejected: $message")
+        }
+
+        if (result?.user_book_read == null) {
+            throw UnexpectedApiException(message = "Progress update returned no read")
+        }
     }
 
     override suspend fun replayMarkBookAsRead(

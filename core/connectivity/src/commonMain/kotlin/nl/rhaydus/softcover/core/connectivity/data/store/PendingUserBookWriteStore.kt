@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.connectivity.data.mapper.toPendingUserBookWrite
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
+import nl.rhaydus.softcover.core.domain.connectivity.USER_BOOK_WRITE_MAX_ATTEMPTS
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 
 /**
@@ -24,6 +25,12 @@ internal class PendingUserBookWriteStore(
     private val progressHistoryLocalDataSource: ProgressHistoryLocalDataSource,
 ) : PendingWriteStore<PendingUserBookWrite>, UserBookWriteQueue {
     override suspend fun enqueue(payload: PendingUserBookWrite) {
+        append(write = payload)
+    }
+
+    override suspend fun append(write: PendingUserBookWrite): Long {
+        val payload: PendingUserBookWrite = write
+
         if (payload.kind == PendingUserBookWriteKind.UPDATE_PROGRESS) {
             dao.getByUserBookIdAndKind(
                 userBookId = payload.userBookId,
@@ -31,10 +38,42 @@ internal class PendingUserBookWriteStore(
             )?.progressHistoryId?.let { progressHistoryLocalDataSource.delete(localId = it) }
         }
 
-        dao.insertReplacing(entity = payload.toEntity())
+        return dao.insertReplacing(entity = payload.toEntity())
     }
 
-    override suspend fun hasPending(): Boolean = dao.getPending().isNotEmpty()
+    override suspend fun remove(localId: Long) {
+        dao.delete(localId = localId)
+    }
+
+    override suspend fun isCurrent(write: PendingUserBookWrite): Boolean {
+        val stored: PendingUserBookWrite? = dao.getByUserBookIdAndKind(
+            userBookId = write.userBookId,
+            kind = write.kind.name,
+        )?.toPendingUserBookWrite()
+
+        return stored == write
+    }
+
+    override suspend fun pendingKindsByUserBook(): Map<Int, Set<PendingUserBookWriteKind>> =
+        dao.getPending(maxAttempts = USER_BOOK_WRITE_MAX_ATTEMPTS)
+            .mapNotNull { it.toPendingUserBookWrite() }
+            .groupBy(
+                { it.userBookId },
+                { it.kind },
+            )
+            .mapValues { (_, kinds) -> kinds.toSet() }
+
+    override suspend fun hasOlderPending(
+        bookId: Int,
+        exceptLocalId: Long,
+    ): Boolean = dao.hasOlderPending(
+        bookId = bookId,
+        exceptLocalId = exceptLocalId,
+        maxAttempts = USER_BOOK_WRITE_MAX_ATTEMPTS,
+    )
+
+    override suspend fun hasPending(): Boolean =
+        dao.getPending(maxAttempts = USER_BOOK_WRITE_MAX_ATTEMPTS).isNotEmpty()
 
     override suspend fun getPending(maxAttempts: Int): List<PendingWrite<PendingUserBookWrite>> =
         dao.getPending(maxAttempts = maxAttempts).mapNotNull { entity ->

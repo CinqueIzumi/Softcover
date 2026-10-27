@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -34,7 +33,7 @@ class UpdateBookProgressUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `updates progress then caches the returned book`() = runTest {
+        fun `updates progress and returns success`() = runTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()
             val newPage = 150
@@ -46,10 +45,6 @@ class UpdateBookProgressUseCaseTest {
                     newPage = newPage,
                 )
             } returns updatedBook
-
-            coJustRun {
-                repository.cacheBook(book = updatedBook)
-            }
 
             // ----- Act -----
             val result = useCase(
@@ -65,7 +60,6 @@ class UpdateBookProgressUseCaseTest {
                     newPage = newPage,
                 )
             }
-            coVerify(exactly = 1) { repository.cacheBook(book = updatedBook) }
             coVerify(exactly = 1) { markReadingActivityUseCase(any()) }
         }
 
@@ -84,10 +78,6 @@ class UpdateBookProgressUseCaseTest {
                     actionAt = actionAt,
                 )
             } returns updatedBook
-
-            coJustRun {
-                repository.cacheBook(book = updatedBook)
-            }
 
             // ----- Act -----
             val result = useCase(
@@ -122,10 +112,6 @@ class UpdateBookProgressUseCaseTest {
                 )
             } returns updatedBook
 
-            coJustRun {
-                repository.cacheBook(book = updatedBook)
-            }
-
             // ----- Act -----
             useCase(
                 book = inputBook,
@@ -149,38 +135,6 @@ class UpdateBookProgressUseCaseTest {
                     book = inputBook,
                     newPage = newPage,
                 )
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase(
-                book = inputBook,
-                newPage = newPage,
-            )
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe expectedError
-            coVerify(exactly = 0) { repository.cacheBook(book = any()) }
-            coVerify(exactly = 0) { markReadingActivityUseCase(any()) }
-        }
-
-        @Test
-        fun `returns failure when cacheBook throws`() = runTest {
-            // ----- Arrange -----
-            val inputBook = mockk<Book>()
-            val newPage = 150
-            val updatedBook = mockk<Book>()
-            val expectedError = RuntimeException("cache error")
-
-            coEvery {
-                repository.updateBookProgress(
-                    book = inputBook,
-                    newPage = newPage,
-                )
-            } returns updatedBook
-
-            coEvery {
-                repository.cacheBook(book = updatedBook)
             } throws expectedError
 
             // ----- Act -----

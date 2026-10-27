@@ -7,6 +7,7 @@ import com.apollographql.cache.normalized.FetchPolicy
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
@@ -52,6 +53,7 @@ import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.domain.exception.NoUserIdFoundException
+import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -2548,6 +2550,43 @@ class BooksRemoteDataSourceImplTest {
         }
 
         @Test
+        fun `throws UnexpectedApiException carrying the server message when the payload has an error`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook(id = 3)
+            val book = stubBook(
+                userBook = userBook,
+                currentRead = stubUserBookRead(id = 5),
+            )
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
+
+            every {
+                userBook.editionId
+            } returns 10
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+            every {
+                updateUserBookRead.error
+            } returns "read is locked"
+
+            // ----- Act & Assert -----
+            val thrown = shouldThrow<UnexpectedApiException> {
+                dataSource.updateBookProgress(
+                    book = book,
+                    newPage = 50,
+                )
+            }
+
+            thrown.message.shouldNotBeNull() shouldContain "read is locked"
+        }
+
+        @Test
         fun `throws when mutation returns null userBookRead fragment`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook(id = 3)
@@ -2559,6 +2598,10 @@ class BooksRemoteDataSourceImplTest {
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
+
+            every {
+                updateUserBookRead.error
+            } returns null
 
             every {
                 userBook.editionId
@@ -2620,6 +2663,10 @@ class BooksRemoteDataSourceImplTest {
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
             val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
+
+            every {
+                updateUserBookRead.error
+            } returns null
             val expectedBook = stubBook()
 
             every {
@@ -2670,6 +2717,10 @@ class BooksRemoteDataSourceImplTest {
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
             val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
+
+            every {
+                updateUserBookRead.error
+            } returns null
             val expectedBook = stubBook()
 
             every {
@@ -2728,6 +2779,10 @@ class BooksRemoteDataSourceImplTest {
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
             val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
+
+            every {
+                updateUserBookRead.error
+            } returns null
             val expectedBook = stubBook()
 
             every {
@@ -2786,6 +2841,10 @@ class BooksRemoteDataSourceImplTest {
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
             val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
+
+            every {
+                updateUserBookRead.error
+            } returns null
             val expectedBook = stubBook()
 
             every {
@@ -2844,6 +2903,10 @@ class BooksRemoteDataSourceImplTest {
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
             val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
+
+            every {
+                updateUserBookRead.error
+            } returns null
             val expectedBook = stubBook()
 
             every {
@@ -2891,13 +2954,90 @@ class BooksRemoteDataSourceImplTest {
     @Nested
     inner class ReplayUpdateBookProgress {
         @Test
+        fun `throws UnexpectedApiException carrying the server message when the payload has an error`() = runTest {
+            // ----- Arrange -----
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+            every {
+                updateUserBookRead.error
+            } returns "read is locked"
+
+            // ----- Act & Assert -----
+            val thrown = shouldThrow<UnexpectedApiException> {
+                dataSource.replayUpdateBookProgress(
+                    userBookReadId = 5,
+                    editionId = 10,
+                    progressPages = 75,
+                    progressSeconds = null,
+                    startedAt = "2026-01-01",
+                    finishedAt = null,
+                    actionAt = null,
+                )
+            }
+
+            thrown.message.shouldNotBeNull() shouldContain "read is locked"
+        }
+
+        @Test
+        fun `throws UnexpectedApiException when the payload has no user_book_read`() = runTest {
+            // ----- Arrange -----
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+            every {
+                updateUserBookRead.error
+            } returns null
+            every {
+                updateUserBookRead.user_book_read
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<UnexpectedApiException> {
+                dataSource.replayUpdateBookProgress(
+                    userBookReadId = 5,
+                    editionId = 10,
+                    progressPages = 75,
+                    progressSeconds = null,
+                    startedAt = "2026-01-01",
+                    finishedAt = null,
+                    actionAt = null,
+                )
+            }
+        }
+
+        @Test
         fun `sends action_at and action when actionAt is provided`() = runTest {
             // ----- Arrange -----
             val actionAt = "2026-07-21T21:00:00Z"
 
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>(relaxed = true)
+
+            every {
+                updateUserBookRead.error
+            } returns null
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+
             coEvery {
                 apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
-            } returns mockk(relaxed = true)
+            } returns mutationData
 
             // ----- Act -----
             dataSource.replayUpdateBookProgress(
@@ -2925,9 +3065,19 @@ class BooksRemoteDataSourceImplTest {
         @Test
         fun `omits action_at and action when actionAt is not provided`() = runTest {
             // ----- Arrange -----
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>(relaxed = true)
+
+            every {
+                updateUserBookRead.error
+            } returns null
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+
             coEvery {
                 apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
-            } returns mockk(relaxed = true)
+            } returns mutationData
 
             // ----- Act -----
             dataSource.replayUpdateBookProgress(

@@ -149,6 +149,7 @@ val bookModule = module {
             userBookWriteDrainer = get(),
             booksLocalDataSource = get(),
             userBookCacheGate = get(),
+            userBookWriteLock = get(),
             networkAvailability = get(),
             applicationScope = get(),
         )

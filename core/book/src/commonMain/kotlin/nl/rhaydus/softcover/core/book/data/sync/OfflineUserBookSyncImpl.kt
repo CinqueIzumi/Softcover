@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.book.data.sync
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -13,10 +14,12 @@ import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.domain.model.UserBooksSnapshot
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
+import nl.rhaydus.softcover.core.book.domain.sync.QueuedWrite
 import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteLock
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -43,6 +46,7 @@ internal class OfflineUserBookSyncImpl(
     private val userBookWriteDrainer: UserBookWriteDrainer,
     private val booksLocalDataSource: BooksLocalDataSource,
     private val userBookCacheGate: UserBookCacheGate,
+    private val userBookWriteLock: UserBookWriteLock,
     private val networkAvailability: NetworkAvailabilityProvider,
     private val applicationScope: ApplicationScope,
 ) : OfflineUserBookSync {
@@ -60,7 +64,7 @@ internal class OfflineUserBookSyncImpl(
         newSeconds: Int?,
         actionAt: String?,
         progressHistoryId: Long?,
-    ) {
+    ): QueuedWrite {
         val userBook = checkNotNull(book.userBook) { "Cannot queue UPDATE_PROGRESS for book ${book.id}: no user book" }
         val userBookRead = checkNotNull(book.currentRead) {
             "Cannot queue UPDATE_PROGRESS for book ${book.id}: no user book read"
@@ -70,7 +74,7 @@ internal class OfflineUserBookSyncImpl(
         val startedAt = userBookRead.startedAt.takeUnless { userBookRead.isPlaceholder }
         val finishedAt = userBookRead.finishedAt.takeUnless { userBookRead.isPlaceholder }
 
-        enqueueAndScheduleRetry(
+        return appendToQueue(
             PendingUserBookWrite(
                 kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
                 userBookId = userBook.id,
@@ -91,11 +95,11 @@ internal class OfflineUserBookSyncImpl(
     override suspend fun enqueueMarkAsRead(
         book: Book,
         actionAt: String?,
-    ) {
+    ): QueuedWrite {
         val userBook = checkNotNull(book.userBook) { "Cannot queue MARK_AS_READ for book ${book.id}: no user book" }
         val userBookRead = book.currentRead
 
-        enqueueAndScheduleRetry(
+        return appendToQueue(
             PendingUserBookWrite(
                 kind = PendingUserBookWriteKind.MARK_AS_READ,
                 userBookId = userBook.id,
@@ -115,10 +119,10 @@ internal class OfflineUserBookSyncImpl(
     override suspend fun enqueueStatusUpdate(
         book: Book,
         status: UserBookStatus,
-    ) {
+    ): QueuedWrite {
         val userBook = checkNotNull(book.userBook) { "Cannot queue SET_STATUS for book ${book.id}: no user book" }
 
-        enqueueAndScheduleRetry(
+        return appendToQueue(
             PendingUserBookWrite(
                 kind = PendingUserBookWriteKind.SET_STATUS,
                 userBookId = userBook.id,
@@ -140,10 +144,10 @@ internal class OfflineUserBookSyncImpl(
     override suspend fun enqueueRatingUpdate(
         book: Book,
         rating: Double,
-    ) {
+    ): QueuedWrite {
         val userBook = checkNotNull(book.userBook) { "Cannot queue UPDATE_RATING for book ${book.id}: no user book" }
 
-        enqueueAndScheduleRetry(
+        return appendToQueue(
             PendingUserBookWrite(
                 kind = PendingUserBookWriteKind.UPDATE_RATING,
                 userBookId = userBook.id,
@@ -166,10 +170,10 @@ internal class OfflineUserBookSyncImpl(
         book: Book,
         review: ReviewDocument,
         hasSpoilers: Boolean,
-    ) {
+    ): QueuedWrite {
         val userBook = checkNotNull(book.userBook) { "Cannot queue UPDATE_REVIEW for book ${book.id}: no user book" }
 
-        enqueueAndScheduleRetry(
+        return appendToQueue(
             PendingUserBookWrite(
                 kind = PendingUserBookWriteKind.UPDATE_REVIEW,
                 userBookId = userBook.id,
@@ -189,21 +193,40 @@ internal class OfflineUserBookSyncImpl(
         )
     }
 
-    /**
-     * The foundation drainer only replays on a connectivity return or an on-demand [drain], so a write
-     * queued by a transient failure while online (a 429, say) would otherwise wait for the next refresh.
-     * Every enqueue restarts one spaced retry schedule, so each write gets the full spacing and the
-     * retries never add request fan-out against the rate limit.
-     */
-    private suspend fun enqueueAndScheduleRetry(write: PendingUserBookWrite) {
-        userBookWriteQueue.enqueue(write)
+    private suspend fun appendToQueue(write: PendingUserBookWrite): QueuedWrite {
+        val localId: Long = userBookWriteQueue.append(write)
 
+        return QueuedWrite(
+            localId = localId,
+            write = write,
+        )
+    }
+
+    override suspend fun <T> runSerialized(
+        bookId: Int,
+        block: suspend () -> T,
+    ): T = applicationScope.scope
+        .async { userBookWriteLock.withLock(bookId) { block() } }
+        .await()
+
+    override suspend fun settle(write: QueuedWrite) {
+        userBookWriteQueue.remove(write.localId)
+    }
+
+    override suspend fun hasOlderPending(write: QueuedWrite): Boolean = userBookWriteQueue.hasOlderPending(
+        bookId = write.write.bookId,
+        exceptLocalId = write.localId,
+    )
+
+    override fun retryLater() {
         if (networkAvailability.isOnline.value.not()) return
 
-        retryMutex.withLock {
-            retryJob?.cancel()
+        applicationScope.scope.launch {
+            retryMutex.withLock {
+                retryJob?.cancel()
 
-            retryJob = applicationScope.scope.launch { runRetrySchedule() }
+                retryJob = launch { runRetrySchedule() }
+            }
         }
     }
 
@@ -260,7 +283,9 @@ internal class OfflineUserBookSyncImpl(
         selectBooksToCache: suspend (List<Book>) -> List<Book>,
     ): List<Book> {
         val drained: Map<Int, Set<PendingUserBookWriteKind>> = userBookWriteDrainer.drain()
+        val stillQueued: Map<Int, Set<PendingUserBookWriteKind>> = userBookWriteQueue.pendingKindsByUserBook()
         val syncedWrites: Map<Int, Set<PendingUserBookWriteKind>> = takeRetainedHints(drained = drained)
+            .mergedWith(stillQueued)
 
         return userBookCacheGate.refresh(
             fetch = fetchFromServer,

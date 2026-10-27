@@ -15,14 +15,14 @@ class UpdateBookProgressUseCase(
         newSeconds: Int? = null,
         actionAt: String? = null,
     ): Result<Unit> = runCatchingLogged {
-        val updatedBook = repository.updateBookProgress(
+        repository.updateBookProgress(
             book = book,
             newPage = newPage,
             newSeconds = newSeconds,
             actionAt = actionAt,
         )
 
-        repository.cacheBook(book = updatedBook)
+        Unit
     }.onSuccess {
         // A follow-on side-effect, kept out of the runCatchingLogged so a cancellation in the mark
         // propagates instead of being captured as a Result.failure of the committed write.

@@ -11,9 +11,12 @@ import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -42,7 +45,10 @@ import nl.rhaydus.softcover.core.book.data.sync.UserBookCacheGate
 import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.book.domain.model.UserBooksSnapshot
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
+import nl.rhaydus.softcover.core.book.domain.sync.QueuedWrite
+import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteLock
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
@@ -101,6 +107,8 @@ class BooksRepositoryImplTest {
 
         testScope = TestScope(UnconfinedTestDispatcher())
 
+        stubOfflineSync()
+
         every {
             networkAvailability.isOnline
         } returns MutableStateFlow(true)
@@ -127,6 +135,81 @@ class BooksRepositoryImplTest {
     @AfterEach
     fun tearDown() {
         testScope.cancel()
+    }
+
+    private fun queuedWrite(
+        kind: PendingUserBookWriteKind,
+        localId: Long = 1L,
+    ): QueuedWrite = QueuedWrite(
+        localId = localId,
+        write = PendingUserBookWrite(
+            kind = kind,
+            userBookId = 1,
+            userBookReadId = 1,
+            bookId = 1,
+            editionId = null,
+            progressPages = null,
+            progressSeconds = null,
+            startedAt = null,
+            finishedAt = null,
+            enqueuedAt = "2026-01-01T00:00:00Z",
+        ),
+    )
+
+    private fun stubOfflineSync() {
+        coEvery {
+            offlineSync.runSerialized(
+                bookId = any(),
+                block = any<suspend () -> Any?>(),
+            )
+        } coAnswers {
+            val block = secondArg<suspend () -> Any?>()
+
+            testScope.async { block() }.await()
+        }
+
+        coEvery {
+            offlineSync.enqueueProgressUpdate(
+                book = any(),
+                newPage = any(),
+                newSeconds = any(),
+                actionAt = any(),
+                progressHistoryId = any(),
+            )
+        } returns queuedWrite(kind = PendingUserBookWriteKind.UPDATE_PROGRESS)
+
+        coEvery {
+            offlineSync.enqueueMarkAsRead(
+                book = any(),
+                actionAt = any(),
+            )
+        } returns queuedWrite(kind = PendingUserBookWriteKind.MARK_AS_READ)
+
+        coEvery {
+            offlineSync.enqueueStatusUpdate(
+                book = any(),
+                status = any(),
+            )
+        } returns queuedWrite(kind = PendingUserBookWriteKind.SET_STATUS)
+
+        coEvery {
+            offlineSync.enqueueRatingUpdate(
+                book = any(),
+                rating = any(),
+            )
+        } returns queuedWrite(kind = PendingUserBookWriteKind.UPDATE_RATING)
+
+        coEvery {
+            offlineSync.enqueueReviewUpdate(
+                book = any(),
+                review = any(),
+                hasSpoilers = any(),
+            )
+        } returns queuedWrite(kind = PendingUserBookWriteKind.UPDATE_REVIEW)
+
+        coEvery {
+            offlineSync.hasOlderPending(write = any())
+        } returns false
     }
 
     private fun snapshotOf(books: List<Book>): UserBooksSnapshot = UserBooksSnapshot(
@@ -1793,7 +1876,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `cancellation — rethrows CancellationException without invoking rollback`() = runTest {
+        fun `a cancelled caller still completes the send and settles the queued write without rolling back`() = runTest {
             // ----- Arrange -----
             val bookId = 11
             val book = mockk<Book>(relaxed = true) {
@@ -1813,21 +1896,34 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getBookById(id = bookId)
             } returns snapshot
 
+            val confirmed = stubBook(userBookId = 5)
+            val remoteGate = CompletableDeferred<Book>()
+
             coEvery {
                 booksRemoteDataSource.markBookAsWantToRead(
                     bookId = bookId,
                     editionId = any(),
                 )
-            } throws CancellationException("cancelled")
+            } coAnswers {
+                remoteGate.await()
+            }
 
-            // ----- Act -----
-            val error = shouldThrow<CancellationException> {
+            val caller = launch(start = CoroutineStart.UNDISPATCHED) {
                 repository.markBookAsWantToRead(book = book)
             }
 
-            // ----- Assert -----
-            error.shouldBeInstanceOf<CancellationException>()
+            // ----- Act -----
+            caller.cancel()
+            remoteGate.complete(confirmed)
+            runCurrent()
 
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                offlineSync.settle(write = any())
+            }
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = confirmed)
+            }
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
@@ -1877,7 +1973,7 @@ class BooksRepositoryImplTest {
                 userBook = userBook,
             )
             val expectedBook = stubBook(userBookId = 1)
-            val slot = slot<Book>()
+            val cached = mutableListOf<Book>()
 
             coEvery {
                 booksRemoteDataSource.markBookAsReading(
@@ -1887,7 +1983,7 @@ class BooksRepositoryImplTest {
             } returns expectedBook
 
             coEvery {
-                booksLocalDataSource.cacheBook(book = capture(slot))
+                booksLocalDataSource.cacheBook(book = capture(cached))
             } returns Unit
 
             // ----- Act -----
@@ -1895,7 +1991,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             result shouldBe expectedBook
-            val capturedUserBook = slot.captured.userBook.shouldNotBeNull()
+            val capturedUserBook = cached.first().userBook.shouldNotBeNull()
             capturedUserBook.status shouldBe BookStatus.Reading
             val capturedJournals = capturedUserBook.journals
             capturedJournals.size shouldBe 2
@@ -2002,7 +2098,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `markBookAsReading cancellation — optimistic write occurs but snapshot rollback is not invoked`() = runTest {
+        fun `markBookAsReading with a cancelled caller still completes the send and settles the queued write`() = runTest {
             // ----- Arrange -----
             val bookId = 42
             val book = mockk<Book>(relaxed = true) {
@@ -2016,25 +2112,34 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getBookById(id = bookId)
             } returns snapshot
 
+            val confirmed = stubBook(userBookId = 1)
+            val remoteGate = CompletableDeferred<Book>()
+
             coEvery {
                 booksRemoteDataSource.markBookAsReading(
                     book = book,
                     editionId = any(),
                 )
-            } throws CancellationException("cancelled")
+            } coAnswers {
+                remoteGate.await()
+            }
 
-            // ----- Act -----
-            val error = shouldThrow<CancellationException> {
+            val caller = launch(start = CoroutineStart.UNDISPATCHED) {
                 repository.markBookAsReading(book = book)
             }
 
+            // ----- Act -----
+            caller.cancel()
+            remoteGate.complete(confirmed)
+            runCurrent()
+
             // ----- Assert -----
-            error.shouldBeInstanceOf<CancellationException>()
-
             coVerify(exactly = 1) {
-                booksLocalDataSource.cacheBook(book = any())
+                offlineSync.settle(write = any())
             }
-
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = confirmed)
+            }
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
@@ -2133,7 +2238,7 @@ class BooksRepositoryImplTest {
                 // ----- Arrange -----
                 val book = statusBook(status = BookStatus.Reading)
                 val remoteBook = stubBook(userBookId = 7)
-                val slot = slot<Book>()
+                val cached = mutableListOf<Book>()
 
                 coEvery {
                     booksRemoteDataSource.markBookAsPaused(
@@ -2143,7 +2248,7 @@ class BooksRepositoryImplTest {
                 } returns remoteBook
 
                 coEvery {
-                    booksLocalDataSource.cacheBook(book = capture(slot))
+                    booksLocalDataSource.cacheBook(book = capture(cached))
                 } returns Unit
 
                 // ----- Act -----
@@ -2151,7 +2256,7 @@ class BooksRepositoryImplTest {
 
                 // ----- Assert -----
                 result shouldBe remoteBook
-                val capturedUserBook = slot.captured.userBook.shouldNotBeNull()
+                val capturedUserBook = cached.first().userBook.shouldNotBeNull()
                 capturedUserBook.status shouldBe BookStatus.Paused
                 capturedUserBook.journals shouldBe listOf(existingJournal)
             }
@@ -2175,7 +2280,7 @@ class BooksRepositoryImplTest {
 
                 // ----- Assert -----
                 coVerify(exactly = 0) {
-                    booksLocalDataSource.cacheBook(book = any())
+                    booksLocalDataSource.cacheBook(book = book)
                 }
                 coVerify(exactly = 1) {
                     booksRemoteDataSource.markBookAsPaused(
@@ -2214,7 +2319,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `markBookAsPaused restores the snapshot and rethrows on a non-transient failure without queueing`() =
+        fun `markBookAsPaused restores the snapshot, settles the queued write and rethrows on a non-transient failure`() =
             runTest {
                 // ----- Arrange -----
                 val book = statusBook(status = BookStatus.Reading)
@@ -2240,16 +2345,13 @@ class BooksRepositoryImplTest {
                 coVerify(exactly = 1) {
                     booksLocalDataSource.cacheBook(book = snapshot)
                 }
-                coVerify(exactly = 0) {
-                    offlineSync.enqueueStatusUpdate(
-                        book = any(),
-                        status = any(),
-                    )
+                coVerify(exactly = 1) {
+                    offlineSync.settle(write = any())
                 }
             }
 
         @Test
-        fun `markBookAsPaused rethrows cancellation without rollback or queueing`() = runTest {
+        fun `markBookAsPaused with a cancelled caller still completes the send and settles the queued write`() = runTest {
             // ----- Arrange -----
             val book = statusBook(status = BookStatus.Reading)
             val snapshot = stubBook(userBookId = 7)
@@ -2258,29 +2360,36 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getBookById(id = book.id)
             } returns snapshot
 
+            val confirmed = stubBook(userBookId = 7)
+            val remoteGate = CompletableDeferred<Book>()
+
             coEvery {
                 booksRemoteDataSource.markBookAsPaused(
                     book = book,
                     editionId = any(),
                 )
-            } throws CancellationException("cancelled")
+            } coAnswers {
+                remoteGate.await()
+            }
 
-            // ----- Act -----
-            val error = shouldThrow<CancellationException> {
+            val caller = launch(start = CoroutineStart.UNDISPATCHED) {
                 repository.markBookAsPaused(book = book)
             }
 
-            // ----- Assert -----
-            error.shouldBeInstanceOf<CancellationException>()
+            // ----- Act -----
+            caller.cancel()
+            remoteGate.complete(confirmed)
+            runCurrent()
 
-            coVerify(exactly = 0) {
-                booksLocalDataSource.cacheBook(book = snapshot)
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                offlineSync.settle(write = any())
+            }
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = confirmed)
             }
             coVerify(exactly = 0) {
-                offlineSync.enqueueStatusUpdate(
-                    book = any(),
-                    status = any(),
-                )
+                booksLocalDataSource.cacheBook(book = snapshot)
             }
         }
 
@@ -2725,7 +2834,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `rethrows CancellationException without invoking snapshot rollback`() = runTest {
+        fun `a cancelled caller still completes the send and settles the queued write without rolling back`() = runTest {
             // ----- Arrange -----
             val bookId = 10
             val newRating = 4.5
@@ -2750,24 +2859,37 @@ class BooksRepositoryImplTest {
                 booksLocalDataSource.getBookById(id = bookId)
             } returns snapshot
 
+            val confirmed = stubBook(userBookId = 5)
+            val remoteGate = CompletableDeferred<Book>()
+
             coEvery {
                 booksRemoteDataSource.updateBookRating(
                     userBook = any(),
                     rating = newRating,
                 )
-            } throws CancellationException("cancelled")
+            } coAnswers {
+                remoteGate.await()
+            }
 
-            // ----- Act -----
-            val error = shouldThrow<CancellationException> {
+            val caller = launch(start = CoroutineStart.UNDISPATCHED) {
                 repository.updateBookRating(
                     book = book,
                     rating = newRating,
                 )
             }
 
-            // ----- Assert -----
-            error.shouldBeInstanceOf<CancellationException>()
+            // ----- Act -----
+            caller.cancel()
+            remoteGate.complete(confirmed)
+            runCurrent()
 
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                offlineSync.settle(write = any())
+            }
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = confirmed)
+            }
             coVerify(exactly = 0) {
                 booksLocalDataSource.cacheBook(book = snapshot)
             }
@@ -3096,7 +3218,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `on success returns the remote book and does not enqueue`() = runTest {
+        fun `on success returns the remote book and settles the queued write`() = runTest {
             // ----- Arrange -----
             val userBookId = 5
             val bookId = 10
@@ -3109,6 +3231,7 @@ class BooksRepositoryImplTest {
                 } returns stubUserBookForReview(id = userBookId)
             }
             val remoteBook = stubBook(userBookId = userBookId)
+            val capturedBooks = mutableListOf<Book>()
 
             every {
                 networkAvailability.isOnline
@@ -3128,7 +3251,7 @@ class BooksRepositoryImplTest {
             } returns remoteBook
 
             coEvery {
-                booksLocalDataSource.cacheBook(book = any())
+                booksLocalDataSource.cacheBook(book = capture(capturedBooks))
             } returns Unit
 
             // ----- Act -----
@@ -3141,12 +3264,8 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             result shouldBe remoteBook
 
-            coVerify(exactly = 0) {
-                offlineSync.enqueueReviewUpdate(
-                    book = any(),
-                    review = any(),
-                    hasSpoilers = any(),
-                )
+            coVerify(exactly = 1) {
+                offlineSync.settle(write = any())
             }
         }
 
@@ -4832,14 +4951,20 @@ class BooksRepositoryImplTest {
             } returns expectedBook
 
             // ----- Act -----
-            val result = repository.updateBookProgress(
+            repository.updateBookProgress(
                 book = book,
                 newPage = newPage,
                 actionAt = actionAt,
             )
 
             // ----- Assert -----
-            result shouldBe expectedBook
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.updateBookProgress(
+                    book = book,
+                    newPage = newPage,
+                    actionAt = actionAt,
+                )
+            }
         }
 
         @Test
@@ -4890,7 +5015,7 @@ class BooksRepositoryImplTest {
                 isCompilation = false,
                 userBook = userBook.copy(reads = listOf(userBookRead)),
             )
-            val slot = slot<Book>()
+            val cached = mutableListOf<Book>()
 
             every {
                 networkAvailability.isOnline
@@ -4906,7 +5031,7 @@ class BooksRepositoryImplTest {
             } returns stubBook(userBookId = 1)
 
             coEvery {
-                booksLocalDataSource.cacheBook(book = capture(slot))
+                booksLocalDataSource.cacheBook(book = capture(cached))
             } returns Unit
 
             // ----- Act -----
@@ -4916,7 +5041,7 @@ class BooksRepositoryImplTest {
             )
 
             // ----- Assert -----
-            val capturedJournals = slot.captured.userBook.shouldNotBeNull().journals
+            val capturedJournals = cached.first().userBook.shouldNotBeNull().journals
             capturedJournals.size shouldBe 2
             capturedJournals[0] shouldBe existingJournal
             capturedJournals[1].event shouldBe "progress_updated"
@@ -5150,7 +5275,7 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `real current read — calls the remote with that read and does not enqueue`() = runTest {
+        fun `real current read — calls the remote with that read and settles the queued write`() = runTest {
             // ----- Arrange -----
             val realRead = UserBookRead(
                 id = 7,
@@ -5192,14 +5317,8 @@ class BooksRepositoryImplTest {
                 )
             }
 
-            coVerify(exactly = 0) {
-                offlineSync.enqueueProgressUpdate(
-                    book = any(),
-                    newPage = any(),
-                    newSeconds = any(),
-                    actionAt = any(),
-                    progressHistoryId = any(),
-                )
+            coVerify(exactly = 1) {
+                offlineSync.settle(write = any())
             }
         }
     }
@@ -5285,7 +5404,13 @@ class BooksRepositoryImplTest {
             // ----- Assert -----
             result shouldBe expectedBook
             coVerify(exactly = 0) {
-                booksLocalDataSource.cacheBook(book = any())
+                booksLocalDataSource.cacheBook(book = book)
+            }
+            coVerify(exactly = 0) {
+                offlineSync.enqueueMarkAsRead(
+                    book = any(),
+                    actionAt = any(),
+                )
             }
             coVerify(exactly = 1) {
                 booksRemoteDataSource.markBookAsRead(
@@ -5343,7 +5468,7 @@ class BooksRepositoryImplTest {
                 isCompilation = false,
                 userBook = userBook.copy(reads = listOf(userBookRead)),
             )
-            val slot = slot<Book>()
+            val cached = mutableListOf<Book>()
 
             every {
                 networkAvailability.isOnline
@@ -5357,14 +5482,14 @@ class BooksRepositoryImplTest {
             } returns stubBook(userBookId = 1)
 
             coEvery {
-                booksLocalDataSource.cacheBook(book = capture(slot))
+                booksLocalDataSource.cacheBook(book = capture(cached))
             } returns Unit
 
             // ----- Act -----
             repository.markBookAsRead(book = book)
 
             // ----- Assert -----
-            val capturedUserBook = slot.captured.userBook.shouldNotBeNull()
+            val capturedUserBook = cached.first().userBook.shouldNotBeNull()
             val capturedJournals = capturedUserBook.journals
             capturedJournals.size shouldBe 2
             capturedJournals[0] shouldBe existingJournal
@@ -5419,7 +5544,7 @@ class BooksRepositoryImplTest {
                 isCompilation = false,
                 userBook = userBook.copy(reads = listOf(userBookRead)),
             )
-            val slot = slot<Book>()
+            val cached = mutableListOf<Book>()
 
             every {
                 networkAvailability.isOnline
@@ -5434,7 +5559,7 @@ class BooksRepositoryImplTest {
             } returns stubBook(userBookId = 1)
 
             coEvery {
-                booksLocalDataSource.cacheBook(book = capture(slot))
+                booksLocalDataSource.cacheBook(book = capture(cached))
             } returns Unit
 
             // ----- Act -----
@@ -5444,7 +5569,7 @@ class BooksRepositoryImplTest {
             )
 
             // ----- Assert -----
-            slot.captured.currentRead?.finishedAt shouldBe expectedFinishedAt
+            cached.first().currentRead?.finishedAt shouldBe expectedFinishedAt
         }
 
         @Test
@@ -7306,7 +7431,7 @@ class BooksRepositoryImplTest {
             book: Book,
             actionAt: String?,
         ): List<ReadingJournal> {
-            val slot = slot<Book>()
+            val cached = mutableListOf<Book>()
 
             coEvery {
                 booksRemoteDataSource.markBookAsRead(
@@ -7317,7 +7442,7 @@ class BooksRepositoryImplTest {
             } returns stubBook(userBookId = 1)
 
             coEvery {
-                booksLocalDataSource.cacheBook(book = capture(slot))
+                booksLocalDataSource.cacheBook(book = capture(cached))
             } returns Unit
 
             repository.markBookAsRead(
@@ -7325,7 +7450,7 @@ class BooksRepositoryImplTest {
                 actionAt = actionAt,
             )
 
-            return slot.captured.userBook.shouldNotBeNull().journals
+            return cached.first().userBook.shouldNotBeNull().journals
         }
 
         @Test
@@ -7427,6 +7552,7 @@ class BooksRepositoryImplTest {
                     userBookWriteDrainer = mockk(relaxed = true),
                     booksLocalDataSource = booksLocalDataSource,
                     userBookCacheGate = gate,
+                    userBookWriteLock = UserBookWriteLock(),
                     networkAvailability = networkAvailability,
                     applicationScope = ApplicationScope(scope = testScope),
                 ),
@@ -7682,6 +7808,794 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             repository.hasSyncedReadBooksThisSession shouldBe false
+        }
+    }
+
+    @Nested
+    inner class LostWrites {
+        private val historyId = 9L
+
+        private fun readingBook(): Book = Book(
+            id = 42,
+            title = "Test Book",
+            editions = emptyList(),
+            defaultEdition = null,
+            rating = 0.0,
+            description = "",
+            releaseYear = 2020,
+            coverUrl = "",
+            authors = emptyList(),
+            usersCount = 0,
+            ratingsCount = 0,
+            bookSeries = null,
+            positionsInSeries = emptyList(),
+            isCompilation = false,
+            userBook = UserBook(
+                id = 7,
+                status = BookStatus.Reading,
+                dateAdded = "2026-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = null,
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+                reads = listOf(
+                    UserBookRead(
+                        id = 5,
+                        currentPage = 10,
+                        currentSeconds = null,
+                        progress = 0.1f,
+                        startedAt = "2026-01-01",
+                        finishedAt = null,
+                    ),
+                ),
+            ),
+        )
+
+        private fun stubInsertPending() {
+            coEvery {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = any(),
+                    actionAtEpochMillis = any(),
+                    pages = any(),
+                    seconds = any(),
+                    pagesRead = any(),
+                )
+            } returns historyId
+        }
+
+        @Test
+        fun `a progress update whose caller is cancelled mid-send still completes the send and marks the history row synced`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val remoteGate = CompletableDeferred<Book>()
+            stubInsertPending()
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } coAnswers {
+                remoteGate.await()
+            }
+
+            val caller = launch(start = CoroutineStart.UNDISPATCHED) {
+                repository.updateBookProgress(
+                    book = book,
+                    newPage = 120,
+                    newSeconds = null,
+                    actionAt = null,
+                )
+            }
+
+            // ----- Act -----
+            caller.cancel()
+            remoteGate.complete(book)
+            runCurrent()
+
+            // ----- Assert -----
+            coVerify {
+                progressHistoryLocalDataSource.markSynced(localId = historyId)
+            }
+            coVerify {
+                booksLocalDataSource.cacheBook(
+                    book = match { cached -> cached.currentRead?.currentPage == 120 },
+                )
+            }
+        }
+
+        @Test
+        fun `a progress update whose caller is cancelled while the remote never returns is durably queued`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            stubInsertPending()
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } coAnswers {
+                awaitCancellation()
+            }
+
+            val caller = launch(start = CoroutineStart.UNDISPATCHED) {
+                repository.updateBookProgress(
+                    book = book,
+                    newPage = 120,
+                    newSeconds = null,
+                    actionAt = null,
+                )
+            }
+
+            // ----- Act -----
+            caller.cancel()
+            runCurrent()
+
+            // ----- Assert -----
+            coVerify {
+                offlineSync.enqueueProgressUpdate(
+                    book = match { queued -> queued.id == 42 },
+                    newPage = 120,
+                    newSeconds = any(),
+                    actionAt = any(),
+                    progressHistoryId = historyId,
+                )
+            }
+        }
+
+        @Test
+        fun `a pause whose caller is cancelled mid-send still completes the send without rolling the shelf back`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val snapshot = stubBook(userBookId = 7)
+            val remoteGate = CompletableDeferred<Book>()
+            var sendCompleted = false
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns snapshot
+
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = any(),
+                    editionId = any(),
+                )
+            } coAnswers {
+                remoteGate.await().also { sendCompleted = true }
+            }
+
+            val caller = launch(start = CoroutineStart.UNDISPATCHED) {
+                repository.markBookAsPaused(book = book)
+            }
+
+            // ----- Act -----
+            caller.cancel()
+            remoteGate.complete(book)
+            runCurrent()
+
+            // ----- Assert -----
+            sendCompleted shouldBe true
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+        }
+
+        @Test
+        fun `a pause whose caller is cancelled while the remote never returns is durably queued`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = any(),
+                    editionId = any(),
+                )
+            } coAnswers {
+                awaitCancellation()
+            }
+
+            val caller = launch(start = CoroutineStart.UNDISPATCHED) {
+                repository.markBookAsPaused(book = book)
+            }
+
+            // ----- Act -----
+            caller.cancel()
+            runCurrent()
+
+            // ----- Assert -----
+            coVerify {
+                offlineSync.enqueueStatusUpdate(
+                    book = any(),
+                    status = UserBookStatus.PAUSED,
+                )
+            }
+        }
+
+        @Test
+        fun `a queue row is appended before the remote call`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns null
+
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = any(),
+                    editionId = any(),
+                )
+            } returns book
+
+            // ----- Act -----
+            repository.markBookAsPaused(book = book)
+
+            // ----- Assert -----
+            coVerifyOrder {
+                offlineSync.enqueueStatusUpdate(
+                    book = any(),
+                    status = UserBookStatus.PAUSED,
+                )
+                booksRemoteDataSource.markBookAsPaused(
+                    book = any(),
+                    editionId = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `a confirmed write settles its own queue row and schedules no retry`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val queued = queuedWrite(
+                kind = PendingUserBookWriteKind.SET_STATUS,
+                localId = 77L,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns null
+
+            coEvery {
+                offlineSync.enqueueStatusUpdate(
+                    book = any(),
+                    status = any(),
+                )
+            } returns queued
+
+            coEvery {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = any(),
+                    editionId = any(),
+                )
+            } returns book
+
+            // ----- Act -----
+            repository.markBookAsPaused(book = book)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                offlineSync.settle(write = queued)
+            }
+            verify(exactly = 0) {
+                offlineSync.retryLater()
+            }
+        }
+
+        @Test
+        fun `a retryable failure keeps the queue row, schedules a retry and returns the optimistic book`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            stubInsertPending()
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns book
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } throws ServerUnavailableException(message = "down")
+
+            // ----- Act -----
+            val result = repository.updateBookProgress(
+                book = book,
+                newPage = 120,
+                newSeconds = null,
+                actionAt = null,
+            )
+
+            // ----- Assert -----
+            result.currentRead.shouldNotBeNull().currentPage shouldBe 120
+            verify(exactly = 1) {
+                offlineSync.retryLater()
+            }
+            coVerify(exactly = 0) {
+                offlineSync.settle(write = any())
+            }
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.delete(localId = any())
+            }
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.markSynced(localId = any())
+            }
+        }
+
+        @Test
+        fun `a rejected progress update settles the row, restores the snapshot and deletes the history row`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val snapshot = stubBook(userBookId = 7)
+            val rejection = RuntimeException("rejected")
+            stubInsertPending()
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns snapshot
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } throws rejection
+
+            // ----- Act -----
+            val caught = runCatching {
+                repository.updateBookProgress(
+                    book = book,
+                    newPage = 120,
+                    newSeconds = null,
+                    actionAt = null,
+                )
+            }
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe rejection
+            coVerify(exactly = 1) {
+                offlineSync.settle(write = any())
+            }
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.delete(localId = historyId)
+            }
+            verify(exactly = 0) {
+                offlineSync.retryLater()
+            }
+        }
+
+        @Test
+        fun `a progress send the server accepted still returns the server book when marking the history row synced fails`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val serverBook = book.copy(title = "Server Book")
+            val snapshot = stubBook(userBookId = 7)
+            stubInsertPending()
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns snapshot
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } returns serverBook
+
+            coEvery {
+                progressHistoryLocalDataSource.markSynced(localId = any())
+            } throws RuntimeException("disk full")
+
+            // ----- Act -----
+            val result = repository.updateBookProgress(
+                book = book,
+                newPage = 120,
+                newSeconds = null,
+                actionAt = null,
+            )
+
+            // ----- Assert -----
+            result shouldBe serverBook
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.delete(localId = any())
+            }
+        }
+
+        @Test
+        fun `a progress send the server accepted still returns the server book when settling the queue row fails`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val serverBook = book.copy(title = "Server Book")
+            val snapshot = stubBook(userBookId = 7)
+            stubInsertPending()
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns snapshot
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } returns serverBook
+
+            coEvery {
+                offlineSync.settle(write = any())
+            } throws RuntimeException("disk full")
+
+            // ----- Act -----
+            val result = repository.updateBookProgress(
+                book = book,
+                newPage = 120,
+                newSeconds = null,
+                actionAt = null,
+            )
+
+            // ----- Assert -----
+            result shouldBe serverBook
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.delete(localId = any())
+            }
+        }
+
+        @Test
+        fun `a progress update whose enqueue throws rolls back, rethrows and never calls the remote`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val snapshot = stubBook(userBookId = 7)
+            val failure = RuntimeException("queue unavailable")
+            stubInsertPending()
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns snapshot
+
+            coEvery {
+                offlineSync.enqueueProgressUpdate(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                    progressHistoryId = any(),
+                )
+            } throws failure
+
+            // ----- Act -----
+            val caught = runCatching {
+                repository.updateBookProgress(
+                    book = book,
+                    newPage = 120,
+                    newSeconds = null,
+                    actionAt = null,
+                )
+            }
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe failure
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.delete(localId = historyId)
+            }
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `a write queued behind an older pending write stays queued and never reaches the remote`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val queued = queuedWrite(kind = PendingUserBookWriteKind.SET_STATUS)
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns null
+
+            coEvery {
+                offlineSync.enqueueStatusUpdate(
+                    book = any(),
+                    status = any(),
+                )
+            } returns queued
+
+            coEvery {
+                offlineSync.hasOlderPending(write = queued)
+            } returns true
+
+            // ----- Act -----
+            val result = repository.markBookAsPaused(book = book)
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().status shouldBe BookStatus.Paused
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.markBookAsPaused(
+                    book = any(),
+                    editionId = any(),
+                )
+            }
+            coVerify(exactly = 0) {
+                offlineSync.settle(write = any())
+            }
+            verify(exactly = 1) {
+                offlineSync.retryLater()
+            }
+        }
+
+        @Test
+        fun `a progress update whose caller is cancelled mid-send still settles its queue row`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val remoteGate = CompletableDeferred<Book>()
+            stubInsertPending()
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } coAnswers {
+                remoteGate.await()
+            }
+
+            val caller = launch(start = CoroutineStart.UNDISPATCHED) {
+                repository.updateBookProgress(
+                    book = book,
+                    newPage = 120,
+                    newSeconds = null,
+                    actionAt = null,
+                )
+            }
+
+            // ----- Act -----
+            caller.cancel()
+            remoteGate.complete(book)
+            runCurrent()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                offlineSync.settle(write = any())
+            }
+            coVerify(exactly = 0) {
+                progressHistoryLocalDataSource.delete(localId = any())
+            }
+        }
+
+        @Test
+        fun `a review whose caller is cancelled mid-send still completes the send and settles its queue row`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val snapshot = stubBook(userBookId = 7)
+            val remoteGate = CompletableDeferred<Book>()
+            var sendCompleted = false
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns snapshot
+
+            coEvery {
+                booksRemoteDataSource.updateBookReview(
+                    userBook = any(),
+                    review = any(),
+                    hasSpoilers = any(),
+                    reviewedAt = any(),
+                )
+            } coAnswers {
+                remoteGate.await().also { sendCompleted = true }
+            }
+
+            val caller = launch(start = CoroutineStart.UNDISPATCHED) {
+                repository.updateBookReview(
+                    book = book,
+                    review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great read"))))),
+                    hasSpoilers = false,
+                )
+            }
+
+            // ----- Act -----
+            caller.cancel()
+            remoteGate.complete(book)
+            runCurrent()
+
+            // ----- Assert -----
+            sendCompleted shouldBe true
+            coVerify(exactly = 1) {
+                offlineSync.settle(write = any())
+            }
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+        }
+
+        @Test
+        fun `a mark as read whose caller is cancelled mid-send still completes the send and settles its queue row`() = runTest {
+            // ----- Arrange -----
+            val book = readingBook()
+            val snapshot = stubBook(userBookId = 7)
+            val confirmed = stubBook(userBookId = 7)
+            val remoteGate = CompletableDeferred<Book>()
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = book.id)
+            } returns snapshot
+
+            coEvery {
+                booksRemoteDataSource.markBookAsRead(
+                    book = any(),
+                    editionId = any(),
+                    actionAt = any(),
+                )
+            } coAnswers {
+                remoteGate.await()
+            }
+
+            val caller = launch(start = CoroutineStart.UNDISPATCHED) {
+                repository.markBookAsRead(book = book)
+            }
+
+            // ----- Act -----
+            caller.cancel()
+            remoteGate.complete(confirmed)
+            runCurrent()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                offlineSync.settle(write = any())
+            }
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = confirmed)
+            }
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+        }
+    }
+
+    @Nested
+    inner class SerializedWrites {
+        private lateinit var serializedRepository: BooksRepositoryImpl
+
+        @BeforeEach
+        fun setUpSerializedRepository() {
+            val gate = UserBookCacheGate(
+                booksLocalDataSource = booksLocalDataSource,
+                userTagsLocalDataSource = FakeUserTagsLocalDataSource(),
+            )
+
+            serializedRepository = BooksRepositoryImpl(
+                booksRemoteDataSource = booksRemoteDataSource,
+                booksLocalDataSource = booksLocalDataSource,
+                userBookCacheGate = gate,
+                networkAvailability = networkAvailability,
+                offlineSync = OfflineUserBookSyncImpl(
+                    userBookWriteQueue = mockk(relaxed = true),
+                    userBookWriteDrainer = mockk(relaxed = true),
+                    booksLocalDataSource = booksLocalDataSource,
+                    userBookCacheGate = gate,
+                    userBookWriteLock = UserBookWriteLock(),
+                    networkAvailability = networkAvailability,
+                    applicationScope = ApplicationScope(scope = testScope),
+                ),
+                applicationScope = ApplicationScope(scope = testScope),
+                appDispatchers = appDispatchers,
+                progressHistoryLocalDataSource = progressHistoryLocalDataSource,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = any())
+            } returns null
+
+            coEvery {
+                progressHistoryLocalDataSource.insertPending(
+                    bookId = any(),
+                    actionAtEpochMillis = any(),
+                    pages = any(),
+                    seconds = any(),
+                    pagesRead = any(),
+                )
+            } returns 9L
+        }
+
+        @Test
+        fun `two writes on the same book reach the remote in the order they were made`() = runTest {
+            // ----- Arrange -----
+            val book = baseBook.copy(
+                userBook = baseBook.userBook.shouldNotBeNull().copy(
+                    status = BookStatus.Reading,
+                    reads = listOf(
+                        UserBookRead(
+                            id = 5,
+                            currentPage = 10,
+                            currentSeconds = null,
+                            progress = 0.1f,
+                            startedAt = "2026-01-01",
+                            finishedAt = null,
+                        ),
+                    ),
+                ),
+            )
+            val firstSendGate = CompletableDeferred<Book>()
+            val pagesReachingRemote = mutableListOf<Int?>()
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } coAnswers {
+                pagesReachingRemote += secondArg<Int?>()
+
+                if (pagesReachingRemote.size == 1) firstSendGate.await() else book
+            }
+
+            val first = async {
+                serializedRepository.updateBookProgress(
+                    book = book,
+                    newPage = 50,
+                )
+            }
+            runCurrent()
+            val second = async {
+                serializedRepository.updateBookProgress(
+                    book = book,
+                    newPage = 80,
+                )
+            }
+            runCurrent()
+            val pagesWhileFirstInFlight = pagesReachingRemote.toList()
+
+            // ----- Act -----
+            firstSendGate.complete(book)
+            first.await()
+            second.await()
+
+            // ----- Assert -----
+            pagesWhileFirstInFlight shouldBe listOf(50)
+            pagesReachingRemote shouldBe listOf(
+                50,
+                80,
+            )
         }
     }
 }

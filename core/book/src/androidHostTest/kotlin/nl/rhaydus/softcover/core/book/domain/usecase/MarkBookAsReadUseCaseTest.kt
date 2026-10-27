@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -37,7 +36,7 @@ class MarkBookAsReadUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `marks book as read then caches the updated book`() = runTest {
+        fun `marks book as read and returns Applied`() = runTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()
             val updatedBook = mockk<Book>()
@@ -61,10 +60,6 @@ class MarkBookAsReadUseCaseTest {
                 )
             } returns updatedBook
 
-            coJustRun {
-                repository.cacheBook(book = updatedBook)
-            }
-
             // ----- Act -----
             val result = useCase(inputBook)
 
@@ -77,7 +72,6 @@ class MarkBookAsReadUseCaseTest {
                     editionId = null,
                 )
             }
-            coVerify(exactly = 1) { repository.cacheBook(book = updatedBook) }
             coVerify(exactly = 1) { markReadingActivityUseCase(any()) }
         }
 
@@ -102,10 +96,6 @@ class MarkBookAsReadUseCaseTest {
                     editionId = editionId,
                 )
             } returns updatedBook
-
-            coJustRun {
-                repository.cacheBook(book = updatedBook)
-            }
 
             // ----- Act -----
             useCase(
@@ -150,10 +140,6 @@ class MarkBookAsReadUseCaseTest {
                 )
             } returns updatedBook
 
-            coJustRun {
-                repository.cacheBook(book = updatedBook)
-            }
-
             // ----- Act -----
             useCase(
                 book = inputBook,
@@ -197,10 +183,6 @@ class MarkBookAsReadUseCaseTest {
                 )
             } returns updatedBook
 
-            coJustRun {
-                repository.cacheBook(book = updatedBook)
-            }
-
             // ----- Act -----
             useCase(
                 book = inputBook,
@@ -242,46 +224,6 @@ class MarkBookAsReadUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
-            coVerify(exactly = 0) { repository.cacheBook(book = any()) }
-            coVerify(exactly = 0) { markReadingActivityUseCase(any()) }
-        }
-
-        @Test
-        fun `returns failure when cacheBook throws`() = runTest {
-            // ----- Arrange -----
-            val inputBook = mockk<Book>()
-            val updatedBook = mockk<Book>()
-            val expectedError = RuntimeException("cache error")
-
-            every {
-                inputBook.status
-            } returns BookStatus.Reading
-
-            every {
-                inputBook.userBook
-            } returns null
-
-            every {
-                inputBook.currentEdition
-            } returns null
-
-            coEvery {
-                repository.markBookAsRead(
-                    book = inputBook,
-                    editionId = null,
-                )
-            } returns updatedBook
-
-            coEvery {
-                repository.cacheBook(book = updatedBook)
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase(inputBook)
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe expectedError
             coVerify(exactly = 0) { markReadingActivityUseCase(any()) }
         }
 
@@ -315,10 +257,6 @@ class MarkBookAsReadUseCaseTest {
                 )
             } returns updatedBook
 
-            coJustRun {
-                repository.cacheBook(book = updatedBook)
-            }
-
             // ----- Act -----
             useCase(inputBook)
 
@@ -351,7 +289,6 @@ class MarkBookAsReadUseCaseTest {
                     any(),
                 )
             }
-            coVerify(exactly = 0) { repository.cacheBook(any()) }
             coVerify(exactly = 0) { markReadingActivityUseCase(any()) }
         }
     }

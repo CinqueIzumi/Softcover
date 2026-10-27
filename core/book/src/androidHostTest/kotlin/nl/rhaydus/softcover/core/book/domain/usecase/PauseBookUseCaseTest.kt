@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -29,7 +28,7 @@ class PauseBookUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `marks book as paused then caches the updated book`() = runTest {
+        fun `marks book as paused and returns Applied`() = runTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()
             val updatedBook = mockk<Book>()
@@ -53,10 +52,6 @@ class PauseBookUseCaseTest {
                 )
             } returns updatedBook
 
-            coJustRun {
-                booksRepository.cacheBook(book = updatedBook)
-            }
-
             // ----- Act -----
             val result = useCase(inputBook)
 
@@ -68,7 +63,6 @@ class PauseBookUseCaseTest {
                     editionId = null,
                 )
             }
-            coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
         }
 
         @Test
@@ -92,10 +86,6 @@ class PauseBookUseCaseTest {
                     editionId = editionId,
                 )
             } returns updatedBook
-
-            coJustRun {
-                booksRepository.cacheBook(book = updatedBook)
-            }
 
             // ----- Act -----
             useCase(
@@ -137,10 +127,6 @@ class PauseBookUseCaseTest {
                     editionId = 5,
                 )
             } returns updatedBook
-
-            coJustRun {
-                booksRepository.cacheBook(book = updatedBook)
-            }
 
             // ----- Act -----
             useCase(
@@ -187,10 +173,6 @@ class PauseBookUseCaseTest {
                 )
             } returns updatedBook
 
-            coJustRun {
-                booksRepository.cacheBook(book = updatedBook)
-            }
-
             // ----- Act -----
             useCase(inputBook)
 
@@ -204,7 +186,7 @@ class PauseBookUseCaseTest {
         }
 
         @Test
-        fun `returns failure and skips caching when markBookAsPaused throws`() = runTest {
+        fun `returns failure when markBookAsPaused throws`() = runTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()
             val expectedError = RuntimeException("network error")
@@ -226,44 +208,6 @@ class PauseBookUseCaseTest {
                     book = inputBook,
                     editionId = null,
                 )
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase(inputBook)
-
-            // ----- Assert -----
-            result.exceptionOrNull() shouldBe expectedError
-            coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
-        }
-
-        @Test
-        fun `returns failure when cacheBook throws`() = runTest {
-            // ----- Arrange -----
-            val inputBook = mockk<Book>()
-            val updatedBook = mockk<Book>()
-            val expectedError = RuntimeException("cache error")
-
-            every {
-                inputBook.status
-            } returns BookStatus.Reading
-
-            every {
-                inputBook.userBook
-            } returns null
-
-            every {
-                inputBook.currentEdition
-            } returns null
-
-            coEvery {
-                booksRepository.markBookAsPaused(
-                    book = inputBook,
-                    editionId = null,
-                )
-            } returns updatedBook
-
-            coEvery {
-                booksRepository.cacheBook(book = updatedBook)
             } throws expectedError
 
             // ----- Act -----
@@ -293,7 +237,6 @@ class PauseBookUseCaseTest {
                     editionId = any(),
                 )
             }
-            coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
     }
 }

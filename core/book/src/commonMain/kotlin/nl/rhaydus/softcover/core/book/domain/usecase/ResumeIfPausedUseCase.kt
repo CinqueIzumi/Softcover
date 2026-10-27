@@ -11,10 +11,6 @@ class ResumeIfPausedUseCase(
     suspend operator fun invoke(book: Book): Result<Book> = runCatchingLogged {
         if (book.status != BookStatus.Paused) return@runCatchingLogged book
 
-        val resumedBook: Book = booksRepository.markBookAsReading(book = book)
-
-        booksRepository.cacheBook(book = resumedBook)
-
-        resumedBook
+        booksRepository.markBookAsReading(book = book)
     }
 }

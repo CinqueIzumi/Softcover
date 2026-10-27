@@ -11,6 +11,8 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.common.runCatchingCancellable
+import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
@@ -23,6 +25,7 @@ import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
+import nl.rhaydus.softcover.core.book.domain.sync.QueuedWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
@@ -598,9 +601,7 @@ internal class BooksRepositoryImpl(
                     editionId = editionId,
                 )
             },
-        ).also { updated ->
-            cacheBook(book = updated)
-        }
+        )
     }
 
     override suspend fun markBookAsReading(
@@ -654,20 +655,27 @@ internal class BooksRepositoryImpl(
     }
 
     /**
-     * A book that already has a user book queues the change on offline or a transient failure; one without
-     * has no server id to queue against, so any failure rolls the optimistic write back.
+     * Writes ahead: the optimistic value and its queue row are durable before anything is sent, inside
+     * [OfflineUserBookSync.runSerialized] so a cancelled caller never abandons the write. A book without a
+     * user book has no server id to queue against, so [enqueue] is null and any failure rolls back.
      *
-     * Replay order relies on a queued status being unique per `(userBookId, kind)` (a newer write
+     * Replay order relies on a queued write being unique per `(userBookId, kind)` (a newer write
      * REPLACEs the older) and on replay reading the queue `ORDER BY enqueuedAt`.
      */
-    private suspend fun writeShelfChange(
+    @Suppress("LongParameterList")
+    private suspend fun writeUserBook(
         book: Book,
-        optimistic: Book,
         kind: PendingUserBookWriteKind,
-        enqueue: suspend () -> Unit,
-        remoteWrite: suspend () -> Book,
-    ): Book {
+        optimisticFrom: (snapshot: Book?) -> Book,
+        enqueue: (suspend (optimistic: Book) -> QueuedWrite)?,
+        remoteWrite: suspend (optimistic: Book) -> Book,
+        queueOnly: Boolean = false,
+        onOptimisticWritten: suspend () -> Unit = {},
+        onConfirmed: suspend () -> Unit = {},
+        onRolledBack: suspend () -> Unit = {},
+    ): Book = offlineSync.runSerialized(book.id) {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
+        val optimistic: Book = optimisticFrom(snapshot)
 
         if (optimistic !== book) {
             userBookCacheGate.cacheBook(
@@ -676,40 +684,96 @@ internal class BooksRepositoryImpl(
             )
         }
 
-        val isQueueable: Boolean = book.userBook != null
+        onOptimisticWritten()
 
-        if (isQueueable && networkAvailability.isOnline.value.not()) {
-            enqueue()
+        val queued: QueuedWrite? = runCatchingCancellable {
+            enqueue?.invoke(optimistic)
+        }.getOrElse { error ->
+            rollBack(
+                snapshot = snapshot,
+                onRolledBack = onRolledBack,
+            )
 
-            return optimistic
+            throw error
         }
 
-        return runCatching { remoteWrite() }.onSuccess { confirmed ->
-            userBookCacheGate.recordWrite(
-                book = confirmed,
-                kind = kind,
-            )
+        val staysQueued: Boolean = queued != null &&
+            (queueOnly || networkAvailability.isOnline.value.not() || offlineSync.hasOlderPending(queued))
+
+        if (staysQueued) {
+            offlineSync.retryLater()
+
+            return@runSerialized optimistic
+        }
+
+        val confirmed: Book = runCatching {
+            remoteWrite(optimistic)
         }.getOrElse { error ->
             when {
                 error is CancellationException -> throw error
 
-                isQueueable && error is RetryableSyncException -> {
+                error is RetryableSyncException && queued != null -> {
                     AppLog.w(
                         error,
-                        "Shelf change ($kind) hit a transient error; queued for retry",
+                        "User book write ($kind) hit a transient error; kept queued for retry",
                     )
 
-                    enqueue()
-                    optimistic
+                    offlineSync.retryLater()
+
+                    return@runSerialized optimistic
                 }
 
                 else -> {
-                    restoreOptimisticWrite(snapshot = snapshot)
+                    queued?.let { offlineSync.settle(it) }
+                    rollBack(
+                        snapshot = snapshot,
+                        onRolledBack = onRolledBack,
+                    )
+
                     throw error
                 }
             }
         }
+
+        runCatchingLogged(context = "Confirming user book write ($kind) failed locally") {
+            queued?.let { offlineSync.settle(it) }
+            userBookCacheGate.recordWrite(
+                book = confirmed,
+                kind = kind,
+            )
+            onConfirmed()
+
+            if (confirmed !== optimistic) cacheBook(book = confirmed)
+        }
+
+        confirmed
     }
+
+    private suspend fun rollBack(
+        snapshot: Book?,
+        onRolledBack: suspend () -> Unit,
+    ) {
+        restoreOptimisticWrite(snapshot = snapshot)
+        onRolledBack()
+    }
+
+    private suspend fun writeShelfChange(
+        book: Book,
+        optimistic: Book,
+        kind: PendingUserBookWriteKind,
+        enqueue: suspend () -> QueuedWrite,
+        remoteWrite: suspend () -> Book,
+    ): Book = writeUserBook(
+        book = book,
+        kind = kind,
+        optimisticFrom = { optimistic },
+        enqueue = if (book.userBook != null) {
+            { enqueue() }
+        } else {
+            null
+        },
+        remoteWrite = { remoteWrite() },
+    )
 
     override suspend fun updateBookRating(
         book: Book,
@@ -717,59 +781,27 @@ internal class BooksRepositoryImpl(
     ): Book {
         val userBook = book.userBook ?: throw Exception("User did not have a user book")
 
-        // Patch the rating onto the CURRENTLY cached book, not the caller-supplied [book]: a verdict
-        // saved right after finishing (Reading screen's finish → verdict prompt) hands us a pre-finish
-        // snapshot still marked Reading, and re-caching that would resurrect the book in the
-        // currently-reading list until the next refresh. Falling back to [book] only when uncached.
-        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val optimistic = (snapshot ?: book).withRating(rating = rating)
-        userBookCacheGate.cacheBook(
-            book = optimistic,
+        return writeUserBook(
+            book = book,
             kind = PendingUserBookWriteKind.UPDATE_RATING,
-        )
-
-        if (networkAvailability.isOnline.value) {
-            return runCatching {
+            // Patch the rating onto the CURRENTLY cached book, not the caller-supplied [book]: a verdict
+            // saved right after finishing (Reading screen's finish → verdict prompt) hands us a pre-finish
+            // snapshot still marked Reading, and re-caching that would resurrect the book in the
+            // currently-reading list until the next refresh. Falling back to [book] only when uncached.
+            optimisticFrom = { snapshot -> (snapshot ?: book).withRating(rating = rating) },
+            enqueue = { optimistic ->
+                offlineSync.enqueueRatingUpdate(
+                    book = optimistic,
+                    rating = rating,
+                )
+            },
+            remoteWrite = {
                 booksRemoteDataSource.updateBookRating(
                     userBook = userBook,
                     rating = rating,
                 )
-            }.onSuccess {
-                userBookCacheGate.recordWrite(
-                    book = optimistic,
-                    kind = PendingUserBookWriteKind.UPDATE_RATING,
-                )
-            }.getOrElse { error ->
-                when (error) {
-                    is CancellationException -> throw error
-
-                    is RetryableSyncException -> {
-                        AppLog.w(
-                            error,
-                            "Rating update hit a transient error; queued for retry",
-                        )
-
-                        offlineSync.enqueueRatingUpdate(
-                            book = optimistic,
-                            rating = rating,
-                        )
-                        optimistic
-                    }
-
-                    else -> {
-                        restoreOptimisticWrite(snapshot = snapshot)
-                        throw error
-                    }
-                }
-            }
-        }
-
-        offlineSync.enqueueRatingUpdate(
-            book = optimistic,
-            rating = rating,
+            },
         )
-
-        return optimistic
     }
 
     override suspend fun updateBookReview(
@@ -781,66 +813,32 @@ internal class BooksRepositoryImpl(
 
         val reviewedAt: String = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
-        // Patch the review onto the CURRENTLY cached book, not the caller-supplied [book]: a verdict
-        // saved right after finishing (Reading screen's finish → verdict prompt) hands us a pre-finish
-        // snapshot still marked Reading, and re-caching that would resurrect the book in the
-        // currently-reading list until the next refresh. Falling back to [book] only when uncached.
-        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val optimistic = (snapshot ?: book).withReview(
-            review = review,
-            hasSpoilers = hasSpoilers,
-        )
-        userBookCacheGate.cacheBook(
-            book = optimistic,
+        return writeUserBook(
+            book = book,
             kind = PendingUserBookWriteKind.UPDATE_REVIEW,
-        )
-
-        if (networkAvailability.isOnline.value) {
-            return runCatching {
+            // Patched onto the cached book for the same reason as in [updateBookRating].
+            optimisticFrom = { snapshot ->
+                (snapshot ?: book).withReview(
+                    review = review,
+                    hasSpoilers = hasSpoilers,
+                )
+            },
+            enqueue = { optimistic ->
+                offlineSync.enqueueReviewUpdate(
+                    book = optimistic,
+                    review = review,
+                    hasSpoilers = hasSpoilers,
+                )
+            },
+            remoteWrite = {
                 booksRemoteDataSource.updateBookReview(
                     userBook = userBook,
                     review = review,
                     hasSpoilers = hasSpoilers,
                     reviewedAt = reviewedAt,
                 )
-            }.onSuccess {
-                userBookCacheGate.recordWrite(
-                    book = optimistic,
-                    kind = PendingUserBookWriteKind.UPDATE_REVIEW,
-                )
-            }.getOrElse { error ->
-                when (error) {
-                    is CancellationException -> throw error
-
-                    is RetryableSyncException -> {
-                        AppLog.w(
-                            error,
-                            "Review update hit a transient error; queued for retry",
-                        )
-
-                        offlineSync.enqueueReviewUpdate(
-                            book = optimistic,
-                            review = review,
-                            hasSpoilers = hasSpoilers,
-                        )
-                        optimistic
-                    }
-
-                    else -> {
-                        restoreOptimisticWrite(snapshot = snapshot)
-                        throw error
-                    }
-                }
-            }
-        }
-
-        offlineSync.enqueueReviewUpdate(
-            book = optimistic,
-            review = review,
-            hasSpoilers = hasSpoilers,
+            },
         )
-
-        return optimistic
     }
 
     override suspend fun stageBookRemoval(books: List<Book>): StagedBookRemoval {
@@ -948,94 +946,57 @@ internal class BooksRepositoryImpl(
             throw Exception("Book did not contain a user book read")
         }
 
-        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val optimistic = book.withProgress(
-            newPage = newPage,
-            newSeconds = newSeconds,
-        )
-        userBookCacheGate.cacheBook(
-            book = optimistic,
-            kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
-        )
-
         val readAt: Instant = actionAt?.let { Instant.parse(it) } ?: Clock.System.now()
         val readAtIso = readAt.toString()
+        var historyId: Long? = null
 
-        val historyId = progressHistoryLocalDataSource.insertPending(
-            bookId = book.id,
-            actionAtEpochMillis = readAt.toEpochMilliseconds(),
-            pages = newPage,
-            seconds = newSeconds,
-            pagesRead = pagesReadBy(
-                before = book.currentRead?.currentPage,
-                after = newPage,
-            ),
-        )
-
-        // A placeholder read has no server id yet, so the write can only wait for replay to resolve one.
-        if (book.currentRead?.isPlaceholder == true) {
-            offlineSync.enqueueProgressUpdate(
-                book = optimistic,
-                newPage = newPage,
-                newSeconds = newSeconds,
-                actionAt = readAtIso,
-                progressHistoryId = historyId,
-            )
-
-            return optimistic
-        }
-
-        if (networkAvailability.isOnline.value) {
-            return runCatching {
+        return writeUserBook(
+            book = book,
+            kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+            optimisticFrom = {
+                book.withProgress(
+                    newPage = newPage,
+                    newSeconds = newSeconds,
+                )
+            },
+            // A placeholder read has no server id yet, so the write can only wait for replay to resolve one.
+            queueOnly = book.currentRead?.isPlaceholder == true,
+            onOptimisticWritten = {
+                historyId = progressHistoryLocalDataSource.insertPending(
+                    bookId = book.id,
+                    actionAtEpochMillis = readAt.toEpochMilliseconds(),
+                    pages = newPage,
+                    seconds = newSeconds,
+                    pagesRead = pagesReadBy(
+                        before = book.currentRead?.currentPage,
+                        after = newPage,
+                    ),
+                )
+            },
+            enqueue = { optimistic ->
+                offlineSync.enqueueProgressUpdate(
+                    book = optimistic,
+                    newPage = newPage,
+                    newSeconds = newSeconds,
+                    actionAt = readAtIso,
+                    progressHistoryId = historyId,
+                )
+            },
+            remoteWrite = {
                 booksRemoteDataSource.updateBookProgress(
                     book = book,
                     newPage = newPage,
                     newSeconds = newSeconds,
                     actionAt = readAtIso,
                 )
-            }.onSuccess {
-                userBookCacheGate.recordWrite(
-                    book = optimistic,
-                    kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
-                )
-                progressHistoryLocalDataSource.markSynced(localId = historyId)
-            }.getOrElse { error ->
-                when (error) {
-                    is CancellationException -> throw error
-
-                    is RetryableSyncException -> {
-                        AppLog.w(
-                            error,
-                            "Progress update hit a transient error; queued for retry",
-                        )
-
-                        offlineSync.enqueueProgressUpdate(
-                            book = optimistic,
-                            newPage = newPage,
-                            newSeconds = newSeconds,
-                            actionAt = readAtIso,
-                            progressHistoryId = historyId,
-                        )
-                        optimistic
-                    }
-
-                    else -> {
-                        restoreOptimisticWrite(snapshot = snapshot)
-                        progressHistoryLocalDataSource.delete(localId = historyId)
-                        throw error
-                    }
-                }
-            }
-        }
-
-        offlineSync.enqueueProgressUpdate(
-            book = optimistic,
-            newPage = newPage,
-            newSeconds = newSeconds,
-            actionAt = readAtIso,
-            progressHistoryId = historyId,
+            },
+            onConfirmed = {
+                historyId?.let { progressHistoryLocalDataSource.markSynced(localId = it) }
+            },
+            onRolledBack = {
+                historyId?.let { progressHistoryLocalDataSource.delete(localId = it) }
+            },
         )
-        return optimistic
     }
 
     override suspend fun markBookAsRead(

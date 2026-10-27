@@ -515,3 +515,12 @@ clone would fail to *configure* — `build-logic` is not in the foundation's `ma
   `**/jvmDesignPresetTest/**`.
 - **What to build:** a shared glob that covers any `*Test` source set (e.g. `**/*Test/**`); then drop
   Softcover's local `FunctionNaming` block.
+
+### F55 — `DefaultOfflineWriteDrainer` never deletes rows that reached `maxAttempts`
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:offline-sync`
+- **Status:** **Open.** Rows that hit the poison cap stay in the pending table forever, and an app's side
+  records tied to them (Softcover's user-book write records) stay pending.
+- **What to build:** delete such rows terminally, or expose a hook the app can use to settle its side records
+  when a row is dropped.

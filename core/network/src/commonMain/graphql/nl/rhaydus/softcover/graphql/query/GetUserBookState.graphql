@@ -1,0 +1,17 @@
+query GetUserBookState($bookId: Int!) {
+    me {
+        user_books(where: { book_id: { _eq: $bookId } }, limit: 1) {
+            id
+            status_id
+            rating
+            review_slate
+            review_has_spoilers
+            user_book_reads(order_by: { id: asc }) {
+                id
+                progress_pages
+                progress_seconds
+                finished_at
+            }
+        }
+    }
+}
