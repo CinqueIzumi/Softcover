@@ -39,7 +39,6 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHeader
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
@@ -166,10 +165,6 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             ratingsEmptyCaption = ratingsEmptyCaption(
                 booksRead = booksRead,
                 scope = scope,
-            ),
-            yearAtAGlanceHeader = yearAtAGlanceHeader(
-                scope = scope,
-                today = sections.today,
             ),
             timeOfDayCaption = timeOfDayCaption(
                 hourly = hourlyPages,

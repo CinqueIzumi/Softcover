@@ -1,11 +1,14 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen.section
 
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
+import nl.rhaydus.softcover.core.profile.domain.model.DailyPages
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
@@ -114,6 +117,23 @@ internal fun profileHourlyPagesPreview(): HourlyPages = HourlyPages(
         2_000, 1_800, 1_400, 2_100, 2_800, 4_600,
         6_900, 9_800, 14_200, 17_500, 12_100, 6_300,
     ),
+)
+
+/** The pages-read-per-day half of the same sample reader: a handful of days a week through the first ten months. */
+internal fun profileDailyPagesPreview(): DailyPages = DailyPages(
+    year = 2025,
+    pages = (0 until 300)
+        .filter { it % 7 != 0 && it % 5 != 0 }
+        .associate { dayOfYear ->
+            LocalDate(
+                year = 2025,
+                month = 1,
+                day = 1,
+            ).plus(
+                value = dayOfYear,
+                unit = DateTimeUnit.DAY,
+            ) to 12 + (dayOfYear * 37) % 140
+        },
 )
 
 /** The [ReadingHistory] half of the same sample reader. */

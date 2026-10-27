@@ -10,6 +10,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
@@ -18,6 +19,7 @@ import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
+import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasScreenModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import org.koin.compose.koinInject
@@ -32,6 +34,21 @@ class StatsAtlasScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
 
         val prefetcher = rememberBookDetailPrefetcher()
+
+        val appNavigator = koinInject<AppNavigator>()
+
+        ObserveAsEvents(flow = screenModel.events) {
+            when (it) {
+                is StatsAtlasEvent.OpenBookDetail -> {
+                    val destination = ScreenDestination.BookDetail(
+                        id = it.bookId,
+                        initialCover = it.initialCover,
+                    )
+
+                    navigator.push(item = appNavigator.screen(destination))
+                }
+            }
+        }
 
         CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
             StatsAtlasScreenLayout(

@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasProfileDataCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasScopeChipsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.AtlasScopedSectionsCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.DayDetailCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.GenreRankingCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.HideUntaggedAuthorsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollector
@@ -17,6 +18,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingSummar
 import nl.rhaydus.softcover.feature.profile.presentation.collector.RecentlyLovedCardsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.StatsAtlasCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.UserInformationCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.YearGridCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.YearHistoryCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.YearMetricToggleCollector
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileScreenScreenModel
@@ -61,6 +63,8 @@ val profileScreenModule = module {
             observeReadingStatsUseCase = get(),
             observeMonthlyPagesReadUseCase = get(),
             observeHourlyPagesReadUseCase = get(),
+            observeDailyPagesReadUseCase = get(),
+            observeReadingDayUseCase = get(),
             observeReadingHistoryUseCase = get(),
             observeReadingStatsBackfilledUseCase = get(),
             getHideUntaggedAuthorsAsFlowUseCase = get(),
@@ -78,4 +82,6 @@ val profileScreenModule = module {
     factory { YearMetricToggleCollector() } bind StatsAtlasCollector::class
     factory { YearHistoryCollector() } bind StatsAtlasCollector::class
     factory { GenreRankingCollector() } bind StatsAtlasCollector::class
+    factory { YearGridCollector() } bind StatsAtlasCollector::class
+    factory { DayDetailCollector() } bind StatsAtlasCollector::class
 }

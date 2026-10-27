@@ -1,18 +1,21 @@
 package nl.rhaydus.softcover.feature.profile.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
+import nl.rhaydus.softcover.core.component.chart.YearGridUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadSubtitle
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.StatsScope
@@ -52,6 +55,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingMonthlyPa
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingTimeOfDayCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingTimeOfDayChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingYearAtAGlanceHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingYearGrid
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
@@ -141,8 +145,13 @@ internal data class StatsAtlasUiState(
 
     val ratingsEmptyCaption: String = ratingsEmptyCaption(booksRead = 0),
 
-    /** Mapped by `AtlasScopedSectionsCollector`. */
+    /** Mapped by `YearGridCollector`, which keys both to the atlas year. */
     val yearAtAGlanceHeader: SectionHeaderUiModel = loadingYearAtAGlanceHeader(),
+    val yearGrid: YearGridUiModel = loadingYearGrid(),
+    val selectedReadingDay: LocalDate? = null,
+
+    /** Mapped by `DayDetailCollector` off [selectedReadingDay]; a row's book rides along as the pending intent. */
+    val dayDetailSheet: SheetSession<DayDetailUiModel, DayDetailBook> = SheetSession.Closed,
     val timeOfDayTitle: String = TIME_OF_DAY_TITLE,
     val timeOfDayCaption: String = loadingTimeOfDayCaption(),
     val timeOfDayChart: ColumnChartUiModel = loadingTimeOfDayChartUiModel(),

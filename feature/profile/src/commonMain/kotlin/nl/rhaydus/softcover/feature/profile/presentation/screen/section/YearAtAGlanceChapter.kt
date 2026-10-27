@@ -6,30 +6,48 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.component.chart.ColumnChart
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
+import nl.rhaydus.softcover.core.component.chart.YearGrid
+import nl.rhaydus.softcover.core.component.chart.YearGridEvent
+import nl.rhaydus.softcover.core.component.chart.YearGridUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
-/**
- * The chapter under its [header]: the share of pages read in each three-hour block of the day. The chart
- * does not cross-fade, because its labels are the same in every scope and only the bars move. When
- * [hasTimeOfDayPages] is false the chart is dropped and [caption] says why.
- */
+/** The time-of-day chart does not cross-fade, because its labels are the same in every scope and only the bars move. */
 @Composable
 internal fun YearAtAGlanceChapter(
     header: SectionHeaderUiModel,
     title: String,
     caption: String,
     chart: ColumnChartUiModel,
+    yearGrid: YearGridUiModel,
+    onDayTapped: (LocalDate) -> Unit,
     footnote: String,
     hasTimeOfDayPages: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         ScopedSectionHeader(header = header)
+
+        Spacer(modifier = Modifier.height(Spacing.md))
+
+        ScopeCrossfade(
+            target = yearGrid,
+            contentKey = { it.year },
+        ) { grid ->
+            YearGrid(
+                model = grid,
+                onEvent = { event ->
+                    when (event) {
+                        is YearGridEvent.DayTapped -> onDayTapped(event.date)
+                    }
+                },
+            )
+        }
 
         Spacer(modifier = Modifier.height(Spacing.xl))
 

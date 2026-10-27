@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnGenreRankingShowLessAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnGenreRankingShowMoreAction
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnReadingDayTappedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnScopeSelectedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
 import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
@@ -61,6 +62,10 @@ internal fun ColumnScope.StatsAtlasBody(
             title = state.timeOfDayTitle,
             caption = state.timeOfDayCaption,
             chart = state.timeOfDayChart,
+            yearGrid = state.yearGrid,
+            onDayTapped = { date ->
+                runAction(OnReadingDayTappedAction(date = date))
+            },
             footnote = state.timeOfDayFootnote,
             hasTimeOfDayPages = state.hasTimeOfDayPages,
         )

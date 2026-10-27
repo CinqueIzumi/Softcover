@@ -67,18 +67,16 @@ class YearAtAGlanceMapperTest {
     @Nested
     inner class YearAtAGlanceHeaderMapping {
         @Test
-        fun `describes the days of the selected calendar year`() {
+        fun `describes the days of the given year`() {
             // ----- Arrange -----
-            val scope = StatsScope.CalendarYear(2023)
+            val year = 2023
 
             // ----- Act -----
-            val result = yearAtAGlanceHeader(
-                scope = scope,
-                today = today,
-            )
+            val result = yearAtAGlanceHeader(year = year)
 
             // ----- Assert -----
-            result.description?.joinToString(separator = "") { it.text }.shouldNotBeNull() shouldContain "a day of 2023"
+            val text = result.description.shouldNotBeNull().joinToString(separator = "") { it.text }
+            text shouldContain "a day of 2023"
         }
     }
 }

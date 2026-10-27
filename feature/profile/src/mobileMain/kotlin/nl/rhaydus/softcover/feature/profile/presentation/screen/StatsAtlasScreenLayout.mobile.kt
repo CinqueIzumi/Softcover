@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SchemeBrightnes
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.DayDetailSheet
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.StatsAtlasBody
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.rememberAtlasChapterJumper
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
@@ -71,6 +72,11 @@ internal actual fun StatsAtlasScreenLayout(
             Spacer(modifier = Modifier.height(Spacing.xl))
         }
     }
+
+    DayDetailSheet(
+        session = state.dayDetailSheet,
+        runAction = runAction,
+    )
 }
 
 @StandardPreview

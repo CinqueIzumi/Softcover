@@ -27,6 +27,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUi
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearGrid
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileDailyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileHourlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileMonthlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingHistoryPreview
@@ -62,10 +64,8 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
         yearsRead = PreviewReadingHistory.yearsRead,
         selectedKey = ALL_TIME_SCOPE_KEY,
     ),
-    yearAtAGlanceHeader = yearAtAGlanceHeader(
-        scope = StatsScope.AllTime,
-        today = PreviewToday,
-    ),
+    yearAtAGlanceHeader = yearAtAGlanceHeader(year = PreviewToday.year),
+    yearGrid = yearGrid(profileDailyPagesPreview()),
     timeOfDayCaption = timeOfDayCaption(
         hourly = PreviewHourlyPages,
         scope = StatsScope.AllTime,

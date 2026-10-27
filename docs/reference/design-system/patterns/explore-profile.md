@@ -35,11 +35,25 @@
   chapter opens with an eyebrow "02 · Title". Numbers are fixed per chapter (01, 02, 03 and 99), following the
   design's chapter list rather than position, so row and header always agree; the other chapters land with
   later 3.3.0 issues.
-- A stat the app holds no data source for yet (reading days) is left out, never a 0.
+- A stat the app holds no data source for yet is left out, never a 0.
 - Chapter 01, "A year at a glance" (caption "Every day you read, and when."), opens with the header "Day by
   day" ("Each square is a day of 2026. Darker days held more pages. Tap one to see what you read."; the year
-  is the selected calendar year, else today's), which describes the day grid that lands ahead of its first
-  section. That section, "When you read", is a scoped `ColumnChart` of the share of pages read in each
+  is the selected calendar year, else today's), which describes the day grid under it. The grid is a
+  `YearGrid` of the atlas year: twelve month rows, one square per day, tinted in four steps by quartiles of
+  that year's reading days (days with equal pages share a step; with fewer than four reading days, or all
+  equal, every read day is the darkest), with a "Fewer pages" to "More" key and future days left empty. It
+  fades only when the year changes; the scope otherwise does not move it. A read day is tappable and reads
+  out like "14 April, 62 pages". Tapping one opens a day-detail sheet with no haptic: the eyebrow is the date
+  ("Tuesday 14 April", with the year only when it is not the current one) and the headline the total ("62
+  pages across 2 books"). Each book is a compact row (cover, title, a neutral badge with its pages that day)
+  captioned with its pages and that book's update times as 24-hour clock times: "Pages 175 to 388 · 1 update
+  at 14:41", "Pages 112 to 158 · 3 updates, 09:10 to 22:40" ("2 updates at 14:41" when the first and last
+  share a minute), "Up to page 40 · 1 update at 08:05" when it started at page 0, with " · finished" added
+  for a book finished that day ("Pages 380 to 412 · finished" when only its unlogged remainder fell on the
+  day, with no time). A book no longer in the library is one untappable coverless row, "A book no longer in
+  your library". "Done" closes the sheet; tapping a
+  row closes it first and then opens that book's detail. A sync that empties the day closes the sheet. The
+  first section, "When you read", is a scoped `ColumnChart` of the share of pages read in each
   three-hour block of the day, with the footnote "Each column covers three hours from the time shown.". Pages
   are the logged progress updates summed by local hour; a finished book's unlogged remainder has no time of
   day and is left out. Eight blocks start at 06 and are labelled "06" to "03". The busiest block is `Lead`,
