@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
  * ([listsRepository]). Re-emits as either changes, so a rail filtering by it drops a book the moment it is
  * shelved or listed.
  */
-class ObserveOwnedBookIdsUseCase(
+class ObserveOwnedBookIdsUseCase internal constructor(
     private val booksRepository: BooksRepository,
     private val listsRepository: ListsRepository,
 ) {

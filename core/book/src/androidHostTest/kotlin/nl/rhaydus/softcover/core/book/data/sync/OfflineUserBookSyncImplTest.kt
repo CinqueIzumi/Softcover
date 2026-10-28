@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.book.data.sync
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -20,9 +21,12 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.FakeUserTagsLocalDataSource
+import nl.rhaydus.softcover.core.book.domain.model.UserBooksSnapshot
 import nl.rhaydus.softcover.core.database.mapper.toJson
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteLock
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -51,7 +55,10 @@ class OfflineUserBookSyncImplTest {
         userBookWriteQueue = mockk(relaxed = true)
         userBookWriteDrainer = mockk(relaxed = true)
         booksLocalDataSource = mockk(relaxed = true)
-        userBookCacheGate = UserBookCacheGate(booksLocalDataSource = booksLocalDataSource)
+        userBookCacheGate = UserBookCacheGate(
+            booksLocalDataSource = booksLocalDataSource,
+            userTagsLocalDataSource = FakeUserTagsLocalDataSource(),
+        )
         networkAvailability = mockk()
         isOnline = MutableStateFlow(true)
 
@@ -73,6 +80,7 @@ class OfflineUserBookSyncImplTest {
         userBookWriteDrainer = userBookWriteDrainer,
         booksLocalDataSource = booksLocalDataSource,
         userBookCacheGate = userBookCacheGate,
+        userBookWriteLock = UserBookWriteLock(),
         networkAvailability = networkAvailability,
         applicationScope = ApplicationScope(scope = scope),
     )
@@ -80,7 +88,12 @@ class OfflineUserBookSyncImplTest {
     private suspend fun OfflineUserBookSyncImpl.drainAndReconcile(
         fetchFromServer: suspend () -> List<Book>,
     ): List<Book> = drainReconcileAndCache(
-        fetchFromServer = fetchFromServer,
+        fetchFromServer = {
+            UserBooksSnapshot(
+                books = fetchFromServer(),
+                userTagsByBookId = emptyMap(),
+            )
+        },
         selectBooksToCache = { it },
     )
 
@@ -175,8 +188,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
+                userBookWriteQueue.append(
+                    write = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_PROGRESS &&
                             write.userBookId == 10 &&
                             write.userBookReadId == 20 &&
@@ -207,8 +220,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
+                userBookWriteQueue.append(
+                    write = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_PROGRESS &&
                             write.progressHistoryId == 77L
                     },
@@ -233,14 +246,14 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                userBookWriteQueue.enqueue(
-                    payload = match { write -> write.progressHistoryId == null },
+                userBookWriteQueue.append(
+                    write = match { write -> write.progressHistoryId == null },
                 )
             }
         }
 
         @Test
-        fun `book with no userBook — enqueue is not called`() = runTest {
+        fun `book with no userBook — throws IllegalStateException and enqueues nothing`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {
                 every {
@@ -252,19 +265,20 @@ class OfflineUserBookSyncImplTest {
                 } returns stubUserBookRead(id = 1)
             }
 
-            // ----- Act -----
-            syncImpl.enqueueProgressUpdate(
-                book = book,
-                newPage = 10,
-                newSeconds = null,
-            )
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> {
+                syncImpl.enqueueProgressUpdate(
+                    book = book,
+                    newPage = 10,
+                    newSeconds = null,
+                )
+            }
 
-            // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
+            coVerify(exactly = 0) { userBookWriteQueue.append(write = any()) }
         }
 
         @Test
-        fun `book with no userBookRead — enqueue is not called`() = runTest {
+        fun `book with no userBookRead — throws IllegalStateException and enqueues nothing`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {
                 every {
@@ -276,15 +290,16 @@ class OfflineUserBookSyncImplTest {
                 } returns null
             }
 
-            // ----- Act -----
-            syncImpl.enqueueProgressUpdate(
-                book = book,
-                newPage = 10,
-                newSeconds = null,
-            )
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> {
+                syncImpl.enqueueProgressUpdate(
+                    book = book,
+                    newPage = 10,
+                    newSeconds = null,
+                )
+            }
 
-            // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
+            coVerify(exactly = 0) { userBookWriteQueue.append(write = any()) }
         }
 
         @Test
@@ -313,8 +328,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
+                userBookWriteQueue.append(
+                    write = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_PROGRESS &&
                             write.userBookReadId == -10 &&
                             write.startedAt == null &&
@@ -350,8 +365,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
+                userBookWriteQueue.append(
+                    write = match { write ->
                         write.userBookReadId == 20 && write.startedAt == "2026-07-21"
                     },
                 )
@@ -385,8 +400,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
+                userBookWriteQueue.append(
+                    write = match { write ->
                         write.kind == PendingUserBookWriteKind.MARK_AS_READ &&
                             write.userBookId == 10 &&
                             write.userBookReadId == 20 &&
@@ -399,7 +414,7 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `book with no userBook — enqueue is not called`() = runTest {
+        fun `book with no userBook — throws IllegalStateException and enqueues nothing`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {
                 every {
@@ -411,15 +426,16 @@ class OfflineUserBookSyncImplTest {
                 } returns stubUserBookRead(id = 1)
             }
 
-            // ----- Act -----
-            syncImpl.enqueueMarkAsRead(book = book)
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> {
+                syncImpl.enqueueMarkAsRead(book = book)
+            }
 
-            // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
+            coVerify(exactly = 0) { userBookWriteQueue.append(write = any()) }
         }
 
         @Test
-        fun `book with no userBookRead — enqueue is not called`() = runTest {
+        fun `book with no userBookRead — enqueues MARK_AS_READ with read id 0 and null read fields`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {
                 every {
@@ -435,7 +451,19 @@ class OfflineUserBookSyncImplTest {
             syncImpl.enqueueMarkAsRead(book = book)
 
             // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
+            coVerify {
+                userBookWriteQueue.append(
+                    write = match { write ->
+                        write.kind == PendingUserBookWriteKind.MARK_AS_READ &&
+                            write.userBookId == 5 &&
+                            write.userBookReadId == 0 &&
+                            write.progressPages == null &&
+                            write.progressSeconds == null &&
+                            write.startedAt == null &&
+                            write.finishedAt == null
+                    },
+                )
+            }
         }
     }
 
@@ -458,8 +486,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
+                userBookWriteQueue.append(
+                    write = match { write ->
                         write.kind == PendingUserBookWriteKind.SET_STATUS &&
                             write.userBookId == 10 &&
                             write.bookId == book.id &&
@@ -484,8 +512,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
+                userBookWriteQueue.append(
+                    write = match { write ->
                         write.kind == PendingUserBookWriteKind.SET_STATUS &&
                             write.userBookReadId == 0 &&
                             write.statusCode == UserBookStatus.WANT_TO_READ.code
@@ -495,18 +523,19 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `book with no userBook — enqueue is not called`() = runTest {
+        fun `book with no userBook — throws IllegalStateException and enqueues nothing`() = runTest {
             // ----- Arrange -----
             val book = stubBook(userBook = null)
 
-            // ----- Act -----
-            syncImpl.enqueueStatusUpdate(
-                book = book,
-                status = UserBookStatus.CURRENTLY_READING,
-            )
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> {
+                syncImpl.enqueueStatusUpdate(
+                    book = book,
+                    status = UserBookStatus.CURRENTLY_READING,
+                )
+            }
 
-            // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
+            coVerify(exactly = 0) { userBookWriteQueue.append(write = any()) }
         }
     }
 
@@ -529,8 +558,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
+                userBookWriteQueue.append(
+                    write = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_RATING &&
                             write.userBookId == 10 &&
                             write.userBookReadId == 20 &&
@@ -556,8 +585,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
+                userBookWriteQueue.append(
+                    write = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_RATING &&
                             write.userBookReadId == 0 &&
                             write.rating == 3.0
@@ -567,7 +596,7 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `book with no userBook — enqueue is not called`() = runTest {
+        fun `book with no userBook — throws IllegalStateException and enqueues nothing`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {
                 every {
@@ -575,14 +604,15 @@ class OfflineUserBookSyncImplTest {
                 } returns null
             }
 
-            // ----- Act -----
-            syncImpl.enqueueRatingUpdate(
-                book = book,
-                rating = 5.0,
-            )
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> {
+                syncImpl.enqueueRatingUpdate(
+                    book = book,
+                    rating = 5.0,
+                )
+            }
 
-            // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
+            coVerify(exactly = 0) { userBookWriteQueue.append(write = any()) }
         }
     }
 
@@ -613,8 +643,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
+                userBookWriteQueue.append(
+                    write = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_REVIEW &&
                             write.userBookId == 10 &&
                             write.userBookReadId == 20 &&
@@ -642,8 +672,8 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Assert -----
             coVerify {
-                userBookWriteQueue.enqueue(
-                    payload = match { write ->
+                userBookWriteQueue.append(
+                    write = match { write ->
                         write.kind == PendingUserBookWriteKind.UPDATE_REVIEW &&
                             write.userBookReadId == 0 &&
                             write.reviewSlateJson == review.toJson() &&
@@ -654,7 +684,7 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `book with no userBook — enqueue is not called`() = runTest {
+        fun `book with no userBook — throws IllegalStateException and enqueues nothing`() = runTest {
             // ----- Arrange -----
             val book = mockk<Book>(relaxed = true) {
                 every {
@@ -662,15 +692,16 @@ class OfflineUserBookSyncImplTest {
                 } returns null
             }
 
-            // ----- Act -----
-            syncImpl.enqueueReviewUpdate(
-                book = book,
-                review = review,
-                hasSpoilers = false,
-            )
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> {
+                syncImpl.enqueueReviewUpdate(
+                    book = book,
+                    review = review,
+                    hasSpoilers = false,
+                )
+            }
 
-            // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteQueue.enqueue(payload = any()) }
+            coVerify(exactly = 0) { userBookWriteQueue.append(write = any()) }
         }
     }
 
@@ -1747,33 +1778,12 @@ class OfflineUserBookSyncImplTest {
         private fun bookWithUserBook(): Book = stubBook(userBook = stubUserBook(id = retryHintsUserBookId))
 
         @Test
-        fun `an enqueue while online drains once after the first delay and not before`() = runTest {
+        fun `an enqueue alone schedules no drain`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
-
-            // ----- Act -----
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 4.0,
-            )
-            advanceBy(millis = 29_999)
-
-            // ----- Assert -----
-            coVerify(exactly = 0) { userBookWriteDrainer.drain() }
-
-            advanceBy(millis = 1)
-
-            coVerify(exactly = 1) { userBookWriteDrainer.drain() }
-        }
-
-        @Test
-        fun `an enqueue while offline schedules no retry`() = runTest {
-            // ----- Arrange -----
-            val impl = createSyncImpl(scope = backgroundScope)
-            isOnline.value = false
 
             // ----- Act -----
             impl.enqueueRatingUpdate(
@@ -1795,10 +1805,7 @@ class OfflineUserBookSyncImplTest {
             } returns emptyMap()
 
             // ----- Act -----
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 4.0,
-            )
+            impl.retryLater()
             isOnline.value = false
             advanceBy(millis = 30_000)
 
@@ -1820,10 +1827,7 @@ class OfflineUserBookSyncImplTest {
             } returns emptyMap()
 
             // ----- Act -----
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 4.0,
-            )
+            impl.retryLater()
             advanceBy(millis = 1_000_000)
 
             // ----- Assert -----
@@ -1831,23 +1835,17 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `a second enqueue restarts the schedule so the first retry waits a full first delay from it`() = runTest {
+        fun `a second retryLater restarts the schedule so the first retry waits a full first delay from it`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 4.0,
-            )
+            impl.retryLater()
             advanceBy(millis = 20_000)
 
             // ----- Act -----
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 5.0,
-            )
+            impl.retryLater()
             advanceBy(millis = 10_000)
 
             // ----- Assert -----
@@ -1869,17 +1867,11 @@ class OfflineUserBookSyncImplTest {
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 4.0,
-            )
+            impl.retryLater()
             advanceBy(millis = 20_000)
 
             // ----- Act -----
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 5.0,
-            )
+            impl.retryLater()
             advanceBy(millis = 1_000_000)
 
             // ----- Assert -----
@@ -1898,17 +1890,11 @@ class OfflineUserBookSyncImplTest {
                 completedDrains++
                 emptyMap()
             }
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 4.0,
-            )
+            impl.retryLater()
             advanceBy(millis = 32_000)
 
             // ----- Act -----
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 5.0,
-            )
+            impl.retryLater()
             advanceBy(millis = 3_000)
 
             // ----- Assert -----
@@ -1927,10 +1913,7 @@ class OfflineUserBookSyncImplTest {
             } returns false
 
             // ----- Act -----
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 4.0,
-            )
+            impl.retryLater()
             advanceBy(millis = 1_000_000)
 
             // ----- Assert -----
@@ -1949,10 +1932,7 @@ class OfflineUserBookSyncImplTest {
             } returnsMany listOf(true, false)
 
             // ----- Act -----
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 4.0,
-            )
+            impl.retryLater()
             advanceBy(millis = 1_000_000)
 
             // ----- Assert -----
@@ -1960,7 +1940,7 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `concurrent enqueues produce a single schedule`() = runTest(StandardTestDispatcher()) {
+        fun `concurrent retryLater calls produce a single schedule`() = runTest(StandardTestDispatcher()) {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
             coEvery {
@@ -1969,16 +1949,10 @@ class OfflineUserBookSyncImplTest {
 
             // ----- Act -----
             launch {
-                impl.enqueueRatingUpdate(
-                    book = bookWithUserBook(),
-                    rating = 4.0,
-                )
+                impl.retryLater()
             }
             launch {
-                impl.enqueueRatingUpdate(
-                    book = bookWithUserBook(),
-                    rating = 5.0,
-                )
+                impl.retryLater()
             }
             runCurrent()
             advanceBy(millis = 30_000)
@@ -1992,23 +1966,17 @@ class OfflineUserBookSyncImplTest {
         }
 
         @Test
-        fun `an enqueue after the loop has finished starts a fresh loop`() = runTest {
+        fun `a retryLater after the loop has finished starts a fresh loop`() = runTest {
             // ----- Arrange -----
             val impl = createSyncImpl(scope = backgroundScope)
             coEvery {
                 userBookWriteDrainer.drain()
             } returns emptyMap()
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 4.0,
-            )
+            impl.retryLater()
             advanceBy(millis = 1_000_000)
 
             // ----- Act -----
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 5.0,
-            )
+            impl.retryLater()
             advanceBy(millis = 30_000)
 
             // ----- Assert -----
@@ -2024,10 +1992,7 @@ class OfflineUserBookSyncImplTest {
             } throws IllegalStateException("boom")
 
             // ----- Act -----
-            impl.enqueueRatingUpdate(
-                book = bookWithUserBook(),
-                rating = 4.0,
-            )
+            impl.retryLater()
             advanceBy(millis = 1_000_000)
 
             // ----- Assert -----
@@ -2056,10 +2021,7 @@ class OfflineUserBookSyncImplTest {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
 
-            impl.enqueueStatusUpdate(
-                book = localBook,
-                status = UserBookStatus.PAUSED,
-            )
+            impl.retryLater()
             advanceBy(millis = 30_000)
 
             // ----- Act -----
@@ -2098,10 +2060,7 @@ class OfflineUserBookSyncImplTest {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
 
-            impl.enqueueStatusUpdate(
-                book = localBook,
-                status = UserBookStatus.PAUSED,
-            )
+            impl.retryLater()
             advanceBy(millis = 30_000)
 
             // ----- Act -----
@@ -2141,10 +2100,7 @@ class OfflineUserBookSyncImplTest {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localBook))
 
-            impl.enqueueStatusUpdate(
-                book = localBook,
-                status = UserBookStatus.PAUSED,
-            )
+            impl.retryLater()
             advanceBy(millis = 120_000)
 
             // ----- Act -----
@@ -2184,10 +2140,7 @@ class OfflineUserBookSyncImplTest {
                 booksLocalDataSource.allUserBooks
             } returns flowOf(listOf(localRetryBook, localDrainBook))
 
-            impl.enqueueStatusUpdate(
-                book = localRetryBook,
-                status = UserBookStatus.PAUSED,
-            )
+            impl.retryLater()
             advanceBy(millis = 30_000)
 
             // ----- Act -----
@@ -2425,6 +2378,260 @@ class OfflineUserBookSyncImplTest {
             val reconciled = result.single().userBook.shouldNotBeNull()
             reconciled.status shouldBe BookStatus.Read
             reconciled.reads.first { it.id == 30 }.finishedAt shouldBe "2026-02-02"
+        }
+    }
+
+    @Nested
+    inner class LostWrites {
+        private fun bookWithPage(
+            userBookId: Int,
+            page: Int,
+        ): Book = stubBook(
+            userBook = stubUserBook(id = userBookId).copy(
+                reads = listOf(
+                    stubUserBookRead(
+                        id = userBookId,
+                        currentPage = page,
+                    ),
+                ),
+            ),
+        )
+
+        @Test
+        fun `a progress write still in the queue keeps the local page when the drain returned no synced hints`() = runTest {
+            // ----- Arrange -----
+            val local = bookWithPage(
+                userBookId = 77,
+                page = 80,
+            )
+            val fetched = bookWithPage(
+                userBookId = 77,
+                page = 10,
+            )
+            coEvery {
+                userBookWriteDrainer.drain()
+            } returns emptyMap()
+            coEvery {
+                userBookWriteQueue.pendingKindsByUserBook()
+            } returns mapOf(77 to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS))
+            every {
+                booksLocalDataSource.allUserBooks
+            } returns flowOf(listOf(local))
+
+            // ----- Act -----
+            val result = syncImpl.drainAndReconcile(fetchFromServer = { listOf(fetched) })
+
+            // ----- Assert -----
+            result.single().userBook.shouldNotBeNull().reads.single().currentPage shouldBe 80
+        }
+
+        @Test
+        fun `a book with no queued row takes the fetched page while a queued book keeps its local one`() = runTest {
+            // ----- Arrange -----
+            val localQueued = bookWithPage(
+                userBookId = 77,
+                page = 80,
+            )
+            val localUnqueued = bookWithPage(
+                userBookId = 78,
+                page = 90,
+            )
+            val fetchedQueued = bookWithPage(
+                userBookId = 77,
+                page = 10,
+            )
+            val fetchedUnqueued = bookWithPage(
+                userBookId = 78,
+                page = 20,
+            )
+            coEvery {
+                userBookWriteDrainer.drain()
+            } returns emptyMap()
+            coEvery {
+                userBookWriteQueue.pendingKindsByUserBook()
+            } returns mapOf(77 to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS))
+            every {
+                booksLocalDataSource.allUserBooks
+            } returns flowOf(listOf(localQueued, localUnqueued))
+
+            // ----- Act -----
+            val result = syncImpl.drainAndReconcile(fetchFromServer = { listOf(fetchedQueued, fetchedUnqueued) })
+
+            // ----- Assert -----
+            val pagesByUserBookId: Map<Int, Int?> = result.associate { book ->
+                val userBook = book.userBook.shouldNotBeNull()
+
+                userBook.id to userBook.reads.single().currentPage
+            }
+            pagesByUserBookId shouldBe mapOf(77 to 80, 78 to 20)
+        }
+
+        @Test
+        fun `a queued rating keeps the local rating but not the local page`() = runTest {
+            // ----- Arrange -----
+            val local = bookWithPage(
+                userBookId = 77,
+                page = 80,
+            ).let { book ->
+                book.copy(userBook = book.userBook.shouldNotBeNull().copy(rating = 5.0))
+            }
+            val fetched = bookWithPage(
+                userBookId = 77,
+                page = 10,
+            ).let { book ->
+                book.copy(userBook = book.userBook.shouldNotBeNull().copy(rating = 2.0))
+            }
+            coEvery {
+                userBookWriteDrainer.drain()
+            } returns emptyMap()
+            coEvery {
+                userBookWriteQueue.pendingKindsByUserBook()
+            } returns mapOf(77 to setOf(PendingUserBookWriteKind.UPDATE_RATING))
+            every {
+                booksLocalDataSource.allUserBooks
+            } returns flowOf(listOf(local))
+
+            // ----- Act -----
+            val result = syncImpl.drainAndReconcile(fetchFromServer = { listOf(fetched) })
+
+            // ----- Assert -----
+            val userBook = result.single().userBook.shouldNotBeNull()
+            userBook.rating shouldBe 5.0
+            userBook.reads.single().currentPage shouldBe 10
+        }
+    }
+
+    @Nested
+    inner class QueuedWrites {
+        @Test
+        fun `enqueue returns the local id the queue appended together with the written payload`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(userBook = stubUserBook(id = 10))
+            coEvery {
+                userBookWriteQueue.append(write = any())
+            } returns 42L
+
+            // ----- Act -----
+            val queued = syncImpl.enqueueRatingUpdate(
+                book = book,
+                rating = 4.0,
+            )
+
+            // ----- Assert -----
+            queued.localId shouldBe 42L
+            queued.write.kind shouldBe PendingUserBookWriteKind.UPDATE_RATING
+            queued.write.userBookId shouldBe 10
+            queued.write.rating shouldBe 4.0
+        }
+    }
+
+    @Nested
+    inner class RunSerialized {
+        @Test
+        fun `returns the value the block produced`() = runTest {
+            // ----- Arrange -----
+            val impl = createSyncImpl(scope = backgroundScope)
+
+            // ----- Act -----
+            val result = impl.runSerialized(bookId = 1) { "done" }
+
+            // ----- Assert -----
+            result shouldBe "done"
+        }
+
+        @Test
+        fun `the block still completes when the caller is cancelled mid-block`() = runTest {
+            // ----- Arrange -----
+            val impl = createSyncImpl(scope = backgroundScope)
+            val started = CompletableDeferred<Unit>()
+            val release = CompletableDeferred<Unit>()
+            var completed = false
+            val caller = launch {
+                impl.runSerialized(bookId = 1) {
+                    started.complete(Unit)
+                    release.await()
+                    completed = true
+                }
+            }
+            runCurrent()
+            started.isCompleted shouldBe true
+
+            // ----- Act -----
+            caller.cancel()
+            release.complete(Unit)
+            runCurrent()
+
+            // ----- Assert -----
+            completed shouldBe true
+        }
+
+        @Test
+        fun `two blocks for the same book do not overlap`() = runTest {
+            // ----- Arrange -----
+            val impl = createSyncImpl(scope = backgroundScope)
+            val release = CompletableDeferred<Unit>()
+            val events = mutableListOf<String>()
+            val first = async {
+                impl.runSerialized(bookId = 1) {
+                    events += "first:start"
+                    release.await()
+                    events += "first:end"
+                }
+            }
+            runCurrent()
+            val second = async {
+                impl.runSerialized(bookId = 1) {
+                    events += "second:start"
+                }
+            }
+            runCurrent()
+
+            // ----- Act -----
+            val eventsWhileFirstHolds: List<String> = events.toList()
+            release.complete(Unit)
+            first.await()
+            second.await()
+
+            // ----- Assert -----
+            eventsWhileFirstHolds shouldBe listOf("first:start")
+            events shouldBe listOf("first:start", "first:end", "second:start")
+        }
+    }
+
+    @Nested
+    inner class RetryLater {
+        @Test
+        fun `while online it drains once after thirty seconds and not before`() = runTest {
+            // ----- Arrange -----
+            val impl = createSyncImpl(scope = backgroundScope)
+            coEvery {
+                userBookWriteDrainer.drain()
+            } returns emptyMap()
+
+            // ----- Act -----
+            impl.retryLater()
+            advanceBy(millis = 29_999)
+
+            // ----- Assert -----
+            coVerify(exactly = 0) { userBookWriteDrainer.drain() }
+
+            advanceBy(millis = 1)
+
+            coVerify(exactly = 1) { userBookWriteDrainer.drain() }
+        }
+
+        @Test
+        fun `while offline it schedules nothing`() = runTest {
+            // ----- Arrange -----
+            val impl = createSyncImpl(scope = backgroundScope)
+            isOnline.value = false
+
+            // ----- Act -----
+            impl.retryLater()
+            advanceBy(millis = 1_000_000)
+
+            // ----- Assert -----
+            coVerify(exactly = 0) { userBookWriteDrainer.drain() }
         }
     }
 }

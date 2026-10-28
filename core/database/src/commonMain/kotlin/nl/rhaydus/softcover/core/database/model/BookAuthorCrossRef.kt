@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.database.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 
@@ -13,4 +14,6 @@ import androidx.room.Index
 data class BookAuthorCrossRef(
     val bookId: Int,
     val authorId: Int,
+    @ColumnInfo(defaultValue = "1")
+    val isPrimaryAuthor: Boolean = true,
 )

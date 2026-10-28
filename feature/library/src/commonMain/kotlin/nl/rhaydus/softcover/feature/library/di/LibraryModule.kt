@@ -36,6 +36,7 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSidebarC
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSwipeCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelvesSheetCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.SortModeCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.UserTagsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.VisibleTabsCollector
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
 import org.koin.dsl.bind
@@ -71,6 +72,7 @@ val libraryModule = module {
     factory { SortModeCollector() } bind LibraryCollector::class
 
     factory { BookDeadlinesCollector() } bind LibraryCollector::class
+    factory { UserTagsCollector() } bind LibraryCollector::class
 
     factory { DateStyleCollector() } bind LibraryCollector::class
 
@@ -105,6 +107,7 @@ val libraryModule = module {
             setLibraryGridLayoutUseCase = get(),
             getLibrarySortSettingsAsFlowUseCase = get(),
             setLibrarySortUseCase = get(),
+            observeUserTagsByBookUseCase = get(),
             observeAllBookDeadlinesUseCase = get(),
             getDateStyleAsFlowUseCase = get(),
             getEnabledStatusCodesAsFlowUseCase = get(),

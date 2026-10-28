@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.core.component.chip.toChipSet
  * `FilterChipModelsCollector` can call it on `Dispatchers.Default` without keeping the whole UI state
  * on the worker thread.
  *
- * Every chip's key encodes the facet it belongs to (`"format:Hardcover"`, `"tag:42"`, …) so each
+ * Every chip's key encodes the facet it belongs to (`"format:Hardcover"`, `"hardcover:include:42"`, …) so each
  * facet's [nl.rhaydus.softcover.core.component.chip.ChipSet] stays collision-free.
  */
 internal fun buildLibraryFilterChips(
@@ -19,7 +19,6 @@ internal fun buildLibraryFilterChips(
     formatChips = formatChipEntries(options = options).toChipSet(),
     releaseYearChips = releaseYearChipEntries(options = options).toChipSet(),
     readYearChips = readYearChipEntries(options = options).toChipSet(),
-    tagChips = tagChipEntries(options = options).toChipSet(),
     ratingChips = ratingChipEntries(options = options).toChipSet(),
 )
 
@@ -74,17 +73,6 @@ private fun readYearChipEntries(
     ChipUiModel(
         key = value.chipKey(),
         label = year.toString(),
-    ) to value
-}
-
-private fun tagChipEntries(
-    options: LibraryFilterOptions,
-): List<Pair<ChipUiModel, LibraryFilterValue>> = options.tags.map { tag ->
-    val value = LibraryFilterValue.Tag(tag = tag)
-
-    ChipUiModel(
-        key = value.chipKey(),
-        label = tag.name,
     ) to value
 }
 

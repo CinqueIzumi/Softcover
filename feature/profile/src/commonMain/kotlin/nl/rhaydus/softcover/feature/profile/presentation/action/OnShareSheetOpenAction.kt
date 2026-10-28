@@ -13,7 +13,7 @@ internal class OnShareSheetOpenAction : ProfileAction {
         scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>,
     ) {
         scope.setState {
-            if (it.readingLife == null || it.userProfileData == null) return@setState it
+            if (it.canShare.not()) return@setState it
 
             it.copy(
                 isShareSheetRequested = true,

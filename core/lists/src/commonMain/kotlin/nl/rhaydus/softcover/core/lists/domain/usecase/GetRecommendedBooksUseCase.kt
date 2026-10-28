@@ -12,7 +12,7 @@ import nl.rhaydus.softcover.core.domain.model.SystemVibe
  * The cache holds more than a caller shows, so shelving or hiding a book backfills the list rather than
  * shrinking it.
  */
-class GetRecommendedBooksUseCase(
+class GetRecommendedBooksUseCase internal constructor(
     private val observeSystemVibeBooks: ObserveSystemVibeBooksUseCase,
     private val observeOwnedBookIds: ObserveOwnedBookIdsUseCase,
     private val observeHiddenRecommendations: ObserveHiddenRecommendationsUseCase,

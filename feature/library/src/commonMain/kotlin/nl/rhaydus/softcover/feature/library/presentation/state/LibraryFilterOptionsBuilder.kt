@@ -3,8 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.Tag
-import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.library.presentation.util.availableFinishedYears
 
 /**
@@ -20,15 +19,10 @@ private val RATING_BUCKETS = listOf(4.5, 4.0, 3.5, 3.0)
  */
 internal fun buildBookFilterOptions(
     books: List<Book>,
+    userTagsByBookId: Map<Int, List<UserTag>> = emptyMap(),
     isReadTab: Boolean = false,
 ): LibraryFilterOptions {
     if (books.isEmpty()) return LibraryFilterOptions()
-
-    val tags = books
-        .flatMap { it.tags }
-        .filter { it.category == TagCategory.GENRE }
-        .distinctBy { it.id }
-        .sortedBy { it.name.lowercase() }
 
     val formats = books
         .flatMap { book -> book.editions.map { it.format } }
@@ -50,7 +44,8 @@ internal fun buildBookFilterOptions(
     val ratingBuckets = RATING_BUCKETS.filter { it <= maxRating }
 
     return LibraryFilterOptions(
-        tags = tags.toImmutableList(),
+        hardcoverTags = buildHardcoverTagOptions(books = books),
+        yourTags = buildYourTagOptions(userTagsPerBook = books.map { userTagsByBookId[it.id].orEmpty() }),
         formats = formats.toImmutableList(),
         releaseYears = years.toImmutableList(),
         readYears = readYears.toImmutableList(),
@@ -62,16 +57,12 @@ internal fun buildBookFilterOptions(
 internal fun buildEditionFilterOptions(
     editions: List<BookEdition>,
     bookByBookId: Map<Int, Book>,
+    userTagsByBookId: Map<Int, List<UserTag>> = emptyMap(),
 ): LibraryFilterOptions {
     if (editions.isEmpty()) return LibraryFilterOptions()
 
     val parentBooks = editions.mapNotNull { bookByBookId[it.bookId] }
-
-    val tags: List<Tag> = parentBooks
-        .flatMap { it.tags }
-        .filter { it.category == TagCategory.GENRE }
-        .distinctBy { it.id }
-        .sortedBy { it.name.lowercase() }
+    val uniqueParentBooks = parentBooks.distinctBy { it.id }
 
     val formats = editions
         .map { it.format }
@@ -91,7 +82,10 @@ internal fun buildEditionFilterOptions(
     val ratingBuckets = RATING_BUCKETS.filter { it <= maxRating }
 
     return LibraryFilterOptions(
-        tags = tags.toImmutableList(),
+        hardcoverTags = buildHardcoverTagOptions(books = uniqueParentBooks),
+        yourTags = buildYourTagOptions(
+            userTagsPerBook = uniqueParentBooks.map { userTagsByBookId[it.id].orEmpty() },
+        ),
         formats = formats.toImmutableList(),
         releaseYears = years.toImmutableList(),
         supportsOwnedFilter = supportsOwned,

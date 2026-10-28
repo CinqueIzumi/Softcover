@@ -8,7 +8,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
- * One stacked bar of parts of a whole, with its legend beneath.
+ * One stacked bar of parts of a whole, with its legend beneath as rows or inline keys.
  *
  * While [isLoading] the bar masks as one block and the legend keeps its rows with masked text and swatches.
  */
@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 data class ProportionChartUiModel(
     val segments: ImmutableList<ChartSliceUiModel>,
     val isLoading: Boolean = false,
+    val variant: ProportionChartVariant = ProportionChartVariant.Rows,
 ) {
     companion object : UiModelPreviews<ProportionChartUiModel> {
         override val previews: ImmutableMap<String, ProportionChartUiModel> = persistentMapOf(
@@ -86,6 +87,38 @@ data class ProportionChartUiModel(
                     loadingSegment(ChartTone.Third),
                 ),
                 isLoading = true,
+            ),
+            "Inline keys" to ProportionChartUiModel(
+                segments = persistentListOf(
+                    ChartSliceUiModel(
+                        label = "Print",
+                        share = "52%",
+                        fraction = 0.52f,
+                        tone = ChartTone.Lead,
+                    ),
+                    ChartSliceUiModel(
+                        label = "Ebook",
+                        share = "31%",
+                        fraction = 0.31f,
+                        tone = ChartTone.Second,
+                    ),
+                    ChartSliceUiModel(
+                        label = "Audiobook",
+                        share = "17%",
+                        fraction = 0.17f,
+                        tone = ChartTone.Third,
+                    ),
+                ),
+                variant = ProportionChartVariant.Keys,
+            ),
+            "Inline keys loading" to ProportionChartUiModel(
+                segments = persistentListOf(
+                    loadingSegment(ChartTone.Lead),
+                    loadingSegment(ChartTone.Second),
+                    loadingSegment(ChartTone.Third),
+                ),
+                isLoading = true,
+                variant = ProportionChartVariant.Keys,
             ),
         )
 

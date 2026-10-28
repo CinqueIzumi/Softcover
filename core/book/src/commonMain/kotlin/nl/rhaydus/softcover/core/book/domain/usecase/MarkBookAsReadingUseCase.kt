@@ -14,12 +14,10 @@ class MarkBookAsReadingUseCase(
     ): Result<ShelfMutationOutcome> = runCatchingLogged {
         if (book.status == BookStatus.Reading) return@runCatchingLogged ShelfMutationOutcome.NoChange
 
-        val updatedBook: Book = booksRepository.markBookAsReading(
+        booksRepository.markBookAsReading(
             book = book,
             editionId = book.statusChangeEditionId(requestedEditionId = editionId),
         )
-
-        booksRepository.cacheBook(book = updatedBook)
 
         ShelfMutationOutcome.Applied
     }

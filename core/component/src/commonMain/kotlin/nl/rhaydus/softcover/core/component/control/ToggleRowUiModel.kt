@@ -26,7 +26,7 @@ data class ToggleRowUiModel<K>(
             "Title and gloss" to ToggleRowUiModel(
                 key = "reading-streak",
                 title = "Reading streak",
-                gloss = "Count the days you read in a row, shown on your profile.",
+                gloss = "Show the days you read on the Reading screen.",
                 checked = true,
                 variant = ToggleRowVariant.Inset,
             ),

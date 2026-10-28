@@ -72,7 +72,7 @@ only on modules **below** its tier.
 | T3 app shell | `:app`, `:showcase` (the design-preset showcase app; depends on `:core:designsystem` and `:core:component` only) |
 | T3 orchestration | `:orchestration` |
 | T1 features | `:feature:{lists, profile, onboarding, explore, library, book_detail, reading, session, scan, settings, app_update, widget}` |
-| T0 core | `:core:{domain, database, network, notification, preferences, identity, book, lists, deadlines, personal, profile, connectivity, designsystem, component, uibinding, presentation}` |
+| T0 core | `:core:{domain, database, network, notification, preferences, identity, book, lists, corpus, deadlines, personal, profile, connectivity, designsystem, component, uibinding, presentation, progresssheet}` |
 
 ### What each `core:*` module holds (Softcover roster)
 
@@ -81,6 +81,7 @@ only on modules **below** its tier.
 | `core:domain` | shared domain models, classification enums, config value types, cross-feature use-case **contracts** (`ResetUserDataUseCase`, `InitializeUserIdAndBooksUseCase`, `ReAuthenticateUseCase`, `RefreshLibraryUseCase`, `AppUpdateSimulator`, `ObserveAppUpdateStateUseCase`) whose impls live in orchestration |
 | `core:book` | the book-operations service: `BooksRepository` + use cases every feature calls (incl. `GetTrendingBooksUseCase`) |
 | `core:lists` | the list-operations service: `ListsRepository`, `GetAllUserListsUseCase`, `AddBookToListUseCase`, `SetEditionAsOwnedUseCase` |
+| `core:corpus` | the private-corpus service: the reader's device-only per-book data (book traits so far), repository + use cases, no screen |
 | `core:deadlines` | the deadline-operations service: `BookDeadlineRepository`, `ObserveBookDeadlineUseCase`, `SetBookDeadlineUseCase` |
 | `core:personal` | the reading-activity service (sessions, quotes) — no screen |
 | `core:profile` | the profile-data service consumed by reading/book_detail (the `ProfileScreen` stays a feature) |
@@ -88,9 +89,10 @@ only on modules **below** its tier.
 | `core:identity` | `GetUserIdUseCase`, `UpdateApiKeyUseCase` (storage lives in `core:preferences/data`) |
 | `core:connectivity` | offline write-queue / sync infra (contracts in `core:domain/connectivity`) |
 | `core:designsystem` | **Tokens and the system-bar seam.** Material 3 theme, editorial typography, the icon/illustration catalogs, modifiers, the bottom-chrome padding seam, shared-element scopes, and the Android system-bar seam (`presentation/systembar/`: `transparentSystemBarStyle`, `ApplySystemBarAppearance`), plus the build-time token exporter in the `jvmDesignPreset` source set (`.claude/rules/build-wiring.md` § Design preset tasks). Holds **zero project dependencies** — asserted by `checkModuleGraph`, with a scoped detekt `ForbiddenImport` closing the source-level half. See the three rows below for where its components live |
-| `core:component` | The component library: every component the app renders, driven by a UI model. Depends on `core:designsystem` and nothing else — domain, data, DI, navigation and Apollo are build failures (`checkModuleGraph` for the dependency graph, a scoped detekt `ForbiddenImport` for the source). One directory per family, model + component + fixtures together: `badge/`, `bookcard/`, `button/`, `callout/`, `celebration/`, `chart/`, `chip/`, `chrome/`, `control/`, `cover/`, `deadline/`, `dialog/`, `divider/`, `document/`, `field/`, `header/`, `lists/`, `progress/`, `quote/`, `richtext/`, `selection/`, `share/`, `sheet/`, `snackbar/`, `state/`, `statistic/`, `topbar/`, `transition/`, `verdict/`, `gallery/` so far. `transition/` owns `BookTransitionKey`, `BookTransitionElement` and the `bookTransitionKey` builder, the only minter of a key. It owns its own `composeResources` for the copy that belongs to a component rather than to a feature (the offline banner and offline screen say the same thing on every surface that shows them) |
+| `core:component` | The component library: every component the app renders, driven by a UI model. Depends on `core:designsystem` and nothing else — domain, data, DI, navigation and Apollo are build failures (`checkModuleGraph` for the dependency graph, a scoped detekt `ForbiddenImport` for the source). One directory per family, model + component + fixtures together: `badge/`, `bookcard/`, `button/`, `callout/`, `celebration/`, `chart/`, `chip/`, `chrome/`, `control/`, `cover/`, `deadline/`, `dialog/`, `divider/`, `document/`, `field/`, `header/`, `lists/`, `progress/`, `quote/`, `richtext/`, `selection/`, `share/`, `sheet/`, `snackbar/`, `state/`, `statistic/`, `topbar/`, `traits/`, `transition/`, `verdict/`, `gallery/` so far. `transition/` owns `BookTransitionKey`, `BookTransitionElement` and the `bookTransitionKey` builder, the only minter of a key. It owns its own `composeResources` for the copy that belongs to a component rather than to a feature (the offline banner and offline screen say the same thing on every surface that shows them) |
 | `core:uibinding` | Adapters mapping a domain model to the UI type that renders it, for mappings two or more consumers need. `api`-exposes both sides of every mapping — `core:domain`, `core:component`, `core:designsystem` — so a consumer sees the type it maps from and the type it maps to without re-declaring either. Residents: `ColorPalette.toSpinePalette()` (the reader's persisted spine colour as the design system's palette token) and `ThemeMode.toSchemeBrightness(systemInDark)` (the appearance preference as the design system's brightness token); the `ReviewDocument` ↔ `RichTextUiModel` pair, which is **bidirectional** because the verdict sheet is an editor and the edited model has to travel back out to be persisted; `ProgressUnit` ↔ `ProgressSheetTab` plus `Book.toProgressSheetUiModel()`; the two `List<BookList>` → `ChooseListsUiModel` entry points (single-book and bulk); and `Book.toVerdictSheetUiModel(context, review, cover)` with its `VerdictSheetContext` input (`verdict/`). The last three were promoted straight here rather than starting feature-local, because each landed with two consumers already (R6). Three more join it on the same grounds: `DeadlineProgress` → the badge / cover-overlay / summary-line models (`deadline/`), the three `LocalDate` → unreleased-badge mappers (`toCompactUnreleasedBadgeUiModel`, `toProminentUnreleasedBadgeUiModel`, `toFeaturedUnreleasedBadgeUiModel`; `release/`), and the two neutral date formatters `formatCompactDate` / `formatLongDate` (`date/`) — the latter named for the shape they render rather than for releases, since the roadmap's "Last updated" footer is a non-release consumer. `bookStatsLine(releaseYear, usersCount, rating)` (`book/`) builds the "year · N readers · ★ rating" supporting line Library's large rows render; Explore's search rows draw the same line and are its second consumer. `Book.transitionKey(element, surface)` (`book/`) delegates to the `bookTransitionKey` builder in `core:component`. Beside it, `BookCardTextFormats.kt` holds the card text every `BookCard` mapper shares: `byline` ("By X"), `ratingPart` (the rating label with its spoken description) and the uppercase `seriesEyebrow`; the neutral `percentLabel` ("42%") sits in `format/`, shared by card, chart and progress mappers. `session/` holds `endSessionPauseSheetScaffold` and `ConfirmedPause` |
 | `core:presentation` | The non-component residents evicted from `core:designsystem`: the cross-tier contracts whose impls live in orchestration (`AppNavigator`, `AppEntryPoint`, `BookDetailPresenter`, `CreateListPresenter`, `ActiveSessionController` (with its `activeSessionBookId` / `stopSessionThen` helpers), `SessionAuthenticator`, `ReadingSessionLauncher`), the nav destinations (`ScreenDestination`, `TabDestination`, `TransientNavArg`, `BookInitialCover`), `LibraryTab`, API-error mapping (`toUserMessage` / `onApiFailure`), `SplashState` / `ReAuthState`, `BookDetailPrefetcher` (with `rememberPrefetchingBookCardEventHandler`, the card-event handler that prefetches on press), the app-update composition locals, the reader's appearance preference as composition state (`LocalThemeConfiguration`), the `DebugRoutesContent` seam, `UndoableBookRemover` (the Undo-snackbar window shared by every remove-from-library entry point), `LocalCoverImagePersister` / `ProvideCoverImagePersister` (mounted once in `App.kt`), and `presentationModule` — the app's one Koin module below the feature tier, which also binds `core:component`'s `OfflineCopy` to `ResourceOfflineCopy` (the component library cannot use DI). `api`-depends on `core:domain` and `core:component` (the latter for `ActiveSession`'s `CoverUiModel` and for the cover-persister seam); `implementation` on `core:book`. **Not** on `core:designsystem` |
+| `core:progresssheet` | The update-progress sheet's screen logic, shared by every screen that shows the sheet: `ProgressSheetSlice` (the feeds that keep the sheet current, plus tab, draft, backdate, submit and dismiss handling), `ProgressSheetState`, `ProgressEntry` and the `ProgressSheetHost` seam a TOAD screen implements to record the write. The slice's constructor is `internal`, so `core:preferences` stays an `implementation` edge |
 | `core:network` | Apollo client, interceptors, `safeQuery` / `safeMutation`, and the plain-HTTP seam `safeGetText` |
 | `core:database` | Room database, migrations, **all** persisted entities + DAOs (incl. those a feature's data source uses) |
 
@@ -168,13 +170,16 @@ component/
 +              SkeletonMask (Modifier.skeletonMask)
 +              · ErrorState
 + chart/       ChartTone  RankedBars(+UiModel, +BarUiModel)
-+              ProportionChart(+UiModel, +SegmentUiModel)
++              ProportionChart(+UiModel, +Variant, +ChartSliceUiModel)
 +              ColumnChart(+UiModel)  ColumnUiModel
++              YearGrid(+UiModel, +MonthUiModel, +Cell, +Step, +Event)
 + statistic/   StatNumber  StatNumberUiModel  StatNumberFormat
 +              StatTile(+UiModel, +Variant)
 + text/        SoftcoverText   FadeThroughText
 + topbar/      TopBar  TopBarUiModel/Event/Surface
 +              SearchTopBar(+UiModel, +Event)   EditorialTopBar(+UiModel, +Event)
++ traits/      HowItReadBlock  HowItReadBlockUiModel/Event  HowItReadRowUiModel
++              HowItReadSheet  HowItReadSheetUiModel/Event
 + verdict/     VerdictBlock  VerdictBlockUiModel/Event
 +              VerdictSheet  VerdictSheetUiModel/Event
 · bookcard/    BookCard  BookCardUiModel/Variant/Content/Decorations
@@ -192,16 +197,16 @@ design-preset renders read it.
 
 The `core` tier holds two **kinds** of module, and a new one should land deliberately in one bucket:
 
-- **Domain-area data modules** — `core:{book, lists, deadlines, personal, profile, identity,
+- **Domain-area data modules** — `core:{book, lists, corpus, deadlines, personal, profile, identity,
   preferences}`: a repository + use cases (+ data sources/mappers) for one area. These carry a feature's
   data/use-case layer, so depending on one is normal but **re-exporting one is not**: a module must
   `implementation`-depend on them, never `api`, unless the edge is on the allowlist in the
   `checkModuleGraph` task. That api-visibility rule is what stops a UI/infra module from quietly becoming
   a god-module (the way `:core:designsystem` once `api`-exported half the app).
 - **Infra / contract modules** — `core:{domain, database, network, notification, connectivity,
-  designsystem, presentation, component, uibinding}`: cross-cutting plumbing (Apollo, Room, DI/UI
-  primitives, sync) and the shared kernel (`core:domain`). They may `api`-expose their own surface
-  (and `core:domain` types) as needed — **except** `core:{component, presentation, uibinding}`, which
+  designsystem, presentation, component, uibinding, progresssheet}`: cross-cutting plumbing (Apollo,
+  Room, DI/UI primitives, shared UI logic, sync) and the shared kernel (`core:domain`). They may
+  `api`-expose their own surface (and `core:domain` types) as needed — **except** `core:{component, presentation, uibinding}`, which
   sit under the same api-visibility sign-off as the data modules above. They are big public surfaces
   (a whole component library; every navigation and session contract), so re-exporting one has the same
   god-module effect that rule exists to prevent. `core:domain` and `core:designsystem` deliberately
@@ -211,6 +216,10 @@ The `core` tier holds two **kinds** of module, and a new one should land deliber
   A `:core:uibinding` → `:core:<data>` edge is **pre-approved** in `allowedApiDataEdges` for a shared
   mapper that genuinely needs a data-area type (e.g. `:core:book`'s `IsbnEditionMatch` /
   `CreatedBook`) — write the allowlist row when the edge exists, not speculatively.
+
+  `core:progresssheet` is the shared-UI-plumbing member of this bucket, beside `core:presentation`. Its
+  two `api` edges, to `core:component` and `core:uibinding`, are allowlisted because its host contract
+  names their types.
 
 ### The vertical-slice rule (Softcover concretization)
 

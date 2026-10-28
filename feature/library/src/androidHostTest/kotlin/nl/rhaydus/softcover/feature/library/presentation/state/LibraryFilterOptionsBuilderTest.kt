@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -24,10 +25,19 @@ class LibraryFilterOptionsBuilderTest {
         category = TagCategory.GENRE,
     )
 
+    private val userCozy = UserTag(
+        name = "cozy",
+        category = TagCategory.MOOD,
+    )
+    private val userSlow = UserTag(
+        name = "slow",
+        category = TagCategory.MOOD,
+    )
+
     @Nested
     inner class BuildBookFilterOptions {
         @Test
-        fun `returns distinct tags sorted by name lowercase`() {
+        fun `lists each community tag once with the number of books carrying it`() {
             // ----- Arrange -----
             val book1 = buildBook(
                 id = 1,
@@ -42,7 +52,10 @@ class LibraryFilterOptionsBuilderTest {
             val result = buildBookFilterOptions(books = listOf(book1, book2))
 
             // ----- Assert -----
-            result.tags.map { it.id } shouldBe listOf(tagFiction.id, tagScifi.id)
+            result.hardcoverTags.map { it.key.id to it.count } shouldBe listOf(
+                tagFiction.id to 2,
+                tagScifi.id to 1,
+            )
         }
 
         @Test
@@ -219,13 +232,8 @@ class LibraryFilterOptionsBuilderTest {
         }
 
         @Test
-        fun `excludes non-Genre tags from tag facets`() {
+        fun `lists community tags of every category`() {
             // ----- Arrange -----
-            val tagGenre = Tag(
-                id = 1,
-                name = "Fantasy",
-                category = TagCategory.GENRE,
-            )
             val tagMood = Tag(
                 id = 3,
                 name = "Hopeful",
@@ -236,17 +244,56 @@ class LibraryFilterOptionsBuilderTest {
                 name = "Violence",
                 category = TagCategory.CONTENT_WARNING,
             )
-
             val book = buildBook(
                 id = 1,
-                tags = listOf(tagGenre, tagMood, tagWarning),
+                tags = listOf(tagFiction, tagMood, tagWarning),
             )
 
             // ----- Act -----
             val result = buildBookFilterOptions(books = listOf(book))
 
             // ----- Assert -----
-            result.tags.map { it.id } shouldBe listOf(tagGenre.id)
+            result.hardcoverTags.map { it.category }.toSet() shouldBe setOf(
+                TagCategory.GENRE,
+                TagCategory.MOOD,
+                TagCategory.CONTENT_WARNING,
+            )
+        }
+
+        @Test
+        fun `counts the user's own tags per book and leaves books without any out`() {
+            // ----- Arrange -----
+            val book1 = buildBook(id = 1)
+            val book2 = buildBook(id = 2)
+            val book3 = buildBook(id = 3)
+            val userTags = mapOf(
+                1 to listOf(userCozy, userSlow),
+                2 to listOf(userCozy),
+            )
+
+            // ----- Act -----
+            val result = buildBookFilterOptions(
+                books = listOf(book1, book2, book3),
+                userTagsByBookId = userTags,
+            )
+
+            // ----- Assert -----
+            result.yourTags.map { it.key.name to it.count } shouldBe listOf(
+                "cozy" to 2,
+                "slow" to 1,
+            )
+        }
+
+        @Test
+        fun `offers no Yours options when no book has own tags`() {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+
+            // ----- Act -----
+            val result = buildBookFilterOptions(books = listOf(book))
+
+            // ----- Assert -----
+            result.yourTags shouldBe emptyList()
         }
 
         @Nested
@@ -318,7 +365,7 @@ class LibraryFilterOptionsBuilderTest {
     @Nested
     inner class BuildEditionFilterOptions {
         @Test
-        fun `tags sourced from parent books via bookByBookId`() {
+        fun `community tags sourced from parent books via bookByBookId`() {
             // ----- Arrange -----
             val edition = buildEdition(
                 id = 1,
@@ -336,7 +383,55 @@ class LibraryFilterOptionsBuilderTest {
             )
 
             // ----- Assert -----
-            result.tags.map { it.id } shouldBe listOf(tagFiction.id)
+            result.hardcoverTags.map { it.key.id } shouldBe listOf(tagFiction.id)
+        }
+
+        @Test
+        fun `counts a parent book once when several of its editions are on the tab`() {
+            // ----- Arrange -----
+            val edition1 = buildEdition(
+                id = 1,
+                bookId = 10,
+            )
+            val edition2 = buildEdition(
+                id = 2,
+                bookId = 10,
+            )
+            val book = buildBook(
+                id = 10,
+                tags = listOf(tagFiction),
+            )
+
+            // ----- Act -----
+            val result = buildEditionFilterOptions(
+                editions = listOf(edition1, edition2),
+                bookByBookId = mapOf(10 to book),
+                userTagsByBookId = mapOf(10 to listOf(userCozy)),
+            )
+
+            // ----- Assert -----
+            result.hardcoverTags.single().count shouldBe 1
+            result.yourTags.single().count shouldBe 1
+        }
+
+        @Test
+        fun `own tags are resolved through the edition's parent book id`() {
+            // ----- Arrange -----
+            val edition = buildEdition(
+                id = 1,
+                bookId = 10,
+            )
+            val book = buildBook(id = 10)
+
+            // ----- Act -----
+            val result = buildEditionFilterOptions(
+                editions = listOf(edition),
+                bookByBookId = mapOf(10 to book),
+                userTagsByBookId = mapOf(10 to listOf(userSlow)),
+            )
+
+            // ----- Assert -----
+            result.yourTags.map { it.key.name } shouldBe listOf("slow")
         }
 
         @Test

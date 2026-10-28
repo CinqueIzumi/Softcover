@@ -43,6 +43,7 @@ internal class DisplayListsCollector : LibraryCollector {
                     sortDirectionByTab = state.sortDirectionByTab,
                     addedAtByTab = state.addedAtByTab,
                     bookByBookId = state.bookByBookId,
+                    userTagsByBookId = state.userTagsByBookId,
                 )
             }
             .distinctUntilChanged()

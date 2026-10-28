@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
+import nl.rhaydus.softcover.core.progresssheet.di.progressSheetModule
 import nl.rhaydus.softcover.feature.reading.presentation.collector.BookCardModelsCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.CoverModelsCollector
@@ -16,7 +17,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.collector.CurrentlyRead
 import nl.rhaydus.softcover.feature.reading.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.DeadlineModelsCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.FeaturedBookCollector
-import nl.rhaydus.softcover.feature.reading.presentation.collector.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.MastheadCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.OnHoldBooksCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.PlanTodayDismissalsCollector
@@ -41,6 +41,7 @@ val readingModule = module {
         personalModule,
         preferencesModule,
         profileModule,
+        progressSheetModule,
         notificationModule,
         presentationModule,
     )
@@ -62,11 +63,9 @@ val readingModule = module {
             getPausedUserBooksUseCase = get(),
             observeTrendingBooksUseCase = get(),
             refreshTrendingBooksUseCase = get(),
-            observeRecentReadingActivityUseCase = get(),
-            refreshReadingActivityUseCase = get(),
+            observeReadingActivityUseCase = get(),
             getReadingStreakEnabledAsFlowUseCase = get(),
-            getLastUsedProgressUnitAsFlowUseCase = get(),
-            setLastUsedProgressUnitUseCase = get(),
+            progressSheetSlice = get(),
             observeReadingJournalHistoryUseCase = get(),
             refreshReadingJournalHistoryUseCase = get(),
             appDispatchers = get(),
@@ -88,7 +87,6 @@ val readingModule = module {
     factory { OnHoldBooksCollector() } bind ReadingCollector::class
     factory { TrendingBooksLoader() } bind ReadingCollector::class
     factory { ReadingActivityCollector() } bind ReadingCollector::class
-    factory { LastUsedProgressUnitCollector() } bind ReadingCollector::class
     factory { ReadingPaceForecastCollector() } bind ReadingCollector::class
     factory { MastheadCollector() } bind ReadingCollector::class
     factory { ReadingReadinessCollector() } bind ReadingCollector::class

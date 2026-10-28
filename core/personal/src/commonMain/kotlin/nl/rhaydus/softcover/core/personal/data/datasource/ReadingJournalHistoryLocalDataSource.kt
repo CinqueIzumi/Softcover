@@ -7,12 +7,12 @@ import nl.rhaydus.softcover.core.database.model.ProgressHistoryEntity
 interface ReadingJournalHistoryLocalDataSource {
     fun observeByBookId(bookId: Int): Flow<List<ProgressHistoryEntity>>
 
-    suspend fun getSyncedIds(bookId: Int): List<Long>
-
-    suspend fun replaceSynced(
-        syncedIdsBeforeFetch: List<Long>,
+    suspend fun replaceSyncedForBook(
+        bookId: Int,
         entities: List<ProgressHistoryEntity>,
     )
+
+    suspend fun replaceAllSynced(entities: List<ProgressHistoryEntity>)
 }
 
 internal class ReadingJournalHistoryLocalDataSourceImpl(
@@ -21,13 +21,14 @@ internal class ReadingJournalHistoryLocalDataSourceImpl(
     override fun observeByBookId(bookId: Int): Flow<List<ProgressHistoryEntity>> =
         dao.observeByBookId(bookId = bookId)
 
-    override suspend fun getSyncedIds(bookId: Int): List<Long> = dao.getSyncedIdsForBook(bookId = bookId)
-
-    override suspend fun replaceSynced(
-        syncedIdsBeforeFetch: List<Long>,
+    override suspend fun replaceSyncedForBook(
+        bookId: Int,
         entities: List<ProgressHistoryEntity>,
-    ) = dao.replaceSynced(
-        syncedIdsBeforeFetch = syncedIdsBeforeFetch,
+    ) = dao.replaceSyncedForBook(
+        bookId = bookId,
         entities = entities,
     )
+
+    override suspend fun replaceAllSynced(entities: List<ProgressHistoryEntity>) =
+        dao.replaceAllSynced(entities = entities)
 }

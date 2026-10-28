@@ -6,26 +6,16 @@ import androidx.compose.runtime.LaunchedEffect
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.softcover.core.component.haptics.Feedback
 import nl.rhaydus.softcover.core.component.haptics.play
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.component.verdict.VerdictDraftEvent
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
-import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
-import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissStreakSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissVerdictPromptAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnEditVerdictDraftAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressMinutesSteppedAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabClickAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTimeChangedAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressSheetEventAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnSaveVerdictAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePageProgressClickAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercentageProgressClickAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdateTimeProgressClickAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnWhenReadResetAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnWhenReadShiftedAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSheet
 import nl.rhaydus.softcover.feature.reading.presentation.screen.MarkAsReadController
@@ -48,60 +38,12 @@ internal fun ReadingOverlays(
     val haptics = LocalHaptics.current
 
     val updatingBook = state.bookToUpdate
-    val progressSheet = state.progressSheet.modelOrNull
+    val progressSheet = state.progressSheet.session.modelOrNull
 
     if (updatingBook != null && progressSheet != null) {
         UpdateProgressBottomSheet(
             model = progressSheet,
-            onEvent = { event ->
-                when (event) {
-                    is ProgressSheetEvent.TabSelected -> runAction(OnProgressTabClickAction(event.tab))
-
-                    is ProgressSheetEvent.PagesSubmitted -> runAction(
-                        OnUpdatePageProgressClickAction(
-                            newPage = event.page,
-                        ),
-                    )
-
-                    is ProgressSheetEvent.PercentageSubmitted -> runAction(
-                        OnUpdatePercentageProgressClickAction(
-                            newPercentage = event.percentage,
-                        ),
-                    )
-
-                    is ProgressSheetEvent.TimeChanged -> runAction(
-                        OnProgressTimeChangedAction(
-                            unit = event.unit,
-                            text = event.text,
-                        ),
-                    )
-
-                    is ProgressSheetEvent.MinutesStepped -> runAction(OnProgressMinutesSteppedAction(delta = event.delta))
-
-                    is ProgressSheetEvent.TimeSubmitted -> runAction(
-                        OnUpdateTimeProgressClickAction(
-                            hours = event.hours,
-                            minutes = event.minutes,
-                            seconds = event.seconds,
-                        ),
-                    )
-
-                    ProgressSheetEvent.MarkAsReadRequested -> {
-                        // Routes through the controller rather than dispatching directly, so the sheet path
-                        // gets the same burst, bottom-bar pulse and "slide to shelf" as the row and hero.
-                        controller.requestMarkAsRead(
-                            book = updatingBook,
-                            actionAt = state.readAt.toActionAt(),
-                        )
-                    }
-
-                    is ProgressSheetEvent.WhenReadShifted -> runAction(OnWhenReadShiftedAction(minutes = event.minutes))
-
-                    ProgressSheetEvent.WhenReadReset -> runAction(OnWhenReadResetAction())
-
-                    ProgressSheetEvent.Dismissed -> runAction(DismissProgressSheetAction)
-                }
-            },
+            onEvent = { runAction(OnProgressSheetEventAction(event = it)) },
         )
     }
 

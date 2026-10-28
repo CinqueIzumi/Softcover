@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -28,7 +27,7 @@ class MarkBookAsReadingUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `marks book as reading then caches the updated book`() = runTest {
+        fun `marks book as reading and returns Applied`() = runTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()
             val updatedBook = mockk<Book>()
@@ -52,10 +51,6 @@ class MarkBookAsReadingUseCaseTest {
                 )
             } returns updatedBook
 
-            coJustRun {
-                booksRepository.cacheBook(book = updatedBook)
-            }
-
             // ----- Act -----
             val result = useCase(inputBook)
 
@@ -68,7 +63,6 @@ class MarkBookAsReadingUseCaseTest {
                     editionId = null,
                 )
             }
-            coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
         }
 
         @Test
@@ -92,10 +86,6 @@ class MarkBookAsReadingUseCaseTest {
                     editionId = editionId,
                 )
             } returns updatedBook
-
-            coJustRun {
-                booksRepository.cacheBook(book = updatedBook)
-            }
 
             // ----- Act -----
             useCase(
@@ -143,45 +133,6 @@ class MarkBookAsReadingUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
-            coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
-        }
-
-        @Test
-        fun `returns failure when cacheBook throws`() = runTest {
-            // ----- Arrange -----
-            val inputBook = mockk<Book>()
-            val updatedBook = mockk<Book>()
-            val expectedError = RuntimeException("cache error")
-
-            every {
-                inputBook.status
-            } returns BookStatus.WantToRead
-
-            every {
-                inputBook.userBook
-            } returns null
-
-            every {
-                inputBook.currentEdition
-            } returns null
-
-            coEvery {
-                booksRepository.markBookAsReading(
-                    book = inputBook,
-                    editionId = null,
-                )
-            } returns updatedBook
-
-            coEvery {
-                booksRepository.cacheBook(book = updatedBook)
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase(inputBook)
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe expectedError
         }
 
         @Test
@@ -213,10 +164,6 @@ class MarkBookAsReadingUseCaseTest {
                     editionId = 7,
                 )
             } returns updatedBook
-
-            coJustRun {
-                booksRepository.cacheBook(book = updatedBook)
-            }
 
             // ----- Act -----
             useCase(inputBook)
@@ -250,7 +197,6 @@ class MarkBookAsReadingUseCaseTest {
                     editionId = any(),
                 )
             }
-            coVerify(exactly = 0) { booksRepository.cacheBook(any()) }
         }
     }
 }

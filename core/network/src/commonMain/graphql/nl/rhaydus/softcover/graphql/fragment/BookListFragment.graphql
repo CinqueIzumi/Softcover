@@ -12,6 +12,7 @@ fragment BookListFragment on books {
     }
     release_year
     release_date
+    pages
     users_count
     ratings_count
     compilation
@@ -19,9 +20,14 @@ fragment BookListFragment on books {
         ...BookSeriesFragment
     }
     contributions {
+        contribution
+        contributor_role_id
         author {
             id
             name
+            is_bipoc
+            is_lgbtq
+            gender_id
         }
     }
     taggable_counts(order_by: { count: desc }) {

@@ -335,4 +335,231 @@ class YearHistoryMapperTest {
             result shouldBe fallbackCaption
         }
     }
+
+
+    @Nested
+    inner class LitYearChart {
+        private val series = listOf(
+            YearCount(
+                year = 2022,
+                count = 0,
+            ),
+            YearCount(
+                year = 2023,
+                count = 4,
+            ),
+            YearCount(
+                year = 2024,
+                count = 9,
+            ),
+        )
+
+        @Test
+        fun `the lit year leads, the busier year drops to Second and a zero year stays Fifth`() {
+            // ----- Arrange -----
+            val litYear = 2023
+
+            // ----- Act -----
+            val result = yearHistoryChartUiModel(
+                series = series,
+                metric = YearMetric.BOOKS,
+                litYear = litYear,
+            )
+
+            // ----- Assert -----
+            result.columns.map { it.tone } shouldBe listOf(ChartTone.Fifth, ChartTone.Lead, ChartTone.Second)
+        }
+
+        @Test
+        fun `a lit year with no books has no Lead column`() {
+            // ----- Arrange -----
+            val litYear = 2022
+
+            // ----- Act -----
+            val result = yearHistoryChartUiModel(
+                series = series,
+                metric = YearMetric.BOOKS,
+                litYear = litYear,
+            )
+
+            // ----- Assert -----
+            result.columns.map { it.tone } shouldBe listOf(ChartTone.Fifth, ChartTone.Second, ChartTone.Second)
+        }
+
+        @Test
+        fun `a lit year outside the series has no Lead column`() {
+            // ----- Arrange -----
+            val litYear = 2030
+
+            // ----- Act -----
+            val result = yearHistoryChartUiModel(
+                series = series,
+                metric = YearMetric.BOOKS,
+                litYear = litYear,
+            )
+
+            // ----- Assert -----
+            result.columns.map { it.tone } shouldBe listOf(ChartTone.Fifth, ChartTone.Second, ChartTone.Second)
+        }
+
+        @Test
+        fun `column heights stay relative to the busiest year`() {
+            // ----- Arrange -----
+            val litYear = 2023
+
+            // ----- Act -----
+            val result = yearHistoryChartUiModel(
+                series = series,
+                metric = YearMetric.BOOKS,
+                litYear = litYear,
+            )
+
+            // ----- Assert -----
+            result.columns.map { it.fraction } shouldBe listOf(0f, 4f / 9f, 1f)
+        }
+    }
+
+    @Nested
+    inner class LitYearCaption {
+        private fun captionFor(
+            count: Int,
+            metric: YearMetric,
+        ): String = yearHistoryCaption(
+            series = listOf(
+                YearCount(
+                    year = 2023,
+                    count = count,
+                ),
+            ),
+            metric = metric,
+            litYear = 2023,
+        )
+
+        @Test
+        fun `names the year and a plural books count`() {
+            // ----- Arrange -----
+            val count = 1_234
+
+            // ----- Act -----
+            val result = captionFor(
+                count = count,
+                metric = YearMetric.BOOKS,
+            )
+
+            // ----- Assert -----
+            result shouldBe "In 2023 you finished ${formatGroupedNumber(1_234)} books."
+        }
+
+        @Test
+        fun `uses the singular for one book`() {
+            // ----- Arrange -----
+            val count = 1
+
+            // ----- Act -----
+            val result = captionFor(
+                count = count,
+                metric = YearMetric.BOOKS,
+            )
+
+            // ----- Assert -----
+            result shouldBe "In 2023 you finished 1 book."
+        }
+
+        @Test
+        fun `says no finished books for a year with none`() {
+            // ----- Arrange -----
+            val count = 0
+
+            // ----- Act -----
+            val result = captionFor(
+                count = count,
+                metric = YearMetric.BOOKS,
+            )
+
+            // ----- Assert -----
+            result shouldBe "No finished books in 2023."
+        }
+
+        @Test
+        fun `names the year and a plural pages count`() {
+            // ----- Arrange -----
+            val count = 800
+
+            // ----- Act -----
+            val result = captionFor(
+                count = count,
+                metric = YearMetric.PAGES,
+            )
+
+            // ----- Assert -----
+            result shouldBe "In 2023 you read 800 pages."
+        }
+
+        @Test
+        fun `uses the singular for one page`() {
+            // ----- Arrange -----
+            val count = 1
+
+            // ----- Act -----
+            val result = captionFor(
+                count = count,
+                metric = YearMetric.PAGES,
+            )
+
+            // ----- Assert -----
+            result shouldBe "In 2023 you read 1 page."
+        }
+
+        @Test
+        fun `says no pages read for a year with none`() {
+            // ----- Arrange -----
+            val count = 0
+
+            // ----- Act -----
+            val result = captionFor(
+                count = count,
+                metric = YearMetric.PAGES,
+            )
+
+            // ----- Assert -----
+            result shouldBe "No pages read in 2023."
+        }
+
+        @Test
+        fun `a year missing from the series counts as none`() {
+            // ----- Arrange -----
+            val series = listOf(
+                YearCount(
+                    year = 2020,
+                    count = 7,
+                ),
+            )
+
+            // ----- Act -----
+            val result = yearHistoryCaption(
+                series = series,
+                metric = YearMetric.BOOKS,
+                litYear = 2023,
+            )
+
+            // ----- Assert -----
+            result shouldBe "No finished books in 2023."
+        }
+
+        @Test
+        fun `a missing series falls back to the empty copy even with a lit year`() {
+            // ----- Arrange -----
+            val series: List<YearCount>? = null
+
+            // ----- Act -----
+            val result = yearHistoryCaption(
+                series = series,
+                metric = YearMetric.BOOKS,
+                litYear = 2023,
+            )
+
+            // ----- Assert -----
+            result shouldBe fallbackCaption
+        }
+    }
 }

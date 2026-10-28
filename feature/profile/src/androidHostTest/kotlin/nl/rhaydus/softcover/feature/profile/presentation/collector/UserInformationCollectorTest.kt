@@ -12,11 +12,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileStatsUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingAtlasUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
@@ -27,7 +27,9 @@ import org.junit.jupiter.api.Test
 
 class UserInformationCollectorTest {
     private lateinit var observeUserProfileDataUseCase: ObserveUserProfileDataUseCase
-    private lateinit var refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase
+    private lateinit var refreshUserProfileStatsUseCase: RefreshUserProfileStatsUseCase
+    private lateinit var observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase
+    private lateinit var backfilledFlow: MutableStateFlow<Boolean>
     private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
     private lateinit var eventChannel: Channel<ProfileEvent>
     private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
@@ -36,8 +38,10 @@ class UserInformationCollectorTest {
     @BeforeEach
     fun setUp() {
         profileDataFlow = MutableSharedFlow()
+        backfilledFlow = MutableStateFlow(true)
+        observeReadingStatsBackfilledUseCase = mockk()
         observeUserProfileDataUseCase = mockk()
-        refreshUserProfileDataUseCase = mockk()
+        refreshUserProfileStatsUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
@@ -49,6 +53,10 @@ class UserInformationCollectorTest {
         every {
             observeUserProfileDataUseCase()
         } returns profileDataFlow
+
+        every {
+            observeReadingStatsBackfilledUseCase()
+        } returns backfilledFlow
     }
 
     private fun stubDependencies(testScope: TestScope): ProfileDependencies {
@@ -59,8 +67,12 @@ class UserInformationCollectorTest {
             } returns observeUserProfileDataUseCase
 
             every {
-                mock.refreshUserProfileDataUseCase
-            } returns refreshUserProfileDataUseCase
+                mock.refreshUserProfileStatsUseCase
+            } returns refreshUserProfileStatsUseCase
+
+            every {
+                mock.observeReadingStatsBackfilledUseCase
+            } returns observeReadingStatsBackfilledUseCase
 
             every {
                 mock.coroutineScope
@@ -81,19 +93,15 @@ class UserInformationCollectorTest {
         name = "Jane Doe",
         username = "cinque",
         bio = "Avid reader",
-        booksRead = 42,
-        totalPagesRead = 12000,
-        averageRating = 4.2,
-        readingStreak = 7,
     )
 
     @Nested
     inner class OnLaunch {
         @Test
-        fun `invokes refreshUserProfileDataUseCase on launch`() = runTest(UnconfinedTestDispatcher()) {
+        fun `invokes refreshUserProfileStatsUseCase on launch`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery {
-                refreshUserProfileDataUseCase()
+                refreshUserProfileStatsUseCase()
             } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
@@ -108,7 +116,7 @@ class UserInformationCollectorTest {
             // (refresh is triggered immediately on launch via dependencies.launch { ... })
 
             // ----- Assert -----
-            coVerify(exactly = 1) { refreshUserProfileDataUseCase() }
+            coVerify(exactly = 1) { refreshUserProfileStatsUseCase() }
             job.cancel()
         }
 
@@ -116,7 +124,7 @@ class UserInformationCollectorTest {
         fun `updates state to userProfileData and isLoading false when observe emits non-null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery {
-                refreshUserProfileDataUseCase()
+                refreshUserProfileStatsUseCase()
             } returns Result.success(Unit)
             val profileData = buildProfileData()
             val dependencies = stubDependencies(this)
@@ -134,7 +142,55 @@ class UserInformationCollectorTest {
             // ----- Assert -----
             stateFlow.value.userProfileData shouldBe profileData
             stateFlow.value.isLoading shouldBe false
-            stateFlow.value.readingAtlas shouldBe readingAtlasUiModel(profileData)
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps loading while the library is not yet backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            coEvery {
+                refreshUserProfileStatsUseCase()
+            } returns Result.success(Unit)
+            backfilledFlow.value = false
+            val dependencies = stubDependencies(this)
+            val initializer = UserInformationCollector()
+            val job = launch {
+                initializer.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            profileDataFlow.emit(buildProfileData())
+
+            // ----- Assert -----
+            stateFlow.value.isLoading shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `stops loading once the backfill flag turns true`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            coEvery {
+                refreshUserProfileStatsUseCase()
+            } returns Result.success(Unit)
+            backfilledFlow.value = false
+            val dependencies = stubDependencies(this)
+            val initializer = UserInformationCollector()
+            val job = launch {
+                initializer.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            profileDataFlow.emit(buildProfileData())
+
+            // ----- Act -----
+            backfilledFlow.value = true
+
+            // ----- Assert -----
+            stateFlow.value.isLoading shouldBe false
             job.cancel()
         }
 
@@ -142,7 +198,7 @@ class UserInformationCollectorTest {
         fun `does not update state when observe emits null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery {
-                refreshUserProfileDataUseCase()
+                refreshUserProfileStatsUseCase()
             } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
@@ -166,7 +222,7 @@ class UserInformationCollectorTest {
         fun `swallows refresh failure and still collects from observe`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery {
-                refreshUserProfileDataUseCase()
+                refreshUserProfileStatsUseCase()
             } returns Result.failure(RuntimeException("refresh error"))
             val profileData = buildProfileData()
             val dependencies = stubDependencies(this)

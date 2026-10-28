@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardProgress
+import nl.rhaydus.softcover.core.component.bookcard.BookCardTagStrip
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
 import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
@@ -24,7 +25,9 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
@@ -591,6 +594,102 @@ class LibraryBookCardMapperTest {
             // ----- Assert -----
             variants.map { it.titleKey() }.all { it == null } shouldBe true
             variants.flatMap { it.ratingKeys() }.shouldBeEmpty()
+        }
+    }
+
+    @Nested
+    inner class TagStrip {
+        private val gridLayouts = LibraryGridLayout.entries.filter { it.name.startsWith("GRID") }
+        private val listLayouts = listOf(LibraryGridLayout.LIST_COMPACT, LibraryGridLayout.LIST_LARGE)
+        private val tags = listOf(
+            UserTag(
+                name = "cozy",
+                category = TagCategory.MOOD,
+            ),
+            UserTag(
+                name = "dark",
+                category = TagCategory.MOOD,
+            ),
+        )
+
+        private fun BookCardVariant.stripOrNull(): BookCardTagStrip? = when (this) {
+            is BookCardVariant.Column -> text.tagStrip
+            is BookCardVariant.Row -> text.tagStrip
+            is BookCardVariant.CoverOnly -> null
+        }
+
+        @Test
+        fun `both list layouts carry the book's tags as a strip`() {
+            // ----- Arrange -----
+            val book = stubBook()
+
+            // ----- Act -----
+            val strips = listLayouts.map { layout ->
+                book.toBookCard(
+                    layout = layout,
+                    press = BookCardDecorations.Press.Tap,
+                    selection = null,
+                    deadline = null,
+                    dateStyle = DateStyle.entries.first(),
+                    userTags = tags,
+                ).variant.stripOrNull()?.chips?.map { it.label }
+            }
+
+            // ----- Assert -----
+            strips shouldBe listOf(listOf("cozy", "dark"), listOf("cozy", "dark"))
+        }
+
+        @Test
+        fun `no grid layout carries a strip even when the book has tags`() {
+            // ----- Arrange -----
+            val book = stubBook()
+
+            // ----- Act -----
+            val strips = gridLayouts.map { layout ->
+                book.toBookCard(
+                    layout = layout,
+                    press = BookCardDecorations.Press.Tap,
+                    selection = null,
+                    deadline = null,
+                    dateStyle = DateStyle.entries.first(),
+                    userTags = tags,
+                ).variant.stripOrNull()
+            }
+
+            // ----- Assert -----
+            strips.filterNotNull() shouldBe emptyList()
+        }
+
+        @Test
+        fun `a book without tags has no strip on the lists`() {
+            // ----- Arrange -----
+            val book = stubBook()
+
+            // ----- Act -----
+            val strips = listLayouts.map { layout ->
+                book.card(layout = layout).variant.stripOrNull()
+            }
+
+            // ----- Assert -----
+            strips.filterNotNull() shouldBe emptyList()
+        }
+
+        @Test
+        fun `an edition carries the tags it is handed on the lists only`() {
+            // ----- Arrange -----
+            val edition = stubEdition(authorString = "")
+
+            // ----- Act -----
+            val byLayout = LibraryGridLayout.entries.associateWith { layout ->
+                edition.toEditionCard(
+                    layout = layout,
+                    press = BookCardDecorations.Press.Tap,
+                    userTags = tags,
+                ).variant.stripOrNull()?.chips?.map { it.label }
+            }
+
+            // ----- Assert -----
+            byLayout.filterValues { it != null }.keys shouldBe listLayouts.toSet()
         }
     }
 }

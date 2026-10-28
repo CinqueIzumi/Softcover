@@ -16,8 +16,12 @@ data class Book(
     val description: String,
     val releaseYear: Int,
     val releaseDate: LocalDate? = null,
+    val pages: Int? = null,
     val coverUrl: String,
     val authors: List<Author>,
+
+    /** Contributors in [authors] credited only in another role, such as translator or narrator. */
+    val nonPrimaryAuthorIds: Set<Int> = emptySet(),
     val usersCount: Int,
     val ratingsCount: Int,
     val bookSeries: BookSeries?,
@@ -27,6 +31,9 @@ data class Book(
 
     val userBook: UserBook?,
 ) {
+    val primaryAuthors: List<Author>
+        get() = authors.filter { it.id !in nonPrimaryAuthorIds }
+
     val currentRead: UserBookRead?
         get() = userBook?.currentRead
 
@@ -43,12 +50,15 @@ data class Book(
             return release > Clock.System.todayIn(TimeZone.currentSystemDefault())
         }
 
+    val readerEdition: BookEdition?
+        get() = editions.firstOrNull { it.id == userBook?.editionId }
+
     /**
      * The title of the reader's own edition, else the book's title; never an owned or default edition's,
      * unlike [currentEdition].
      */
     val displayTitle: String
-        get() = titleIn(editions.firstOrNull { it.id == userBook?.editionId })
+        get() = titleIn(readerEdition)
 
     fun titleIn(edition: BookEdition?): String = edition?.title?.takeIf { it.isNotBlank() } ?: title
 
@@ -56,14 +66,10 @@ data class Book(
         ?: authors.joinToString(", ") { it.name }
 
     val currentEdition: BookEdition?
-        get() {
-            val userEditionId = userBook?.editionId
-
-            return editions.firstOrNull { it.id == userEditionId }
-                ?: editions.firstOrNull { it.owned }
-                ?: defaultEdition
-                ?: editions.firstOrNull()
-        }
+        get() = readerEdition
+            ?: editions.firstOrNull { it.owned }
+            ?: defaultEdition
+            ?: editions.firstOrNull()
 
     /** Author names for display, falling back to the book's own authors when no edition is known. */
     val authorString: String

@@ -8,66 +8,55 @@ import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
- * Horizontal bars, each measured against its own 100% track rather than against its neighbours.
+ * Numbered horizontal bars, each filled relative to the lead row rather than to a common 100%.
  *
- * While [isLoading] the rows keep their layout and mask their text and tracks.
+ * While [isLoading] the rows keep their layout and mask their numbers, text and tracks.
+ *
+ * [rows] is the complete ranking; rows from [visibleCount] on are folded away.
  */
 @Immutable
 data class RankedBarsUiModel(
-    val rows: ImmutableList<ChartSliceUiModel>,
+    val rows: ImmutableList<RankedBarUiModel>,
+    val visibleCount: Int,
     val isLoading: Boolean = false,
 ) {
     companion object : UiModelPreviews<RankedBarsUiModel> {
         override val previews: ImmutableMap<String, RankedBarsUiModel> = persistentMapOf(
-            "5 rows" to RankedBarsUiModel(
+            "Filled" to RankedBarsUiModel(
                 rows = persistentListOf(
-                    ChartSliceUiModel(
+                    RankedBarUiModel(
                         label = "Fantasy",
                         share = "62%",
-                        fraction = 0.62f,
-                        tone = ChartTone.Lead,
+                        fill = 1f,
                     ),
-                    ChartSliceUiModel(
+                    RankedBarUiModel(
                         label = "Science fiction",
                         share = "41%",
-                        fraction = 0.41f,
-                        tone = ChartTone.Second,
+                        fill = 0.66f,
                     ),
-                    ChartSliceUiModel(
+                    RankedBarUiModel(
                         label = "Literary fiction",
                         share = "27%",
-                        fraction = 0.27f,
-                        tone = ChartTone.Third,
-                    ),
-                    ChartSliceUiModel(
-                        label = "Historical",
-                        share = "12%",
-                        fraction = 0.12f,
-                        tone = ChartTone.Fourth,
-                    ),
-                    ChartSliceUiModel(
-                        label = "Poetry",
-                        share = "1%",
-                        fraction = 0.01f,
-                        tone = ChartTone.Fifth,
+                        fill = 0.44f,
                     ),
                 ),
+                visibleCount = 3,
             ),
             "Loading" to RankedBarsUiModel(
                 rows = persistentListOf(
-                    loadingRow(ChartTone.Lead),
-                    loadingRow(ChartTone.Second),
-                    loadingRow(ChartTone.Third),
+                    loadingRow(),
+                    loadingRow(),
+                    loadingRow(),
                 ),
+                visibleCount = 3,
                 isLoading = true,
             ),
         )
 
-        private fun loadingRow(tone: ChartTone) = ChartSliceUiModel(
+        private fun loadingRow() = RankedBarUiModel(
             label = "",
             share = "",
-            fraction = 0f,
-            tone = tone,
+            fill = 0f,
         )
     }
 }

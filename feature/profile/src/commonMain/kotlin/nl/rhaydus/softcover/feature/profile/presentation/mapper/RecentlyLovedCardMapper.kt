@@ -3,13 +3,15 @@ package nl.rhaydus.softcover.feature.profile.presentation.mapper
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.char
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
-import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
@@ -19,46 +21,37 @@ import nl.rhaydus.softcover.core.uibinding.book.ratingPart
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.RecentlyLovedEntry
 
+private val monthYearLabelFormat = LocalDate.Format {
+    monthName(MonthNames.ENGLISH_ABBREVIATED)
+    char(' ')
+    year()
+}
+
 /**
  * A "Recently loved" tile: the reader's rating, then the month it landed; a blank author drops the byline.
- * The cover is the library book's when cached, so it follows the picked edition; otherwise the profile's own.
+ * The cover is the library book's, so it follows the picked edition.
  */
 internal fun RecentlyLovedEntry.toRecentlyLovedCard(): BookCardUiModel = BookCardUiModel(
     key = BookCardKey.Book(bookId = loved.bookId),
     variant = BookCardVariant.Column(
-        cover = BookCardCover(model = toCoverUiModel()),
+        cover = BookCardCover(
+            model = libraryBook.toCoverUiModel(
+                variant = CoverVariant.Raised,
+                shareTransition = true,
+            ),
+        ),
         text = BookCardContent(
-            title = loved.title,
+            title = libraryBook.title,
             titleTransitionKey = bookTransitionKey(
                 element = BookTransitionElement.Title,
                 bookId = loved.bookId,
             ),
-            byline = byline(author = loved.author),
+            byline = byline(author = libraryBook.authorString),
             supportingLines = persistentListOf(
                 persistentListOf(ratingPart(rating = loved.ratingStars)),
-                persistentListOf(BookCardLinePart.Text(text = loved.monthLabel)),
+                persistentListOf(BookCardLinePart.Text(text = monthYearLabelFormat.format(loved.finishedOn))),
             ),
         ),
-    ),
-)
-
-private fun RecentlyLovedEntry.toCoverUiModel(): CoverUiModel = libraryBook?.toCoverUiModel(
-    variant = CoverVariant.Raised,
-    shareTransition = true,
-) ?: CoverUiModel(
-    source = loved.coverUrl
-        .takeIf { it.isNotBlank() }
-        ?.let {
-            CoverSource.Remote(
-                url = it,
-                persistEditionId = null,
-            )
-        },
-    coverlessTitle = loved.title,
-    variant = CoverVariant.Raised,
-    sharedTransitionKey = bookTransitionKey(
-        element = BookTransitionElement.Cover,
-        bookId = loved.bookId,
     ),
 )
 

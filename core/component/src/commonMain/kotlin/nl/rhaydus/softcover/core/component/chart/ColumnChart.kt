@@ -91,6 +91,7 @@ private fun ColumnChartRow(
     modifier: Modifier = Modifier,
 ) {
     val shape = Corners.xxs
+    val gapPx = with(LocalDensity.current) { Spacing.xs.toPx() }
 
     Row(
         modifier = modifier,
@@ -150,6 +151,11 @@ private fun ColumnChartRow(
                                 },
                                 isLoading = model.isLoading,
                                 standIn = "00",
+                                modifier = Modifier.keepInsideRow(
+                                    index = index,
+                                    count = model.columns.size,
+                                    gap = gapPx,
+                                ),
                                 maxLines = 1,
                             )
                         }
@@ -215,7 +221,13 @@ private fun ColumnChartRow(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             isLoading = model.isLoading,
                             standIn = "'00",
+                            modifier = Modifier.keepInsideRow(
+                                index = index,
+                                count = model.columns.size,
+                                gap = gapPx,
+                            ),
                             maxLines = 1,
+                            softWrap = false,
                         )
                     }
                 }

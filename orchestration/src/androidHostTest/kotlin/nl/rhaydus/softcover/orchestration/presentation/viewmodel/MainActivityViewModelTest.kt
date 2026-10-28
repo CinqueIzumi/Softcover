@@ -21,7 +21,6 @@ import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.DrainPendingListWritesUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.softcover.orchestration.navigation.ExternalNavigationRequestsImpl
 import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryOnStartUseCase
 import org.junit.jupiter.api.AfterEach
@@ -34,7 +33,6 @@ class MainActivityViewModelTest {
     private lateinit var getUserIdUseCase: GetUserIdUseCase
     private lateinit var refreshLibraryOnStartUseCase: RefreshLibraryOnStartUseCase
     private lateinit var getThemeConfigurationUseCase: GetThemeConfigurationUseCase
-    private lateinit var refreshReadingActivityUseCase: RefreshReadingActivityUseCase
     private lateinit var drainPendingListWritesUseCase: DrainPendingListWritesUseCase
     private lateinit var reAuthenticateUseCase: ReAuthenticateUseCase
     private lateinit var resetUserDataUseCase: ResetUserDataUseCase
@@ -48,7 +46,6 @@ class MainActivityViewModelTest {
         getUserIdUseCase = mockk(relaxed = true)
         refreshLibraryOnStartUseCase = mockk(relaxed = true)
         getThemeConfigurationUseCase = mockk(relaxed = true)
-        refreshReadingActivityUseCase = mockk(relaxed = true)
         drainPendingListWritesUseCase = mockk(relaxed = true)
         reAuthenticateUseCase = mockk(relaxed = true)
         resetUserDataUseCase = mockk(relaxed = true)
@@ -65,7 +62,6 @@ class MainActivityViewModelTest {
             getUserIdUseCase = getUserIdUseCase,
             refreshLibraryOnStartUseCase = refreshLibraryOnStartUseCase,
             getThemeConfigurationUseCase = getThemeConfigurationUseCase,
-            refreshReadingActivityUseCase = refreshReadingActivityUseCase,
             drainPendingListWritesUseCase = drainPendingListWritesUseCase,
             reAuthenticateUseCase = reAuthenticateUseCase,
             resetUserDataUseCase = resetUserDataUseCase,
@@ -82,7 +78,6 @@ class MainActivityViewModelTest {
         getUserIdUseCase = getUserIdUseCase,
         refreshLibraryOnStartUseCase = refreshLibraryOnStartUseCase,
         getThemeConfigurationUseCase = getThemeConfigurationUseCase,
-        refreshReadingActivityUseCase = refreshReadingActivityUseCase,
         drainPendingListWritesUseCase = drainPendingListWritesUseCase,
         reAuthenticateUseCase = reAuthenticateUseCase,
         resetUserDataUseCase = resetUserDataUseCase,
@@ -420,20 +415,6 @@ class MainActivityViewModelTest {
         }
 
         @Test
-        fun `refreshes the reading activity when signed in`() {
-            // ----- Arrange -----
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(42)
-
-            // ----- Act -----
-            createViewModel()
-
-            // ----- Assert -----
-            coVerify(exactly = 1) { refreshReadingActivityUseCase() }
-        }
-
-        @Test
         fun `refreshes and drains nothing when no user is signed in`() {
             // ----- Arrange -----
             coEvery {
@@ -447,7 +428,6 @@ class MainActivityViewModelTest {
             model.state.value.authenticated shouldBe false
             coVerify(exactly = 0) { refreshLibraryOnStartUseCase() }
             coVerify(exactly = 0) { drainPendingListWritesUseCase() }
-            coVerify(exactly = 0) { refreshReadingActivityUseCase() }
         }
     }
 

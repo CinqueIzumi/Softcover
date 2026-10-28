@@ -14,21 +14,30 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.baseBook
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
+import nl.rhaydus.softcover.core.book.data.datasource.FakeUserTagsLocalDataSource
 import nl.rhaydus.softcover.core.book.data.sync.UserBookCacheGate.RefreshWindow
+import nl.rhaydus.softcover.core.book.domain.model.UserBooksSnapshot
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UserBookCacheGateTest {
     private lateinit var booksLocalDataSource: BooksLocalDataSource
+    private lateinit var userTagsLocalDataSource: FakeUserTagsLocalDataSource
     private lateinit var gate: UserBookCacheGate
 
     @BeforeEach
     fun setUp() {
         booksLocalDataSource = mockk(relaxed = true)
-        gate = UserBookCacheGate(booksLocalDataSource = booksLocalDataSource)
+        userTagsLocalDataSource = FakeUserTagsLocalDataSource()
+        gate = UserBookCacheGate(
+            booksLocalDataSource = booksLocalDataSource,
+            userTagsLocalDataSource = userTagsLocalDataSource,
+        )
     }
 
     private fun bookWithUserBook(userBookId: Int): Book = baseBook.copy(
@@ -42,7 +51,12 @@ class UserBookCacheGateTest {
     ): Deferred<List<Book>> {
         val refresh: Deferred<List<Book>> = async {
             gate.refresh(
-                fetch = { fetchGate.await() },
+                fetch = {
+                    UserBooksSnapshot(
+                        books = fetchGate.await(),
+                        userTagsByBookId = emptyMap(),
+                    )
+                },
                 reconcile = { fetched, window ->
                     windows += window
                     fetched
@@ -343,7 +357,12 @@ class UserBookCacheGateTest {
             val failing: Deferred<Result<List<Book>>> = async {
                 runCatching {
                     gate.refresh(
-                        fetch = { fetchGate.await() },
+                        fetch = {
+                    UserBooksSnapshot(
+                        books = fetchGate.await(),
+                        userTagsByBookId = emptyMap(),
+                    )
+                },
                         reconcile = { fetched, window ->
                             windows += window
                             fetched
@@ -400,6 +419,209 @@ class UserBookCacheGateTest {
             coVerify(exactly = 1) {
                 booksLocalDataSource.cacheBooks(books = any())
             }
+        }
+    }
+
+    @Nested
+    inner class TagsDuringFetch {
+        private fun tag(name: String): UserTag = UserTag(
+            name = name,
+            category = TagCategory.TAG,
+        )
+
+        private fun TestScope.openTagRefresh(
+            fetchGate: CompletableDeferred<UserBooksSnapshot>,
+            books: List<Book>,
+        ): Deferred<List<Book>> {
+            val refresh: Deferred<List<Book>> = async {
+                gate.refresh(
+                    fetch = { fetchGate.await() },
+                    reconcile = { _, _ -> books },
+                    selectToCache = { it },
+                )
+            }
+
+            runCurrent()
+
+            return refresh
+        }
+
+        @Test
+        fun `a refresh stores the snapshot's tags for the books it caches`() = runTest {
+            // ----- Arrange -----
+            val first = baseBook.copy(id = 1)
+            val second = baseBook.copy(id = 2)
+            val fetchGate = CompletableDeferred<UserBooksSnapshot>()
+            val refresh = openTagRefresh(
+                fetchGate = fetchGate,
+                books = listOf(first, second),
+            )
+            userTagsLocalDataSource.replaceForBook(
+                bookId = 2,
+                tags = listOf(tag("stale")),
+            )
+
+            // ----- Act -----
+            fetchGate.complete(
+                UserBooksSnapshot(
+                    books = listOf(first, second),
+                    userTagsByBookId = mapOf(1 to listOf(tag("fresh"))),
+                ),
+            )
+            refresh.await()
+
+            // ----- Assert -----
+            userTagsLocalDataSource.snapshot shouldBe mapOf(
+                1 to listOf(tag("fresh")),
+                2 to emptyList(),
+            )
+        }
+
+        @Test
+        fun `tags written mid-refresh survive while other fetched books get the snapshot`() = runTest {
+            // ----- Arrange -----
+            val tagged = baseBook.copy(id = 1)
+            val other = baseBook.copy(id = 2)
+            val fetchGate = CompletableDeferred<UserBooksSnapshot>()
+            val refresh = openTagRefresh(
+                fetchGate = fetchGate,
+                books = listOf(tagged, other),
+            )
+
+            // ----- Act -----
+            gate.writeUserTags(
+                bookId = 1,
+                rows = listOf(tag("mine")),
+            )
+            fetchGate.complete(
+                UserBooksSnapshot(
+                    books = listOf(tagged, other),
+                    userTagsByBookId = mapOf(
+                        1 to listOf(tag("stale")),
+                        2 to listOf(tag("theirs")),
+                    ),
+                ),
+            )
+            refresh.await()
+
+            // ----- Assert -----
+            userTagsLocalDataSource.snapshot shouldBe mapOf(
+                1 to listOf(tag("mine")),
+                2 to listOf(tag("theirs")),
+            )
+        }
+
+        @Test
+        fun `a tag write after the refresh finished is not marked against it`() = runTest {
+            // ----- Arrange -----
+            val book = baseBook.copy(id = 1)
+            val firstFetch = CompletableDeferred<UserBooksSnapshot>()
+            val first = openTagRefresh(
+                fetchGate = firstFetch,
+                books = listOf(book),
+            )
+            firstFetch.complete(
+                UserBooksSnapshot(
+                    books = listOf(book),
+                    userTagsByBookId = emptyMap(),
+                ),
+            )
+            first.await()
+            gate.writeUserTags(
+                bookId = 1,
+                rows = listOf(tag("mine")),
+            )
+            val secondFetch = CompletableDeferred<UserBooksSnapshot>()
+            val second = openTagRefresh(
+                fetchGate = secondFetch,
+                books = listOf(book),
+            )
+
+            // ----- Act -----
+            secondFetch.complete(
+                UserBooksSnapshot(
+                    books = listOf(book),
+                    userTagsByBookId = mapOf(1 to listOf(tag("server"))),
+                ),
+            )
+            second.await()
+
+            // ----- Assert -----
+            userTagsLocalDataSource.snapshot shouldBe mapOf(1 to listOf(tag("server")))
+        }
+    }
+
+    @Nested
+    inner class SingleBookTagRefresh {
+        private fun tag(name: String): UserTag = UserTag(
+            name = name,
+            category = TagCategory.TAG,
+        )
+
+        @Test
+        fun `stores the fetched tags`() = runTest {
+            // ----- Arrange -----
+            userTagsLocalDataSource.replaceForBook(
+                bookId = 1,
+                tags = listOf(tag("old")),
+            )
+
+            // ----- Act -----
+            gate.refreshUserTags(
+                bookId = 1,
+                fetch = { listOf(tag("fetched")) },
+            )
+
+            // ----- Assert -----
+            userTagsLocalDataSource.getForBook(bookId = 1) shouldBe listOf(tag("fetched"))
+        }
+
+        @Test
+        fun `a save racing the fetch keeps the saved tags`() = runTest {
+            // ----- Arrange -----
+            val fetchGate = CompletableDeferred<List<UserTag>>()
+            val refresh = async {
+                gate.refreshUserTags(
+                    bookId = 1,
+                    fetch = { fetchGate.await() },
+                )
+            }
+            runCurrent()
+
+            // ----- Act -----
+            gate.writeUserTags(
+                bookId = 1,
+                rows = listOf(tag("saved")),
+            )
+            fetchGate.complete(listOf(tag("stale")))
+            refresh.await()
+
+            // ----- Assert -----
+            userTagsLocalDataSource.getForBook(bookId = 1) shouldBe listOf(tag("saved"))
+        }
+
+        @Test
+        fun `a save to a different book does not block the store`() = runTest {
+            // ----- Arrange -----
+            val fetchGate = CompletableDeferred<List<UserTag>>()
+            val refresh = async {
+                gate.refreshUserTags(
+                    bookId = 1,
+                    fetch = { fetchGate.await() },
+                )
+            }
+            runCurrent()
+
+            // ----- Act -----
+            gate.writeUserTags(
+                bookId = 2,
+                rows = listOf(tag("other")),
+            )
+            fetchGate.complete(listOf(tag("fetched")))
+            refresh.await()
+
+            // ----- Assert -----
+            userTagsLocalDataSource.getForBook(bookId = 1) shouldBe listOf(tag("fetched"))
         }
     }
 }

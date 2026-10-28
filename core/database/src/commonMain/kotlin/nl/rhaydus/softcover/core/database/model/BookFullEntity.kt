@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.core.database.model
 
 import androidx.room.Embedded
-import androidx.room.Junction
 import androidx.room.Relation
 
 data class BookFullEntity(
@@ -9,15 +8,11 @@ data class BookFullEntity(
     val book: BookEntity,
 
     @Relation(
+        entity = BookAuthorCrossRef::class,
         parentColumn = "id",
-        entityColumn = "id",
-        associateBy = Junction(
-            value = BookAuthorCrossRef::class,
-            parentColumn = "bookId",
-            entityColumn = "authorId",
-        ),
+        entityColumn = "bookId",
     )
-    val bookAuthors: List<AuthorEntity>,
+    val bookAuthors: List<BookAuthorFull>,
 
     @Relation(
         parentColumn = "seriesId",

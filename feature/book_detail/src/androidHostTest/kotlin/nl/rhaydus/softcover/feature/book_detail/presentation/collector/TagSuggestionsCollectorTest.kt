@@ -140,7 +140,10 @@ class TagSuggestionsCollectorTest {
             stateFlow.value.tagSuggestions shouldBe listOf(fantasy)
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(persistentListOf(fantasy)))
+            stateFlow.value = stateFlow.value.copy(
+                userTags = persistentListOf(fantasy),
+                userTagsLoad = UserTagsLoad.Loaded,
+            )
 
             // ----- Assert -----
             stateFlow.value.tagSuggestions shouldBe emptyList()

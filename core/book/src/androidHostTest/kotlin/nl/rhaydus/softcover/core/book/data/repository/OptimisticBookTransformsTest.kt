@@ -182,7 +182,7 @@ class OptimisticBookTransformsTest {
         }
 
         @Test
-        fun `from WantToRead and DidNotFinish changes no reads`() {
+        fun `from WantToRead and DidNotFinish keeps the reads and adds a finished placeholder`() {
             listOf(BookStatus.WantToRead, BookStatus.DidNotFinish).forEach { status ->
                 // ----- Arrange -----
                 val unfinished = read(
@@ -198,13 +198,19 @@ class OptimisticBookTransformsTest {
                 val result = book.withMarkedAsRead(actionAt = "2026-05-01T10:00:00Z")
 
                 // ----- Assert -----
-                result.readsOrFail() shouldBe listOf(unfinished)
+                val reads = result.readsOrFail()
+                reads.size shouldBe 2
+                reads.first { it.id == 6 } shouldBe unfinished
+                val placeholder = reads.first { it.id == -userBookId }
+                placeholder.startedAt shouldBe null
+                placeholder.finishedAt shouldBe "2026-05-01"
+                placeholder.progress shouldBe 100f
                 result.status shouldBe BookStatus.Read
             }
         }
 
         @Test
-        fun `from Reading whose current read is already finished changes no reads`() {
+        fun `from Reading whose current read is already finished keeps it and adds a finished placeholder`() {
             // ----- Arrange -----
             val alreadyFinished = read(
                 id = 6,
@@ -220,8 +226,26 @@ class OptimisticBookTransformsTest {
             val result = book.withMarkedAsRead(actionAt = "2026-05-01T10:00:00Z")
 
             // ----- Assert -----
-            result.readsOrFail() shouldBe listOf(alreadyFinished)
+            val reads = result.readsOrFail()
+            reads.size shouldBe 2
+            reads.first { it.id == 6 } shouldBe alreadyFinished
+            val placeholder = reads.first { it.id == -userBookId }
+            placeholder.startedAt shouldBe null
+            placeholder.finishedAt shouldBe "2026-05-01"
+            placeholder.progress shouldBe 100f
             result.status shouldBe BookStatus.Read
+        }
+
+        @Test
+        fun `from WantToRead dates the book to the marked day`() {
+            // ----- Arrange -----
+            val book = bookWith(BookStatus.WantToRead)
+
+            // ----- Act -----
+            val result = book.withMarkedAsRead(actionAt = "2026-05-01T10:00:00Z")
+
+            // ----- Assert -----
+            result.userBook.shouldNotBeNull().finishDate.toString() shouldBe "2026-05-01"
         }
 
         @Test

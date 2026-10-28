@@ -5,11 +5,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
+import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
@@ -17,6 +19,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshAllReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -27,6 +30,7 @@ class RefreshLibraryUseCaseImplTest {
     private lateinit var booksRepository: BooksRepository
     private lateinit var listsRepository: ListsRepository
     private lateinit var settingsRepository: SettingsRepository
+    private lateinit var refreshAllReadingJournalHistoryUseCase: RefreshAllReadingJournalHistoryUseCase
     private lateinit var useCase: RefreshLibraryUseCaseImpl
 
     @BeforeEach
@@ -35,6 +39,11 @@ class RefreshLibraryUseCaseImplTest {
         booksRepository = mockk(relaxed = true)
         listsRepository = mockk(relaxed = true)
         settingsRepository = mockk(relaxed = true)
+        refreshAllReadingJournalHistoryUseCase = mockk()
+
+        coEvery {
+            refreshAllReadingJournalHistoryUseCase()
+        } returns Result.success(Unit)
 
         every {
             settingsRepository.listDefaultsSeeded
@@ -47,6 +56,8 @@ class RefreshLibraryUseCaseImplTest {
             booksRepository = booksRepository,
             listsRepository = listsRepository,
             settingsRepository = settingsRepository,
+            refreshAllReadingJournalHistoryUseCase = refreshAllReadingJournalHistoryUseCase,
+            applicationScope = ApplicationScope(scope = CoroutineScope(dispatcher)),
             dispatchers = AppDispatchers(
                 main = dispatcher,
                 io = dispatcher,
@@ -355,6 +366,191 @@ class RefreshLibraryUseCaseImplTest {
                 listsRepository.syncBookListMetadata(serverListIds = any())
                 booksRepository.deleteOrphanBooks()
             }
+        }
+    }
+
+    @Nested
+    inner class ReadingJournalRefresh {
+        @Test
+        fun `a full refresh also refreshes the reading journal for every book`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(55)
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.All)
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) { refreshAllReadingJournalHistoryUseCase() }
+        }
+
+        @Test
+        fun `a status refresh also refreshes the reading journal`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(55)
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.ByStatuses(statuses = setOf(UserBookStatus.READ)))
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) { refreshAllReadingJournalHistoryUseCase() }
+        }
+
+        @Test
+        fun `a single-list refresh leaves the reading journal alone`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(55)
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.ByList(listId = 7))
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 0) { refreshAllReadingJournalHistoryUseCase() }
+        }
+
+        @Test
+        fun `a failing journal refresh does not fail the library refresh`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(55)
+
+            coEvery {
+                refreshAllReadingJournalHistoryUseCase()
+            } returns Result.failure(IllegalStateException("journal down"))
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.All)
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+        }
+    }
+
+    @Nested
+    inner class AuthorDemographicsBackfill {
+        @BeforeEach
+        fun setUpUserId() {
+            coEvery {
+                getUserIdUseCase()
+            } returns Result.success(55)
+            coEvery {
+                listsRepository.refreshUserLists(userId = 55)
+            } returns ListsRefreshResult(
+                changedLists = emptyList(),
+                serverListIds = emptySet(),
+            )
+        }
+
+        @Test
+        fun `an all-scope refresh marks the backfill`() = runTest {
+            // ----- Arrange -----
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.All)
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) { settingsRepository.markAuthorDemographicsBackfilled() }
+            coVerify(exactly = 1) { settingsRepository.markAuthorRolesBackfilled() }
+        }
+
+        @Test
+        fun `a statuses refresh containing read marks the backfill`() = runTest {
+            // ----- Arrange -----
+            val scope = RefreshScope.ByStatuses(
+                statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.READ),
+            )
+
+            // ----- Act -----
+            val result = useCase(scope = scope)
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) { settingsRepository.markAuthorDemographicsBackfilled() }
+            coVerify(exactly = 1) { settingsRepository.markAuthorRolesBackfilled() }
+        }
+
+        @Test
+        fun `a statuses refresh without read does not mark the backfill`() = runTest {
+            // ----- Arrange -----
+            val scope = RefreshScope.ByStatuses(
+                statuses = setOf(UserBookStatus.CURRENTLY_READING, UserBookStatus.PAUSED),
+            )
+
+            // ----- Act -----
+            val result = useCase(scope = scope)
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 0) { settingsRepository.markAuthorDemographicsBackfilled() }
+            coVerify(exactly = 0) { settingsRepository.markAuthorRolesBackfilled() }
+        }
+
+        @Test
+        fun `a single-list refresh does not mark the backfill`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                listsRepository.fetchUserLists(
+                    userId = 55,
+                    listIds = setOf(7),
+                )
+            } returns emptyList()
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.ByList(listId = 7))
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 0) { settingsRepository.markAuthorDemographicsBackfilled() }
+            coVerify(exactly = 0) { settingsRepository.markAuthorRolesBackfilled() }
+        }
+
+        @Test
+        fun `a failed read refresh does not mark the backfill`() = runTest {
+            // ----- Arrange -----
+            val scope = RefreshScope.ByStatuses(statuses = setOf(UserBookStatus.READ))
+            coEvery {
+                booksRepository.refreshUserBooks(
+                    userId = 55,
+                    statusFilter = setOf(UserBookStatus.READ),
+                )
+            } throws IllegalStateException("books refresh failed")
+
+            // ----- Act -----
+            val result = useCase(scope = scope)
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            coVerify(exactly = 0) { settingsRepository.markAuthorDemographicsBackfilled() }
+            coVerify(exactly = 0) { settingsRepository.markAuthorRolesBackfilled() }
+        }
+
+        @Test
+        fun `a failed all-scope refresh does not mark the backfill`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRepository.refreshUserBooks(
+                    userId = 55,
+                    statusFilter = null,
+                )
+            } throws IllegalStateException("books refresh failed")
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.All)
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            coVerify(exactly = 0) { settingsRepository.markAuthorDemographicsBackfilled() }
+            coVerify(exactly = 0) { settingsRepository.markAuthorRolesBackfilled() }
         }
     }
 }

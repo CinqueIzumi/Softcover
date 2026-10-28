@@ -227,32 +227,9 @@ class LibraryStatsTest {
         }
 
         @Test
-        fun `returns year from latest journal when multiple finished journals exist`() {
+        fun `a book with only a finished journal has no finished year`() {
             // ----- Arrange -----
-            val journals = listOf(
-                buildFinishedJournal("2021-01-01T00:00:00"),
-                buildFinishedJournal("2023-12-31T23:59:59"),
-            )
-
-            val book = buildBook(userBook = buildUserBook(journals = journals))
-
-            // ----- Act -----
-            val result = book.finishedYear()
-
-            // ----- Assert -----
-            result shouldBe 2023
-        }
-
-        @Test
-        fun `returns null for malformed updatedAt date`() {
-            // ----- Arrange -----
-            val journals = listOf(
-                ReadingJournal(
-                    updatedAt = "not-a-date",
-                    event = JournalEventType.StatusFinished.eventName,
-                ),
-            )
-
+            val journals = listOf(buildFinishedJournal("2023-12-31T23:59:59"))
             val book = buildBook(userBook = buildUserBook(journals = journals))
 
             // ----- Act -----
@@ -263,14 +240,32 @@ class LibraryStatsTest {
         }
 
         @Test
-        fun `the latest finishedAt wins over an older lastReadDate, journal, and createdAt`() {
+        fun `the newest finished read decides the year among several reads`() {
+            // ----- Arrange -----
+            val book = buildBook(
+                userBook = buildUserBook(
+                    reads = listOf(
+                        buildUserBookRead(finishedAt = "2021-01-01"),
+                        buildUserBookRead(finishedAt = "2023-12-31"),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = book.finishedYear()
+
+            // ----- Assert -----
+            result shouldBe 2023
+        }
+
+        @Test
+        fun `the latest finishedAt wins over an older lastReadDate and journal`() {
             // ----- Arrange -----
             val journals = listOf(buildFinishedJournal("2019-06-01T00:00:00"))
             val book = buildBook(
                 userBook = buildUserBook(
                     journals = journals,
                     lastReadDate = "2020-03-15",
-                    createdAt = "2018-01-01T00:00:00",
                     reads = listOf(buildUserBookRead(finishedAt = "2022-05-10")),
                 ),
             )
@@ -290,7 +285,6 @@ class LibraryStatsTest {
                 userBook = buildUserBook(
                     journals = journals,
                     lastReadDate = "2020-03-15",
-                    createdAt = "2018-01-01T00:00:00",
                     reads = listOf(buildUserBookRead(finishedAt = null)),
                 ),
             )
@@ -303,32 +297,12 @@ class LibraryStatsTest {
         }
 
         @Test
-        fun `createdAt is used as final fallback when all earlier candidates are null`() {
-            // ----- Arrange -----
-            val book = buildBook(
-                userBook = buildUserBook(
-                    journals = emptyList(),
-                    lastReadDate = null,
-                    createdAt = "2017-11-20T08:30:00",
-                    reads = listOf(buildUserBookRead(finishedAt = null)),
-                ),
-            )
-
-            // ----- Act -----
-            val result = book.finishedYear()
-
-            // ----- Assert -----
-            result shouldBe 2017
-        }
-
-        @Test
         fun `unparseable finishedAt falls through to next valid candidate`() {
             // ----- Arrange -----
             val book = buildBook(
                 userBook = buildUserBook(
                     journals = emptyList(),
                     lastReadDate = "2021-08-22",
-                    createdAt = null,
                     reads = listOf(buildUserBookRead(finishedAt = "garbage")),
                 ),
             )
@@ -341,41 +315,12 @@ class LibraryStatsTest {
         }
 
         @Test
-        fun `a journal at UTC year-end evening counts toward the next year in a zone ahead of UTC`() {
+        fun `returns null for an undated book even when it has a createdAt`() {
             // ----- Arrange -----
-            TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"))
-            val journals = listOf(buildFinishedJournal("2025-12-31T23:30:00.000000"))
-            val book = buildBook(userBook = buildUserBook(journals = journals))
-
-            // ----- Act -----
-            val result = book.finishedYear()
-
-            // ----- Assert -----
-            result shouldBe 2026
-        }
-
-        @Test
-        fun `a journal at UTC new-year morning counts toward the previous year in a zone behind UTC`() {
-            // ----- Arrange -----
-            TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Pago_Pago"))
-            val journals = listOf(buildFinishedJournal("2026-01-01T05:00:00.000000"))
-            val book = buildBook(userBook = buildUserBook(journals = journals))
-
-            // ----- Act -----
-            val result = book.finishedYear()
-
-            // ----- Assert -----
-            result shouldBe 2025
-        }
-
-        @Test
-        fun `createdAt at UTC year-end evening falls back to the next local year`() {
-            // ----- Arrange -----
-            TimeZone.setDefault(TimeZone.getTimeZone("Europe/Amsterdam"))
             val book = buildBook(
                 userBook = buildUserBook(
                     journals = emptyList(),
-                    createdAt = "2025-12-31T23:30:00.000000",
+                    createdAt = "2017-11-20T08:30:00",
                 ),
             )
 
@@ -383,7 +328,7 @@ class LibraryStatsTest {
             val result = book.finishedYear()
 
             // ----- Assert -----
-            result shouldBe 2026
+            result shouldBe null
         }
 
         @Test
@@ -408,7 +353,6 @@ class LibraryStatsTest {
                 userBook = buildUserBook(
                     journals = emptyList(),
                     lastReadDate = null,
-                    createdAt = null,
                     reads = listOf(buildUserBookRead(finishedAt = null)),
                 ),
             )
@@ -442,19 +386,19 @@ class LibraryStatsTest {
                 buildBook(
                     id = 1,
                     userBook = buildUserBook(
-                        journals = listOf(buildFinishedJournal("2021-06-01T00:00:00")),
+                        reads = listOf(buildUserBookRead(finishedAt = "2021-06-01")),
                     ),
                 ),
                 buildBook(
                     id = 2,
                     userBook = buildUserBook(
-                        journals = listOf(buildFinishedJournal("2023-01-01T00:00:00")),
+                        reads = listOf(buildUserBookRead(finishedAt = "2023-01-01")),
                     ),
                 ),
                 buildBook(
                     id = 3,
                     userBook = buildUserBook(
-                        journals = listOf(buildFinishedJournal("2021-12-31T00:00:00")),
+                        reads = listOf(buildUserBookRead(finishedAt = "2021-12-31")),
                     ),
                 ),
             )
@@ -464,6 +408,27 @@ class LibraryStatsTest {
 
             // ----- Assert -----
             result shouldBe listOf(2023, 2021)
+        }
+
+        @Test
+        fun `omits undated books from the available years`() {
+            // ----- Arrange -----
+            val books = listOf(
+                buildBook(
+                    id = 1,
+                    userBook = buildUserBook(createdAt = "2019-05-05T00:00:00"),
+                ),
+                buildBook(
+                    id = 2,
+                    userBook = buildUserBook(reads = listOf(buildUserBookRead(finishedAt = "2022-03-01"))),
+                ),
+            )
+
+            // ----- Act -----
+            val result = books.availableFinishedYears()
+
+            // ----- Assert -----
+            result shouldBe listOf(2022)
         }
     }
 }

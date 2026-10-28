@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.data.mapper
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.FindUserTagVocabularyQuery
 import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
@@ -8,6 +9,30 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UserTagVocabularyMapperTest {
+    private fun stubVocabularyTag(
+        tag: String = "emotional",
+        tagCategoryValue: String? = "Mood",
+        aggregateCount: Int? = 111,
+    ): FindUserTagVocabularyQuery.Data.Tag =
+        FindUserTagVocabularyQuery.Data.Tag(
+            __typename = "tags",
+            id = 1L,
+            tag = tag,
+            tag_category = FindUserTagVocabularyQuery.Data.Tag.Tag_category(
+                __typename = "tag_categories",
+                category = tagCategoryValue,
+            ),
+            taggings_aggregate = FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate(
+                __typename = "taggings_aggregate",
+                aggregate = aggregateCount?.let {
+                    FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate.Aggregate(
+                        __typename = "taggings_aggregate_fields",
+                        count = it,
+                    )
+                },
+            ),
+        )
+
     @Nested
     inner class EntityToUserTag {
         @Test
@@ -88,6 +113,42 @@ class UserTagVocabularyMapperTest {
 
             // ----- Assert -----
             result.category shouldBe "CONTENT_WARNING"
+        }
+    }
+
+    @Nested
+    inner class QueryTagToUserTag {
+        @Test
+        fun `maps the tag name, category and the personal aggregate count`() {
+            // ----- Arrange -----
+            val tag = stubVocabularyTag(
+                tag = "emotional",
+                tagCategoryValue = "Mood",
+                aggregateCount = 111,
+            )
+
+            // ----- Act -----
+            val result = tag.toUserTag()
+
+            // ----- Assert -----
+            result shouldBe UserTag(
+                name = "emotional",
+                category = TagCategory.MOOD,
+                count = 111,
+                spoiler = false,
+            )
+        }
+
+        @Test
+        fun `defaults count to 0 when the taggings aggregate is null`() {
+            // ----- Arrange -----
+            val tag = stubVocabularyTag(aggregateCount = null)
+
+            // ----- Act -----
+            val result = tag.toUserTag()
+
+            // ----- Assert -----
+            result.count shouldBe 0
         }
     }
 }

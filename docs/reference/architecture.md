@@ -23,8 +23,8 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
 :feature:*            # Leaf features: lists, profile, onboarding, explore, library, book_detail,
                       #   reading, session, scan, settings, app_update, widget
 :core:*               # domain, database, network, designsystem, presentation, component, uibinding,
-                      #   notification, preferences, identity, book, lists, deadlines, personal,
-                      #   profile, connectivity
+                      #   notification, preferences, identity, book, lists, corpus, deadlines, personal,
+                      #   profile, connectivity, progresssheet
 ```
 
 ## TOAD — Softcover-specific notes
@@ -150,9 +150,11 @@ and a change that breaks one is a defect even if it compiles:
 - **Fewer, fatter queries.** A top-level field costs the same regardless of payload, so adding a field
   to an existing query is free and **splitting one query into two doubles its cost**. This inverts the
   usual instinct toward small focused queries; flag any change that splits one.
-- **Page-size and fan-out constants are budget, not tuning.** `fetchAllPages`' `pageSize`/`maxPages`
-  (below) and `ProfileRemoteDataSource.MAX_PAGES` are request multipliers — one runaway loop is 100
-  requests, twenty full buckets. Every uncapped `async`/`awaitAll` fan-out is the same hazard with no
+- **Page-size and fan-out constants are budget, not tuning.** The library sync's `pageSize` is a request
+  multiplier, but its page count is bounded by the server's row count fetched in the same request
+  (`fetchAllPagesCounted`, below). `fetchAllPages`' `pageSize`/`maxPages` still guard the uncounted
+  callers, as does `ProfileRemoteDataSource.MAX_PAGES` — one runaway loop is 100 requests, twenty full
+  buckets. Every uncapped `async`/`awaitAll` fan-out is the same hazard with no
   ceiling at all.
 
 `search` accepts exactly one per request and cannot be merged with anything, so `GetIdsForQuery` is
@@ -187,11 +189,14 @@ books with more than 200 updates).
   row's own `id`) so offset windows don't overlap or skip rows. If a consumer depends on a meaningful
   order (e.g. chronological), make it a composite key with `id` as the tiebreaker
   (`order_by: [{ updated_at: asc }, { id: asc }]`).
-- Callers: `ProfileRemoteDataSource.fetchAllStatsBooks`, `UserTagsRemoteDataSource.fetchUserVocabulary`,
+- **`fetchAllPagesCounted`** bounds the library sync by data, not a constant: the query carries an aliased
+  `user_books_aggregate` count under the same `me` root (one billed request), paging runs until that many
+  rows arrive, and a short page below the count throws, so the prune never runs on an incomplete fetch.
+  `BooksRemoteDataSource.initializeBooks` is its only caller.
+- Callers: through the throwing `fetchAllPagesOrThrow` because their result feeds a prune or replace-all,
+  `UserTagsRemoteDataSource.fetchUserVocabulary`,
   `ReadingJournalHistoryRemoteDataSource.getReadingJournalHistory`,
-  `QuoteRemoteDataSource.getQuotes` / `getAllQuotes`. A per-row lazily-cancellable
-  `Flow` (e.g. `streamReadingDaysDescending`) stays a hand-rolled loop — it emits as it goes rather
-  than accumulating into a list, so it can't use this helper.
+  `QuoteRemoteDataSource.getQuotes` / `getAllQuotes`.
 
 ### Unresolvable API enums
 
@@ -241,6 +246,16 @@ Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core
   app-side, in `OfflineUserBookSyncImpl`. Every user-book row write goes through `UserBookCacheGate`, which
   serialises writes against the refresh's merge and save and records each write made while a refresh is in
   flight; the reconcile re-applies those records, so a write made mid-refresh survives the stale server snapshot.
+  Every user-book write with local state is **write-ahead**: `BooksRepositoryImpl.writeUserBook` appends its queue
+  row before sending, and the send runs under the per-book `UserBookWriteLock` on the application scope, so it
+  outlives the caller. Success removes exactly its own row; a transient error keeps it and restarts the retry
+  drains; a rejection removes it and rolls the cache back. A write behind an older queued write of another kind
+  stays queued. Replays (`UserBookWriteReplay`) take the same lock and skip rows that are no longer current, and
+  the refresh keeps the owned fields of still-queued writes. Replays first fetch Hardcover's current state and
+  finish a write it already applied as synced without sending, so at-least-once delivery stays idempotent. A
+  same-kind write replaces an older queued one: if Hardcover rejects the newer, the older value is not re-queued
+  and the server value wins on the next refresh. Lock order is drainer mutex, then book lock, then gate mutex;
+  never drain or refresh inside the book lock.
 
 ## Local Storage
 

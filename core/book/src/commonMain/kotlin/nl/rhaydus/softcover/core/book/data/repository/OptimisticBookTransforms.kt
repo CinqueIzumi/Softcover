@@ -129,21 +129,21 @@ internal fun Book.withMarkedAsRead(actionAt: String?): Book {
         ?.let { localDateTimeOf(actionAt = it).date.toString() }
         ?: Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
-    // From any other status the server finishes no read (or creates an already finished one), so none is touched here.
     val finishesCurrentRead = existingUserBook.status == BookStatus.Reading ||
         existingUserBook.status == BookStatus.Paused
 
-    val withReads: UserBook = currentRead
+    // From any other status no existing read is finished, so a finished placeholder keeps the book dated until the
+    // server's copy, dated by the same `user_date`, replaces it.
+    val finishedRead: UserBookRead = currentRead
         ?.takeIf { finishesCurrentRead && it.isFinished.not() }
-        ?.let { read ->
-            existingUserBook.withReplacedRead(
-                read = read.copy(
-                    finishedAt = finishedDate,
-                    progress = 100f,
-                ),
-            )
-        }
-        ?: existingUserBook
+        ?: existingUserBook.newPlaceholderRead().copy(startedAt = null)
+
+    val withReads: UserBook = existingUserBook.withReplacedRead(
+        read = finishedRead.copy(
+            finishedAt = finishedDate,
+            progress = 100f,
+        ),
+    )
 
     val updatedUserBook: UserBook = withReads
         .copy(status = BookStatus.Read)

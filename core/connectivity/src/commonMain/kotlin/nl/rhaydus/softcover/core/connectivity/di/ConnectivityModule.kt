@@ -20,7 +20,9 @@ import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
 import nl.rhaydus.softcover.core.domain.connectivity.QuoteWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.USER_BOOK_WRITE_MAX_ATTEMPTS
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
+import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteLock
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
@@ -83,6 +85,8 @@ val connectivityModule = module {
         UserBookWriteReplay(
             booksRemoteDataSource = get(),
             progressHistoryLocalDataSource = get(),
+            writeLock = get(),
+            queue = get(),
         )
     }
 
@@ -100,6 +104,8 @@ val connectivityModule = module {
         )
     }
 
+    single { UserBookWriteLock() }
+
     single<UserBookWriteDrainer> {
         val replay = get<UserBookWriteReplay>()
 
@@ -111,7 +117,10 @@ val connectivityModule = module {
                 replay = { payload -> replay(payload) },
                 hintKey = { payload -> payload.userBookId to payload.kind },
                 isTransient = { error -> error is RetryableSyncException },
-                policy = DrainPolicy(inDrainRetries = USER_BOOK_IN_DRAIN_RETRIES),
+                policy = DrainPolicy(
+                    inDrainRetries = USER_BOOK_IN_DRAIN_RETRIES,
+                    maxAttempts = USER_BOOK_WRITE_MAX_ATTEMPTS,
+                ),
             ),
         )
     }

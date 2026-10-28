@@ -46,5 +46,17 @@ class ProportionChartUiModelTest {
             // ----- Assert -----
             withZero.shouldNotBeEmpty()
         }
+
+        @Test
+        fun `includes a fixture with the Keys variant`() {
+            // ----- Arrange -----
+            val previews = ProportionChartUiModel.previews.values
+
+            // ----- Act -----
+            val withKeys = previews.filter { it.variant == ProportionChartVariant.Keys }
+
+            // ----- Assert -----
+            withKeys.shouldNotBeEmpty()
+        }
     }
 }

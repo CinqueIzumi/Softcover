@@ -12,7 +12,7 @@ import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
-import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import nl.rhaydus.softcover.feature.reading.presentation.state.StreakDayRowUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.StreakDayUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.StreakSheetUiModel
@@ -27,16 +27,19 @@ private val sheetDateFormatter = LocalDate.Format {
     monthName(MonthNames.ENGLISH_ABBREVIATED)
 }
 
-/** [activity] is oldest first; its last entry is today. */
+/** The last 21 days ending [today], newest first; empty until [activity] and [today] are known. */
 internal fun streakStripFor(
-    activity: List<ReadingDayActivity>,
+    activity: ReadingActivity?,
+    today: LocalDate?,
     isLoading: Boolean = false,
 ): StreakStripUiModel {
-    val today = activity.lastOrNull()?.date
-    val streakLength = currentStreakLength(activity)
+    val streakLength = if (activity == null || today == null) 0 else activity.currentStreak(today)?.days ?: 0
 
     return StreakStripUiModel(
-        days = activity.asReversed().map { day ->
+        days = recentDays(
+            activity = activity,
+            today = today,
+        ).map { day ->
             StreakDayUiModel(
                 didRead = day.didRead,
                 isToday = day.date == today,
@@ -60,13 +63,22 @@ internal fun streakStripFor(
     )
 }
 
-/** [activity] is oldest first; its last entry is today. */
-internal fun streakSheetFor(activity: List<ReadingDayActivity>): StreakSheetUiModel {
-    val today = activity.lastOrNull()?.date
+/** The last 21 days ending [today], newest first; empty until [activity] and [today] are known. */
+internal fun streakSheetFor(
+    activity: ReadingActivity?,
+    today: LocalDate?,
+): StreakSheetUiModel {
+    val days = recentDays(
+        activity = activity,
+        today = today,
+    )
 
     return StreakSheetUiModel(
-        scaffold = streakSheetScaffoldFor(activity = activity),
-        rows = activity.asReversed().map { day ->
+        scaffold = streakSheetScaffoldFor(
+            readDays = days.count { it.didRead },
+            dayCount = days.size,
+        ),
+        rows = days.map { day ->
             StreakDayRowUiModel(
                 label = sheetDayLabel(
                     date = day.date,
@@ -78,20 +90,30 @@ internal fun streakSheetFor(activity: List<ReadingDayActivity>): StreakSheetUiMo
     )
 }
 
-/**
- * The number of consecutive read days running backward from today (the last entry in [activity]).
- * Stops at the first missed day; `0` when today itself was missed or the list is empty.
- */
-internal fun currentStreakLength(activity: List<ReadingDayActivity>): Int {
-    var streak = 0
+private const val STREAK_WINDOW_DAYS = 21
 
-    for (day in activity.asReversed()) {
-        if (day.didRead.not()) break
+private data class RecentDay(
+    val date: LocalDate,
+    val didRead: Boolean,
+)
 
-        streak++
+private fun recentDays(
+    activity: ReadingActivity?,
+    today: LocalDate?,
+): List<RecentDay> {
+    if (activity == null || today == null) return emptyList()
+
+    return List(STREAK_WINDOW_DAYS) { offset ->
+        val date = today.minus(
+            value = offset,
+            unit = DateTimeUnit.DAY,
+        )
+
+        RecentDay(
+            date = date,
+            didRead = date in activity.pagesByDay,
+        )
     }
-
-    return streak
 }
 
 private fun sheetDayLabel(

@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetSortedBooksByStatusUseCa
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserTagsByBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
@@ -42,6 +43,7 @@ internal class LibraryDependencies(
     val setLibraryGridLayoutUseCase: SetLibraryGridLayoutUseCase,
     val getLibrarySortSettingsAsFlowUseCase: GetLibrarySortSettingsAsFlowUseCase,
     val setLibrarySortUseCase: SetLibrarySortUseCase,
+    val observeUserTagsByBookUseCase: ObserveUserTagsByBookUseCase,
     val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,

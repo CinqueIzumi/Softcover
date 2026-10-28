@@ -18,7 +18,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetUiM
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagsLoad
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.shareSheetFor
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.shareTagPickerFor
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.tagsOrEmpty
 
 internal data class ShareCardsSnapshot(
     val book: Book?,
@@ -38,7 +37,7 @@ internal fun BookDetailUiState.shareCardsSnapshot(): ShareCardsSnapshot = ShareC
     edition = displayedEdition,
     username = currentUser?.username,
     avatarUrl = currentUser?.avatarUrl,
-    userTags = userTags.tagsOrEmpty,
+    userTags = userTags,
     chosenVariant = chosenShareVariant,
     chosenSize = chosenShareSize,
     selectedBookTags = selectedBookShareTags,
@@ -47,7 +46,7 @@ internal fun BookDetailUiState.shareCardsSnapshot(): ShareCardsSnapshot = ShareC
 )
 
 private fun BookDetailUiState.hasResolvedShareInputs(): Boolean {
-    val tagsResolved = book?.userBook == null || userTags != UserTagsLoad.Loading
+    val tagsResolved = book?.userBook == null || userTagsLoad != UserTagsLoad.Loading
 
     return currentUser != null && tagsResolved
 }

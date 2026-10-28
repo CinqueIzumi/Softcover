@@ -7,4 +7,7 @@ interface ReadingJournalHistoryRepository {
     fun observeReadingJournalHistory(bookId: Int): Flow<List<ReadingJournalEntry>>
 
     suspend fun refreshReadingJournalHistory(bookId: Int)
+
+    /** Refreshes the journal of every book at once, for stats that span the whole library. */
+    suspend fun refreshAllReadingJournalHistory()
 }

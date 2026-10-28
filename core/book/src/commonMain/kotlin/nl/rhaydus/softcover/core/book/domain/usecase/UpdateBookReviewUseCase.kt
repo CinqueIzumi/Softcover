@@ -15,12 +15,12 @@ class UpdateBookReviewUseCase(
     ): Result<Unit> = runCatchingLogged {
         book.userBook ?: return@runCatchingLogged
 
-        val updatedBook: Book = booksRepository.updateBookReview(
+        booksRepository.updateBookReview(
             book = book,
             review = review,
             hasSpoilers = hasSpoilers,
         )
 
-        booksRepository.cacheBook(book = updatedBook)
+        Unit
     }
 }

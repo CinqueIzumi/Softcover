@@ -7,46 +7,61 @@ import io.kotest.matchers.string.shouldEndWith
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.softcover.core.component.share.ReadingLifeGenre
+import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ReadingLifeShareCardMapperTest {
+    private class Life(
+        val stats: ReadingStats,
+        val history: ReadingHistory,
+    ) {
+        fun toReadingLifeShareCardUiModel(
+            profile: UserProfileData,
+            dayStreak: Int = 0,
+        ): ReadingLifeShareCardUiModel =
+            stats.toReadingLifeShareCardUiModel(
+                history = history,
+                profile = profile,
+                dayStreak = dayStreak,
+            )
+    }
+
     private fun life(
         pagesByMonth: List<MonthCount> = emptyList(),
         slices: List<GenreSlice> = emptyList(),
         average: Double = 0.0,
         trackedYears: Int = 0,
-    ): ReadingLife = ReadingLife(
-        booksByYear = emptyList(),
-        pagesByYear = emptyList(),
-        pagesByMonth = pagesByMonth,
-        genres = GenreBreakdown(slices = slices),
-        ratings = RatingsDistribution(average = average),
-        recentlyLoved = emptyList(),
-        trackedYears = trackedYears,
+        booksRead: Int = 0,
+        totalPages: Int = 0,
+    ): Life = Life(
+        stats = ReadingStats(
+            booksRead = booksRead,
+            totalPages = totalPages,
+            genres = GenreBreakdown(slices = slices),
+            ratings = RatingsDistribution(average = average),
+        ),
+        history = ReadingHistory(
+            pagesByMonth = pagesByMonth,
+            trackedYears = trackedYears,
+        ),
     )
 
     private fun profile(
         name: String = "Ada Lovelace",
         imageUrl: String = "https://avatar",
-        booksRead: Int = 12,
-        totalPagesRead: Int = 950,
-        streak: Int = 4,
     ): UserProfileData = UserProfileData(
         profileImageUrl = imageUrl,
         name = name,
         username = "ada",
         bio = "",
-        booksRead = booksRead,
-        totalPagesRead = totalPagesRead,
-        averageRating = 0.0,
-        readingStreak = streak,
     )
 
     private fun slice(
@@ -61,17 +76,18 @@ class ReadingLifeShareCardMapperTest {
     @Nested
     inner class ToReadingLifeShareCardUiModel {
         @Test
-        fun `carries the reader identity and totals from the profile`() {
+        fun `carries the reader identity from the profile and the totals from the stats`() {
             // ----- Arrange -----
-            val profile = profile(
-                name = "Ada Lovelace",
-                booksRead = 12,
-                totalPagesRead = 950,
-                streak = 4,
-            )
+            val profile = profile(name = "Ada Lovelace")
 
             // ----- Act -----
-            val result = life(trackedYears = 3).toReadingLifeShareCardUiModel(profile)
+            val result = life(
+                trackedYears = 3,
+                totalPages = 950,
+            ).toReadingLifeShareCardUiModel(
+                profile = profile,
+                dayStreak = 4,
+            )
 
             // ----- Assert -----
             result.readerName shouldBe "Ada Lovelace"
@@ -83,10 +99,10 @@ class ReadingLifeShareCardMapperTest {
         @Test
         fun `uses the singular book for a single book read`() {
             // ----- Arrange -----
-            val profile = profile(booksRead = 1)
+            val life = life(booksRead = 1)
 
             // ----- Act -----
-            val result = life().toReadingLifeShareCardUiModel(profile)
+            val result = life.toReadingLifeShareCardUiModel(profile())
 
             // ----- Assert -----
             result.totalBooksLine shouldEndWith "1 book"
@@ -95,10 +111,10 @@ class ReadingLifeShareCardMapperTest {
         @Test
         fun `uses the plural books for several books read`() {
             // ----- Arrange -----
-            val profile = profile(booksRead = 12)
+            val life = life(booksRead = 12)
 
             // ----- Act -----
-            val result = life().toReadingLifeShareCardUiModel(profile)
+            val result = life.toReadingLifeShareCardUiModel(profile())
 
             // ----- Assert -----
             result.totalBooksLine shouldEndWith "12 books"

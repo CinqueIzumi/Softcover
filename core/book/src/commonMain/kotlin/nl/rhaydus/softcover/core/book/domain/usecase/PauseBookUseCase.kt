@@ -14,12 +14,10 @@ class PauseBookUseCase(
     ): Result<ShelfMutationOutcome> = runCatchingLogged {
         if (book.status == BookStatus.Paused) return@runCatchingLogged ShelfMutationOutcome.NoChange
 
-        val updatedBook: Book = booksRepository.markBookAsPaused(
+        booksRepository.markBookAsPaused(
             book = book,
             editionId = book.statusChangeEditionId(requestedEditionId = editionId),
         )
-
-        booksRepository.cacheBook(book = updatedBook)
 
         ShelfMutationOutcome.Applied
     }

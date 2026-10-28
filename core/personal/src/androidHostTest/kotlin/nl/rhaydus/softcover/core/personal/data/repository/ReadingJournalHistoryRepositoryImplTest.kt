@@ -26,21 +26,18 @@ class ReadingJournalHistoryRepositoryImplTest {
             return id
         }
 
-        fun markSynced(localId: Long) {
-            val index = rows.indexOfFirst { it.localId == localId }
-            rows[index] = rows[index].copy(pending = false)
-        }
-
         override fun observeByBookId(bookId: Int) = flowOf(rows.filter { it.bookId == bookId })
 
-        override suspend fun getSyncedIds(bookId: Int): List<Long> =
-            rows.filter { it.bookId == bookId && it.pending.not() }.map { it.localId }
-
-        override suspend fun replaceSynced(
-            syncedIdsBeforeFetch: List<Long>,
+        override suspend fun replaceSyncedForBook(
+            bookId: Int,
             entities: List<ProgressHistoryEntity>,
         ) {
-            rows.removeAll { it.localId in syncedIdsBeforeFetch }
+            rows.removeAll { it.bookId == bookId && it.pending.not() }
+            entities.forEach { add(entity = it) }
+        }
+
+        override suspend fun replaceAllSynced(entities: List<ProgressHistoryEntity>) {
+            rows.removeAll { it.pending.not() }
             entities.forEach { add(entity = it) }
         }
     }
@@ -140,39 +137,6 @@ class ReadingJournalHistoryRepositoryImplTest {
                     pages = 7,
                 ),
             )
-
-            // ----- Act -----
-            repository.refreshReadingJournalHistory(bookId = 5)
-
-            // ----- Assert -----
-            local.rows.map { it.pages }.shouldContainExactly(
-                2,
-                7,
-            )
-        }
-
-        @Test
-        fun `keeps a row that was marked synced while the fetch was in flight`() = runTest {
-            // ----- Arrange -----
-            val racingId = local.add(
-                entity = entity(
-                    actionAtEpochMillis = 2_000L,
-                    pages = 2,
-                    pending = true,
-                ),
-            )
-
-            coEvery {
-                remote.getReadingJournalHistory(bookId = 5)
-            } coAnswers {
-                local.markSynced(localId = racingId)
-                listOf(
-                    entity(
-                        actionAtEpochMillis = 3_000L,
-                        pages = 7,
-                    ),
-                )
-            }
 
             // ----- Act -----
             repository.refreshReadingJournalHistory(bookId = 5)

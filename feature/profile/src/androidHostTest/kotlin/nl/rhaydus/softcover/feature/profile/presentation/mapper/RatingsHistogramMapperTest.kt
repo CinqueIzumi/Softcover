@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
+import nl.rhaydus.softcover.core.domain.model.StatsScope
+import nl.rhaydus.softcover.core.domain.model.StatsWindow
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import org.junit.jupiter.api.Nested
@@ -222,6 +224,189 @@ class RatingsHistogramMapperTest {
 
             // ----- Assert -----
             result shouldBe "AVERAGE ACROSS 42 BOOKS"
+        }
+    }
+
+
+    @Nested
+    inner class RatingsHistogramHeader {
+        private fun newReader(totalRatings: Int) = RatingsDistribution(
+            totalRatings = totalRatings,
+            band = RatingBand.NEW_READER,
+        )
+
+        @Test
+        fun `all time keeps the band headline for a new reader`() {
+            // ----- Arrange -----
+            val ratings = newReader(totalRatings = 3)
+
+            // ----- Act -----
+            val result = ratingsHistogramHeader(
+                ratings = ratings,
+                scope = StatsScope.AllTime,
+            )
+
+            // ----- Assert -----
+            result shouldBe RatingBand.NEW_READER.toRatingsHistogramHeader()
+        }
+
+        @Test
+        fun `a narrow scope with few ratings states the count`() {
+            // ----- Arrange -----
+            val ratings = newReader(totalRatings = 3)
+
+            // ----- Act -----
+            val result = ratingsHistogramHeader(
+                ratings = ratings,
+                scope = StatsScope.Rolling(StatsWindow.LAST_30_DAYS),
+            )
+
+            // ----- Assert -----
+            result.headlineText shouldBe "3 rated books in the last 30 days"
+        }
+
+        @Test
+        fun `a narrow scope with a single rating uses the singular`() {
+            // ----- Arrange -----
+            val ratings = newReader(totalRatings = 1)
+
+            // ----- Act -----
+            val result = ratingsHistogramHeader(
+                ratings = ratings,
+                scope = StatsScope.CalendarYear(2026),
+            )
+
+            // ----- Assert -----
+            result.headlineText shouldBe "1 rated book in 2026"
+        }
+
+        @Test
+        fun `a narrow scope with no ratings says no rated books`() {
+            // ----- Arrange -----
+            val ratings = newReader(totalRatings = 0)
+
+            // ----- Act -----
+            val result = ratingsHistogramHeader(
+                ratings = ratings,
+                scope = StatsScope.CalendarYear(2026),
+            )
+
+            // ----- Assert -----
+            result.headlineText shouldBe "No rated books in 2026"
+        }
+
+        @Test
+        fun `a narrow scope with a classified band keeps the band headline`() {
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(
+                totalRatings = 12,
+                band = RatingBand.GENEROUS,
+            )
+
+            // ----- Act -----
+            val result = ratingsHistogramHeader(
+                ratings = ratings,
+                scope = StatsScope.CalendarYear(2026),
+            )
+
+            // ----- Assert -----
+            result shouldBe RatingBand.GENEROUS.toRatingsHistogramHeader()
+        }
+    }
+
+    @Nested
+    inner class RatingsHistogramCaption {
+        @Test
+        fun `a narrow scope with a new reader leaves the count to the header`() {
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(band = RatingBand.NEW_READER)
+
+            // ----- Act -----
+            val result = ratingsHistogramCaption(
+                ratings = ratings,
+                scope = StatsScope.CalendarYear(2026),
+            )
+
+            // ----- Assert -----
+            result shouldBe "Half stars count."
+        }
+
+        @Test
+        fun `all time keeps the band caption for a new reader`() {
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(band = RatingBand.NEW_READER)
+
+            // ----- Act -----
+            val result = ratingsHistogramCaption(
+                ratings = ratings,
+                scope = StatsScope.AllTime,
+            )
+
+            // ----- Assert -----
+            result shouldBe RatingBand.NEW_READER.toRatingsHistogramCaption()
+        }
+
+        @Test
+        fun `a narrow scope with a classified band keeps the band caption`() {
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(band = RatingBand.CENTRIST)
+
+            // ----- Act -----
+            val result = ratingsHistogramCaption(
+                ratings = ratings,
+                scope = StatsScope.Rolling(StatsWindow.LAST_6_MONTHS),
+            )
+
+            // ----- Assert -----
+            result shouldBe RatingBand.CENTRIST.toRatingsHistogramCaption()
+        }
+    }
+
+    @Nested
+    inner class RatingsEmptyCaption {
+        @Test
+        fun `a scope with no finished books says so`() {
+            // ----- Arrange -----
+            val scope = StatsScope.CalendarYear(2025)
+
+            // ----- Act -----
+            val result = ratingsEmptyCaption(
+                booksRead = 0,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            result shouldBe "No finished books in 2025."
+        }
+
+        @Test
+        fun `a scope with finished but unrated books names the scope`() {
+            // ----- Arrange -----
+            val scope = StatsScope.Rolling(StatsWindow.LAST_12_MONTHS)
+
+            // ----- Act -----
+            val result = ratingsEmptyCaption(
+                booksRead = 4,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            result shouldBe "You haven't rated any books you finished in the last 12 months."
+        }
+
+        @Test
+        fun `all time asks the reader to rate a few books`() {
+            // ----- Arrange -----
+            val scope = StatsScope.AllTime
+
+            // ----- Act -----
+            val result = ratingsEmptyCaption(
+                booksRead = 0,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            result shouldBe "Rate a few books you've finished and this fills in."
         }
     }
 }

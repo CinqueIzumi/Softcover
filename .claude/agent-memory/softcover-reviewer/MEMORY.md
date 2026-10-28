@@ -19,3 +19,4 @@
 - [R9 citation covers R10 ground](architecture_r9_citation_covers_r10_ground.md) — "off the composition (R9)" on a stored UiState model list is house shorthand, not a wrong rule number
 - [UiState field never populated](project_uistate_field_never_populated.md) — a declared, rendered field with no writer passes every gate; grep for its writes
 - [Self-emitting click modifiers](architecture_foundation_self_emitting_modifiers.md) — clickable already emits hover; an extra hoverable on the same source doubles up
+- [ObserveAsEvents captures first lambda](architecture_observeasevents_captures_first_lambda.md) — keyed on flow only; a keyed remembered object captured in it goes stale

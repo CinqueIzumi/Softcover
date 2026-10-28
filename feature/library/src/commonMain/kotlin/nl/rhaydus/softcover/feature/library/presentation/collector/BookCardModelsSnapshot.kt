@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 
 /** The state fields the Library's book and edition card models are derived from. */
@@ -18,6 +19,7 @@ internal data class BookCardModelsSnapshot(
     val displayEditionsByTab: Map<String, List<BookEdition>>,
     val gridLayout: LibraryGridLayout,
     val deadlines: Map<Int, BookDeadline>,
+    val userTagsByBookId: Map<Int, List<UserTag>>,
     val dateStyle: DateStyle,
     val selectionMode: Boolean,
     val selectedBookIds: Set<Int>,

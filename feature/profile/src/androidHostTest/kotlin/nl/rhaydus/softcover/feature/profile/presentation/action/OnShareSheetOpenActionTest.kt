@@ -13,7 +13,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDepe
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareProfile
-import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareReadingLife
+import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareReadingHistory
+import nl.rhaydus.softcover.feature.profile.presentation.state.buildShareReadingStats
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -38,10 +39,11 @@ class OnShareSheetOpenActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `requests the sheet when the reading life and profile are loaded`() = runTest {
+        fun `requests the sheet when the reading stats, history and profile are loaded`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
-                readingLife = buildShareReadingLife(),
+                readingStats = buildShareReadingStats(),
+                readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
             )
             val action = OnShareSheetOpenAction()
@@ -60,7 +62,8 @@ class OnShareSheetOpenActionTest {
         fun `leaves opening the session to the collector`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
-                readingLife = buildShareReadingLife(),
+                readingStats = buildShareReadingStats(),
+                readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
             )
             val action = OnShareSheetOpenAction()
@@ -79,7 +82,8 @@ class OnShareSheetOpenActionTest {
         fun `resets leftover capture progress from an earlier opening`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(
-                readingLife = buildShareReadingLife(),
+                readingStats = buildShareReadingStats(),
+                readingHistory = buildShareReadingHistory(),
                 userProfileData = buildShareProfile(),
                 shareCapture = ShareCaptureState(progress = ShareCaptureProgress.Saving),
             )
@@ -96,9 +100,12 @@ class OnShareSheetOpenActionTest {
         }
 
         @Test
-        fun `stays unrequested when only the reading life has loaded`() = runTest {
+        fun `stays unrequested when only the reading stats and history have loaded`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(readingLife = buildShareReadingLife())
+            stateFlow.value = ProfileUiState(
+                readingStats = buildShareReadingStats(),
+                readingHistory = buildShareReadingHistory(),
+            )
             val action = OnShareSheetOpenAction()
 
             // ----- Act -----

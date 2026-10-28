@@ -7,30 +7,31 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
-import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
+import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_CARD_COUNT
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRecentlyLovedCard
-import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
-import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
-import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.RecentlyLovedEntry
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.ActionScope
 
 /**
  * Maps the reader's most recently loved books to book cards off the composition. Each card takes its
- * cover from the cached library book when there is one, and re-maps when that book changes. While the
- * reading life is still loading and there are none, the cards are loading stand-ins.
+ * cover, title and authors from the cached library book, and re-maps when that book changes; a loved book
+ * the library does not hold yet is left out. While the reading history is still loading and there are
+ * none, the cards are loading stand-ins.
  */
-internal class RecentlyLovedCardsCollector : ProfileCollector {
+internal class RecentlyLovedCardsCollector : StatsAtlasCollector {
     override suspend fun onLaunch(
-        scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>,
-        dependencies: ProfileDependencies,
+        scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>,
+        dependencies: StatsAtlasDependencies,
     ) {
         scope.state
             .map {
                 RecentlyLovedSnapshot(
-                    books = it.readingLife?.recentlyLoved.orEmpty(),
+                    books = it.readingHistory?.recentlyLoved.orEmpty(),
                     isLoading = it.isReadingLifeLoading,
                 )
             }
@@ -40,7 +41,7 @@ internal class RecentlyLovedCardsCollector : ProfileCollector {
     }
 
     private fun RecentlyLovedSnapshot.toCardSets(
-        dependencies: ProfileDependencies,
+        dependencies: StatsAtlasDependencies,
     ): Flow<BookCardSet<RecentlyLovedEntry>> {
         if (isLoading && books.isEmpty()) {
             return flowOf(BookCardSet.standIns(RECENTLY_LOVED_STAND_IN_CARDS))
@@ -53,10 +54,12 @@ internal class RecentlyLovedCardsCollector : ProfileCollector {
             val byId = libraryBooks.associateBy { it.id }
 
             loved
-                .map { book ->
+                .mapNotNull { book ->
+                    val libraryBook = byId[book.bookId]?.takeIf { it.userBook != null }
+                        ?: return@mapNotNull null
                     val entry = RecentlyLovedEntry(
                         loved = book,
-                        libraryBook = byId[book.bookId]?.takeIf { it.userBook != null },
+                        libraryBook = libraryBook,
                     )
 
                     entry.toRecentlyLovedCard() to entry

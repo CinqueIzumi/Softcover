@@ -60,6 +60,7 @@ class BookDaoRankedBooksTest {
                 description = "",
                 releaseYear = 2020,
                 releaseDate = null,
+                pages = null,
                 coverUrl = "",
                 usersCount = 0,
                 ratingsCount = 0,

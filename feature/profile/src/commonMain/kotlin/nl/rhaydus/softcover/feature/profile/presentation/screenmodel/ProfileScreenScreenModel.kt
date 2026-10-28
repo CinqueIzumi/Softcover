@@ -2,13 +2,14 @@ package nl.rhaydus.softcover.feature.profile.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
-import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
+import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileStatsUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollector
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
@@ -18,12 +19,13 @@ import nl.rhaydus.toad.ToadScreenModel
 
 internal class ProfileScreenScreenModel(
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
-    private val observeReadingLifeUseCase: ObserveReadingLifeUseCase,
-    private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
+    private val observeReadingStatsUseCase: ObserveReadingStatsUseCase,
+    private val observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
+    private val observeReadingActivityUseCase: ObserveReadingActivityUseCase,
+    private val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
+    private val observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase,
+    private val refreshUserProfileStatsUseCase: RefreshUserProfileStatsUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
-    private val getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
-    private val setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
-    private val observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,
     dispatchers: AppDispatchers,
     initializers: List<ProfileCollector>,
 ) : ToadScreenModel<ProfileUiState, ProfileEvent, ProfileDependencies, ProfileCollector, LocalProfileVariables>(
@@ -33,12 +35,13 @@ internal class ProfileScreenScreenModel(
 ) {
     override val dependencies: ProfileDependencies = ProfileDependencies(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
-        observeReadingLifeUseCase = observeReadingLifeUseCase,
-        refreshUserProfileDataUseCase = refreshUserProfileDataUseCase,
+        observeReadingStatsUseCase = observeReadingStatsUseCase,
+        observeReadingHistoryUseCase = observeReadingHistoryUseCase,
+        observeReadingActivityUseCase = observeReadingActivityUseCase,
+        observeCurrentDateUseCase = observeCurrentDateUseCase,
+        observeReadingStatsBackfilledUseCase = observeReadingStatsBackfilledUseCase,
+        refreshUserProfileStatsUseCase = refreshUserProfileStatsUseCase,
         resetUserDataUseCase = resetUserDataUseCase,
-        getHideUntaggedAuthorsAsFlowUseCase = getHideUntaggedAuthorsAsFlowUseCase,
-        setHideUntaggedAuthorsUseCase = setHideUntaggedAuthorsUseCase,
-        observeBooksByIdsUseCase = observeBooksByIdsUseCase,
         mainDispatcher = dispatchers.main,
         coroutineScope = screenModelScope,
     )

@@ -16,6 +16,7 @@ kotlin {
             implementation(project(":core:personal"))
             implementation(project(":core:preferences"))
             implementation(project(":core:profile"))
+            implementation(project(":core:progresssheet"))
             implementation(project(":core:notification"))
             api(project(":core:component"))
             implementation(project(":core:designsystem"))

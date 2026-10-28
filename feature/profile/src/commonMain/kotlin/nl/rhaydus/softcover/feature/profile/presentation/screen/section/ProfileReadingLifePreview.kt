@@ -1,32 +1,149 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen.section
 
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.domain.model.ReadingFormat
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
-import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
+import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
+import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
+import nl.rhaydus.softcover.core.profile.domain.model.RecentlyLovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
 
 /**
- * A representative [ReadingLife] sample (the redline spec's sample reader, Elena Marchetti) shared by
+ * A representative [ReadingStats] sample (the redline spec's sample reader, Elena Marchetti) shared by
  * both the mobile and desktop `@StandardPreview`s so the two stay in sync. Split into one builder per
  * field (below) purely to keep this assembly function short.
  */
-internal fun profileReadingLifePreview(): ReadingLife = ReadingLife(
-    booksByYear = previewBooksByYear(),
-    pagesByYear = previewPagesByYear(),
-    pagesByMonth = previewPagesByMonth(),
+internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
+    booksRead = 214,
+    totalPages = 128_406,
     genres = previewGenres(),
     ratings = previewRatings(),
-    recentlyLoved = previewRecentlyLoved(),
-    trackedYears = 8,
     authorDemographics = previewAuthorDemographics(),
+    topAuthors = previewTopAuthors(),
+    formatSplit = previewFormatSplit(),
+)
+
+private fun previewFormatSplit(): FormatSplit = FormatSplit(
+    counts = mapOf(
+        ReadingFormat.Physical to 111,
+        ReadingFormat.Ebook to 66,
+        ReadingFormat.Audio to 37,
+    ),
+)
+
+private fun previewTopAuthors(): List<AuthorRanking> = listOf(
+    previewRanking(
+        id = 1,
+        name = "Ursula K. Le Guin",
+        leadTitle = "The Left Hand of Darkness",
+        booksRead = 4,
+        averageRating = 4.6,
+    ),
+    previewRanking(
+        id = 2,
+        name = "Terry Pratchett",
+        leadTitle = "Guards! Guards!",
+        booksRead = 3,
+        averageRating = 4.3,
+    ),
+    previewRanking(
+        id = 3,
+        name = "Becky Chambers",
+        leadTitle = "A Psalm for the Wild-Built",
+        booksRead = 3,
+        averageRating = 4.1,
+    ),
+    previewRanking(
+        id = 4,
+        name = "Susanna Clarke",
+        leadTitle = "Piranesi",
+        booksRead = 2,
+        averageRating = 4.8,
+    ),
+    previewRanking(
+        id = 5,
+        name = "Kazuo Ishiguro",
+        leadTitle = "Klara and the Sun",
+        booksRead = 2,
+        averageRating = 3.9,
+    ),
+)
+
+private fun previewRanking(
+    id: Int,
+    name: String,
+    leadTitle: String,
+    booksRead: Int,
+    averageRating: Double,
+): AuthorRanking = AuthorRanking(
+    author = PreviewData.baseAuthor.copy(
+        id = id,
+        name = name,
+    ),
+    booksRead = booksRead,
+    averageRating = averageRating,
+    leadBook = PreviewData.baseBook.copy(
+        id = id,
+        title = leadTitle,
+    ),
+)
+
+/** The pages-read-per-month half of the same sample reader, summed across every year. */
+internal fun profileMonthlyPagesPreview(): MonthlyPages = MonthlyPages.AcrossYears(
+    pages = listOf(9_200, 7_800, 14_800, 11_400, 8_600, 6_900, 12_100, 13_500, 10_300, 12_700, 9_800, 11_300),
+)
+
+/** The pages-read-per-hour half of the same sample reader, mostly in the evening. */
+internal fun profileHourlyPagesPreview(): HourlyPages = HourlyPages(
+    pages = listOf(
+        2_400, 700, 100, 0, 0, 200,
+        900, 1_300, 1_100, 1_700, 1_900, 2_300,
+        2_000, 1_800, 1_400, 2_100, 2_800, 4_600,
+        6_900, 9_800, 14_200, 17_500, 12_100, 6_300,
+    ),
+)
+
+/** The pages-read-per-day half of the same sample reader: a handful of days a week through the first ten months. */
+internal fun profileReadingActivityPreview(): ReadingActivity = ReadingActivity(
+    pagesByDay = (0 until 300)
+        .filter { it % 7 != 0 && it % 5 != 0 }
+        .associate { dayOfYear ->
+            LocalDate(
+                year = 2025,
+                month = 1,
+                day = 1,
+            ).plus(
+                value = dayOfYear,
+                unit = DateTimeUnit.DAY,
+            ) to 12 + (dayOfYear * 37) % 140
+        },
+    streaks = emptyList(),
+)
+
+/** The [ReadingHistory] half of the same sample reader. */
+internal fun profileReadingHistoryPreview(): ReadingHistory = ReadingHistory(
+    booksByYear = previewBooksByYear(),
+    pagesByYear = previewPagesByYear(),
+    yearsRead = (2025 downTo 2018).toList(),
+    trackedYears = 8,
+    pagesByMonth = previewPagesByMonth(),
+    recentlyLoved = previewRecentlyLoved(),
 )
 
 private fun previewBooksByYear(): List<YearCount> = listOf(
@@ -139,7 +256,6 @@ private fun previewGenres(): GenreBreakdown = GenreBreakdown(
             fraction = 0.128,
         ),
     ),
-    taggedBookCount = 148,
 )
 
 private fun previewAuthorDemographics(): AuthorDemographics = AuthorDemographics(
@@ -186,29 +302,32 @@ private fun previewRatings(): RatingsDistribution = RatingsDistribution(
     band = RatingBand.GENEROUS,
 )
 
-private fun previewRecentlyLoved(): List<LovedBook> = listOf(
-    LovedBook(
+private fun previewRecentlyLoved(): List<RecentlyLovedBook> = listOf(
+    RecentlyLovedBook(
         bookId = 1,
-        coverUrl = "",
-        title = "The Bee Sting",
-        author = "Paul Murray",
         ratingStars = 4.5,
-        monthLabel = "Jun 2026",
+        finishedOn = LocalDate(
+            2026,
+            6,
+            14,
+        ),
     ),
-    LovedBook(
+    RecentlyLovedBook(
         bookId = 2,
-        coverUrl = "",
-        title = "Cloud Cuckoo Land",
-        author = "Anthony Doerr",
         ratingStars = 4.0,
-        monthLabel = "May 2026",
+        finishedOn = LocalDate(
+            2026,
+            5,
+            9,
+        ),
     ),
-    LovedBook(
+    RecentlyLovedBook(
         bookId = 3,
-        coverUrl = "",
-        title = "Sea of Tranquility",
-        author = "Emily St John Mandel",
         ratingStars = 4.5,
-        monthLabel = "Apr 2026",
+        finishedOn = LocalDate(
+            2026,
+            4,
+            21,
+        ),
     ),
 )

@@ -4,12 +4,14 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.library.presentation.sort.applyEditionSort
 
 internal fun computeDisplayBooks(
     raw: List<Book>,
     query: String,
     filters: LibraryFilters,
+    userTagsByBookId: Map<Int, List<UserTag>>,
 ): List<Book> {
     val q = query.trim()
 
@@ -30,7 +32,12 @@ internal fun computeDisplayBooks(
         }
     }
 
-    return if (filters.isEmpty) searchFiltered else searchFiltered.filter { filters.matchesBook(book = it) }
+    return if (filters.isEmpty) searchFiltered else searchFiltered.filter { book ->
+        filters.matchesBook(
+            book = book,
+            userTags = userTagsByBookId[book.id].orEmpty(),
+        )
+    }
 }
 
 internal fun computeDisplayEditions(
@@ -41,6 +48,7 @@ internal fun computeDisplayEditions(
     addedAtByEditionId: Map<Int, String?>,
     filters: LibraryFilters,
     bookByBookId: Map<Int, Book>,
+    userTagsByBookId: Map<Int, List<UserTag>>,
 ): List<BookEdition> {
     val q = query.trim()
 
@@ -74,6 +82,7 @@ internal fun computeDisplayEditions(
             filters.matchesEdition(
                 edition = edition,
                 book = bookByBookId[edition.bookId],
+                userTags = userTagsByBookId[edition.bookId].orEmpty(),
             )
         }
     }
@@ -97,6 +106,7 @@ internal fun libraryPreviewCount(
             raw = books,
             query = state.searchQuery,
             filters = draftFilters,
+            userTagsByBookId = state.userTagsByBookId,
         ).size
     }
 
@@ -110,5 +120,6 @@ internal fun libraryPreviewCount(
         addedAtByEditionId = state.addedAtByTab[tabId].orEmpty(),
         filters = draftFilters,
         bookByBookId = state.bookByBookId,
+        userTagsByBookId = state.userTagsByBookId,
     ).size
 }

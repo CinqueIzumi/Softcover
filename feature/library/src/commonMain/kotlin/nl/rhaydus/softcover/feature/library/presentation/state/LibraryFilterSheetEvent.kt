@@ -9,5 +9,15 @@ internal sealed interface LibraryFilterSheetEvent {
 
     data class ChipToggled(val key: String) : LibraryFilterSheetEvent
 
-    data class TagSearchChanged(val query: String) : LibraryFilterSheetEvent
+    data class TagRemoved(val key: String) : LibraryFilterSheetEvent
+
+    data class TagSearchChanged(
+        val source: TagSource,
+        val query: String,
+    ) : LibraryFilterSheetEvent
+
+    data class TagCategoryPicked(
+        val source: TagSource,
+        val key: String,
+    ) : LibraryFilterSheetEvent
 }

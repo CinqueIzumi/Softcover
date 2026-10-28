@@ -23,7 +23,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 
 /**
  * The "Find it" section (The Book lens): one outlined pill per search link. Absent until the edition has an
- * ISBN.
+ * ISBN or a title.
  */
 @Composable
 internal fun ExternalLinksSection(
@@ -32,7 +32,7 @@ internal fun ExternalLinksSection(
 ) {
     val links = state.externalLinks
 
-    // The ISBN is unknown until the edition resolves, almost always after t0 — so, like Tags, this
+    // The links are unknown until the edition resolves, almost always after t0 — so, like Tags, this
     // section is condition-gated rather than skeleton-reserved, but its arrival still animates in
     // (§5 "Book-detail lens-section reveal") instead of popping and shoving Voices down.
     // `AnimatedVisibility` must stay composed across the null→non-null flip for the enter transition

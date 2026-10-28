@@ -7,6 +7,7 @@ import com.apollographql.cache.normalized.FetchPolicy
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
@@ -34,6 +35,7 @@ import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
 import nl.rhaydus.softcover.GetLatestUnfinishedReadQuery
 import nl.rhaydus.softcover.GetSystemVibeBookIdsQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
+import nl.rhaydus.softcover.GetUserBookIdsByIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.InsertUserBookWithStatusMutation
 import nl.rhaydus.softcover.MarkBookAsReadMutation
@@ -51,6 +53,7 @@ import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.domain.exception.NoUserIdFoundException
+import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -60,6 +63,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.SystemVibe
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
@@ -1795,34 +1799,13 @@ class BooksRemoteDataSourceImplTest {
             // ----- Arrange -----
             val userId = 1
             val expectedBook = stubBook()
-            val queryData = mockk<GetUserBooksQuery.Data>()
-            val meEntry = mockk<GetUserBooksQuery.Data.Me>()
-            val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
-
-            coEvery {
-                apolloClient.safeQuery(
-                    query = any<GetUserBooksQuery>(),
-                    fetchPolicy = any(),
-                )
-            } returns queryData
-
-            every {
-                queryData.me
-            } returns listOf(meEntry)
-
-            every {
-                meEntry.user_books
-            } returns listOf(userBookEntry)
-
-            every {
-                userBookEntry.toBook()
-            } returns expectedBook
+            stubUserBookEntries(entries = listOf(stubUserBookEntry(book = expectedBook)))
 
             // ----- Act -----
             val result = dataSource.initializeBooks(userId = userId)
 
             // ----- Assert -----
-            result shouldBe listOf(expectedBook)
+            result.books shouldBe listOf(expectedBook)
         }
 
         @Test
@@ -1851,34 +1834,13 @@ class BooksRemoteDataSourceImplTest {
         fun `filters out entries whose toBook maps to null`() = runTest {
             // ----- Arrange -----
             val userId = 1
-            val queryData = mockk<GetUserBooksQuery.Data>()
-            val meEntry = mockk<GetUserBooksQuery.Data.Me>()
-            val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
-
-            coEvery {
-                apolloClient.safeQuery(
-                    query = any<GetUserBooksQuery>(),
-                    fetchPolicy = any(),
-                )
-            } returns queryData
-
-            every {
-                queryData.me
-            } returns listOf(meEntry)
-
-            every {
-                meEntry.user_books
-            } returns listOf(userBookEntry)
-
-            every {
-                userBookEntry.toBook()
-            } returns null
+            stubUserBookEntries(entries = listOf(stubUserBookEntry(book = null)))
 
             // ----- Act -----
             val result = dataSource.initializeBooks(userId = userId)
 
             // ----- Assert -----
-            result shouldBe emptyList()
+            result.books shouldBe emptyList()
         }
 
         @Test
@@ -1889,34 +1851,13 @@ class BooksRemoteDataSourceImplTest {
                 id = 10,
                 canonicalId = null,
             )
-            val queryData = mockk<GetUserBooksQuery.Data>()
-            val meEntry = mockk<GetUserBooksQuery.Data.Me>()
-            val userBookEntry = mockk<GetUserBooksQuery.Data.Me.User_book>()
-
-            coEvery {
-                apolloClient.safeQuery(
-                    query = any<GetUserBooksQuery>(),
-                    fetchPolicy = any(),
-                )
-            } returns queryData
-
-            every {
-                queryData.me
-            } returns listOf(meEntry)
-
-            every {
-                meEntry.user_books
-            } returns listOf(userBookEntry)
-
-            every {
-                userBookEntry.toBook()
-            } returns bookWithoutCanonical
+            stubUserBookEntries(entries = listOf(stubUserBookEntry(book = bookWithoutCanonical)))
 
             // ----- Act -----
             val result = dataSource.initializeBooks(userId = userId)
 
             // ----- Assert -----
-            result shouldBe listOf(bookWithoutCanonical)
+            result.books shouldBe listOf(bookWithoutCanonical)
             coVerify(exactly = 0) {
                 apolloClient.safeQuery(
                     query = match<Query<GetBooksByIdsQuery.Data>> { it is GetBooksByIdsQuery },
@@ -1947,6 +1888,7 @@ class BooksRemoteDataSourceImplTest {
                         name = "Canonical Author",
                     ),
                 ),
+                nonPrimaryAuthorIds = setOf(2),
                 usersCount = 500,
                 ratingsCount = 999,
                 positionsInSeries = listOf(1.0),
@@ -1958,7 +1900,7 @@ class BooksRemoteDataSourceImplTest {
             stubCanonicalBooksQuery(canonicalBooks = listOf(canonical))
 
             // ----- Act -----
-            val result = dataSource.initializeBooks(userId = 1).single()
+            val result = dataSource.initializeBooks(userId = 1).books.single()
 
             // ----- Assert -----
             result.id shouldBe canonical.id
@@ -1969,6 +1911,7 @@ class BooksRemoteDataSourceImplTest {
             result.releaseYear shouldBe canonical.releaseYear
             result.coverUrl shouldBe canonical.coverUrl
             result.authors shouldBe canonical.authors
+            result.nonPrimaryAuthorIds shouldBe canonical.nonPrimaryAuthorIds
             result.usersCount shouldBe canonical.usersCount
             result.ratingsCount shouldBe canonical.ratingsCount
             result.positionsInSeries shouldBe canonical.positionsInSeries
@@ -1982,18 +1925,22 @@ class BooksRemoteDataSourceImplTest {
             val first = baseBook.copy(
                 id = 10,
                 canonicalId = 20,
+                userBook = baseBook.userBook?.copy(id = 10),
             )
             val plain = baseBook.copy(
                 id = 11,
                 canonicalId = null,
+                userBook = baseBook.userBook?.copy(id = 11),
             )
             val second = baseBook.copy(
                 id = 12,
                 canonicalId = 20,
+                userBook = baseBook.userBook?.copy(id = 12),
             )
             val third = baseBook.copy(
                 id = 13,
                 canonicalId = 30,
+                userBook = baseBook.userBook?.copy(id = 13),
             )
             val canonical20 = baseBook.copy(id = 20)
             val canonical30 = baseBook.copy(id = 30)
@@ -2005,7 +1952,7 @@ class BooksRemoteDataSourceImplTest {
             val result = dataSource.initializeBooks(userId = 1)
 
             // ----- Assert -----
-            result.map { it.id } shouldBe listOf(20, 11, 20, 30)
+            result.books.map { it.id } shouldBe listOf(20, 11, 20, 30)
             coVerify(exactly = 1) {
                 apolloClient.safeQuery(
                     query = match<Query<GetBooksByIdsQuery.Data>> {
@@ -2031,19 +1978,346 @@ class BooksRemoteDataSourceImplTest {
             val result = dataSource.initializeBooks(userId = 1)
 
             // ----- Assert -----
-            result shouldBe listOf(book)
+            result.books shouldBe listOf(book)
+        }
+
+        @Test
+        fun `maps each book's taggings by category, name and spoiler flag, keyed by book id`() = runTest {
+            // ----- Arrange -----
+            val first = baseBook.copy(id = 10)
+            val second = baseBook.copy(id = 11)
+
+            stubUserBookEntries(
+                entries = listOf(
+                    stubUserBookEntry(
+                        book = first,
+                        taggings = listOf(
+                            tagging(
+                                name = "Cozy",
+                                category = "Mood",
+                            ),
+                            tagging(
+                                name = "Violence",
+                                category = "Content Warning",
+                                spoiler = true,
+                            ),
+                        ),
+                    ),
+                    stubUserBookEntry(
+                        book = second,
+                        taggings = listOf(
+                            tagging(
+                                name = "Fantasy",
+                                category = "Genre",
+                            ),
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1)
+
+            // ----- Assert -----
+            result.userTagsByBookId.keys shouldBe setOf(10, 11)
+            result.userTagsByBookId[10].shouldNotBeNull().map { tag ->
+                Triple(
+                    tag.category,
+                    tag.name,
+                    tag.spoiler,
+                )
+            } shouldBe listOf(
+                Triple(
+                    TagCategory.MOOD,
+                    "Cozy",
+                    false,
+                ),
+                Triple(
+                    TagCategory.CONTENT_WARNING,
+                    "Violence",
+                    true,
+                ),
+            )
+            result.userTagsByBookId[11].shouldNotBeNull().map { tag ->
+                Triple(
+                    tag.category,
+                    tag.name,
+                    tag.spoiler,
+                )
+            } shouldBe listOf(
+                Triple(
+                    TagCategory.GENRE,
+                    "Fantasy",
+                    false,
+                ),
+            )
+        }
+
+        @Test
+        fun `maps a book without taggings to an empty list`() = runTest {
+            // ----- Arrange -----
+            val untagged = baseBook.copy(id = 10)
+
+            stubUserBooksQuery(userBooks = listOf(untagged))
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1)
+
+            // ----- Assert -----
+            result.userTagsByBookId shouldBe mapOf(10 to emptyList())
+        }
+
+        @Test
+        fun `a merged book takes the canonical book's taggings under the canonical id`() = runTest {
+            // ----- Arrange -----
+            val original = baseBook.copy(
+                id = 10,
+                canonicalId = 20,
+            )
+            val canonical = baseBook.copy(id = 20)
+
+            stubUserBookEntries(
+                entries = listOf(
+                    stubUserBookEntry(
+                        book = original,
+                        taggings = listOf(
+                            tagging(
+                                name = "Own copy tag",
+                                category = "Tag",
+                            ),
+                        ),
+                        canonicalTaggings = listOf(
+                            canonicalTagging(
+                                name = "Slow burn",
+                                category = "Mood",
+                                spoiler = true,
+                            ),
+                        ),
+                    ),
+                ),
+            )
+            stubCanonicalBooksQuery(canonicalBooks = listOf(canonical))
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1)
+
+            // ----- Assert -----
+            result.userTagsByBookId.keys shouldBe setOf(20)
+            result.userTagsByBookId[20].shouldNotBeNull().map { tag ->
+                Triple(
+                    tag.category,
+                    tag.name,
+                    tag.spoiler,
+                )
+            } shouldBe listOf(
+                Triple(
+                    TagCategory.MOOD,
+                    "Slow burn",
+                    true,
+                ),
+            )
+        }
+
+        @Test
+        fun `a book whose canonical is missing from the response keeps its own taggings`() = runTest {
+            // ----- Arrange -----
+            val book = baseBook.copy(
+                id = 10,
+                canonicalId = 20,
+            )
+
+            stubUserBookEntries(
+                entries = listOf(
+                    stubUserBookEntry(
+                        book = book,
+                        taggings = listOf(
+                            tagging(
+                                name = "Own copy tag",
+                                category = "Tag",
+                            ),
+                        ),
+                        canonicalTaggings = listOf(
+                            canonicalTagging(
+                                name = "Slow burn",
+                                category = "Mood",
+                            ),
+                        ),
+                    ),
+                ),
+            )
+            stubCanonicalBooksQuery(canonicalBooks = emptyList())
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1)
+
+            // ----- Assert -----
+            result.userTagsByBookId[10].shouldNotBeNull().map { it.name } shouldBe listOf("Own copy tag")
+        }
+
+        @Test
+        fun `returns the rows of every page when the library spans several pages`() = runTest {
+            // ----- Arrange -----
+            val firstPage = userBooksWithIds(ids = 1..50)
+            val secondPage = userBooksWithIds(ids = 51..100)
+            val lastPage = userBooksWithIds(ids = 101..120)
+
+            stubUserBooksPage(
+                offset = 0,
+                books = firstPage,
+                total = 120,
+            )
+            stubUserBooksPage(
+                offset = 50,
+                books = secondPage,
+                total = 120,
+            )
+            stubUserBooksPage(
+                offset = 100,
+                books = lastPage,
+                total = 120,
+            )
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1)
+
+            // ----- Assert -----
+            result.books.map { it.userBook?.id } shouldBe (1..120).toList()
+        }
+
+        @Test
+        fun `throws when a later page has no me instead of treating it as the end`() = runTest {
+            // ----- Arrange -----
+            stubUserBooksPage(
+                offset = 0,
+                books = userBooksWithIds(ids = 1..50),
+                total = 120,
+            )
+
+            val emptyMeData = mockk<GetUserBooksQuery.Data> {
+                every {
+                    me
+                } returns emptyList()
+            }
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery && it.offset == 50 },
+                    fetchPolicy = any(),
+                )
+            } returns emptyMeData
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.initializeBooks(userId = 1)
+            }
+        }
+
+        @Test
+        fun `keeps one row when the same user book id appears on two pages`() = runTest {
+            // ----- Arrange -----
+            val firstPage = userBooksWithIds(ids = 1..50)
+            val secondPage = userBooksWithIds(ids = 50..60)
+
+            stubUserBooksPage(
+                offset = 0,
+                books = firstPage,
+                total = 60,
+            )
+            stubUserBooksPage(
+                offset = 50,
+                books = secondPage,
+                total = 60,
+            )
+
+            // ----- Act -----
+            val result = dataSource.initializeBooks(userId = 1)
+
+            // ----- Assert -----
+            result.books.map { it.userBook?.id } shouldBe (1..60).toList()
+        }
+
+        private fun userBooksWithIds(ids: IntRange): List<Book> = ids.map { id ->
+            baseBook.copy(
+                id = id,
+                canonicalId = null,
+                userBook = baseBook.userBook?.copy(id = id),
+            )
+        }
+
+        private fun stubUserBooksPage(
+            offset: Int,
+            books: List<Book>,
+            total: Int,
+        ) {
+            val entries = books.map { book ->
+                stubUserBookEntry(book = book).also { entry ->
+                    every {
+                        entry.id
+                    } returns checkNotNull(book.userBook?.id)
+                }
+            }
+            val meEntry = mockk<GetUserBooksQuery.Data.Me> {
+                every {
+                    user_books
+                } returns entries
+
+                every {
+                    this@mockk.total
+                } returns totalOf(count = total)
+            }
+            val queryData = mockk<GetUserBooksQuery.Data> {
+                every {
+                    me
+                } returns listOf(meEntry)
+            }
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = match<Query<GetUserBooksQuery.Data>> { it is GetUserBooksQuery && it.offset == offset },
+                    fetchPolicy = any(),
+                )
+            } returns queryData
         }
 
         private fun stubUserBooksQuery(userBooks: List<Book>) {
+            stubUserBookEntries(entries = userBooks.map { stubUserBookEntry(book = it) })
+        }
+
+        private fun stubUserBookEntry(
+            book: Book?,
+            taggings: List<GetUserBooksQuery.Data.Me.User_book.Book.Tagging> = emptyList(),
+            canonicalTaggings: List<GetUserBooksQuery.Data.Me.User_book.Book.Canonical.Tagging>? = null,
+        ): GetUserBooksQuery.Data.Me.User_book {
+            val canonicalEntry: GetUserBooksQuery.Data.Me.User_book.Book.Canonical? = canonicalTaggings?.let {
+                GetUserBooksQuery.Data.Me.User_book.Book.Canonical(
+                    __typename = "books",
+                    id = book?.canonicalId ?: 0,
+                    taggings = it,
+                )
+            }
+
+            val bookEntry = mockk<GetUserBooksQuery.Data.Me.User_book.Book> {
+                every {
+                    this@mockk.taggings
+                } returns taggings
+                every {
+                    canonical
+                } returns canonicalEntry
+            }
+
+            return mockk {
+                every {
+                    toBook()
+                } returns book
+                every {
+                    this@mockk.book
+                } returns bookEntry
+            }
+        }
+
+        private fun stubUserBookEntries(entries: List<GetUserBooksQuery.Data.Me.User_book>) {
             val queryData = mockk<GetUserBooksQuery.Data>()
             val meEntry = mockk<GetUserBooksQuery.Data.Me>()
-            val entries = userBooks.map { book ->
-                mockk<GetUserBooksQuery.Data.Me.User_book> {
-                    every {
-                        toBook()
-                    } returns book
-                }
-            }
 
             coEvery {
                 apolloClient.safeQuery(
@@ -2056,10 +2330,69 @@ class BooksRemoteDataSourceImplTest {
                 queryData.me
             } returns listOf(meEntry)
 
+            entries.forEachIndexed { index, entry ->
+                every {
+                    entry.id
+                } returns index
+            }
+
             every {
                 meEntry.user_books
             } returns entries
+
+            every {
+                meEntry.total
+            } returns totalOf(count = entries.size)
         }
+
+        private fun totalOf(count: Int): GetUserBooksQuery.Data.Me.Total = GetUserBooksQuery.Data.Me.Total(
+            __typename = "user_books_aggregate",
+            aggregate = GetUserBooksQuery.Data.Me.Total.Aggregate(
+                __typename = "user_books_aggregate_fields",
+                count = count,
+            ),
+        )
+
+        private fun tagging(
+            name: String,
+            category: String?,
+            spoiler: Boolean = false,
+        ): GetUserBooksQuery.Data.Me.User_book.Book.Tagging = GetUserBooksQuery.Data.Me.User_book.Book.Tagging(
+            __typename = "taggings",
+            id = 1L,
+            spoiler = spoiler,
+            tag = GetUserBooksQuery.Data.Me.User_book.Book.Tagging.Tag(
+                __typename = "tags",
+                id = 1L,
+                tag = name,
+                count = 9,
+                tag_category = GetUserBooksQuery.Data.Me.User_book.Book.Tagging.Tag.Tag_category(
+                    __typename = "tag_categories",
+                    category = category,
+                ),
+            ),
+        )
+
+        private fun canonicalTagging(
+            name: String,
+            category: String?,
+            spoiler: Boolean = false,
+        ): GetUserBooksQuery.Data.Me.User_book.Book.Canonical.Tagging =
+            GetUserBooksQuery.Data.Me.User_book.Book.Canonical.Tagging(
+                __typename = "taggings",
+                id = 1L,
+                spoiler = spoiler,
+                tag = GetUserBooksQuery.Data.Me.User_book.Book.Canonical.Tagging.Tag(
+                    __typename = "tags",
+                    id = 1L,
+                    tag = name,
+                    count = 9,
+                    tag_category = GetUserBooksQuery.Data.Me.User_book.Book.Canonical.Tagging.Tag.Tag_category(
+                        __typename = "tag_categories",
+                        category = category,
+                    ),
+                ),
+            )
 
         private fun stubCanonicalBooksQuery(canonicalBooks: List<Book>) {
             val queryData = mockk<GetBooksByIdsQuery.Data>()
@@ -2085,6 +2418,97 @@ class BooksRemoteDataSourceImplTest {
             every {
                 queryData.books
             } returns entries
+        }
+    }
+
+    @Nested
+    inner class FetchExistingUserBookIds {
+        @Test
+        fun `splits the ids into requests of 200 and returns the union of the ids found`() = runTest {
+            // ----- Arrange -----
+            val ids = (1..450).toList()
+
+            stubIdsLookup(
+                requested = ids.subList(
+                    0,
+                    200,
+                ),
+                found = listOf(1, 200),
+            )
+            stubIdsLookup(
+                requested = ids.subList(
+                    200,
+                    400,
+                ),
+                found = listOf(201),
+            )
+            stubIdsLookup(
+                requested = ids.subList(
+                    400,
+                    450,
+                ),
+                found = listOf(450),
+            )
+
+            // ----- Act -----
+            val result = dataSource.fetchExistingUserBookIds(ids = ids)
+
+            // ----- Assert -----
+            result shouldBe setOf(1, 200, 201, 450)
+        }
+
+        @Test
+        fun `throws when the lookup has no me`() = runTest {
+            // ----- Arrange -----
+            val queryData = mockk<GetUserBookIdsByIdsQuery.Data> {
+                every {
+                    me
+                } returns emptyList()
+            }
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = any<GetUserBookIdsByIdsQuery>(),
+                    fetchPolicy = any(),
+                )
+            } returns queryData
+
+            // ----- Act & Assert -----
+            shouldThrow<Exception> {
+                dataSource.fetchExistingUserBookIds(ids = listOf(1, 2))
+            }
+        }
+
+        private fun stubIdsLookup(
+            requested: List<Int>,
+            found: List<Int>,
+        ) {
+            val entries = found.map { id ->
+                mockk<GetUserBookIdsByIdsQuery.Data.Me.User_book> {
+                    every {
+                        this@mockk.id
+                    } returns id
+                }
+            }
+            val meEntry = mockk<GetUserBookIdsByIdsQuery.Data.Me> {
+                every {
+                    user_books
+                } returns entries
+            }
+            val queryData = mockk<GetUserBookIdsByIdsQuery.Data> {
+                every {
+                    me
+                } returns listOf(meEntry)
+            }
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = match<Query<GetUserBookIdsByIdsQuery.Data>> {
+                        it is GetUserBookIdsByIdsQuery && it.ids == requested
+                    },
+                    fetchPolicy = any(),
+                )
+            } returns queryData
         }
     }
 
@@ -2126,6 +2550,43 @@ class BooksRemoteDataSourceImplTest {
         }
 
         @Test
+        fun `throws UnexpectedApiException carrying the server message when the payload has an error`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook(id = 3)
+            val book = stubBook(
+                userBook = userBook,
+                currentRead = stubUserBookRead(id = 5),
+            )
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
+
+            every {
+                userBook.editionId
+            } returns 10
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+            every {
+                updateUserBookRead.error
+            } returns "read is locked"
+
+            // ----- Act & Assert -----
+            val thrown = shouldThrow<UnexpectedApiException> {
+                dataSource.updateBookProgress(
+                    book = book,
+                    newPage = 50,
+                )
+            }
+
+            thrown.message.shouldNotBeNull() shouldContain "read is locked"
+        }
+
+        @Test
         fun `throws when mutation returns null userBookRead fragment`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook(id = 3)
@@ -2137,6 +2598,10 @@ class BooksRemoteDataSourceImplTest {
             val mutationData = mockk<UpdateReadingProgressMutation.Data>()
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
+
+            every {
+                updateUserBookRead.error
+            } returns null
 
             every {
                 userBook.editionId
@@ -2198,6 +2663,10 @@ class BooksRemoteDataSourceImplTest {
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
             val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
+
+            every {
+                updateUserBookRead.error
+            } returns null
             val expectedBook = stubBook()
 
             every {
@@ -2248,6 +2717,10 @@ class BooksRemoteDataSourceImplTest {
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
             val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
+
+            every {
+                updateUserBookRead.error
+            } returns null
             val expectedBook = stubBook()
 
             every {
@@ -2306,6 +2779,10 @@ class BooksRemoteDataSourceImplTest {
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
             val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
+
+            every {
+                updateUserBookRead.error
+            } returns null
             val expectedBook = stubBook()
 
             every {
@@ -2364,6 +2841,10 @@ class BooksRemoteDataSourceImplTest {
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
             val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
+
+            every {
+                updateUserBookRead.error
+            } returns null
             val expectedBook = stubBook()
 
             every {
@@ -2422,6 +2903,10 @@ class BooksRemoteDataSourceImplTest {
             val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
             val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
             val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
+
+            every {
+                updateUserBookRead.error
+            } returns null
             val expectedBook = stubBook()
 
             every {
@@ -2469,13 +2954,90 @@ class BooksRemoteDataSourceImplTest {
     @Nested
     inner class ReplayUpdateBookProgress {
         @Test
+        fun `throws UnexpectedApiException carrying the server message when the payload has an error`() = runTest {
+            // ----- Arrange -----
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+            every {
+                updateUserBookRead.error
+            } returns "read is locked"
+
+            // ----- Act & Assert -----
+            val thrown = shouldThrow<UnexpectedApiException> {
+                dataSource.replayUpdateBookProgress(
+                    userBookReadId = 5,
+                    editionId = 10,
+                    progressPages = 75,
+                    progressSeconds = null,
+                    startedAt = "2026-01-01",
+                    finishedAt = null,
+                    actionAt = null,
+                )
+            }
+
+            thrown.message.shouldNotBeNull() shouldContain "read is locked"
+        }
+
+        @Test
+        fun `throws UnexpectedApiException when the payload has no user_book_read`() = runTest {
+            // ----- Arrange -----
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+            every {
+                updateUserBookRead.error
+            } returns null
+            every {
+                updateUserBookRead.user_book_read
+            } returns null
+
+            // ----- Act & Assert -----
+            shouldThrow<UnexpectedApiException> {
+                dataSource.replayUpdateBookProgress(
+                    userBookReadId = 5,
+                    editionId = 10,
+                    progressPages = 75,
+                    progressSeconds = null,
+                    startedAt = "2026-01-01",
+                    finishedAt = null,
+                    actionAt = null,
+                )
+            }
+        }
+
+        @Test
         fun `sends action_at and action when actionAt is provided`() = runTest {
             // ----- Arrange -----
             val actionAt = "2026-07-21T21:00:00Z"
 
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>(relaxed = true)
+
+            every {
+                updateUserBookRead.error
+            } returns null
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+
             coEvery {
                 apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
-            } returns mockk(relaxed = true)
+            } returns mutationData
 
             // ----- Act -----
             dataSource.replayUpdateBookProgress(
@@ -2503,9 +3065,19 @@ class BooksRemoteDataSourceImplTest {
         @Test
         fun `omits action_at and action when actionAt is not provided`() = runTest {
             // ----- Arrange -----
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>(relaxed = true)
+
+            every {
+                updateUserBookRead.error
+            } returns null
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+
             coEvery {
                 apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
-            } returns mockk(relaxed = true)
+            } returns mutationData
 
             // ----- Act -----
             dataSource.replayUpdateBookProgress(

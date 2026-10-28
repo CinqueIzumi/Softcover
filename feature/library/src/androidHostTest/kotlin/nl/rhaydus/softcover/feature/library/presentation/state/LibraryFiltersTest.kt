@@ -6,8 +6,10 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -20,6 +22,34 @@ class LibraryFiltersTest {
     private val tagScifi = Tag(
         id = 2,
         name = "Sci-Fi",
+    )
+    private val keyFiction = HardcoverTagKey(
+        id = 1,
+        name = "Fiction",
+    )
+    private val keyScifi = HardcoverTagKey(
+        id = 2,
+        name = "Sci-Fi",
+    )
+    private val userCozy = UserTag(
+        name = "cozy",
+        category = TagCategory.MOOD,
+    )
+    private val userSlow = UserTag(
+        name = "slow",
+        category = TagCategory.MOOD,
+    )
+    private val userCozyGenre = UserTag(
+        name = "cozy",
+        category = TagCategory.GENRE,
+    )
+    private val keyCozy = UserTagKey(
+        category = TagCategory.MOOD,
+        name = "cozy",
+    )
+    private val keySlow = UserTagKey(
+        category = TagCategory.MOOD,
+        name = "slow",
     )
 
     private fun buildEdition(
@@ -116,9 +146,21 @@ class LibraryFiltersTest {
         }
 
         @Test
-        fun `returns false when tags is non-empty`() {
+        fun `returns false when only an excluded Hardcover tag is picked`() {
             // ----- Arrange -----
-            val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
+            val filters = LibraryFilters(hardcoverTags = TagSelection(excluded = persistentSetOf(keyFiction)))
+
+            // ----- Act -----
+            val result = filters.isEmpty
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `returns false when only an included Yours tag is picked`() {
+            // ----- Arrange -----
+            val filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(keyCozy)))
 
             // ----- Act -----
             val result = filters.isEmpty
@@ -191,25 +233,237 @@ class LibraryFiltersTest {
     @Nested
     inner class MatchesBook {
         @Nested
-        inner class TagFacet {
+        inner class HardcoverTagFacet {
             @Test
-            fun `matches when book has at least one active tag`() {
+            fun `matches when book carries every included tag`() {
                 // ----- Arrange -----
                 val book = buildBook(tags = listOf(tagFiction, tagScifi))
-                val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
+                val filters = LibraryFilters(
+                    hardcoverTags = TagSelection(included = persistentSetOf(keyFiction, keyScifi)),
+                )
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe true
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe true
             }
 
             @Test
-            fun `rejects when book has none of the active tags`() {
+            fun `rejects when book carries only some of the included tags`() {
                 // ----- Arrange -----
-                val book = buildBook(tags = listOf(tagScifi))
-                val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
+                val book = buildBook(tags = listOf(tagFiction))
+                val filters = LibraryFilters(
+                    hardcoverTags = TagSelection(included = persistentSetOf(keyFiction, keyScifi)),
+                )
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe false
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
+            }
+
+            @Test
+            fun `rejects when book carries an excluded tag`() {
+                // ----- Arrange -----
+                val book = buildBook(tags = listOf(tagFiction, tagScifi))
+                val filters = LibraryFilters(hardcoverTags = TagSelection(excluded = persistentSetOf(keyScifi)))
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
+            }
+
+            @Test
+            fun `matches when book carries none of the excluded tags`() {
+                // ----- Arrange -----
+                val book = buildBook(tags = listOf(tagFiction))
+                val filters = LibraryFilters(hardcoverTags = TagSelection(excluded = persistentSetOf(keyScifi)))
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe true
+            }
+
+            @Test
+            fun `matches an untagged book against an exclusion`() {
+                // ----- Arrange -----
+                val book = buildBook(tags = emptyList())
+                val filters = LibraryFilters(hardcoverTags = TagSelection(excluded = persistentSetOf(keyScifi)))
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe true
+            }
+
+            @Test
+            fun `requires the included tag and the absence of the excluded tag together`() {
+                // ----- Arrange -----
+                val book = buildBook(tags = listOf(tagFiction, tagScifi))
+                val filters = LibraryFilters(
+                    hardcoverTags = TagSelection(
+                        included = persistentSetOf(keyFiction),
+                        excluded = persistentSetOf(keyScifi),
+                    ),
+                )
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
+            }
+        }
+
+        @Nested
+        inner class YourTagFacet {
+            @Test
+            fun `matches when the user's tags include every included tag`() {
+                // ----- Arrange -----
+                val book = buildBook()
+                val filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(keyCozy, keySlow)))
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = listOf(userCozy, userSlow),
+                ) shouldBe true
+            }
+
+            @Test
+            fun `rejects when the user's tags miss one of the included tags`() {
+                // ----- Arrange -----
+                val book = buildBook()
+                val filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(keyCozy, keySlow)))
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = listOf(userCozy),
+                ) shouldBe false
+            }
+
+            @Test
+            fun `rejects a book with no own tags against an include`() {
+                // ----- Arrange -----
+                val book = buildBook()
+                val filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(keyCozy)))
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
+            }
+
+            @Test
+            fun `matches a book with no own tags against an exclusion`() {
+                // ----- Arrange -----
+                val book = buildBook()
+                val filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(keyCozy)))
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe true
+            }
+
+            @Test
+            fun `rejects when the user's tags carry an excluded tag`() {
+                // ----- Arrange -----
+                val book = buildBook()
+                val filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(keyCozy)))
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = listOf(userCozy),
+                ) shouldBe false
+            }
+
+            @Test
+            fun `does not treat a tag of the same name in another category as the same tag`() {
+                // ----- Arrange -----
+                val book = buildBook()
+                val filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(keyCozy)))
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = listOf(userCozyGenre),
+                ) shouldBe false
+            }
+
+            @Test
+            fun `ignores the book's community tags`() {
+                // ----- Arrange -----
+                val book = buildBook(tags = listOf(tagFiction))
+                val filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(keyCozy)))
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe true
+            }
+        }
+
+        @Nested
+        inner class TagSourcesCombined {
+            @Test
+            fun `rejects when the Hardcover selection passes but the Yours selection fails`() {
+                // ----- Arrange -----
+                val book = buildBook(tags = listOf(tagFiction))
+                val filters = LibraryFilters(
+                    hardcoverTags = TagSelection(included = persistentSetOf(keyFiction)),
+                    yourTags = TagSelection(included = persistentSetOf(keyCozy)),
+                )
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
+            }
+
+            @Test
+            fun `rejects when the Yours selection passes but the Hardcover selection fails`() {
+                // ----- Arrange -----
+                val book = buildBook(tags = emptyList())
+                val filters = LibraryFilters(
+                    hardcoverTags = TagSelection(included = persistentSetOf(keyFiction)),
+                    yourTags = TagSelection(included = persistentSetOf(keyCozy)),
+                )
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = listOf(userCozy),
+                ) shouldBe false
+            }
+
+            @Test
+            fun `matches when both selections pass`() {
+                // ----- Arrange -----
+                val book = buildBook(tags = listOf(tagFiction))
+                val filters = LibraryFilters(
+                    hardcoverTags = TagSelection(included = persistentSetOf(keyFiction)),
+                    yourTags = TagSelection(included = persistentSetOf(keyCozy)),
+                )
+
+                // ----- Act & Assert -----
+                filters.matchesBook(
+                    book = book,
+                    userTags = listOf(userCozy),
+                ) shouldBe true
             }
         }
 
@@ -222,7 +476,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(formats = persistentSetOf("ebook"))
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe true
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe true
             }
 
             @Test
@@ -232,7 +489,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(formats = persistentSetOf("ebook"))
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe false
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
             }
         }
 
@@ -245,7 +505,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(releaseYears = persistentSetOf(2021))
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe true
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe true
             }
 
             @Test
@@ -255,7 +518,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(releaseYears = persistentSetOf(2021))
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe false
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
             }
         }
 
@@ -268,7 +534,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(readYear = 2021)
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe true
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe true
             }
 
             @Test
@@ -278,7 +547,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(readYear = 2021)
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe false
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
             }
 
             @Test
@@ -288,7 +560,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(readYear = 2021)
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe false
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
             }
         }
 
@@ -301,7 +576,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(owned = true)
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe true
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe true
             }
 
             @Test
@@ -311,7 +589,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(owned = true)
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe false
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
             }
 
             @Test
@@ -321,7 +602,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(owned = false)
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe true
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe true
             }
 
             @Test
@@ -331,7 +615,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(owned = false)
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe false
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
             }
         }
 
@@ -344,7 +631,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(ratingMin = 4.0)
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe true
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe true
             }
 
             @Test
@@ -354,7 +644,10 @@ class LibraryFiltersTest {
                 val filters = LibraryFilters(ratingMin = 4.0)
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe false
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
             }
         }
 
@@ -377,7 +670,7 @@ class LibraryFiltersTest {
                 )
 
                 val filters = LibraryFilters(
-                    tags = persistentSetOf(tagFiction),
+                    hardcoverTags = TagSelection(included = persistentSetOf(keyFiction)),
                     formats = persistentSetOf("paperback"),
                     releaseYears = persistentSetOf(2020),
                     readYear = 2021,
@@ -386,7 +679,10 @@ class LibraryFiltersTest {
                 )
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe false
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
             }
 
             @Test
@@ -406,7 +702,7 @@ class LibraryFiltersTest {
                 )
 
                 val filters = LibraryFilters(
-                    tags = persistentSetOf(tagFiction),
+                    hardcoverTags = TagSelection(included = persistentSetOf(keyFiction)),
                     formats = persistentSetOf("paperback"),
                     releaseYears = persistentSetOf(2020),
                     readYear = 2021,
@@ -415,7 +711,10 @@ class LibraryFiltersTest {
                 )
 
                 // ----- Act & Assert -----
-                filters.matchesBook(book = book) shouldBe true
+                filters.matchesBook(
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe true
             }
         }
     }
@@ -423,46 +722,143 @@ class LibraryFiltersTest {
     @Nested
     inner class MatchesEdition {
         @Nested
-        inner class TagFacet {
+        inner class HardcoverTagFacet {
             @Test
-            fun `matches when parent book has at least one active tag`() {
+            fun `matches when parent book carries every included tag`() {
                 // ----- Arrange -----
                 val edition = buildEdition()
-                val book = buildBook(tags = listOf(tagFiction))
-                val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
+                val book = buildBook(tags = listOf(tagFiction, tagScifi))
+                val filters = LibraryFilters(
+                    hardcoverTags = TagSelection(included = persistentSetOf(keyFiction, keyScifi)),
+                )
 
                 // ----- Act & Assert -----
                 filters.matchesEdition(
                     edition = edition,
                     book = book,
+                    userTags = emptyList(),
                 ) shouldBe true
             }
 
             @Test
-            fun `rejects when parent book has none of the active tags`() {
+            fun `rejects when parent book carries only some of the included tags`() {
                 // ----- Arrange -----
                 val edition = buildEdition()
                 val book = buildBook(tags = listOf(tagScifi))
-                val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
+                val filters = LibraryFilters(
+                    hardcoverTags = TagSelection(included = persistentSetOf(keyFiction, keyScifi)),
+                )
 
                 // ----- Act & Assert -----
                 filters.matchesEdition(
                     edition = edition,
                     book = book,
+                    userTags = emptyList(),
                 ) shouldBe false
             }
 
             @Test
-            fun `rejects when book is null and tags filter is active`() {
+            fun `rejects when parent book carries an excluded tag`() {
                 // ----- Arrange -----
                 val edition = buildEdition()
-                val filters = LibraryFilters(tags = persistentSetOf(tagFiction))
+                val book = buildBook(tags = listOf(tagScifi))
+                val filters = LibraryFilters(hardcoverTags = TagSelection(excluded = persistentSetOf(keyScifi)))
+
+                // ----- Act & Assert -----
+                filters.matchesEdition(
+                    edition = edition,
+                    book = book,
+                    userTags = emptyList(),
+                ) shouldBe false
+            }
+
+            @Test
+            fun `rejects when parent book is missing and an include is active`() {
+                // ----- Arrange -----
+                val edition = buildEdition()
+                val filters = LibraryFilters(hardcoverTags = TagSelection(included = persistentSetOf(keyFiction)))
 
                 // ----- Act & Assert -----
                 filters.matchesEdition(
                     edition = edition,
                     book = null,
+                    userTags = emptyList(),
                 ) shouldBe false
+            }
+
+            @Test
+            fun `matches when parent book is missing and only an exclusion is active`() {
+                // ----- Arrange -----
+                val edition = buildEdition()
+                val filters = LibraryFilters(hardcoverTags = TagSelection(excluded = persistentSetOf(keyFiction)))
+
+                // ----- Act & Assert -----
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                    userTags = emptyList(),
+                ) shouldBe true
+            }
+        }
+
+        @Nested
+        inner class YourTagFacet {
+            @Test
+            fun `matches when the parent book's own tags include every included tag`() {
+                // ----- Arrange -----
+                val edition = buildEdition()
+                val book = buildBook()
+                val filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(keyCozy)))
+
+                // ----- Act & Assert -----
+                filters.matchesEdition(
+                    edition = edition,
+                    book = book,
+                    userTags = listOf(userCozy),
+                ) shouldBe true
+            }
+
+            @Test
+            fun `rejects when the parent book carries an excluded own tag`() {
+                // ----- Arrange -----
+                val edition = buildEdition()
+                val book = buildBook()
+                val filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(keyCozy)))
+
+                // ----- Act & Assert -----
+                filters.matchesEdition(
+                    edition = edition,
+                    book = book,
+                    userTags = listOf(userCozy),
+                ) shouldBe false
+            }
+
+            @Test
+            fun `rejects an edition with no own tags against an include`() {
+                // ----- Arrange -----
+                val edition = buildEdition()
+                val filters = LibraryFilters(yourTags = TagSelection(included = persistentSetOf(keyCozy)))
+
+                // ----- Act & Assert -----
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                    userTags = emptyList(),
+                ) shouldBe false
+            }
+
+            @Test
+            fun `matches an edition with no own tags against an exclusion`() {
+                // ----- Arrange -----
+                val edition = buildEdition()
+                val filters = LibraryFilters(yourTags = TagSelection(excluded = persistentSetOf(keyCozy)))
+
+                // ----- Act & Assert -----
+                filters.matchesEdition(
+                    edition = edition,
+                    book = null,
+                    userTags = emptyList(),
+                ) shouldBe true
             }
         }
 
@@ -478,6 +874,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = null,
+                    userTags = emptyList(),
                 ) shouldBe true
             }
 
@@ -491,6 +888,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = null,
+                    userTags = emptyList(),
                 ) shouldBe false
             }
         }
@@ -508,6 +906,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = book,
+                    userTags = emptyList(),
                 ) shouldBe true
             }
 
@@ -521,6 +920,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = null,
+                    userTags = emptyList(),
                 ) shouldBe true
             }
 
@@ -534,6 +934,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = null,
+                    userTags = emptyList(),
                 ) shouldBe false
             }
         }
@@ -551,6 +952,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = book,
+                    userTags = emptyList(),
                 ) shouldBe true
             }
 
@@ -565,6 +967,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = book,
+                    userTags = emptyList(),
                 ) shouldBe false
             }
 
@@ -578,6 +981,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = null,
+                    userTags = emptyList(),
                 ) shouldBe false
             }
         }
@@ -594,6 +998,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = null,
+                    userTags = emptyList(),
                 ) shouldBe true
             }
 
@@ -607,6 +1012,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = null,
+                    userTags = emptyList(),
                 ) shouldBe false
             }
 
@@ -620,6 +1026,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = null,
+                    userTags = emptyList(),
                 ) shouldBe false
             }
         }
@@ -637,6 +1044,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = book,
+                    userTags = emptyList(),
                 ) shouldBe true
             }
 
@@ -651,6 +1059,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = book,
+                    userTags = emptyList(),
                 ) shouldBe false
             }
 
@@ -664,6 +1073,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = null,
+                    userTags = emptyList(),
                 ) shouldBe false
             }
         }
@@ -685,7 +1095,7 @@ class LibraryFiltersTest {
                 )
 
                 val filters = LibraryFilters(
-                    tags = persistentSetOf(tagFiction),
+                    hardcoverTags = TagSelection(included = persistentSetOf(keyFiction)),
                     formats = persistentSetOf("paperback"),
                     releaseYears = persistentSetOf(2020),
                     owned = true,
@@ -696,6 +1106,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = book,
+                    userTags = emptyList(),
                 ) shouldBe false
             }
 
@@ -714,7 +1125,7 @@ class LibraryFiltersTest {
                 )
 
                 val filters = LibraryFilters(
-                    tags = persistentSetOf(tagFiction),
+                    hardcoverTags = TagSelection(included = persistentSetOf(keyFiction)),
                     formats = persistentSetOf("paperback"),
                     releaseYears = persistentSetOf(2020),
                     owned = true,
@@ -725,6 +1136,7 @@ class LibraryFiltersTest {
                 filters.matchesEdition(
                     edition = edition,
                     book = book,
+                    userTags = emptyList(),
                 ) shouldBe true
             }
         }

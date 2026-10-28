@@ -1,8 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
-import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
-import nl.rhaydus.softcover.core.presentation.error.onApiFailure
+import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakSheetFor
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakStripFor
@@ -20,33 +19,40 @@ internal class ReadingActivityCollector : ReadingCollector {
             scope.setState { it.copy(streakEnabled = enabled) }
 
             if (enabled) {
-                dependencies.launch {
-                    dependencies.refreshReadingActivityUseCase()
-                        .onApiFailure()
-                }
-
-                dependencies.observeRecentReadingActivityUseCase()
-                    .collectLatest { activity: List<ReadingDayActivity> ->
-                        scope.setState {
-                            it.copy(
-                                hasLoadedReadingActivity = true,
-                                streakStrip = streakStripFor(
-                                    activity = activity,
-                                    isLoading = it.isLoading,
-                                ),
-                                streakSheet = streakSheetFor(activity = activity),
-                            )
-                        }
+                combine(
+                    dependencies.observeReadingActivityUseCase(),
+                    dependencies.observeCurrentDateUseCase(),
+                ) { activity, today ->
+                    activity to today
+                }.collectLatest { (activity, today) ->
+                    scope.setState {
+                        it.copy(
+                            hasLoadedReadingActivity = true,
+                            streakStrip = streakStripFor(
+                                activity = activity,
+                                today = today,
+                                isLoading = it.isLoading,
+                            ),
+                            streakSheet = streakSheetFor(
+                                activity = activity,
+                                today = today,
+                            ),
+                        )
                     }
+                }
             } else {
                 scope.setState {
                     it.copy(
                         hasLoadedReadingActivity = true,
                         streakStrip = streakStripFor(
-                            activity = emptyList(),
+                            activity = null,
+                            today = null,
                             isLoading = it.isLoading,
                         ),
-                        streakSheet = streakSheetFor(activity = emptyList()),
+                        streakSheet = streakSheetFor(
+                            activity = null,
+                            today = null,
+                        ),
                     )
                 }
             }

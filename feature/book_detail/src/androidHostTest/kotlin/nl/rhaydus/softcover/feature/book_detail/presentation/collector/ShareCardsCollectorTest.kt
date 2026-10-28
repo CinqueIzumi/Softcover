@@ -9,6 +9,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -109,7 +110,8 @@ class ShareCardsCollectorTest {
 
     private fun readerState(
         book: Book,
-        userTags: UserTagsLoad = UserTagsLoad.Loaded(persistentListOf()),
+        userTags: List<UserTag> = emptyList(),
+        userTagsLoad: UserTagsLoad = UserTagsLoad.Loaded,
         chosenShareVariant: ShareCardVariant? = null,
         shareSheet: SheetSession<ShareSheetUiModel, Nothing> = SheetSession.Closed,
         shareSheetRequested: Boolean = true,
@@ -120,7 +122,8 @@ class ShareCardsCollectorTest {
             username = "reader",
             avatarUrl = "https://example.com/avatar.png",
         ),
-        userTags = userTags,
+        userTags = userTags.toImmutableList(),
+        userTagsLoad = userTagsLoad,
         chosenShareVariant = chosenShareVariant,
         shareSheet = shareSheet,
         shareSheetRequested = shareSheetRequested,
@@ -361,7 +364,10 @@ class ShareCardsCollectorTest {
                         avatarUrl = "https://example.com/avatar.png",
                     ),
                 )
-                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(persistentListOf(tag)))
+                stateFlow.value = stateFlow.value.copy(
+                    userTags = persistentListOf(tag),
+                    userTagsLoad = UserTagsLoad.Loaded,
+                )
 
                 // ----- Assert -----
                 val card = stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull().sheet.card
@@ -393,7 +399,8 @@ class ShareCardsCollectorTest {
             // ----- Act -----
             stateFlow.value = readerState(
                 book = book,
-                userTags = UserTagsLoad.Loaded(persistentListOf(visibleTag, spoilerTag)),
+                userTags = persistentListOf(visibleTag, spoilerTag),
+                userTagsLoad = UserTagsLoad.Loaded,
             )
 
             // ----- Assert -----
@@ -440,7 +447,7 @@ class ShareCardsCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 stateFlow.value = readerState(book = stubBook(userBook = stubUserBook())).copy(
-                    userTags = UserTagsLoad.Loading,
+                    userTagsLoad = UserTagsLoad.Loading,
                 )
 
                 // ----- Act -----
@@ -456,7 +463,7 @@ class ShareCardsCollectorTest {
             stateFlow.value = readerState(book = stubBook(userBook = stubUserBook())).copy(
                 loadingBookDetails = true,
                 currentUser = null,
-                userTags = UserTagsLoad.Loading,
+                userTagsLoad = UserTagsLoad.Loading,
             )
             launchCollector()
             stateFlow.value = stateFlow.value.copy(loadingBookDetails = false)
@@ -469,7 +476,7 @@ class ShareCardsCollectorTest {
             stateFlow.value.shareSheet shouldBe SheetSession.Closed
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(persistentListOf()))
+            stateFlow.value = stateFlow.value.copy(userTagsLoad = UserTagsLoad.Loaded)
 
             // ----- Assert -----
             stateFlow.value.shareSheet.modelOrNull.shouldNotBeNull()
@@ -482,7 +489,7 @@ class ShareCardsCollectorTest {
                 val book = stubBook(userBook = stubUserBook())
                 stateFlow.value = readerState(
                     book = book,
-                    userTags = UserTagsLoad.Failed,
+                    userTagsLoad = UserTagsLoad.Failed,
                 )
 
                 // ----- Act -----
@@ -501,7 +508,7 @@ class ShareCardsCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 stateFlow.value = readerState(book = stubBook(userBook = null)).copy(
-                    userTags = UserTagsLoad.Loading,
+                    userTagsLoad = UserTagsLoad.Loading,
                 )
 
                 // ----- Act -----
@@ -532,7 +539,7 @@ class ShareCardsCollectorTest {
                     username = null,
                     avatarUrl = null,
                 ),
-                userTags = UserTagsLoad.Loaded(persistentListOf()),
+                userTagsLoad = UserTagsLoad.Loaded,
                 shareSheetRequested = true,
             )
 
@@ -952,7 +959,8 @@ class ShareCardsCollectorTest {
             // ----- Arrange -----
             stateFlow.value = readerState(
                 book = stubBook(userBook = stubUserBook()),
-                userTags = UserTagsLoad.Loaded(readerTags),
+                userTags = readerTags,
+                userTagsLoad = UserTagsLoad.Loaded,
             )
 
             // ----- Act -----
@@ -970,7 +978,8 @@ class ShareCardsCollectorTest {
             // ----- Arrange -----
             stateFlow.value = readerState(
                 book = stubBook(userBook = stubUserBook()),
-                userTags = UserTagsLoad.Loaded(readerTags),
+                userTags = readerTags,
+                userTagsLoad = UserTagsLoad.Loaded,
             )
             launchCollector()
 
@@ -992,7 +1001,8 @@ class ShareCardsCollectorTest {
                     userBook = stubUserBook(),
                     tags = communityTags,
                 ),
-                userTags = UserTagsLoad.Loaded(readerTags),
+                userTags = readerTags,
+                userTagsLoad = UserTagsLoad.Loaded,
             )
             launchCollector()
 

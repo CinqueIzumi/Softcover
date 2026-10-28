@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.orchestration.di
 
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.connectivity.di.connectivityModule
+import nl.rhaydus.softcover.core.corpus.di.corpusModule
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
 import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
@@ -60,6 +61,7 @@ internal val orchestrationModule = module {
         identityModule,
         bookModule,
         listsModule,
+        corpusModule,
         deadlinesModule,
         personalModule,
         profileModule,
@@ -114,7 +116,6 @@ internal val orchestrationModule = module {
             getUserIdUseCase = get(),
             refreshLibraryOnStartUseCase = get(),
             getThemeConfigurationUseCase = get(),
-            refreshReadingActivityUseCase = get(),
             drainPendingListWritesUseCase = get(),
             reAuthenticateUseCase = get(),
             resetUserDataUseCase = get(),
@@ -145,7 +146,7 @@ internal val orchestrationModule = module {
             settingsRepository = get(),
             resetUserDataUseCase = get(),
             refreshLibraryUseCase = get(),
-            refreshUserProfileDataUseCase = get(),
+            refreshUserProfileStatsUseCase = get(),
         )
     }
 
@@ -162,6 +163,8 @@ internal val orchestrationModule = module {
             booksRepository = get(),
             listsRepository = get(),
             settingsRepository = get(),
+            refreshAllReadingJournalHistoryUseCase = get(),
+            applicationScope = get(),
             dispatchers = get(),
         )
     }

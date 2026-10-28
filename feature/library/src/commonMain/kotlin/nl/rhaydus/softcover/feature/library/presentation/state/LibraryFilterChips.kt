@@ -19,7 +19,6 @@ internal data class LibraryFilterChips(
     val formatChips: ChipSet<LibraryFilterValue> = ChipSet(),
     val releaseYearChips: ChipSet<LibraryFilterValue> = ChipSet(),
     val readYearChips: ChipSet<LibraryFilterValue> = ChipSet(),
-    val tagChips: ChipSet<LibraryFilterValue> = ChipSet(),
     val ratingChips: ChipSet<LibraryFilterValue> = ChipSet(),
 ) {
     val isEmpty: Boolean
@@ -27,7 +26,6 @@ internal data class LibraryFilterChips(
             formatChips.isEmpty &&
             releaseYearChips.isEmpty &&
             readYearChips.isEmpty &&
-            tagChips.isEmpty &&
             ratingChips.isEmpty
 
     operator fun get(key: String): LibraryFilterValue? =
@@ -35,6 +33,5 @@ internal data class LibraryFilterChips(
             ?: formatChips[key]
             ?: releaseYearChips[key]
             ?: readYearChips[key]
-            ?: tagChips[key]
             ?: ratingChips[key]
 }

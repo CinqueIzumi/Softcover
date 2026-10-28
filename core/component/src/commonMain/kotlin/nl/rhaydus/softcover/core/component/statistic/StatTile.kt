@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
+import nl.rhaydus.softcover.core.component.text.FadeThroughText
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -91,7 +92,7 @@ private fun HeroTile(
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
-            SoftcoverText(
+            FadeThroughText(
                 text = variant.caption,
                 style = typography.body,
                 color = demoted,
@@ -132,7 +133,7 @@ private fun StandardTile(
                 autoSize = null,
             )
 
-            SoftcoverText(
+            FadeThroughText(
                 text = variant.caption,
                 style = typography.bodySmall,
                 color = colors.onSurfaceVariant,

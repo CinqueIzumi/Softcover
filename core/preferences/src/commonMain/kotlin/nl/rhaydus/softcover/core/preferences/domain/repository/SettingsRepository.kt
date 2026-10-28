@@ -66,6 +66,14 @@ interface SettingsRepository {
 
     suspend fun markReadThroughsBackfilled()
 
+    val authorDemographicsBackfilled: Flow<Boolean>
+
+    suspend fun markAuthorDemographicsBackfilled()
+
+    val authorRolesBackfilled: Flow<Boolean>
+
+    suspend fun markAuthorRolesBackfilled()
+
     suspend fun seedEnabledListIds(ids: Set<Int>)
 
     suspend fun resetLibraryVisibilityPreferences()

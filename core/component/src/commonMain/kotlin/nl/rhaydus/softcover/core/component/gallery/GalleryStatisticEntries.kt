@@ -8,6 +8,10 @@ import nl.rhaydus.softcover.core.component.chart.ProportionChart
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBars
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
+import nl.rhaydus.softcover.core.component.chart.RecentDaysGrid
+import nl.rhaydus.softcover.core.component.chart.RecentDaysGridUiModel
+import nl.rhaydus.softcover.core.component.chart.YearGrid
+import nl.rhaydus.softcover.core.component.chart.YearGridUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
@@ -18,8 +22,8 @@ internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "RankedBars",
         family = GalleryFamily.CHART,
-        blurb = "Horizontal bars, each measured against its own full-width track; while loading " +
-            "the rows keep their layout and mask.",
+        blurb = "Numbered bars filled relative to the lead row, with the share at the end; while " +
+            "loading the rows keep their layout and mask.",
         previews = RankedBarsUiModel,
         content = { model, modifier ->
             RankedBars(
@@ -44,11 +48,38 @@ internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "ProportionChart",
         family = GalleryFamily.CHART,
-        blurb = "A stacked bar of parts of a whole with its legend beneath; an Unknown segment " +
-            "renders muted and a zero segment draws nothing.",
+        blurb = "A stacked bar of parts of a whole with its legend beneath, as rows or as inline keys; " +
+            "an Unknown segment renders muted and a zero segment draws nothing.",
         previews = ProportionChartUiModel,
         content = { model, modifier ->
             ProportionChart(
+                model = model,
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
+        name = "YearGrid",
+        family = GalleryFamily.CHART,
+        blurb = "A year of day squares in a row per month, tinted by pages read on four steps; " +
+            "tapping a read day emits an event, and while loading the grid keeps its layout and masks.",
+        previews = YearGridUiModel,
+        content = { model, modifier ->
+            YearGrid(
+                model = model,
+                onEvent = {},
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
+        name = "RecentDaysGrid",
+        family = GalleryFamily.CHART,
+        blurb = "The last twelve weeks as 84 day squares filled column by column, tinted like the year grid; " +
+            "not interactive, and while loading the grid keeps its layout and masks.",
+        previews = RecentDaysGridUiModel,
+        content = { model, modifier ->
+            RecentDaysGrid(
                 model = model,
                 modifier = modifier,
             )

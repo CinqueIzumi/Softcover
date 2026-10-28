@@ -6,8 +6,10 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterChips
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterOptions
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetSelection
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.state.buildLibraryFilterSheetSelection
@@ -23,10 +25,12 @@ import nl.rhaydus.softcover.feature.library.presentation.state.libraryPreviewCou
 internal data class FilterDraftChipsSnapshot(
     val draft: LibraryFilterDraft?,
     val filterChipsByTab: ImmutableMap<String, LibraryFilterChips>,
+    val filterOptionsByTab: ImmutableMap<String, LibraryFilterOptions>,
     val booksByTab: ImmutableMap<String, ImmutableList<Book>>,
     val editionsByTab: ImmutableMap<String, ImmutableList<BookEdition>>,
     val addedAtByTab: ImmutableMap<String, ImmutableMap<Int, String?>>,
     val bookByBookId: ImmutableMap<Int, Book>,
+    val userTagsByBookId: ImmutableMap<Int, List<UserTag>>,
     val sortModeByTab: ImmutableMap<String, LibrarySortMode>,
     val sortDirectionByTab: ImmutableMap<String, SortDirection>,
     val searchQuery: String,
@@ -34,12 +38,14 @@ internal data class FilterDraftChipsSnapshot(
     fun compute(): LibraryFilterSheetSelection? {
         val draft = draft ?: return null
         val chips = filterChipsByTab[draft.tabId] ?: LibraryFilterChips()
+        val options = filterOptionsByTab[draft.tabId] ?: LibraryFilterOptions()
 
         val previewState = LibraryUiState(
             booksByTab = booksByTab,
             editionsByTab = editionsByTab,
             addedAtByTab = addedAtByTab,
             bookByBookId = bookByBookId,
+            userTagsByBookId = userTagsByBookId,
             sortModeByTab = sortModeByTab,
             sortDirectionByTab = sortDirectionByTab,
             searchQuery = searchQuery,
@@ -53,6 +59,7 @@ internal data class FilterDraftChipsSnapshot(
 
         return buildLibraryFilterSheetSelection(
             chips = chips,
+            options = options,
             draft = draft,
             resultCount = resultCount,
         )

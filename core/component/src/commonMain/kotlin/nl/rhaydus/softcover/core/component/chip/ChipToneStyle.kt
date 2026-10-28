@@ -53,9 +53,20 @@ internal fun ChipTone.style(
         weight = FontWeight.SemiBold,
     )
 
+    ChipTone.TonalDashed -> tonalStyle(
+        scheme = scheme,
+        selected = false,
+    )
+
     ChipTone.Spoiler -> ChipStyle(
         container = scheme.spoilerCover,
         ink = Color.Transparent,
+        weight = FontWeight.Medium,
+    )
+
+    ChipTone.Excluded -> ChipStyle(
+        container = Color.Transparent,
+        ink = scheme.onSurfaceVariant,
         weight = FontWeight.Medium,
     )
 

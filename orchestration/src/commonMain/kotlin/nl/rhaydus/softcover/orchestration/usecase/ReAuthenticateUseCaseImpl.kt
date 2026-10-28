@@ -7,13 +7,13 @@ import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.model.NO_USER_ID
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileStatsUseCase
 
 internal class ReAuthenticateUseCaseImpl(
     private val settingsRepository: SettingsRepository,
     private val resetUserDataUseCase: ResetUserDataUseCase,
     private val refreshLibraryUseCase: RefreshLibraryUseCase,
-    private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
+    private val refreshUserProfileStatsUseCase: RefreshUserProfileStatsUseCase,
 ) : ReAuthenticateUseCase {
     override suspend operator fun invoke(apiKey: String): Result<Unit> = runCatchingLogged {
         val sanitizedKey = apiKey
@@ -44,6 +44,6 @@ internal class ReAuthenticateUseCaseImpl(
         // re-auth (and re-show the dialog); it refills on the next profile load. The result is
         // dropped, not surfaced: the failure is already logged inside the use case's own
         // `runCatchingLogged`, and authoring UI is presentation's job, not a use case's.
-        refreshUserProfileDataUseCase()
+        refreshUserProfileStatsUseCase()
     }
 }

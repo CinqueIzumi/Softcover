@@ -5,10 +5,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
-import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
-import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
+import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.softcover.feature.profile.presentation.state.YearMetric
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
@@ -16,17 +16,17 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnYearMetricSelectedActionTest {
-    private lateinit var dependencies: ProfileDependencies
-    private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
-    private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
+    private lateinit var dependencies: StatsAtlasDependencies
+    private lateinit var stateFlow: MutableStateFlow<StatsAtlasUiState>
+    private lateinit var scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>
 
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(ProfileUiState())
+        stateFlow = MutableStateFlow(StatsAtlasUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
-            localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
+            localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
     }
@@ -36,7 +36,7 @@ class OnYearMetricSelectedActionTest {
         @Test
         fun `sets the selected year metric`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(selectedYearMetric = YearMetric.BOOKS)
+            stateFlow.value = StatsAtlasUiState(selectedYearMetric = YearMetric.BOOKS)
             val action = OnYearMetricSelectedAction(metric = YearMetric.PAGES)
 
             // ----- Act -----

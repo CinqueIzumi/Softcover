@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.core.database.dao
 import android.content.Context
 import androidx.room.Room
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
@@ -165,47 +164,11 @@ class ProgressHistoryDaoTest {
     }
 
     @Nested
-    inner class GetSyncedIdsForBook {
+    inner class ReplaceSyncedForBook {
         @Test
-        fun `returns only the synced rows of that book`() = runTest(testDispatcher) {
+        fun `swaps the synced rows of the book for the fetched ones, keeping other books`() = runTest(testDispatcher) {
             // ----- Arrange -----
-            val syncedId = dao.insert(
-                entity = row(
-                    bookId = 1,
-                    actionAtEpochMillis = 1000,
-                    pages = 1,
-                ),
-            )
             dao.insert(
-                entity = row(
-                    bookId = 1,
-                    actionAtEpochMillis = 2000,
-                    pages = 2,
-                    pending = true,
-                ),
-            )
-            dao.insert(
-                entity = row(
-                    bookId = 2,
-                    actionAtEpochMillis = 1000,
-                    pages = 3,
-                ),
-            )
-
-            // ----- Act -----
-            val result = dao.getSyncedIdsForBook(bookId = 1)
-
-            // ----- Assert -----
-            result shouldContainExactly listOf(syncedId)
-        }
-    }
-
-    @Nested
-    inner class ReplaceSynced {
-        @Test
-        fun `deletes the snapshotted rows and inserts the new ones, keeping other books`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val syncedId = dao.insert(
                 entity = row(
                     bookId = 1,
                     actionAtEpochMillis = 1000,
@@ -221,8 +184,8 @@ class ProgressHistoryDaoTest {
             )
 
             // ----- Act -----
-            dao.replaceSynced(
-                syncedIdsBeforeFetch = listOf(syncedId),
+            dao.replaceSyncedForBook(
+                bookId = 1,
                 entities = listOf(
                     row(
                         bookId = 1,
@@ -238,9 +201,9 @@ class ProgressHistoryDaoTest {
         }
 
         @Test
-        fun `keeps a row that was pending at snapshot time`() = runTest(testDispatcher) {
+        fun `keeps the pending rows of the book`() = runTest(testDispatcher) {
             // ----- Arrange -----
-            val syncedId = dao.insert(
+            dao.insert(
                 entity = row(
                     bookId = 1,
                     actionAtEpochMillis = 1000,
@@ -257,9 +220,10 @@ class ProgressHistoryDaoTest {
             )
 
             // ----- Act -----
-            dao.replaceSynced(
-                syncedIdsBeforeFetch = listOf(syncedId),
-                entities = emptyList(),
+            dao.replaceSyncedForBook(
+                bookId = 1,
+                entities = listOf(
+                ),
             )
 
             // ----- Assert -----
@@ -267,38 +231,7 @@ class ProgressHistoryDaoTest {
         }
 
         @Test
-        fun `keeps a row that turned synced after the snapshot`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val snapshottedId = dao.insert(
-                entity = row(
-                    bookId = 1,
-                    actionAtEpochMillis = 1000,
-                    pages = 1,
-                ),
-            )
-            val racingId = dao.insert(
-                entity = row(
-                    bookId = 1,
-                    actionAtEpochMillis = 2000,
-                    pages = 2,
-                    pending = true,
-                ),
-            )
-
-            // ----- Act -----
-            val snapshot = listOf(snapshottedId)
-            dao.markSynced(localId = racingId)
-            dao.replaceSynced(
-                syncedIdsBeforeFetch = snapshot,
-                entities = emptyList(),
-            )
-
-            // ----- Assert -----
-            pagesFor(bookId = 1) shouldBe listOf(2)
-        }
-
-        @Test
-        fun `an empty snapshot deletes nothing and still inserts the new rows`() = runTest(testDispatcher) {
+        fun `running twice with the same fetched rows leaves each row once`() = runTest(testDispatcher) {
             // ----- Arrange -----
             dao.insert(
                 entity = row(
@@ -309,8 +242,18 @@ class ProgressHistoryDaoTest {
             )
 
             // ----- Act -----
-            dao.replaceSynced(
-                syncedIdsBeforeFetch = emptyList(),
+            dao.replaceSyncedForBook(
+                bookId = 1,
+                entities = listOf(
+                    row(
+                        bookId = 1,
+                        actionAtEpochMillis = 3000,
+                        pages = 7,
+                    ),
+                ),
+            )
+            dao.replaceSyncedForBook(
+                bookId = 1,
                 entities = listOf(
                     row(
                         bookId = 1,
@@ -321,10 +264,177 @@ class ProgressHistoryDaoTest {
             )
 
             // ----- Assert -----
-            pagesFor(bookId = 1) shouldBe listOf(
-                1,
-                7,
+            pagesFor(bookId = 1) shouldBe listOf(7)
+        }
+
+        @Test
+        fun `an empty fetch clears the synced rows of the book`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            dao.insert(
+                entity = row(
+                    bookId = 1,
+                    actionAtEpochMillis = 1000,
+                    pages = 1,
+                ),
             )
+
+            // ----- Act -----
+            dao.replaceSyncedForBook(
+                bookId = 1,
+                entities = listOf(
+                ),
+            )
+
+            // ----- Assert -----
+            pagesFor(bookId = 1).shouldBeEmpty()
+        }
+    }
+
+    @Nested
+    inner class ReplaceAllSynced {
+        @Test
+        fun `swaps every book's synced rows for the fetched ones`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            dao.insert(
+                entity = row(
+                    bookId = 1,
+                    actionAtEpochMillis = 1000,
+                    pages = 1,
+                ),
+            )
+            dao.insert(
+                entity = row(
+                    bookId = 2,
+                    actionAtEpochMillis = 1000,
+                    pages = 99,
+                ),
+            )
+
+            // ----- Act -----
+            dao.replaceAllSynced(
+                entities = listOf(
+                    row(
+                        bookId = 1,
+                        actionAtEpochMillis = 3000,
+                        pages = 7,
+                    ),
+                    row(
+                        bookId = 2,
+                        actionAtEpochMillis = 3000,
+                        pages = 8,
+                    ),
+                ),
+            )
+
+            // ----- Assert -----
+            pagesFor(bookId = 1) shouldBe listOf(7)
+            pagesFor(bookId = 2) shouldBe listOf(8)
+        }
+
+        @Test
+        fun `clears the synced rows of a book absent from the fetch`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            dao.insert(
+                entity = row(
+                    bookId = 1,
+                    actionAtEpochMillis = 1000,
+                    pages = 1,
+                ),
+            )
+            dao.insert(
+                entity = row(
+                    bookId = 2,
+                    actionAtEpochMillis = 1000,
+                    pages = 99,
+                ),
+            )
+
+            // ----- Act -----
+            dao.replaceAllSynced(
+                entities = listOf(
+                    row(
+                        bookId = 1,
+                        actionAtEpochMillis = 3000,
+                        pages = 7,
+                    ),
+                ),
+            )
+
+            // ----- Assert -----
+            pagesFor(bookId = 2).shouldBeEmpty()
+        }
+
+        @Test
+        fun `keeps the pending rows of every book`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            dao.insert(
+                entity = row(
+                    bookId = 1,
+                    actionAtEpochMillis = 1000,
+                    pages = 1,
+                ),
+            )
+            dao.insert(
+                entity = row(
+                    bookId = 1,
+                    actionAtEpochMillis = 2000,
+                    pages = 2,
+                    pending = true,
+                ),
+            )
+            dao.insert(
+                entity = row(
+                    bookId = 2,
+                    actionAtEpochMillis = 2000,
+                    pages = 3,
+                    pending = true,
+                ),
+            )
+
+            // ----- Act -----
+            dao.replaceAllSynced(
+                entities = listOf(
+                ),
+            )
+
+            // ----- Assert -----
+            pagesFor(bookId = 1) shouldBe listOf(2)
+            pagesFor(bookId = 2) shouldBe listOf(3)
+        }
+
+        @Test
+        fun `running twice with the same fetched rows leaves each row once`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            dao.insert(
+                entity = row(
+                    bookId = 1,
+                    actionAtEpochMillis = 1000,
+                    pages = 1,
+                ),
+            )
+
+            // ----- Act -----
+            dao.replaceAllSynced(
+                entities = listOf(
+                    row(
+                        bookId = 1,
+                        actionAtEpochMillis = 3000,
+                        pages = 7,
+                    ),
+                ),
+            )
+            dao.replaceAllSynced(
+                entities = listOf(
+                    row(
+                        bookId = 1,
+                        actionAtEpochMillis = 3000,
+                        pages = 7,
+                    ),
+                ),
+            )
+
+            // ----- Assert -----
+            pagesFor(bookId = 1) shouldBe listOf(7)
         }
     }
 

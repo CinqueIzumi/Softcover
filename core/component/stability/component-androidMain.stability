@@ -120,6 +120,14 @@ internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardSeriesStack(fr
     - isLoading: STABLE (primitive type)
 
 @Composable
+internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardTagStripRow(strip: nl.rhaydus.softcover.core.component.bookcard.BookCardTagStrip, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - strip: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 internal fun nl.rhaydus.softcover.core.component.bookcard.BookCardTextBlock(content: nl.rhaydus.softcover.core.component.bookcard.BookCardContent, titleStyle: androidx.compose.ui.text.TextStyle, titleMinLines: kotlin.Int, titleMaxLines: kotlin.Int, isLoading: kotlin.Boolean, modifier: androidx.compose.ui.Modifier, progress: nl.rhaydus.softcover.core.component.bookcard.BookCardProgress?): kotlin.Unit
   skippable: true
   restartable: true
@@ -150,7 +158,7 @@ private fun nl.rhaydus.softcover.core.component.bookcard.ProgressLabel(label: ko
     - isLoading: STABLE (primitive type)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.bookcard.RatingLabel(label: kotlin.String, contentDescription: kotlin.String, transitionKey: nl.rhaydus.softcover.core.component.transition.BookTransitionKey?, style: androidx.compose.ui.text.TextStyle, color: androidx.compose.ui.graphics.Color, isLoading: kotlin.Boolean): kotlin.Unit
+internal fun nl.rhaydus.softcover.core.component.bookcard.RatingLabel(label: kotlin.String, contentDescription: kotlin.String, transitionKey: nl.rhaydus.softcover.core.component.transition.BookTransitionKey?, style: androidx.compose.ui.text.TextStyle, color: androidx.compose.ui.graphics.Color, isLoading: kotlin.Boolean, iconSize: androidx.compose.ui.unit.Dp): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -160,6 +168,7 @@ private fun nl.rhaydus.softcover.core.component.bookcard.RatingLabel(label: kotl
     - style: STABLE (marked @Stable or @Immutable)
     - color: STABLE (marked @Stable or @Immutable)
     - isLoading: STABLE (primitive type)
+    - iconSize: STABLE (marked @Stable or @Immutable)
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.bookcard.RestoreLabel(label: kotlin.String): kotlin.Unit
@@ -459,6 +468,22 @@ internal fun nl.rhaydus.softcover.core.component.chart.ColumnReadout(text: kotli
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+private fun nl.rhaydus.softcover.core.component.chart.InlineKey(slice: nl.rhaydus.softcover.core.component.chart.ChartSliceUiModel, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - slice: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.chart.KeysLegend(retention: nl.rhaydus.softcover.core.component.chart.SegmentRetention, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - retention: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+
+@Composable
 public fun nl.rhaydus.softcover.core.component.chart.ProportionChart(model: nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
@@ -467,11 +492,58 @@ public fun nl.rhaydus.softcover.core.component.chart.ProportionChart(model: nl.r
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+private fun nl.rhaydus.softcover.core.component.chart.RankedBarRow(row: nl.rhaydus.softcover.core.component.chart.RankedBarUiModel, position: kotlin.Int, isLoading: kotlin.Boolean, positionWidth: androidx.compose.ui.unit.Dp, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - row: STABLE (marked @Stable or @Immutable)
+    - position: STABLE (primitive type)
+    - isLoading: STABLE (primitive type)
+    - positionWidth: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 public fun nl.rhaydus.softcover.core.component.chart.RankedBars(model: nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - model: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.chart.RetainedEntry(entry: nl.rhaydus.softcover.core.component.chart.SegmentRetention.Entry, retention: nl.rhaydus.softcover.core.component.chart.SegmentRetention, enter: androidx.compose.animation.EnterTransition, exit: androidx.compose.animation.ExitTransition, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.animation.AnimatedVisibilityScope, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - entry: STABLE (class with no mutable properties)
+    - retention: STABLE (marked @Stable or @Immutable)
+    - enter: STABLE (marked @Stable or @Immutable)
+    - exit: STABLE (marked @Stable or @Immutable)
+    - content: STABLE (composable function type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.chart.RowsLegend(retention: nl.rhaydus.softcover.core.component.chart.SegmentRetention, isLoading: kotlin.Boolean): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - retention: STABLE (marked @Stable or @Immutable)
+    - isLoading: STABLE (primitive type)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.chart.RecentDaysGrid(model: nl.rhaydus.softcover.core.component.chart.RecentDaysGridUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.chart.YearGrid(model: nl.rhaydus.softcover.core.component.chart.YearGridUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chart.YearGridEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -545,13 +617,14 @@ private fun nl.rhaydus.softcover.core.component.chip.ChipTrailingSlot(trailing: 
     - onDismiss: STABLE (function type)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.chip.chipInteraction(interaction: nl.rhaydus.softcover.core.component.chip.ChipInteraction, selectable: kotlin.Boolean, selected: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>): androidx.compose.ui.Modifier
+private fun nl.rhaydus.softcover.core.component.chip.chipInteraction(interaction: nl.rhaydus.softcover.core.component.chip.ChipInteraction, selectable: kotlin.Boolean, selected: kotlin.Boolean, tentative: kotlin.Boolean, onClick: kotlin.Function0<kotlin.Unit>): androidx.compose.ui.Modifier
   skippable: true
   restartable: true
   params:
     - interaction: STABLE (class with no mutable properties)
     - selectable: STABLE (primitive type)
     - selected: STABLE (primitive type)
+    - tentative: STABLE (primitive type)
     - onClick: STABLE (function type)
 
 @Composable
@@ -2185,6 +2258,140 @@ public fun nl.rhaydus.softcover.core.component.topbar.TopBar(model: nl.rhaydus.s
     - modifier: STABLE (marked @Stable or @Immutable)
     - scrollBehavior: STABLE (marked @Stable or @Immutable)
     - actions: STABLE (composable function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.traits.HowItReadBalance(model: nl.rhaydus.softcover.core.component.traits.HowItReadBalanceUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.traits.HowItReadSheetEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.traits.HowItReadBlock(model: nl.rhaydus.softcover.core.component.traits.HowItReadBlockUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.traits.HowItReadBlockEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.traits.HowItReadChipGroup(group: nl.rhaydus.softcover.core.component.traits.HowItReadChipGroupUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.traits.HowItReadSheetEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - group: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.traits.HowItReadFilled(model: nl.rhaydus.softcover.core.component.traits.HowItReadBlockUiModel.Filled, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.traits.HowItReadBlockEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - onEvent: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.traits.HowItReadInvitation(invitation: kotlin.String, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - invitation: STABLE (String is immutable)
+    - onClick: STABLE (function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.traits.HowItReadRow(row: nl.rhaydus.softcover.core.component.traits.HowItReadRowUiModel): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - row: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.traits.HowItReadRows(rows: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.traits.HowItReadRowUiModel>, editLabel: kotlin.String, onEditClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - rows: STABLE (known stable type)
+    - editLabel: STABLE (String is immutable)
+    - onEditClick: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.traits.HowItReadScale(row: nl.rhaydus.softcover.core.component.traits.HowItReadRowUiModel.Scale): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - row: STABLE (class with no mutable properties)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.traits.HowItReadScaleLabel(text: kotlin.String, textAlign: androidx.compose.ui.text.style.TextAlign, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - text: STABLE (String is immutable)
+    - textAlign: STABLE (known stable type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.traits.HowItReadScaleLabels(startLabel: kotlin.String, centreLabel: kotlin.String, endLabel: kotlin.String, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - startLabel: STABLE (String is immutable)
+    - centreLabel: STABLE (String is immutable)
+    - endLabel: STABLE (String is immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+public fun nl.rhaydus.softcover.core.component.traits.HowItReadSheet(model: nl.rhaydus.softcover.core.component.traits.HowItReadSheetUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.traits.HowItReadSheetEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.traits.HowItReadSheetBody(model: nl.rhaydus.softcover.core.component.traits.HowItReadSheetUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.traits.HowItReadSheetEvent, kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.traits.HowItReadSheetEmptyPreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.traits.HowItReadSheetFilledPreview(): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+
+@Composable
+internal fun nl.rhaydus.softcover.core.component.traits.HowItReadSheetLabel(text: kotlin.String): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - text: STABLE (String is immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.traits.HowItReadSheetPreview(model: nl.rhaydus.softcover.core.component.traits.HowItReadSheetUiModel): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.traits.HowItReadSummaryRow(model: nl.rhaydus.softcover.core.component.traits.HowItReadBlockUiModel.Filled, onClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - onClick: STABLE (function type)
 
 @Composable
 public fun nl.rhaydus.softcover.core.component.transition.ExitingItems(items: kotlinx.collections.immutable.ImmutableList<T of nl.rhaydus.softcover.core.component.transition.ExitingItems>, keyOf: kotlin.Function1<T of nl.rhaydus.softcover.core.component.transition.ExitingItems, kotlin.Any>, itemModifier: androidx.compose.ui.Modifier, animatesExit: kotlin.Function1<T of nl.rhaydus.softcover.core.component.transition.ExitingItems, kotlin.Boolean>, exit: androidx.compose.animation.ExitTransition, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction2<@[ParameterName(name = \): kotlin.Unit

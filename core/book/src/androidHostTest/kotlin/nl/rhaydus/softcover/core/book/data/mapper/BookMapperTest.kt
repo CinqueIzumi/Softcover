@@ -10,6 +10,7 @@ import io.mockk.unmockkAll
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.fragment.BookDetailFragment
@@ -134,6 +135,43 @@ class BookMapperTest {
         )
     }
 
+    private fun stubContribution(
+        authorId: Int,
+        name: String,
+        roleId: Int?,
+        contributionText: String?,
+    ): BookListFragment.Contribution {
+        val author = mockk<BookListFragment.Contribution.Author> {
+            every {
+                id
+            } returns authorId
+            every {
+                this@mockk.name
+            } returns name
+            every {
+                is_bipoc
+            } returns null
+            every {
+                is_lgbtq
+            } returns null
+            every {
+                gender_id
+            } returns null
+        }
+
+        return mockk {
+            every {
+                this@mockk.author
+            } returns author
+            every {
+                contributor_role_id
+            } returns roleId
+            every {
+                contribution
+            } returns contributionText
+        }
+    }
+
     private fun stubBookListFragment(
         id: Int = 100,
         canonicalId: Int? = null,
@@ -142,6 +180,7 @@ class BookMapperTest {
         imageUrl: String? = null,
         releaseYear: Int? = null,
         releaseDate: String? = null,
+        pages: Int? = null,
         contributions: List<BookListFragment.Contribution> = emptyList(),
         usersCount: Int = 0,
         ratingsCount: Int = 0,
@@ -187,6 +226,9 @@ class BookMapperTest {
             every {
                 release_date
             } returns releaseDate
+            every {
+                this@mockk.pages
+            } returns pages
             every {
                 book_series
             } returns emptyList()
@@ -346,6 +388,9 @@ class BookMapperTest {
             } returns null
             every {
                 release_date
+            } returns null
+            every {
+                pages
             } returns null
             every {
                 book_series
@@ -553,6 +598,15 @@ class BookMapperTest {
                 every {
                     name
                 } returns "George Orwell"
+                every {
+                    is_bipoc
+                } returns null
+                every {
+                    is_lgbtq
+                } returns null
+                every {
+                    gender_id
+                } returns null
             }
             val withAuthor = mockk<EditionDetailFragment.Contribution> {
                 every {
@@ -588,6 +642,54 @@ class BookMapperTest {
         }
 
         @Test
+        fun `maps the author demographics and resolves the gender from its id`() {
+            // ----- Arrange -----
+            val author = mockk<EditionDetailFragment.Contribution.Author> {
+                every {
+                    id
+                } returns 9
+                every {
+                    name
+                } returns "Octavia Butler"
+                every {
+                    is_bipoc
+                } returns true
+                every {
+                    is_lgbtq
+                } returns false
+                every {
+                    gender_id
+                } returns 2
+            }
+            val contribution = mockk<EditionDetailFragment.Contribution> {
+                every {
+                    this@mockk.author
+                } returns author
+            }
+            val fragment = mockk<EditionDetailFragment>()
+
+            fragment.stubEditionFields()
+
+            every {
+                fragment.contributions
+            } returns listOf(contribution)
+
+            // ----- Act -----
+            val result = fragment.toBookEdition()
+
+            // ----- Assert -----
+            result.authors shouldBe listOf(
+                Author(
+                    id = 9,
+                    name = "Octavia Butler",
+                    isBipoc = true,
+                    isLgbtq = false,
+                    gender = Gender.Female,
+                ),
+            )
+        }
+
+        @Test
         fun `collapses and trims whitespace in author names`() {
             // ----- Arrange -----
             val contributions = listOf("Morgan   James", " Morgan James ").mapIndexed { index, rawName ->
@@ -598,6 +700,15 @@ class BookMapperTest {
                     every {
                         name
                     } returns rawName
+                    every {
+                        is_bipoc
+                    } returns null
+                    every {
+                        is_lgbtq
+                    } returns null
+                    every {
+                        gender_id
+                    } returns null
                 }
 
                 mockk<EditionDetailFragment.Contribution> {
@@ -628,6 +739,154 @@ class BookMapperTest {
     @Nested
     inner class UserBookFragmentToBook {
         @Test
+        fun `a person listed as author and translator is one primary author`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                bookListFragment = stubBookListFragment(
+                    contributions = listOf(
+                        stubContribution(
+                            authorId = 1,
+                            name = "Jane Doe",
+                            roleId = 1,
+                            contributionText = null,
+                        ),
+                        stubContribution(
+                            authorId = 1,
+                            name = "Jane Doe",
+                            roleId = 2,
+                            contributionText = "Translator",
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.authors.map { it.id } shouldBe listOf(1)
+            result.nonPrimaryAuthorIds shouldBe emptySet()
+        }
+
+        @Test
+        fun `a translator-only person stays in authors but is not primary`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                bookListFragment = stubBookListFragment(
+                    contributions = listOf(
+                        stubContribution(
+                            authorId = 1,
+                            name = "Jane Doe",
+                            roleId = 1,
+                            contributionText = null,
+                        ),
+                        stubContribution(
+                            authorId = 2,
+                            name = "Tom Translator",
+                            roleId = 2,
+                            contributionText = "Translator",
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.authors.map { it.id } shouldBe listOf(1, 2)
+            result.nonPrimaryAuthorIds shouldBe setOf(2)
+            result.primaryAuthors.map { it.id } shouldBe listOf(1)
+        }
+
+        @Test
+        fun `a contribution with no role id and no description counts as a primary author`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                bookListFragment = stubBookListFragment(
+                    contributions = listOf(
+                        stubContribution(
+                            authorId = 1,
+                            name = "Jane Doe",
+                            roleId = null,
+                            contributionText = null,
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.nonPrimaryAuthorIds shouldBe emptySet()
+        }
+
+        @Test
+        fun `a contribution with no role id but a description is not primary`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                bookListFragment = stubBookListFragment(
+                    contributions = listOf(
+                        stubContribution(
+                            authorId = 1,
+                            name = "Jane Doe",
+                            roleId = null,
+                            contributionText = "Illustrator",
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.nonPrimaryAuthorIds shouldBe setOf(1)
+        }
+
+        @Test
+        fun `keeps authors in the order they were first listed`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                bookListFragment = stubBookListFragment(
+                    contributions = listOf(
+                        stubContribution(
+                            authorId = 3,
+                            name = "Third",
+                            roleId = 1,
+                            contributionText = null,
+                        ),
+                        stubContribution(
+                            authorId = 1,
+                            name = "First",
+                            roleId = 1,
+                            contributionText = null,
+                        ),
+                        stubContribution(
+                            authorId = 3,
+                            name = "Third",
+                            roleId = 2,
+                            contributionText = "Editor",
+                        ),
+                        stubContribution(
+                            authorId = 2,
+                            name = "Second",
+                            roleId = 1,
+                            contributionText = null,
+                        ),
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.authors.map { it.id } shouldBe listOf(3, 1, 2)
+        }
+
+        @Test
         fun `returns null when the book list fragment is missing`() {
             // ----- Arrange -----
             val fragment = stubUserBookFragment(bookListFragment = null)
@@ -649,15 +908,36 @@ class BookMapperTest {
                 every {
                     name
                 } returns "Ursula Le Guin"
+                every {
+                    is_bipoc
+                } returns null
+                every {
+                    is_lgbtq
+                } returns null
+                every {
+                    gender_id
+                } returns null
             }
             val withAuthor = mockk<BookListFragment.Contribution> {
                 every {
                     this@mockk.author
                 } returns author
+                every {
+                    contributor_role_id
+                } returns 1
+                every {
+                    contribution
+                } returns null
             }
             val withoutAuthor = mockk<BookListFragment.Contribution> {
                 every {
                     this@mockk.author
+                } returns null
+                every {
+                    contributor_role_id
+                } returns 1
+                every {
+                    contribution
                 } returns null
             }
             val fragment = stubUserBookFragment(
@@ -708,6 +988,56 @@ class BookMapperTest {
         }
 
         @Test
+        fun `maps the author demographics and resolves the gender from its id`() {
+            // ----- Arrange -----
+            val author = mockk<BookListFragment.Contribution.Author> {
+                every {
+                    id
+                } returns 9
+                every {
+                    name
+                } returns "Octavia Butler"
+                every {
+                    is_bipoc
+                } returns true
+                every {
+                    is_lgbtq
+                } returns false
+                every {
+                    gender_id
+                } returns 2
+            }
+            val contribution = mockk<BookListFragment.Contribution> {
+                every {
+                    this@mockk.author
+                } returns author
+                every {
+                    contributor_role_id
+                } returns 1
+                every {
+                    contribution
+                } returns null
+            }
+            val fragment = stubUserBookFragment(
+                bookListFragment = stubBookListFragment(contributions = listOf(contribution)),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            result.authors shouldBe listOf(
+                Author(
+                    id = 9,
+                    name = "Octavia Butler",
+                    isBipoc = true,
+                    isLgbtq = false,
+                    gender = Gender.Female,
+                ),
+            )
+        }
+
+        @Test
         fun `collapses and trims whitespace in author names`() {
             // ----- Arrange -----
             val contributions = listOf("Morgan   James", " Morgan James ").mapIndexed { index, rawName ->
@@ -718,12 +1048,27 @@ class BookMapperTest {
                     every {
                         name
                     } returns rawName
+                    every {
+                        is_bipoc
+                    } returns null
+                    every {
+                        is_lgbtq
+                    } returns null
+                    every {
+                        gender_id
+                    } returns null
                 }
 
                 mockk<BookListFragment.Contribution> {
                     every {
                         this@mockk.author
                     } returns author
+                    every {
+                        contributor_role_id
+                    } returns 1
+                    every {
+                        contribution
+                    } returns null
                 }
             }
             val fragment = stubUserBookFragment(
@@ -787,11 +1132,26 @@ class BookMapperTest {
                 every {
                     name
                 } returns "Ursula Le Guin"
+                every {
+                    is_bipoc
+                } returns null
+                every {
+                    is_lgbtq
+                } returns null
+                every {
+                    gender_id
+                } returns null
             }
             val contribution = mockk<BookListFragment.Contribution> {
                 every {
                     this@mockk.author
                 } returns author
+                every {
+                    contributor_role_id
+                } returns 1
+                every {
+                    contribution
+                } returns null
             }
             val fragment = stubUserBookFragment(
                 bookListFragment = stubBookListFragment(

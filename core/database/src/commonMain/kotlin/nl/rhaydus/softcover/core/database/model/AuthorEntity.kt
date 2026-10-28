@@ -7,4 +7,7 @@ import androidx.room.PrimaryKey
 data class AuthorEntity(
     @PrimaryKey val id: Int,
     val name: String,
+    val isBipoc: Boolean?,
+    val isLgbtq: Boolean?,
+    val genderId: Int?,
 )

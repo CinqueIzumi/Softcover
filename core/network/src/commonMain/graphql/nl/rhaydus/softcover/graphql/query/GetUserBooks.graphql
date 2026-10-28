@@ -1,4 +1,10 @@
-query GetUserBooks($statusIds: [Int!], $userBookIds: [Int!]) {
+query GetUserBooks(
+    $userId: Int!,
+    $statusIds: [Int!],
+    $userBookIds: [Int!],
+    $limit: Int!,
+    $offset: Int!,
+) {
     me {
         user_books(
             where: {
@@ -7,9 +13,50 @@ query GetUserBooks($statusIds: [Int!], $userBookIds: [Int!]) {
                     { id: { _in: $userBookIds } }
                 ]
             },
-            order_by: { updated_at: desc }
+            order_by: { id: asc },
+            limit: $limit,
+            offset: $offset
         ) {
             ...UserBookFragment
+            book {
+                taggings(
+                    where: {
+                        user_id: { _eq: $userId },
+                        taggable_type: { _eq: "Book" }
+                    }
+                ) {
+                    ...TaggingFragment
+                    tag {
+                        ...TagFragment
+                    }
+                }
+                canonical {
+                    id
+                    taggings(
+                        where: {
+                            user_id: { _eq: $userId },
+                            taggable_type: { _eq: "Book" }
+                        }
+                    ) {
+                        ...TaggingFragment
+                        tag {
+                            ...TagFragment
+                        }
+                    }
+                }
+            }
+        }
+        total: user_books_aggregate(
+            where: {
+                _or: [
+                    { status_id: { _in: $statusIds } },
+                    { id: { _in: $userBookIds } }
+                ]
+            }
+        ) {
+            aggregate {
+                count
+            }
         }
     }
 }

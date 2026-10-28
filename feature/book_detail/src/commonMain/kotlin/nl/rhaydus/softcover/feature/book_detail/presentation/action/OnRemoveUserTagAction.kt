@@ -4,7 +4,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagsLoad
 import nl.rhaydus.toad.ActionScope
 
 internal class OnRemoveUserTagAction(
@@ -16,7 +15,7 @@ internal class OnRemoveUserTagAction(
     ) {
         val tag = scope.currentState.userTagByEditorChipKey[chipKey] ?: return
 
-        val current = (scope.currentState.userTags as? UserTagsLoad.Loaded)?.tags ?: return
+        val current = scope.currentState.editableUserTags ?: return
 
         val newSet = current.filterNot {
             it.category == tag.category && it.name == tag.name

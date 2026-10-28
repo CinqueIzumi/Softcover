@@ -6,7 +6,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -78,7 +77,10 @@ class TagChipModelsCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(userTags.toImmutableList()))
+            stateFlow.value = stateFlow.value.copy(
+                userTags = userTags,
+                userTagsLoad = UserTagsLoad.Loaded,
+            )
 
             // ----- Assert -----
             stateFlow.value.userTagChips.map { it.key } shouldBe listOf("GENRE:Fantasy", "MOOD:Cozy")
@@ -379,7 +381,7 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(persistentListOf()))
+                stateFlow.value = stateFlow.value.copy(userTagsLoad = UserTagsLoad.Loaded)
 
                 // ----- Assert -----
                 stateFlow.value.tagEditorOpenerChip?.label shouldBe "Add tags"
@@ -405,7 +407,10 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(userTags.toImmutableList()))
+                stateFlow.value = stateFlow.value.copy(
+                    userTags = userTags,
+                    userTagsLoad = UserTagsLoad.Loaded,
+                )
 
                 // ----- Assert -----
                 stateFlow.value.tagEditorOpenerChip?.label shouldBe "Edit tags"
@@ -443,7 +448,10 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(userTags.toImmutableList()))
+                stateFlow.value = stateFlow.value.copy(
+                    userTags = userTags,
+                    userTagsLoad = UserTagsLoad.Loaded,
+                )
 
                 // ----- Assert -----
                 stateFlow.value.userTagEditorGroups.map { it.label } shouldBe listOf(
@@ -474,7 +482,10 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(userTags.toImmutableList()))
+                stateFlow.value = stateFlow.value.copy(
+                    userTags = userTags,
+                    userTagsLoad = UserTagsLoad.Loaded,
+                )
 
                 // ----- Assert -----
                 stateFlow.value.userTagEditorGroups.map { it.label } shouldBe listOf(TagCategory.GENRE.label)
@@ -506,7 +517,10 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(userTags.toImmutableList()))
+                stateFlow.value = stateFlow.value.copy(
+                    userTags = userTags,
+                    userTagsLoad = UserTagsLoad.Loaded,
+                )
 
                 // ----- Assert -----
                 val chips = stateFlow.value.userTagEditorGroups.flatMap { it.chips }.associateBy { it.label }
@@ -539,7 +553,10 @@ class TagChipModelsCollectorTest {
                 }
 
                 // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(userTags = UserTagsLoad.Loaded(userTags.toImmutableList()))
+                stateFlow.value = stateFlow.value.copy(
+                    userTags = userTags,
+                    userTagsLoad = UserTagsLoad.Loaded,
+                )
 
                 // ----- Assert -----
                 stateFlow.value.userTagByEditorChipKey shouldBe mapOf(

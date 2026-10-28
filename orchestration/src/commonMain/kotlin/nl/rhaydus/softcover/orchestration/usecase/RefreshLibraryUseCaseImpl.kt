@@ -9,12 +9,15 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
+import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
+import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshAllReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
 
 private const val OWNED_LIST_SLUG: String = "owned"
@@ -24,6 +27,8 @@ internal class RefreshLibraryUseCaseImpl(
     private val booksRepository: BooksRepository,
     private val listsRepository: ListsRepository,
     private val settingsRepository: SettingsRepository,
+    private val refreshAllReadingJournalHistoryUseCase: RefreshAllReadingJournalHistoryUseCase,
+    private val applicationScope: ApplicationScope,
     private val dispatchers: AppDispatchers,
 ) : RefreshLibraryUseCase {
     override suspend operator fun invoke(scope: RefreshScope): Result<Unit> = runCatchingLogged {
@@ -42,6 +47,28 @@ internal class RefreshLibraryUseCaseImpl(
                 )
             }
         }
+
+        if (scope.coversReadBooks()) {
+            settingsRepository.markAuthorDemographicsBackfilled()
+            settingsRepository.markAuthorRolesBackfilled()
+        }
+
+        if (scope !is RefreshScope.ByList) refreshReadingJournalInBackground()
+    }
+
+    // The pages-per-month stats read the journal from Room, so the fetch trails the refresh on the
+    // application scope: the caller never waits on it and a failure only logs.
+    private fun refreshReadingJournalInBackground() {
+        applicationScope.scope.launch(dispatchers.io) {
+            refreshAllReadingJournalHistoryUseCase()
+        }
+    }
+
+    // The reading stats need only the Read status, so any refresh that covers it completes the demographics backfill.
+    private fun RefreshScope.coversReadBooks(): Boolean = when (this) {
+        RefreshScope.All -> true
+        is RefreshScope.ByStatuses -> UserBookStatus.READ in statuses
+        is RefreshScope.ByList -> false
     }
 
     private suspend fun refreshAll(userId: Int) = coroutineScope {

@@ -24,7 +24,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.DemographicBreakd
  * that attribute known), so the — often large — untagged population is always visible rather than
  * hidden behind a share-of-tagged-authors percentage.
  *
- * [hideUntaggedAuthors] is the reader's opt-in to the *other* reading: the untagged bucket drops out
+ * The hide switch is the reader's opt-in to the *other* reading: the untagged bucket drops out
  * of each bar and the remaining percentages are renormalised over the tagged authors alone (per bar —
  * see `AuthorDemographics.excludingUntaggedAuthors`, which is applied upstream in the state). The
  * switch renders whenever there is an untagged bucket to drop at all ([canHideUntaggedAuthors]) and
@@ -40,7 +40,8 @@ internal fun AuthorRepresentationSection(
     genderBreakdown: DemographicBreakdownUiModel,
     bipocBreakdown: DemographicBreakdownUiModel,
     lgbtqBreakdown: DemographicBreakdownUiModel,
-    hideUntaggedAuthors: Boolean,
+    scopeCaption: String,
+    emptyCaption: String,
     hideUntaggedAuthorsToggle: ToggleRowUiModel<String>,
     canHideUntaggedAuthors: Boolean,
     isLoading: Boolean,
@@ -58,85 +59,73 @@ internal fun AuthorRepresentationSection(
 
         Spacer(modifier = Modifier.height(Spacing.md))
 
-        if (canHideUntaggedAuthors && isLoading.not()) {
-            ToggleRow(
-                model = hideUntaggedAuthorsToggle,
-                onEvent = { event ->
-                    when (event) {
-                        is ToggleEvent.Toggled -> onHideUntaggedAuthorsChange(event.checked)
-                    }
-                },
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.xl))
-        }
-
-        if (hasContent.not() && isLoading.not()) {
-            SoftcoverText(
-                text = emptyAuthorDemographicsCaption(hideUntaggedAuthors = hideUntaggedAuthors),
-                style = MaterialTheme.editorialTypography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
-            if (hasGenderData || isLoading) {
-                ProportionChart(model = genderBreakdown.chart)
-
-                Spacer(modifier = Modifier.height(Spacing.sm))
-
-                FadeThroughText(
-                    text = genderBreakdown.caption,
-                    style = MaterialTheme.editorialTypography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    isLoading = isLoading,
-                    standIn = "Across 120 authors with a known gender.",
-                )
-            }
-
-            if (hasBipocData || hasLgbtqData || isLoading) {
-                if (hasGenderData || isLoading) {
-                    Spacer(modifier = Modifier.height(Spacing.xxl))
-                }
-
-                FadeThroughText(
-                    text = demographicScopeCaption(hideUntaggedAuthors = hideUntaggedAuthors),
-                    style = MaterialTheme.editorialTypography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    isLoading = isLoading,
-                    standIn = "Each bar counts only the authors tagged for it.",
-                )
-
-                Spacer(modifier = Modifier.height(Spacing.md))
-
-                DemographicBreakdownBlock(
-                    label = "BIPOC",
-                    breakdown = bipocBreakdown,
-                    isLoading = isLoading,
+        Column(modifier = Modifier.animateScopeContentSize()) {
+            if (canHideUntaggedAuthors && isLoading.not()) {
+                ToggleRow(
+                    model = hideUntaggedAuthorsToggle,
+                    onEvent = { event ->
+                        when (event) {
+                            is ToggleEvent.Toggled -> onHideUntaggedAuthorsChange(event.checked)
+                        }
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.xl))
+            }
 
-                DemographicBreakdownBlock(
-                    label = "LGBTQ+",
-                    breakdown = lgbtqBreakdown,
-                    isLoading = isLoading,
+            if (hasContent.not() && isLoading.not()) {
+                FadeThroughText(
+                    text = emptyCaption,
+                    style = MaterialTheme.editorialTypography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            } else {
+                if (hasGenderData || isLoading) {
+                    ProportionChart(model = genderBreakdown.chart)
+
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+
+                    FadeThroughText(
+                        text = genderBreakdown.caption,
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        isLoading = isLoading,
+                        standIn = "Across 120 authors with a known gender.",
+                    )
+                }
+
+                if (hasBipocData || hasLgbtqData || isLoading) {
+                    if (hasGenderData || isLoading) {
+                        Spacer(modifier = Modifier.height(Spacing.xxl))
+                    }
+
+                    FadeThroughText(
+                        text = scopeCaption,
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        isLoading = isLoading,
+                        standIn = "Each bar counts only the authors tagged for it.",
+                    )
+
+                    Spacer(modifier = Modifier.height(Spacing.md))
+
+                    DemographicBreakdownBlock(
+                        label = "BIPOC",
+                        breakdown = bipocBreakdown,
+                        isLoading = isLoading,
+                    )
+
+                    Spacer(modifier = Modifier.height(Spacing.xl))
+
+                    DemographicBreakdownBlock(
+                        label = "LGBTQ+",
+                        breakdown = lgbtqBreakdown,
+                        isLoading = isLoading,
+                    )
+                }
             }
         }
     }
-}
-
-private fun emptyAuthorDemographicsCaption(hideUntaggedAuthors: Boolean): String = if (hideUntaggedAuthors) {
-    "None of your authors have this data yet. Turn off Hide untagged authors to see them."
-} else {
-    "Author demographics will appear here as the authors you read get tagged."
-}
-
-// Names what the two breakdowns below are a share *of* — the one line that changes meaning wholesale
-// with the switch, since each bar's denominator drops to its own tagged subset.
-private fun demographicScopeCaption(hideUntaggedAuthors: Boolean): String = if (hideUntaggedAuthors) {
-    "Each bar counts only the authors tagged for it."
-} else {
-    "Shares of every author you've read, tagged or not."
 }
 
 @Composable

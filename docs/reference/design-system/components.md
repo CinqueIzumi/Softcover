@@ -28,7 +28,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 
 ## Chips
 
-- **Chip** — `chip` — the one chip, in eight tones with leading and trailing slots; a trailing `Disclosure` arrow flips while expanded.
+- **Chip** — `chip` — the one chip, in ten tones (`TonalDashed` the indeterminate third state) with leading and trailing slots; `Disclosure` flips while expanded; `Eyebrow` face sets caps.
 - **ChipFlow** — `chip` — wraps a `ChipSet` in one flow row.
 
 ## Covers & cards
@@ -75,8 +75,13 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **StatNumber** — `statistic` — springs or rolls a number into place, with an optional prefix or suffix.
 - **StatTile** — `statistic` — a labelled stat on a hero, standard or compact tile.
 - **ColumnChart** — `chart` — vertical columns on one baseline with a per-column readout.
-- **RankedBars** — `chart` — a bar per category, each on its own 100% track.
-- **ProportionChart** — `chart` — one stacked bar of parts of a whole, with its legend.
+- **RankedBars** — `chart` — numbered rows, each a name over a bar filled relative to the lead row, with its share.
+  Rows from `visibleCount` on fold in and out one by one.
+- **ProportionChart** — `chart` — one slim stacked bar of parts of a whole, with its legend as rows or inline keys (`ProportionChartVariant`).
+- **YearGrid** — `chart` — a year of day squares, a row per month, tinted by pages read on four steps with a
+  "Fewer pages → More" key; tapping a read day emits `YearGridEvent.DayTapped`.
+- **RecentDaysGrid** — `chart` — the last 84 days as 12dp squares, 7 rows by 12 columns filled column by column
+  (oldest top-left, today bottom-right), tinted like YearGrid; not interactive, one image node.
 
 ## Share
 
@@ -91,6 +96,7 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **MarkdownDocument** — `document` — a parsed markdown document as an editorial spread; links leave as `LinkClicked`.
 - **VerdictSheet** — `verdict` — the combined rating-and-review editor.
 - **VerdictBlock** — `verdict` — book-page rating and review card that opens the verdict sheet.
+- **HowItReadBlock / HowItReadSheet** — `traits` — the private reading-survey panel and the sheet that edits it.
 
 ## Modifiers & helpers
 

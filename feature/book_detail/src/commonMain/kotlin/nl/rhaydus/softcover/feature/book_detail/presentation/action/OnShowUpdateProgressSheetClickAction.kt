@@ -11,13 +11,8 @@ internal class OnShowUpdateProgressSheetClickAction : BookDetailAction {
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        // The active unit is kept current by LastUsedProgressUnitCollector, so opening the sheet just
-        // reveals it. A suspending preference read on open could fail or stall, so there is none here.
         scope.setState {
-            it.copy(
-                progressSheetRequested = true,
-                readAt = null,
-            )
+            it.copy(progressSheet = it.progressSheet.opened())
         }
     }
 }

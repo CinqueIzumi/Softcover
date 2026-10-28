@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.profile.domain.model
 
 /**
- * One of the user's top genres. [count] is how many of their genre-tagged books carry it, and
- * [fraction] is that count over [GenreBreakdown.taggedBookCount] — a share of *books*, so it reads
+ * One genre in the reader's ranking. [count] is how many of their genre-tagged books carry it, and
+ * [fraction] is that count over all of them — a share of *books*, so it reads
  * straight off as "N% of your books were X".
  *
  * Genres overlap (one book carries several), so these are not parts of a whole: the fractions across

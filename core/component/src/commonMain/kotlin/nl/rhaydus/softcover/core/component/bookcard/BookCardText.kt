@@ -17,6 +17,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import kotlinx.collections.immutable.ImmutableList
@@ -97,6 +98,15 @@ internal fun BookCardTextBlock(
             BookCardProgressBar(
                 progress = progress,
                 isLoading = isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.xxs),
+            )
+        }
+
+        content.tagStrip?.takeIf { it.chips.isNotEmpty() }?.let { strip ->
+            BookCardTagStripRow(
+                strip = strip,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = Spacing.xxs),
@@ -212,13 +222,14 @@ private fun SupportingLine(
 }
 
 @Composable
-private fun RatingLabel(
+internal fun RatingLabel(
     label: String,
     contentDescription: String,
     transitionKey: BookTransitionKey?,
     style: TextStyle,
     color: Color,
     isLoading: Boolean,
+    iconSize: Dp = 12.dp,
 ) {
     val icon = drawableIconResource(
         icon = SoftcoverIcon.StarFilled,
@@ -237,7 +248,7 @@ private fun RatingLabel(
             contentDescription = null,
             tint = RatingGold,
             modifier = Modifier
-                .size(12.dp)
+                .size(iconSize)
                 .skeletonMask(visible = isLoading),
         )
 

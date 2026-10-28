@@ -10,7 +10,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.preferences.domain.repository.SettingsRepository
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileStatsUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -19,7 +19,7 @@ class ReAuthenticateUseCaseImplTest {
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var resetUserDataUseCase: ResetUserDataUseCase
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
-    private lateinit var refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase
+    private lateinit var refreshUserProfileStatsUseCase: RefreshUserProfileStatsUseCase
     private lateinit var useCase: ReAuthenticateUseCaseImpl
 
     @BeforeEach
@@ -27,12 +27,12 @@ class ReAuthenticateUseCaseImplTest {
         settingsRepository = mockk(relaxed = true)
         resetUserDataUseCase = mockk(relaxed = true)
         refreshLibraryUseCase = mockk(relaxed = true)
-        refreshUserProfileDataUseCase = mockk(relaxed = true)
+        refreshUserProfileStatsUseCase = mockk(relaxed = true)
         useCase = ReAuthenticateUseCaseImpl(
             settingsRepository = settingsRepository,
             resetUserDataUseCase = resetUserDataUseCase,
             refreshLibraryUseCase = refreshLibraryUseCase,
-            refreshUserProfileDataUseCase = refreshUserProfileDataUseCase,
+            refreshUserProfileStatsUseCase = refreshUserProfileStatsUseCase,
         )
 
         coEvery {
@@ -42,7 +42,7 @@ class ReAuthenticateUseCaseImplTest {
             refreshLibraryUseCase()
         } returns Result.success(Unit)
         coEvery {
-            refreshUserProfileDataUseCase()
+            refreshUserProfileStatsUseCase()
         } returns Result.success(Unit)
     }
 

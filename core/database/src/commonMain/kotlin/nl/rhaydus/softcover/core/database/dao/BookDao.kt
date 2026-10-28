@@ -222,9 +222,6 @@ interface BookDao {
     @Query("SELECT id FROM book_editions WHERE id IN (:editionIds)")
     suspend fun getExistingEditionIds(editionIds: List<Int>): List<Int>
 
-    @Query("SELECT * FROM authors WHERE name IN (:names)")
-    suspend fun getAuthorsByName(names: List<String>): List<AuthorEntity>
-
     @Query("SELECT id, localImagePath, localImageUrl FROM book_editions WHERE id IN (:editionIds)")
     suspend fun getEditionImageRefsByEditionIds(editionIds: List<Int>): List<EditionImageRef>
 
@@ -326,24 +323,17 @@ interface BookDao {
         )
         insertEditions(editionPlan.entities)
 
-        // Insert authors (deduplicated)
+        // Insert authors (deduplicated by Hardcover id; book-level authors win over edition-level ones)
         val allAuthors = (book.authors + book.editions.flatMap { it.authors })
-            .distinctBy { it.name }
+            .distinctBy { it.id }
         insertAuthors(allAuthors.map { it.toEntity() })
-
-        // Resolve IDs
-        val authorEntities = getAuthorsByName(allAuthors.map { it.name })
-        val authorIdsByName = authorEntities.associateBy(
-            { it.name },
-            { it.id },
-        )
 
         // Cross references
         clearBookAuthors(book.id)
-        insertBookAuthors(book.toBookAuthorRefs(authorIdsByName))
+        insertBookAuthors(book.toBookAuthorRefs())
 
         clearEditionAuthorsByEditionIds(editionIds = book.editions.map { it.id })
-        insertEditionAuthors(book.toEditionAuthorRefs(authorIdsByName))
+        insertEditionAuthors(book.toEditionAuthorRefs())
 
         if (book.tags.isNotEmpty()) {
             insertTags(
@@ -445,18 +435,13 @@ interface BookDao {
         )
         insertEditions(plan.entities)
 
-        val allAuthors = editions.flatMap { it.authors }.distinctBy { it.name }
+        val allAuthors = editions.flatMap { it.authors }.distinctBy { it.id }
 
         if (allAuthors.isEmpty()) return plan.stalePaths
 
         insertAuthors(allAuthors.map { it.toEntity() })
-        val authorEntities = getAuthorsByName(allAuthors.map { it.name })
-        val authorIdsByName = authorEntities.associateBy(
-            { it.name },
-            { it.id },
-        )
 
-        val crossRefs = editions.flatMap { edition -> edition.toEditionAuthorRefs(authorIdsByName) }
+        val crossRefs = editions.flatMap { edition -> edition.toEditionAuthorRefs() }
         insertEditionAuthors(crossRefs)
 
         return plan.stalePaths
@@ -541,6 +526,9 @@ interface BookDao {
     @Query("DELETE FROM book_deadlines")
     suspend fun deleteAllBookDeadlines()
 
+    @Query("DELETE FROM book_traits")
+    suspend fun deleteAllBookTraits()
+
     @Query("DELETE FROM pending_user_book_writes")
     suspend fun deleteAllPendingUserBookWrites()
 
@@ -591,6 +579,25 @@ interface BookDao {
 
     @Query("DELETE FROM ranked_books")
     suspend fun deleteAllRankedBooks()
+
+    @Query("DELETE FROM book_user_tags")
+    suspend fun deleteAllBookUserTags()
+
+    @Query(
+        """
+            INSERT OR IGNORE INTO book_user_tags (bookId, category, name, spoiler)
+            SELECT :newId, category, name, spoiler
+            FROM book_user_tags
+            WHERE bookId = :oldId
+        """,
+    )
+    suspend fun copyBookUserTags(
+        oldId: Int,
+        newId: Int,
+    )
+
+    @Query("DELETE FROM book_user_tags WHERE bookId = :bookId")
+    suspend fun deleteBookUserTagsForBook(bookId: Int)
 
     @Query("DELETE FROM ranked_books WHERE listKey = :listKey")
     suspend fun deleteRankedBooks(listKey: String)
@@ -786,13 +793,18 @@ interface BookDao {
 
         val newIdHasBook = getExistingBookIds(bookIds = listOf(newId)).isNotEmpty()
 
-        // user_books and ranked_books reference books(id); re-pointing at a missing row violates
+        // user_books, book_user_tags and ranked_books reference books(id); re-pointing at a missing row violates
         // the foreign key. A user book stays on its old id; cached ranked rows are only a cache.
         if (newIdHasBook) {
             redirectUserBooksBookId(
                 oldId = oldId,
                 newId = newId,
             )
+            copyBookUserTags(
+                oldId = oldId,
+                newId = newId,
+            )
+            deleteBookUserTagsForBook(bookId = oldId)
         }
 
         redirectListBooksBookId(
@@ -875,6 +887,7 @@ interface BookDao {
         deleteAllDismissedContinueSeries()
         deleteAllHiddenRecommendations()
         deleteAllBookDeadlines()
+        deleteAllBookTraits()
         deleteAllPendingUserBookWrites()
         deleteAllPendingListWrites()
         deleteAllQuotes()
@@ -883,6 +896,7 @@ interface BookDao {
         deleteAllProgressHistory()
         deleteAllRankedBooks()
         deleteAllRankedListMeta()
+        deleteAllBookUserTags()
 
         deleteAllUserBooks()
         deleteAllBookEditions()

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.connectivity.data.store
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coJustRun
@@ -16,6 +17,7 @@ import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
+import nl.rhaydus.softcover.core.domain.connectivity.USER_BOOK_WRITE_MAX_ATTEMPTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -392,6 +394,226 @@ class PendingUserBookWriteStoreTest {
 
             // ----- Assert -----
             result shouldBe false
+        }
+    }
+
+    @Nested
+    inner class Append {
+        @Test
+        fun `returns the row id the dao assigned`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(kind = PendingUserBookWriteKind.UPDATE_RATING)
+
+            coEvery {
+                dao.insertReplacing(entity = any())
+            } returns 77L
+
+            // ----- Act -----
+            val result = store.append(write = payload)
+
+            // ----- Assert -----
+            result shouldBe 77L
+        }
+
+        @Test
+        fun `deletes the history row of the superseded progress write`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                progressHistoryId = 32L,
+            )
+
+            coEvery {
+                dao.getByUserBookIdAndKind(
+                    userBookId = 10,
+                    kind = "UPDATE_PROGRESS",
+                )
+            } returns pendingUserBookWriteEntity(progressHistoryId = 31L)
+
+            coEvery {
+                dao.insertReplacing(entity = any())
+            } returns 5L
+
+            // ----- Act -----
+            store.append(write = payload)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                progressHistoryLocalDataSource.delete(localId = 31L)
+            }
+        }
+    }
+
+    @Nested
+    inner class Remove {
+        @Test
+        fun `deletes only the given localId`() = runTest {
+            // ----- Arrange -----
+            coJustRun {
+                dao.delete(localId = any())
+            }
+
+            // ----- Act -----
+            store.remove(localId = 9L)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                dao.delete(localId = 9L)
+            }
+
+            coVerify(exactly = 1) {
+                dao.delete(localId = any())
+            }
+        }
+    }
+
+    @Nested
+    inner class IsCurrent {
+        @Test
+        fun `returns true when the stored row equals the write`() = runTest {
+            // ----- Arrange -----
+            val entity = pendingUserBookWriteEntity()
+            val write = entity.toPendingUserBookWrite().shouldNotBeNull()
+
+            coEvery {
+                dao.getByUserBookIdAndKind(
+                    userBookId = write.userBookId,
+                    kind = write.kind.name,
+                )
+            } returns entity
+
+            // ----- Act -----
+            val result = store.isCurrent(write = write)
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `returns false when the stored row differs from the write`() = runTest {
+            // ----- Arrange -----
+            val write = pendingUserBookWriteEntity(progressPages = 50)
+                .toPendingUserBookWrite()
+                .shouldNotBeNull()
+
+            coEvery {
+                dao.getByUserBookIdAndKind(
+                    userBookId = any(),
+                    kind = any(),
+                )
+            } returns pendingUserBookWriteEntity(progressPages = 60)
+
+            // ----- Act -----
+            val result = store.isCurrent(write = write)
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `returns false when the stored row is gone`() = runTest {
+            // ----- Arrange -----
+            val write = pendingUserBookWrite()
+
+            coEvery {
+                dao.getByUserBookIdAndKind(
+                    userBookId = any(),
+                    kind = any(),
+                )
+            } returns null
+
+            // ----- Act -----
+            val result = store.isCurrent(write = write)
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+    }
+
+    @Nested
+    inner class PendingKindsByUserBook {
+        @Test
+        fun `groups the pending kinds per user book`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                dao.getPending(maxAttempts = any())
+            } returns listOf(
+                pendingUserBookWriteEntity(
+                    localId = 1L,
+                    userBookId = 10,
+                    kind = PendingUserBookWriteKind.UPDATE_PROGRESS.name,
+                ),
+                pendingUserBookWriteEntity(
+                    localId = 2L,
+                    userBookId = 10,
+                    kind = PendingUserBookWriteKind.UPDATE_RATING.name,
+                ),
+                pendingUserBookWriteEntity(
+                    localId = 3L,
+                    userBookId = 11,
+                    kind = PendingUserBookWriteKind.UPDATE_PROGRESS.name,
+                ),
+            )
+
+            // ----- Act -----
+            val result = store.pendingKindsByUserBook()
+
+            // ----- Assert -----
+            result shouldBe mapOf(
+                10 to setOf(
+                    PendingUserBookWriteKind.UPDATE_PROGRESS,
+                    PendingUserBookWriteKind.UPDATE_RATING,
+                ),
+                11 to setOf(PendingUserBookWriteKind.UPDATE_PROGRESS),
+            )
+        }
+
+        @Test
+        fun `queries the dao with the attempt cap`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                dao.getPending(maxAttempts = any())
+            } returns emptyList()
+
+            // ----- Act -----
+            store.pendingKindsByUserBook()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                dao.getPending(maxAttempts = USER_BOOK_WRITE_MAX_ATTEMPTS)
+            }
+        }
+    }
+
+    @Nested
+    inner class HasOlderPending {
+        @Test
+        fun `asks the dao with the cap and the excluded localId`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                dao.hasOlderPending(
+                    bookId = any(),
+                    exceptLocalId = any(),
+                    maxAttempts = any(),
+                )
+            } returns true
+
+            // ----- Act -----
+            val result = store.hasOlderPending(
+                bookId = 20,
+                exceptLocalId = 4L,
+            )
+
+            // ----- Assert -----
+            result shouldBe true
+
+            coVerify(exactly = 1) {
+                dao.hasOlderPending(
+                    bookId = 20,
+                    exceptLocalId = 4L,
+                    maxAttempts = USER_BOOK_WRITE_MAX_ATTEMPTS,
+                )
+            }
         }
     }
 }

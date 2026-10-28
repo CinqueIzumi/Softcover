@@ -4,20 +4,18 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
-import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
-import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
+import nl.rhaydus.softcover.core.domain.model.StatsRange
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
@@ -27,16 +25,24 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ReadingLifeCollectorTest {
-    private lateinit var observeReadingLifeUseCase: ObserveReadingLifeUseCase
+    private lateinit var observeReadingStatsUseCase: ObserveReadingStatsUseCase
+    private lateinit var observeReadingHistoryUseCase: ObserveReadingHistoryUseCase
+    private lateinit var observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase
     private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
     private lateinit var eventChannel: Channel<ProfileEvent>
     private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
-    private lateinit var readingLifeFlow: MutableSharedFlow<ReadingLife?>
+    private lateinit var readingStatsFlow: MutableStateFlow<ReadingStats>
+    private lateinit var readingHistoryFlow: MutableStateFlow<ReadingHistory>
+    private lateinit var backfilledFlow: MutableStateFlow<Boolean>
 
     @BeforeEach
     fun setUp() {
-        readingLifeFlow = MutableSharedFlow()
-        observeReadingLifeUseCase = mockk()
+        readingStatsFlow = MutableStateFlow(ReadingStats())
+        readingHistoryFlow = MutableStateFlow(ReadingHistory())
+        backfilledFlow = MutableStateFlow(true)
+        observeReadingStatsUseCase = mockk()
+        observeReadingHistoryUseCase = mockk()
+        observeReadingStatsBackfilledUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
@@ -46,16 +52,32 @@ class ReadingLifeCollectorTest {
         )
 
         every {
-            observeReadingLifeUseCase()
-        } returns readingLifeFlow
+            observeReadingStatsUseCase(StatsRange.Unbounded)
+        } returns readingStatsFlow
+
+        every {
+            observeReadingHistoryUseCase()
+        } returns readingHistoryFlow
+
+        every {
+            observeReadingStatsBackfilledUseCase()
+        } returns backfilledFlow
     }
 
     private fun stubDependencies(testScope: TestScope): ProfileDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<ProfileDependencies>(relaxed = true).also { mock ->
             every {
-                mock.observeReadingLifeUseCase
-            } returns observeReadingLifeUseCase
+                mock.observeReadingStatsUseCase
+            } returns observeReadingStatsUseCase
+
+            every {
+                mock.observeReadingHistoryUseCase
+            } returns observeReadingHistoryUseCase
+
+            every {
+                mock.observeReadingStatsBackfilledUseCase
+            } returns observeReadingStatsBackfilledUseCase
 
             every {
                 mock.coroutineScope
@@ -67,67 +89,17 @@ class ReadingLifeCollectorTest {
         }
     }
 
-    private fun buildReadingLife(
-        trackedYears: Int = 3,
-        ratingBand: RatingBand = RatingBand.NEW_READER,
-    ): ReadingLife = ReadingLife(
-        booksByYear = emptyList(),
-        pagesByYear = emptyList(),
-        pagesByMonth = emptyList(),
-        genres = GenreBreakdown(),
-        ratings = RatingsDistribution(band = ratingBand),
-        recentlyLoved = emptyList(),
-        trackedYears = trackedYears,
-    )
-
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates state readingLife when observe emits non-null`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val readingLife = buildReadingLife()
-            val dependencies = stubDependencies(this)
-            val collector = ReadingLifeCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            readingLifeFlow.emit(readingLife)
-
-            // ----- Assert -----
-            stateFlow.value.readingLife shouldBe readingLife
-            job.cancel()
-        }
-
-        @Test
-        fun `does not update state when observe emits null`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val dependencies = stubDependencies(this)
-            val collector = ReadingLifeCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            readingLifeFlow.emit(null)
-
-            // ----- Assert -----
-            stateFlow.value.readingLife shouldBe null
-            job.cancel()
-        }
-
-        @Test
-        fun `sets ratingsHistogramHeader and ratingsHistogramCaption from the emitted ratings band`() =
+        fun `updates the reading stats and history once the library is backfilled`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                val readingLife = buildReadingLife(ratingBand = RatingBand.SUPERFAN)
+                val stats = ReadingStats(
+                    booksRead = 12,
+                    totalPages = 3400,
+                )
+                val history = ReadingHistory(trackedYears = 3)
                 val dependencies = stubDependencies(this)
                 val collector = ReadingLifeCollector()
                 val job = launch {
@@ -138,11 +110,35 @@ class ReadingLifeCollectorTest {
                 }
 
                 // ----- Act -----
-                readingLifeFlow.emit(readingLife)
+                readingStatsFlow.value = stats
+                readingHistoryFlow.value = history
 
                 // ----- Assert -----
-                stateFlow.value.ratingsHistogramHeader shouldBe RatingBand.SUPERFAN.toRatingsHistogramHeader()
-                stateFlow.value.ratingsHistogramCaption shouldBe RatingBand.SUPERFAN.toRatingsHistogramCaption()
+                stateFlow.value.readingStats shouldBe stats
+                stateFlow.value.readingHistory shouldBe history
+                job.cancel()
+            }
+
+        @Test
+        fun `leaves the reading stats and history unset while the library is not backfilled`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                backfilledFlow.value = false
+                val dependencies = stubDependencies(this)
+                val collector = ReadingLifeCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                readingStatsFlow.value = ReadingStats(booksRead = 12)
+
+                // ----- Assert -----
+                stateFlow.value.readingStats shouldBe null
+                stateFlow.value.readingHistory shouldBe null
                 job.cancel()
             }
     }

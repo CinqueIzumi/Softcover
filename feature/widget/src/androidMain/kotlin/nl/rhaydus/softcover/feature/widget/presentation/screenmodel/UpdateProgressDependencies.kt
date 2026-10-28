@@ -9,11 +9,10 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBook
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
 import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationRequest
+import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.toad.ActionDependencies
 
@@ -23,8 +22,7 @@ internal class UpdateProgressDependencies(
     val getCurrentlyReadingUserBooks: GetCurrentlyReadingUserBooksUseCase,
     val recordBookProgress: RecordBookProgressUseCase,
     val markBookAsRead: MarkBookAsReadUseCase,
-    val getLastUsedProgressUnitAsFlow: GetLastUsedProgressUnitAsFlowUseCase,
-    val setLastUsedProgressUnit: SetLastUsedProgressUnitUseCase,
+    val progressSheetSlice: ProgressSheetSlice,
     val getThemeConfiguration: GetThemeConfigurationUseCase,
     val appEntryPoint: AppEntryPoint,
     override val coroutineScope: CoroutineScope,

@@ -24,7 +24,6 @@ import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
@@ -36,13 +35,14 @@ import nl.rhaydus.softcover.feature.profile.presentation.action.OnShareSheetOpen
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AccountFootSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileIdentity
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileReadingLife
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileShareButton
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileSheets
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ReadingSummaryCard
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ShareEntryRow
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 
 /**
- * Desktop Profile: a fixed identity column beside a scrolling reading-life column on a wide window,
+ * Desktop Profile: a fixed identity column beside a scrolling share-and-atlas column on a wide window,
  * one scrolling column on a narrow one. The opaque [Surface] keeps the screen beneath a pushed Profile
  * from bleeding through during the navigation transition.
  */
@@ -51,7 +51,7 @@ internal actual fun ProfileScreenLayout(
     state: ProfileUiState,
     runAction: (ProfileAction) -> Unit,
     onNavigateUp: () -> Unit,
-    onBookCardEvent: (BookCardEvent) -> Unit,
+    onOpenStatsAtlas: () -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -61,7 +61,7 @@ internal actual fun ProfileScreenLayout(
             state = state,
             runAction = runAction,
             onNavigateUp = onNavigateUp,
-            onBookCardEvent = onBookCardEvent,
+            onOpenStatsAtlas = onOpenStatsAtlas,
         )
     }
 }
@@ -71,7 +71,7 @@ private fun ProfileContent(
     state: ProfileUiState,
     runAction: (ProfileAction) -> Unit,
     onNavigateUp: () -> Unit,
-    onBookCardEvent: (BookCardEvent) -> Unit,
+    onOpenStatsAtlas: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         EditorialTopBar(
@@ -100,18 +100,16 @@ private fun ProfileContent(
             if (maxWidth >= 720.dp) {
                 TwoColumnProfile(
                     state = state,
-                    runAction = runAction,
                     onShareClick = { runAction(OnShareSheetOpenAction()) },
                     onLogOutClick = { runAction(OnLogOutSheetOpenAction()) },
-                    onBookCardEvent = onBookCardEvent,
+                    onOpenStatsAtlas = onOpenStatsAtlas,
                 )
             } else {
                 SingleColumnProfile(
                     state = state,
-                    runAction = runAction,
                     onShareClick = { runAction(OnShareSheetOpenAction()) },
                     onLogOutClick = { runAction(OnLogOutSheetOpenAction()) },
-                    onBookCardEvent = onBookCardEvent,
+                    onOpenStatsAtlas = onOpenStatsAtlas,
                 )
             }
         }
@@ -124,12 +122,31 @@ private fun ProfileContent(
 }
 
 @Composable
+private fun SummaryAndShareRows(
+    state: ProfileUiState,
+    onShareClick: () -> Unit,
+    onOpenStatsAtlas: () -> Unit,
+) {
+    ReadingSummaryCard(
+        summary = state.readingSummary,
+        onClick = onOpenStatsAtlas,
+    )
+
+    Spacer(modifier = Modifier.height(Spacing.md))
+
+    ShareEntryRow(
+        isLoading = state.isReadingLifeLoading,
+        enabled = state.canShare,
+        onClick = onShareClick,
+    )
+}
+
+@Composable
 private fun TwoColumnProfile(
     state: ProfileUiState,
-    runAction: (ProfileAction) -> Unit,
     onShareClick: () -> Unit,
     onLogOutClick: () -> Unit,
-    onBookCardEvent: (BookCardEvent) -> Unit,
+    onOpenStatsAtlas: () -> Unit,
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -170,11 +187,10 @@ private fun TwoColumnProfile(
                     .padding(start = Spacing.gutter, end = Spacing.gutter, top = Spacing.xs, bottom = Spacing.xl),
             ) {
                 Column(modifier = Modifier.widthIn(max = 640.dp)) {
-                    ProfileReadingLife(
+                    SummaryAndShareRows(
                         state = state,
-                        runAction = runAction,
                         onShareClick = onShareClick,
-                        onBookCardEvent = onBookCardEvent,
+                        onOpenStatsAtlas = onOpenStatsAtlas,
                     )
                 }
             }
@@ -193,10 +209,9 @@ private fun TwoColumnProfile(
 @Composable
 private fun SingleColumnProfile(
     state: ProfileUiState,
-    runAction: (ProfileAction) -> Unit,
     onShareClick: () -> Unit,
     onLogOutClick: () -> Unit,
-    onBookCardEvent: (BookCardEvent) -> Unit,
+    onOpenStatsAtlas: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         val scrollState = rememberScrollState()
@@ -215,11 +230,10 @@ private fun SingleColumnProfile(
 
             Spacer(modifier = Modifier.height(Spacing.section))
 
-            ProfileReadingLife(
+            SummaryAndShareRows(
                 state = state,
-                runAction = runAction,
                 onShareClick = onShareClick,
-                onBookCardEvent = onBookCardEvent,
+                onOpenStatsAtlas = onOpenStatsAtlas,
             )
 
             Spacer(modifier = Modifier.height(Spacing.section))
@@ -251,7 +265,7 @@ private fun ProfileScreenDesktopLightPreview() {
             state = ProfileScreenPreviewState,
             runAction = {},
             onNavigateUp = {},
-            onBookCardEvent = {},
+            onOpenStatsAtlas = {},
         )
     }
 }
@@ -264,7 +278,7 @@ private fun ProfileScreenDesktopDarkPreview() {
             state = ProfileScreenPreviewState,
             runAction = {},
             onNavigateUp = {},
-            onBookCardEvent = {},
+            onOpenStatsAtlas = {},
         )
     }
 }

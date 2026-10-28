@@ -6,7 +6,6 @@ import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
-import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardRailUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
@@ -28,8 +27,6 @@ import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.quote.QuoteSheetUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCaptureState
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
@@ -37,6 +34,8 @@ import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
+import nl.rhaydus.softcover.core.component.traits.HowItReadBlockUiModel
+import nl.rhaydus.softcover.core.component.traits.HowItReadSheetUiModel
 import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
@@ -51,7 +50,7 @@ import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
+import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetState
 import nl.rhaydus.softcover.core.uibinding.session.ConfirmedPause
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
@@ -108,21 +107,7 @@ internal data class BookDetailUiState(
     val scannedEditionId: Int? = null,
     val scannedEditionBannerDismissed: Boolean = false,
     val isUpdatingScannedEdition: Boolean = false,
-    val selectedProgressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
-
-    /** The reader's uncommitted time entry; `null` seeds the sheet's fields from the book. */
-    val progressTimeDraft: ProgressTimeDraft? = null,
-
-    /** The reader's backdate for the next logged action; `null` is "just now". */
-    val readAt: LocalDateTime? = null,
-
-    /**
-     * What the progress sheet renders, derived from [book] and [selectedProgressSheetTab]. The tab's
-     * stored home is [selectedProgressSheetTab], so the two cannot disagree.
-     */
-    val progressSheet: SheetSession<ProgressSheetUiModel, Nothing> = SheetSession.Closed,
-
-    val progressSheetRequested: Boolean = false,
+    val progressSheet: ProgressSheetState = ProgressSheetState(),
 
     /** The Yours lens "Your quotes" section, mapped by `QuotesSectionCollector`; null unless the book is shelved. */
     val quotesSection: QuotesSectionUiModel? = null,
@@ -132,6 +117,16 @@ internal data class BookDetailUiState(
 
     /** What the quote sheet renders, derived from [book] and [quoteDraft] by `QuoteSheetCollector`. */
     val quoteSheet: SheetSession<QuoteSheetUiModel, Nothing> = SheetSession.Closed,
+
+    /** The Yours lens "How it read" panel, mapped by `HowItReadSectionCollector`; null hides the section. */
+    val howItRead: HowItReadBlockUiModel? = null,
+    val howItReadExpanded: Boolean = false,
+
+    /** Non-null exactly while the how-it-read sheet is requested; its edits are the only writer of the draft. */
+    val howItReadDraft: HowItReadDraft? = null,
+
+    /** What the how-it-read sheet renders, derived from [book] and [howItReadDraft] by `HowItReadSheetCollector`. */
+    val howItReadSheet: SheetSession<HowItReadSheetUiModel, Nothing> = SheetSession.Closed,
 
     /** The local id of the quote awaiting its delete confirm; `null` when none is. */
     val quoteDeleteRequestId: Long? = null,
@@ -154,6 +149,7 @@ internal data class BookDetailUiState(
     val findItLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Find it"),
     val tagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Tags"),
     val yourTagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Your tags"),
+    val howItReadLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "How it read"),
 
     /** The "Shelve this book" opener; the retry label when the last shelve write for this book failed. */
     val shelveControlHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(eyebrow = "Shelve this book"),
@@ -186,7 +182,10 @@ internal data class BookDetailUiState(
 
     val releaseCaption: String? = null,
 
-    /** The "Find it" pills, mapped by `ExternalLinksCollector` off [displayedEdition]; null without an ISBN. */
+    /**
+     * The "Find it" pills, mapped by `ExternalLinksCollector` off [displayedEdition]; null without an ISBN or a
+     * title.
+     */
     val externalLinks: ImmutableList<PillButtonUiModel>? = null,
 
     val updateProgressPill: PillButtonUiModel = PillButtonUiModel(
@@ -321,7 +320,8 @@ internal data class BookDetailUiState(
 
     val chooseListsSheet: ChooseListsUiModel? = null,
 
-    val userTags: UserTagsLoad = UserTagsLoad.Loading,
+    val userTags: ImmutableList<UserTag> = persistentListOf(),
+    val userTagsLoad: UserTagsLoad = UserTagsLoad.Loading,
     val showTagEditorSheet: Boolean = false,
     val tagEditorCategory: TagCategory = TagCategory.TAG,
     val tagEditorInput: String = "",

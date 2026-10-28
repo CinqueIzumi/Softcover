@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.uibinding.book.bookStatsLine
 import nl.rhaydus.softcover.core.uibinding.book.byline
 import nl.rhaydus.softcover.core.uibinding.book.seriesEyebrow
@@ -40,6 +41,7 @@ internal fun Book.toBookCard(
     selection: BookCardSelection?,
     deadline: BookDeadline?,
     dateStyle: DateStyle,
+    userTags: List<UserTag> = emptyList(),
 ): BookCardUiModel {
     val deadlineProgress = toDeadlineProgress(deadline)
     val badgedDeadline = deadlineProgress.takeUnless { isPaused }
@@ -103,6 +105,7 @@ internal fun Book.toBookCard(
                     titleTransitionKey = transitionKey(
                         element = BookTransitionElement.Title,
                     ),
+                    tagStrip = userTags.toTagStrip(),
                 ),
                 trailing = badgedDeadline?.toBadgeUiModel()?.let { BookCardTrailing.Badge(model = it) },
             )
@@ -137,6 +140,7 @@ internal fun Book.toBookCard(
                             element = BookTransitionElement.Rating,
                         ),
                     )?.let { persistentListOf(it) } ?: persistentListOf(),
+                    tagStrip = userTags.toTagStrip(),
                 ),
                 deadline = deadlineSummary,
             )
@@ -159,11 +163,13 @@ internal fun Book.toBookCard(
 internal fun BookEdition.toEditionCard(
     layout: LibraryGridLayout,
     press: BookCardDecorations.Press,
+    userTags: List<UserTag> = emptyList(),
 ): BookCardUiModel {
     val text = BookCardContent(
         title = title.orEmpty(),
         byline = byline(author = authorString),
     )
+    val rowText = text.copy(tagStrip = userTags.toTagStrip())
 
     val variant = when (layout) {
         LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
@@ -177,11 +183,11 @@ internal fun BookEdition.toEditionCard(
             text = text,
         )
 
-        LibraryGridLayout.LIST_COMPACT -> libraryCompactRow(text = text)
+        LibraryGridLayout.LIST_COMPACT -> libraryCompactRow(text = rowText)
 
         LibraryGridLayout.LIST_LARGE -> libraryLargeRow(
             lead = BookCardLead.Cover(cover = BookCardCover(model = toShelfEditionCover())),
-            text = text,
+            text = rowText,
         )
     }
 

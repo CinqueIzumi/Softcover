@@ -4,7 +4,8 @@ import org.gradle.kotlin.dsl.register
 
 /**
  * Registers `designPresetBundle` on the root project: the exporter's tokens and assets, the showcase
- * renders and the committed `design/project` content, assembled into `build/design-preset/project`.
+ * renders, the committed `design/project` content and the screen pattern pages, assembled into
+ * `build/design-preset/project`.
  */
 class DesignPresetBundleConventionPlugin : Plugin<Project> {
     override fun apply(target: Project): Unit = with(target) {
@@ -20,6 +21,8 @@ class DesignPresetBundleConventionPlugin : Plugin<Project> {
             val handWritten = layout.projectDirectory.dir("design/project")
             handWrittenDir.set(handWritten)
             handWrittenFiles.from(fileTree(handWritten))
+            val patterns = layout.projectDirectory.dir("docs/reference/design-system/patterns")
+            screenPages.from(SCREEN_PAGES.map { patterns.file(it) })
             tokensDir.fileProvider(
                 provider {
                     project(":core:designsystem").tasks.getByName("exportDesignTokens").outputs.files.singleFile
@@ -33,5 +36,13 @@ class DesignPresetBundleConventionPlugin : Plugin<Project> {
 
     private companion object {
         const val MAX_FILES = 1008
+        val SCREEN_PAGES = listOf(
+            "settings.md",
+            "explore-profile.md",
+            "book-detail.md",
+            "library.md",
+            "reading.md",
+            "widgets.md",
+        )
     }
 }

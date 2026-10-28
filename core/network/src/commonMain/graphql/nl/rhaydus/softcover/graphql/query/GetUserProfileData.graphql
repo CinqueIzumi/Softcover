@@ -6,49 +6,5 @@ query GetUserProfileData {
         }
         name
         username
-        books_read: user_books_aggregate(where: { status_id: { _eq: 3 } }) {
-            aggregate {
-                count
-            }
-        }
-        rated_books: user_books_aggregate(where: { rating: { _is_null: false } }) {
-            aggregate {
-                count
-                avg {
-                    rating
-                }
-            }
-        }
-
-        # The last few highly-rated finished books, newest first - a small targeted list, not a
-        # full pull. Id/cover/title/author only; the cover is the picked edition's, falling back to the
-        # book's. No series/description/tags (those belong to the full book-detail fragments, not
-        # this small preview list).
-        recently_loved: user_books(
-            where: { status_id: { _eq: 3 }, rating: { _gte: 4.0 } }
-            order_by: { last_read_date: desc_nulls_last }
-            limit: 3
-        ) {
-            id
-            rating
-            last_read_date
-            edition {
-                image {
-                    url
-                }
-            }
-            book {
-                id
-                title
-                image {
-                    url
-                }
-                contributions {
-                    author {
-                        name
-                    }
-                }
-            }
-        }
     }
 }

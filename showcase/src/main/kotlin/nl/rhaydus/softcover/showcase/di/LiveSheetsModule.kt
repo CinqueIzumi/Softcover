@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.showcase.live.progress.screenmodel.ProgressLiveScree
 import nl.rhaydus.softcover.showcase.live.quote.screenmodel.QuoteLiveScreenModel
 import nl.rhaydus.softcover.showcase.live.share.screenmodel.ShareLiveScreenModel
 import nl.rhaydus.softcover.showcase.live.sheet.screenmodel.SheetLiveScreenModel
+import nl.rhaydus.softcover.showcase.live.traits.screenmodel.HowItReadLiveScreenModel
 import nl.rhaydus.softcover.showcase.live.verdict.screenmodel.VerdictLiveScreenModel
 import org.koin.dsl.module
 
@@ -36,6 +37,14 @@ internal val liveSheetsModule = module {
 
     factory {
         QuoteLiveScreenModel(
+            appDispatchers = get(),
+            themeStore = get(),
+            initializers = listOf(ThemeChipsCollector(themeStore = get())),
+        )
+    }
+
+    factory {
+        HowItReadLiveScreenModel(
             appDispatchers = get(),
             themeStore = get(),
             initializers = listOf(ThemeChipsCollector(themeStore = get())),

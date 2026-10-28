@@ -11,6 +11,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
  * gated by [interaction], with a [leading] / [trailing] slot and a [face] mark
  * (`component-contract.md` § 7.2 R2).
  *
+ * @property contentDescription Overrides the label as the announced name, for a chip whose label alone
+ * is ambiguous.
  * @property key Identity — the event carries it back (R1); [ChipSet] resolves it to whatever payload
  * dispatching the original action needs (a filter value, a tag, a category).
  */
@@ -25,6 +27,7 @@ data class ChipUiModel(
     val leading: ChipLeading? = null,
     val trailing: ChipTrailing? = null,
     val face: ChipFace = ChipFace.Plain,
+    val contentDescription: String? = null,
 ) {
     companion object : UiModelPreviews<ChipUiModel> {
         /**
@@ -82,6 +85,17 @@ data class ChipUiModel(
                 label = "Add tags",
                 tone = ChipTone.Dashed,
                 leading = ChipLeading.Icon(icon = SoftcoverIcon.Add),
+            ),
+            "Tentative" to ChipUiModel(
+                key = "tonal-dashed",
+                label = "Multi-layered",
+                tone = ChipTone.TonalDashed,
+            ),
+            "Excluded" to ChipUiModel(
+                key = "excluded",
+                label = "Grimdark",
+                tone = ChipTone.Excluded,
+                leading = ChipLeading.Icon(icon = SoftcoverIcon.Remove),
             ),
             "Spoiler" to ChipUiModel(
                 key = "spoiler",
@@ -149,6 +163,11 @@ data class ChipUiModel(
                 key = "format-bold",
                 label = "Bold",
                 face = ChipFace.Bold,
+            ),
+            "Eyebrow" to ChipUiModel(
+                key = "eyebrow",
+                label = "This year",
+                face = ChipFace.Eyebrow,
             ),
             "Disabled" to ChipUiModel(
                 key = "disabled",

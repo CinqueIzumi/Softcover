@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
@@ -17,7 +18,7 @@ import nl.rhaydus.softcover.core.component.transition.BookTransitionElement
 import nl.rhaydus.softcover.core.component.transition.bookTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
+import nl.rhaydus.softcover.core.profile.domain.model.RecentlyLovedBook
 import nl.rhaydus.softcover.feature.profile.presentation.state.RecentlyLovedEntry
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -25,21 +26,19 @@ import org.junit.jupiter.api.Test
 class RecentlyLovedCardMapperTest {
     private fun lovedBook(
         bookId: Int = 7,
-        coverUrl: String = "https://example.com/dune.jpg",
-        title: String = "Dune",
-        author: String = "Frank Herbert",
         ratingStars: Double = 4.5,
-        monthLabel: String = "May 2026",
-    ): LovedBook = LovedBook(
+        finishedOn: LocalDate = LocalDate(
+            year = 2026,
+            month = 5,
+            day = 14,
+        ),
+    ): RecentlyLovedBook = RecentlyLovedBook(
         bookId = bookId,
-        coverUrl = coverUrl,
-        title = title,
-        author = author,
         ratingStars = ratingStars,
-        monthLabel = monthLabel,
+        finishedOn = finishedOn,
     )
 
-    private fun LovedBook.toCard(libraryBook: Book? = null): BookCardUiModel =
+    private fun RecentlyLovedBook.toCard(libraryBook: Book = libraryBook(id = bookId)): BookCardUiModel =
         RecentlyLovedEntry(
             loved = this,
             libraryBook = libraryBook,
@@ -47,7 +46,9 @@ class RecentlyLovedCardMapperTest {
 
     private fun libraryBook(
         id: Int,
-        editionUrl: String?,
+        title: String = "Dune",
+        authorString: String = "Frank Herbert",
+        editionUrl: String? = "https://example.com/picked.jpg",
         coverUrl: String = "https://example.com/default.jpg",
     ): Book {
         val edition = mockk<BookEdition> {
@@ -67,8 +68,11 @@ class RecentlyLovedCardMapperTest {
                 this@mockk.id
             } returns id
             every {
-                title
-            } returns "Library title"
+                this@mockk.title
+            } returns title
+            every {
+                this@mockk.authorString
+            } returns authorString
             every {
                 currentEdition
             } returns edition
@@ -99,11 +103,15 @@ class RecentlyLovedCardMapperTest {
         }
 
         @Test
-        fun `puts the star rating first and the month label second`() {
+        fun `puts the star rating first and the month and year of the finish second`() {
             // ----- Arrange -----
             val book = lovedBook(
                 ratingStars = 4.5,
-                monthLabel = "May 2026",
+                finishedOn = LocalDate(
+                    year = 2026,
+                    month = 5,
+                    day = 14,
+                ),
             )
 
             // ----- Act -----
@@ -121,6 +129,24 @@ class RecentlyLovedCardMapperTest {
                     BookCardLinePart.Text(text = "May 2026"),
                 ),
             )
+        }
+
+        @Test
+        fun `abbreviates the month and keeps the finish year on a year boundary`() {
+            // ----- Arrange -----
+            val book = lovedBook(
+                finishedOn = LocalDate(
+                    year = 2025,
+                    month = 12,
+                    day = 31,
+                ),
+            )
+
+            // ----- Act -----
+            val lines = book.toCard().column().text.supportingLines
+
+            // ----- Assert -----
+            lines.last() shouldBe listOf(BookCardLinePart.Text(text = "Dec 2025"))
         }
 
         @Test
@@ -158,15 +184,17 @@ class RecentlyLovedCardMapperTest {
         }
 
         @Test
-        fun `shows the title and a By-prefixed byline`() {
+        fun `shows the library book's title and a By-prefixed byline`() {
             // ----- Arrange -----
-            val book = lovedBook(
+            val book = lovedBook()
+            val library = libraryBook(
+                id = 7,
                 title = "Dune",
-                author = "Frank Herbert",
+                authorString = "Frank Herbert",
             )
 
             // ----- Act -----
-            val text = book.toCard().column().text
+            val text = book.toCard(libraryBook = library).column().text
 
             // ----- Assert -----
             text.title shouldBe "Dune"
@@ -174,64 +202,41 @@ class RecentlyLovedCardMapperTest {
         }
 
         @Test
-        fun `drops the byline when the author is blank`() {
+        fun `drops the byline when the library book's authors are blank`() {
             // ----- Arrange -----
-            val book = lovedBook(author = "   ")
+            val book = lovedBook()
+            val library = libraryBook(
+                id = 7,
+                authorString = "   ",
+            )
 
             // ----- Act -----
-            val text = book.toCard().column().text
+            val text = book.toCard(libraryBook = library).column().text
 
             // ----- Assert -----
             text.byline.shouldBeNull()
         }
 
         @Test
-        fun `drops the byline when the author is empty`() {
+        fun `drops the byline when the library book's authors are empty`() {
             // ----- Arrange -----
-            val book = lovedBook(author = "")
+            val book = lovedBook()
+            val library = libraryBook(
+                id = 7,
+                authorString = "",
+            )
 
             // ----- Act -----
-            val text = book.toCard().column().text
+            val text = book.toCard(libraryBook = library).column().text
 
             // ----- Assert -----
             text.byline.shouldBeNull()
         }
 
         @Test
-        fun `builds a remote cover source from a non-blank cover url`() {
+        fun `uses the library book's picked edition cover`() {
             // ----- Arrange -----
-            val book = lovedBook(coverUrl = "https://example.com/dune.jpg")
-
-            // ----- Act -----
-            val source = book.toCard().column().cover.shouldNotBeNull().model.source
-
-            // ----- Assert -----
-            source.shouldNotBeNull().shouldBeInstanceOf<CoverSource.Remote>().url shouldBe "https://example.com/dune.jpg"
-        }
-
-        @Test
-        fun `gives a null cover source and keeps the title as the coverless title when the cover url is blank`() {
-            // ----- Arrange -----
-            val book = lovedBook(
-                coverUrl = "  ",
-                title = "Dune",
-            )
-
-            // ----- Act -----
-            val cover = book.toCard().column().cover.shouldNotBeNull().model
-
-            // ----- Assert -----
-            cover.source.shouldBeNull()
-            cover.coverlessTitle shouldBe "Dune"
-        }
-
-        @Test
-        fun `uses the library book's picked edition cover over the profile cover when it is present`() {
-            // ----- Arrange -----
-            val book = lovedBook(
-                bookId = 7,
-                coverUrl = "https://example.com/profile.jpg",
-            )
+            val book = lovedBook(bookId = 7)
             val library = libraryBook(
                 id = 7,
                 editionUrl = "https://example.com/picked.jpg",
@@ -250,15 +255,12 @@ class RecentlyLovedCardMapperTest {
         }
 
         @Test
-        fun `keeps the loved book's title and rating when a library book supplies the cover`() {
+        fun `keeps the loved book's rating when a library book supplies the title and cover`() {
             // ----- Arrange -----
-            val book = lovedBook(
-                title = "Dune",
-                ratingStars = 4.5,
-            )
+            val book = lovedBook(ratingStars = 4.5)
             val library = libraryBook(
                 id = 7,
-                editionUrl = "https://example.com/picked.jpg",
+                title = "Dune",
             )
 
             // ----- Act -----

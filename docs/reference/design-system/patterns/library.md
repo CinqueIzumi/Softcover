@@ -52,13 +52,25 @@
 ### Filter sheet
 
 - Canonical header `FILTER THIS SHELF`: Ownership · Format, Release year, Year finished (Read tab only,
-  `LibraryFilterOptions.readYears`), Tags, Rating — each a `FacetSection` of `Chip`s, wrapping on the
-  panel form and scrolling on the sheet form (§3.5).
-- Tags carries an "N available" count and a `TextField` `Pill` search that narrows the cloud client-side.
+  `LibraryFilterOptions.readYears`), Your tags, Hardcover tags, Rating — each a `FacetSection` of `Chip`s,
+  wrapping on the panel form and scrolling on the sheet form (§3.5).
+- Two tag sources, never merged: Your tags (the reader's own, from Room) and Hardcover tags (every category
+  of the book's community tags). Within and across sources a book needs every included tag and none left out.
+- Each source section: "N chosen", the chosen chips (included: selected with a check; left out:
+  `ChipTone.Excluded`; a tap flips included and left out, the trailing ✕ removes), then a `TextField`
+  `Pill` search with a trailing clear. Below it, every unchosen tag is one `ExpandableFlowRow` of
+  `name · count` chips (as the book-detail tags: two lines collapsed, progressive, collapsible, "Show more" /
+  "Show less" chips), ordered by count with prefix matches first while searching. Tapping a chip includes
+  the tag, moving it up into the chosen chips. While the search is non-blank, category `Choice` chips (All
+  plus those present) and a "Matching “query”" eyebrow appear above the row; clearing the search resets the
+  category to All. The row is one item whose height animates, never snapping. A source with no tags on the
+  shelf is hidden. Filtering and a tag moving into the chosen chips glide on the theme motion scheme
+  (instant under reduced motion), and chip taps and the ✕ give a light selection haptic.
 - Draft/commit: chips and the in-sheet "Clear all" mutate a `LibraryFilters` draft; the footer "Show N
   titles" previews it live (`libraryPreviewCount`) and fires `OnApplyFiltersAction`; any other dismiss
   discards. "Clear all" is always rendered, dimmed and inert with no active filter.
-- The main-screen active-filter row stays live (`OnToggleFilterValueAction` / `OnClearFiltersAction`).
+- The main-screen active-filter row stays live (`OnToggleFilterValueAction` / `OnClearFiltersAction`). A
+  left-out tag reads "Not romance"; chips from Your tags lead with the tag glyph.
 
 ### Library layout model
 
@@ -77,3 +89,6 @@
   tracked; the compact row carries a deadline `Badge` instead.
 - A Paused book's card with a deadline shows "On hold" in place of the date and pace line, with no deadline
   badge.
+- List rows end the text column with one line of the reader's own tags as inert compact chips (Genre, Mood,
+  Tag, Content warning, then by name; spoiler-flagged shown plainly), the overflow collapsed into an outlined
+  "+N". No tags, no strip. Custom-list rows take the parent book's tags.

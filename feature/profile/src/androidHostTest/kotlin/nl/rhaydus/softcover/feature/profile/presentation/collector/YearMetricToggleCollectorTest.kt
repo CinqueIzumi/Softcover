@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
-import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
-import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
-import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
+import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
+import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.softcover.feature.profile.presentation.state.YearMetric
 import nl.rhaydus.softcover.feature.profile.presentation.state.yearMetricToggleFor
 import nl.rhaydus.toad.ActionScope
@@ -20,17 +20,17 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class YearMetricToggleCollectorTest {
-    private lateinit var dependencies: ProfileDependencies
-    private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
-    private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
+    private lateinit var dependencies: StatsAtlasDependencies
+    private lateinit var stateFlow: MutableStateFlow<StatsAtlasUiState>
+    private lateinit var scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>
 
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(ProfileUiState())
+        stateFlow = MutableStateFlow(StatsAtlasUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
-            localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
+            localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
     }
@@ -38,11 +38,11 @@ class YearMetricToggleCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `disables the toggle while the reading life is loading`() = runTest(UnconfinedTestDispatcher()) {
+        fun `disables the toggle while the reading history is loading`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
+            stateFlow.value = StatsAtlasUiState(
                 isLoading = true,
-                readingLife = mockk<ReadingLife>(),
+                readingHistory = mockk<ReadingHistory>(),
             )
             val collector = YearMetricToggleCollector()
 
@@ -63,11 +63,11 @@ class YearMetricToggleCollectorTest {
         }
 
         @Test
-        fun `disables the toggle when loading finished without a reading life`() = runTest(UnconfinedTestDispatcher()) {
+        fun `disables the toggle when loading finished without a reading history`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
+            stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
-                readingLife = null,
+                readingHistory = null,
             )
             val collector = YearMetricToggleCollector()
 
@@ -88,11 +88,11 @@ class YearMetricToggleCollectorTest {
         }
 
         @Test
-        fun `enables the toggle once the reading life has loaded`() = runTest(UnconfinedTestDispatcher()) {
+        fun `enables the toggle once the reading history has loaded`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
+            stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
-                readingLife = mockk<ReadingLife>(),
+                readingHistory = mockk<ReadingHistory>(),
             )
             val collector = YearMetricToggleCollector()
 
@@ -115,9 +115,9 @@ class YearMetricToggleCollectorTest {
         @Test
         fun `follows the selected metric when it changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
+            stateFlow.value = StatsAtlasUiState(
                 isLoading = false,
-                readingLife = mockk<ReadingLife>(),
+                readingHistory = mockk<ReadingHistory>(),
             )
             val collector = YearMetricToggleCollector()
             val job = launch {

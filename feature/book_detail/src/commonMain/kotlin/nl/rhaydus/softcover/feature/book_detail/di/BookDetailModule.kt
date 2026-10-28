@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.di
 
 import nl.rhaydus.softcover.core.book.di.bookModule
+import nl.rhaydus.softcover.core.corpus.di.corpusModule
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
@@ -14,23 +15,20 @@ import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.profile.di.profileModule
+import nl.rhaydus.softcover.core.progresssheet.di.progressSheetModule
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.BookReviewsRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyLocalDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyLocalDataSourceImpl
-import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSource
-import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSourceImpl
+import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyRemoteDataSource
+import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabularyRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.book_detail.data.repository.BookReviewsRepositoryImpl
 import nl.rhaydus.softcover.feature.book_detail.data.repository.UserTagVocabularyRepositoryImpl
-import nl.rhaydus.softcover.feature.book_detail.data.repository.UserTagsRepositoryImpl
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.BookReviewsRepository
 import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagVocabularyRepository
-import nl.rhaydus.softcover.feature.book_detail.domain.repository.UserTagsRepository
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
-import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.RecordAppliedTagsUseCase
-import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ActiveSessionBookCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDeadlineCollector
@@ -45,8 +43,9 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSe
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EndSessionPauseSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ExternalLinksCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.HowItReadSectionCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.HowItReadSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.InProgressCollector
-import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LensToggleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.OfflineStateCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
@@ -83,12 +82,14 @@ val bookDetailModule = module {
         bookModule,
         listsModule,
         deadlinesModule,
+        corpusModule,
         profileModule,
         identityModule,
         preferencesModule,
         databaseModule,
         apolloModule,
         personalModule,
+        progressSheetModule,
         presentationModule,
         currentDateModule,
         dispatcherModule,
@@ -110,7 +111,6 @@ val bookDetailModule = module {
     factory { UserListsFlowCollector() } bind BookDetailCollector::class
     factory { CurrentUserCollector() } bind BookDetailCollector::class
     factory { UserTagsCollector() } bind BookDetailCollector::class
-    factory { LastUsedProgressUnitCollector() } bind BookDetailCollector::class
     factory { ReadingPaceForecastCollector() } bind BookDetailCollector::class
     factory { TagSuggestionsCollector() } bind BookDetailCollector::class
     factory { TagChipModelsCollector() } bind BookDetailCollector::class
@@ -135,6 +135,8 @@ val bookDetailModule = module {
     factory { QuotesRefreshCollector() } bind BookDetailCollector::class
     factory { QuoteSheetCollector() } bind BookDetailCollector::class
     factory { QuoteDeleteSheetCollector() } bind BookDetailCollector::class
+    factory { HowItReadSectionCollector() } bind BookDetailCollector::class
+    factory { HowItReadSheetCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())
@@ -148,23 +150,8 @@ val bookDetailModule = module {
         GetTopBookReviewsUseCase(bookReviewsRepository = get())
     }
 
-    single<UserTagsRemoteDataSource> {
-        UserTagsRemoteDataSourceImpl(apolloClient = get())
-    }
-
-    single<UserTagsRepository> {
-        UserTagsRepositoryImpl(userTagsRemoteDataSource = get())
-    }
-
-    factory {
-        GetUserTagsUseCase(
-            userTagsRepository = get(),
-            getUserIdUseCase = get(),
-        )
-    }
-
-    factory {
-        SaveUserTagsUseCase(userTagsRepository = get())
+    single<UserTagVocabularyRemoteDataSource> {
+        UserTagVocabularyRemoteDataSourceImpl(apolloClient = get())
     }
 
     single { get<SoftcoverDatabase>().userTagVocabularyDao() }
@@ -236,10 +223,10 @@ val bookDetailModule = module {
             refreshReadingJournalHistoryUseCase = get(),
             updateBookReviewUseCase = get(),
             observeUserProfileDataUseCase = get(),
-            getUserTagsUseCase = get(),
+            observeUserTagsForBookUseCase = get(),
+            refreshUserTagsForBookUseCase = get(),
             saveUserTagsUseCase = get(),
-            getLastUsedProgressUnitAsFlowUseCase = get(),
-            setLastUsedProgressUnitUseCase = get(),
+            progressSheetSlice = get(),
             observeUserTagVocabularyUseCase = get(),
             syncUserTagVocabularyUseCase = get(),
             recordAppliedTagsUseCase = get(),
@@ -249,6 +236,9 @@ val bookDetailModule = module {
             refreshBookQuotesUseCase = get(),
             loadSimilarBooksPageUseCase = get(),
             observeShelvedBookIdsUseCase = get(),
+            observeBookTraitsUseCase = get(),
+            getBookTraitsUseCase = get(),
+            saveBookTraitsUseCase = get(),
         )
     }
 }

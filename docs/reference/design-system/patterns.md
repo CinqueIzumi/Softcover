@@ -16,14 +16,15 @@ file under `patterns/`.
 ## Book detail
 
 - [Book-detail tag block](patterns/book-detail.md#book-detail-tag-block) — read-only, category-grouped tags on The Book lens.
+- [How it read](patterns/book-detail.md#how-it-read) — private survey on the Yours lens.
 - [Your tags section](patterns/book-detail.md#your-tags-section) — the reader's own tags on the Yours lens.
 - [Tag editor sheet](patterns/book-detail.md#tag-editor-sheet) — add, suggest and remove the reader's tags.
 - [Change edition sheet](patterns/book-detail.md#change-edition-sheet) — searchable single-choice edition picker.
 - [Shelve control](patterns/book-detail.md#shelve-control) — three-row Want to read / Reading / Read control.
 - [Lens toggle](patterns/book-detail.md#lens-toggle) — sticky switch between The Book and Yours.
-- [Similar books](patterns/book-detail.md#similar-books) — pageable "If you liked this" rail on The Book lens.
-- [Book-detail in-progress stat](patterns/book-detail.md#book-detail-in-progress-stat) — Reading-shelf hero stat with pace and deadline.
-- [Edition colophon line](patterns/book-detail.md#edition-colophon-line) — one-line publisher, format and ISBN readout.
+- [Similar books](patterns/book-detail.md#similar-books) — "If you liked this" rail on The Book lens.
+- [Book-detail in-progress stat](patterns/book-detail.md#book-detail-in-progress-stat) — Reading hero stat with pace and deadline.
+- [Edition colophon line](patterns/book-detail.md#edition-colophon-line) — publisher, format and ISBN readout.
 - [External-links strip](patterns/book-detail.md#external-links-strip-labeled-pills) — labelled pills to off-app lookups.
 - [Verdict](patterns/book-detail.md#verdict-rating-and-review) — rating and review as one sheet and one block.
 - [Verdict prompt](patterns/book-detail.md#verdict-prompt-open-on-finish) — verdict sheet raised on a genuine finish.
@@ -32,12 +33,12 @@ file under `patterns/`.
 ## Library
 
 - [Masthead-as-shelf-switcher](patterns/library.md#masthead-as-shelf-switcher-library-mobile) — the page title switches shelves.
-- [Masthead control line](patterns/library.md#masthead-control-line) — sort, filter and select row under the search field.
-- [Shelf neighbour rail](patterns/library.md#shelf-neighbour-rail-library-mobile) — previous and next shelf row for the swipe.
+- [Masthead control line](patterns/library.md#masthead-control-line) — sort, filter and select row.
+- [Shelf neighbour rail](patterns/library.md#shelf-neighbour-rail-library-mobile) — previous and next shelf row.
 - [Shelves sheet](patterns/library.md#shelves-sheet-library-mobile) — sheet form of the shelf switcher.
 - [Arrange sheet](patterns/library.md#arrange-sheet) — sort and layout, draft then commit.
 - [Filter sheet](patterns/library.md#filter-sheet) — faceted filter picker, draft then commit.
-- [Library layout model](patterns/library.md#library-layout-model) — layout chips mapped onto the persisted layout enum.
+- [Library layout model](patterns/library.md#library-layout-model) — layout chips onto the persisted layout.
 - [Library cover grid and list row](patterns/library.md#library-cover-grid-and-list-row) — the shelf's `BookCard` cells.
 
 ## Library editing modes
@@ -49,21 +50,22 @@ file under `patterns/`.
 ## Reading
 
 - [Backdate a logged action](patterns/reading.md#backdate-a-logged-action) — pill-plus-stepper editor for logging the past.
-- [Reading-session peek bar](patterns/reading.md#reading-session-peek-bar) — live-timer bar above the nav during a session.
+- [Reading-session peek bar](patterns/reading.md#reading-session-peek-bar) — live-timer bar during a session.
 - [Focus Mode](patterns/reading.md#focus-mode) — full-screen surface for the running session.
 - [Streak strip](patterns/reading.md#streak-strip) — 21-day binary activity row.
-- [Reading featured-hero card](patterns/reading.md#reading-featured-hero-card) — blurred-cover hero for the featured book.
+- [Reading featured-hero card](patterns/reading.md#reading-featured-hero-card) — blurred-cover hero.
 - [Reading secondary row](patterns/reading.md#reading-secondary-row) — flat rows for the other books in progress.
 - [Mark-as-read celebration](patterns/reading.md#mark-as-read-celebration) — one burst and haptic per finish.
 
 ## Settings
 
-- [Settings rows](patterns/settings.md#settings-rows) — the feature's menu and selectable row anatomy.
-- [Desktop settings master-detail](patterns/settings.md#desktop-settings-master-detail) — sidebar and inline pane on desktop.
-- [Theme picker](patterns/settings.md#theme-picker-preview-tiles) — Light / Dark / System tiles leading Appearance.
+- [Main Settings menu](patterns/settings.md#main-settings-menu-mobile) — flat icon-tile row groups.
+- [Settings rows](patterns/settings.md#settings-rows) — menu and choice row anatomy.
+- [Desktop settings master-detail](patterns/settings.md#desktop-settings-master-detail) — sidebar and inline pane.
+- [Theme picker](patterns/settings.md#theme-picker-preview-tiles) — Light / Dark / Dim / System tiles.
 - [Spine-colour picker](patterns/settings.md#spine-colour-picker-the-featured-personalisation) — five palette tiles.
 - [Appearance settings rows](patterns/settings.md#appearance-settings-rows-flat-hairline-separated) — flat sections of Appearance.
-- [Desktop display scale](patterns/settings.md#desktop-display-scale) — desktop-only UI-scale selector.
+- [Desktop display scale](patterns/settings.md#desktop-display-scale) — UI-scale selector.
 - [About screen body](patterns/settings.md#about-screen-body) — Credits, Source, Contact and the one version line.
 - [Library tabs reorderable row](patterns/settings.md#library-tabs-reorderable-row) — reorder and show/hide Library tabs.
 
@@ -73,10 +75,11 @@ file under `patterns/`.
 
 ## Explore & Profile
 
-- [Profile screen](patterns/explore-profile.md#profile-screen) — reading-life section order.
-- [Statistics charts](patterns/explore-profile.md#statistics-charts) — which chart each Profile statistic uses.
-- [Profile share sheet](patterns/explore-profile.md#profile-share-sheet) — share-card preview with save and share.
-- [Log-out confirm sheet](patterns/explore-profile.md#log-out-confirm-sheet) — destructive confirm gating Log out.
+- [Profile screen](patterns/explore-profile.md#profile-screen) — section order.
+- [Stats Atlas](patterns/explore-profile.md#stats-atlas) — one page of numbered chapters.
+- [Statistics charts](patterns/explore-profile.md#statistics-charts) — which chart each stat uses.
+- [Profile share sheet](patterns/explore-profile.md#profile-share-sheet) — share-card preview.
+- [Log-out confirm sheet](patterns/explore-profile.md#log-out-confirm-sheet) — confirm gating Log out.
 - [Title-page sheet](patterns/explore-profile.md#title-page-sheet-create-list) — centred single-field naming sheet.
 - [Browse-by-mood grid](patterns/explore-profile.md#browse-by-mood-grid) — two-column mood tiles.
 - [Because-you-read genre picker](patterns/explore-profile.md#because-you-read-genre-picker) — genre anchor and sheet.

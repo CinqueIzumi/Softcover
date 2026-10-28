@@ -20,16 +20,18 @@ internal class ReadingJournalHistoryRepositoryImpl(
             entities.map { it.toReadingJournalEntry(timeZone = timeZone) }
         }
 
-    // The synced ids are snapshotted before the fetch: a row that turns synced while the fetch is in flight
-    // may be absent from the result, so deleting every synced row afterwards would lose it.
     override suspend fun refreshReadingJournalHistory(bookId: Int) {
-        val syncedIdsBeforeFetch = readingJournalHistoryLocalDataSource.getSyncedIds(bookId = bookId)
-
         val remote = readingJournalHistoryRemoteDataSource.getReadingJournalHistory(bookId = bookId)
 
-        readingJournalHistoryLocalDataSource.replaceSynced(
-            syncedIdsBeforeFetch = syncedIdsBeforeFetch,
+        readingJournalHistoryLocalDataSource.replaceSyncedForBook(
+            bookId = bookId,
             entities = remote,
         )
+    }
+
+    override suspend fun refreshAllReadingJournalHistory() {
+        val remote = readingJournalHistoryRemoteDataSource.getAllReadingJournalHistory()
+
+        readingJournalHistoryLocalDataSource.replaceAllSynced(entities = remote)
     }
 }

@@ -20,8 +20,10 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnEndSessionPaus
 import nl.rhaydus.softcover.feature.library.presentation.action.OnEndSessionPauseSheetDismissedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftChipToggledAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftClearAllAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftTagSearchChangedAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftTagRemovedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterTagCategoryPickedAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterTagSearchChangedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRecommendedHideChosenAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRecommendedMenuDismissedAction
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryArrangeSheet
@@ -58,8 +60,20 @@ internal fun LibrarySheets(
 
                     is LibraryFilterSheetEvent.ChipToggled -> runAction(OnFilterDraftChipToggledAction(key = event.key))
 
+                    is LibraryFilterSheetEvent.TagRemoved -> runAction(OnFilterDraftTagRemovedAction(key = event.key))
+
                     is LibraryFilterSheetEvent.TagSearchChanged -> runAction(
-                        OnFilterDraftTagSearchChangedAction(query = event.query),
+                        OnFilterTagSearchChangedAction(
+                            source = event.source,
+                            query = event.query,
+                        ),
+                    )
+
+                    is LibraryFilterSheetEvent.TagCategoryPicked -> runAction(
+                        OnFilterTagCategoryPickedAction(
+                            source = event.source,
+                            key = event.key,
+                        ),
                     )
                 }
             },

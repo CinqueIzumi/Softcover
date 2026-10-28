@@ -49,19 +49,15 @@ data class UserBook(
             BookStatus.WantToRead, BookStatus.None -> null
         }
 
+    /**
+     * Null when the reader gave no finish date. The "finished" journal event is not a fallback: it dates when
+     * the book was shelved as read, which for a backlog added in bulk is not when it was read.
+     */
     val finishDate: LocalDate?
-        get() {
-            val journalDate = journals
-                .filter { it.event == JournalEventType.StatusFinished.eventName }
-                .maxByOrNull { it.updatedAt }
-                ?.let { utcJournalTimeToLocalDate(it.updatedAt) }
-
-            return listOfNotNull(
-                newestFinishedRead()?.finishedAt?.toLocalDateOrNull(),
-                lastReadDate?.toLocalDateOrNull(),
-                journalDate,
-            ).maxOrNull()
-        }
+        get() = listOfNotNull(
+            newestFinishedRead()?.finishedAt?.toLocalDateOrNull(),
+            lastReadDate?.toLocalDateOrNull(),
+        ).maxOrNull()
 
     fun getDnfDateString(style: DateStyle): String? {
         return getUpdatedDateForEventType(

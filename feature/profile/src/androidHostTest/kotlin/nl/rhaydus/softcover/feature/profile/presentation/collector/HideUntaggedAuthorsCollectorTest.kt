@@ -11,10 +11,10 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
-import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
-import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
-import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
-import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
+import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
+import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.softcover.feature.profile.presentation.state.hideUntaggedAuthorsToggleFor
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
@@ -23,20 +23,20 @@ import org.junit.jupiter.api.Test
 
 class HideUntaggedAuthorsCollectorTest {
     private lateinit var getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase
-    private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
-    private lateinit var eventChannel: Channel<ProfileEvent>
-    private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
+    private lateinit var stateFlow: MutableStateFlow<StatsAtlasUiState>
+    private lateinit var eventChannel: Channel<StatsAtlasEvent>
+    private lateinit var scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>
     private lateinit var hideUntaggedAuthorsFlow: MutableSharedFlow<Boolean>
 
     @BeforeEach
     fun setUp() {
         hideUntaggedAuthorsFlow = MutableSharedFlow()
         getHideUntaggedAuthorsAsFlowUseCase = mockk()
-        stateFlow = MutableStateFlow(ProfileUiState())
+        stateFlow = MutableStateFlow(StatsAtlasUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
-            localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
+            localVariablesFlow = MutableStateFlow(StatsAtlasLocalVariables()),
             eventChannel = eventChannel,
         )
 
@@ -45,9 +45,9 @@ class HideUntaggedAuthorsCollectorTest {
         } returns hideUntaggedAuthorsFlow
     }
 
-    private fun stubDependencies(testScope: TestScope): ProfileDependencies {
+    private fun stubDependencies(testScope: TestScope): StatsAtlasDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
-        return mockk<ProfileDependencies>(relaxed = true).also { mock ->
+        return mockk<StatsAtlasDependencies>(relaxed = true).also { mock ->
             every {
                 mock.getHideUntaggedAuthorsAsFlowUseCase
             } returns getHideUntaggedAuthorsAsFlowUseCase

@@ -28,6 +28,8 @@ import nl.rhaydus.softcover.GetSimilarBooksQuery
 import nl.rhaydus.softcover.GetSystemVibeBookIdsQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.GetUpcomingReleaseIdsQuery
+import nl.rhaydus.softcover.GetUserBookIdsByIdsQuery
+import nl.rhaydus.softcover.GetUserBookStateQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.GetUserBooksQuery.Data.Me.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.InsertUserBookWithStatusMutation
@@ -53,14 +55,20 @@ import nl.rhaydus.softcover.core.book.data.mapper.toBookEdition
 import nl.rhaydus.softcover.core.book.data.mapper.toDatePeriod
 import nl.rhaydus.softcover.core.book.data.mapper.toMonths
 import nl.rhaydus.softcover.core.book.data.mapper.toTrendingDuration
+import nl.rhaydus.softcover.core.book.data.mapper.toUserTag
 import nl.rhaydus.softcover.core.book.data.mapper.toVibeSlug
 import nl.rhaydus.softcover.core.book.data.mapper.toVibeType
 import nl.rhaydus.softcover.core.book.domain.model.BookImport
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.core.book.domain.model.ServerUserBookRead
+import nl.rhaydus.softcover.core.book.domain.model.ServerUserBookState
 import nl.rhaydus.softcover.core.book.domain.model.SimilarBookCandidate
 import nl.rhaydus.softcover.core.book.domain.model.SimilarBookSeed
 import nl.rhaydus.softcover.core.book.domain.model.UnfinishedRead
+import nl.rhaydus.softcover.core.book.domain.model.UserBooksSnapshot
+import nl.rhaydus.softcover.core.database.mapper.reviewDocumentFromSlate
 import nl.rhaydus.softcover.core.database.mapper.reviewSlateFromDocument
+import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
@@ -73,8 +81,12 @@ import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.domain.model.UserTag
+import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.domain.util.localDateOf
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.core.network.helper.CountedPage
+import nl.rhaydus.softcover.core.network.helper.fetchAllPagesCounted
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.fragment.BookListFragment.Book_series.Companion.bookSeriesFragment
@@ -89,6 +101,9 @@ interface BooksRemoteDataSource {
     suspend fun fetchBookIdForEdition(editionId: Int): Int?
 
     suspend fun fetchLatestUnfinishedRead(userBookId: Int): UnfinishedRead?
+
+    /** Null when the user has no user book for [bookId] on the server. */
+    suspend fun fetchUserBookState(bookId: Int): ServerUserBookState?
 
     suspend fun fetchEditionMatchesForIsbns(isbns: List<String>): Map<String, IsbnEditionMatch>
 
@@ -159,7 +174,10 @@ interface BooksRemoteDataSource {
         userId: Int,
         statusIds: Set<Int>? = null,
         userBookIds: Set<Int> = emptySet(),
-    ): List<Book>
+    ): UserBooksSnapshot
+
+    /** Returns the subset of [ids] the signed-in user still has as user books; throws if the lookup fails. */
+    suspend fun fetchExistingUserBookIds(ids: List<Int>): Set<Int>
 
     suspend fun getEditionsByBookId(
         bookId: Int,
@@ -227,6 +245,11 @@ interface BooksRemoteDataSource {
 
 private const val BATCH_ID_LIMIT: Int = 200
 
+// Request-multiplier budget for the library fetch: the page count is the server's row count divided by
+// this. The page is small because each row carries a deep selection and the server's row cap for it is
+// unverified.
+private const val USER_BOOKS_PAGE_SIZE: Int = 50
+
 /** Hardcover's ISBN external-book provider platform — `upsert_book` uses the ISBN as the external id. */
 private const val HARDCOVER_ISBN_PLATFORM_ID: Int = 8
 
@@ -282,6 +305,27 @@ internal class BooksRemoteDataSourceImpl(
             UnfinishedRead(
                 id = read.id,
                 startedAt = read.started_at,
+            )
+        }
+    }
+
+    override suspend fun fetchUserBookState(bookId: Int): ServerUserBookState? {
+        val result = apolloClient.safeQuery(query = GetUserBookStateQuery(bookId = bookId))
+
+        return result.me.firstOrNull()?.user_books?.firstOrNull()?.let { userBook ->
+            ServerUserBookState(
+                statusCode = userBook.status_id,
+                rating = userBook.rating,
+                reviewDocument = reviewDocumentFromSlate(slate = userBook.review_slate).takeUnless { it.isBlank() },
+                reviewHasSpoilers = userBook.review_has_spoilers,
+                reads = userBook.user_book_reads.map { read ->
+                    ServerUserBookRead(
+                        id = read.id,
+                        progressPages = read.progress_pages,
+                        progressSeconds = read.progress_seconds,
+                        finishedAt = read.finished_at,
+                    )
+                },
             )
         }
     }
@@ -696,21 +740,70 @@ internal class BooksRemoteDataSourceImpl(
         userId: Int,
         statusIds: Set<Int>?,
         userBookIds: Set<Int>,
-    ): List<Book> = withContext(appDispatchers.io) {
-        val result = apolloClient.safeQuery(
-            query = GetUserBooksQuery(
-                statusIds = Optional.presentIfNotNull(statusIds?.toList()),
-                userBookIds = Optional.present(userBookIds.toList()),
-            ),
+    ): UserBooksSnapshot = withContext(appDispatchers.io) {
+        val userBooks = fetchAllPagesCounted(
+            pageSize = USER_BOOKS_PAGE_SIZE,
+            key = { it.id },
+        ) { limit, offset ->
+            val result = apolloClient.safeQuery(
+                query = GetUserBooksQuery(
+                    userId = userId,
+                    statusIds = Optional.presentIfNotNull(statusIds?.toList()),
+                    userBookIds = Optional.present(userBookIds.toList()),
+                    limit = limit,
+                    offset = offset,
+                ),
+            )
+
+            // A missing `me` must fail the fetch: an empty page would end the loop and read as complete.
+            val me = result.me.firstOrNull() ?: throw Exception("No books were found")
+
+            CountedPage(
+                rows = me.user_books,
+                total = me.total.aggregate?.count ?: 0,
+            )
+        }
+
+        val mapped: List<Pair<Book, GetUserBooksQuery.Data.Me.User_book>> = userBooks.mapNotNull { userBook ->
+            userBook.userBookFragment()?.toBook()?.let { it to userBook }
+        }
+
+        val merged: List<Book> = resolveCanonicalMerges(books = mapped.map { it.first })
+
+        UserBooksSnapshot(
+            books = merged,
+            userTagsByBookId = merged
+                .zip(mapped)
+                .associate { (mergedBook, original) ->
+                    val (originalBook, userBook) = original
+
+                    mergedBook.id to userBook.userTagsFor(wasMerged = mergedBook.id != originalBook.id)
+                },
         )
-
-        val userBooks = result.me.firstOrNull()?.user_books
-            ?: throw Exception("No books were found")
-
-        val mapped = userBooks.mapNotNull { it.userBookFragment()?.toBook() }
-
-        resolveCanonicalMerges(books = mapped)
     }
+
+    // A merged book shows the canonical book's tags, which is where the user's tagging lives after a merge.
+    private fun GetUserBooksQuery.Data.Me.User_book.userTagsFor(wasMerged: Boolean): List<UserTag> {
+        val canonical = book.canonical
+
+        return if (wasMerged && canonical != null) {
+            canonical.taggings.map { it.toUserTag(tag = it.tag) }
+        } else {
+            book.taggings.map { it.toUserTag(tag = it.tag) }
+        }
+    }
+
+    override suspend fun fetchExistingUserBookIds(ids: List<Int>): Set<Int> =
+        withContext(appDispatchers.io) {
+            ids.chunked(BATCH_ID_LIMIT).flatMapTo(mutableSetOf()) { chunk ->
+                val result = apolloClient.safeQuery(query = GetUserBookIdsByIdsQuery(ids = chunk))
+
+                val userBooks = result.me.firstOrNull()?.user_books
+                    ?: throw Exception("No user was found")
+
+                userBooks.map { it.id }
+            }
+        }
 
     private suspend fun resolveCanonicalMerges(books: List<Book>): List<Book> {
         val canonicalIds = books.mapNotNull { it.canonicalId }.distinct()
@@ -744,6 +837,7 @@ internal class BooksRemoteDataSourceImpl(
         releaseDate = canonical.releaseDate,
         coverUrl = canonical.coverUrl,
         authors = canonical.authors,
+        nonPrimaryAuthorIds = canonical.nonPrimaryAuthorIds,
         usersCount = canonical.usersCount,
         ratingsCount = canonical.ratingsCount,
         bookSeries = canonical.bookSeries,
@@ -784,9 +878,15 @@ internal class BooksRemoteDataSourceImpl(
             datesReadInput = dataObject,
         )
 
-        val userBookFragment = apolloClient
+        val result = apolloClient
             .safeMutation(mutation = mutation)
             .update_user_book_read
+
+        result?.error?.let { message ->
+            throw UnexpectedApiException(message = "Progress update rejected: $message")
+        }
+
+        val userBookFragment = result
             ?.user_book_read
             ?.user_book
             ?.userBookFragment()
@@ -882,12 +982,22 @@ internal class BooksRemoteDataSourceImpl(
             },
         )
 
-        apolloClient.safeMutation(
-            mutation = UpdateReadingProgressMutation(
-                id = userBookReadId,
-                datesReadInput = dataObject,
-            ),
-        )
+        val result = apolloClient
+            .safeMutation(
+                mutation = UpdateReadingProgressMutation(
+                    id = userBookReadId,
+                    datesReadInput = dataObject,
+                ),
+            )
+            .update_user_book_read
+
+        result?.error?.let { message ->
+            throw UnexpectedApiException(message = "Progress update rejected: $message")
+        }
+
+        if (result?.user_book_read == null) {
+            throw UnexpectedApiException(message = "Progress update returned no read")
+        }
     }
 
     override suspend fun replayMarkBookAsRead(

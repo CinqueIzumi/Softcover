@@ -10,12 +10,18 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveShelvedBookIdsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserBookUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ObserveUserTagsForBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PauseBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.RefreshUserTagsForBookUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
+import nl.rhaydus.softcover.core.corpus.domain.usecase.GetBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.ObserveBookTraitsUseCase
+import nl.rhaydus.softcover.core.corpus.domain.usecase.SaveBookTraitsUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
@@ -31,16 +37,13 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.ObserveReadingJournalHi
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshBookQuotesUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.RefreshReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
+import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
-import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.RecordAppliedTagsUseCase
-import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabularyUseCase
 import nl.rhaydus.toad.ActionDependencies
 
@@ -71,10 +74,10 @@ internal class BookDetailDependencies(
     val refreshReadingJournalHistoryUseCase: RefreshReadingJournalHistoryUseCase,
     val updateBookReviewUseCase: UpdateBookReviewUseCase,
     val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
-    val getUserTagsUseCase: GetUserTagsUseCase,
+    val observeUserTagsForBookUseCase: ObserveUserTagsForBookUseCase,
+    val refreshUserTagsForBookUseCase: RefreshUserTagsForBookUseCase,
     val saveUserTagsUseCase: SaveUserTagsUseCase,
-    val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
-    val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
+    val progressSheetSlice: ProgressSheetSlice,
     val observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase,
     val syncUserTagVocabularyUseCase: SyncUserTagVocabularyUseCase,
     val recordAppliedTagsUseCase: RecordAppliedTagsUseCase,
@@ -84,6 +87,9 @@ internal class BookDetailDependencies(
     val refreshBookQuotesUseCase: RefreshBookQuotesUseCase,
     val loadSimilarBooksPageUseCase: LoadSimilarBooksPageUseCase,
     val observeShelvedBookIdsUseCase: ObserveShelvedBookIdsUseCase,
+    val observeBookTraitsUseCase: ObserveBookTraitsUseCase,
+    val getBookTraitsUseCase: GetBookTraitsUseCase,
+    val saveBookTraitsUseCase: SaveBookTraitsUseCase,
     val offlineCopy: OfflineCopy,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,

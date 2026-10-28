@@ -10,7 +10,7 @@ import nl.rhaydus.softcover.GetBookQuotesQuery.Data.Reading_journal.Companion.qu
 import nl.rhaydus.softcover.InsertQuoteMutation
 import nl.rhaydus.softcover.core.database.model.QuoteEntity
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
-import nl.rhaydus.softcover.core.network.helper.fetchAllPages
+import nl.rhaydus.softcover.core.network.helper.fetchAllPagesOrThrow
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.core.personal.data.mapper.toPosition
@@ -39,7 +39,10 @@ internal class QuoteRemoteDataSourceImpl(
     override suspend fun getQuotes(bookId: Int): List<QuoteEntity> {
         val userId = getUserIdUseCase().getOrThrow()
 
-        return fetchAllPages { limit, offset ->
+        return fetchAllPagesOrThrow(
+            pageSize = PAGE_SIZE,
+            maxPages = MAX_PAGES,
+        ) { limit, offset ->
             apolloClient.safeQuery(
                 query = GetBookQuotesQuery(
                     bookId = bookId,
@@ -54,7 +57,10 @@ internal class QuoteRemoteDataSourceImpl(
     override suspend fun getAllQuotes(): List<QuoteEntity> {
         val userId = getUserIdUseCase().getOrThrow()
 
-        return fetchAllPages { limit, offset ->
+        return fetchAllPagesOrThrow(
+            pageSize = PAGE_SIZE,
+            maxPages = MAX_PAGES,
+        ) { limit, offset ->
             apolloClient.safeQuery(
                 query = GetAllQuotesQuery(
                     userId = userId,
@@ -93,3 +99,8 @@ internal class QuoteRemoteDataSourceImpl(
         apolloClient.safeMutation(mutation = DeleteQuoteMutation(id = remoteId.toInt()))
     }
 }
+
+// Request-multiplier budget: ceiling of PAGE_SIZE * MAX_PAGES rows before the fetch fails.
+private const val PAGE_SIZE: Int = 100
+
+private const val MAX_PAGES: Int = 100

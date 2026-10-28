@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -49,7 +48,6 @@ class UpdateBookRatingUseCaseTest {
                     rating = any(),
                 )
             }
-            coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
         @Test
@@ -80,11 +78,10 @@ class UpdateBookRatingUseCaseTest {
                     rating = any(),
                 )
             }
-            coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
         @Test
-        fun `calls updateBookRating then cacheBook and returns success on a real rating change`() = runTest {
+        fun `calls updateBookRating and returns success on a real rating change`() = runTest {
             // ----- Arrange -----
             val newRating = 4.5
             val userBook = mockk<UserBook>()
@@ -105,10 +102,6 @@ class UpdateBookRatingUseCaseTest {
                 )
             } returns updatedBook
 
-            coJustRun {
-                booksRepository.cacheBook(book = updatedBook)
-            }
-
             // ----- Act -----
             val result = useCase(
                 inputBook,
@@ -123,7 +116,6 @@ class UpdateBookRatingUseCaseTest {
                     rating = newRating,
                 )
             }
-            coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
         }
 
         @Test
@@ -157,7 +149,6 @@ class UpdateBookRatingUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
-            coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
     }
 }

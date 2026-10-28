@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -55,11 +54,10 @@ class UpdateBookReviewUseCaseTest {
                     hasSpoilers = any(),
                 )
             }
-            coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
         @Test
-        fun `calls updateBookReview then cacheBook with the returned book and returns success`() = runTest {
+        fun `calls updateBookReview and returns success`() = runTest {
             // ----- Arrange -----
             val review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Absolutely loved it.")))))
             val hasSpoilers = true
@@ -79,10 +77,6 @@ class UpdateBookReviewUseCaseTest {
                 )
             } returns updatedBook
 
-            coJustRun {
-                booksRepository.cacheBook(book = updatedBook)
-            }
-
             // ----- Act -----
             val result = useCase(
                 inputBook,
@@ -99,7 +93,6 @@ class UpdateBookReviewUseCaseTest {
                     hasSpoilers = hasSpoilers,
                 )
             }
-            coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
         }
     }
 }

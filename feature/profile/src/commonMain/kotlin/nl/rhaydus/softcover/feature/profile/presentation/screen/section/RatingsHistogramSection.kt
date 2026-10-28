@@ -17,10 +17,10 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.chart.ColumnChart
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
-import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.text.FadeThroughText
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -41,38 +41,45 @@ internal fun RatingsHistogramSection(
     isLoading: Boolean,
     header: SectionHeaderUiModel,
     caption: String,
+    emptyCaption: String,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        SectionHeader(model = header)
+        ScopedSectionHeader(header = header)
 
         Spacer(modifier = Modifier.height(Spacing.md))
 
-        if (totalRatings == 0 && isLoading.not()) {
-            SoftcoverText(
-                text = "Rate a few books you've finished and this fills in.",
-                style = MaterialTheme.editorialTypography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
-            RatingsAverageRow(
-                average = average,
-                averageLabel = averageLabel,
-                isLoading = isLoading,
-            )
+        ScopeEmptySwitch(
+            isEmpty = totalRatings == 0 && isLoading.not(),
+            empty = {
+                FadeThroughText(
+                    text = emptyCaption,
+                    style = MaterialTheme.editorialTypography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+            filled = {
+                Column {
+                    RatingsAverageRow(
+                        average = average,
+                        averageLabel = averageLabel,
+                        isLoading = isLoading,
+                    )
 
-            Spacer(modifier = Modifier.height(Spacing.xl))
+                    Spacer(modifier = Modifier.height(Spacing.xl))
 
-            ColumnChart(model = chart)
+                    ColumnChart(model = chart)
 
-            Spacer(modifier = Modifier.height(Spacing.md))
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
-            SoftcoverText(
-                text = caption,
-                style = MaterialTheme.editorialTypography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+                    FadeThroughText(
+                        text = caption,
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
+        )
     }
 }
 
@@ -118,7 +125,7 @@ private fun RatingsAverageRow(
 
         Spacer(modifier = Modifier.width(Spacing.lg))
 
-        SoftcoverText(
+        FadeThroughText(
             text = averageLabel,
             isLoading = isLoading,
             standIn = "AVERAGE ACROSS 00 BOOKS",

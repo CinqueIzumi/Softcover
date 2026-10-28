@@ -55,6 +55,12 @@ interface BooksRepository {
     )
 
     /**
+     * Whether a successful [refreshUserBooks] covering the Read status has run since the app started or
+     * since [removeAllBooks]; a caller that only needs the Read books skips its own fetch when true.
+     */
+    val hasSyncedReadBooksThisSession: Boolean
+
+    /**
      * Re-fetches the user's books from the remote and reconciles them with the local cache.
      * When [statusFilter] is null, refreshes every status; otherwise refreshes only the books under
      * those statuses. This is a books-only operation — list refresh is owned by
