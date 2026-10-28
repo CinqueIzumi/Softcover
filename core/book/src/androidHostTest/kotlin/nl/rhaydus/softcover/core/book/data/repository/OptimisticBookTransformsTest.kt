@@ -7,6 +7,7 @@ import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.core.book.baseBook
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.DatePrecision
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import org.junit.jupiter.api.Nested
@@ -29,6 +30,8 @@ class OptimisticBookTransformsTest {
         progress = progress,
         startedAt = startedAt,
         finishedAt = finishedAt,
+        finishedAtPrecision = null,
+        editionPages = null,
     )
 
     private fun bookWith(
@@ -179,6 +182,26 @@ class OptimisticBookTransformsTest {
                 finished.currentPage shouldBe 40
                 result.status shouldBe BookStatus.Read
             }
+        }
+
+        @Test
+        fun `the finished read is dated to the day`() {
+            // ----- Arrange -----
+            val current = read(
+                id = 6,
+                progress = 40f,
+                page = 40,
+            )
+            val book = bookWith(
+                BookStatus.Reading,
+                current,
+            )
+
+            // ----- Act -----
+            val result = book.withMarkedAsRead(actionAt = "2026-05-01T10:00:00Z")
+
+            // ----- Assert -----
+            result.readsOrFail().single().finishedAtPrecision shouldBe DatePrecision.DAY
         }
 
         @Test

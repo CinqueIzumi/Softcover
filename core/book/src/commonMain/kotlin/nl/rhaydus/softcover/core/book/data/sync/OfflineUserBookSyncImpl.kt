@@ -411,6 +411,7 @@ internal class OfflineUserBookSyncImpl(
                         progress = snapshotRead.progress,
                         startedAt = snapshotRead.startedAt,
                         finishedAt = snapshotRead.finishedAt,
+                        finishedAtPrecision = snapshotRead.finishedAtPrecision,
                     )
                 } else {
                     read
@@ -438,6 +439,7 @@ internal class OfflineUserBookSyncImpl(
                 read.copy(
                     progress = snapshotRead.progress,
                     finishedAt = snapshotRead.finishedAt,
+                    finishedAtPrecision = snapshotRead.finishedAtPrecision,
                 )
             } else {
                 read

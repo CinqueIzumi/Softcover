@@ -50,6 +50,8 @@ class ShelveReadingStatusCollectorTest {
             progress = progress,
             startedAt = null,
             finishedAt = null,
+            finishedAtPrecision = null,
+            editionPages = null,
         )
 
         every {

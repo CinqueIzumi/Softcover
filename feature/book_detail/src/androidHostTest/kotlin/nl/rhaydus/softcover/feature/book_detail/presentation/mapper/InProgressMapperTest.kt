@@ -53,6 +53,8 @@ class InProgressMapperTest {
         progress = progress,
         startedAt = null,
         finishedAt = null,
+        finishedAtPrecision = null,
+        editionPages = null,
     )
 
     private fun paperEdition(pages: Int?): BookEdition = buildEdition(id = 1).copy(

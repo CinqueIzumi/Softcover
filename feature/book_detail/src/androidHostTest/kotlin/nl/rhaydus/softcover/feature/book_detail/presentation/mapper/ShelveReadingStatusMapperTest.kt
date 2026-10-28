@@ -39,6 +39,8 @@ class ShelveReadingStatusMapperTest {
         progress = progress,
         startedAt = null,
         finishedAt = null,
+        finishedAtPrecision = null,
+        editionPages = null,
     )
 
     private fun paperEdition(): BookEdition = buildEdition(id = 1).copy(

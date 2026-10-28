@@ -10,6 +10,7 @@ import io.mockk.unmockkAll
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.DatePrecision
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.TagCategory
@@ -1611,6 +1612,9 @@ class BookMapperTest {
             progressSeconds: Int? = null,
             startedAt: String? = null,
             finishedAt: String? = null,
+            finishedAtPrecision: Int? = null,
+            editionPages: Int? = null,
+            hasEdition: Boolean = editionPages != null,
         ): UserBookFragment.User_book_read = mockk {
             every {
                 this@mockk.id
@@ -1630,6 +1634,20 @@ class BookMapperTest {
             every {
                 finished_at
             } returns finishedAt
+            every {
+                finished_at_precision
+            } returns finishedAtPrecision
+            every {
+                edition
+            } returns if (hasEdition) {
+                mockk<UserBookFragment.User_book_read.Edition> {
+                    every {
+                        pages
+                    } returns editionPages
+                }
+            } else {
+                null
+            }
         }
 
         @Test
@@ -1677,6 +1695,55 @@ class BookMapperTest {
             userBookRead.currentSeconds shouldBe 3600
             userBookRead.startedAt shouldBe "2024-01-02"
             userBookRead.finishedAt shouldBe "2024-02-03"
+        }
+
+        @Test
+        fun `carries the finish precision code and the edition pages onto the read`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                userBookReads = listOf(
+                    stubRead(
+                        id = 7,
+                        progress = 100.0,
+                        finishedAt = "2024-02-03",
+                        finishedAtPrecision = DatePrecision.MONTH.code,
+                        editionPages = 320,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            val userBookRead = result.userBook.shouldNotBeNull().reads.single()
+
+            userBookRead.finishedAtPrecision shouldBe DatePrecision.MONTH
+            userBookRead.editionPages shouldBe 320
+        }
+
+        @Test
+        fun `an unknown precision code and a read without an edition map to null`() {
+            // ----- Arrange -----
+            val fragment = stubUserBookFragment(
+                userBookReads = listOf(
+                    stubRead(
+                        id = 7,
+                        progress = 100.0,
+                        finishedAtPrecision = 99,
+                        hasEdition = false,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            val result = fragment.toBook().shouldNotBeNull()
+
+            // ----- Assert -----
+            val userBookRead = result.userBook.shouldNotBeNull().reads.single()
+
+            userBookRead.finishedAtPrecision.shouldBeNull()
+            userBookRead.editionPages.shouldBeNull()
         }
 
         @Test

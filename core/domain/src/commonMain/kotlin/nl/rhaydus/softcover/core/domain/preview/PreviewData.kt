@@ -113,6 +113,8 @@ object PreviewData {
                     progress = 0f,
                     startedAt = null,
                     finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
                 ),
             ),
         ),

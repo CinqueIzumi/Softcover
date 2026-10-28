@@ -81,6 +81,8 @@ class LibraryStatsTest {
         progress = 1.0f,
         startedAt = null,
         finishedAt = finishedAt,
+        finishedAtPrecision = null,
+        editionPages = null,
     )
 
     private fun buildBook(

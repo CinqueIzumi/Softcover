@@ -29,6 +29,8 @@ class YourReadsMapperTest {
         progress = progress,
         startedAt = startedAt,
         finishedAt = finishedAt,
+        finishedAtPrecision = null,
+        editionPages = null,
     )
 
     private fun userBook(
@@ -133,10 +135,12 @@ class YourReadsMapperTest {
             // ----- Arrange -----
             val book = book(
                 status = BookStatus.Reading,
-                reads = listOf(read(
-                    id = 1,
-                    startedAt = "2026-01-02",
-                ),),
+                reads = listOf(
+                    read(
+                        id = 1,
+                        startedAt = "2026-01-02",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -203,10 +207,12 @@ class YourReadsMapperTest {
             // ----- Arrange -----
             val book = book(
                 status = BookStatus.Read,
-                reads = listOf(read(
-                    id = 1,
-                    finishedAt = "2026-02-02",
-                ),),
+                reads = listOf(
+                    read(
+                        id = 1,
+                        finishedAt = "2026-02-02",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -264,10 +270,12 @@ class YourReadsMapperTest {
             // ----- Arrange -----
             val book = book(
                 status = BookStatus.Read,
-                reads = listOf(read(
-                    id = 1,
-                    finishedAt = "2026-02-10",
-                ),),
+                reads = listOf(
+                    read(
+                        id = 1,
+                        finishedAt = "2026-02-10",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -282,10 +290,12 @@ class YourReadsMapperTest {
             // ----- Arrange -----
             val book = book(
                 status = BookStatus.Reading,
-                reads = listOf(read(
-                    id = 1,
-                    startedAt = "2026-01-05",
-                ),),
+                reads = listOf(
+                    read(
+                        id = 1,
+                        startedAt = "2026-01-05",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -336,10 +346,12 @@ class YourReadsMapperTest {
             // ----- Arrange -----
             val book = book(
                 status = BookStatus.Reading,
-                reads = listOf(read(
-                    id = 1,
-                    startedAt = "2026-01-05",
-                ),),
+                reads = listOf(
+                    read(
+                        id = 1,
+                        startedAt = "2026-01-05",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -357,10 +369,12 @@ class YourReadsMapperTest {
             // ----- Arrange -----
             val book = book(
                 status = BookStatus.Reading,
-                reads = listOf(read(
-                    id = 1,
-                    progress = 13.6f,
-                ),),
+                reads = listOf(
+                    read(
+                        id = 1,
+                        progress = 13.6f,
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -375,11 +389,13 @@ class YourReadsMapperTest {
             // ----- Arrange -----
             val book = book(
                 status = BookStatus.Read,
-                reads = listOf(read(
-                    id = 1,
-                    finishedAt = "2026-02-10",
-                    progress = 100f,
-                ),),
+                reads = listOf(
+                    read(
+                        id = 1,
+                        finishedAt = "2026-02-10",
+                        progress = 100f,
+                    ),
+                ),
             )
 
             // ----- Act -----

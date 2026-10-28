@@ -34,6 +34,8 @@ internal data class AppSettingsEntity(
     val authorDemographicsBackfilled: Boolean = false,
     // False until one refresh covering every Read book has stored each contributor's role.
     val authorRolesBackfilled: Boolean = false,
+    // False until one refresh covering every status has stored each read's finish-date precision and edition pages.
+    val readDatesBackfilled: Boolean = false,
     val libraryTabOrder: List<String> = emptyList(),
     val desktopWindowState: DesktopWindowStateEntity = DesktopWindowStateEntity(),
     val readingStreakEnabled: Boolean = true,

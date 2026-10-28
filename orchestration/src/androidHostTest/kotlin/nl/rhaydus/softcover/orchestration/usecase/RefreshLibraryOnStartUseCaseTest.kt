@@ -34,6 +34,9 @@ class RefreshLibraryOnStartUseCaseTest {
         every {
             settingsRepository.authorRolesBackfilled
         } returns flowOf(true)
+        every {
+            settingsRepository.readDatesBackfilled
+        } returns flowOf(true)
 
         useCase = RefreshLibraryOnStartUseCase(
             settingsRepository = settingsRepository,
@@ -204,6 +207,59 @@ class RefreshLibraryOnStartUseCaseTest {
             result.isSuccess shouldBe true
             coVerify(exactly = 1) { refreshLibraryUseCase(scope = readScope) }
             coVerify(exactly = 0) { refreshLibraryUseCase(scope = activeScope) }
+        }
+
+        @Test
+        fun `refreshes every status when read dates are not backfilled even if read-throughs are`() = runTest {
+            // ----- Arrange -----
+            every {
+                settingsRepository.readThroughsBackfilled
+            } returns flowOf(true)
+            every {
+                settingsRepository.authorDemographicsBackfilled
+            } returns flowOf(true)
+            every {
+                settingsRepository.readDatesBackfilled
+            } returns flowOf(false)
+            coEvery {
+                refreshLibraryUseCase(scope = any())
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            val result = useCase()
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) {
+                refreshLibraryUseCase(
+                    scope = RefreshScope.ByStatuses(statuses = UserBookStatus.entries.toSet()),
+                )
+            }
+            coVerify(exactly = 0) { refreshLibraryUseCase(scope = activeScope) }
+        }
+
+        @Test
+        fun `returns the failure when the read-dates refresh fails`() = runTest {
+            // ----- Arrange -----
+            val expectedError = RuntimeException("refresh error")
+            every {
+                settingsRepository.readThroughsBackfilled
+            } returns flowOf(true)
+            every {
+                settingsRepository.authorDemographicsBackfilled
+            } returns flowOf(true)
+            every {
+                settingsRepository.readDatesBackfilled
+            } returns flowOf(false)
+            coEvery {
+                refreshLibraryUseCase(scope = any())
+            } returns Result.failure(expectedError)
+
+            // ----- Act -----
+            val result = useCase()
+
+            // ----- Assert -----
+            result.exceptionOrNull() shouldBe expectedError
         }
 
         @Test

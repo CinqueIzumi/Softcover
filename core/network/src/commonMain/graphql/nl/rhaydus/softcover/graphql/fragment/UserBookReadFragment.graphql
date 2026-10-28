@@ -5,4 +5,9 @@ fragment UserBookReadFragment on user_book_reads{
     progress_seconds
     started_at
     finished_at
+    finished_at_precision
+    edition {
+        id
+        pages
+    }
 }

@@ -26,6 +26,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.DatePrecision
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
@@ -166,6 +167,8 @@ class BookEntityMapperTest {
         progress: Float = 0.14f,
         startedAt: String? = "2024-01-01",
         finishedAt: String? = null,
+        finishedAtPrecision: DatePrecision? = null,
+        editionPages: Int? = null,
     ): UserBookRead = mockk {
         every {
             this@mockk.id
@@ -190,6 +193,14 @@ class BookEntityMapperTest {
         every {
             this@mockk.finishedAt
         } returns finishedAt
+
+        every {
+            this@mockk.finishedAtPrecision
+        } returns finishedAtPrecision
+
+        every {
+            this@mockk.editionPages
+        } returns editionPages
     }
 
     private fun stubUserBook(
@@ -524,6 +535,8 @@ class BookEntityMapperTest {
         progress: Float = 0.14f,
         startedAt: String? = "2024-01-01",
         finishedAt: String? = null,
+        finishedAtPrecision: Int? = null,
+        editionPages: Int? = null,
     ): UserBookReadEntity = UserBookReadEntity(
         id = id,
         userBookId = userBookId,
@@ -532,6 +545,8 @@ class BookEntityMapperTest {
         progress = progress,
         startedAt = startedAt,
         finishedAt = finishedAt,
+        finishedAtPrecision = finishedAtPrecision,
+        editionPages = editionPages,
     )
 
     private fun stubReadingJournalEntity(
@@ -707,6 +722,38 @@ class BookEntityMapperTest {
             result.startedAt shouldBe "2024-01-01"
             result.finishedAt shouldBe "2024-06-01"
             result.userBookId shouldBe 3
+        }
+
+        @Test
+        fun `maps the finish precision to its code and carries the edition pages`() {
+            // ----- Arrange -----
+            val userBookRead = stubUserBookRead(
+                finishedAtPrecision = DatePrecision.MONTH,
+                editionPages = 320,
+            )
+
+            // ----- Act -----
+            val result = userBookRead.toEntity(userBookId = 3)
+
+            // ----- Assert -----
+            result.finishedAtPrecision shouldBe 2
+            result.editionPages shouldBe 320
+        }
+
+        @Test
+        fun `keeps a missing precision and missing edition pages null`() {
+            // ----- Arrange -----
+            val userBookRead = stubUserBookRead(
+                finishedAtPrecision = null,
+                editionPages = null,
+            )
+
+            // ----- Act -----
+            val result = userBookRead.toEntity(userBookId = 3)
+
+            // ----- Assert -----
+            result.finishedAtPrecision shouldBe null
+            result.editionPages shouldBe null
         }
     }
 
@@ -1125,6 +1172,50 @@ class BookEntityMapperTest {
             result.progress shouldBe 0.14f
             result.startedAt shouldBe "2024-01-01"
             result.finishedAt shouldBe "2024-06-01"
+        }
+
+        @Test
+        fun `maps the stored precision code back to its enum and carries the edition pages`() {
+            // ----- Arrange -----
+            val entity = stubUserBookReadEntity(
+                finishedAtPrecision = 3,
+                editionPages = 320,
+            )
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.finishedAtPrecision shouldBe DatePrecision.YEAR
+            result.editionPages shouldBe 320
+        }
+
+        @Test
+        fun `an unknown precision code reads as no precision`() {
+            // ----- Arrange -----
+            val entity = stubUserBookReadEntity(finishedAtPrecision = 9)
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.finishedAtPrecision shouldBe null
+        }
+
+        @Test
+        fun `a null precision and null edition pages stay null`() {
+            // ----- Arrange -----
+            val entity = stubUserBookReadEntity(
+                finishedAtPrecision = null,
+                editionPages = null,
+            )
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.finishedAtPrecision shouldBe null
+            result.editionPages shouldBe null
         }
     }
 

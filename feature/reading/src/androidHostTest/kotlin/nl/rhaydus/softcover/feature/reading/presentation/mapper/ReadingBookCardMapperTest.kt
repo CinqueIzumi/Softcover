@@ -75,6 +75,8 @@ class ReadingBookCardMapperTest {
         progress = progress,
         startedAt = null,
         finishedAt = null,
+        finishedAtPrecision = null,
+        editionPages = null,
     )
 
     private fun book(

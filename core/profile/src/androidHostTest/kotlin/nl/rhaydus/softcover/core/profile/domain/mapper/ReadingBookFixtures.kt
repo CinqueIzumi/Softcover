@@ -4,6 +4,7 @@ import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.DatePrecision
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
@@ -71,6 +72,25 @@ internal fun finishedRead(
     progress = 1f,
     startedAt = null,
     finishedAt = finishedAt,
+    finishedAtPrecision = null,
+    editionPages = null,
+)
+
+internal fun datedRead(
+    id: Int,
+    startedAt: String?,
+    finishedAt: String?,
+    precision: DatePrecision? = DatePrecision.DAY,
+    editionPages: Int? = null,
+): UserBookRead = UserBookRead(
+    id = id,
+    currentPage = null,
+    currentSeconds = null,
+    progress = 1f,
+    startedAt = startedAt,
+    finishedAt = finishedAt,
+    finishedAtPrecision = precision,
+    editionPages = editionPages,
 )
 
 internal fun edition(

@@ -221,6 +221,9 @@ inline the integers at call sites, and re-confirm with the Hardcover team before
 - **`vibe_type`** (on `vibes`) — **`0` = made by the reader, `1` = Recommendations, `3` = Top Picks,
   `4` = book club.** Observed in the data, not confirmed by Hardcover; no vibe has type `2`. System vibes are
   identified by type and slug: `SystemVibe` (`:core:domain`), mapped in one place, `:core:book`'s `RecommendationsMapper`.
+- **`finished_at_precision`** (on `user_book_reads`) — **`1` = day, `2` = month (stored as the 1st), `3` = year
+  (stored as 1 January), `0` = no date.** Observed in live data, not confirmed by Hardcover; mapped in one
+  place, `DatePrecision.fromCode` (`:core:domain`).
 
 ## Platform seams from the foundation
 

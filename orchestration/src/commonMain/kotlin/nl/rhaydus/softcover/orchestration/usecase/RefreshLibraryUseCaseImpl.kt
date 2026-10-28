@@ -53,6 +53,8 @@ internal class RefreshLibraryUseCaseImpl(
             settingsRepository.markAuthorRolesBackfilled()
         }
 
+        if (scope.coversEveryStatus()) settingsRepository.markReadDatesBackfilled()
+
         if (scope !is RefreshScope.ByList) refreshReadingJournalInBackground()
     }
 
@@ -68,6 +70,12 @@ internal class RefreshLibraryUseCaseImpl(
     private fun RefreshScope.coversReadBooks(): Boolean = when (this) {
         RefreshScope.All -> true
         is RefreshScope.ByStatuses -> UserBookStatus.READ in statuses
+        is RefreshScope.ByList -> false
+    }
+
+    private fun RefreshScope.coversEveryStatus(): Boolean = when (this) {
+        RefreshScope.All -> true
+        is RefreshScope.ByStatuses -> statuses.containsAll(UserBookStatus.entries)
         is RefreshScope.ByList -> false
     }
 

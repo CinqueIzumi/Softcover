@@ -31,6 +31,7 @@ import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteQueue
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.DatePrecision
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
@@ -137,6 +138,8 @@ class OfflineUserBookSyncImplTest {
         progress = 0.5f,
         startedAt = "2026-01-01",
         finishedAt = null,
+        finishedAtPrecision = null,
+        editionPages = null,
     )
 
     private fun stubBook(
@@ -312,6 +315,8 @@ class OfflineUserBookSyncImplTest {
                 progress = 0f,
                 startedAt = "2026-07-21",
                 finishedAt = "2026-07-22",
+                finishedAtPrecision = null,
+                editionPages = null,
             )
             val book = stubBook(
                 userBook = stubUserBook(id = 10),
@@ -350,6 +355,8 @@ class OfflineUserBookSyncImplTest {
                 progress = 0.1f,
                 startedAt = "2026-07-21",
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             )
             val book = stubBook(
                 userBook = stubUserBook(id = 10),
@@ -857,6 +864,8 @@ class OfflineUserBookSyncImplTest {
                 progress = 80f,
                 startedAt = "2026-01-01",
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             )
 
             val serverUserBook = UserBook(
@@ -882,6 +891,8 @@ class OfflineUserBookSyncImplTest {
                 progress = 20f, // stale — local (80f) should win
                 startedAt = null,
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             )
 
             val fetchedBook = stubBook(
@@ -938,6 +949,8 @@ class OfflineUserBookSyncImplTest {
                 progress = 80f,
                 startedAt = "2026-01-01",
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             )
 
             val serverUserBook = localUserBook.copy()
@@ -996,6 +1009,8 @@ class OfflineUserBookSyncImplTest {
                 progress = 50f,
                 startedAt = null,
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             )
 
             val serverUserBook = UserBook(
@@ -1021,6 +1036,8 @@ class OfflineUserBookSyncImplTest {
                 progress = 100f,
                 startedAt = null,
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             )
 
             val fetchedBook = stubBook(
@@ -1077,6 +1094,8 @@ class OfflineUserBookSyncImplTest {
                 progress = 100f, // owned — preserved
                 startedAt = null,
                 finishedAt = "2026-05-01", // owned — preserved
+                finishedAtPrecision = null,
+                editionPages = null,
             )
 
             val serverUserBook = UserBook(
@@ -1102,6 +1121,8 @@ class OfflineUserBookSyncImplTest {
                 progress = 0f,
                 startedAt = null,
                 finishedAt = null, // stale — local should win
+                finishedAtPrecision = null,
+                editionPages = null,
             )
 
             val fetchedBook = stubBook(
@@ -1366,6 +1387,8 @@ class OfflineUserBookSyncImplTest {
             progress = progress,
             startedAt = startedAt,
             finishedAt = finishedAt,
+            finishedAtPrecision = null,
+            editionPages = null,
         )
 
         private fun bookWith(
@@ -1601,6 +1624,38 @@ class OfflineUserBookSyncImplTest {
                 finishedAt = "2026-05-01",
             )
             userBook.reads.first { it.id == 9 } shouldBe otherRead
+        }
+
+        @Test
+        fun `MARK_AS_READ — the local finish keeps its own precision over the server's`() = runTest {
+            // ----- Arrange -----
+            val snapshot = bookWith(
+                BookStatus.Read,
+                read(
+                    id = 10,
+                    progress = 100f,
+                    finishedAt = "2026-05-01",
+                ).copy(finishedAtPrecision = DatePrecision.DAY),
+            )
+            val fetched = bookWith(
+                BookStatus.Reading,
+                read(
+                    id = 10,
+                    progress = 40f,
+                    finishedAt = "2026-05-01",
+                ).copy(finishedAtPrecision = DatePrecision.MONTH),
+            )
+
+            // ----- Act -----
+            val result = reconcile(
+                PendingUserBookWriteKind.MARK_AS_READ,
+                snapshot,
+                fetched,
+            )
+
+            // ----- Assert -----
+            val reconciled = result.userBook.shouldNotBeNull().reads.single()
+            reconciled.finishedAtPrecision shouldBe DatePrecision.DAY
         }
 
         @Test
@@ -2166,6 +2221,8 @@ class OfflineUserBookSyncImplTest {
             progress = if (finishedAt != null) 1f else 0.1f,
             startedAt = "2026-01-01",
             finishedAt = finishedAt,
+            finishedAtPrecision = null,
+            editionPages = null,
         )
 
         private fun bookWith(

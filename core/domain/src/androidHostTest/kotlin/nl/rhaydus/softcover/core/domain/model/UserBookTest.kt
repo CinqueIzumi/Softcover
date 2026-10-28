@@ -63,6 +63,8 @@ class UserBookTest {
         progress = 0f,
         startedAt = null,
         finishedAt = finishedAt,
+        finishedAtPrecision = null,
+        editionPages = null,
     )
 
     @Nested
@@ -581,6 +583,8 @@ class UserBookTest {
                         progress = 100f,
                         startedAt = "2026-06-01",
                         finishedAt = "2026-07-09",
+                        finishedAtPrecision = null,
+                        editionPages = null,
                     ),
                 ),
             )
