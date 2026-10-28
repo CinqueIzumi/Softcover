@@ -36,8 +36,8 @@ internal class PendingUserBookWriteStore(
 
     override suspend fun hasPending(): Boolean = dao.getPending().isNotEmpty()
 
-    override suspend fun getPending(maxAttempts: Int): List<PendingWrite<PendingUserBookWrite>> =
-        dao.getPending(maxAttempts = maxAttempts).mapNotNull { entity ->
+    override suspend fun getPending(): List<PendingWrite<PendingUserBookWrite>> =
+        dao.getPending().mapNotNull { entity ->
             val payload: PendingUserBookWrite? = entity.toPendingUserBookWrite()
 
             if (payload == null) {
@@ -63,5 +63,11 @@ internal class PendingUserBookWriteStore(
 
     override suspend fun incrementAttempts(localId: Long) {
         dao.incrementAttempts(localId = localId)
+    }
+
+    override suspend fun abandon(write: PendingWrite<PendingUserBookWrite>) {
+        write.payload.progressHistoryId?.let { progressHistoryLocalDataSource.delete(localId = it) }
+
+        dao.delete(localId = write.localId)
     }
 }

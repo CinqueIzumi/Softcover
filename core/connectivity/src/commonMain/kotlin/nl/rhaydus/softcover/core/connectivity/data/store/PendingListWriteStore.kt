@@ -17,8 +17,8 @@ internal class PendingListWriteStore(
         dao.insert(entity = payload.toEntity())
     }
 
-    override suspend fun getPending(maxAttempts: Int): List<PendingWrite<PendingListWrite>> =
-        dao.getPending(maxAttempts = maxAttempts).mapNotNull { entity ->
+    override suspend fun getPending(): List<PendingWrite<PendingListWrite>> =
+        dao.getPending().mapNotNull { entity ->
             val payload: PendingListWrite? = entity.toPendingListWrite()
 
             if (payload == null) {
@@ -42,5 +42,9 @@ internal class PendingListWriteStore(
 
     override suspend fun incrementAttempts(localId: Long) {
         dao.incrementAttempts(localId = localId)
+    }
+
+    override suspend fun abandon(write: PendingWrite<PendingListWrite>) {
+        dao.delete(localId = write.localId)
     }
 }

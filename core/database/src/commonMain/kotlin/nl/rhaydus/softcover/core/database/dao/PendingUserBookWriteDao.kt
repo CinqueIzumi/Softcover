@@ -11,8 +11,8 @@ interface PendingUserBookWriteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReplacing(entity: PendingUserBookWriteEntity)
 
-    @Query("SELECT * FROM pending_user_book_writes WHERE attempts < :maxAttempts ORDER BY enqueuedAt ASC")
-    suspend fun getPending(maxAttempts: Int = 5): List<PendingUserBookWriteEntity>
+    @Query("SELECT * FROM pending_user_book_writes ORDER BY enqueuedAt ASC")
+    suspend fun getPending(): List<PendingUserBookWriteEntity>
 
     @Query("SELECT * FROM pending_user_book_writes WHERE userBookId = :userBookId AND kind = :kind LIMIT 1")
     suspend fun getByUserBookIdAndKind(

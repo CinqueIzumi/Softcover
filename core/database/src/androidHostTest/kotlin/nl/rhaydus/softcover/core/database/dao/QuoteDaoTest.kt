@@ -620,7 +620,7 @@ class QuoteDaoTest {
     @Nested
     inner class PendingWrites {
         @Test
-        fun `getPending skips writes at the attempt cap and orders by enqueue time`() = runTest(testDispatcher) {
+        fun `getPending returns writes at any attempt count ordered by enqueue time`() = runTest(testDispatcher) {
             // ----- Arrange -----
             pendingDao.insert(
                 PendingQuoteWriteEntity(
@@ -649,7 +649,7 @@ class QuoteDaoTest {
             val result = pendingDao.getPending()
 
             // ----- Assert -----
-            result.map { it.quoteLocalId } shouldBe listOf(2L, 1L)
+            result.map { it.quoteLocalId } shouldBe listOf(2L, 1L, 3L)
         }
     }
 }

@@ -30,7 +30,7 @@ import org.koin.dsl.module
 
 // The drain loop, its online trigger, the mutex, the poison cap, and the in-drain backoff all live in the
 // foundation's DefaultOfflineWriteDrainer. What stays here is what is genuinely Softcover's: the replay
-// dispatch, and the two places the queues legitimately differ.
+// dispatch, each store's `abandon`, and the two places the queues legitimately differ.
 //
 //  - A user-book write that the server *rejects* (GraphQL error, 4xx) would fail identically on replay, so
 //    only a RetryableSyncException halts the pass; everything else discards the row. A list write is always
@@ -73,7 +73,12 @@ val connectivityModule = module {
 
     single { PendingListWriteStore(dao = get()) }
 
-    single { PendingQuoteWriteStore(dao = get()) }
+    single {
+        PendingQuoteWriteStore(
+            dao = get(),
+            localDataSource = get(),
+        )
+    }
 
     single<UserBookWriteQueue> { get<PendingUserBookWriteStore>() }
 

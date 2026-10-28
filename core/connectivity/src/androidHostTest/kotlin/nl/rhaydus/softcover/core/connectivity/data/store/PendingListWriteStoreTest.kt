@@ -151,11 +151,11 @@ class PendingListWriteStoreTest {
             )
 
             coEvery {
-                dao.getPending(maxAttempts = 7)
+                dao.getPending()
             } returns listOf(entityA, entityB)
 
             // ----- Act -----
-            val result = store.getPending(maxAttempts = 7)
+            val result = store.getPending()
 
             // ----- Assert -----
             result shouldBe listOf(
@@ -181,7 +181,7 @@ class PendingListWriteStoreTest {
             )
 
             coEvery {
-                dao.getPending(maxAttempts = any())
+                dao.getPending()
             } returns listOf(unknownEntity)
 
             coJustRun {
@@ -189,13 +189,34 @@ class PendingListWriteStoreTest {
             }
 
             // ----- Act -----
-            val result = store.getPending(maxAttempts = 5)
+            val result = store.getPending()
 
             // ----- Assert -----
             result shouldBe emptyList()
             coVerify(exactly = 1) {
                 dao.delete(localId = 6L)
             }
+        }
+    }
+
+    @Nested
+    inner class Abandon {
+        @Test
+        fun `deletes the row`() = runTest {
+            // ----- Arrange -----
+            val write = PendingWrite(
+                localId = 4L,
+                attempts = 9,
+                payload = pendingListWrite(),
+            )
+
+            coJustRun { dao.delete(any()) }
+
+            // ----- Act -----
+            store.abandon(write = write)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { dao.delete(localId = 4L) }
         }
     }
 }

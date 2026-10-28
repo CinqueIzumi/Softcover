@@ -15,19 +15,18 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** step 3's third box (tooling) is done. Both repos run detekt `dev.detekt` 2.0.0-alpha.6
-  (user-approved alpha) with working type resolution; every type-resolved rule fired on a probe. Shared
-  test excludes are `'**/*Test/**', '**/test/**'`; `UnreachableCode`, `RedundantSuspendModifier` and
-  `IgnoredReturnValue` (production only) are on; `detektCheck` is in the foundation's `check`. ktlint has
-  `NoUnusedImportsRule` (Softcover's detekt `UnusedImport` is gone) and the
-  `rhaydus_fully_qualified_exempt_package_segments` property (Softcover sets `fragment`). The surfaced
-  findings are fixed: 152 dead constructor `private val`s became parameters, Reading previews moved to
-  `ReadingScreenLayoutPreviews.kt`. Entries pruned from `candidates.md`.
-- **Next:** step 3, fourth box in § 3 below: data F55.
-- **Open questions:** none.
-- **Verification:** reviewer findings applied. Foundation `check`, Softcover `styleCheck`,
-  `:detekt-rules:test`, `testAndroidHostTest`, `checkDocBudgets` green; test audit clean.
-- **Uncommitted:** all of the above, both repos. Not pushed: foundation `6f48c70`, Softcover `8508d036a`;
+- **State:** step 3's fourth box (data F55) is done. `PendingWriteStore` gained `abandon(write)`, which
+  the drainer calls (logged, never aborting the pass) only for a write at `DrainPolicy.maxAttempts`:
+  a row already over the cap, or a transient failure that reaches it. `getPending()` lost its
+  `maxAttempts` parameter, so the engine owns the cap and clears rows already stuck on devices.
+  DISCARDED and terminal failures still `delete`, and the replays keep their rejection cleanup
+  unchanged. Softcover's three stores settle side records in `abandon`, then delete the row.
+- **Next:** step 3, fifth box in § 3 below: adopt F18, F20, F21 through
+  `includeBuild("foundation/build-logic")` and delete the Softcover copies.
+- **Open questions:** none. A path-by-path audit against `HEAD` found no change outside the poison cap.
+- **Verification:** foundation `check` green; Softcover `styleCheck`, `testAndroidHostTest`,
+  `checkDocBudgets` green; reviewer findings applied; test audit clean.
+- **Uncommitted:** nothing. Not pushed: foundation `398f68c`, and Softcover's commits since `68dd22e4e`;
   push the foundation first.
 
 ## How to run a step
@@ -82,7 +81,7 @@ Bugs and gaps in shared code only; new components, design tokens and house-style
       detekt bans on the foundation versions.
 - [x] Contract gaps: F42, F44, F56.
 - [x] Tooling: F33, F37, F54, F60; wire `detektCheck` into the foundation's `check`.
-- [ ] Data: F55.
+- [x] Data: F55.
 - [ ] Adopt F18, F20, F21 through `includeBuild("foundation/build-logic")`; delete the Softcover copies.
 
 ### 4 — Ship

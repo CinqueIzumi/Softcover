@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.connectivity.data.store
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coJustRun
@@ -314,11 +315,11 @@ class PendingUserBookWriteStoreTest {
             )
 
             coEvery {
-                dao.getPending(maxAttempts = 7)
+                dao.getPending()
             } returns listOf(entityA, entityB)
 
             // ----- Act -----
-            val result = store.getPending(maxAttempts = 7)
+            val result = store.getPending()
 
             // ----- Assert -----
             result shouldBe listOf(
@@ -346,7 +347,7 @@ class PendingUserBookWriteStoreTest {
             )
 
             coEvery {
-                dao.getPending(maxAttempts = any())
+                dao.getPending()
             } returns listOf(unknownEntity)
 
             coJustRun {
@@ -354,7 +355,7 @@ class PendingUserBookWriteStoreTest {
             }
 
             // ----- Act -----
-            val result = store.getPending(maxAttempts = 5)
+            val result = store.getPending()
 
             // ----- Assert -----
             result shouldBe emptyList()
@@ -370,7 +371,7 @@ class PendingUserBookWriteStoreTest {
         fun `returns true when the dao has an eligible pending row`() = runTest {
             // ----- Arrange -----
             coEvery {
-                dao.getPending(maxAttempts = any())
+                dao.getPending()
             } returns listOf(pendingUserBookWriteEntity())
 
             // ----- Act -----
@@ -384,7 +385,7 @@ class PendingUserBookWriteStoreTest {
         fun `returns false when the dao has no eligible pending rows`() = runTest {
             // ----- Arrange -----
             coEvery {
-                dao.getPending(maxAttempts = any())
+                dao.getPending()
             } returns emptyList()
 
             // ----- Act -----
@@ -392,6 +393,69 @@ class PendingUserBookWriteStoreTest {
 
             // ----- Assert -----
             result shouldBe false
+        }
+    }
+
+    @Nested
+    inner class Abandon {
+        @Test
+        fun `deletes the row and its progress history row`() = runTest {
+            // ----- Arrange -----
+            val write = PendingWrite(
+                localId = 4L,
+                attempts = 9,
+                payload = pendingUserBookWrite(progressHistoryId = 77L),
+            )
+
+            coJustRun { dao.delete(any()) }
+
+            // ----- Act -----
+            store.abandon(write = write)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { dao.delete(localId = 4L) }
+            coVerify(exactly = 1) { progressHistoryLocalDataSource.delete(localId = 77L) }
+        }
+
+        @Test
+        fun `deletes only the row when the payload has no progress history row`() = runTest {
+            // ----- Arrange -----
+            val write = PendingWrite(
+                localId = 4L,
+                attempts = 9,
+                payload = pendingUserBookWrite(
+                    kind = PendingUserBookWriteKind.MARK_AS_READ,
+                    progressHistoryId = null,
+                ),
+            )
+
+            coJustRun { dao.delete(any()) }
+
+            // ----- Act -----
+            store.abandon(write = write)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { dao.delete(localId = 4L) }
+            verify { progressHistoryLocalDataSource wasNot Called }
+        }
+
+        @Test
+        fun `propagates the failure and keeps the row when deleting the progress history row throws`() = runTest {
+            // ----- Arrange -----
+            val write = PendingWrite(
+                localId = 4L,
+                attempts = 9,
+                payload = pendingUserBookWrite(progressHistoryId = 77L),
+            )
+
+            coJustRun { dao.delete(any()) }
+            coEvery {
+                progressHistoryLocalDataSource.delete(localId = 77L)
+            } throws IllegalStateException("settle failed")
+
+            // ----- Act & Assert -----
+            shouldThrow<IllegalStateException> { store.abandon(write = write) }
+            coVerify(exactly = 0) { dao.delete(localId = any()) }
         }
     }
 }
