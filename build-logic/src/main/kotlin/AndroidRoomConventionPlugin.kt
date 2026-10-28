@@ -7,7 +7,7 @@ import org.gradle.kotlin.dsl.dependencies
 /**
  * Room runtime + KSP compiler for the single `@Database` owner (`:core:database`).
  *
- * `:core:database` is a Kotlin Multiplatform module (it applies `softcover.kmp.library`), so the Room
+ * `:core:database` is a Kotlin Multiplatform module (it applies `rhaydus.kmp.library`), so the Room
  * artifacts attach to source-set-scoped configurations rather than the flat `api`/`ksp` ones a
  * single-variant Android library would expose:
  *
@@ -17,7 +17,7 @@ import org.gradle.kotlin.dsl.dependencies
  *   consumers resolve Room transitively across every target.
  * - `room-compiler` runs through KSP **per target** — KMP KSP has no single `ksp` configuration, so
  *   codegen is wired once per compilation (`kspAndroid` + one per iOS target + `kspJvm`, matching the
- *   targets declared by [KmpLibraryConventionPlugin]) so every target gets its generated `@Database`
+ *   targets declared by `rhaydus.kmp.library`) so every target gets its generated `@Database`
  *   implementation.
  * - The Room Gradle plugin (`androidx.room`) exports the schema JSON for each `@Database` version to
  *   `schemas/`. It coordinates the per-target KSP runs onto one schema directory (a tracked task
@@ -45,8 +45,8 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
                 libs.library("androidx-sqlite-bundled"),
             )
 
-            // One ksp<Target> configuration per target compiled — matches the targets declared in
-            // KmpLibraryConventionPlugin (the Android target, the two iOS targets, and the JVM desktop
+            // One ksp<Target> configuration per target compiled — matches the targets declared by
+            // `rhaydus.kmp.library` (the Android target, the two iOS targets, and the JVM desktop
             // target). Room generates each target's `@Database` implementation through its own KSP run.
             listOf(
                 "kspAndroid",

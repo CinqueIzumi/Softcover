@@ -16,9 +16,11 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.stability.analyzer) apply false
-    alias(libs.plugins.dependency.analysis)
+    alias(libs.plugins.dependency.analysis) apply false
     alias(libs.plugins.kover)
     id("rhaydus.doc-budgets")
+    id("rhaydus.module-graph")
+    id("rhaydus.dependency-analysis")
 }
 
 // Code coverage. Kover is applied to every shipped module (below) and aggregated into a single XML
@@ -71,9 +73,8 @@ val typeResolvedDetektTasks = setOf(
 val rhaydusDetektRules = libs.rhaydus.detektRules
 
 // Apply detekt uniformly to every Kotlin module (no baseline - gates from zero on the shared config).
-// Wired centrally here, alongside the ktlint/styleCheck/checkModuleGraph gates, rather than per module.
+// Wired centrally here, alongside the ktlint/styleCheck gates, rather than per module.
 subprojects {
-    apply(plugin = "com.autonomousapps.dependency-analysis")
     apply(plugin = "dev.detekt")
 
     // Coverage instrumentation for every shipped module; the merged report is wired at the root above.
@@ -198,7 +199,6 @@ tasks.register<JavaExec>("ktlintCheck") {
 subprojects {
     tasks.matching { it.name == "check" }.configureEach {
         dependsOn(rootProject.tasks.named("ktlintCheck"))
-        dependsOn(":checkModuleGraph")
         dependsOn(":checkResourcePackaging")
         dependsOn(":checkPresentationFileSize")
         dependsOn(":checkDocBudgets")
@@ -235,249 +235,144 @@ subprojects {
     }
 }
 
-// Enforces the module-tier DAG from MODULE_STRUCTURE_GUIDELINES §2 so the split graph cannot
-// silently regress: a module may depend only on a lower tier, and a leaf feature may never depend on
-// a sibling feature. Replaces the manual `grep` import audits with a build-time gate (wired into
-// `check` above). Tiers are derived from the module path.
-val allowedTargetTiers = mapOf(
-    "core" to setOf("core"),
-    "feature" to setOf("core"),
-    "orchestration" to setOf("feature", "core"),
-    "app" to setOf("orchestration", "core"),
-)
+// Module-graph gate (`checkModuleGraph`, wired into every `check` by `rhaydus.module-graph`).
+moduleGraph {
+    tierOf = { path ->
+        when {
+            path.startsWith(":core:") -> "core"
+            path.startsWith(":feature:") -> "feature"
+            path == ":orchestration" -> "orchestration"
+            path == ":app" || path == ":desktopApp" -> "app"
+            else -> null
+        }
+    }
 
-fun tierOf(path: String): String? = when {
-    path.startsWith(":core:") -> "core"
-    path.startsWith(":feature:") -> "feature"
-    path == ":orchestration" -> "orchestration"
-    path == ":app" || path == ":desktopApp" -> "app"
-    else -> null
+    allowedTargetTiers = mapOf(
+        "core" to setOf("core"),
+        "feature" to setOf("core"),
+        "orchestration" to setOf("feature", "core"),
+        "app" to setOf("orchestration", "core"),
+    )
+
+    // An `api` edge republishes the target's whole public surface, which is how `:core:designsystem`
+    // became a god-module. Every `api` edge to a module here must be allowlisted below.
+    //
+    // Deliberately not in the set:
+    //  - `:core:domain`: a dependency-free contract module, `api`-exposed freely.
+    //  - `:core:designsystem`: tokens with no project dependency, so an `api` edge republishes a leaf.
+    //  - `:core:network`, `:core:database`: infra whose `api` edges carry the Apollo/Room types that
+    //    cross module boundaries by design.
+    dataAreaModules = setOf(
+        ":core:book",
+        ":core:lists",
+        ":core:deadlines",
+        ":core:personal",
+        ":core:profile",
+        ":core:identity",
+        ":core:preferences",
+        ":core:component",
+        ":core:presentation",
+        ":core:uibinding",
+    )
+
+    allowedApiDataEdges = setOf(
+        ":core:identity" to ":core:preferences",
+        ":core:profile" to ":core:identity",
+        ":feature:book_detail" to ":core:component",
+        ":feature:book_detail" to ":core:identity",
+        ":feature:book_detail" to ":core:personal",
+        ":feature:explore" to ":core:book",
+        ":feature:explore" to ":core:component",
+        ":feature:explore" to ":core:identity",
+        ":feature:explore" to ":core:lists",
+        ":feature:explore" to ":core:preferences",
+        ":feature:lists" to ":core:lists",
+        ":feature:onboarding" to ":core:component",
+        ":feature:reading" to ":core:component",
+        ":feature:settings" to ":core:preferences",
+
+        // `:core:uibinding` maps a domain model onto the UI type that renders it, so a consumer needs
+        // both sides of the mapping.
+        ":core:uibinding" to ":core:component",
+
+        // `ActiveSession` carries a `CoverUiModel` per surface, so a consumer must see that type too.
+        ":core:presentation" to ":core:component",
+
+        // `BookDetailScreen` is constructed by orchestration with a `BookInitialCover`.
+        ":feature:book_detail" to ":core:presentation",
+    )
+
+    // The UI stack layers `:core:component` -> `:core:designsystem` and `:core:uibinding` ->
+    // `:core:component`, never the reverse. The tier rule cannot see this, and a cycle fails Gradle
+    // with an unhelpful message. `designsystem` -> `presentation` is no cycle and is forbidden too.
+    bannedEdges = setOf(
+        ":core:designsystem" to ":core:component",
+        ":core:designsystem" to ":core:uibinding",
+        ":core:designsystem" to ":core:presentation",
+    )
+
+    // `:core:designsystem` is tokens and declares no project dependency. The detekt `ForbiddenImport`
+    // rule in `config/detekt/detekt.yml` is complementary: it catches a stray import that outlives a
+    // dependency removal, which this declared-dependency gate cannot see.
+    // `:core:component` renders from UI models and may reach nothing but the tokens.
+    allowedProjects = mapOf(
+        ":core:designsystem" to emptySet(),
+        ":core:component" to setOf(":core:designsystem"),
+    )
+
+    // DI, navigation and the network client are how a component library stops being renderable in
+    // isolation. The convention-provided `koin-core` is skipped, so declaring it explicitly passes;
+    // the `ForbiddenImport` rule scoped to `:core:component` in `config/detekt/detekt.yml` closes
+    // that gap at the import.
+    bannedExternalGroups = mapOf(
+        ":core:component" to setOf(
+            "io.insert-koin",
+            "cafe.adriel.voyager",
+            "com.apollographql.apollo",
+        ),
+    )
+
+    ignoredExternalCoordinates = setOf(
+        "io.insert-koin:koin-core",
+        "org.jetbrains.kotlinx:kotlinx-coroutines-core",
+    )
 }
 
-// api-visibility rule (MODULE_STRUCTURE_GUIDELINES §10). The tier check above proves an edge is
-// *allowed*; it does not constrain whether the target is re-exported (`api`) or kept private
-// (`implementation`). An `api` edge republishes the target's whole public surface to every downstream
-// consumer — which is exactly how `:core:designsystem` became a god-module. `implementation` is
-// therefore the default for the modules below; every `api(project(<one of these>))` edge must be an
-// explicit, reviewed entry in `allowedApiDataEdges` so a new one is a conscious decision, not a
-// silent leak.
-//
-// The set is **not** just the data-area modules. It started that way, and the component-library
-// migration walked straight into the gap: `:feature:book_detail` declared
-// `api(project(":core:component"))` on a mistaken belief that it re-exported a component type, the
-// two features doing the identical integration used `implementation`, and nothing failed — because
-// `:core:component` was not in this set. The rule's own rationale applies verbatim to a library whose
-// entire surface is components, so it is in the set now.
-//
-// Deliberately NOT in the set, so the omissions are decisions rather than oversights:
-//
-//  - `:core:domain` — a pure contract module with no dependencies of its own. Re-exporting it leaks
-//    nothing a consumer could not already reach, and the migration tracker's § 3a settled that it may
-//    be `api`-exposed freely. Putting it in the set would mean allowlisting ~15 legitimate edges.
-//  - `:core:designsystem` — tokens. It has zero project dependencies, so an
-//    `api` edge to it republishes a leaf. Revisit only if it ever grows a dependency again.
-//  - `:core:network`, `:core:database` — infra, and their `api` edges are load-bearing for the
-//    Apollo/Room types that cross module boundaries by design.
-val apiSignOffModules = setOf(
-    ":core:book",
-    ":core:lists",
-    ":core:deadlines",
-    ":core:personal",
-    ":core:profile",
-    ":core:identity",
-    ":core:preferences",
-
-    // Added by the component-library migration — see the note above.
-    ":core:component",
-    ":core:presentation",
-    ":core:uibinding",
-)
-
-// Allowlisted (source → data module) `api` edges: each genuinely renders/returns the data module's
-// types in its own public surface. Adding a row is the deliberate sign-off the rule exists to force.
-val allowedApiDataEdges = setOf(
-    ":core:identity" to ":core:preferences",
-    ":core:profile" to ":core:identity",
-    ":feature:book_detail" to ":core:component",
-    ":feature:book_detail" to ":core:identity",
-    ":feature:book_detail" to ":core:personal",
-    ":feature:explore" to ":core:book",
-    ":feature:explore" to ":core:component",
-    ":feature:explore" to ":core:identity",
-    ":feature:explore" to ":core:lists",
-    ":feature:explore" to ":core:preferences",
-    ":feature:lists" to ":core:lists",
-    ":feature:onboarding" to ":core:component",
-    ":feature:reading" to ":core:component",
-    ":feature:settings" to ":core:preferences",
-
-    // `:core:uibinding` exists to map a domain model onto the UI type that renders it, so a consumer
-    // needs to see *both sides* of a mapping without re-declaring them — that is the whole point of
-    // the module, decided in the migration tracker's § 3a. `api` is the design, not a leak.
-    ":core:uibinding" to ":core:component",
-
-    // `ActiveSession` — `:core:presentation`'s cross-tier session model, consumed by `:feature:session`
-    // through `ActiveSessionController` — carries a `CoverUiModel` per surface. A consumer that
-    // sees `ActiveSession` must see the type of its own properties, so this is the same "both sides of
-    // a public type" shape as the `:core:uibinding` row above, not a leak of the whole library.
-    ":core:presentation" to ":core:component",
-
-    // `:feature:book_detail` re-exports presentation types through its own public surface (its
-    // `BookDetailScreen` is constructed by orchestration with a `BookInitialCover`), settled in § 5e.
-    // Contrast `:core:component`, which it depends on with `implementation`: nothing public in that
-    // module names a component type, and an `api` edge there republished the whole library by mistake
-    // — the mistake that widened this rule's scope in the first place.
-    ":feature:book_detail" to ":core:presentation",
-)
-
-// Layering direction inside the UI stack (docs/reference/module-structure.md § Build wiring
-// conventions). The tier rule lets any `:core:*` module depend on any other, so it has nothing to say
-// about the one direction that matters here: `:core:component` -> `:core:designsystem`,
-// `:core:uibinding` -> `:core:component`, and **never** the reverse.
-//
-// A reverse edge is a Gradle dependency cycle, so it does fail the build — but with a task-graph
-// error that says nothing about why it is wrong. This exists for the error message. It also catches
-// the non-cyclic case:
-// `:core:designsystem` -> `:core:presentation` is not a cycle, and is still forbidden — the whole
-// point of S3's split was to establish that those two sit side by side rather than stacking.
-val bannedReverseEdges = setOf(
-    ":core:designsystem" to ":core:component",
-    ":core:designsystem" to ":core:uibinding",
-    ":core:designsystem" to ":core:presentation",
-)
-
-// Token-module isolation (docs/reference/module-structure.md § The UI stack — target shape, G2).
-// `:core:designsystem` is tokens — theme, editorial typography, the icon/illustration catalogs, modifiers, shared-element
-// scopes. A token is a value the whole app may read; it has nothing to ask of the app in return, so the
-// module needs no project dependency at all, and the modules listed here must declare none.
-//
-// This is asserted rather than left to hold by accident. It held by accident once before and stopped:
-// the module accumulated an `api` edge per component that wanted a domain type, which is how a token
-// module became the god-module S3 and S4 spent six sub-commits unwinding.
-//
-// Pairs with the detekt `ForbiddenImport` rule scoped to `**/core/designsystem/**` in
-// `config/detekt/detekt.yml`. The two are NOT redundant: fully-qualified `nl.rhaydus.softcover.core.domain.model.*` references were once left in `Color.kt`
-// and `LocalDarkTheme.kt`'s KDoc, and BOTH gates were blind to them — they are neither imports nor
-// declared dependencies. A reviewer caught them. What the import rule does close is the case where a
-// stray `import` outlives a dependency removal, which stays compilable for as long as some other module
-// on the compile classpath still `api`-exposes the type.
-val zeroProjectDependencyModules = setOf(
-    ":core:designsystem",
-)
-
-// Component-library isolation (docs/reference/module-structure.md § The UI stack — target shape, G1).
-// The tier rule above lets any `:core:*` module depend on any other, which is too loose for the component library:
-// `:core:component` renders UI from UI models and must never reach a domain model, a use case, DI, or
-// navigation. That is the property that keeps it a *library* rather than a second god-module — the
-// exact failure `:core:designsystem` already lived through — so it is a build failure, not a
-// convention. A module listed here may depend on the named projects and nothing else.
-val componentLibraryAllowedProjects = mapOf(
-    ":core:component" to setOf(":core:designsystem"),
-)
-
-// External-coordinate ban for the same modules. DI, navigation, and the network client are the three
-// ways a component library stops being renderable in isolation.
-//
-// Note on Koin, and on the limit of this check: `KmpLibraryConventionPlugin` injects
-// `io.insert-koin:koin-core` into EVERY KMP module's commonMain, so a blanket group ban would fail on
-// a dependency the module never declared. The convention-provided coordinates are therefore skipped
-// (the same set dependency-analysis already treats as uniformly provided), and what remains caught
-// here is every Koin artifact a module must opt into to do DI from a composable — `koin-compose`,
-// `koin-android`, `koin-androidx-compose`.
-//
-// That leaves a REAL residual hole this check cannot close: `koin-core` on its own is enough for
-// `KoinComponent` / `GlobalContext.get()` service-locator DI, and because the coordinate is skipped,
-// declaring it explicitly passes. Verified empirically, not assumed. A declared-coordinate gate is
-// structurally blind to this — usage is the thing that matters, not the declaration — so it is closed
-// at the import instead, by the `ForbiddenImport` rule scoped to `:core:component` in
-// `config/detekt/detekt.yml`. The two gates are complementary: this one keeps the dependency graph
-// honest, that one keeps the source honest.
-val componentLibraryBannedGroups = setOf(
-    "io.insert-koin",
-    "cafe.adriel.voyager",
-    "com.apollographql.apollo",
-)
-
-// Injected uniformly by the convention plugins rather than declared per module, so they are not a
-// signal about what a module chose to depend on. Mirrors the dependency-analysis exclude list above.
-val conventionProvidedCoordinates = setOf(
-    "io.insert-koin:koin-core",
-    "org.jetbrains.kotlinx:kotlinx-coroutines-core",
-)
-
-// dependency-analysis (buildHealth) configuration. Gates on the high-value categories — genuinely
-// unused dependencies and wrong api/implementation exposure (MODULE_STRUCTURE_GUIDELINES §10) — while
-// staying out of the way of the convention-plugin design: the uniform runtime + test bundle provided
-// by softcover.kmp.library (coroutines, koin, JUnit5/Kotest/MockK/Turbine) is
-// intentionally declared centrally, not per module, so it is excluded from the "unused" check. The
-// "declare transitive dependencies directly" advice is BOM/convention-managed completeness noise and
-// is treated as informational (ignored), not a gate.
+// Softcover-specific dependency-analysis exclusions, on top of the shared `rhaydus.dependency-analysis`
+// policy.
 dependencyAnalysis {
     issues {
         all {
             onUnusedDependencies {
-                severity("fail")
                 exclude(
-                    // Uniform runtime + test bundle provided by softcover.kmp.library.
-                    "io.insert-koin:koin-android",
-                    "org.jetbrains.kotlinx:kotlinx-coroutines-android",
-                    // Desktop's Main dispatcher — supplied via ServiceLoader (no compile reference), the
-                    // desktop counterpart of coroutines-android; wired into :desktopApp's runtime classpath.
+                    // Desktop's Main dispatcher, supplied via ServiceLoader (no compile reference).
                     "org.jetbrains.kotlinx:kotlinx-coroutines-swing",
-                    "org.junit.jupiter:junit-jupiter-api",
-                    "org.junit.jupiter:junit-jupiter-params",
-                    "io.kotest:kotest-assertions-core",
-                    "io.mockk:mockk",
-                    "app.cash.turbine:turbine",
-                    // The `:smoketest` device stack: the runner and rules are reached by the instrumentation
-                    // harness, not by a compile reference.
+                    // The `:smoketest` device stack: reached by the instrumentation harness, not by a
+                    // compile reference.
                     "androidx.test:runner",
                     "androidx.test:core",
                     "androidx.test.ext:junit",
                     "androidx.test.uiautomator:uiautomator",
                     "junit:junit",
-                    // Provided uniformly by the Compose / Room convention plugins (not per-module deps).
-                    "androidx.activity:activity-compose",
-                    "androidx.compose.ui:ui",
-                    "androidx.compose.ui:ui-tooling-preview",
-                    "androidx.compose.ui:ui-tooling",
+                    // Provided uniformly by the Compose / Room convention plugins.
                     "androidx.compose.material3:material3",
                     "androidx.compose.ui:ui-graphics",
                     // Added to every Compose module by the stability analyzer plugin.
                     "com.github.skydoves:compose-stability-runtime",
-                    // KMP Compose Multiplatform artifacts provided uniformly by KmpComposeConventionPlugin.
-                    "org.jetbrains.compose.runtime:runtime",
-                    "org.jetbrains.compose.foundation:foundation",
-                    "org.jetbrains.compose.animation:animation",
-                    "org.jetbrains.compose.ui:ui",
-                    "org.jetbrains.androidx.navigationevent:navigationevent-compose",
-                    "org.jetbrains.compose.components:components-ui-tooling-preview",
-                    "org.jetbrains.compose.material3:material3",
-                    // Compose Multiplatform auto-injects a `jvmDev` source set (Compose Hot Reload) plus the
-                    // OS-specific desktop runtime for every module that has a `jvm()` target; :desktopApp's
-                    // compose.desktop.currentOs resolves to the same OS-specific coordinate. None are referenced
-                    // in code (the desktop UI types resolve transitively), so DA flags them — exclude every host
-                    // variant centrally, the same way the convention-plugin Compose artifacts above are excluded.
-                    "org.jetbrains.compose.desktop:desktop-jvm-macos-arm64",
-                    "org.jetbrains.compose.desktop:desktop-jvm-macos-x64",
-                    "org.jetbrains.compose.desktop:desktop-jvm-linux-x64",
-                    "org.jetbrains.compose.desktop:desktop-jvm-linux-arm64",
-                    "org.jetbrains.compose.desktop:desktop-jvm-windows-x64",
-                    "org.jetbrains.compose.hot-reload:hot-reload-runtime-api",
-                    // KMP-variant bundle deps from KmpLibraryConventionPlugin's commonMain set — provided
-                    // uniformly, so never a per-module "unused" finding (mirrors the onIncorrectConfiguration list).
-                    "io.insert-koin:koin-core",
-                    "org.jetbrains.kotlinx:kotlinx-coroutines-core",
                     // False positives: genuinely used via mechanisms DA can't see without type resolution.
                     "io.insert-koin:koin-androidx-compose", // koinInject(...)
                     "cafe.adriel.voyager:voyager-koin", // ScreenModel / screenModelScope (ToadScreenModel)
                     "org.jetbrains.kotlinx:kotlinx-serialization-json", // @Serializable / Json
                     "androidx.work:work-runtime-ktx", // CoroutineWorker
-                    "androidx.camera:camera-camera2", // CameraX runtime backend, loaded via ServiceLoader (no compile ref)
-                    "com.google.mlkit:barcode-scanning", // MLKit barcode model + API used by the scanner; DA mis-resolves to a transitive
-                    "com.google.android.material:material", // Material Components Theme.Material3.* XML themes (resource-only, no Kotlin ref)
-                    // The included foundation build has no published root/-android/-jvm split, which DA needs to
-                    // credit platform usage to a commonMain declaration, so every foundation dependency reads as unused.
+                    // CameraX runtime backend, loaded via ServiceLoader (no compile ref).
+                    "androidx.camera:camera-camera2",
+                    // Used by the scanner; DA mis-resolves it to a transitive.
+                    "com.google.mlkit:barcode-scanning",
+                    // Theme.Material3.* XML themes (resource-only, no Kotlin ref).
+                    "com.google.android.material:material",
+                    // The included foundation build has no published root/-android/-jvm split, which DA needs
+                    // to credit platform usage to a commonMain declaration, so every foundation dependency
+                    // reads as unused.
                     "nl.rhaydus:core-common",
                     "nl.rhaydus:core-platform",
                     "nl.rhaydus:offline-sync",
@@ -489,164 +384,10 @@ dependencyAnalysis {
             }
 
             onIncorrectConfiguration {
-                severity("fail")
-                exclude(
-                    // api/impl of convention-plugin-provided deps is managed centrally, not per module.
-                    "androidx.compose.material3:material3",
-                    "androidx.compose.ui:ui",
-                    "androidx.compose.ui:ui-graphics",
-                    // KMP-variant bundle deps from KmpLibraryConventionPlugin's commonMain set — same
-                    // central-provisioning rationale as the Android `-android` variants above.
-                    "io.insert-koin:koin-core",
-                    "org.jetbrains.kotlinx:kotlinx-coroutines-core",
-                    // Intentional public exposure: designsystem returns a Coil ImageRequest (§10).
-                    "io.coil-kt.coil3:coil-compose",
-                )
-            }
-
-            onUsedTransitiveDependencies {
-                severity("ignore")
-            }
-
-            // Compile-vs-runtime classpath splitting is a micro-optimisation entangled with the
-            // convention bundle (it wants coroutines-android demoted to runtimeOnly in every module);
-            // not a correctness/structure concern, so it does not gate.
-            onRuntimeOnly {
-                severity("ignore")
-            }
-
-            onRedundantPlugins {
-                severity("ignore")
+                // Intentional public exposure: designsystem returns a Coil ImageRequest.
+                exclude("io.coil-kt.coil3:coil-compose")
             }
         }
-    }
-}
-
-// Dependency edges are snapshotted as plain data once every project is evaluated, so the task body
-// never touches `Project`/`Configuration` state and stays safe under parallel execution.
-val moduleGraphProjectEdges = mutableListOf<List<String>>()
-val moduleGraphExternalEdges = mutableListOf<List<String>>()
-
-gradle.projectsEvaluated {
-    subprojects.forEach { module ->
-        module.configurations.forEach { configuration ->
-            configuration.dependencies.forEach { dependency ->
-                when (dependency) {
-                    is ProjectDependency ->
-                        moduleGraphProjectEdges += listOf(module.path, dependency.path, configuration.name)
-
-                    is ExternalModuleDependency ->
-                        moduleGraphExternalEdges += listOf(
-                            module.path,
-                            configuration.name,
-                            dependency.group.orEmpty(),
-                            dependency.name,
-                        )
-                }
-            }
-        }
-    }
-}
-
-tasks.register("checkModuleGraph") {
-    group = "verification"
-    description = "Fails on any module dependency that breaks the tier DAG " +
-        "(MODULE_STRUCTURE_GUIDELINES §2), re-exports a data module (§10), or breaches " +
-        "component-library isolation."
-
-    val projectEdges = moduleGraphProjectEdges
-    val externalEdges = moduleGraphExternalEdges
-
-    doLast {
-        val violations = mutableListOf<String>()
-        var edges = 0
-
-        projectEdges.forEach edge@{ (fromPath, toPath, configurationName) ->
-            val fromTier = tierOf(fromPath) ?: return@edge
-            val allowed = allowedTargetTiers.getValue(fromTier)
-
-            if (toPath == fromPath) return@edge
-
-            val targetTier = tierOf(toPath) ?: return@edge
-            edges++
-
-            if (targetTier !in allowed) {
-                violations += "$fromPath → $toPath  " +
-                    "($fromTier may depend only on $allowed)"
-            }
-
-            // api-visibility rule: a declared `api` edge to a data-area module must be
-            // allowlisted in `allowedApiDataEdges`. Match every declarable api bucket — plain `api`
-            // (android-only modules) and the KMP/variant `<sourceSet>Api` configs
-            // (`commonMainApi`, `androidMainApi`, `debugApi`, …) — but never the test ones,
-            // where an api edge can't leak into a production consumer's graph.
-            val isApiEdge = configurationName.endsWith("api", ignoreCase = true) &&
-                configurationName.contains("test", ignoreCase = true).not()
-
-            if (
-                isApiEdge &&
-                toPath in apiSignOffModules &&
-                (fromPath to toPath) !in allowedApiDataEdges
-            ) {
-                violations += "$fromPath → api($toPath)  " +
-                    "(must be implementation-depended unless allowlisted in " +
-                    "allowedApiDataEdges — MODULE_STRUCTURE_GUIDELINES §10)"
-            }
-
-            if (fromPath in zeroProjectDependencyModules) {
-                violations += "$fromPath → $toPath  " +
-                    "(tokens only — this module must declare NO project dependency at " +
-                    "all. See docs/reference/module-structure.md § The UI stack — target shape)"
-            }
-
-            if ((fromPath to toPath) in bannedReverseEdges) {
-                violations += "$fromPath → $toPath  " +
-                    "(wrong direction — the UI stack layers component → designsystem and " +
-                    "uibinding → component; a stayer may never depend on a mover. See " +
-                    "docs/reference/module-structure.md § Build wiring conventions)"
-            }
-
-            // Component-library isolation: an explicit per-module allowlist, tighter than
-            // the tier rule.
-            val allowedProjects = componentLibraryAllowedProjects[fromPath]
-
-            if (allowedProjects != null && toPath !in allowedProjects) {
-                violations += "$fromPath → $toPath  " +
-                    "(component library may depend only on $allowedProjects — " +
-                    "no domain, data, DI or navigation)"
-            }
-        }
-
-        // Deliberately NOT restricted to non-test configurations, unlike the
-        // api-visibility rule. That one skips test configs because a test-only `api`
-        // edge cannot leak into a consumer's graph, which is a statement about leakage. This
-        // one is a statement about the module itself: the component library renders from UI
-        // models and needs no DI, navigation, or network client to be exercised — in tests
-        // least of all. Do not "fix" the asymmetry by adding a test exclusion.
-        externalEdges.forEach external@{ (fromPath, _, group, name) ->
-            if (tierOf(fromPath) == null) return@external
-            if (fromPath !in componentLibraryAllowedProjects) return@external
-
-            val coordinate = "$group:$name"
-
-            if (coordinate in conventionProvidedCoordinates) return@external
-
-            if (group in componentLibraryBannedGroups) {
-                violations += "$fromPath → $coordinate  " +
-                    "(component library may not depend on " +
-                    "$group — DI, navigation and networking are banned)"
-            }
-        }
-
-        if (violations.isNotEmpty()) {
-            throw GradleException(
-                "Illegal module dependencies (see MODULE_STRUCTURE_GUIDELINES §2 tiers / §10 " +
-                    "api-visibility):\n" +
-                    violations.distinct().sorted().joinToString("\n") { "  - $it" },
-            )
-        }
-
-        logger.lifecycle("checkModuleGraph: $edges project dependencies validated, DAG intact.")
     }
 }
 

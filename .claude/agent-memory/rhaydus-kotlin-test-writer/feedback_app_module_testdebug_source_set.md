@@ -5,7 +5,7 @@ metadata:
   type: feedback
 ---
 
-`:app` uses the plain `android.application` + `kotlin.android` plugins, not the `softcover.kmp.library`
+`:app` uses the plain `android.application` + `kotlin.android` plugins, not the `rhaydus.kmp.library`
 convention plugin that wires JUnit5/MockK/Kotest/coroutines-test onto `androidHostTest` for `:core:*` /
 `:feature:*` modules (see [[project_test_conventions]]). The first unit test for anything under
 `app/src/debug/` (e.g. a debug-only TOAD `ScreenModel`) needs, added by hand in `app/build.gradle.kts`:
@@ -15,7 +15,7 @@ convention plugin that wires JUnit5/MockK/Kotest/coroutines-test onto `androidHo
   debug-only production classes are visible with no extra wiring).
 - `testDebugImplementation`/`testDebugRuntimeOnly` for `libs.junit.api`, `libs.junit.params`,
   `libs.junit.engine`, `libs.junit.platform.launcher`, `libs.mockk`, `libs.kotest`, `libs.coroutines.test`
-  — the same aliases `KmpLibraryConventionPlugin` wires for `androidHostTest`.
+  — the same aliases `rhaydus.kmp.library` wires for `androidHostTest`.
 - `tasks.withType<Test> { useJUnitPlatform() }` at the bottom of the file — AGP defaults `Test` tasks to
   JUnit4, so JUnit5 `@Test`/`@Nested` annotations silently no-op (0 tests run, still `BUILD SUCCESSFUL`)
   without this.

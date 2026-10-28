@@ -15,19 +15,20 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** step 3's fourth box (data F55) is done. `PendingWriteStore` gained `abandon(write)`, which
-  the drainer calls (logged, never aborting the pass) only for a write at `DrainPolicy.maxAttempts`:
-  a row already over the cap, or a transient failure that reaches it. `getPending()` lost its
-  `maxAttempts` parameter, so the engine owns the cap and clears rows already stuck on devices.
-  DISCARDED and terminal failures still `delete`, and the replays keep their rejection cleanup
-  unchanged. Softcover's three stores settle side records in `abandon`, then delete the row.
-- **Next:** step 3, fifth box in § 3 below: adopt F18, F20, F21 through
-  `includeBuild("foundation/build-logic")` and delete the Softcover copies.
-- **Open questions:** none. A path-by-path audit against `HEAD` found no change outside the poison cap.
-- **Verification:** foundation `check` green; Softcover `styleCheck`, `testAndroidHostTest`,
-  `checkDocBudgets` green; reviewer findings applied; test audit clean.
-- **Uncommitted:** nothing. Not pushed: foundation `398f68c`, and Softcover's commits since `68dd22e4e`;
-  push the foundation first.
+- **State:** the build-logic adoption is done. `rhaydus.module-graph` gained `allowedProjects`,
+  `bannedEdges`, `bannedExternalGroups`, `ignoredExternalCoordinates` and snapshots edges at configuration
+  time; the new root-applied `rhaydus.dependency-analysis` carries the shared buildHealth policy;
+  `rhaydus.kmp.compose` uses `navigationevent-compose`. Softcover applies both gates, its library modules
+  apply `rhaydus.kmp.library`, and `softcover.kmp.compose` is `rhaydus.kmp.compose` + the stability gate.
+  Injected violations proved module-graph, DA and stability still fail; lint did not (see Next).
+- **Next:** step 3, last box: library modules (`com.android.kotlin.multiplatform.library`) get no
+  main-source lint task, so a warning in `core/book/src/androidMain` passes everything, `:app:lintDebug`
+  with `checkDependencies = true` included. Find how that plugin enables main-source lint, wire it in
+  `rhaydus.kmp.library` and `check`, prove it with an injected `SdCardPath`, fix what it surfaces.
+- **Open questions:** none.
+- **Verification:** Softcover and foundation `check buildHealth` green, foundation build-logic tests green.
+- **Uncommitted:** nothing. Not pushed: foundation since `398f68c`, and Softcover's commits since
+  `68dd22e4e`; push the foundation first.
 
 ## How to run a step
 
@@ -82,7 +83,8 @@ Bugs and gaps in shared code only; new components, design tokens and house-style
 - [x] Contract gaps: F42, F44, F56.
 - [x] Tooling: F33, F37, F54, F60; wire `detektCheck` into the foundation's `check`.
 - [x] Data: F55.
-- [ ] Adopt F18, F20, F21 through `includeBuild("foundation/build-logic")`; delete the Softcover copies.
+- [x] Adopt F18, F20, F21 through `includeBuild("foundation/build-logic")`; delete the Softcover copies.
+- [ ] Lint the main sources of KMP library modules through `rhaydus.kmp.library`, gated by `check`.
 
 ### 4 — Ship
 

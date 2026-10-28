@@ -31,10 +31,6 @@ tasks.test {
 
 gradlePlugin {
     plugins {
-        register("kmpLibrary") {
-            id = "softcover.kmp.library"
-            implementationClass = "KmpLibraryConventionPlugin"
-        }
         register("kmpCompose") {
             id = "softcover.kmp.compose"
             implementationClass = "KmpComposeConventionPlugin"

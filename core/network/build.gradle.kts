@@ -1,7 +1,7 @@
 import java.util.Properties
 
 plugins {
-    id("softcover.kmp.library")
+    id("rhaydus.kmp.library")
     id("softcover.android.apollo")
 }
 

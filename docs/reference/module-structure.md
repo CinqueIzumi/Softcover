@@ -232,9 +232,11 @@ Room DB.
 - **Convention plugins** in `build-logic/` keep module build files uniform. Apply the smallest set:
   - `softcover.android.room` — `:core:database` only.
   - `softcover.android.apollo` — `:core:network` only.
-  - `softcover.kmp.library` / `softcover.kmp.compose` — the base for every `:core:*` / `:feature:*` /
-    `:orchestration` library module (KMP base with SDK/JDK, the shared coroutines/Koin runtime and the
-    JUnit5/Kotest/MockK/Turbine test stack; and Compose UI wiring AndroidX Compose into `androidMain`).
+  - `rhaydus.kmp.library` (foundation) — the base for every `:core:*` / `:feature:*` /
+    `:orchestration` library module: KMP targets, SDK/JDK, the shared coroutines/Koin runtime and the
+    JUnit5/Kotest/MockK/Turbine test stack.
+  - `softcover.kmp.compose` — on top of `rhaydus.kmp.library` for UI modules: the foundation's
+    `rhaydus.kmp.compose` plus the Compose stability gate.
   - `:app` is the lone `com.android.application` and stays Android-only (it owns build-type-conditional
     wiring). Because it is the **only** module with build types — the KMP Android library plugin
     produces a single variant — it is also where **debug-only UI** lives: `src/debug/` holds the
@@ -280,7 +282,7 @@ Room DB.
 - The tier rules and the **api-visibility** rule are **enforced automatically** by the
   `checkModuleGraph` Gradle task (wired into `check`): it derives each module's tier from its path and
   fails the build on any `project(...)` dependency pointing sideways or upward, and on any
-  `api(project(...))` edge into `apiSignOffModules` that is not on the task's explicit allowlist (§10).
+  `api(project(...))` edge into the `dataAreaModules` set that is not on the task's explicit allowlist (§10).
   It also fails on a **wrong-direction** edge inside the UI stack (`core:designsystem` depending on
   `core:{component, uibinding, presentation}`) and on any breach of the component library's own
   dependency ban. Every one of those rules has been verified by deliberately introducing a violation

@@ -15,8 +15,8 @@ paths:
   leave it to the module build file. Gated by `./gradlew checkResourcePackaging` (wired into `check`).
 - Presentation and `:core:component` main sources stay at or under 600 lines. Gated by
   `./gradlew checkPresentationFileSize` (wired into `check`), with no baseline.
-- Apply the smallest set of `softcover.*` convention plugins and do not re-declare what they provide; the
-  roster and the rules are in `docs/reference/module-structure.md` § Build wiring conventions.
+- Apply the smallest set of `rhaydus.*` / `softcover.*` convention plugins and do not re-declare what they
+  provide; the roster and the rules are in `docs/reference/module-structure.md` § Build wiring conventions.
 - `ktlintCheck`, `ktlintFormat` and `checkDocBudgets` are root-only tasks, so `:<module>:ktlintCheck` does not
   exist. Run the bare task, which always scans the whole repo (`-Pktlint.root=<dir>` narrows ktlint).
   `detekt*` and compile tasks are per-module.

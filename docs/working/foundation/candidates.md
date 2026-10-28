@@ -227,59 +227,6 @@ Filed but not yet implemented in the foundation.
   it is the only signal that covers a `customDirectory` module, which has no such directory (Softcover's
   `:feature:settings` is exactly that case). Verified by flipping a real module's flag and watching it fail.
 
----
-
-# Implemented, not adopted
-
-An item is **implemented** once it lands in the foundation. *Implemented, not adopted* means it landed
-in the foundation but Softcover still ships its app-local copy and has **not** switched to the
-foundation symbol — it arrives on the next `rhaydus-adopt` pass.
-
-Only the **build-logic** batch remains. F18, F20 and F21 landed in the foundation's `build-logic` (the
-convention plugins + root); each extracts a reusable gate mechanism from Softcover's inline build config, with
-the concrete app data left configurable. Softcover consumes them through `includeBuild("foundation/build-logic")`.
-
-### F18 — `checkModuleGraph` tier-DAG + api-visibility enforcement
-
-- **Type:** gate (custom Gradle task)
-- **Home:** `build-logic` convention plugins
-- **Status:** **Implemented, not adopted.** Landed as the root-applied `rhaydus.module-graph` convention plugin
-  (`build-logic` `ModuleGraphConventionPlugin` + `ModuleGraphExtension`): the `checkModuleGraph` task derives
-  each module's tier from its path and fails the build on any `project(...)` edge breaking the tier DAG, plus
-  the api-visibility allowlist (an `api` edge to a data-area module must be allowlisted). The mechanism is
-  generic — the concrete `tierOf` mapping, `allowedTargetTiers`, `dataAreaModules`, and `allowedApiDataEdges`
-  are supplied per build via the `moduleGraph { }` extension; the foundation configures its own graph
-  (core→{core}, designsystem→{designsystem, core}, toad→{}, tooling excluded), and it wires into every module's
-  `check` like Softcover's inline version. Verified to fail on an injected illegal edge. Softcover still has
-  the equivalent inline in its root `build.gradle.kts`; adoption applies `rhaydus.module-graph` and moves the
-  Softcover `dataAreaModules` / `allowedApiDataEdges` / tier mapping into the `moduleGraph { }` block.
-
-### F20 — `dependencyAnalysis` (buildHealth) gating policy
-
-- **Type:** gate (policy)
-- **Home:** `build-logic` (root)
-- **Status:** **Implemented, not adopted.** Landed as the root `dependencyAnalysis { }` policy (plugin
-  `com.autonomousapps.dependency-analysis` 3.14.1, applied at root + every subproject): `onUnusedDependencies`
-  and `onIncorrectConfiguration` gate to `fail`; `onUsedTransitiveDependencies` / `onRuntimeOnly` /
-  `onRedundantPlugins` are `ignore`. The exclusion list mirrors the foundation's own convention bundle (the
-  junit/kotest/turbine/mockk test stack, koin + coroutines, the Compose Multiplatform + androidx-compose +
-  desktop-host artifacts, `androidx.core:core-ktx`) plus `eu.anifantakis:ksafe` kept `implementation` (no
-  KSafe type leaks into SecureStorage's public surface). Triaged to a green `buildHealth`; verified to fail
-  when an exclusion is removed. Softcover keeps its own inline `dependencyAnalysis { }` (its exclusions cover
-  its app libraries — voyager-koin, work-runtime-ktx, camera, mlkit, coil); adoption keeps only the
-  app-specific exclusions and inherits the shared policy shape.
-
-### F21 — Shared `lint.xml` + `warningsAsErrors` policy
-
-- **Type:** gate (policy + config)
-- **Home:** `build-logic` convention plugins + the shared `lint.xml`
-- **Status:** **Implemented, not adopted.** The duplicated `lint { warningsAsErrors; abortOnError; lintConfig }`
-  block in the two library convention plugins was consolidated into one `build-logic` helper
-  (`Lint.applyRhaydusLintPolicy(project)`), and the root `lint.xml` gained the version-freshness policy
-  (`NewerVersionAvailable` / `GradleDependency` / `AndroidGradlePluginVersion` = `informational`) so a newer
-  upstream release never breaks a build pinned to the foundation catalog. Softcover already had the freshness
-  policy in its own `lint.xml`; adoption is a no-op on the app side beyond inheriting the shared helper.
-
 ### F50 — Compose stability gate in the convention plugins
 
 - **Type:** gate
