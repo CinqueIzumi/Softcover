@@ -196,9 +196,7 @@ books with more than 200 updates).
 - Callers: through the throwing `fetchAllPagesOrThrow` because their result feeds a prune or replace-all,
   `UserTagsRemoteDataSource.fetchUserVocabulary`,
   `ReadingJournalHistoryRemoteDataSource.getReadingJournalHistory`,
-  `QuoteRemoteDataSource.getQuotes` / `getAllQuotes`. A per-row lazily-cancellable
-  `Flow` (e.g. `streamReadingDaysDescending`) stays a hand-rolled loop — it emits as it goes rather
-  than accumulating into a list, so it can't use this helper.
+  `QuoteRemoteDataSource.getQuotes` / `getAllQuotes`.
 
 ### Unresolvable API enums
 

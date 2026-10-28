@@ -20,8 +20,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseC
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
 import nl.rhaydus.toad.ActionDependencies
 
@@ -41,8 +40,7 @@ internal data class ReadingScreenDependencies(
     val getPausedUserBooksUseCase: GetPausedUserBooksUseCase,
     val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
     val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
-    val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
-    val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
+    val observeReadingActivityUseCase: ObserveReadingActivityUseCase,
     val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     val progressSheetSlice: ProgressSheetSlice,
     val observeReadingJournalHistoryUseCase: ObserveReadingJournalHistoryUseCase,

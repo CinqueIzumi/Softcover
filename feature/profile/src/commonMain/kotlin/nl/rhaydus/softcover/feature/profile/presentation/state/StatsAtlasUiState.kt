@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatTileUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
@@ -28,6 +29,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_K
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_LINE
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.COLLAPSED_GENRE_COUNT
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.FORMAT_SPLIT_TITLE
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.LOADING_TODAY
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.LOADING_YEAR
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.TIME_OF_DAY_FOOTNOTE
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.TIME_OF_DAY_TITLE
@@ -39,6 +42,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiMo
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsEmptyCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.authorsScopeCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.currentStreakTile
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitChart
@@ -56,6 +60,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingTimeOfDay
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingTimeOfDayChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingYearAtAGlanceHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.loadingYearGrid
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.longestStreakTile
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
@@ -145,9 +150,23 @@ internal data class StatsAtlasUiState(
 
     val ratingsEmptyCaption: String = ratingsEmptyCaption(booksRead = 0),
 
-    /** Mapped by `YearGridCollector`, which keys both to the atlas year. */
+    /**
+     * Mapped by `YearGridCollector`, which keys all of them to the atlas year;
+     * [atlasStreaks] feeds the day sheet.
+     */
     val yearAtAGlanceHeader: SectionHeaderUiModel = loadingYearAtAGlanceHeader(),
     val yearGrid: YearGridUiModel = loadingYearGrid(),
+    val currentStreakTile: StatTileUiModel = currentStreakTile(
+        streak = null,
+        today = LOADING_TODAY,
+        isLoading = true,
+    ),
+    val longestStreakTile: StatTileUiModel = longestStreakTile(
+        streak = null,
+        year = LOADING_YEAR,
+        isLoading = true,
+    ),
+    val atlasStreaks: AtlasStreaks = AtlasStreaks(),
     val selectedReadingDay: LocalDate? = null,
 
     /** Mapped by `DayDetailCollector` off [selectedReadingDay]; a row's book rides along as the pending intent. */

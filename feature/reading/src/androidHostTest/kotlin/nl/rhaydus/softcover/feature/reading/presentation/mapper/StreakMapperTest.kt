@@ -1,224 +1,192 @@
 package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
-import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStreak
 import nl.rhaydus.softcover.feature.reading.presentation.state.StreakDayRowUiModel
-import nl.rhaydus.softcover.feature.reading.presentation.state.StreakDayUiModel
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class StreakMapperTest {
-    private fun day(
-        dayOfMonth: Int,
-        didRead: Boolean,
-    ): ReadingDayActivity = ReadingDayActivity(
-        date = LocalDate(
-            2026,
-            5,
-            dayOfMonth,
-        ),
-        didRead = didRead,
+    private val today = LocalDate(
+        2026,
+        5,
+        31,
+    )
+
+    private fun may(dayOfMonth: Int): LocalDate = LocalDate(
+        2026,
+        5,
+        dayOfMonth,
+    )
+
+    private fun streak(
+        from: Int,
+        to: Int = from,
+    ): ReadingStreak = ReadingStreak(
+        start = may(from),
+        end = may(to),
+    )
+
+    private fun activityOf(vararg streaks: ReadingStreak): ReadingActivity = ReadingActivity(
+        pagesByDay = streaks.flatMap { streak ->
+            (streak.start.day..streak.end.day).map { may(it) to 10 }
+        }.toMap(),
+        streaks = streaks.toList(),
     )
 
     @Nested
     inner class StreakStripFor {
         @Test
-        fun `lists days most recent first and marks only the last entry as today`() {
+        fun `lists a 21 day window newest first and marks only the first entry as today`() {
             // ----- Arrange -----
-            val activity = listOf(
-                day(
-                    dayOfMonth = 29,
-                    didRead = true,
-                ),
-                day(
-                    dayOfMonth = 30,
-                    didRead = false,
-                ),
-                day(
-                    dayOfMonth = 31,
-                    didRead = true,
-                ),
+            val activity = activityOf(
+                streak(29),
+                streak(31),
             )
 
             // ----- Act -----
-            val result = streakStripFor(activity = activity)
+            val result = streakStripFor(
+                activity = activity,
+                today = today,
+            )
 
             // ----- Assert -----
-            result.days shouldBe listOf(
-                StreakDayUiModel(
-                    didRead = true,
-                    isToday = true,
-                ),
-                StreakDayUiModel(
-                    didRead = false,
-                    isToday = false,
-                ),
-                StreakDayUiModel(
-                    didRead = true,
-                    isToday = false,
-                ),
+            result.days shouldHaveSize 21
+            result.days.take(3).map { it.didRead } shouldBe listOf(
+                true,
+                false,
+                true,
             )
+            result.days.map { it.isToday } shouldBe List(21) { it == 0 }
+            result.days.drop(3).none { it.didRead } shouldBe true
         }
 
         @Test
-        fun `labels a single running day in the singular`() {
+        fun `reaches back 20 days before today`() {
             // ----- Arrange -----
-            val activity = listOf(
-                day(
-                    dayOfMonth = 30,
-                    didRead = false,
-                ),
-                day(
-                    dayOfMonth = 31,
-                    didRead = true,
-                ),
+            val activity = activityOf(
+                streak(11),
             )
 
             // ----- Act -----
-            val result = streakStripFor(activity = activity)
+            val result = streakStripFor(
+                activity = activity,
+                today = today,
+            )
 
             // ----- Assert -----
-            val running = result.running.shouldNotBeNull()
-            running.value shouldBe 1.0
-            running.suffix shouldBe StatNumberSuffix.Plural(
-                one = " day running",
-                other = " days running",
-            )
+            result.days.last().didRead shouldBe true
+            result.days.dropLast(1).none { it.didRead } shouldBe true
         }
 
         @Test
-        fun `labels several running days in the plural and stops at the first missed day`() {
+        fun `ignores a day older than the window`() {
             // ----- Arrange -----
-            val activity = listOf(
-                day(
-                    dayOfMonth = 28,
-                    didRead = true,
-                ),
-                day(
-                    dayOfMonth = 29,
-                    didRead = false,
-                ),
-                day(
-                    dayOfMonth = 30,
-                    didRead = true,
-                ),
-                day(
-                    dayOfMonth = 31,
-                    didRead = true,
-                ),
+            val activity = activityOf(
+                streak(10),
             )
 
             // ----- Act -----
-            val result = streakStripFor(activity = activity)
+            val result = streakStripFor(
+                activity = activity,
+                today = today,
+            )
 
             // ----- Assert -----
-            result.running.shouldNotBeNull().value shouldBe 2.0
+            result.days.none { it.didRead } shouldBe true
         }
 
         @Test
-        fun `has no running label when today was missed`() {
+        fun `counts the whole current run and stops at the first missed day`() {
             // ----- Arrange -----
-            val activity = listOf(
-                day(
-                    dayOfMonth = 30,
-                    didRead = true,
-                ),
-                day(
-                    dayOfMonth = 31,
-                    didRead = false,
+            val activity = activityOf(
+                streak(27),
+                streak(
+                    29,
+                    31,
                 ),
             )
 
             // ----- Act -----
-            val result = streakStripFor(activity = activity)
+            val result = streakStripFor(
+                activity = activity,
+                today = today,
+            )
+
+            // ----- Assert -----
+            result.running.shouldNotBeNull().value shouldBe 3.0
+        }
+
+        @Test
+        fun `has no running label when the last read day is before yesterday`() {
+            // ----- Arrange -----
+            val activity = activityOf(
+                streak(
+                    27,
+                    28,
+                ),
+            )
+
+            // ----- Act -----
+            val result = streakStripFor(
+                activity = activity,
+                today = today,
+            )
 
             // ----- Assert -----
             result.running.shouldBeNull()
         }
 
         @Test
-        fun `is empty with no running label for no activity`() {
+        fun `is empty with no running label when the activity or today is not known yet`() {
             // ----- Arrange -----
-            val activity = emptyList<ReadingDayActivity>()
+            val activity = activityOf(streak(31))
 
             // ----- Act -----
-            val result = streakStripFor(activity = activity)
-
-            // ----- Assert -----
-            result.days.shouldBeEmpty()
-            result.running.shouldBeNull()
-        }
-
-        @Test
-        fun `passes isLoading through`() {
-            // ----- Arrange -----
-            val activity = emptyList<ReadingDayActivity>()
-
-            // ----- Act -----
-            val loading = streakStripFor(
+            val withoutActivity = streakStripFor(
+                activity = null,
+                today = today,
+            )
+            val withoutToday = streakStripFor(
                 activity = activity,
-                isLoading = true,
+                today = null,
             )
-            val settled = streakStripFor(activity = activity)
 
             // ----- Assert -----
-            loading.isLoading shouldBe true
-            settled.isLoading shouldBe false
-        }
-
-        @Test
-        fun `passes isLoading through to the running figure`() {
-            // ----- Arrange -----
-            val activity = listOf(
-                day(
-                    dayOfMonth = 31,
-                    didRead = true,
-                ),
-            )
-
-            // ----- Act -----
-            val loading = streakStripFor(
-                activity = activity,
-                isLoading = true,
-            )
-            val settled = streakStripFor(activity = activity)
-
-            // ----- Assert -----
-            loading.running.shouldNotBeNull().isLoading shouldBe true
-            settled.running.shouldNotBeNull().isLoading shouldBe false
+            withoutActivity.days.shouldBeEmpty()
+            withoutActivity.running.shouldBeNull()
+            withoutToday.days.shouldBeEmpty()
+            withoutToday.running.shouldBeNull()
         }
     }
 
     @Nested
     inner class StreakSheetFor {
         @Test
-        fun `labels rows Today, Yesterday and a formatted date, most recent first`() {
+        fun `labels rows Today, Yesterday and a formatted date, newest first`() {
             // ----- Arrange -----
-            val activity = listOf(
-                day(
-                    dayOfMonth = 29,
-                    didRead = false,
-                ),
-                day(
-                    dayOfMonth = 30,
-                    didRead = true,
-                ),
-                day(
-                    dayOfMonth = 31,
-                    didRead = true,
+            val activity = activityOf(
+                streak(
+                    30,
+                    31,
                 ),
             )
 
             // ----- Act -----
-            val result = streakSheetFor(activity = activity)
+            val result = streakSheetFor(
+                activity = activity,
+                today = today,
+            )
 
             // ----- Assert -----
-            result.rows shouldBe listOf(
+            result.rows shouldHaveSize 21
+            result.rows.take(3) shouldBe listOf(
                 StreakDayRowUiModel(
                     label = "Today",
                     didRead = true,
@@ -235,15 +203,49 @@ class StreakMapperTest {
         }
 
         @Test
-        fun `has no rows for no activity`() {
+        fun `has no rows while the activity or today is unknown`() {
             // ----- Arrange -----
-            val activity = emptyList<ReadingDayActivity>()
+            val activity = activityOf(
+                streak(31),
+            )
 
             // ----- Act -----
-            val result = streakSheetFor(activity = activity)
+            val withoutActivity = streakSheetFor(
+                activity = null,
+                today = today,
+            )
+            val withoutToday = streakSheetFor(
+                activity = activity,
+                today = null,
+            )
 
             // ----- Assert -----
-            result.rows.shouldBeEmpty()
+            withoutActivity.rows.shouldBeEmpty()
+            withoutToday.rows.shouldBeEmpty()
+        }
+
+        @Test
+        fun `builds the scaffold from the read days in the window`() {
+            // ----- Arrange -----
+            val activity = activityOf(
+                streak(
+                    10,
+                    11,
+                ),
+                streak(
+                    30,
+                    31,
+                ),
+            )
+
+            // ----- Act -----
+            val result = streakSheetFor(
+                activity = activity,
+                today = today,
+            )
+
+            // ----- Assert -----
+            result.scaffold.header.shouldNotBeNull().section.headlineText shouldBe "You read on 3 of the last 21 days"
         }
     }
 }

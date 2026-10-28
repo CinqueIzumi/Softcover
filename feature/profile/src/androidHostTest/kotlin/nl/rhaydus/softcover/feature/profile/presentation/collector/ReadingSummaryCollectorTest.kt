@@ -6,13 +6,16 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.TimeZone
+import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStreak
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
@@ -22,16 +25,21 @@ import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import kotlin.time.Clock
-import kotlin.time.Instant
 
 class ReadingSummaryCollectorTest {
-    private lateinit var observeReadingHistoryUseCase: ObserveReadingHistoryUseCase
-    private lateinit var observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase
+    private lateinit var dependencies: ProfileDependencies
     private lateinit var stateFlow: MutableStateFlow<ProfileUiState>
     private lateinit var scope: ActionScope<ProfileUiState, ProfileEvent, LocalProfileVariables>
-    private lateinit var readingHistoryFlow: MutableStateFlow<ReadingHistory>
+    private lateinit var historyFlow: MutableStateFlow<ReadingHistory>
+    private lateinit var activityFlow: MutableStateFlow<ReadingActivity>
     private lateinit var backfilledFlow: MutableStateFlow<Boolean>
+    private lateinit var dateFlow: MutableStateFlow<LocalDate>
+
+    private val newYearsEve = LocalDate(
+        year = 2024,
+        month = 12,
+        day = 31,
+    )
 
     private val readingHistory = ReadingHistory(
         booksByYear = listOf(
@@ -58,10 +66,15 @@ class ReadingSummaryCollectorTest {
 
     @BeforeEach
     fun setUp() {
-        readingHistoryFlow = MutableStateFlow(ReadingHistory())
+        historyFlow = MutableStateFlow(ReadingHistory())
+        activityFlow = MutableStateFlow(
+            ReadingActivity(
+                pagesByDay = emptyMap(),
+                streaks = emptyList(),
+            ),
+        )
         backfilledFlow = MutableStateFlow(true)
-        observeReadingHistoryUseCase = mockk()
-        observeReadingStatsBackfilledUseCase = mockk()
+        dateFlow = MutableStateFlow(newYearsEve)
         stateFlow = MutableStateFlow(ProfileUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
@@ -69,104 +82,56 @@ class ReadingSummaryCollectorTest {
             eventChannel = Channel(Channel.BUFFERED),
         )
 
+        val observeReadingHistoryUseCase = mockk<ObserveReadingHistoryUseCase>()
+        val observeReadingActivityUseCase = mockk<ObserveReadingActivityUseCase>()
+        val observeReadingStatsBackfilledUseCase = mockk<ObserveReadingStatsBackfilledUseCase>()
+        val observeCurrentDateUseCase = mockk<ObserveCurrentDateUseCase>()
+
         every {
             observeReadingHistoryUseCase()
-        } returns readingHistoryFlow
+        } returns historyFlow
+
+        every {
+            observeReadingActivityUseCase()
+        } returns activityFlow
 
         every {
             observeReadingStatsBackfilledUseCase()
         } returns backfilledFlow
+
+        every {
+            observeCurrentDateUseCase()
+        } returns dateFlow
+
+        dependencies = mockk(relaxed = true)
+
+        every {
+            dependencies.observeReadingHistoryUseCase
+        } returns observeReadingHistoryUseCase
+
+        every {
+            dependencies.observeReadingActivityUseCase
+        } returns observeReadingActivityUseCase
+
+        every {
+            dependencies.observeReadingStatsBackfilledUseCase
+        } returns observeReadingStatsBackfilledUseCase
+
+        every {
+            dependencies.observeCurrentDateUseCase
+        } returns observeCurrentDateUseCase
     }
 
-    private fun stubDependencies(
-        testScope: TestScope,
-        now: Instant,
-        timeZone: TimeZone = TimeZone.UTC,
-    ): ProfileDependencies {
-        val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
-        val fixedClock = object : Clock {
-            override fun now(): Instant = now
-        }
-        return mockk<ProfileDependencies>(relaxed = true).also { mock ->
-            every {
-                mock.observeReadingHistoryUseCase
-            } returns observeReadingHistoryUseCase
-            every {
-                mock.observeReadingStatsBackfilledUseCase
-            } returns observeReadingStatsBackfilledUseCase
-            every {
-                mock.clock
-            } returns fixedClock
-            every {
-                mock.timeZone
-            } returns timeZone
-            every {
-                mock.coroutineScope
-            } returns testScope
-            every {
-                mock.mainDispatcher
-            } returns dispatcher
-        }
-    }
+    private fun activityWithStreak(streak: ReadingStreak): ReadingActivity = ReadingActivity(
+        pagesByDay = emptyMap(),
+        streaks = listOf(streak),
+    )
 
     @Nested
     inner class OnLaunch {
         @Test
-        fun `summarises the year the clock is in on the last second of the old year`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val dependencies = stubDependencies(
-                    this,
-                    now = Instant.parse("2024-12-31T23:59:59Z"),
-                )
-                val collector = ReadingSummaryCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                readingHistoryFlow.value = readingHistory
-
-                // ----- Assert -----
-                stateFlow.value.readingSummary.stats.map { it.stat.value } shouldBe listOf(9.0, 800.0)
-                job.cancel()
-            }
-
-        @Test
-        fun `summarises the new year the clock is in right after New Year`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val dependencies = stubDependencies(
-                    this,
-                    now = Instant.parse("2025-01-01T00:00:00Z"),
-                )
-                val collector = ReadingSummaryCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                readingHistoryFlow.value = readingHistory
-
-                // ----- Assert -----
-                stateFlow.value.readingSummary.stats.map { it.stat.value } shouldBe listOf(4.0, 1_200.0)
-                job.cancel()
-            }
-
-        @Test
-        fun `reads the year in the injected time zone, not in UTC`() = runTest(UnconfinedTestDispatcher()) {
+        fun `summarises the year of the current date on its last day`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val dependencies = stubDependencies(
-                testScope = this,
-                now = Instant.parse("2024-12-31T23:30:00Z"),
-                timeZone = TimeZone.of("Pacific/Auckland"),
-            )
             val collector = ReadingSummaryCollector()
             val job = launch {
                 collector.onLaunch(
@@ -176,10 +141,34 @@ class ReadingSummaryCollectorTest {
             }
 
             // ----- Act -----
-            readingHistoryFlow.value = readingHistory
+            historyFlow.value = readingHistory
 
             // ----- Assert -----
-            stateFlow.value.readingSummary.stats.map { it.stat.value } shouldBe listOf(4.0, 1_200.0)
+            stateFlow.value.readingSummary.stats.map { it.stat.value } shouldBe listOf(9.0, 800.0, 0.0)
+            job.cancel()
+        }
+
+        @Test
+        fun `moves to the new year when the date rolls over`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            historyFlow.value = readingHistory
+            val collector = ReadingSummaryCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            dateFlow.value = LocalDate(
+                year = 2025,
+                month = 1,
+                day = 1,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.readingSummary.stats.map { it.stat.value } shouldBe listOf(4.0, 1_200.0, 0.0)
             job.cancel()
         }
 
@@ -187,9 +176,86 @@ class ReadingSummaryCollectorTest {
         fun `keeps the loading summary while the library is not backfilled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             backfilledFlow.value = false
-            val dependencies = stubDependencies(
-                this,
-                now = Instant.parse("2025-06-01T00:00:00Z"),
+            val collector = ReadingSummaryCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            historyFlow.value = readingHistory
+
+            // ----- Assert -----
+            stateFlow.value.readingSummary.stats.map { it.stat.isLoading } shouldBe listOf(true, true, true)
+            stateFlow.value.readingSummary.recentDays.isLoading shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `lifts the loading summary once the library is backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            backfilledFlow.value = false
+            val collector = ReadingSummaryCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            backfilledFlow.value = true
+
+            // ----- Assert -----
+            stateFlow.value.readingSummary.stats.map { it.stat.isLoading } shouldBe listOf(false, false, false)
+            job.cancel()
+        }
+    }
+
+    @Nested
+    inner class CurrentStreakDays {
+        @Test
+        fun `writes the length of a run ending today`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = ReadingSummaryCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            activityFlow.value = activityWithStreak(
+                ReadingStreak(
+                    start = LocalDate(
+                        year = 2024,
+                        month = 12,
+                        day = 28,
+                    ),
+                    end = newYearsEve,
+                ),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.currentStreakDays shouldBe 4
+            job.cancel()
+        }
+
+        @Test
+        fun `drops to zero when the date moves past the day after the run`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            activityFlow.value = activityWithStreak(
+                ReadingStreak(
+                    start = LocalDate(
+                        year = 2024,
+                        month = 12,
+                        day = 29,
+                    ),
+                    end = newYearsEve,
+                ),
             )
             val collector = ReadingSummaryCollector()
             val job = launch {
@@ -200,10 +266,39 @@ class ReadingSummaryCollectorTest {
             }
 
             // ----- Act -----
-            readingHistoryFlow.value = readingHistory
+            dateFlow.value = LocalDate(
+                year = 2025,
+                month = 1,
+                day = 2,
+            )
 
             // ----- Assert -----
-            stateFlow.value.readingSummary.stats.map { it.stat.isLoading } shouldBe listOf(true, true)
+            stateFlow.value.currentStreakDays shouldBe 0
+            job.cancel()
+        }
+
+        @Test
+        fun `stays zero while the library is not backfilled`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            backfilledFlow.value = false
+            val collector = ReadingSummaryCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            activityFlow.value = activityWithStreak(
+                ReadingStreak(
+                    start = newYearsEve,
+                    end = newYearsEve,
+                ),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.currentStreakDays shouldBe 0
             job.cancel()
         }
     }

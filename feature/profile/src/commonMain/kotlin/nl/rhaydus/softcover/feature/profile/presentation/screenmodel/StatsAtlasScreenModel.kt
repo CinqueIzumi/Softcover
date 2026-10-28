@@ -7,9 +7,9 @@ import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveDailyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
@@ -26,7 +26,7 @@ internal class StatsAtlasScreenModel(
     private val observeReadingStatsUseCase: ObserveReadingStatsUseCase,
     private val observeMonthlyPagesReadUseCase: ObserveMonthlyPagesReadUseCase,
     private val observeHourlyPagesReadUseCase: ObserveHourlyPagesReadUseCase,
-    private val observeDailyPagesReadUseCase: ObserveDailyPagesReadUseCase,
+    private val observeReadingActivityUseCase: ObserveReadingActivityUseCase,
     private val observeReadingDayUseCase: ObserveReadingDayUseCase,
     private val observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
     private val observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase,
@@ -52,7 +52,7 @@ internal class StatsAtlasScreenModel(
         observeReadingStatsUseCase = observeReadingStatsUseCase,
         observeMonthlyPagesReadUseCase = observeMonthlyPagesReadUseCase,
         observeHourlyPagesReadUseCase = observeHourlyPagesReadUseCase,
-        observeDailyPagesReadUseCase = observeDailyPagesReadUseCase,
+        observeReadingActivityUseCase = observeReadingActivityUseCase,
         observeReadingDayUseCase = observeReadingDayUseCase,
         observeReadingHistoryUseCase = observeReadingHistoryUseCase,
         observeReadingStatsBackfilledUseCase = observeReadingStatsBackfilledUseCase,

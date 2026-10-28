@@ -45,11 +45,15 @@ class ReadingLifeShareCardCollectorTest {
 
     private fun openSheet(
         name: String = "Jane Doe",
+        dayStreak: Int = 0,
         progress: ShareCaptureProgress = ShareCaptureProgress.Idle,
         closing: Boolean = false,
     ): SheetSession<ShareCardSheetUiModel, Nothing> {
         val model = profileShareSheetFor(
-            card = buildShareCard(name = name),
+            card = buildShareCard(
+                name = name,
+                dayStreak = dayStreak,
+            ),
             progress = progress,
         )
 

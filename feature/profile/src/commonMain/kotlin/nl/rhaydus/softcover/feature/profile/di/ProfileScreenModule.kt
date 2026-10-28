@@ -43,10 +43,10 @@ val profileScreenModule = module {
             observeUserProfileDataUseCase = get(),
             observeReadingStatsUseCase = get(),
             observeReadingHistoryUseCase = get(),
+            observeReadingActivityUseCase = get(),
+            observeCurrentDateUseCase = get(),
             observeReadingStatsBackfilledUseCase = get(),
-            refreshUserProfileDataUseCase = get(),
-            clock = get(),
-            timeZone = get(),
+            refreshUserProfileStatsUseCase = get(),
         )
     }
 
@@ -63,7 +63,7 @@ val profileScreenModule = module {
             observeReadingStatsUseCase = get(),
             observeMonthlyPagesReadUseCase = get(),
             observeHourlyPagesReadUseCase = get(),
-            observeDailyPagesReadUseCase = get(),
+            observeReadingActivityUseCase = get(),
             observeReadingDayUseCase = get(),
             observeReadingHistoryUseCase = get(),
             observeReadingStatsBackfilledUseCase = get(),

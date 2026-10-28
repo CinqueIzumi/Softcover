@@ -23,10 +23,14 @@ class ReadingLifeShareCardMapperTest {
         val stats: ReadingStats,
         val history: ReadingHistory,
     ) {
-        fun toReadingLifeShareCardUiModel(profile: UserProfileData): ReadingLifeShareCardUiModel =
+        fun toReadingLifeShareCardUiModel(
+            profile: UserProfileData,
+            dayStreak: Int = 0,
+        ): ReadingLifeShareCardUiModel =
             stats.toReadingLifeShareCardUiModel(
                 history = history,
                 profile = profile,
+                dayStreak = dayStreak,
             )
     }
 
@@ -53,13 +57,11 @@ class ReadingLifeShareCardMapperTest {
     private fun profile(
         name: String = "Ada Lovelace",
         imageUrl: String = "https://avatar",
-        streak: Int = 4,
     ): UserProfileData = UserProfileData(
         profileImageUrl = imageUrl,
         name = name,
         username = "ada",
         bio = "",
-        readingStreak = streak,
     )
 
     private fun slice(
@@ -76,16 +78,16 @@ class ReadingLifeShareCardMapperTest {
         @Test
         fun `carries the reader identity from the profile and the totals from the stats`() {
             // ----- Arrange -----
-            val profile = profile(
-                name = "Ada Lovelace",
-                streak = 4,
-            )
+            val profile = profile(name = "Ada Lovelace")
 
             // ----- Act -----
             val result = life(
                 trackedYears = 3,
                 totalPages = 950,
-            ).toReadingLifeShareCardUiModel(profile)
+            ).toReadingLifeShareCardUiModel(
+                profile = profile,
+                dayStreak = 4,
+            )
 
             // ----- Assert -----
             result.readerName shouldBe "Ada Lovelace"

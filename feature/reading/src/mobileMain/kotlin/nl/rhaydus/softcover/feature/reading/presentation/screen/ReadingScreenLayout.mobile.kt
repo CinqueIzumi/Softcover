@@ -37,12 +37,12 @@ import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
-import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.util.TabReselectScrollToTopEffect
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowStreakSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
+import nl.rhaydus.softcover.feature.reading.presentation.component.previewReadingActivity
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakStripFor
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.toPickUpNextCard
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.toTrendingTileUiModel
@@ -371,34 +371,23 @@ private fun ReadingScreenPreview() {
     }
 }
 
-private fun previewReadingActivity(): List<ReadingDayActivity> {
-    val today = currentLocalDate()
-    val firstDay = today.minus(
-        20,
-        DateTimeUnit.DAY,
-    )
-    val litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20)
-
-    return (0..20).map { offset ->
-        ReadingDayActivity(
-            date = firstDay.plus(
-                offset,
-                DateTimeUnit.DAY,
-            ),
-            didRead = offset in litOffsets,
-        )
-    }
-}
-
 @StandardPreview
 @Composable
 private fun ReadingScreenWithStreakStripPreview() {
+    val today = currentLocalDate()
+
     SoftcoverTheme {
         ReadingScreenLayout(
             state = ReadingScreenUiState(
                 books = previewBooks.toImmutableList(),
                 isLoading = false,
-                streakStrip = streakStripFor(activity = previewReadingActivity()),
+                streakStrip = streakStripFor(
+                    activity = previewReadingActivity(
+                        today = today,
+                        litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20),
+                    ),
+                    today = today,
+                ),
             ),
             runAction = {},
             controller = rememberMarkAsReadController(

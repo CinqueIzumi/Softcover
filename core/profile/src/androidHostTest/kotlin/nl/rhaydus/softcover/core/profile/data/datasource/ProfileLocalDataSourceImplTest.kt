@@ -1,12 +1,10 @@
 package nl.rhaydus.softcover.core.profile.data.datasource
 
 import androidx.datastore.core.DataStore
-import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldBe
+import io.kotest.matchers.nulls.shouldBeNull
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.profile.data.datastore.ProfileCacheDataStore
 import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
 import nl.rhaydus.softcover.core.profile.data.model.UserProfileDataEntity
@@ -23,8 +21,6 @@ class ProfileLocalDataSourceImplTest {
         name = "",
         username = "",
         bio = "",
-        readingStreak = 0,
-        recentReadingDays = emptyList(),
     )
 
     @BeforeEach
@@ -49,54 +45,18 @@ class ProfileLocalDataSourceImplTest {
     }
 
     @Nested
-    inner class MarkActiveReadingDate {
-        private val date = LocalDate(
-            2026,
-            6,
-            19,
-        )
-
+    inner class Clear {
         @Test
-        fun `adds new date and keeps list sorted ascending`() = runTest {
+        fun `removes the cached profile`() = runTest {
             // ----- Arrange -----
-            val seed = ProfileCacheEntity(
-                profile = baseProfile.copy(recentReadingDays = listOf("2026-06-17")),
-            )
+            val seed = ProfileCacheEntity(profile = baseProfile)
             val result = stubStore(seed)
 
             // ----- Act -----
-            dataSource.markActiveReadingDate(date)
+            dataSource.clear()
 
             // ----- Assert -----
-            result().profile.shouldNotBeNull().recentReadingDays shouldBe listOf("2026-06-17", "2026-06-19")
-        }
-
-        @Test
-        fun `is a no-op when date is already present`() = runTest {
-            // ----- Arrange -----
-            val seed = ProfileCacheEntity(
-                profile = baseProfile.copy(recentReadingDays = listOf("2026-06-19")),
-            )
-            val result = stubStore(seed)
-
-            // ----- Act -----
-            dataSource.markActiveReadingDate(date)
-
-            // ----- Assert -----
-            result().profile.shouldNotBeNull().recentReadingDays shouldBe listOf("2026-06-19")
-        }
-
-        @Test
-        fun `is a no-op when cached profile is null`() = runTest {
-            // ----- Arrange -----
-            val seed = ProfileCacheEntity(profile = null)
-            val result = stubStore(seed)
-
-            // ----- Act -----
-            dataSource.markActiveReadingDate(date)
-
-            // ----- Assert -----
-            result() shouldBe seed
+            result().profile.shouldBeNull()
         }
     }
 }

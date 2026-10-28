@@ -34,7 +34,6 @@ import nl.rhaydus.softcover.core.presentation.navigation.ExternalNavigationReque
 import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 import nl.rhaydus.softcover.core.presentation.state.SplashState
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
 import nl.rhaydus.softcover.orchestration.presentation.ReAuthLogOut
 import nl.rhaydus.softcover.orchestration.presentation.ReAuthSheetUiModel
@@ -45,7 +44,6 @@ internal class MainActivityViewModel(
     private val getUserIdUseCase: GetUserIdUseCase,
     private val refreshLibraryOnStartUseCase: RefreshLibraryOnStartUseCase,
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
-    private val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
     private val drainPendingListWritesUseCase: DrainPendingListWritesUseCase,
     private val reAuthenticateUseCase: ReAuthenticateUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
@@ -223,13 +221,6 @@ internal class MainActivityViewModel(
 
         backgroundScope.launch {
             drainPendingListWritesUseCase().onApiFailure()
-        }
-
-        // Activity-only: the stats half (fetchAllStatsBooks, ceil(booksRead/100) requests) is
-        // rendered only by the Profile tab, so it refreshes lazily on Profile-tab mount
-        // (UserInformationCollector) instead of paying for it on every cold start.
-        backgroundScope.launch {
-            refreshReadingActivityUseCase().onApiFailure()
         }
     }
 }

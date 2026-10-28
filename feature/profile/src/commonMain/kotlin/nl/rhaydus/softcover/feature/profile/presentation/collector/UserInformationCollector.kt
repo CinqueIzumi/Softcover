@@ -15,7 +15,7 @@ internal class UserInformationCollector : ProfileCollector {
         dependencies: ProfileDependencies,
     ) {
         dependencies.launch {
-            dependencies.refreshUserProfileDataUseCase()
+            dependencies.refreshUserProfileStatsUseCase()
                 .onApiFailure()
         }
 

@@ -6,7 +6,7 @@ import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.component.chart.YearGridCell
 import nl.rhaydus.softcover.core.component.chart.YearGridStep
 import nl.rhaydus.softcover.core.component.chart.YearGridUiModel
-import nl.rhaydus.softcover.core.profile.domain.model.DailyPages
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -21,37 +21,27 @@ class YearGridMapperTest {
         day = day,
     )
 
-    private fun daily(
-        year: Int = 2025,
-        vararg pages: Pair<LocalDate, Int>,
-    ): DailyPages = DailyPages(
-        year = year,
-        pages = pages.toMap(),
+    private fun daily(vararg pages: Pair<LocalDate, Int>): ReadingActivity = ReadingActivity(
+        pagesByDay = pages.toMap(),
+        streaks = emptyList(),
     )
 
     private fun YearGridUiModel.cell(date: LocalDate): YearGridCell = months[date.month.ordinal].days[date.day - 1]
 
     private fun YearGridUiModel.stepOf(date: LocalDate): YearGridStep? = (cell(date) as? YearGridCell.Read)?.step
 
-    private fun dailyOfJanuaryDays(vararg counts: Int): DailyPages = daily(
-        year = 2025,
-        pages = counts.mapIndexed { index, count ->
-            day(
-                month = 1,
-                day = index + 1,
-            ) to count
-        }.toTypedArray(),
-    )
-
     @Nested
     inner class Layout {
         @Test
         fun `holds twelve months of the daily year`() {
             // ----- Arrange -----
-            val daily = daily(year = 2024)
+            val daily = daily()
 
             // ----- Act -----
-            val result = yearGrid(daily)
+            val result = yearGrid(
+                activity = daily,
+                year = 2024,
+            )
 
             // ----- Assert -----
             result.year shouldBe 2024
@@ -61,10 +51,13 @@ class YearGridMapperTest {
         @Test
         fun `gives a leap year a 29 day February`() {
             // ----- Arrange -----
-            val daily = daily(year = 2024)
+            val daily = daily()
 
             // ----- Act -----
-            val result = yearGrid(daily)
+            val result = yearGrid(
+                activity = daily,
+                year = 2024,
+            )
 
             // ----- Assert -----
             result.months[1].days shouldHaveSize 29
@@ -74,10 +67,13 @@ class YearGridMapperTest {
         @Test
         fun `gives a common year a 28 day February`() {
             // ----- Arrange -----
-            val daily = daily(year = 2025)
+            val daily = daily()
 
             // ----- Act -----
-            val result = yearGrid(daily)
+            val result = yearGrid(
+                activity = daily,
+                year = 2025,
+            )
 
             // ----- Assert -----
             result.months[1].days shouldHaveSize 28
@@ -88,7 +84,6 @@ class YearGridMapperTest {
         fun `leaves days without pages empty`() {
             // ----- Arrange -----
             val daily = daily(
-                year = 2025,
                 day(
                     month = 4,
                     day = 14,
@@ -96,7 +91,10 @@ class YearGridMapperTest {
             )
 
             // ----- Act -----
-            val result = yearGrid(daily)
+            val result = yearGrid(
+                activity = daily,
+                year = 2025,
+            )
 
             // ----- Assert -----
             result.cell(
@@ -109,123 +107,75 @@ class YearGridMapperTest {
     }
 
     @Nested
-    inner class Steps {
+    inner class YearFilter {
         @Test
-        fun `splits eight distinct days into quartile steps by nearest rank`() {
+        fun `ignores days outside the year, in both the cells and the quartiles`() {
             // ----- Arrange -----
-            val daily = dailyOfJanuaryDays(
-                10,
-                20,
-                30,
-                40,
-                50,
-                60,
-                70,
-                80,
+            val inYear = daily(
+                day(
+                    month = 1,
+                    day = 1,
+                ) to 10,
+                day(
+                    month = 1,
+                    day = 2,
+                ) to 20,
+                day(
+                    month = 1,
+                    day = 3,
+                ) to 30,
+                day(
+                    month = 1,
+                    day = 4,
+                ) to 40,
+                day(
+                    year = 2024,
+                    month = 1,
+                    day = 5,
+                ) to 5_000,
             )
 
             // ----- Act -----
-            val result = yearGrid(daily)
+            val result = yearGrid(
+                activity = inYear,
+                year = 2025,
+            )
 
             // ----- Assert -----
-            val steps = (1..8).map {
-                result.stepOf(
-                    day(
-                        month = 1,
-                        day = it,
-                    ),
-                )
-            }
-            steps shouldBe listOf(
-                YearGridStep.One,
-                YearGridStep.One,
-                YearGridStep.Two,
-                YearGridStep.Two,
-                YearGridStep.Three,
-                YearGridStep.Three,
-                YearGridStep.Four,
-                YearGridStep.Four,
-            )
+            result.months.sumOf { month -> month.days.count { it is YearGridCell.Read } } shouldBe 4
+            result.stepOf(
+                day(
+                    month = 1,
+                    day = 4,
+                ),
+            ) shouldBe YearGridStep.Four
+            result.stepOf(
+                day(
+                    month = 1,
+                    day = 1,
+                ),
+            ) shouldBe YearGridStep.One
         }
 
         @Test
-        fun `gives equal page counts the same step`() {
+        fun `is empty when every day falls outside the year`() {
             // ----- Arrange -----
-            val daily = dailyOfJanuaryDays(
-                5,
-                5,
-                5,
-                5,
-                9,
-                9,
-                9,
-                9,
+            val outside = daily(
+                day(
+                    year = 2024,
+                    month = 6,
+                    day = 1,
+                ) to 40,
             )
 
             // ----- Act -----
-            val result = yearGrid(daily)
-
-            // ----- Assert -----
-            val steps = (1..8).map {
-                result.stepOf(
-                    day(
-                        month = 1,
-                        day = it,
-                    ),
-                )
-            }
-            steps.take(4).toSet() shouldBe setOf(YearGridStep.One)
-            steps.drop(4).toSet() shouldBe setOf(YearGridStep.Three)
-        }
-
-        @Test
-        fun `tints every read day the darkest step with fewer than four reading days`() {
-            // ----- Arrange -----
-            val daily = dailyOfJanuaryDays(
-                1,
-                50,
-                400,
+            val result = yearGrid(
+                activity = outside,
+                year = 2025,
             )
 
-            // ----- Act -----
-            val result = yearGrid(daily)
-
             // ----- Assert -----
-            val steps = (1..3).map {
-                result.stepOf(
-                    day(
-                        month = 1,
-                        day = it,
-                    ),
-                )
-            }
-            steps shouldBe List(3) { YearGridStep.Four }
-        }
-
-        @Test
-        fun `tints every read day the darkest step when all counts are equal`() {
-            // ----- Arrange -----
-            val daily = dailyOfJanuaryDays(
-                30,
-                30,
-                30,
-                30,
-                30,
-            )
-
-            // ----- Act -----
-            val result = yearGrid(daily)
-
-            // ----- Assert -----
-            val steps = (1..5).map {
-                result.stepOf(
-                    day(
-                        month = 1,
-                        day = it,
-                    ),
-                )
-            }
-            steps shouldBe List(5) { YearGridStep.Four }
+            result.months.sumOf { month -> month.days.count { it is YearGridCell.Read } } shouldBe 0
         }
     }
 
@@ -239,12 +189,14 @@ class YearGridMapperTest {
                 day = 14,
             )
             val daily = daily(
-                year = 2025,
                 date to 62,
             )
 
             // ----- Act -----
-            val result = yearGrid(daily)
+            val result = yearGrid(
+                activity = daily,
+                year = 2025,
+            )
 
             // ----- Assert -----
             (result.cell(date) as YearGridCell.Read).contentDescription shouldBe "14 April, 62 pages"
@@ -258,12 +210,14 @@ class YearGridMapperTest {
                 day = 14,
             )
             val daily = daily(
-                year = 2025,
                 date to 1,
             )
 
             // ----- Act -----
-            val result = yearGrid(daily)
+            val result = yearGrid(
+                activity = daily,
+                year = 2025,
+            )
 
             // ----- Assert -----
             (result.cell(date) as YearGridCell.Read).contentDescription shouldBe "14 April, 1 page"

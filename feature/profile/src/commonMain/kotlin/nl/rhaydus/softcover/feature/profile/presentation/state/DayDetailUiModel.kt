@@ -83,6 +83,7 @@ internal data class DayDetailUiModel(
                     ),
                 ),
                 currentYear = previewDate.year,
+                streaks = AtlasStreaks(),
             ),
             "Finished remainder, missing book" to dayDetailUiModel(
                 day = ReadingDay(
@@ -123,6 +124,7 @@ internal data class DayDetailUiModel(
                     ),
                 ),
                 currentYear = previewDate.year + 1,
+                streaks = AtlasStreaks(),
             ),
         )
 

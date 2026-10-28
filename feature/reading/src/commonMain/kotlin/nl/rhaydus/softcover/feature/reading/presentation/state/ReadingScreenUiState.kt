@@ -89,10 +89,14 @@ internal data class ReadingScreenUiState(
     val streakEnabled: Boolean = true,
 
     val streakStrip: StreakStripUiModel = streakStripFor(
-        activity = emptyList(),
+        activity = null,
+        today = null,
         isLoading = true,
     ),
-    val streakSheet: StreakSheetUiModel = streakSheetFor(activity = emptyList()),
+    val streakSheet: StreakSheetUiModel = streakSheetFor(
+        activity = null,
+        today = null,
+    ),
     val showStreakSheet: Boolean = false,
 
     /** The featured book's pace line, mapped by `ReadingPaceForecastCollector`; null while no forecast exists. */

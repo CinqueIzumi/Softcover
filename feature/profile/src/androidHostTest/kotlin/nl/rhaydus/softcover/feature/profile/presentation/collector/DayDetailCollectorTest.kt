@@ -17,12 +17,15 @@ import nl.rhaydus.softcover.core.component.sheet.SheetSession
 import nl.rhaydus.softcover.core.component.sheet.isClosing
 import nl.rhaydus.softcover.core.component.sheet.modelOrNull
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDay
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayBook
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStreak
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.dayDetailUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
+import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasStreaks
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.ActionScope
@@ -127,6 +130,7 @@ class DayDetailCollectorTest {
                 day = reading,
                 books = emptyList(),
                 currentYear = 2026,
+                streaks = AtlasStreaks(),
             )
             stateFlow.value.dayDetailSheet.modelOrNull shouldBe expected
             job.cancel()
@@ -157,8 +161,56 @@ class DayDetailCollectorTest {
                 day = readingDay(pages = 45),
                 books = emptyList(),
                 currentYear = 2026,
+                streaks = AtlasStreaks(),
             )
             stateFlow.value.dayDetailSheet.modelOrNull shouldBe expected
+            job.cancel()
+        }
+
+        @Test
+        fun `refreshes the open sheet when the streaks change`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val run = ReadingStreak(
+                start = LocalDate(
+                    year = 2026,
+                    month = 4,
+                    day = 13,
+                ),
+                end = LocalDate(
+                    year = 2026,
+                    month = 4,
+                    day = 15,
+                ),
+            )
+
+            every {
+                observeReadingDayUseCase(day)
+            } returns flowOf(readingDay(pages = 30))
+
+            stateFlow.value = StatsAtlasUiState(selectedReadingDay = day)
+            val job = launch {
+                DayDetailCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                atlasStreaks = AtlasStreaks(
+                    activity = ReadingActivity(
+                        pagesByDay = emptyMap(),
+                        streaks = listOf(run),
+                    ),
+                ),
+            )
+
+            // ----- Assert -----
+            val description = stateFlow.value.dayDetailSheet.modelOrNull
+                .shouldNotBeNull()
+                .scaffold.header.shouldNotBeNull().section.description
+                ?.joinToString(separator = "") { it.text }
+            description shouldBe "Day 2 of a 3-day streak."
             job.cancel()
         }
 

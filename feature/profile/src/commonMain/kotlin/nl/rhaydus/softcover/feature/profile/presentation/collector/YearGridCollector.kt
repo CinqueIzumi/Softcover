@@ -6,16 +6,20 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasYear
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.currentStreakTile
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.longestStreakTile
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearGrid
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
+import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasStreaks
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasLocalVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 import nl.rhaydus.toad.ActionScope
 
 /**
- * The only writer of everything keyed by the atlas year: the chapter header and the day grid. Only a change
- * of year re-observes the days, so a scope change within the same year leaves the grid alone.
+ * The only writer of everything keyed by the atlas year: the chapter header, the day grid, the streak tiles and
+ * the streaks the day sheet reads. Only a change of year re-keys the grid, so a scope change within the same
+ * year leaves the grid alone.
  */
 internal class YearGridCollector : StatsAtlasCollector {
     override suspend fun onLaunch(
@@ -29,17 +33,42 @@ internal class YearGridCollector : StatsAtlasCollector {
             atlasYear(
                 scope = selectedScope,
                 today = today,
-            )
+            ) to today
         }
             .distinctUntilChanged()
-            .flatMapLatest { year ->
-                dependencies.observeDailyPagesReadUseCase(year)
+            .flatMapLatest { (year, today) ->
+                dependencies.observeReadingActivityUseCase().map { activity ->
+                    Triple(
+                        year,
+                        today,
+                        activity,
+                    )
+                }
             }
-            .collect { daily ->
+            .collect { (year, today, activity) ->
+                val longest = activity.longestStreakIn(year)
+                val current = activity.currentStreak(today)
+
                 scope.setState {
                     it.copy(
-                        yearGrid = yearGrid(daily),
-                        yearAtAGlanceHeader = yearAtAGlanceHeader(year = daily.year),
+                        yearGrid = yearGrid(
+                            activity = activity,
+                            year = year,
+                        ),
+                        yearAtAGlanceHeader = yearAtAGlanceHeader(year = year),
+                        currentStreakTile = currentStreakTile(
+                            streak = current,
+                            today = today,
+                        ),
+                        longestStreakTile = longestStreakTile(
+                            streak = longest,
+                            year = year,
+                        ),
+                        atlasStreaks = AtlasStreaks(
+                            activity = activity,
+                            longestInAtlasYear = longest,
+                            current = current,
+                        ),
                     )
                 }
             }

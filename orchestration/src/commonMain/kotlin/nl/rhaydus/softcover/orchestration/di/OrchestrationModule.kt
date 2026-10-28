@@ -116,7 +116,6 @@ internal val orchestrationModule = module {
             getUserIdUseCase = get(),
             refreshLibraryOnStartUseCase = get(),
             getThemeConfigurationUseCase = get(),
-            refreshReadingActivityUseCase = get(),
             drainPendingListWritesUseCase = get(),
             reAuthenticateUseCase = get(),
             resetUserDataUseCase = get(),
@@ -147,7 +146,7 @@ internal val orchestrationModule = module {
             settingsRepository = get(),
             resetUserDataUseCase = get(),
             refreshLibraryUseCase = get(),
-            refreshUserProfileDataUseCase = get(),
+            refreshUserProfileStatsUseCase = get(),
         )
     }
 

@@ -64,10 +64,19 @@ internal class DayDetailCollector : StatsAtlasCollector {
     ): Flow<DayDetailUiModel> = combine(
         dependencies.observeReadingDayUseCase(day),
         dependencies.observeCurrentDateUseCase(),
-    ) { readingDay, today -> readingDay to today.year }
-        .transformLatest { (readingDay, currentYear) ->
+        scope.state.map { it.atlasStreaks }.distinctUntilChanged(),
+    ) { readingDay, today, streaks ->
+        Triple(
+            readingDay,
+            today.year,
+            streaks,
+        )
+    }
+        .transformLatest { (readingDay, currentYear, streaks) ->
             if (readingDay.books.sumOf { it.pages } == 0) {
-                scope.setState { it.copy(selectedReadingDay = null) }
+                scope.setState {
+                    it.copy(selectedReadingDay = null)
+                }
 
                 return@transformLatest
             }
@@ -78,6 +87,7 @@ internal class DayDetailCollector : StatsAtlasCollector {
                         day = readingDay,
                         books = books,
                         currentYear = currentYear,
+                        streaks = streaks,
                     )
                 },
             )

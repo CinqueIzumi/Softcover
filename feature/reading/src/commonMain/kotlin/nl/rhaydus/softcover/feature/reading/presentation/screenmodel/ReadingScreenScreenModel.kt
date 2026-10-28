@@ -20,8 +20,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseC
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.progresssheet.presentation.ProgressSheetSlice
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingCollector
@@ -46,8 +45,7 @@ internal class ReadingScreenScreenModel(
     private val getPausedUserBooksUseCase: GetPausedUserBooksUseCase,
     private val observeTrendingBooksUseCase: ObserveTrendingBooksUseCase,
     private val refreshTrendingBooksUseCase: RefreshTrendingBooksUseCase,
-    private val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
-    private val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
+    private val observeReadingActivityUseCase: ObserveReadingActivityUseCase,
     private val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     private val progressSheetSlice: ProgressSheetSlice,
     private val observeReadingJournalHistoryUseCase: ObserveReadingJournalHistoryUseCase,
@@ -77,8 +75,7 @@ internal class ReadingScreenScreenModel(
         getPausedUserBooksUseCase = getPausedUserBooksUseCase,
         observeTrendingBooksUseCase = observeTrendingBooksUseCase,
         refreshTrendingBooksUseCase = refreshTrendingBooksUseCase,
-        observeRecentReadingActivityUseCase = observeRecentReadingActivityUseCase,
-        refreshReadingActivityUseCase = refreshReadingActivityUseCase,
+        observeReadingActivityUseCase = observeReadingActivityUseCase,
         getReadingStreakEnabledAsFlowUseCase = getReadingStreakEnabledAsFlowUseCase,
         progressSheetSlice = progressSheetSlice,
         observeReadingJournalHistoryUseCase = observeReadingJournalHistoryUseCase,

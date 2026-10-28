@@ -2,11 +2,13 @@ package nl.rhaydus.softcover.feature.profile.presentation.screen
 
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.StatsScope
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStreak
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ALL_TIME_SCOPE_KEY
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.COLLAPSED_GENRE_COUNT
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.currentStreakTile
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.formatSplitChart
@@ -19,6 +21,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiMo
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasFormatSplit
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTimeOfDayPages
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.hasTopAuthors
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.longestStreakTile
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
@@ -28,9 +31,9 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearGrid
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileDailyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileHourlyPagesPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileMonthlyPagesPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingActivityPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingHistoryPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingStatsPreview
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
@@ -51,7 +54,6 @@ private val PreviewProfileData = UserProfileData(
     name = "Elena Marchetti",
     username = "elenam",
     bio = "Mostly literary fiction, the occasional doorstop fantasy.",
-    readingStreak = 31,
 )
 
 internal val StatsAtlasPreviewState = StatsAtlasUiState(
@@ -65,7 +67,40 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
         selectedKey = ALL_TIME_SCOPE_KEY,
     ),
     yearAtAGlanceHeader = yearAtAGlanceHeader(year = PreviewToday.year),
-    yearGrid = yearGrid(profileDailyPagesPreview()),
+    yearGrid = yearGrid(
+        activity = profileReadingActivityPreview(),
+        year = 2025,
+    ),
+    currentStreakTile = currentStreakTile(
+        streak = ReadingStreak(
+            start = LocalDate(
+                2026,
+                3,
+                10,
+            ),
+            end = LocalDate(
+                2026,
+                3,
+                13,
+            ),
+        ),
+        today = PreviewToday,
+    ),
+    longestStreakTile = longestStreakTile(
+        streak = ReadingStreak(
+            start = LocalDate(
+                2025,
+                3,
+                10,
+            ),
+            end = LocalDate(
+                2025,
+                4,
+                25,
+            ),
+        ),
+        year = 2025,
+    ),
     timeOfDayCaption = timeOfDayCaption(
         hourly = PreviewHourlyPages,
         scope = StatsScope.AllTime,

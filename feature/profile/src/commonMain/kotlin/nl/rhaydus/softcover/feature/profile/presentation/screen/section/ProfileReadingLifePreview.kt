@@ -8,7 +8,6 @@ import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
-import nl.rhaydus.softcover.core.profile.domain.model.DailyPages
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.FormatSplit
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
@@ -19,6 +18,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.RecentlyLovedBook
@@ -120,9 +120,8 @@ internal fun profileHourlyPagesPreview(): HourlyPages = HourlyPages(
 )
 
 /** The pages-read-per-day half of the same sample reader: a handful of days a week through the first ten months. */
-internal fun profileDailyPagesPreview(): DailyPages = DailyPages(
-    year = 2025,
-    pages = (0 until 300)
+internal fun profileReadingActivityPreview(): ReadingActivity = ReadingActivity(
+    pagesByDay = (0 until 300)
         .filter { it % 7 != 0 && it % 5 != 0 }
         .associate { dayOfYear ->
             LocalDate(
@@ -134,6 +133,7 @@ internal fun profileDailyPagesPreview(): DailyPages = DailyPages(
                 unit = DateTimeUnit.DAY,
             ) to 12 + (dayOfYear * 37) % 140
         },
+    streaks = emptyList(),
 )
 
 /** The [ReadingHistory] half of the same sample reader. */

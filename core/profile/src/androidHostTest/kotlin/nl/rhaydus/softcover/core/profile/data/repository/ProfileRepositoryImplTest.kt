@@ -12,19 +12,16 @@ import org.junit.jupiter.api.Test
 
 class ProfileRepositoryImplTest {
     private lateinit var profileLocalDataSource: ProfileLocalDataSource
-    private lateinit var activityRefreshGate: ProfileRefreshGate
     private lateinit var statsRefreshGate: ProfileRefreshGate
     private lateinit var repository: ProfileRepositoryImpl
 
     @BeforeEach
     fun setUp() {
         profileLocalDataSource = mockk(relaxed = true)
-        activityRefreshGate = mockk(relaxed = true)
         statsRefreshGate = mockk(relaxed = true)
         repository = ProfileRepositoryImpl(
             profileRemoteDataSource = mockk<ProfileRemoteDataSource>(),
             profileLocalDataSource = profileLocalDataSource,
-            activityRefreshGate = activityRefreshGate,
             statsRefreshGate = statsRefreshGate,
         )
     }
@@ -32,16 +29,15 @@ class ProfileRepositoryImplTest {
     @Nested
     inner class ClearProfileCache {
         @Test
-        fun `clears the cache and resets both refresh gates so the next session can refetch`() = runTest {
+        fun `clears the cache and resets the stats refresh gate so the next session can refetch`() = runTest {
             // ----- Arrange -----
-            // (local data source and refresh gates are relaxed)
+            // (local data source and refresh gate are relaxed)
 
             // ----- Act -----
             repository.clearProfileCache()
 
             // ----- Assert -----
             coVerify(exactly = 1) { profileLocalDataSource.clear() }
-            coVerify(exactly = 1) { activityRefreshGate.reset() }
             coVerify(exactly = 1) { statsRefreshGate.reset() }
         }
     }

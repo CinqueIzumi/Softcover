@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.profile.data.model
 
-import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 
@@ -10,8 +9,6 @@ internal data class UserProfileDataEntity(
     val name: String,
     val username: String = "",
     val bio: String,
-    val readingStreak: Int,
-    val recentReadingDays: List<String> = emptyList(),
 )
 
 internal fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
@@ -19,10 +16,6 @@ internal fun UserProfileDataEntity.toModel(): UserProfileData = UserProfileData(
     name = name,
     username = username,
     bio = bio,
-    readingStreak = readingStreak,
-    recentReadingDays = recentReadingDays
-        .mapNotNull { runCatching { LocalDate.parse(it) }.getOrNull() }
-        .toSet(),
 )
 
 internal fun UserProfileData.toEntity(): UserProfileDataEntity = UserProfileDataEntity(
@@ -30,8 +23,4 @@ internal fun UserProfileData.toEntity(): UserProfileDataEntity = UserProfileData
     name = name,
     username = username,
     bio = bio,
-    readingStreak = readingStreak,
-    recentReadingDays = recentReadingDays
-        .sorted()
-        .map { it.toString() },
 )

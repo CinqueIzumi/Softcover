@@ -63,6 +63,8 @@ internal fun ColumnScope.StatsAtlasBody(
             caption = state.timeOfDayCaption,
             chart = state.timeOfDayChart,
             yearGrid = state.yearGrid,
+            currentStreakTile = state.currentStreakTile,
+            longestStreakTile = state.longestStreakTile,
             onDayTapped = { date ->
                 runAction(OnReadingDayTappedAction(date = date))
             },

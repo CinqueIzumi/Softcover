@@ -34,6 +34,7 @@ internal class ReadingLifeShareCardCollector : ProfileCollector {
                         readingStats.toReadingLifeShareCardUiModel(
                             history = readingHistory,
                             profile = profile,
+                            dayStreak = state.currentStreakDays,
                         )
                     } else {
                         null

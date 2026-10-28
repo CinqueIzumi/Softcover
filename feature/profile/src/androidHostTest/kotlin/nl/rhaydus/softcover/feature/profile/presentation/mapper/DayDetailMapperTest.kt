@@ -14,8 +14,11 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDay
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayBook
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStreak
+import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasStreaks
 import nl.rhaydus.softcover.feature.profile.presentation.state.DayDetailUiModel
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -84,6 +87,7 @@ class DayDetailMapperTest {
             day = day,
             books = libraryOf(book.bookId),
             currentYear = 2026,
+            streaks = AtlasStreaks(),
         )
 
         return model.captionAt(0)
@@ -134,6 +138,52 @@ class DayDetailMapperTest {
 
     private fun BookCardUiModel.bookId(): Int = key.shouldBeInstanceOf<BookCardKey.Book>().bookId
 
+    private fun streakDescriptionOn(
+        day: LocalDate,
+        streaks: AtlasStreaks,
+    ): String? {
+        val reading = ReadingDay(
+            date = day,
+            books = singlePageDay,
+        )
+
+        return dayDetailUiModel(
+            day = reading,
+            books = libraryOf(1),
+            currentYear = 2026,
+            streaks = streaks,
+        ).scaffold.header.shouldNotBeNull().section.description?.joinToString(separator = "") { it.text }
+    }
+
+    private fun run(
+        startDay: Int,
+        endDay: Int,
+    ): ReadingStreak = ReadingStreak(
+        start = LocalDate(
+            year = 2026,
+            month = 4,
+            day = startDay,
+        ),
+        end = LocalDate(
+            year = 2026,
+            month = 4,
+            day = endDay,
+        ),
+    )
+
+    private fun streaksOf(
+        vararg runs: ReadingStreak,
+        longest: ReadingStreak? = null,
+        current: ReadingStreak? = null,
+    ): AtlasStreaks = AtlasStreaks(
+        activity = ReadingActivity(
+            pagesByDay = emptyMap(),
+            streaks = runs.toList(),
+        ),
+        longestInAtlasYear = longest,
+        current = current,
+    )
+
     @Nested
     inner class Eyebrow {
         @Test
@@ -158,6 +208,193 @@ class DayDetailMapperTest {
 
             // ----- Assert -----
             eyebrow shouldBe "Tuesday 14 April 2026"
+        }
+    }
+
+    @Nested
+    inner class StreakDescription {
+        @Test
+        fun `names the position in the longest streak of the atlas year`() {
+            // ----- Arrange -----
+            val longest = run(
+                startDay = 10,
+                endDay = 20,
+            )
+            val streaks = streaksOf(
+                longest,
+                longest = longest,
+            )
+
+            // ----- Act -----
+            val result = streakDescriptionOn(
+                day = LocalDate(
+                    year = 2026,
+                    month = 4,
+                    day = 14,
+                ),
+                streaks = streaks,
+            )
+
+            // ----- Assert -----
+            result shouldBe "Day 5 of your longest streak."
+        }
+
+        @Test
+        fun `names the position in the current streak when it is not the longest`() {
+            // ----- Arrange -----
+            val current = run(
+                startDay = 12,
+                endDay = 15,
+            )
+            val streaks = streaksOf(
+                current,
+                current = current,
+            )
+
+            // ----- Act -----
+            val result = streakDescriptionOn(
+                day = LocalDate(
+                    year = 2026,
+                    month = 4,
+                    day = 14,
+                ),
+                streaks = streaks,
+            )
+
+            // ----- Assert -----
+            result shouldBe "Day 3 of your current streak."
+        }
+
+        @Test
+        fun `prefers longest when the run is both the longest and the current`() {
+            // ----- Arrange -----
+            val both = run(
+                startDay = 14,
+                endDay = 18,
+            )
+            val streaks = streaksOf(
+                both,
+                longest = both,
+                current = both,
+            )
+
+            // ----- Act -----
+            val result = streakDescriptionOn(
+                day = LocalDate(
+                    year = 2026,
+                    month = 4,
+                    day = 14,
+                ),
+                streaks = streaks,
+            )
+
+            // ----- Assert -----
+            result shouldBe "Day 1 of your longest streak."
+        }
+
+        @Test
+        fun `gives the length of any other streak of two days or more`() {
+            // ----- Arrange -----
+            val other = run(
+                startDay = 13,
+                endDay = 16,
+            )
+            val streaks = streaksOf(other)
+
+            // ----- Act -----
+            val result = streakDescriptionOn(
+                day = LocalDate(
+                    year = 2026,
+                    month = 4,
+                    day = 16,
+                ),
+                streaks = streaks,
+            )
+
+            // ----- Assert -----
+            result shouldBe "Day 4 of a 4-day streak."
+        }
+
+        @Test
+        fun `says nothing for a one-day run`() {
+            // ----- Arrange -----
+            val single = run(
+                startDay = 14,
+                endDay = 14,
+            )
+            val streaks = streaksOf(single)
+
+            // ----- Act -----
+            val result = streakDescriptionOn(
+                day = LocalDate(
+                    year = 2026,
+                    month = 4,
+                    day = 14,
+                ),
+                streaks = streaks,
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `says nothing for a one-day run that is the longest of the year`() {
+            // ----- Arrange -----
+            val single = run(
+                startDay = 14,
+                endDay = 14,
+            )
+            val streaks = streaksOf(
+                single,
+                longest = single,
+            )
+
+            // ----- Act -----
+            val result = streakDescriptionOn(
+                day = date,
+                streaks = streaks,
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `says nothing for a one-day run that is the current streak`() {
+            // ----- Arrange -----
+            val single = run(
+                startDay = 14,
+                endDay = 14,
+            )
+            val streaks = streaksOf(
+                single,
+                current = single,
+            )
+
+            // ----- Act -----
+            val result = streakDescriptionOn(
+                day = date,
+                streaks = streaks,
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `says nothing when the day belongs to no run`() {
+            // ----- Arrange -----
+            val streaks = AtlasStreaks()
+
+            // ----- Act -----
+            val result = streakDescriptionOn(
+                day = date,
+                streaks = streaks,
+            )
+
+            // ----- Assert -----
+            result.shouldBeNull()
         }
     }
 
@@ -188,6 +425,7 @@ class DayDetailMapperTest {
                 day = day,
                 books = libraryOf(1),
                 currentYear = 2026,
+                streaks = AtlasStreaks(),
             )
 
             // ----- Assert -----
@@ -364,6 +602,7 @@ class DayDetailMapperTest {
                     3,
                 ),
                 currentYear = 2026,
+                streaks = AtlasStreaks(),
             )
 
             // ----- Assert -----

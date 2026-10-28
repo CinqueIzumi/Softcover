@@ -23,11 +23,15 @@ internal data class ProfileUiState(
     val shareCapture: ShareCaptureState = ShareCaptureState(),
     val isLoading: Boolean = true,
 
-    /** Mapped by `ReadingSummaryCollector` off [readingHistory] and the current year. */
+    /** Mapped by `ReadingSummaryCollector` off the reading history, the reading activity and today's date. */
     val readingSummary: ReadingSummaryUiModel = readingSummaryUiModel(
         history = null,
-        currentYear = 0,
+        activity = null,
+        today = null,
     ),
+
+    /** The current streak from `ReadingActivity`, written by `ReadingSummaryCollector`; 0 until it loads. */
+    val currentStreakDays: Int = 0,
 
     val theReaderHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Reader"),
     val logOutSheet: SheetSession<SheetScaffoldUiModel, LogOut> = SheetSession.Closed,

@@ -2,9 +2,11 @@
 
 ### Profile screen
 
-- Top to bottom: the reader header; the "Your reading" summary card (books and pages this year over an
-  "Open your Reading Atlas" link; the whole card opens the Stats Atlas); the share entry row card; the
-  account foot (tonal Log out over a "— · —" colophon). Profile holds no charts.
+- Top to bottom: the reader header; the "Your reading" summary card (books, pages and reading days this
+  year, then "The last 12 weeks. You read on N of 84 days." over a `RecentDaysGrid`, both centred, the grid
+  tinted like the year grid and not tappable, then an "Open your Reading Atlas" link; the whole card opens the
+  Stats Atlas); the share entry row card; the account foot (tonal Log out over a "— · —" colophon). Profile
+  holds no charts beyond the 12-week grid.
 
 ### Stats Atlas
 
@@ -19,7 +21,8 @@
   leaves the row falls back to All time.
 - Beneath the row, a quiet italic line names the dates: "Showing 2026", "Showing 24 September to today"
   (the year is added only when the window starts in an earlier one), "Showing every year".
-- The scope moves the opening tiles, the time-of-day chart, the pages-by-month chart, the authors list, the format split, the genre
+- The scope moves the opening tiles, the time-of-day chart, the pages-by-month chart, the authors list, the format
+  split, the genre
   ranking, "Who you read" (Hide untagged authors still applies) and "How you score". "Recently loved" and
   the year chart ignore it. Values animate between scopes; labels cross-fade, and reduced motion swaps them in place.
 - A scope with no finished books says so in each section's framing sentence ("No finished books in the last
@@ -42,11 +45,14 @@
   `YearGrid` of the atlas year: twelve month rows, one square per day, tinted in four steps by quartiles of
   that year's reading days (days with equal pages share a step; with fewer than four reading days, or all
   equal, every read day is the darkest), with a "Fewer pages" to "More" key and future days left empty. It
-  fades only when the year changes; the scope otherwise does not move it. A read day is tappable and reads
+  fades only when the year changes; the scope otherwise does not move it. Under it, "Current streak" (counted
+  back from today, surviving until midnight) and "Longest streak" (the grid year's; a run across 1 January
+  counts whole) tiles. A reading day everywhere has pages in the on-device history. A read day is tappable and reads
   out like "14 April, 62 pages". Tapping one opens a day-detail sheet with no haptic: the eyebrow is the date
   ("Tuesday 14 April", with the year only when it is not the current one) and the headline the total ("62
-  pages across 2 books"). Each book is a compact row (cover, title, a neutral badge with its pages that day)
-  captioned with its pages and that book's update times as 24-hour clock times: "Pages 175 to 388 · 1 update
+  pages across 2 books"), under a line "Day N of your longest streak." / "Day N of your current streak." /
+  "Day N of a M-day streak." (none for a single day). Each book is a compact row (cover, title, a neutral badge with its
+  pages that day) captioned with its pages and that book's update times as 24-hour clock times: "Pages 175 to 388 · 1 update
   at 14:41", "Pages 112 to 158 · 3 updates, 09:10 to 22:40" ("2 updates at 14:41" when the first and last
   share a minute), "Up to page 40 · 1 update at 08:05" when it started at page 0, with " · finished" added
   for a book finished that day ("Pages 380 to 412 · finished" when only its unlogged remainder fell on the
@@ -104,7 +110,8 @@
   ride the list's bottom edge; rows off screen when the fold starts drop out at once. The buttons fade
   and slide in and out. The header and its description stay the same throughout, so a tap animates only
   the rows and the buttons. Rows visible at first data, the loading swap and a scope switch do not
-  animate in. A scope switch folds the ranking back to five. A scope with no genres says "The genres you read most" over its empty sentence, with no rows.
+  animate in. A scope switch folds the ranking back to five. A scope with no genres says "The genres you read most" over its empty
+  sentence, with no rows.
 - Chapter 99, "Temporary" (removed later), holds the former Profile charts: "The shape of the years" (a
   `ColumnChart` behind a Books / Pages `SegmentedControl`); "Who you read";
   "How you score" (headline from the rating band, never the bare average); "Recently loved" (up to three

@@ -46,7 +46,7 @@ internal fun displayToggleRowsFor(
         ToggleRowUiModel(
             key = DisplayToggle.READING_STREAK,
             title = "Reading streak",
-            gloss = "Count the days you read in a row, shown on your profile.",
+            gloss = "Show the days you read on the Reading screen.",
             checked = readingStreakEnabledChecked,
             variant = ToggleRowVariant.Inset,
         ),

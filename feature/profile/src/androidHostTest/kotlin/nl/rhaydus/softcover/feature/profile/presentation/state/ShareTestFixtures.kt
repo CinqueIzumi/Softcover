@@ -16,11 +16,14 @@ internal fun buildShareProfile(name: String = "Jane Doe"): UserProfileData =
         name = name,
         username = "cinque",
         bio = "Avid reader",
-        readingStreak = 7,
     )
 
-internal fun buildShareCard(name: String = "Jane Doe"): ReadingLifeShareCardUiModel =
+internal fun buildShareCard(
+    name: String = "Jane Doe",
+    dayStreak: Int = 0,
+): ReadingLifeShareCardUiModel =
     buildShareReadingStats().toReadingLifeShareCardUiModel(
         history = buildShareReadingHistory(),
         profile = buildShareProfile(name = name),
+        dayStreak = dayStreak,
     )

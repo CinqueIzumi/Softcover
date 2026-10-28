@@ -2,25 +2,25 @@ package nl.rhaydus.softcover.feature.profile.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.datetime.TimeZone
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
+import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileStatsUseCase
 import nl.rhaydus.toad.ActionDependencies
-import kotlin.time.Clock
 
 internal data class ProfileDependencies(
     val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     val observeReadingStatsUseCase: ObserveReadingStatsUseCase,
     val observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
+    val observeReadingActivityUseCase: ObserveReadingActivityUseCase,
+    val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     val observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase,
-    val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
+    val refreshUserProfileStatsUseCase: RefreshUserProfileStatsUseCase,
     val resetUserDataUseCase: ResetUserDataUseCase,
-    val clock: Clock,
-    val timeZone: TimeZone,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

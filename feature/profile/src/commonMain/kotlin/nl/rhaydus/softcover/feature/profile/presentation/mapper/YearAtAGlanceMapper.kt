@@ -8,6 +8,11 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasChapter
 private val YEAR_AT_A_GLANCE_EYEBROW = atlasChapterEyebrow(AtlasChapter.YEAR_AT_A_GLANCE)
 private const val HEADLINE = "Day by day"
 internal const val LOADING_YEAR = 2026
+internal val LOADING_TODAY = LocalDate(
+    year = LOADING_YEAR,
+    month = 1,
+    day = 1,
+)
 
 /** The masked header shown until the first stats land. */
 internal fun loadingYearAtAGlanceHeader(): SectionHeaderUiModel.Section = SectionHeaderUiModel.Section(

@@ -369,7 +369,7 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Tr
     - tint: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearAtAGlanceChapter(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, title: kotlin.String, caption: kotlin.String, chart: nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel, yearGrid: nl.rhaydus.softcover.core.component.chart.YearGridUiModel, onDayTapped: kotlin.Function1<kotlinx.datetime.LocalDate, kotlin.Unit>, footnote: kotlin.String, hasTimeOfDayPages: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearAtAGlanceChapter(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, title: kotlin.String, caption: kotlin.String, chart: nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel, yearGrid: nl.rhaydus.softcover.core.component.chart.YearGridUiModel, currentStreakTile: nl.rhaydus.softcover.core.component.statistic.StatTileUiModel, longestStreakTile: nl.rhaydus.softcover.core.component.statistic.StatTileUiModel, onDayTapped: kotlin.Function1<kotlinx.datetime.LocalDate, kotlin.Unit>, footnote: kotlin.String, hasTimeOfDayPages: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -378,6 +378,8 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Ye
     - caption: STABLE (String is immutable)
     - chart: STABLE (marked @Stable or @Immutable)
     - yearGrid: STABLE (marked @Stable or @Immutable)
+    - currentStreakTile: STABLE (marked @Stable or @Immutable)
+    - longestStreakTile: STABLE (marked @Stable or @Immutable)
     - onDayTapped: STABLE (function type)
     - footnote: STABLE (String is immutable)
     - hasTimeOfDayPages: STABLE (primitive type)

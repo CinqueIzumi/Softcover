@@ -1,7 +1,12 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen.section
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -13,6 +18,8 @@ import nl.rhaydus.softcover.core.component.chart.YearGrid
 import nl.rhaydus.softcover.core.component.chart.YearGridEvent
 import nl.rhaydus.softcover.core.component.chart.YearGridUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatTile
+import nl.rhaydus.softcover.core.component.statistic.StatTileUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -25,6 +32,8 @@ internal fun YearAtAGlanceChapter(
     caption: String,
     chart: ColumnChartUiModel,
     yearGrid: YearGridUiModel,
+    currentStreakTile: StatTileUiModel,
+    longestStreakTile: StatTileUiModel,
     onDayTapped: (LocalDate) -> Unit,
     footnote: String,
     hasTimeOfDayPages: Boolean,
@@ -46,6 +55,29 @@ internal fun YearAtAGlanceChapter(
                         is YearGridEvent.DayTapped -> onDayTapped(event.date)
                     }
                 },
+            )
+        }
+
+        Spacer(modifier = Modifier.height(Spacing.md))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Max),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            StatTile(
+                model = currentStreakTile,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+            )
+
+            StatTile(
+                model = longestStreakTile,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
             )
         }
 

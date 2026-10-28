@@ -335,15 +335,14 @@ class ReadingDayMapperTest {
                 updates = updates,
                 books = books,
             )
-            val daily = toDailyPages(
+            val activity = toReadingActivity(
                 updates = updates,
                 readBooks = books,
-                year = 2026,
                 timeZone = TimeZone.UTC,
             )
 
             // ----- Assert -----
-            result.books.sumOf { it.pages } shouldBe daily.pages[day]
+            result.books.sumOf { it.pages } shouldBe activity.pagesByDay[day]
         }
     }
 

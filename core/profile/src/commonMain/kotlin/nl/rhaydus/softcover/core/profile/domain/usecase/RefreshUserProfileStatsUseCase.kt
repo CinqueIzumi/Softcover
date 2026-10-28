@@ -8,9 +8,9 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 
-// Refreshes what the Stats Atlas is built from: the account's identity (one request, cached in the
-// profile DataStore) and the Read books the aggregates are computed from, which live in Room. Called
-// only from Profile's composed refresh (which opens the Atlas), never at startup.
+// Refreshes what the Profile tab and the Stats Atlas are built from: the account's identity (one
+// request, cached in the profile DataStore) and the Read books the aggregates are computed from,
+// which live in Room. Called from the Profile tab and after re-auth, never at startup.
 class RefreshUserProfileStatsUseCase internal constructor(
     private val profileRepository: ProfileRepository,
     private val statsRefreshGate: ProfileRefreshGate,
@@ -19,8 +19,7 @@ class RefreshUserProfileStatsUseCase internal constructor(
 ) {
     // Skips the whole refresh once this session has already completed it - every other Profile visit
     // renders from the DataStore cache and Room. runOnce marks only after both halves succeed, so a
-    // transient failure leaves the gate open and the next visit retries. Gated independently from the
-    // activity half (RefreshReadingActivityUseCase).
+    // transient failure leaves the gate open and the next visit retries.
     suspend operator fun invoke(): Result<Unit> = runCatchingLogged {
         statsRefreshGate.runOnce {
             val snapshot = profileRepository.fetchUserProfileSnapshot()

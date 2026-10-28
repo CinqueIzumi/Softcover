@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import nl.rhaydus.common.currentLocalDate
@@ -37,7 +38,8 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingStreak
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakSheetFor
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.streakStripFor
 import nl.rhaydus.softcover.feature.reading.presentation.state.StreakDayRowUiModel
@@ -207,34 +209,63 @@ private fun StreakStripSheetRow(row: StreakDayRowUiModel) {
     }
 }
 
-private fun previewActivity(litOffsets: Set<Int>): List<ReadingDayActivity> {
-    val today = currentLocalDate()
+/** Reading on each of [litOffsets] counted from 20 days ago, so offset 20 is [today]. */
+internal fun previewReadingActivity(
+    today: LocalDate,
+    litOffsets: Set<Int>,
+): ReadingActivity {
     val firstDay = today.minus(
         20,
         DateTimeUnit.DAY,
     )
+    val runs = litOffsets.sorted().fold(emptyList<List<Int>>()) { runs, offset ->
+        val last = runs.lastOrNull()
 
-    return (0..20).map { offset ->
-        ReadingDayActivity(
-            date = firstDay.plus(
+        if (last != null && last.last() + 1 == offset) {
+            runs.dropLast(1) + listOf(last + offset)
+        } else {
+            runs + listOf(listOf(offset))
+        }
+    }
+
+    return ReadingActivity(
+        pagesByDay = litOffsets.associate { offset ->
+            firstDay.plus(
                 offset,
                 DateTimeUnit.DAY,
-            ),
-            didRead = offset in litOffsets,
-        )
-    }
+            ) to PREVIEW_PAGES
+        },
+        streaks = runs.map { run ->
+            ReadingStreak(
+                start = firstDay.plus(
+                    run.first(),
+                    DateTimeUnit.DAY,
+                ),
+                end = firstDay.plus(
+                    run.last(),
+                    DateTimeUnit.DAY,
+                ),
+            )
+        },
+    )
 }
+
+private const val PREVIEW_PAGES = 12
 
 @StandardPreview
 @Composable
 private fun StreakStripPreview() {
+    val today = currentLocalDate()
+
     SoftcoverTheme {
         Column(modifier = Modifier.padding(Spacing.xl)) {
             StreakStrip(
                 model = streakStripFor(
-                    activity = previewActivity(
+                    activity = previewReadingActivity(
+                        today = today,
                         litOffsets = setOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20),
                     ),
+                    today = today,
                 ),
                 onEvent = {},
             )
@@ -246,12 +277,17 @@ private fun StreakStripPreview() {
 @Composable
 private fun StreakStripSheetPreview() {
     SoftcoverTheme {
-        val activity = previewActivity(
+        val today = currentLocalDate()
+        val activity = previewReadingActivity(
+            today = today,
             litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20),
         )
 
         StreakStripSheet(
-            model = streakSheetFor(activity = activity),
+            model = streakSheetFor(
+                activity = activity,
+                today = today,
+            ),
             onDismiss = {},
         )
     }

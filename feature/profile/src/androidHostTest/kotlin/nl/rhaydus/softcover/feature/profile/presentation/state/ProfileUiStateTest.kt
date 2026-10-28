@@ -17,7 +17,6 @@ class ProfileUiStateTest {
         name = "Jane Doe",
         username = "cinque",
         bio = "Avid reader",
-        readingStreak = 7,
     )
 
     @Nested

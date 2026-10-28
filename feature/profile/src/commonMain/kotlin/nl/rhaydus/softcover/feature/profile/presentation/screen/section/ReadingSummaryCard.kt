@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
+import nl.rhaydus.softcover.core.component.chart.RecentDaysGrid
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.modifier.tactileClickable
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
@@ -20,7 +22,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.profile.presentation.state.ReadingSummaryUiModel
 
-/** Profile's door to the Stats Atlas: this year's headline counts, then a line that opens the Atlas. */
+/**
+ * Profile's door to the Stats Atlas: this year's headline counts, the last 12 weeks at a glance,
+ * then a line that opens the Atlas.
+ */
 @Composable
 internal fun ReadingSummaryCard(
     summary: ReadingSummaryUiModel,
@@ -53,6 +58,21 @@ internal fun ReadingSummaryCard(
                     )
                 }
             }
+        }
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            SoftcoverText(
+                text = summary.recentDaysCaption,
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+
+            RecentDaysGrid(model = summary.recentDays)
         }
 
         Row(

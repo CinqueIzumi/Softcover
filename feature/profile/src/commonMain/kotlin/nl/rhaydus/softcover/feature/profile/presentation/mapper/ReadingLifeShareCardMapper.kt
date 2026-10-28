@@ -21,6 +21,7 @@ private const val MONTHS_IN_YEAR = 12
 internal fun ReadingStats.toReadingLifeShareCardUiModel(
     history: ReadingHistory,
     profile: UserProfileData,
+    dayStreak: Int,
 ): ReadingLifeShareCardUiModel =
     ReadingLifeShareCardUiModel(
         readerName = profile.name,
@@ -41,7 +42,7 @@ internal fun ReadingStats.toReadingLifeShareCardUiModel(
             value = ratings.average,
             fractionDigits = 1,
         ),
-        dayStreak = profile.readingStreak.toString(),
+        dayStreak = dayStreak.toString(),
         trackedYears = history.trackedYears.toString(),
     )
 

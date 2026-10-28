@@ -8,10 +8,10 @@ import kotlinx.datetime.TimeZone
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetReadUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveProgressUpdatesUseCase
-import nl.rhaydus.softcover.core.profile.domain.mapper.toDailyPages
-import nl.rhaydus.softcover.core.profile.domain.model.DailyPages
+import nl.rhaydus.softcover.core.profile.domain.mapper.toReadingActivity
+import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 
-class ObserveDailyPagesReadUseCase internal constructor(
+class ObserveReadingActivityUseCase internal constructor(
     private val observeProgressUpdatesUseCase: ObserveProgressUpdatesUseCase,
     private val getReadUserBooksUseCase: GetReadUserBooksUseCase,
     private val timeZone: TimeZone,
@@ -21,14 +21,13 @@ class ObserveDailyPagesReadUseCase internal constructor(
      * Re-emits when a progress update or a read book changes; unfinished books count. The bucketing runs
      * off the main thread.
      */
-    operator fun invoke(year: Int): Flow<DailyPages> = combine(
+    operator fun invoke(): Flow<ReadingActivity> = combine(
         observeProgressUpdatesUseCase(),
         getReadUserBooksUseCase(),
     ) { updates, readBooks ->
-        toDailyPages(
+        toReadingActivity(
             updates = updates,
             readBooks = readBooks,
-            year = year,
             timeZone = timeZone,
         )
     }

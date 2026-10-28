@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.mapper
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.daysUntil
 import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
@@ -30,6 +31,7 @@ import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDay
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingDayBook
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.state.AtlasStreaks
 import nl.rhaydus.softcover.feature.profile.presentation.state.DayDetailBook
 import nl.rhaydus.softcover.feature.profile.presentation.state.DayDetailUiModel
 
@@ -59,11 +61,15 @@ private val dayWithYearFormat = LocalDate.Format {
     year()
 }
 
-/** The year joins the eyebrow only when [currentYear] is not the day's own. A book absent from [books] gets an untappable row. */
+/**
+ * The year joins the eyebrow only when [currentYear] is not the day's own.
+ * A book absent from [books] gets an untappable row.
+ */
 internal fun dayDetailUiModel(
     day: ReadingDay,
     books: List<Book>,
     currentYear: Int,
+    streaks: AtlasStreaks,
 ): DayDetailUiModel {
     val booksById = books.associateBy { it.id }
     val totalPages = day.books.sumOf { it.pages }
@@ -75,6 +81,10 @@ internal fun dayDetailUiModel(
                 section = SectionHeaderUiModel.Section(
                     eyebrow = eyebrowFormat.format(day.date),
                     headline = "${pagesLabel(totalPages)} across ${booksLabel(day.books.size)}",
+                    description = streakDescription(
+                        day = day.date,
+                        streaks = streaks,
+                    ),
                 ),
             ),
             footer = SheetFooterUiModel.Stacked(
@@ -89,6 +99,20 @@ internal fun dayDetailUiModel(
             .map { dayBook -> dayBook.toRow(book = booksById[dayBook.bookId]) }
             .toBookCardSet(),
     )
+}
+
+private fun streakDescription(
+    day: LocalDate,
+    streaks: AtlasStreaks,
+): String? {
+    val streak = streaks.activity.streakOn(day)?.takeIf { it.days >= 2 } ?: return null
+    val position = streak.start.daysUntil(day) + 1
+
+    return when (streak) {
+        streaks.longestInAtlasYear -> "Day $position of your longest streak."
+        streaks.current -> "Day $position of your current streak."
+        else -> "Day $position of a ${streak.days}-day streak."
+    }
 }
 
 private fun ReadingDayBook.toRow(book: Book?): Pair<BookCardUiModel, DayDetailBook> {
