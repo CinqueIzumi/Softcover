@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.editorial.component.DropCapText
 import nl.rhaydus.designsystem.util.htmlToAnnotatedString
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.richtext.isBlank
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing

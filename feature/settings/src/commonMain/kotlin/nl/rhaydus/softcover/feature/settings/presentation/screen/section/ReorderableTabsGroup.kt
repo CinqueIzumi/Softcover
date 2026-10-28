@@ -167,7 +167,7 @@ internal fun ReorderableTabsGroup(
                                 reorderHaptics.lift(fromIndex = index)
                             },
                             onDragStopped = {
-                                val currentIdx = workingOrder.indexOfFirst { it.id == entry.id }
+                                val currentIdx = workingOrder.indexOfFirst { tab -> tab.id == entry.id }
 
                                 var residualOffsetY = dragOffsetY
 
@@ -203,7 +203,7 @@ internal fun ReorderableTabsGroup(
 
                                         runAction(
                                             OnReorderLibraryTabsAction(
-                                                newOrderedIds = workingOrder.map { it.id },
+                                                newOrderedIds = workingOrder.map { tab -> tab.id },
                                             ),
                                         )
                                     }

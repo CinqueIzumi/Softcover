@@ -58,7 +58,7 @@ coroutines = "1.10.2"
 # Ktor powers Coil's network image loading on iOS only (Coil's OkHttp fetcher is JVM/Android-only and
 # Apollo brings no Ktor engine to reuse). Aligned with the Ktor 3.x line Coil 3.2.0 is built against.
 ktor = "3.1.0"
-detekt = "1.23.8"
+detekt = "2.0.0-alpha.6"
 dependencyAnalysis = "3.19.2"
 # Kotlin code-coverage toolset; aggregates an XML report at the root for Codecov upload in CI.
 kover = "0.9.8"
@@ -81,8 +81,8 @@ rhaydus-ktlintRules = { group = "nl.rhaydus", name = "ktlint-rules" }
 rhaydus-detektRules = { group = "nl.rhaydus", name = "detekt-rules" }
 
 # detekt rule API — consumed by the app-local :detekt-rules module
-detekt-api = { group = "io.gitlab.arturbosch.detekt", name = "detekt-api", version.ref = "detekt" }
-detekt-test = { group = "io.gitlab.arturbosch.detekt", name = "detekt-test", version.ref = "detekt" }
+detekt-api = { group = "dev.detekt", name = "detekt-api", version.ref = "detekt" }
+detekt-test = { group = "dev.detekt", name = "detekt-test", version.ref = "detekt" }
 
 # ktlint rule-engine — consumed by the :ktlint-rules module to drive the custom autofix ruleset
 ktlint-ruleEngine = { group = "com.pinterest.ktlint", name = "ktlint-rule-engine", version.ref = "ktlint" }
@@ -184,6 +184,6 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "roomVersion" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysis" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

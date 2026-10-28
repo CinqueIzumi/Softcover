@@ -1,24 +1,23 @@
 package nl.rhaydus.softcover.detekt
 
-import io.gitlab.arturbosch.detekt.api.Config
-import io.gitlab.arturbosch.detekt.api.RuleSet
-import io.gitlab.arturbosch.detekt.api.RuleSetProvider
+import dev.detekt.api.RuleSet
+import dev.detekt.api.RuleSetId
+import dev.detekt.api.RuleSetProvider
 
 /** Registers the `softcover` ruleset. */
 class SoftcoverRuleSetProvider : RuleSetProvider {
-    override val ruleSetId: String = "softcover"
+    override val ruleSetId = RuleSetId("softcover")
 
-    override fun instance(config: Config): RuleSet {
-        return RuleSet(
+    override fun instance(): RuleSet =
+        RuleSet(
             ruleSetId,
             listOf(
-                RawSpacingDp(config),
-                RawCornerDp(config),
-                UiModelBuiltInRender(config),
-                RememberHapticsOutsideTheme(config),
-                NoReflection(config),
-                ScreenConstructorProperty(config),
+                ::RawSpacingDp,
+                ::RawCornerDp,
+                ::UiModelBuiltInRender,
+                ::RememberHapticsOutsideTheme,
+                ::NoReflection,
+                ::ScreenConstructorProperty,
             ),
         )
-    }
 }

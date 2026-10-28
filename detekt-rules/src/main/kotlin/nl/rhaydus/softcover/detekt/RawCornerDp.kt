@@ -1,12 +1,9 @@
 package nl.rhaydus.softcover.detekt
 
-import io.gitlab.arturbosch.detekt.api.CodeSmell
-import io.gitlab.arturbosch.detekt.api.Config
-import io.gitlab.arturbosch.detekt.api.Debt
-import io.gitlab.arturbosch.detekt.api.Entity
-import io.gitlab.arturbosch.detekt.api.Issue
-import io.gitlab.arturbosch.detekt.api.Rule
-import io.gitlab.arturbosch.detekt.api.Severity
+import dev.detekt.api.Config
+import dev.detekt.api.Entity
+import dev.detekt.api.Finding
+import dev.detekt.api.Rule
 import java.io.File
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtCallExpression
@@ -24,14 +21,11 @@ import org.jetbrains.kotlin.psi.KtValueArgument
  * A raw radius is a number or `N.dp` literal other than zero, or a named `percent` argument other than
  * a literal zero.
  */
-class RawCornerDp(config: Config = Config.empty) : Rule(config) {
-    override val issue = Issue(
-        id = "RawCornerDp",
-        severity = Severity.Style,
-        description = "Corners must read a Corners token, not a raw corner radius.",
-        debt = Debt.FIVE_MINS,
-    )
-
+class RawCornerDp(config: Config) :
+    Rule(
+        config,
+        "Corners must read a Corners token, not a raw corner radius.",
+    ) {
     override fun visitCallExpression(expression: KtCallExpression) {
         super.visitCallExpression(expression)
 
@@ -46,8 +40,7 @@ class RawCornerDp(config: Config = Config.empty) : Rule(config) {
 
     private fun reportRawRadius(argument: KtValueArgument) {
         report(
-            CodeSmell(
-                issue = issue,
+            Finding(
                 entity = Entity.from(argument),
                 message = MESSAGE,
             ),

@@ -34,9 +34,6 @@ private val LIST_TAB = LibraryTab.CustomList(
 private val SidebarRowUiModel<String>.selected: Boolean
     get() = (variant as? SidebarRowVariant.Destination)?.selected == true
 
-private val SidebarRowUiModel<String>.longPressable: Boolean
-    get() = (variant as? SidebarRowVariant.Destination)?.longPressable == true
-
 class ShelfSidebarCollectorTest {
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>

@@ -12,3 +12,4 @@ trim_trailing_whitespace = true
 # plugin from reformatting on save.
 ktlint_standard = disabled
 ij_kotlin_imports_layout = *,java.**,javax.**,kotlin.**,^
+rhaydus_fully_qualified_exempt_package_segments = fragment

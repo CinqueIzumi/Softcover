@@ -11,7 +11,7 @@ import nl.rhaydus.softcover.feature.lists.presentation.state.LocalCreateListVari
 import nl.rhaydus.toad.ToadScreenModel
 
 internal class CreateListScreenModel(
-    private val createListUseCase: CreateListUseCase,
+    createListUseCase: CreateListUseCase,
     dispatchers: AppDispatchers,
 ) : ToadScreenModel<CreateListUiState, CreateListEvent, CreateListDependencies, CreateListCollector, LocalCreateListVariables>(
     initializers = emptyList(),

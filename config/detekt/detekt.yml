@@ -3,7 +3,7 @@
 # The baseline (`config/detekt.yml`, bundled in `nl.rhaydus:detekt-rules`, unpacked by the root
 # `extractRhaydusDetektConfig` task) carries everything every nl.rhaydus app wants: the Compose/TOAD
 # `ignoreAnnotated` sets, `MagicNumber` off, `LargeClass`, the generous DI constructor threshold,
-# guard-clause `ReturnCount`, snake_case `PackageNaming`, `MaxLineLength: 140`, `UnusedPrivateMember`,
+# guard-clause `ReturnCount`, snake_case `PackageNaming`, `MaxLineLength: 140`, `UnusedPrivateFunction`,
 # and the type-resolution calibration. Both files reach `config.setFrom(...)` in that order, so THIS
 # file wins on conflict.
 #
@@ -21,7 +21,7 @@
 complexity:
   LongMethod:
     # Room migration blocks and the nav host legitimately run long; accept up to 140 lines.
-    threshold: 140
+    allowedLines: 140
     # Test sources are exempt, and this one IS a judgement call rather than detekt's own policy (unlike
     # the test excludes in the shared baseline, which merely restore globs detekt already intends).
     # Reason: every finding here was an Apollo fragment fixture in `core/book` — `stubMinimalUserBookFragment`
@@ -31,13 +31,13 @@ complexity:
     # onto its own line, tripling every stub. Splitting such a fixture yields `…Part1` / `…Part2` halves
     # that are strictly harder to read than the thing they replace, so the rule is asking for a change that
     # would make the code worse. Production code keeps the full 140-line gate.
-    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
+    excludes: ['**/*Test/**', '**/test/**']
   CyclomaticComplexMethod:
-    threshold: 25
+    allowedComplexity: 25
   ComplexCondition:
-    threshold: 6
+    allowedConditions: 6
   NestedBlockDepth:
-    threshold: 6
+    allowedDepth: 6
   LongParameterList:
     # TOAD *ScreenModel / *Dependencies constructors grow every time a screen gains a use case (book
     # detail alone is 30+ params) — a parameter object isn't idiomatic for constructor DI, and the
@@ -45,18 +45,18 @@ complexity:
     # every future use case addition. Exclude the layer by path instead of chasing the count: every
     # TOAD screen keeps its ScreenModel + Dependencies under `presentation/screenmodel/` by convention
     # (see foundation/docs/toad-architecture.md), so this targets exactly the DI-constructor classes
-    # and leaves the rule at full strength (the baseline's threshold: 30) everywhere else.
+    # and leaves the rule at full strength (the baseline's allowedConstructorParameters: 30) everywhere else.
     excludes: ['**/presentation/screenmodel/**']
-    functionThreshold: 12
+    allowedFunctionParameters: 12
     ignoreDefaultParameters: true
   TooManyFunctions:
     # DAOs (BookDao has ~90 queries), operation repositories, and Compose screen objects legitimately
     # hold many members; @Composable members are not counted.
-    thresholdInFiles: 100
-    thresholdInClasses: 100
-    thresholdInInterfaces: 100
-    thresholdInObjects: 100
-    thresholdInEnums: 100
+    allowedFunctionsPerFile: 100
+    allowedFunctionsPerClass: 100
+    allowedFunctionsPerInterface: 100
+    allowedFunctionsPerObject: 100
+    allowedFunctionsPerEnum: 100
     ignoreAnnotatedFunctions: ['Composable', 'Preview', 'StandardPreview']
 
 style:
@@ -78,7 +78,7 @@ style:
     # fully-qualified inline reference or a KDoc link — stray references were once left in `Color.kt`
     # and `LocalDarkTheme.kt` and a reviewer, not a gate, caught them.
     #
-    # One rule instance covers both scopes because detekt 1.23.8 has no multiple-rule-instance support.
+    # One rule instance covers both scopes.
     # That makes the ban a superset for `:core:designsystem` — Koin, Voyager and Apollo imports are
     # forbidden there too. That is correct rather than incidental: a token module has no more business
     # with DI, navigation or the network client than the component library does.
@@ -89,7 +89,7 @@ style:
     # androidMain + jvmMain, so an iosMain-only file is not scanned. Components live in commonMain.
     active: true
     includes: ['**/core/component/**', '**/core/designsystem/**']
-    imports:
+    forbiddenImports:
       - 'org.koin.**'
       - 'cafe.adriel.voyager.**'
       - 'com.apollographql.apollo.**'
@@ -111,20 +111,10 @@ style:
         reason: 'A lambda action needs a live Glance session and breaks in background-rendered RemoteViews. Use actionRunCallback or actionStartActivity.'
       - value: 'androidx.glance.action.clickable(androidx.glance.GlanceModifier, kotlin.String, kotlin.Int, kotlin.Function0)'
         reason: 'A lambda action needs a live Glance session and breaks in background-rendered RemoteViews. Use actionRunCallback or actionStartActivity.'
-  UnusedPrivateMember:
+  UnusedPrivateFunction:
     # The shared baseline also exempts `Composable`. Softcover deliberately does not: an unused private
     # @Composable is dead UI code and should be caught. Only previews are exempt (they are entry points).
     ignoreAnnotated: ['Preview', 'StandardPreview']
-  UnusedImports:
-    active: true
-    excludes:
-      # kotlinx.coroutines.IO is an extension Dispatchers.IO needs in commonMain on native targets only.
-      - '**/core/domain/di/DispatcherModule.kt'
-      # The SessionValueCache getOrPut/refresh extension imports are not attributed to their call sites.
-      - '**/core/book/data/repository/BooksRepositoryImpl.kt'
-      - '**/feature/explore/data/repository/ExploreRepositoryImpl.kt'
-      # kotlin.concurrent.Volatile is the annotation native targets need; on the JVM @Volatile is kotlin.jvm.
-      - '**/core/preferences/data/datasource/ApiKeyLocalDataSource.kt'
   ForbiddenComment:
     # TODO / FIXME / STOPSHIP are legitimate, tracked markers in this codebase — not a code smell to gate
     # on, so `comments` below replaces the rule's own TODO/FIXME/STOPSHIP defaults rather than adding to

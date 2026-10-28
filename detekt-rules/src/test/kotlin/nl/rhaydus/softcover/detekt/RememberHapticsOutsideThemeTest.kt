@@ -1,13 +1,14 @@
 package nl.rhaydus.softcover.detekt
 
-import io.gitlab.arturbosch.detekt.test.lint
+import dev.detekt.api.Config
+import dev.detekt.test.lint
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class RememberHapticsOutsideThemeTest {
-    private val rule = RememberHapticsOutsideTheme()
+    private val rule = RememberHapticsOutsideTheme(Config.empty)
 
     @Nested
     inner class FlaggedImports {

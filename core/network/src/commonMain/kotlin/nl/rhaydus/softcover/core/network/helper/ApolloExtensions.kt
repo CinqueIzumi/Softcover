@@ -154,7 +154,7 @@ private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
 
                 error.extensions?.let { append(" | extensions=$it") }
             }
-        } ?: ""
+        }.orEmpty()
 
         throw UnexpectedApiException("Apollo GraphQL error(s): \n$message")
     }

@@ -9,10 +9,10 @@ softcover:
     active: true
   UiModelBuiltInRender:
     active: true
-    excludes: ['**/*Previews.kt', '**/gallery/**', '**/src/debug/**', '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**']
+    excludes: ['**/*Previews.kt', '**/gallery/**', '**/src/debug/**', '**/*Test/**', '**/test/**']
   NoReflection:
     active: true
-    excludes: ['**/smoketest/**', '**/src/debug/**', '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**']
+    excludes: ['**/smoketest/**', '**/src/debug/**', '**/*Test/**', '**/test/**']
   ScreenConstructorProperty:
     active: true
-    excludes: ['**/smoketest/**', '**/src/debug/**', '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**']
+    excludes: ['**/smoketest/**', '**/src/debug/**', '**/*Test/**', '**/test/**']

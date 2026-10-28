@@ -1,26 +1,25 @@
 package nl.rhaydus.softcover.detekt
 
-import io.github.detekt.test.utils.KotlinCoreEnvironmentWrapper
-import io.github.detekt.test.utils.createEnvironment
-import io.gitlab.arturbosch.detekt.test.compileAndLintWithContext
-import io.gitlab.arturbosch.detekt.test.lint
+import dev.detekt.api.Config
+import dev.detekt.test.lintWithContext
+import dev.detekt.test.utils.KotlinEnvironmentContainer
+import dev.detekt.test.utils.createEnvironment
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class UiModelBuiltInRenderTest {
-    private val rule = UiModelBuiltInRender()
+    private val rule = UiModelBuiltInRender(Config.empty)
 
-    private fun lintWithTypes(body: String) = rule.compileAndLintWithContext(
-        wrapper.env,
+    private fun lintWithTypes(body: String) = rule.lintWithContext(
+        env,
         HEADER + body,
     )
 
-    private fun lintOutsideProject(body: String) = rule.compileAndLintWithContext(
-        wrapper.env,
+    private fun lintOutsideProject(body: String) = rule.lintWithContext(
+        env,
         header("com.example.sample") + body,
     )
 
@@ -695,28 +694,8 @@ class UiModelBuiltInRenderTest {
         }
     }
 
-    @Nested
-    inner class WithoutTypeResolution {
-        @Test
-        fun `reports nothing when linted without type resolution`() {
-            // ----- Arrange -----
-            val code = HEADER + """
-                @Composable
-                fun Screen() {
-                    FooUiModel(1)
-                }
-            """.trimIndent()
-
-            // ----- Act -----
-            val findings = rule.lint(code)
-
-            // ----- Assert -----
-            findings.shouldBeEmpty()
-        }
-    }
-
     companion object {
-        private lateinit var wrapper: KotlinCoreEnvironmentWrapper
+        private lateinit var env: KotlinEnvironmentContainer
 
         private fun header(packageName: String) = """
             package $packageName
@@ -741,13 +720,7 @@ class UiModelBuiltInRenderTest {
         @BeforeAll
         @JvmStatic
         fun setUp() {
-            wrapper = createEnvironment()
-        }
-
-        @AfterAll
-        @JvmStatic
-        fun tearDown() {
-            wrapper.dispose()
+            env = createEnvironment()
         }
     }
 }

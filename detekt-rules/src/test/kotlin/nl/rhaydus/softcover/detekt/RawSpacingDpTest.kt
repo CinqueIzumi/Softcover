@@ -1,7 +1,8 @@
 package nl.rhaydus.softcover.detekt
 
-import io.github.detekt.test.utils.compileContentForTest
-import io.gitlab.arturbosch.detekt.test.lint
+import dev.detekt.api.Config
+import dev.detekt.test.lint
+import dev.detekt.test.utils.compileContentForTest
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -10,163 +11,163 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class RawSpacingDpTest {
-    private val rule = RawSpacingDp()
+    private val rule = RawSpacingDp(Config.empty)
 
     @Nested
     inner class FlaggedSpacing {
         @Test
         fun `flags a positional dp passed to padding`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(12.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags a named dp passed to padding`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(horizontal = 6.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags every raw dp in a multi-argument padding call`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(horizontal = 6.dp, vertical = 10.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 2
         }
 
         @Test
         fun `flags a raw dp passed to PaddingValues`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val p = PaddingValues(8.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags a raw dp named contentPadding`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val c = Foo(contentPadding = 4.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags the raw dp inside a contentPadding PaddingValues`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val c = Foo(contentPadding = PaddingValues(horizontal = 4.dp))"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags a raw dp passed to spacedBy`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val a = Arrangement.spacedBy(10.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags a raw dp passed to offset`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.offset(x = 2.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags a float dp literal that is not an allowed value`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(2.5f.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags a dp literal written with underscores`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(1_2.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags a negative dp passed to offset`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.offset(y = -2.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags a negative dp passed to padding`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(start = -4.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `reports the offending literal with the token message`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(12.dp)"
 
-            // Act
+            // ----- Act -----
             val finding = rule.lint(code).firstOrNull()
 
-            // Assert
+            // ----- Assert -----
             finding.shouldNotBeNull()
             finding.message shouldBe "Use a Spacing token instead of a raw dp literal."
             finding.entity.signature.contains("12.dp") shouldBe true
@@ -177,49 +178,49 @@ class RawSpacingDpTest {
     inner class FlaggedSpacerSizes {
         @Test
         fun `flags a raw dp passed to a Spacer height`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val s = Spacer(Modifier.height(8.dp))"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags a raw dp passed to a Spacer width`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val s = Spacer(Modifier.width(8.dp))"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags a raw dp passed to a Spacer size`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val s = Spacer(Modifier.size(8.dp))"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
 
         @Test
         fun `flags a raw dp in a chained Spacer modifier`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val s = Spacer(modifier = Modifier.fillMaxWidth().height(8.dp))"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
     }
@@ -228,85 +229,85 @@ class RawSpacingDpTest {
     inner class AllowedValues {
         @Test
         fun `does not flag zero`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(0.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag 64`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(64.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag 96`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(96.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag an allowed value written as a float`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(0.0.dp, 64f.dp, 96.0f.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag a negative zero`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.offset(x = -0.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag a negative 64 because the absolute value is allowed`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.offset(y = -64.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `flags only the raw value next to an allowed one`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(horizontal = 0.dp, vertical = 12.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
     }
@@ -315,109 +316,109 @@ class RawSpacingDpTest {
     inner class NotSpacing {
         @Test
         fun `does not flag a Spacing token`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(Spacing.md)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag a variable passed as spacing`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(horizontal = gap)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag a size outside a Spacer`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.size(24.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag a height on a non-Spacer`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.height(48.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag a border width`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.border(1.dp, color, shape)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag a size call inside a Spacer lambda argument`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val s = Spacer(Modifier.fillMaxWidth(), content = { Box(Modifier.size(24.dp)) })"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag a height call inside a non-modifier Spacer argument`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val s = Spacer(Foo(Modifier.height(8.dp)))"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag a non-dp unit`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Modifier.padding(12.sp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `does not flag a raw dp passed to an unrelated call`() {
-            // Arrange
+            // ----- Arrange -----
             val code = "val m = Foo(gap = 12.dp)"
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(code)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
     }
@@ -426,31 +427,31 @@ class RawSpacingDpTest {
     inner class TokenFile {
         @Test
         fun `does not flag raw dp in Spacing kt`() {
-            // Arrange
+            // ----- Arrange -----
             val file = compileContentForTest(
                 content = "val md = PaddingValues(12.dp)",
                 filename = "Spacing.kt",
             )
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(file)
 
-            // Assert
+            // ----- Assert -----
             findings.shouldBeEmpty()
         }
 
         @Test
         fun `flags the same code in any other file`() {
-            // Arrange
+            // ----- Arrange -----
             val file = compileContentForTest(
                 content = "val md = PaddingValues(12.dp)",
                 filename = "Other.kt",
             )
 
-            // Act
+            // ----- Act -----
             val findings = rule.lint(file)
 
-            // Assert
+            // ----- Assert -----
             findings shouldHaveSize 1
         }
     }

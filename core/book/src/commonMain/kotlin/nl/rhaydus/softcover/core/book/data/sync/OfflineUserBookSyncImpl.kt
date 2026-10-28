@@ -422,7 +422,7 @@ internal class OfflineUserBookSyncImpl(
             fetchedUserBook.reads.none { it.id == snapshotRead.id }
 
         val missingSnapshotRead: List<UserBookRead> = if (isSnapshotReadMissing) {
-            listOfNotNull(snapshotRead)
+            listOf(snapshotRead)
         } else {
             emptyList()
         }

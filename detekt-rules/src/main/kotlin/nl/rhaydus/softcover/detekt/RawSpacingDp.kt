@@ -1,12 +1,9 @@
 package nl.rhaydus.softcover.detekt
 
-import io.gitlab.arturbosch.detekt.api.CodeSmell
-import io.gitlab.arturbosch.detekt.api.Config
-import io.gitlab.arturbosch.detekt.api.Debt
-import io.gitlab.arturbosch.detekt.api.Entity
-import io.gitlab.arturbosch.detekt.api.Issue
-import io.gitlab.arturbosch.detekt.api.Rule
-import io.gitlab.arturbosch.detekt.api.Severity
+import dev.detekt.api.Config
+import dev.detekt.api.Entity
+import dev.detekt.api.Finding
+import dev.detekt.api.Rule
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtConstantExpression
@@ -24,14 +21,11 @@ import org.jetbrains.kotlin.psi.KtValueArgument
  * `0`, `64` and `96` stay literal. Component sizes, strokes and borders are not spacing and are not
  * inspected. Files named `Spacing.kt` hold the tokens and are exempt.
  */
-class RawSpacingDp(config: Config = Config.empty) : Rule(config) {
-    override val issue = Issue(
-        id = "RawSpacingDp",
-        severity = Severity.Style,
-        description = "Spacing must read a Spacing token, not a raw dp literal.",
-        debt = Debt.FIVE_MINS,
-    )
-
+class RawSpacingDp(config: Config) :
+    Rule(
+        config,
+        "Spacing must read a Spacing token, not a raw dp literal.",
+    ) {
     override fun visitCallExpression(expression: KtCallExpression) {
         super.visitCallExpression(expression)
 
@@ -67,8 +61,7 @@ class RawSpacingDp(config: Config = Config.empty) : Rule(config) {
 
     private fun reportRawDp(expression: KtExpression) {
         report(
-            CodeSmell(
-                issue = issue,
+            Finding(
                 entity = Entity.from(expression),
                 message = MESSAGE,
             ),

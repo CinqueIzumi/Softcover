@@ -15,18 +15,19 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** step 3's second box (contract gaps) is done. F42: `RhaydusButton` has a `content` slot
-  overload; `SheetFooterButton.count` springs the Library "Show N titles" count through `StatNumber`.
-  F44 + F56: `RhaydusTheme` swaps in a snapping `MotionScheme` under reduced motion and provides
-  `LocalHaptics`; Softcover's `ReducedMotionScheme` and haptics provider are deleted. Entries pruned from
-  `candidates.md`.
-- **Next:** step 3, third box in § 3 below: tooling F33, F37, F54, F60, and `detektCheck` in the
-  foundation's `check`.
+- **State:** step 3's third box (tooling) is done. Both repos run detekt `dev.detekt` 2.0.0-alpha.6
+  (user-approved alpha) with working type resolution; every type-resolved rule fired on a probe. Shared
+  test excludes are `'**/*Test/**', '**/test/**'`; `UnreachableCode`, `RedundantSuspendModifier` and
+  `IgnoredReturnValue` (production only) are on; `detektCheck` is in the foundation's `check`. ktlint has
+  `NoUnusedImportsRule` (Softcover's detekt `UnusedImport` is gone) and the
+  `rhaydus_fully_qualified_exempt_package_segments` property (Softcover sets `fragment`). The surfaced
+  findings are fixed: 152 dead constructor `private val`s became parameters, Reading previews moved to
+  `ReadingScreenLayoutPreviews.kt`. Entries pruned from `candidates.md`.
+- **Next:** step 3, fourth box in § 3 below: data F55.
 - **Open questions:** none.
-- **Verification:** foundation `build` and Softcover `compileKotlinJvm styleCheck testAndroidHostTest`
-  green; test audit clean. Untested (no Compose UI harness): the footer count's spring, the snapping
-  scheme, the theme-provided haptics.
-- **Uncommitted:** all of the above, both repos. Not pushed: foundation `66fa1dd`, Softcover `c8b9b016f`;
+- **Verification:** reviewer findings applied. Foundation `check`, Softcover `styleCheck`,
+  `:detekt-rules:test`, `testAndroidHostTest`, `checkDocBudgets` green; test audit clean.
+- **Uncommitted:** all of the above, both repos. Not pushed: foundation `6f48c70`, Softcover `8508d036a`;
   push the foundation first.
 
 ## How to run a step
@@ -80,7 +81,7 @@ Bugs and gaps in shared code only; new components, design tokens and house-style
 - [x] Component bugs: F26, F27, F31 + F46, F36, F45, F47, F48, F49, F51; delete Softcover's forks and the
       detekt bans on the foundation versions.
 - [x] Contract gaps: F42, F44, F56.
-- [ ] Tooling: F33, F37, F54, F60; wire `detektCheck` into the foundation's `check`.
+- [x] Tooling: F33, F37, F54, F60; wire `detektCheck` into the foundation's `check`.
 - [ ] Data: F55.
 - [ ] Adopt F18, F20, F21 through `includeBuild("foundation/build-logic")`; delete the Softcover copies.
 

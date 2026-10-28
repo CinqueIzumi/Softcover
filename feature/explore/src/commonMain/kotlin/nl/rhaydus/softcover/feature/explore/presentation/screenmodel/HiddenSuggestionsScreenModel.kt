@@ -17,13 +17,13 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestions
 import nl.rhaydus.toad.ToadScreenModel
 
 internal class HiddenSuggestionsScreenModel(
-    private val getDismissedContinueSeriesBooksUseCase: GetDismissedContinueSeriesBooksUseCase,
-    private val getDismissedContinueSeriesUseCase: GetDismissedContinueSeriesUseCase,
-    private val undoContinueSeriesBookDismissalUseCase: UndoContinueSeriesBookDismissalUseCase,
-    private val undoContinueSeriesDismissalUseCase: UndoContinueSeriesDismissalUseCase,
-    private val dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
-    private val dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
-    private val enrichDismissedContinueSeriesMetadataUseCase: EnrichDismissedContinueSeriesMetadataUseCase,
+    getDismissedContinueSeriesBooksUseCase: GetDismissedContinueSeriesBooksUseCase,
+    getDismissedContinueSeriesUseCase: GetDismissedContinueSeriesUseCase,
+    undoContinueSeriesBookDismissalUseCase: UndoContinueSeriesBookDismissalUseCase,
+    undoContinueSeriesDismissalUseCase: UndoContinueSeriesDismissalUseCase,
+    dismissContinueSeriesBookUseCase: DismissContinueSeriesBookUseCase,
+    dismissContinueSeriesUseCase: DismissContinueSeriesUseCase,
+    enrichDismissedContinueSeriesMetadataUseCase: EnrichDismissedContinueSeriesMetadataUseCase,
     appDispatchers: AppDispatchers,
     flows: List<HiddenSuggestionsCollector>,
 ) : ToadScreenModel<

@@ -58,7 +58,7 @@ internal data class OnBecauseYouReadGenreSelectedAction(val genre: String?) : Ex
 
         dependencies.setBecauseYouReadGenreUseCase(genre = genre)
             .onFailure {
-                scope.setState { it.copy(loadingBecauseYouReadBooks = false) }
+                scope.setState { state -> state.copy(loadingBecauseYouReadBooks = false) }
             }
     }
 }

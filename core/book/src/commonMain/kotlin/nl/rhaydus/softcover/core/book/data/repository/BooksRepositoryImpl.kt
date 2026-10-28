@@ -37,7 +37,6 @@ import nl.rhaydus.softcover.core.domain.model.TrendingPeriod
 import nl.rhaydus.softcover.core.domain.model.UpcomingWindow
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.domain.model.isBlank
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -822,7 +821,7 @@ internal class BooksRepositoryImpl(
                 runCatching {
                     booksRemoteDataSource.removeBookFromLibrary(book = book)
                 }.onSuccess {
-                    book.userBook?.id?.let { userBookCacheGate.removeUserBooks(ids = listOf(it)) }
+                    book.userBook?.id?.let { userBookId -> userBookCacheGate.removeUserBooks(ids = listOf(userBookId)) }
                 }.onFailure { error ->
                     if (error is CancellationException) throw error
 

@@ -1,17 +1,22 @@
 package nl.rhaydus.softcover.detekt
 
-import io.gitlab.arturbosch.detekt.api.CodeSmell
-import io.gitlab.arturbosch.detekt.api.Config
-import io.gitlab.arturbosch.detekt.api.Debt
-import io.gitlab.arturbosch.detekt.api.Entity
-import io.gitlab.arturbosch.detekt.api.Issue
-import io.gitlab.arturbosch.detekt.api.Rule
-import io.gitlab.arturbosch.detekt.api.Severity
-import io.gitlab.arturbosch.detekt.api.internal.RequiresTypeResolution
-import org.jetbrains.kotlin.com.intellij.psi.PsiElement
-import org.jetbrains.kotlin.descriptors.CallableDescriptor
-import org.jetbrains.kotlin.descriptors.ClassDescriptor
-import org.jetbrains.kotlin.descriptors.ConstructorDescriptor
+import dev.detekt.api.Config
+import dev.detekt.api.Entity
+import dev.detekt.api.Finding
+import dev.detekt.api.RequiresAnalysisApi
+import dev.detekt.api.Rule
+import org.jetbrains.kotlin.analysis.api.KaSession
+import org.jetbrains.kotlin.analysis.api.analyze
+import org.jetbrains.kotlin.analysis.api.resolution.successfulFunctionCallOrNull
+import org.jetbrains.kotlin.analysis.api.resolution.symbol
+import org.jetbrains.kotlin.analysis.api.symbols.KaCallableSymbol
+import org.jetbrains.kotlin.analysis.api.symbols.KaConstructorSymbol
+import org.jetbrains.kotlin.analysis.api.types.KaClassType
+import org.jetbrains.kotlin.analysis.api.types.KaType
+import org.jetbrains.kotlin.analysis.api.types.KaTypeArgumentWithVariance
+import com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.psi.KtAnnotated
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtClassOrObject
@@ -23,71 +28,67 @@ import org.jetbrains.kotlin.psi.KtPropertyAccessor
 import org.jetbrains.kotlin.psi.psiUtil.collectDescendantsOfType
 import org.jetbrains.kotlin.psi.psiUtil.getStrictParentOfType
 import org.jetbrains.kotlin.psi.psiUtil.parents
-import org.jetbrains.kotlin.resolve.BindingContext
-import org.jetbrains.kotlin.resolve.calls.util.getResolvedCall
-import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
-import org.jetbrains.kotlin.types.KotlinType
-import org.jetbrains.kotlin.types.typeUtil.supertypes
 
-@RequiresTypeResolution
-class UiModelBuiltInRender(config: Config = Config.empty) : Rule(config) {
-    override val issue = Issue(
-        id = "UiModelBuiltInRender",
-        severity = Severity.Style,
-        description = "A UI model must be built outside render code and UiState members.",
-        debt = Debt.TWENTY_MINS,
-    )
-
+class UiModelBuiltInRender(config: Config) :
+    Rule(
+        config,
+        "A UI model must be built outside render code and UiState members.",
+    ),
+    RequiresAnalysisApi {
     override fun visitCallExpression(expression: KtCallExpression) {
         super.visitCallExpression(expression)
 
-        if (bindingContext == BindingContext.EMPTY) return
+        val builtInRender = analyze(expression) {
+            buildsUiModel(expression) && (isBuiltInRender(expression) || isBuiltInUiStateMember(expression))
+        }
 
-        if (expression.buildsUiModel().not()) return
-
-        if (expression.isBuiltInRender().not() && expression.isBuiltInUiStateMember().not()) return
+        if (builtInRender.not()) return
 
         report(
-            CodeSmell(
-                issue = issue,
+            Finding(
                 entity = Entity.from(expression),
                 message = MESSAGE,
             ),
         )
     }
 
-    private fun KtCallExpression.buildsUiModel(): Boolean {
-        val descriptor = getResolvedCall(bindingContext)?.resultingDescriptor ?: return false
-        val returnType = descriptor.returnType ?: return false
+    private fun KaSession.buildsUiModel(call: KtCallExpression): Boolean {
+        val symbol = call.resolveToCall()?.successfulFunctionCallOrNull()?.symbol ?: return false
 
-        if (returnType.isUiModel().not()) return false
+        if (isUiModel(symbol.returnType).not()) return false
 
-        if (descriptor.isUiStateMember()) return false
+        if (symbol.isUiStateMember()) return false
 
-        return descriptor is ConstructorDescriptor || descriptor.fqNameSafe.asString().startsWith(PACKAGE_PREFIX)
+        return symbol is KaConstructorSymbol || symbol.callableId.startsWithPackagePrefix()
     }
 
-    private fun CallableDescriptor.isUiStateMember(): Boolean {
-        val owner = containingDeclaration as? ClassDescriptor ?: return false
+    private fun KaCallableSymbol.isUiStateMember(): Boolean {
+        val owner = if (this is KaConstructorSymbol) containingClassId else callableId?.classId
 
-        return owner.name.asString().endsWith(UI_STATE) && owner.fqNameSafe.asString().startsWith(PACKAGE_PREFIX)
+        return owner != null &&
+            owner.relativeClassName.shortName().asString().endsWith(UI_STATE) &&
+            owner.asSingleFqName().asString().startsWith(PACKAGE_PREFIX)
     }
 
-    private fun KtCallExpression.isBuiltInRender(): Boolean {
-        val ancestors = parents.toList()
+    private fun CallableId?.startsWithPackagePrefix(): Boolean {
+        return this?.asSingleFqName()?.asString()?.startsWith(PACKAGE_PREFIX) == true
+    }
+
+    private fun KaSession.isBuiltInRender(call: KtCallExpression): Boolean {
+        val ancestors = call.parents.toList()
 
         if (ancestors.any { it.isSkipped() }) return false
 
-        val inComposable = ancestors.any { it.isComposable() }
+        val inComposable = ancestors.any { isComposable(it) }
         val inRenderProperty = ancestors.any {
-            it is KtProperty && it.isLocal.not() && containingKtFile.declaresComposable()
+            it is KtProperty && it.isLocal.not() && call.containingKtFile.declaresComposable()
         }
 
         return inComposable || inRenderProperty
     }
 
-    private fun KtCallExpression.isBuiltInUiStateMember(): Boolean {
-        val ancestors = parents.toList()
+    private fun KaSession.isBuiltInUiStateMember(call: KtCallExpression): Boolean {
+        val ancestors = call.parents.toList()
 
         if (ancestors.any { it.isSkipped() }) return false
 
@@ -97,23 +98,23 @@ class UiModelBuiltInRender(config: Config = Config.empty) : Rule(config) {
         val inUiState = owner.name?.endsWith(UI_STATE) == true &&
             owner.fqName?.asString()?.startsWith(PACKAGE_PREFIX) == true
 
-        return inUiState && member.returnsUiModel()
+        return inUiState && returnsUiModel(member)
     }
 
-    private fun PsiElement.returnsUiModel(): Boolean {
-        val declaration = (this as? KtPropertyAccessor)?.property ?: this
-        val descriptor = bindingContext[BindingContext.DECLARATION_TO_DESCRIPTOR, declaration] as? CallableDescriptor
+    private fun KaSession.returnsUiModel(member: PsiElement): Boolean {
+        val declaration = (member as? KtPropertyAccessor)?.property ?: member as? KtNamedFunction ?: return false
+        val symbol = declaration.symbol as? KaCallableSymbol ?: return false
 
-        return descriptor?.returnType?.carriesUiModel() == true
+        return carriesUiModel(symbol.returnType)
     }
 
-    private fun PsiElement.isComposable(): Boolean {
-        return when (this) {
-            is KtLambdaExpression -> bindingContext[BindingContext.EXPECTED_EXPRESSION_TYPE, this]?.annotations?.any {
-                it.fqName?.shortName()?.asString() == COMPOSABLE
+    private fun KaSession.isComposable(element: PsiElement): Boolean {
+        return when (element) {
+            is KtLambdaExpression -> element.expectedType?.annotations?.any {
+                it.classId?.shortClassName?.asString() == COMPOSABLE
             } == true
-            is KtProperty -> hasAnnotation(COMPOSABLE) || typeReference?.hasAnnotation(COMPOSABLE) == true
-            is KtAnnotated -> hasAnnotation(COMPOSABLE)
+            is KtProperty -> element.hasAnnotation(COMPOSABLE) || element.typeReference?.hasAnnotation(COMPOSABLE) == true
+            is KtAnnotated -> element.hasAnnotation(COMPOSABLE)
             else -> false
         }
     }
@@ -136,31 +137,53 @@ class UiModelBuiltInRender(config: Config = Config.empty) : Rule(config) {
         }
     }
 
-    private fun KotlinType.isUiModel(): Boolean {
-        return (listOf(this) + supertypes()).any {
-            it.constructor.declarationDescriptor?.name?.asString()?.endsWith(UI_MODEL) == true
+    private fun KaSession.isUiModel(type: KaType): Boolean {
+        return (sequenceOf(type) + type.allSupertypes).any {
+            (it as? KaClassType)?.classId?.relativeClassName?.shortName()?.asString()?.endsWith(UI_MODEL) == true
         }
     }
 
-    private fun KotlinType.carriesUiModel(depth: Int = 0): Boolean {
-        if (isUiModel()) return true
+    private fun KaSession.carriesUiModel(
+        type: KaType,
+        depth: Int = 0,
+    ): Boolean {
+        if (isUiModel(type)) return true
 
         if (depth >= MAX_DEPTH) return false
 
-        val inArguments = arguments.any { it.isStarProjection.not() && it.type.carriesUiModel(depth + 1) }
+        val inArguments = (type as? KaClassType)?.typeArguments.orEmpty().any { argument ->
+            argument is KaTypeArgumentWithVariance &&
+                carriesUiModel(
+                    type = argument.type,
+                    depth = depth + 1,
+                )
+        }
 
-        return inArguments || isWrapperOfUiModel(depth)
+        return inArguments ||
+            isWrapperOfUiModel(
+                type = type,
+                depth = depth,
+            )
     }
 
-    private fun KotlinType.isWrapperOfUiModel(depth: Int): Boolean {
-        val descriptor = constructor.declarationDescriptor as? ClassDescriptor ?: return false
+    private fun KaSession.isWrapperOfUiModel(
+        type: KaType,
+        depth: Int,
+    ): Boolean {
+        val symbol = type.expandedSymbol ?: return false
+        val classId: ClassId = symbol.classId ?: return false
 
-        if (descriptor.fqNameSafe.asString().startsWith(PACKAGE_PREFIX).not()) return false
+        if (classId.asSingleFqName().asString().startsWith(PACKAGE_PREFIX).not()) return false
 
-        if (descriptor.name.asString().endsWith(UI_STATE)) return false
+        if (classId.relativeClassName.shortName().asString().endsWith(UI_STATE)) return false
 
-        return descriptor.constructors.any { constructor ->
-            constructor.valueParameters.any { it.type.carriesUiModel(depth + 1) }
+        return symbol.declaredMemberScope.constructors.any { constructor ->
+            constructor.valueParameters.any { parameter ->
+                carriesUiModel(
+                    type = parameter.returnType,
+                    depth = depth + 1,
+                )
+            }
         }
     }
 

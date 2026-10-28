@@ -68,7 +68,7 @@ fun reviewDocumentFromSlate(slate: Any?): ReviewDocument {
     val paragraphs: List<ReviewParagraph> = blocks.mapNotNull { block ->
         val map = block as? Map<*, *> ?: return@mapNotNull null
 
-        val children = map["children"] as? List<*> ?: emptyList<Any?>()
+        val children = (map["children"] as? List<*>).orEmpty()
 
         ReviewParagraph(runs = runsFrom(children = children))
     }
@@ -107,7 +107,7 @@ private fun runsFrom(children: List<*>): List<ReviewRun> =
                 ),
             )
         } else {
-            val nested = map["children"] as? List<*> ?: emptyList<Any?>()
+            val nested = (map["children"] as? List<*>).orEmpty()
 
             runsFrom(children = nested)
         }

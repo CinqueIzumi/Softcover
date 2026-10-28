@@ -25,7 +25,7 @@ private class EntryHeading(
 internal fun PublishedDocument.toChangelog(): Changelog {
     val entries = mutableListOf<ChangelogEntry>()
     var heading: EntryHeading? = null
-    var body = mutableListOf<MarkdownBlock>()
+    val body = mutableListOf<MarkdownBlock>()
 
     fun closeEntry() {
         heading?.let { entries += it.toEntry(body = body) }
@@ -35,7 +35,7 @@ internal fun PublishedDocument.toChangelog(): Changelog {
         if (block is MarkdownBlock.Heading && block.level == ENTRY_HEADING_LEVEL) {
             closeEntry()
             heading = block.toEntryHeading()
-            body = mutableListOf()
+            body.clear()
 
             if (heading == null) {
                 AppLog.w("Skipping a changelog section whose heading is not \"<version>: <headline>\"")

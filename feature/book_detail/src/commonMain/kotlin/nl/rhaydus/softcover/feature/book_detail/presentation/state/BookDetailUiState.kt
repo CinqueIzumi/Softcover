@@ -421,7 +421,7 @@ internal data class BookDetailUiState(
         get() = userLists.firstOrNull { it.isOwned }
             ?.books
             ?.mapTo(mutableSetOf()) { it.editionId }
-            ?: emptySet()
+            .orEmpty()
 
     fun isEditionOwned(edition: BookEdition?): Boolean = edition != null && edition.id in ownedEditionIds
 

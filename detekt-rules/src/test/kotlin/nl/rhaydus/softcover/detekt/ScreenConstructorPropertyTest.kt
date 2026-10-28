@@ -1,39 +1,23 @@
 package nl.rhaydus.softcover.detekt
 
-import io.github.detekt.test.utils.KotlinCoreEnvironmentWrapper
-import io.github.detekt.test.utils.createEnvironment
-import io.gitlab.arturbosch.detekt.test.lint
-import io.gitlab.arturbosch.detekt.test.lintWithContext
+import dev.detekt.api.Config
+import dev.detekt.test.lintWithContext
+import dev.detekt.test.utils.KotlinEnvironmentContainer
+import dev.detekt.test.utils.createEnvironment
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ScreenConstructorPropertyTest {
-    private val rule = ScreenConstructorProperty()
+    private val rule = ScreenConstructorProperty(Config.empty)
 
     private fun lintWithTypes(body: String) = rule.lintWithContext(
-        wrapper.env,
+        env,
         HEADER + body,
         SCREEN_STUB,
     )
-
-    @Nested
-    inner class WithoutTypeResolution {
-        @Test
-        fun `reports nothing when linted without type resolution`() {
-            // ----- Arrange -----
-            val code = HEADER + "class S(val a: Plain) : Screen"
-
-            // ----- Act -----
-            val findings = rule.lint(code)
-
-            // ----- Assert -----
-            findings.shouldBeEmpty()
-        }
-    }
 
     @Nested
     inner class AcceptedProperties {
@@ -336,7 +320,7 @@ class ScreenConstructorPropertyTest {
     }
 
     companion object {
-        private lateinit var wrapper: KotlinCoreEnvironmentWrapper
+        private lateinit var env: KotlinEnvironmentContainer
 
         private val HEADER = """
             package nl.rhaydus.softcover.sample
@@ -362,13 +346,7 @@ class ScreenConstructorPropertyTest {
         @BeforeAll
         @JvmStatic
         fun setUp() {
-            wrapper = createEnvironment()
-        }
-
-        @AfterAll
-        @JvmStatic
-        fun tearDown() {
-            wrapper.dispose()
+            env = createEnvironment()
         }
     }
 }

@@ -16,7 +16,7 @@ import kotlin.math.roundToInt
 /** Stores the blurred backdrop and the gradient masks behind a book as files, reusing a file whose key already exists. */
 internal class BackdropImages(
     private val context: Context,
-    private val density: Float,
+    density: Float,
     private val store: WidgetImageStore,
 ) {
     /** Backdrops are blurred, so half resolution is invisible once Crop scales them up, and a quarter of the bytes. */

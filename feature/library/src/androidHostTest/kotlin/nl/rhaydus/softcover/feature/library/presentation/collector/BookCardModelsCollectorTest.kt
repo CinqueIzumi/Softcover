@@ -278,7 +278,7 @@ class BookCardModelsCollectorTest {
         gridLayout = layout,
         selectionMode = selectionMode,
         isRearranging = isRearranging,
-        sortModeByTab = (sortMode?.let { mapOf(tab.id to it) } ?: emptyMap()).toImmutableMap(),
+        sortModeByTab = sortMode?.let { mapOf(tab.id to it) }.orEmpty().toImmutableMap(),
     )
 
     @Nested

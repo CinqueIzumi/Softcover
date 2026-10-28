@@ -12,8 +12,8 @@ import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import nl.rhaydus.toad.ToadScreenModel
 
 internal class ScanScreenModel(
-    private val resolveBookByIsbnUseCase: ResolveBookByIsbnUseCase,
-    private val addBookByIsbnUseCase: AddBookByIsbnUseCase,
+    resolveBookByIsbnUseCase: ResolveBookByIsbnUseCase,
+    addBookByIsbnUseCase: AddBookByIsbnUseCase,
     dispatchers: AppDispatchers,
     flows: List<ScanCollector>,
     prefilledIsbn: String? = null,

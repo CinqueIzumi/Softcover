@@ -77,7 +77,7 @@ private const val UNCONFIRMED_TOKEN_ALLOWANCE = 2.0
  * deterministically.
  */
 internal class RateLimitInterceptor(
-    private val fallbackBucketSize: Int = ApiRateLimitTier.LEGACY_JWT.bucketSize,
+    fallbackBucketSize: Int = ApiRateLimitTier.LEGACY_JWT.bucketSize,
     private val refillTokensPerSecond: Double = ApiRateLimitTier.LEGACY_JWT.refillTokensPerSecond,
     private val timeSource: TimeSource = TimeSource.Monotonic,
 ) : ApolloInterceptor {

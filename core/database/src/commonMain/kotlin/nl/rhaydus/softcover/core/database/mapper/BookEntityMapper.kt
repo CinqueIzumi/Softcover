@@ -219,11 +219,11 @@ fun BookFullEntity.toModel(): Book {
         uiEditions.firstOrNull { it.id == id }
     }
 
-    val journals = userBookWithJournals?.journals?.map { it.toModel() } ?: emptyList()
+    val journals = userBookWithJournals?.journals?.map { it.toModel() }.orEmpty()
     val reads = userBookWithJournals?.userBookReads
         ?.sortedBy { it.id }
         ?.map { it.toModel() }
-        ?: emptyList()
+        .orEmpty()
 
     return Book(
         id = book.id,

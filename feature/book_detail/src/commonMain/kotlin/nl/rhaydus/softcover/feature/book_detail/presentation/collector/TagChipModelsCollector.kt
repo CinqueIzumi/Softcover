@@ -60,7 +60,7 @@ internal class TagChipModelsCollector : BookDetailCollector {
                         communityTagGroups = communityTagGroups.toImmutableList(),
                         tagEditorOpenerChip = tagEditorOpenerChip(hasTags = snapshot.userTags.isNotEmpty()),
                         userTagEditorGroups = snapshot.userTags.toUserTagEditorChipGroups(),
-                        userTagByEditorChipKey = snapshot.userTags.associateBy { it.chipKey }.toImmutableMap(),
+                        userTagByEditorChipKey = snapshot.userTags.associateBy { tag -> tag.chipKey }.toImmutableMap(),
                     )
                 }
             }

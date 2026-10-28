@@ -1,11 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
-import com.android.build.api.variant.ApplicationAndroidComponentsExtension
-import com.android.build.api.variant.TestAndroidComponentsExtension
-import io.gitlab.arturbosch.detekt.Detekt
-import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import dev.detekt.gradle.Detekt
+import dev.detekt.gradle.extensions.DetektExtension
 import org.jetbrains.compose.resources.ResourcesExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -56,35 +53,28 @@ val extractRhaydusDetektConfig = tasks.register<Sync>("extractRhaydusDetektConfi
     into(layout.buildDirectory.dir("rhaydus-detekt"))
 }
 
-// The production detekt tasks that carry TYPE RESOLUTION, by module shape: KMP libraries get one task per
-// target, the Android application and the desktop JVM app get a single all-variants `detektMain`. Only
-// these can run the foundation's `rhaydus:UnguardedFlowTerminalRead` rule (F1) — it is `@RequiresTypeResolution`,
-// so it resolves `Flow.first()` apart from `Collection.first()` via the compile classpath, and is silently
-// INERT on the source-only `detekt` task. Per-variant tasks are deliberately excluded.
-//
-// `detektAndroidHostTest` covers the unit tests. It was previously left out, and the cost of that showed:
-// by the time it was first run it had accumulated 3,308 findings. All but 46 came from a single stale glob —
-// detekt 1.23.8's built-in "these rules don't apply to test code" exclude lists predate AGP 9's KMP source
-// sets, so they have never heard of `androidHostTest` and fired `FunctionNaming` at 3,144 backticked test
-// names. That is repaired in the shared baseline (see the test-excludes block in the foundation
-// `config/detekt.yml`); the rest were fixed in the tests themselves. Keeping the task gated is what stops
-// it silently refilling — an ungated task is indistinguishable from a passing one right up until you run it.
+// The detekt tasks that carry TYPE RESOLUTION, by module shape: KMP libraries get one task per compilation
+// (`detektMainAndroid`, `detektMainJvm`, and `detektHostTestAndroid` for the unit tests), the Android
+// application and the minified test module get a `detektMain` lifecycle over their variants, and the desktop
+// JVM app gets the `main` compilation's `detektMain`. Only these can run the foundation's
+// `rhaydus:UnguardedFlowTerminalRead` rule, which resolves `Flow.first()` apart from `Collection.first()`
+// through the Analysis API; the source-only `detekt` and `detekt<SourceSet>SourceSet` tasks never run it.
 val typeResolvedDetektTasks = setOf(
-    "detektAndroidMain",
-    "detektJvmMain",
+    "detektMainAndroid",
+    "detektMainJvm",
     "detektMain",
-    "detektAndroidHostTest",
+    "detektHostTestAndroid",
 )
 
 // Captured here because the generated `libs` accessor is scoped to this script's project and is not
 // resolvable from inside the `subprojects { }` block below.
 val rhaydusDetektRules = libs.rhaydus.detektRules
 
-// Apply detekt uniformly to every Kotlin module (no baseline — gates from zero on the shared config).
+// Apply detekt uniformly to every Kotlin module (no baseline - gates from zero on the shared config).
 // Wired centrally here, alongside the ktlint/styleCheck/checkModuleGraph gates, rather than per module.
 subprojects {
     apply(plugin = "com.autonomousapps.dependency-analysis")
-    apply(plugin = "io.gitlab.arturbosch.detekt")
+    apply(plugin = "dev.detekt")
 
     // Coverage instrumentation for every shipped module; the merged report is wired at the root above.
     if (path != ":detekt-rules") {
@@ -102,7 +92,7 @@ subprojects {
     }
 
     configure<DetektExtension> {
-        buildUponDefaultConfig = true
+        buildUponDefaultConfig.set(true)
         // Layered, later wins: the shared foundation baseline, then Softcover's own deltas on top.
         config.setFrom(
             listOfNotNull(
@@ -111,42 +101,29 @@ subprojects {
                 rootProject.file("config/detekt/softcover-rules.yml").takeIf { path != ":detekt-rules" },
             ),
         )
-        parallel = true
+        parallel.set(true)
     }
 
     tasks.withType<Detekt>().configureEach {
         dependsOn(extractRhaydusDetektConfig)
-        jvmTarget = "11"
         reports {
             html.required.set(true)
-            xml.required.set(true)
-            txt.required.set(false)
+            checkstyle.required.set(true)
+            markdown.required.set(false)
             sarif.required.set(false)
         }
     }
 
-    // Point each type-resolved task at the HAND-WRITTEN sources of the compilation it belongs to, keeping
-    // the compilation's classpath (which is what type resolution actually needs) untouched. Two reasons this
-    // has to be spelled out rather than left to detekt's defaults:
-    //
-    //  1. detekt seeds a KMP task with only that target's OWN source set, so a module whose code lives in
-    //     `commonMain` would analyse nothing and silently report NO-SOURCE. `commonMain` is otherwise
-    //     reachable only via `detektMetadataCommonMain`, which has no type resolution and therefore cannot
-    //     run the crash-safety rule at all.
-    //  2. The compilation's source set also carries GENERATED code — KSP/Room DAO impls, Apollo operations,
-    //     Compose resource accessors. Analysing it produced ~2700 findings we neither own nor can fix.
-    //
-    // This must run in `afterEvaluate`: detekt seeds the KMP task sources from its own `afterEvaluate`, so a
-    // plain `configureEach` here would be overwritten afterwards.
-    //
-    // `commonMain` is consequently analysed twice on a KMP module with a jvm target (once per compilation).
-    // That is deliberate: a jvm-only file referencing a commonMain declaration needs commonMain in scope for
-    // its receiver type to resolve, and an unresolved receiver makes the crash-safety rule silently miss.
-    // Duplicate findings are visible only while a violation exists; the steady state is zero.
+    // Point each KMP compilation task at the HAND-WRITTEN sources it belongs to, keeping the compilation's
+    // classpath (which is what type resolution needs) untouched. The compilation's source sets also carry
+    // GENERATED code - KSP/Room DAO impls, Apollo operations, Compose resource accessors - which we neither
+    // own nor can fix. `commonMain` is analysed once per compilation: a platform file referencing a
+    // `commonMain` declaration needs it in scope for the receiver type to resolve. Duplicate findings are
+    // visible only while a violation exists; the steady state is zero.
     afterEvaluate {
         tasks.withType<Detekt>().configureEach {
             when (name) {
-                "detektAndroidMain" -> setSource(
+                "detektMainAndroid" -> setSource(
                     project.files(
                         "src/commonMain/kotlin",
                         "src/mobileMain/kotlin",
@@ -154,123 +131,31 @@ subprojects {
                     ),
                 )
 
-                "detektJvmMain" -> setSource(project.files("src/commonMain/kotlin", "src/jvmMain/kotlin"))
+                "detektMainJvm" -> setSource(project.files("src/commonMain/kotlin", "src/jvmMain/kotlin"))
 
-                // The unit tests. Spelled out for the same reason as the main compilations: detekt would
-                // otherwise seed only the target's own source set, so a module that ever puts shared test
-                // code in `commonTest` would have it silently skipped. Every module's tests live in
-                // `androidHostTest` today; naming `commonTest` here means that stays true if one moves.
-                "detektAndroidHostTest" -> setSource(
+                "detektHostTestAndroid" -> setSource(
                     project.files(
                         "src/commonTest/kotlin",
                         "src/androidHostTest/kotlin",
                     ),
                 )
-
-                // `:desktopApp`'s own `detektMain` — the variant-neutral `src/main` layout. `:app`'s
-                // `detektMain` is a source-less lifecycle task and never reaches this branch.
-                "detektMain" -> setSource(project.files("src/main/java", "src/main/kotlin"))
-
-                // `:app`'s per-variant tasks additionally read that variant's OWN source set, which is
-                // where the build-type-specific code lives: the debug-routes bindings and (since the
-                // component-library migration moved them out of `:core:designsystem`) the debug screens
-                // themselves. Without this they would be silently unscanned — `:app` is the only module
-                // with build types, so it is the only place this applies.
-                //
-                // Each variant gets only its own source set, never both: `src/debug` and `src/release`
-                // each declare `nl.rhaydus.softcover.di.debugRoutesModule`, so putting them in one
-                // scope would hand type resolution two conflicting declarations of the same symbol.
-                "detektDebug" -> setSource(
-                    project.files(
-                        "src/main/java",
-                        "src/main/kotlin",
-                        "src/debug/java",
-                        "src/debug/kotlin",
-                    ),
-                )
-
-                "detektRelease" -> setSource(
-                    project.files(
-                        "src/main/java",
-                        "src/main/kotlin",
-                        "src/release/java",
-                        "src/release/kotlin",
-                    ),
-                )
             }
         }
     }
 
-    // detekt's own Android integration keys off the legacy `kotlin-android` plugin id and AGP's removed
-    // `BaseExtension`, so with AGP built-in Kotlin it registers no per-variant tasks. `:app` therefore gets
-    // its type-resolved `detekt<Variant>` tasks here, classpathed from the variant's Kotlin compilation.
-    // `detektMain` stays the lifecycle name the gates below fan out from.
-    pluginManager.withPlugin("com.android.application") {
-        val detektExtension = extensions.getByType<DetektExtension>()
-        val androidComponents = extensions.getByType<ApplicationAndroidComponentsExtension>()
-
-        androidComponents.onVariants { variant ->
-            val capitalizedName = variant.name.replaceFirstChar { it.uppercase() }
-
-            tasks.register<Detekt>("detekt$capitalizedName") {
-                description = "Run detekt with type resolution on the ${variant.name} variant."
-                group = "verification"
-                config.setFrom(detektExtension.config)
-                buildUponDefaultConfig = detektExtension.buildUponDefaultConfig
-                parallel = detektExtension.parallel
-                include("**/*.kt", "**/*.kts")
-                exclude("**/resources/**", "**/build/**")
-                classpath.setFrom(
-                    tasks.named<KotlinCompile>("compile${capitalizedName}Kotlin").map { it.libraries },
-                    androidComponents.sdkComponents.bootClasspath,
-                )
-                reports {
-                    xml.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.xml"))
-                    html.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.html"))
-                }
-            }
-        }
-
-        tasks.register("detektMain") {
-            group = "verification"
-            description = "Run type-resolved detekt on every :app variant."
-            dependsOn(tasks.matching { it.name == "detektDebug" || it.name == "detektRelease" })
-            // An empty fan-out would pass green with nothing scanned, so a detekt/AGP change that stops
-            // registering the variant tasks must fail here instead.
-            doFirst {
-                val variantTasks = taskDependencies.getDependencies(this).filterIsInstance<Detekt>()
-                check(variantTasks.isNotEmpty()) {
-                    "No type-resolved detekt<Variant> task is registered for :app; the detekt gate would pass vacuously."
-                }
+    // A lifecycle `detektMain` that fans out to nothing would pass green with nothing scanned, so a
+    // detekt/AGP change that stops registering the variant tasks must fail here instead.
+    tasks.matching { it.name == "detektMain" && it !is Detekt }.configureEach {
+        doFirst {
+            val variantTasks = taskDependencies.getDependencies(this).filterIsInstance<Detekt>()
+            check(variantTasks.isNotEmpty()) {
+                "No type-resolved detekt<Variant> task is registered for $path; the detekt gate would pass vacuously."
             }
         }
     }
 
-    pluginManager.withPlugin("com.android.test") {
-        val detektExtension = extensions.getByType<DetektExtension>()
-        val androidComponents = extensions.getByType<TestAndroidComponentsExtension>()
-
-        tasks.register<Detekt>("detektMain") {
-            description = "Run detekt with type resolution on the minified test module."
-            group = "verification"
-            config.setFrom(detektExtension.config)
-            buildUponDefaultConfig = detektExtension.buildUponDefaultConfig
-            parallel = detektExtension.parallel
-            include("**/*.kt", "**/*.kts")
-            exclude("**/resources/**", "**/build/**")
-            classpath.setFrom(
-                tasks.named<KotlinCompile>("compileMinifiedKotlin").map { it.libraries },
-                androidComponents.sdkComponents.bootClasspath,
-            )
-            reports {
-                xml.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.xml"))
-                html.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.html"))
-            }
-        }
-    }
-
-    // The source-only `detekt` task parses without a classpath, so the crash-safety rule is inert on it and
-    // its remaining findings are a strict subset of what the type-resolved tasks report. Disabled so it
+    // The source-only `detekt` task parses without a classpath, so every type-resolved rule is inert on it
+    // and its remaining findings are a strict subset of what the type-resolved tasks report. Disabled so it
     // neither double-reports nor lends a false sense of coverage.
     tasks.matching { it.name == "detekt" }.configureEach {
         enabled = false

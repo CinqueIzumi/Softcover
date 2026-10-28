@@ -1,16 +1,18 @@
 package nl.rhaydus.softcover.detekt
 
-import io.github.detekt.test.utils.compileContentForTest
-import io.gitlab.arturbosch.detekt.test.lint
+import dev.detekt.api.Config
+import dev.detekt.test.lint
+import dev.detekt.test.utils.compileContentForTest
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.io.path.Path
 
 class RawCornerDpTest {
-    private val rule = RawCornerDp()
+    private val rule = RawCornerDp(Config.empty)
 
     @Nested
     inner class FlaggedCorners {
@@ -417,7 +419,7 @@ class RawCornerDpTest {
             // ----- Arrange -----
             val file = compileContentForTest(
                 content = "val md = RoundedCornerShape(8.dp)",
-                filename = "/project/core/component/src/commonMain/Corners.kt",
+                path = Path("/project/core/component/src/commonMain/Corners.kt"),
             )
 
             // ----- Act -----

@@ -1,34 +1,27 @@
 package nl.rhaydus.softcover.detekt
 
-import io.gitlab.arturbosch.detekt.api.CodeSmell
-import io.gitlab.arturbosch.detekt.api.Config
-import io.gitlab.arturbosch.detekt.api.Debt
-import io.gitlab.arturbosch.detekt.api.Entity
-import io.gitlab.arturbosch.detekt.api.Issue
-import io.gitlab.arturbosch.detekt.api.Rule
-import io.gitlab.arturbosch.detekt.api.Severity
+import dev.detekt.api.Config
+import dev.detekt.api.Entity
+import dev.detekt.api.Finding
+import dev.detekt.api.Rule
 import org.jetbrains.kotlin.psi.KtImportDirective
 
 /**
  * Reports an import of `rememberHaptics`, so haptics are read from `LocalHaptics` rather than created
  * per call site. Matches the import, so it needs no type resolution.
  */
-class RememberHapticsOutsideTheme(config: Config = Config.empty) : Rule(config) {
-    override val issue = Issue(
-        id = "RememberHapticsOutsideTheme",
-        severity = Severity.Style,
-        description = "Haptics must be read from LocalHaptics, not created with rememberHaptics.",
-        debt = Debt.FIVE_MINS,
-    )
-
+class RememberHapticsOutsideTheme(config: Config) :
+    Rule(
+        config,
+        "Haptics must be read from LocalHaptics, not created with rememberHaptics.",
+    ) {
     override fun visitImportDirective(importDirective: KtImportDirective) {
         super.visitImportDirective(importDirective)
 
         if (importDirective.importedFqName?.asString() != REMEMBER_HAPTICS) return
 
         report(
-            CodeSmell(
-                issue = issue,
+            Finding(
                 entity = Entity.from(importDirective),
                 message = MESSAGE,
             ),

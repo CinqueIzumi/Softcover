@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.core.net.toUri
 import java.io.File
 import java.security.MessageDigest
+import java.util.Locale
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
@@ -123,7 +124,15 @@ internal class WidgetImageStore(
         format: WidgetImageFormat,
     ): String {
         val digest = MessageDigest.getInstance("SHA-256").digest(key.toByteArray())
-        return digest.joinToString(separator = "") { "%02x".format(it) } + format.extension
+        val hex = digest.joinToString(separator = "") { byte ->
+            String.format(
+                Locale.ROOT,
+                "%02x",
+                byte,
+            )
+        }
+
+        return hex + format.extension
     }
 
     private companion object {

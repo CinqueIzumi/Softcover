@@ -114,7 +114,6 @@ class ListsRemoteDataSourceImplTest {
         @Test
         fun `maps each list to a ListSignature with correct signature string`() = runTest {
             // ----- Arrange -----
-            val userId = 1
             val updatedAt = "2024-01-10"
             val maxBookUpdatedAt = "2024-01-09"
             val count = 3
@@ -173,7 +172,6 @@ class ListsRemoteDataSourceImplTest {
         @Test
         fun `signature uses empty strings for null updatedAt and null maxListBookUpdatedAt`() = runTest {
             // ----- Arrange -----
-            val userId = 2
             val queryData = mockk<GetUserListSignaturesQuery.Data>()
             val meEntry = mockk<GetUserListSignaturesQuery.Data.Me>()
             val listEntry = mockk<GetUserListSignaturesQuery.Data.Me.List>()
@@ -219,7 +217,6 @@ class ListsRemoteDataSourceImplTest {
         @Test
         fun `uses count 0 when aggregate is null`() = runTest {
             // ----- Arrange -----
-            val userId = 3
             val queryData = mockk<GetUserListSignaturesQuery.Data>()
             val meEntry = mockk<GetUserListSignaturesQuery.Data.Me>()
             val listEntry = mockk<GetUserListSignaturesQuery.Data.Me.List>()
