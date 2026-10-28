@@ -5,6 +5,7 @@ import androidx.room.Room
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -14,6 +15,7 @@ import nl.rhaydus.softcover.core.database.mapper.toEntity
 import nl.rhaydus.softcover.core.database.mapper.toModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.DatePrecision
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import org.junit.jupiter.api.AfterEach
@@ -52,6 +54,8 @@ class BookDaoCacheBookReadsTest {
         progress = 0f,
         startedAt = null,
         finishedAt = null,
+        finishedAtPrecision = null,
+        editionPages = null,
     )
 
     private fun book(
@@ -118,6 +122,32 @@ class BookDaoCacheBookReadsTest {
             // ----- Assert -----
             readIdsOf(bookId = 1).sorted() shouldContainExactly listOf(1, 2)
         }
+
+        @Test
+        fun `persists the finish precision and edition pages of a read`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val cached = book(
+                id = 1,
+                userBookId = 10,
+                reads = listOf(
+                    read(id = 1).copy(
+                        finishedAtPrecision = DatePrecision.MONTH,
+                        editionPages = 320,
+                    ),
+                ),
+            )
+
+            // ----- Act -----
+            dao.cacheBook(book = cached)
+
+            // ----- Assert -----
+            val stored = dao.observeBookById(id = 1).first()
+                .shouldNotBeNull()
+                .userBookWithJournals.shouldNotBeNull()
+                .userBookReads.single()
+            stored.finishedAtPrecision shouldBe 2
+            stored.editionPages shouldBe 320
+        }
     }
 
     @Nested
@@ -133,11 +163,13 @@ class BookDaoCacheBookReadsTest {
         @Test
         fun `replacing reads 1 and 2 with reads 2 and 3 leaves exactly 2 and 3`() = runTest(testDispatcher) {
             // ----- Arrange -----
-            dao.cacheBook(book = book(
-                id = 1,
-                userBookId = 10,
-                reads = listOf(read(id = 1), read(id = 2)),
-            ),)
+            dao.cacheBook(
+                book = book(
+                    id = 1,
+                    userBookId = 10,
+                    reads = listOf(read(id = 1), read(id = 2)),
+                ),
+            )
 
             // ----- Act -----
             replaceReads(
@@ -152,11 +184,13 @@ class BookDaoCacheBookReadsTest {
         @Test
         fun `replacing with no reads removes every stored read`() = runTest(testDispatcher) {
             // ----- Arrange -----
-            dao.cacheBook(book = book(
-                id = 1,
-                userBookId = 10,
-                reads = listOf(read(id = 1), read(id = 2)),
-            ),)
+            dao.cacheBook(
+                book = book(
+                    id = 1,
+                    userBookId = 10,
+                    reads = listOf(read(id = 1), read(id = 2)),
+                ),
+            )
 
             // ----- Act -----
             replaceReads(
@@ -171,22 +205,28 @@ class BookDaoCacheBookReadsTest {
         @Test
         fun `a kept read takes the new values`() = runTest(testDispatcher) {
             // ----- Arrange -----
-            dao.cacheBook(book = book(
-                id = 1,
-                userBookId = 10,
-                reads = listOf(read(
-                    id = 2,
-                    currentPage = 10,
-                ),),
-            ),)
+            dao.cacheBook(
+                book = book(
+                    id = 1,
+                    userBookId = 10,
+                    reads = listOf(
+                        read(
+                            id = 2,
+                            currentPage = 10,
+                        ),
+                    ),
+                ),
+            )
 
             // ----- Act -----
             replaceReads(
                 userBookId = 10,
-                reads = listOf(read(
-                    id = 2,
-                    currentPage = 99,
-                ),),
+                reads = listOf(
+                    read(
+                        id = 2,
+                        currentPage = 99,
+                    ),
+                ),
             )
 
             // ----- Assert -----
@@ -198,16 +238,20 @@ class BookDaoCacheBookReadsTest {
         @Test
         fun `another user book's reads are untouched`() = runTest(testDispatcher) {
             // ----- Arrange -----
-            dao.cacheBook(book = book(
-                id = 1,
-                userBookId = 10,
-                reads = listOf(read(id = 1), read(id = 2)),
-            ),)
-            dao.cacheBook(book = book(
-                id = 2,
-                userBookId = 20,
-                reads = listOf(read(id = 7), read(id = 8)),
-            ),)
+            dao.cacheBook(
+                book = book(
+                    id = 1,
+                    userBookId = 10,
+                    reads = listOf(read(id = 1), read(id = 2)),
+                ),
+            )
+            dao.cacheBook(
+                book = book(
+                    id = 2,
+                    userBookId = 20,
+                    reads = listOf(read(id = 7), read(id = 8)),
+                ),
+            )
 
             // ----- Act -----
             replaceReads(

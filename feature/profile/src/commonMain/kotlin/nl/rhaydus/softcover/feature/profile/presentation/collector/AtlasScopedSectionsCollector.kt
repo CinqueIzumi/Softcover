@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.domain.model.resolve
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
+import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasOpeningUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeLine
@@ -37,6 +38,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsHistogram
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsHistogramHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.StatsAtlasDependencies
@@ -46,9 +48,9 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * The only writer of every section that answers for the selected scope: the opening tiles, who you
- * read, how you score, the format split, pages by month and pages by time of day, with their framing copy and the scope
- * line. For genres it writes only whether any exist and the empty sentence; `GenreRankingCollector` maps
- * the rest off the stats written here.
+ * read, how you score, the format split, pages by month, pages by time of day and the time to finish,
+ * with their framing copy and the scope line. For genres it writes only whether any exist and the
+ * empty sentence; `GenreRankingCollector` maps the rest off the stats written here.
  *
  * It stays idle until the history has landed, because the history decides the default scope and
  * observing the placeholder one first would flash the wrong numbers. Switching scope re-observes the
@@ -81,11 +83,13 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
 
             combine(
                 observeReadingStatsUseCase(range)
-                    .untilBackfilled(observeReadingStatsBackfilledUseCase),
+                    .untilBackfilled(observeReadingStatsBackfilledUseCase()),
                 observeMonthlyPagesReadUseCase(range),
                 observeHourlyPagesReadUseCase(range),
                 getHideUntaggedAuthorsAsFlowUseCase(),
-            ) { stats, monthlyPages, hourlyPages, hideUntaggedAuthors ->
+                observeTimeToFinishUseCase(range)
+                    .untilBackfilled(observeReadDatesBackfilledUseCase()),
+            ) { stats, monthlyPages, hourlyPages, hideUntaggedAuthors, timeToFinish ->
                 ScopedSections(
                     scope = scope,
                     today = today,
@@ -93,6 +97,7 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
                     monthlyPages = monthlyPages,
                     hourlyPages = hourlyPages,
                     hideUntaggedAuthors = hideUntaggedAuthors,
+                    timeToFinish = timeToFinish,
                 )
             }
         }
@@ -198,6 +203,10 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
             ),
             formatSplitChart = formatSplitChart(stats?.formatSplit),
             hasFormatSplit = hasFormatSplit(stats?.formatSplit),
+            timeToFinish = timeToFinishUiModel(
+                timeToFinish = sections.timeToFinish,
+                scope = scope,
+            ),
         )
     }
 
@@ -213,5 +222,6 @@ internal class AtlasScopedSectionsCollector : StatsAtlasCollector {
         val monthlyPages: MonthlyPages,
         val hourlyPages: HourlyPages,
         val hideUntaggedAuthors: Boolean,
+        val timeToFinish: TimeToFinish?,
     )
 }

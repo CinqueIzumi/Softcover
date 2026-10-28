@@ -78,6 +78,10 @@ interface SettingsLocalDataSource {
 
     suspend fun markAuthorRolesBackfilled()
 
+    val readDatesBackfilled: Flow<Boolean>
+
+    suspend fun markReadDatesBackfilled()
+
     suspend fun seedEnabledListIds(ids: Set<Int>)
 
     suspend fun resetLibraryVisibilityPreferences()
@@ -274,6 +278,16 @@ internal class SettingsLocalDataSourceImpl(
     override suspend fun markAuthorRolesBackfilled() {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(authorRolesBackfilled = true)
+        }
+    }
+
+    override val readDatesBackfilled: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.readDatesBackfilled }
+        .distinctUntilChanged()
+
+    override suspend fun markReadDatesBackfilled() {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(readDatesBackfilled = true)
         }
     }
 

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.datetime.LocalDate
@@ -41,7 +42,7 @@ class StreakTilesMapperTest {
             )
 
             // ----- Assert -----
-            result.stat.value shouldBe 0.0
+            result.stat.shouldNotBeNull().value shouldBe 0.0
             result.caption() shouldBe "No streak running. Read today to start one."
         }
 
@@ -63,7 +64,7 @@ class StreakTilesMapperTest {
             )
 
             // ----- Assert -----
-            result.stat.value shouldBe 5.0
+            result.stat.shouldNotBeNull().value shouldBe 5.0
             result.caption() shouldBe "days in a row"
         }
 
@@ -82,7 +83,7 @@ class StreakTilesMapperTest {
             )
 
             // ----- Assert -----
-            result.stat.value shouldBe 1.0
+            result.stat.shouldNotBeNull().value shouldBe 1.0
             result.caption() shouldBe "day in a row"
         }
 
@@ -107,7 +108,7 @@ class StreakTilesMapperTest {
             )
 
             // ----- Assert -----
-            result.stat.value shouldBe 3.0
+            result.stat.shouldNotBeNull().value shouldBe 3.0
             result.caption() shouldBe "days in a row. Read today to keep it."
         }
     }
@@ -126,7 +127,7 @@ class StreakTilesMapperTest {
             )
 
             // ----- Assert -----
-            result.stat.value shouldBe 0.0
+            result.stat.shouldNotBeNull().value shouldBe 0.0
             result.caption() shouldBe "No reading days in 2025."
         }
 
@@ -151,7 +152,7 @@ class StreakTilesMapperTest {
             )
 
             // ----- Assert -----
-            result.stat.value shouldBe 1.0
+            result.stat.shouldNotBeNull().value shouldBe 1.0
             result.caption() shouldBe "day, 14 April"
         }
 
@@ -176,7 +177,7 @@ class StreakTilesMapperTest {
             )
 
             // ----- Assert -----
-            result.stat.value shouldBe 8.0
+            result.stat.shouldNotBeNull().value shouldBe 8.0
             result.caption() shouldBe "days, 3 March to 10 March"
         }
 
@@ -202,7 +203,7 @@ class StreakTilesMapperTest {
             )
 
             // ----- Assert -----
-            result.stat.value shouldBe 4.0
+            result.stat.shouldNotBeNull().value shouldBe 4.0
             result.caption() shouldBe "days, 30 December 2024 to 2 January"
         }
 

@@ -152,6 +152,8 @@ internal val FEATURED_STAND_IN_BOOK = Book(
                 progress = 50f,
                 startedAt = null,
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             ),
         ),
     ),

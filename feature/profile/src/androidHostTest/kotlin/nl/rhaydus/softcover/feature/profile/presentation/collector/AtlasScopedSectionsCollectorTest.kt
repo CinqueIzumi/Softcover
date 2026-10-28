@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
@@ -28,6 +29,7 @@ import nl.rhaydus.softcover.core.domain.model.StatsScope
 import nl.rhaydus.softcover.core.domain.model.StatsWindow
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorRanking
@@ -41,9 +43,11 @@ import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
+import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveMonthlyPagesReadUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.StatsAtlasEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.atlasScopeChips
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicBreakdownUiModel
@@ -62,19 +66,27 @@ class AtlasScopedSectionsCollectorTest {
     private lateinit var observeHourlyPagesReadUseCase: ObserveHourlyPagesReadUseCase
     private lateinit var observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase
     private lateinit var getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase
+    private lateinit var observeTimeToFinishUseCase: ObserveTimeToFinishUseCase
+    private lateinit var observeReadDatesBackfilledUseCase: ObserveReadDatesBackfilledUseCase
     private lateinit var backfilledFlow: MutableStateFlow<Boolean>
+    private lateinit var readDatesBackfilledFlow: MutableStateFlow<Boolean>
     private lateinit var hideFlow: MutableStateFlow<Boolean>
     private lateinit var stateFlow: MutableStateFlow<StatsAtlasUiState>
     private lateinit var scope: ActionScope<StatsAtlasUiState, StatsAtlasEvent, StatsAtlasLocalVariables>
     private val observedRanges: MutableList<StatsRange> = mutableListOf()
     private var statsFor: (StatsRange) -> ReadingStats = { ReadingStats() }
+    private var timeToFinishFor: (StatsRange) -> TimeToFinish = { emptyTimeToFinish() }
 
     @BeforeEach
     fun setUp() {
         backfilledFlow = MutableStateFlow(true)
+        readDatesBackfilledFlow = MutableStateFlow(true)
         hideFlow = MutableStateFlow(false)
         observedRanges.clear()
         statsFor = { ReadingStats() }
+        timeToFinishFor = { emptyTimeToFinish() }
+        observeTimeToFinishUseCase = mockk()
+        observeReadDatesBackfilledUseCase = mockk()
         observeReadingStatsUseCase = mockk()
         observeMonthlyPagesReadUseCase = mockk()
         observeHourlyPagesReadUseCase = mockk()
@@ -110,7 +122,22 @@ class AtlasScopedSectionsCollectorTest {
         every {
             getHideUntaggedAuthorsAsFlowUseCase()
         } returns hideFlow
+
+        every {
+            observeTimeToFinishUseCase(any())
+        } answers { flowOf(timeToFinishFor(firstArg())) }
+
+        every {
+            observeReadDatesBackfilledUseCase()
+        } returns readDatesBackfilledFlow
     }
+
+    private fun emptyTimeToFinish(): TimeToFinish = TimeToFinish(
+        readCount = 0,
+        medianDays = null,
+        bandMedianDays = emptyMap(),
+        excludedReadCount = 0,
+    )
 
     private fun stateFor(
         selected: StatsScope,
@@ -167,6 +194,14 @@ class AtlasScopedSectionsCollectorTest {
         every {
             dependencies.getHideUntaggedAuthorsAsFlowUseCase
         } returns getHideUntaggedAuthorsAsFlowUseCase
+
+        every {
+            dependencies.observeTimeToFinishUseCase
+        } returns observeTimeToFinishUseCase
+
+        every {
+            dependencies.observeReadDatesBackfilledUseCase
+        } returns observeReadDatesBackfilledUseCase
 
         return launch {
             AtlasScopedSectionsCollector().onLaunch(
@@ -341,7 +376,7 @@ class AtlasScopedSectionsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.readingStats.shouldBeNull()
-            stateFlow.value.opening.hero.stat.isLoading shouldBe true
+            stateFlow.value.opening.hero.stat.shouldNotBeNull().isLoading shouldBe true
             job.cancel()
         }
 
@@ -356,8 +391,8 @@ class AtlasScopedSectionsCollectorTest {
             backfilledFlow.value = true
 
             // ----- Assert -----
-            stateFlow.value.opening.books.stat.value shouldBe 6.0
-            stateFlow.value.opening.books.stat.isLoading shouldBe false
+            stateFlow.value.opening.books.stat.shouldNotBeNull().value shouldBe 6.0
+            stateFlow.value.opening.books.stat.shouldNotBeNull().isLoading shouldBe false
             job.cancel()
         }
 
@@ -385,7 +420,7 @@ class AtlasScopedSectionsCollectorTest {
             val job = launchCollector()
 
             // ----- Assert -----
-            stateFlow.value.opening.hero.stat.value shouldBe 1_500.0
+            stateFlow.value.opening.hero.stat.shouldNotBeNull().value shouldBe 1_500.0
             stateFlow.value.heroCaption() shouldBe "From 5 finished books in 2025."
             job.cancel()
         }
@@ -610,6 +645,53 @@ class AtlasScopedSectionsCollectorTest {
                 stateFlow.value.formatSplitChart.isLoading shouldBe false
                 stateFlow.value.formatSplitChart.segments.map { it.label } shouldBe listOf("Print", "Ebook")
                 stateFlow.value.formatSplitCaption shouldBe "Mostly paper, with a quarter on a screen."
+                job.cancel()
+            }
+
+        @Test
+        fun `writes the time to finish of the scope into the section`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            timeToFinishFor = {
+                TimeToFinish(
+                    readCount = 4,
+                    medianDays = 9,
+                    bandMedianDays = emptyMap(),
+                    excludedReadCount = 0,
+                )
+            }
+
+            // ----- Act -----
+            val job = launchCollector()
+
+            // ----- Assert -----
+            stateFlow.value.timeToFinish.isLoading shouldBe false
+            stateFlow.value.timeToFinish.framing shouldBe "Your typical book took 9 days."
+            job.cancel()
+        }
+
+        @Test
+        fun `keeps the time to finish loading until the read dates are backfilled`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                readDatesBackfilledFlow.value = false
+                timeToFinishFor = {
+                    TimeToFinish(
+                        readCount = 4,
+                        medianDays = 9,
+                        bandMedianDays = emptyMap(),
+                        excludedReadCount = 0,
+                    )
+                }
+                val job = launchCollector()
+                val whileLoading = stateFlow.value.timeToFinish.isLoading
+
+                // ----- Act -----
+                readDatesBackfilledFlow.value = true
+
+                // ----- Assert -----
+                whileLoading shouldBe true
+                stateFlow.value.timeToFinish.isLoading shouldBe false
+                stateFlow.value.timeToFinish.framing shouldBe "Your typical book took 9 days."
                 job.cancel()
             }
     }

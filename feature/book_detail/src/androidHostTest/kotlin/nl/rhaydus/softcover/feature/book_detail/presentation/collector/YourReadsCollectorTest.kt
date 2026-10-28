@@ -51,6 +51,8 @@ class YourReadsCollectorTest {
         progress = 0f,
         startedAt = startedAt,
         finishedAt = null,
+        finishedAtPrecision = null,
+        editionPages = null,
     )
 
     private fun stubBook(
@@ -91,10 +93,14 @@ class YourReadsCollectorTest {
         fun `sets yourReads from the book and date style`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
-                book = stubBook(reads = listOf(read(
-                    id = 1,
-                    startedAt = "2026-01-05",),
-                ),),
+                book = stubBook(
+                    reads = listOf(
+                        read(
+                            id = 1,
+                            startedAt = "2026-01-05",
+                        ),
+                    ),
+                ),
                 dateStyle = DateStyle.YEAR_MONTH_DAY,
             )
             val collector = YourReadsCollector()
@@ -165,10 +171,14 @@ class YourReadsCollectorTest {
         fun `reformats yourReads when the date style changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
-                book = stubBook(reads = listOf(read(
-                    id = 1,
-                    startedAt = "2026-01-05",),
-                ),),
+                book = stubBook(
+                    reads = listOf(
+                        read(
+                            id = 1,
+                            startedAt = "2026-01-05",
+                        ),
+                    ),
+                ),
                 dateStyle = DateStyle.YEAR_MONTH_DAY,
             )
             val collector = YourReadsCollector()

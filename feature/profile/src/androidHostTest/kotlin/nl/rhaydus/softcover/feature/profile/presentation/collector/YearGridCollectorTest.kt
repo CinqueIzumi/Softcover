@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -255,8 +256,8 @@ class YearGridCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.longestStreakTile.stat.value shouldBe 5.0
-                stateFlow.value.currentStreakTile.stat.value shouldBe 3.0
+                stateFlow.value.longestStreakTile.stat.shouldNotBeNull().value shouldBe 5.0
+                stateFlow.value.currentStreakTile.stat.shouldNotBeNull().value shouldBe 3.0
                 stateFlow.value.atlasStreaks shouldBe AtlasStreaks(
                     activity = activity,
                     longestInAtlasYear = longestOf2025,
@@ -289,7 +290,7 @@ class YearGridCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.currentStreakTile.stat.value shouldBe 0.0
+            stateFlow.value.currentStreakTile.stat.shouldNotBeNull().value shouldBe 0.0
             stateFlow.value.atlasStreaks.current.shouldBeNull()
             job.cancel()
         }
@@ -325,7 +326,7 @@ class YearGridCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.yearGrid.year shouldBe 2027
-                stateFlow.value.longestStreakTile.stat.value shouldBe 0.0
+                stateFlow.value.longestStreakTile.stat.shouldNotBeNull().value shouldBe 0.0
                 job.cancel()
             }
 
@@ -350,7 +351,7 @@ class YearGridCollectorTest {
             emissions.value = activity
 
             // ----- Assert -----
-            stateFlow.value.longestStreakTile.stat.value shouldBe 5.0
+            stateFlow.value.longestStreakTile.stat.shouldNotBeNull().value shouldBe 5.0
             job.cancel()
         }
     }

@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesHead
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.monthlyPagesMonthSetKey
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeOfDayChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.timeToFinishUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorRows
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.topAuthorsCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearAtAGlanceHeader
@@ -36,6 +37,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileM
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingActivityPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingHistoryPreview
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingStatsPreview
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileTimeToFinishPreview
 import nl.rhaydus.softcover.feature.profile.presentation.state.StatsAtlasUiState
 
 private val PreviewReadingStats = profileReadingStatsPreview()
@@ -133,6 +135,10 @@ internal val StatsAtlasPreviewState = StatsAtlasUiState(
     ),
     formatSplitChart = formatSplitChart(PreviewReadingStats.formatSplit),
     hasFormatSplit = hasFormatSplit(PreviewReadingStats.formatSplit),
+    timeToFinish = timeToFinishUiModel(
+        timeToFinish = profileTimeToFinishPreview(),
+        scope = StatsScope.AllTime,
+    ),
     genreHeader = genreHeader(
         slices = PreviewReadingStats.genres.slices,
         emptyCaption = genreEmptyCaption(booksRead = PreviewReadingStats.booksRead),

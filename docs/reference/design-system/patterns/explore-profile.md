@@ -100,6 +100,12 @@
   of these books has a known format.". With no finished books the caption gives the scope's sentence, or
   "Finish a few books and the formats you read in show up here." for All time, and the chart is dropped.
   The chart animates in place across scopes rather than cross-fading.
+  Last, "Time to finish" shows the median calendar days from start to finish as a two by two grid of compact
+  `StatTile`s: all books, then under 250, 250 to 450 and over 450 pages (a band with no reads shows a dash).
+  The line above reads "Your typical book took 9 days. Ones over 450 pages took 23.", the second sentence
+  only when two bands have reads. It counts reads by their own finish date, a reread on its own, so its
+  count can differ from the books-finished figure. With no read that has both dates the grid is dropped
+  and the line says so.
 - Chapter 03, "Genres and how you read" (caption "What you reach for, and how it reads."), opens with a
   headline naming the top genre ("Mostly fantasy", each word lowercased unless it is all capitals, like
   "LGBTQ+"; a tie goes to the ranking's order) over a `RankedBars` ranking of the top five genres. A

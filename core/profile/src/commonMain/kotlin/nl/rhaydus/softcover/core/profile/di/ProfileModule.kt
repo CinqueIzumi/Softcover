@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUs
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileStatsUseCase
 import org.koin.core.qualifier.named
@@ -71,6 +72,13 @@ val profileModule = module {
         ObserveReadingStatsUseCase(
             getReadUserBooksUseCase = get(),
             observeUserTagsByBookUseCase = get(),
+            appDispatchers = get(),
+        )
+    }
+
+    factory {
+        ObserveTimeToFinishUseCase(
+            getAllUserBooksUseCase = get(),
             appDispatchers = get(),
         )
     }

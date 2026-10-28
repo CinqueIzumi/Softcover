@@ -496,6 +496,62 @@ class RefreshLibraryUseCaseImplTest {
         }
 
         @Test
+        fun `an all-scope refresh marks the read dates backfilled`() = runTest {
+            // ----- Arrange -----
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.All)
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) { settingsRepository.markReadDatesBackfilled() }
+        }
+
+        @Test
+        fun `a statuses refresh covering every status marks the read dates backfilled`() = runTest {
+            // ----- Arrange -----
+            val scope = RefreshScope.ByStatuses(statuses = UserBookStatus.entries.toSet())
+
+            // ----- Act -----
+            val result = useCase(scope = scope)
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) { settingsRepository.markReadDatesBackfilled() }
+        }
+
+        @Test
+        fun `a partial statuses refresh does not mark the read dates backfilled`() = runTest {
+            // ----- Arrange -----
+            val scope = RefreshScope.ByStatuses(statuses = UserBookStatus.entries.toSet() - UserBookStatus.PAUSED)
+
+            // ----- Act -----
+            val result = useCase(scope = scope)
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 0) { settingsRepository.markReadDatesBackfilled() }
+        }
+
+        @Test
+        fun `a failed all-scope refresh does not mark the read dates backfilled`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRepository.refreshUserBooks(
+                    userId = 55,
+                    statusFilter = null,
+                )
+            } throws IllegalStateException("books refresh failed")
+
+            // ----- Act -----
+            val result = useCase(scope = RefreshScope.All)
+
+            // ----- Assert -----
+            result.isFailure shouldBe true
+            coVerify(exactly = 0) { settingsRepository.markReadDatesBackfilled() }
+        }
+
+        @Test
         fun `a single-list refresh does not mark the backfill`() = runTest {
             // ----- Arrange -----
             coEvery {

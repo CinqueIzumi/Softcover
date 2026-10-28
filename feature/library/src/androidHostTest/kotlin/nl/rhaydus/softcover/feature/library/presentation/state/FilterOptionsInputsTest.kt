@@ -93,6 +93,8 @@ class FilterOptionsInputsTest {
                         progress = 1f,
                         startedAt = null,
                         finishedAt = "$it-06-15",
+                        finishedAtPrecision = null,
+                        editionPages = null,
                     ),
                 ),
             )

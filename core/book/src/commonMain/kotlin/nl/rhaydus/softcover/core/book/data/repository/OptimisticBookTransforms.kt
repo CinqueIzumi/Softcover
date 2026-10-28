@@ -4,6 +4,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.DatePrecision
 import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
@@ -74,7 +75,9 @@ internal fun Book.withMarkedAsReading(): Book {
     val withReads: UserBook = if (resumesExistingRead) {
         existingUserBook
     } else {
-        existingUserBook.withReplacedRead(read = existingUserBook.newPlaceholderRead())
+        existingUserBook.withReplacedRead(
+            read = existingUserBook.newPlaceholderRead(editionPages = readerEdition?.pages),
+        )
     }
 
     val updatedUserBook: UserBook = withReads
@@ -136,11 +139,12 @@ internal fun Book.withMarkedAsRead(actionAt: String?): Book {
     // server's copy, dated by the same `user_date`, replaces it.
     val finishedRead: UserBookRead = currentRead
         ?.takeIf { finishesCurrentRead && it.isFinished.not() }
-        ?: existingUserBook.newPlaceholderRead().copy(startedAt = null)
+        ?: existingUserBook.newPlaceholderRead(editionPages = readerEdition?.pages).copy(startedAt = null)
 
     val withReads: UserBook = existingUserBook.withReplacedRead(
         read = finishedRead.copy(
             finishedAt = finishedDate,
+            finishedAtPrecision = DatePrecision.DAY,
             progress = 100f,
         ),
     )
@@ -182,11 +186,13 @@ private fun UserBook.withReplacedRead(read: UserBookRead): UserBook {
     return copy(reads = updatedReads)
 }
 
-private fun UserBook.newPlaceholderRead(): UserBookRead = UserBookRead(
+private fun UserBook.newPlaceholderRead(editionPages: Int?): UserBookRead = UserBookRead(
     id = -id,
     currentPage = null,
     currentSeconds = null,
     progress = 0f,
     startedAt = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString(),
     finishedAt = null,
+    finishedAtPrecision = null,
+    editionPages = editionPages,
 )

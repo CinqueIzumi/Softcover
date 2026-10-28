@@ -85,6 +85,8 @@ class BookDeadlineMapperTest {
         progress = 0f,
         startedAt = null,
         finishedAt = null,
+        finishedAtPrecision = null,
+        editionPages = null,
     )
 
     @Nested

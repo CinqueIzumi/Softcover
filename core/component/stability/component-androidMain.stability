@@ -511,6 +511,14 @@ public fun nl.rhaydus.softcover.core.component.chart.RankedBars(model: nl.rhaydu
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
+public fun nl.rhaydus.softcover.core.component.chart.RecentDaysGrid(model: nl.rhaydus.softcover.core.component.chart.RecentDaysGridUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 private fun nl.rhaydus.softcover.core.component.chart.RetainedEntry(entry: nl.rhaydus.softcover.core.component.chart.SegmentRetention.Entry, retention: nl.rhaydus.softcover.core.component.chart.SegmentRetention, enter: androidx.compose.animation.EnterTransition, exit: androidx.compose.animation.ExitTransition, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.animation.AnimatedVisibilityScope, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
@@ -528,14 +536,6 @@ private fun nl.rhaydus.softcover.core.component.chart.RowsLegend(retention: nl.r
   params:
     - retention: STABLE (marked @Stable or @Immutable)
     - isLoading: STABLE (primitive type)
-
-@Composable
-public fun nl.rhaydus.softcover.core.component.chart.RecentDaysGrid(model: nl.rhaydus.softcover.core.component.chart.RecentDaysGridUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - model: STABLE (marked @Stable or @Immutable)
-    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
 public fun nl.rhaydus.softcover.core.component.chart.YearGrid(model: nl.rhaydus.softcover.core.component.chart.YearGridUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chart.YearGridEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
@@ -2146,6 +2146,15 @@ public fun nl.rhaydus.softcover.core.component.statistic.StatTile(model: nl.rhay
   params:
     - model: STABLE (marked @Stable or @Immutable)
     - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
+private fun nl.rhaydus.softcover.core.component.statistic.StatValue(model: nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel?, style: androidx.compose.ui.text.TextStyle, autoSize: androidx.compose.foundation.text.TextAutoSize?): kotlin.Unit
+  skippable: false
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - style: STABLE (marked @Stable or @Immutable)
+    - autoSize: UNKNOWN (interface or non-final class; concrete implementation unknown)
 
 @Composable
 public fun nl.rhaydus.softcover.core.component.text.FadeThroughText(text: kotlin.String, style: androidx.compose.ui.text.TextStyle, color: androidx.compose.ui.graphics.Color, modifier: androidx.compose.ui.Modifier, isLoading: kotlin.Boolean, standIn: kotlin.String, maxLines: kotlin.Int, overflow: androidx.compose.ui.text.style.TextOverflow): kotlin.Unit

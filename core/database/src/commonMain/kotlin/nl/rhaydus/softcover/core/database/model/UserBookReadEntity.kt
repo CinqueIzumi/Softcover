@@ -30,4 +30,6 @@ data class UserBookReadEntity(
     val progress: Float?,
     val startedAt: String?,
     val finishedAt: String?,
+    val finishedAtPrecision: Int?,
+    val editionPages: Int?,
 )

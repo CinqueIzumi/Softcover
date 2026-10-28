@@ -107,6 +107,8 @@ class UserBooksFlowCollectorTest {
         progress = 0f,
         startedAt = null,
         finishedAt = null,
+        finishedAtPrecision = null,
+        editionPages = null,
     )
 
     private fun buildBook(

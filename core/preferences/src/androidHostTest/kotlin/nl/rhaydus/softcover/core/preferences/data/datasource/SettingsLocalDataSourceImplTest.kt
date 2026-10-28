@@ -334,6 +334,35 @@ class SettingsLocalDataSourceImplTest {
     }
 
     @Nested
+    inner class ReadDatesBackfilled {
+        @Test
+        fun `emits false for a fresh store`() = runTest {
+            // ----- Arrange -----
+            persisted.value = AppSettingsEntity()
+
+            // ----- Act -----
+            val flag = dataSource.readDatesBackfilled.first()
+
+            // ----- Assert -----
+            flag shouldBe false
+        }
+
+        @Test
+        fun `emits true after markReadDatesBackfilled`() = runTest {
+            // ----- Arrange -----
+            dataSource.readDatesBackfilled.test {
+                awaitItem() shouldBe false
+
+                // ----- Act -----
+                dataSource.markReadDatesBackfilled()
+
+                // ----- Assert -----
+                awaitItem() shouldBe true
+            }
+        }
+    }
+
+    @Nested
     inner class ResetAllSettings {
         @Test
         fun `returns the backfilled flag to false`() = runTest {

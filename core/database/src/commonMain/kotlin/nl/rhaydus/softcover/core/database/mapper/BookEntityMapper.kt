@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.DatePrecision
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
@@ -69,6 +70,8 @@ internal fun UserBookRead.toEntity(userBookId: Int): UserBookReadEntity = UserBo
     progress = progress,
     startedAt = startedAt,
     finishedAt = finishedAt,
+    finishedAtPrecision = finishedAtPrecision?.code,
+    editionPages = editionPages,
     userBookId = userBookId,
 )
 
@@ -187,6 +190,8 @@ fun UserBookReadEntity.toModel(): UserBookRead = UserBookRead(
     progress = progress ?: 0f,
     startedAt = startedAt,
     finishedAt = finishedAt,
+    finishedAtPrecision = DatePrecision.fromCode(finishedAtPrecision),
+    editionPages = editionPages,
 )
 
 fun UserBookEntity.toModel(

@@ -4403,6 +4403,8 @@ class BooksRepositoryImplTest {
                 progress = 0f,
                 startedAt = "2026-07-21",
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             )
         }
 
@@ -4557,7 +4559,7 @@ class BooksRepositoryImplTest {
             // ----- Arrange -----
             val book = historyBook()
             val actionAtSlot = slot<Long>()
-            val before = Clock.System.now()
+            val before = Instant.fromEpochMilliseconds(Clock.System.now().toEpochMilliseconds())
             stubInsertPending(localId = 9L)
 
             coEvery {
@@ -4997,6 +4999,8 @@ class BooksRepositoryImplTest {
                 progress = 0.5f,
                 startedAt = null,
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             )
             val book = Book(
                 id = 42,
@@ -5224,6 +5228,8 @@ class BooksRepositoryImplTest {
                 progress = 0f,
                 startedAt = "2026-07-21",
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             )
             val book = readingBook(read = placeholderRead)
             val cached = slot<Book>()
@@ -5284,6 +5290,8 @@ class BooksRepositoryImplTest {
                 progress = 10f,
                 startedAt = "2026-07-21",
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             )
             val book = readingBook(read = realRead)
             val remoteBook = stubBook(userBookId = 1)
@@ -5450,6 +5458,8 @@ class BooksRepositoryImplTest {
                 progress = 0.5f,
                 startedAt = null,
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             )
             val book = Book(
                 id = 42,
@@ -5526,6 +5536,8 @@ class BooksRepositoryImplTest {
                 progress = 0.5f,
                 startedAt = null,
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             )
             val book = Book(
                 id = 42,
@@ -5949,6 +5961,8 @@ class BooksRepositoryImplTest {
             progress = 0.5f,
             startedAt = null,
             finishedAt = null,
+            finishedAtPrecision = null,
+            editionPages = null,
         )
 
         private fun stubBookWithUserBookRead(
@@ -7422,6 +7436,8 @@ class BooksRepositoryImplTest {
                         progress = 0.5f,
                         startedAt = null,
                         finishedAt = null,
+                        finishedAtPrecision = null,
+                        editionPages = null,
                     ),
                 ),
             ),
@@ -7580,6 +7596,8 @@ class BooksRepositoryImplTest {
                             progress = 0.1f,
                             startedAt = "2026-01-01",
                             finishedAt = null,
+                            finishedAtPrecision = null,
+                            editionPages = null,
                         ),
                     ),
                 ),
@@ -7852,6 +7870,8 @@ class BooksRepositoryImplTest {
                         progress = 0.1f,
                         startedAt = "2026-01-01",
                         finishedAt = null,
+                        finishedAtPrecision = null,
+                        editionPages = null,
                     ),
                 ),
             ),
@@ -8549,6 +8569,8 @@ class BooksRepositoryImplTest {
                             progress = 0.1f,
                             startedAt = "2026-01-01",
                             finishedAt = null,
+                            finishedAtPrecision = null,
+                            editionPages = null,
                         ),
                     ),
                 ),

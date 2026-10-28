@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.DatePrecision
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
@@ -139,6 +140,8 @@ private fun UserBookReadFragment.toUserBookRead(): UserBookRead = UserBookRead(
     id = id,
     startedAt = started_at,
     finishedAt = finished_at,
+    finishedAtPrecision = DatePrecision.fromCode(code = finished_at_precision),
+    editionPages = edition?.pages,
 )
 
 private const val PRIMARY_AUTHOR_ROLE_ID = 1

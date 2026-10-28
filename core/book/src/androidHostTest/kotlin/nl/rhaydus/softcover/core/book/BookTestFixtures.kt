@@ -67,6 +67,8 @@ val baseBook = Book(
                 progress = 0f,
                 startedAt = null,
                 finishedAt = null,
+                finishedAtPrecision = null,
+                editionPages = null,
             ),
         ),
     ),
