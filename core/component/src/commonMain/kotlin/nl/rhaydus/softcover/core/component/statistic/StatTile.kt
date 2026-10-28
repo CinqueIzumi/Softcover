@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.component.statistic
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 
 @Composable
 fun StatTile(
@@ -76,7 +77,7 @@ private fun HeroTile(
 
             Spacer(modifier = Modifier.height(Spacing.xs))
 
-            StatNumber(
+            StatValue(
                 model = model.stat,
                 style = typography.statHero,
                 autoSize = TextAutoSize.StepBased(
@@ -115,10 +116,7 @@ private fun StandardTile(
         color = colors.surfaceContainerHigh,
         shape = Corners.xl,
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(Spacing.md),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
+        Column(modifier = Modifier.fillMaxSize().padding(Spacing.md)) {
             SoftcoverText(
                 text = model.eyebrow.uppercase(),
                 style = typography.eyebrowSmall,
@@ -127,11 +125,13 @@ private fun StandardTile(
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
-            StatNumber(
+            StatValue(
                 model = model.stat,
                 style = typography.statLarge,
                 autoSize = null,
             )
+
+            Spacer(modifier = Modifier.weight(1f))
 
             FadeThroughText(
                 text = variant.caption,
@@ -171,21 +171,46 @@ private fun CompactTile(
             Spacer(modifier = Modifier.height(Spacing.xs))
 
             Row(verticalAlignment = Alignment.Bottom) {
-                StatNumber(
+                StatValue(
                     model = model.stat,
                     style = typography.headlineMedium,
                     autoSize = null,
                 )
 
-                Spacer(modifier = Modifier.width(Spacing.xs))
+                if (model.stat != null) {
+                    Spacer(modifier = Modifier.width(Spacing.xs))
 
-                SoftcoverText(
-                    text = variant.unit,
-                    style = typography.body,
-                    color = colors.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = Spacing.xxs),
-                )
+                    SoftcoverText(
+                        text = variant.unit,
+                        style = typography.body,
+                        color = colors.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = Spacing.xxs),
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun StatValue(
+    model: StatNumberUiModel?,
+    style: TextStyle,
+    autoSize: TextAutoSize?,
+) {
+    if (model == null) {
+        SoftcoverText(
+            text = "\u2014",
+            color = LocalContentColor.current,
+            style = style.tabularFigures(),
+            autoSize = autoSize,
+            maxLines = 1,
+        )
+    } else {
+        StatNumber(
+            model = model,
+            style = style,
+            autoSize = autoSize,
+        )
     }
 }

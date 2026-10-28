@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.statistic.StatTileVariant
 import nl.rhaydus.softcover.core.domain.model.StatsScope
@@ -25,7 +26,10 @@ class AtlasOpeningMapperTest {
             val result = atlasOpeningUiModel(stats)
 
             // ----- Assert -----
-            val tiles = listOf(result.hero.stat, result.books.stat)
+            val tiles = listOf(
+                result.hero.stat.shouldNotBeNull(),
+                result.books.stat.shouldNotBeNull(),
+            )
             tiles.map { it.value } shouldBe listOf(0.0, 0.0)
             tiles.map { it.isLoading } shouldBe listOf(true, true)
         }
@@ -51,9 +55,13 @@ class AtlasOpeningMapperTest {
             val result = atlasOpeningUiModel(stats)
 
             // ----- Assert -----
-            result.hero.stat.value shouldBe 12000.0
-            result.books.stat.value shouldBe 42.0
-            listOf(result.hero.stat, result.books.stat).map { it.isLoading } shouldBe listOf(false, false)
+            result.hero.stat.shouldNotBeNull().value shouldBe 12000.0
+            result.books.stat.shouldNotBeNull().value shouldBe 42.0
+            val tiles = listOf(
+                result.hero.stat.shouldNotBeNull(),
+                result.books.stat.shouldNotBeNull(),
+            )
+            tiles.map { it.isLoading } shouldBe listOf(false, false)
         }
 
         @Test

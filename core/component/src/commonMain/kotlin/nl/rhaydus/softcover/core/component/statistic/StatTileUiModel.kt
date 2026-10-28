@@ -9,11 +9,12 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  * A labelled statistic on a tile.
  *
  * Loading rides on [stat]: only the number masks, while the container, eyebrow and caption stay real.
+ * A null [stat] means there is no value to show and renders a dash; a compact tile then drops its unit.
  */
 @Immutable
 data class StatTileUiModel(
     val eyebrow: String,
-    val stat: StatNumberUiModel,
+    val stat: StatNumberUiModel?,
     val variant: StatTileVariant,
 ) {
     companion object : UiModelPreviews<StatTileUiModel> {
@@ -34,6 +35,11 @@ data class StatTileUiModel(
                     value = 4.2,
                     format = StatNumberFormat.Decimal,
                 ),
+                variant = StatTileVariant.Compact(unit = "★"),
+            ),
+            "Compact, no value" to StatTileUiModel(
+                eyebrow = "Avg. rating",
+                stat = null,
                 variant = StatTileVariant.Compact(unit = "★"),
             ),
             "Hero, loading" to StatTileUiModel(
