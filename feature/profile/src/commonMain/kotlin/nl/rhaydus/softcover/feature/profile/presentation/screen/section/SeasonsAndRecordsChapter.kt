@@ -15,13 +15,15 @@ import nl.rhaydus.softcover.core.component.chart.ProportionChart
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.feature.profile.presentation.state.TimeToFinishUiModel
 
 /**
  * The scoped pages-by-month chart under its [header]. The chart cross-fades only when [monthSetKey]
  * changes, because the month labels are then different; otherwise the bars animate in place. When
  * [hasMonthlyPages] is false the chart is dropped and the header's description says why. Below it the
  * [topAuthorRows] sit under their own subhead, and are dropped when [hasTopAuthors] is false. The
- * [formatSplitChart] follows under its own subhead and animates in place across scopes.
+ * [formatSplitChart] follows under its own subhead and animates in place across scopes, and the
+ * [timeToFinish] tiles follow it.
  */
 @Composable
 internal fun SeasonsAndRecordsChapter(
@@ -37,6 +39,7 @@ internal fun SeasonsAndRecordsChapter(
     formatSplitCaption: String,
     formatSplitChart: ProportionChartUiModel,
     hasFormatSplit: Boolean,
+    timeToFinish: TimeToFinishUiModel,
     modifier: Modifier = Modifier,
 ) {
     val isLoadingAuthors = topAuthorRows.any { it.isLoading }
@@ -109,5 +112,9 @@ internal fun SeasonsAndRecordsChapter(
                 }
             },
         )
+
+        Spacer(modifier = Modifier.height(Spacing.xl))
+
+        TimeToFinishSection(model = timeToFinish)
     }
 }

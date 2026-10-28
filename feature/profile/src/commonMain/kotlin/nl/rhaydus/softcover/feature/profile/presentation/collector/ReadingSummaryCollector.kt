@@ -15,9 +15,9 @@ internal class ReadingSummaryCollector : ProfileCollector {
     ) {
         combine(
             dependencies.observeReadingHistoryUseCase()
-                .untilBackfilled(dependencies.observeReadingStatsBackfilledUseCase),
+                .untilBackfilled(dependencies.observeReadingStatsBackfilledUseCase()),
             dependencies.observeReadingActivityUseCase()
-                .untilBackfilled(dependencies.observeReadingStatsBackfilledUseCase),
+                .untilBackfilled(dependencies.observeReadingStatsBackfilledUseCase()),
             dependencies.observeCurrentDateUseCase(),
         ) { history, activity, today ->
             Triple(

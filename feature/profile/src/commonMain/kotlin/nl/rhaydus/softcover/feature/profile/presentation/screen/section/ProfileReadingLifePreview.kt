@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.HourlyPages
+import nl.rhaydus.softcover.core.profile.domain.model.LengthBand
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.MonthlyPages
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
@@ -22,6 +23,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.ReadingActivity
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingHistory
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingStats
 import nl.rhaydus.softcover.core.profile.domain.model.RecentlyLovedBook
+import nl.rhaydus.softcover.core.profile.domain.model.TimeToFinish
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
 
 /**
@@ -37,6 +39,17 @@ internal fun profileReadingStatsPreview(): ReadingStats = ReadingStats(
     authorDemographics = previewAuthorDemographics(),
     topAuthors = previewTopAuthors(),
     formatSplit = previewFormatSplit(),
+)
+
+internal fun profileTimeToFinishPreview(): TimeToFinish = TimeToFinish(
+    readCount = 31,
+    medianDays = 9,
+    bandMedianDays = mapOf(
+        LengthBand.UNDER_250 to 5,
+        LengthBand.FROM_250_TO_450 to 9,
+        LengthBand.OVER_450 to 23,
+    ),
+    excludedReadCount = 2,
 )
 
 private fun previewFormatSplit(): FormatSplit = FormatSplit(

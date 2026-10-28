@@ -89,6 +89,7 @@ internal fun ColumnScope.StatsAtlasBody(
             formatSplitCaption = state.formatSplitCaption,
             formatSplitChart = state.formatSplitChart,
             hasFormatSplit = state.hasFormatSplit,
+            timeToFinish = state.timeToFinish,
         )
     }
 

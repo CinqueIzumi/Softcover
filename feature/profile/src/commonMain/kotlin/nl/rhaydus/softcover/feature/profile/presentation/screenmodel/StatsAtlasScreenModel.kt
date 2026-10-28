@@ -5,6 +5,7 @@ import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.ObserveBooksByIdsUseCase
 import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadDatesBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObserveReadingStatsBackfilledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveHourlyPagesReadUseCase
@@ -13,6 +14,7 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingActivityUs
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingDayUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingHistoryUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingStatsUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveTimeToFinishUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.action.StatsAtlasAction
 import nl.rhaydus.softcover.feature.profile.presentation.collector.StatsAtlasCollector
@@ -30,6 +32,8 @@ internal class StatsAtlasScreenModel(
     private val observeReadingDayUseCase: ObserveReadingDayUseCase,
     private val observeReadingHistoryUseCase: ObserveReadingHistoryUseCase,
     private val observeReadingStatsBackfilledUseCase: ObserveReadingStatsBackfilledUseCase,
+    private val observeReadDatesBackfilledUseCase: ObserveReadDatesBackfilledUseCase,
+    private val observeTimeToFinishUseCase: ObserveTimeToFinishUseCase,
     private val getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
     private val setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
     private val observeBooksByIdsUseCase: ObserveBooksByIdsUseCase,
@@ -56,6 +60,8 @@ internal class StatsAtlasScreenModel(
         observeReadingDayUseCase = observeReadingDayUseCase,
         observeReadingHistoryUseCase = observeReadingHistoryUseCase,
         observeReadingStatsBackfilledUseCase = observeReadingStatsBackfilledUseCase,
+        observeReadDatesBackfilledUseCase = observeReadDatesBackfilledUseCase,
+        observeTimeToFinishUseCase = observeTimeToFinishUseCase,
         getHideUntaggedAuthorsAsFlowUseCase = getHideUntaggedAuthorsAsFlowUseCase,
         setHideUntaggedAuthorsUseCase = setHideUntaggedAuthorsUseCase,
         observeBooksByIdsUseCase = observeBooksByIdsUseCase,

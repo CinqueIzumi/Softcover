@@ -28,4 +28,4 @@ internal fun observeLoadedReadingLife(
         stats = stats,
         history = history,
     )
-}.untilBackfilled(observeReadingStatsBackfilledUseCase)
+}.untilBackfilled(observeReadingStatsBackfilledUseCase())

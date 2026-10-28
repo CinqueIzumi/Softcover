@@ -314,7 +314,7 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Sc
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.SeasonsAndRecordsChapter(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, chart: nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel, monthSetKey: kotlin.String?, hasMonthlyPages: kotlin.Boolean, topAuthorsTitle: kotlin.String, topAuthorsCaption: kotlin.String, topAuthorRows: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel>, hasTopAuthors: kotlin.Boolean, formatSplitTitle: kotlin.String, formatSplitCaption: kotlin.String, formatSplitChart: nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel, hasFormatSplit: kotlin.Boolean, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.SeasonsAndRecordsChapter(header: nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel, chart: nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel, monthSetKey: kotlin.String?, hasMonthlyPages: kotlin.Boolean, topAuthorsTitle: kotlin.String, topAuthorsCaption: kotlin.String, topAuthorRows: kotlinx.collections.immutable.ImmutableList<nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel>, hasTopAuthors: kotlin.Boolean, formatSplitTitle: kotlin.String, formatSplitCaption: kotlin.String, formatSplitChart: nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel, hasFormatSplit: kotlin.Boolean, timeToFinish: nl.rhaydus.softcover.feature.profile.presentation.state.TimeToFinishUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -330,6 +330,7 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Se
     - formatSplitCaption: STABLE (String is immutable)
     - formatSplitChart: STABLE (marked @Stable or @Immutable)
     - hasFormatSplit: STABLE (primitive type)
+    - timeToFinish: STABLE (class with no mutable properties)
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
@@ -360,6 +361,14 @@ internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.Te
     - state: UNSTABLE (has mutable properties or unstable members)
     - runAction: STABLE (function type)
     - onBookCardEvent: STABLE (function type)
+
+@Composable
+internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.TimeToFinishSection(model: nl.rhaydus.softcover.feature.profile.presentation.state.TimeToFinishUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (class with no mutable properties)
+    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
 internal fun nl.rhaydus.softcover.feature.profile.presentation.screen.section.TrailingChevron(tint: androidx.compose.ui.graphics.Color): kotlin.Unit
