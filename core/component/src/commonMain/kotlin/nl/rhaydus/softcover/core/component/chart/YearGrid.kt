@@ -296,13 +296,6 @@ fun YearGrid(
     }
 }
 
-private fun YearGridStep.tone(): ChartTone = when (this) {
-    YearGridStep.One -> ChartTone.Fifth
-    YearGridStep.Two -> ChartTone.Third
-    YearGridStep.Three -> ChartTone.Second
-    YearGridStep.Four -> ChartTone.Lead
-}
-
 internal fun cellLeft(
     column: Int,
     pitchPx: Float,

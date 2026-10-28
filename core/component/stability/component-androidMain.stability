@@ -530,6 +530,14 @@ private fun nl.rhaydus.softcover.core.component.chart.RowsLegend(retention: nl.r
     - isLoading: STABLE (primitive type)
 
 @Composable
+public fun nl.rhaydus.softcover.core.component.chart.RecentDaysGrid(model: nl.rhaydus.softcover.core.component.chart.RecentDaysGridUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+  skippable: true
+  restartable: true
+  params:
+    - model: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
+
+@Composable
 public fun nl.rhaydus.softcover.core.component.chart.YearGrid(model: nl.rhaydus.softcover.core.component.chart.YearGridUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chart.YearGridEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true

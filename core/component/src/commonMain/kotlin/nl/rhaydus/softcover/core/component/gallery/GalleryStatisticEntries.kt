@@ -8,6 +8,8 @@ import nl.rhaydus.softcover.core.component.chart.ProportionChart
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBars
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
+import nl.rhaydus.softcover.core.component.chart.RecentDaysGrid
+import nl.rhaydus.softcover.core.component.chart.RecentDaysGridUiModel
 import nl.rhaydus.softcover.core.component.chart.YearGrid
 import nl.rhaydus.softcover.core.component.chart.YearGridUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
@@ -66,6 +68,19 @@ internal val statisticEntries: ImmutableList<GalleryEntry> = persistentListOf(
             YearGrid(
                 model = model,
                 onEvent = {},
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
+        name = "RecentDaysGrid",
+        family = GalleryFamily.CHART,
+        blurb = "The last twelve weeks as 84 day squares filled column by column, tinted like the year grid; " +
+            "not interactive, and while loading the grid keeps its layout and masks.",
+        previews = RecentDaysGridUiModel,
+        content = { model, modifier ->
+            RecentDaysGrid(
+                model = model,
                 modifier = modifier,
             )
         },

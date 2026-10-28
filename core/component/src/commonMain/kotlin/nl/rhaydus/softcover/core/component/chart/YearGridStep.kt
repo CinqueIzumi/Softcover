@@ -7,3 +7,10 @@ enum class YearGridStep {
     Three,
     Four,
 }
+
+internal fun YearGridStep.tone(): ChartTone = when (this) {
+    YearGridStep.One -> ChartTone.Fifth
+    YearGridStep.Two -> ChartTone.Third
+    YearGridStep.Three -> ChartTone.Second
+    YearGridStep.Four -> ChartTone.Lead
+}
