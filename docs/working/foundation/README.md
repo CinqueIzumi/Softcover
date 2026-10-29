@@ -15,17 +15,17 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** step 3 is done. `rhaydus.kmp.library` applies `com.android.lint` (AGP creates main-source
-  lint tasks for KMP libraries only then) with the shared policy, and pins the Compose runtime lint-check
-  jar so a transitive old runtime cannot crash lint. Every finding the first run surfaced is fixed in code;
-  the suppressions are generated Room code, one `DesktopApp` false positive, widget-info `targetApi`,
-  preview `VectorRaster`, and the exported `WidgetImageProvider` (user decision).
-- **Next:** step 4, first box: bump the foundation version for everything since 0.3.1.
-- **Open questions:** none.
-- **Verification:** Softcover `check buildHealth styleCheck` and foundation `check buildHealth` green;
-  injected lint warning fails `check`; reviewer findings applied; test audit clean.
-- **Uncommitted:** the lint box, in both repos (foundation first). Not pushed: foundation since
-  `398f68c`, Softcover since `68dd22e4e`; push the foundation first.
+- **State:** step 4, first box done. The foundation is 0.4.0 (user decision: the release breaks
+  consumers through the renamed plugin agents, detekt 2 and `RhaydusTheme` owning motion and haptics) in
+  `gradle.properties`, `plugin.json` and the foundation README, whose Kotlin badge now reads 2.4.21.
+- **Next:** step 4, second box: push the foundation branch, merge it, and tag `v0.4.0`. The third box also
+  moves Softcover's `README.md` foundation line and the managed `CLAUDE.md` block (re-run `rhaydus-adopt`)
+  from 0.3.2 to 0.4.0.
+- **Open questions:** none. The user's Medium_Phone pass (widget repaint on a time-zone change; Explore,
+  Reading mark-as-read swipe, Settings rows) is pending but does not block step 4.
+- **Verification:** foundation `verifyPluginVersion` green; no `0.3.2` left in the foundation.
+- **Uncommitted:** the version bump in the foundation; this `## Now` block. Not pushed: foundation since
+  `398f68c` (head `1a32715`), Softcover since `68dd22e4e` (head `e71a9869b`); push the foundation first.
 
 ## How to run a step
 
@@ -85,7 +85,7 @@ Bugs and gaps in shared code only; new components, design tokens and house-style
 
 ### 4 — Ship
 
-- [ ] Bump the foundation version for everything since 0.3.1 (`gradle.properties` and `plugin.json`).
+- [x] Bump the foundation version for everything since 0.3.1 (`gradle.properties` and `plugin.json`).
 - [ ] Push the foundation branch, merge it, and tag the release (a `v*` tag publishes to Maven Central).
 - [ ] Move Softcover's submodule pointer onto the tag; push `chore/foundation-submodule` and open its PR.
 - [ ] Delete this README and `agent-layer.md` (emptied by step 2) and the `ACTIVE.md` line; `candidates.md` stays
