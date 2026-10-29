@@ -24,7 +24,7 @@ internal fun DateStyleSection(
 
         SettingsRowGroup(selectableGroup = true) {
             state.dateStyleRows.forEach { dateStyleRow ->
-                row {
+                DividedRow {
                     SettingsSelectableRow(
                         model = dateStyleRow,
                         onClick = { runAction(OnDateStyleClickAction(style = dateStyleRow.key)) },

@@ -36,10 +36,11 @@ internal fun FullScreenCoverViewer(
     offset: Offset,
     onSizeChanged: (IntSize) -> Unit,
     onNavigateUp: () -> Unit,
+    modifier: Modifier = Modifier,
     imageGestureModifier: Modifier,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(color = Color.Black)
             .onSizeChanged(onSizeChanged),

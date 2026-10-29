@@ -123,7 +123,7 @@ fun Cover(
     ) {
         CoverImage(
             request = request,
-            imageModifier = imageModifier,
+            modifier = imageModifier,
             contentDescription = contentDescription,
             model = model,
         )
@@ -133,7 +133,7 @@ fun Cover(
 @Composable
 private fun CoverImage(
     request: ImageRequest,
-    imageModifier: Modifier,
+    modifier: Modifier,
     contentDescription: String?,
     model: CoverUiModel,
 ) {
@@ -184,7 +184,7 @@ private fun CoverImage(
         val width = maxWidth
 
         Box(
-            modifier = imageModifier
+            modifier = modifier
                 .width(width)
                 .requiredHeight(width / ratio)
                 .skeletonMask(

@@ -369,14 +369,16 @@ internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.di
     - refreshing: STABLE (primitive type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.searchResultItemModifier(): androidx.compose.ui.Modifier
+internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.searchResultItem(scope: androidx.compose.foundation.lazy.LazyItemScope): androidx.compose.ui.Modifier
   skippable: true
   restartable: true
   params:
+    - scope: STABLE (marked @Stable or @Immutable)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.searchResultItemModifier(): androidx.compose.ui.Modifier
+internal fun nl.rhaydus.softcover.feature.explore.presentation.screen.section.searchResultItem(scope: androidx.compose.foundation.lazy.grid.LazyGridItemScope): androidx.compose.ui.Modifier
   skippable: true
   restartable: true
   params:
+    - scope: STABLE (marked @Stable or @Immutable)
 

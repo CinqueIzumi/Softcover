@@ -31,7 +31,7 @@ internal fun DisplaySection(
 
         SettingsRowGroup {
             state.displayToggleRows.forEach { toggleRow ->
-                row {
+                DividedRow {
                     ToggleRow(
                         model = toggleRow,
                         onEvent = { event ->

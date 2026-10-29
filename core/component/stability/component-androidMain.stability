@@ -302,23 +302,23 @@ private fun nl.rhaydus.softcover.core.component.button.pillButtonInteraction(ena
     - onClick: STABLE (function type)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.callout.Banner(model: nl.rhaydus.softcover.core.component.callout.BannerUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.callout.BannerEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier, windowInsets: androidx.compose.foundation.layout.WindowInsets): kotlin.Unit
+public fun nl.rhaydus.softcover.core.component.callout.Banner(model: nl.rhaydus.softcover.core.component.callout.BannerUiModel, modifier: androidx.compose.ui.Modifier, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.callout.BannerEvent, kotlin.Unit>, windowInsets: androidx.compose.foundation.layout.WindowInsets): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - model: STABLE (marked @Stable or @Immutable)
-    - onEvent: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
     - windowInsets: STABLE (marked @Stable or @Immutable)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.callout.Callout(model: nl.rhaydus.softcover.core.component.callout.CalloutUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.callout.CalloutEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+public fun nl.rhaydus.softcover.core.component.callout.Callout(model: nl.rhaydus.softcover.core.component.callout.CalloutUiModel, modifier: androidx.compose.ui.Modifier, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.callout.CalloutEvent, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - model: STABLE (marked @Stable or @Immutable)
-    - onEvent: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.callout.CalloutActionContent(action: nl.rhaydus.softcover.core.component.callout.CalloutActionUiModel, variant: nl.rhaydus.softcover.core.component.callout.CalloutVariant, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.callout.CalloutEvent, kotlin.Unit>): kotlin.Unit
@@ -447,13 +447,13 @@ public fun nl.rhaydus.softcover.core.component.chart.RankedBars(model: nl.rhaydu
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.chip.Chip(model: nl.rhaydus.softcover.core.component.chip.ChipUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+public fun nl.rhaydus.softcover.core.component.chip.Chip(model: nl.rhaydus.softcover.core.component.chip.ChipUiModel, modifier: androidx.compose.ui.Modifier, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.chip.ChipEvent, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - model: STABLE (marked @Stable or @Immutable)
-    - onEvent: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
 
 @Composable
 public fun nl.rhaydus.softcover.core.component.chip.ChipFlow(set: nl.rhaydus.softcover.core.component.chip.ChipSet<P of nl.rhaydus.softcover.core.component.chip.ChipFlow>, onEvent: kotlin.Function2<@[ParameterName(name = \, modifier: androidx.compose.ui.Modifier): kotlin.Unit
@@ -527,7 +527,7 @@ private fun nl.rhaydus.softcover.core.component.chip.chipInteraction(interaction
     - onClick: STABLE (function type)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.chrome.ChromeIconButton(icon: nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon, contentDescription: kotlin.String, tooltip: kotlin.String, onClick: kotlin.Function0<kotlin.Unit>, colors: androidx.compose.material3.IconButtonColors, iconSize: androidx.compose.ui.unit.Dp, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+public fun nl.rhaydus.softcover.core.component.chrome.ChromeIconButton(icon: nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon, contentDescription: kotlin.String, tooltip: kotlin.String, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, colors: androidx.compose.material3.IconButtonColors, iconSize: androidx.compose.ui.unit.Dp): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -535,9 +535,9 @@ public fun nl.rhaydus.softcover.core.component.chrome.ChromeIconButton(icon: nl.
     - contentDescription: STABLE (String is immutable)
     - tooltip: STABLE (String is immutable)
     - onClick: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
     - colors: STABLE (marked @Stable or @Immutable)
     - iconSize: STABLE (marked @Stable or @Immutable)
-    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
 public fun nl.rhaydus.softcover.core.component.chrome.overMediaIconButtonColors(): androidx.compose.material3.IconButtonColors
@@ -675,12 +675,12 @@ private fun nl.rhaydus.softcover.core.component.cover.CoverFallback(model: nl.rh
     - model: STABLE (marked @Stable or @Immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.cover.CoverImage(request: coil3.request.ImageRequest, imageModifier: androidx.compose.ui.Modifier, contentDescription: kotlin.String?, model: nl.rhaydus.softcover.core.component.cover.CoverUiModel): kotlin.Unit
+private fun nl.rhaydus.softcover.core.component.cover.CoverImage(request: coil3.request.ImageRequest, modifier: androidx.compose.ui.Modifier, contentDescription: kotlin.String?, model: nl.rhaydus.softcover.core.component.cover.CoverUiModel): kotlin.Unit
   skippable: false
   restartable: true
   params:
     - request: UNSTABLE (has mutable properties or unstable members)
-    - imageModifier: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
     - contentDescription: STABLE (class with no mutable properties)
     - model: STABLE (marked @Stable or @Immutable)
 
@@ -1303,13 +1303,13 @@ private fun nl.rhaydus.softcover.core.component.richtext.CollapsibleRichText(mod
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.richtext.RichText(model: nl.rhaydus.softcover.core.component.richtext.RichTextUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.richtext.RichTextEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+public fun nl.rhaydus.softcover.core.component.richtext.RichText(model: nl.rhaydus.softcover.core.component.richtext.RichTextUiModel, modifier: androidx.compose.ui.Modifier, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.richtext.RichTextEvent, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - model: STABLE (marked @Stable or @Immutable)
-    - onEvent: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.richtext.RichTextBody(model: nl.rhaydus.softcover.core.component.richtext.RichTextUiModel, maxLines: kotlin.Int, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.richtext.RichTextEvent, kotlin.Unit>, onTextLayout: kotlin.Function1<androidx.compose.ui.text.TextLayoutResult, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
@@ -1382,15 +1382,15 @@ private fun nl.rhaydus.softcover.core.component.share.MiniScallopPortrait(avatar
     - readerInitials: STABLE (String is immutable)
 
 @Composable
-private fun nl.rhaydus.softcover.core.component.share.PaperShareCard(surfaceColor: androidx.compose.ui.graphics.Color, contentColor: androidx.compose.ui.graphics.Color, sizeModifier: androidx.compose.ui.Modifier, contentPadding: androidx.compose.ui.unit.Dp, modifier: androidx.compose.ui.Modifier, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
+private fun nl.rhaydus.softcover.core.component.share.PaperShareCard(surfaceColor: androidx.compose.ui.graphics.Color, contentColor: androidx.compose.ui.graphics.Color, modifier: androidx.compose.ui.Modifier, sizeModifier: androidx.compose.ui.Modifier, contentPadding: androidx.compose.ui.unit.Dp, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - surfaceColor: STABLE (marked @Stable or @Immutable)
     - contentColor: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
     - sizeModifier: STABLE (marked @Stable or @Immutable)
     - contentPadding: STABLE (marked @Stable or @Immutable)
-    - modifier: STABLE (marked @Stable or @Immutable)
     - content: STABLE (composable function type)
 
 @Composable
@@ -1769,13 +1769,13 @@ private fun nl.rhaydus.softcover.core.component.state.CenteredEmptyState(model: 
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.state.EmptyState(model: nl.rhaydus.softcover.core.component.state.EmptyStateUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.state.EmptyStateEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
+public fun nl.rhaydus.softcover.core.component.state.EmptyState(model: nl.rhaydus.softcover.core.component.state.EmptyStateUiModel, modifier: androidx.compose.ui.Modifier, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.state.EmptyStateEvent, kotlin.Unit>): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - model: STABLE (marked @Stable or @Immutable)
-    - onEvent: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
+    - onEvent: STABLE (function type)
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.state.InlineEmptyState(model: nl.rhaydus.softcover.core.component.state.EmptyStateUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
@@ -2018,13 +2018,13 @@ public fun nl.rhaydus.softcover.core.component.topbar.TopBar(model: nl.rhaydus.s
     - actions: STABLE (composable function type)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.transition.ExitingItems(items: kotlinx.collections.immutable.ImmutableList<T of nl.rhaydus.softcover.core.component.transition.ExitingItems>, keyOf: kotlin.Function1<T of nl.rhaydus.softcover.core.component.transition.ExitingItems, kotlin.Any>, itemModifier: androidx.compose.ui.Modifier, animatesExit: kotlin.Function1<T of nl.rhaydus.softcover.core.component.transition.ExitingItems, kotlin.Boolean>, exit: androidx.compose.animation.ExitTransition, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction2<@[ParameterName(name = \): kotlin.Unit
+public fun nl.rhaydus.softcover.core.component.transition.ExitingItems(items: kotlinx.collections.immutable.ImmutableList<T of nl.rhaydus.softcover.core.component.transition.ExitingItems>, keyOf: kotlin.Function1<T of nl.rhaydus.softcover.core.component.transition.ExitingItems, kotlin.Any>, modifier: androidx.compose.ui.Modifier, animatesExit: kotlin.Function1<T of nl.rhaydus.softcover.core.component.transition.ExitingItems, kotlin.Boolean>, exit: androidx.compose.animation.ExitTransition, content: @[Composable] androidx.compose.runtime.internal.ComposableFunction2<@[ParameterName(name = \): kotlin.Unit
   skippable: true
   restartable: true
   params:
     - items: STABLE (known stable type)
     - keyOf: STABLE (function type)
-    - itemModifier: STABLE (marked @Stable or @Immutable)
+    - modifier: STABLE (marked @Stable or @Immutable)
     - animatesExit: STABLE (function type)
     - exit: STABLE (marked @Stable or @Immutable)
     - content: STABLE (composable function type)

@@ -132,7 +132,7 @@ internal actual fun SettingsScreenLayout(
             Spacer(modifier = Modifier.height(Spacing.md))
 
             SettingsRowGroup {
-                row {
+                DividedRow {
                     SettingsMenuRow(
                         title = "Your profile",
                         gloss = "Your shelves, stats and reading year",
@@ -149,7 +149,7 @@ internal actual fun SettingsScreenLayout(
             Spacer(modifier = Modifier.height(Spacing.md))
 
             SettingsRowGroup {
-                row {
+                DividedRow {
                     SettingsMenuRow(
                         title = "Appearance",
                         gloss = "Theme, accent and text size",
@@ -157,7 +157,7 @@ internal actual fun SettingsScreenLayout(
                         target = SettingsMenuRowTarget.SubPage(onClick = navigateToAppearanceSettings),
                     )
                 }
-                row {
+                DividedRow {
                     SettingsMenuRow(
                         title = "Library tabs",
                         gloss = "Which shelves show, and their order",
@@ -166,7 +166,7 @@ internal actual fun SettingsScreenLayout(
                     )
                 }
                 if (state.widgetsSupported) {
-                    row {
+                    DividedRow {
                         SettingsMenuRow(
                             title = "Widgets",
                             gloss = "Your shelves, on your home screen",
@@ -175,7 +175,7 @@ internal actual fun SettingsScreenLayout(
                         )
                     }
                 }
-                row {
+                DividedRow {
                     SettingsMenuRow(
                         title = "Hidden suggestions",
                         gloss = "Books you've asked us to stop recommending",
@@ -192,7 +192,7 @@ internal actual fun SettingsScreenLayout(
             Spacer(modifier = Modifier.height(Spacing.md))
 
             SettingsRowGroup {
-                row {
+                DividedRow {
                     SettingsMenuRow(
                         title = "About Softcover",
                         gloss = "Credits, source, and how to reach us",
@@ -200,7 +200,7 @@ internal actual fun SettingsScreenLayout(
                         target = SettingsMenuRowTarget.SubPage(onClick = navigateToAbout),
                     )
                 }
-                row {
+                DividedRow {
                     SettingsMenuRow(
                         title = "What's new",
                         gloss = "What changed in each version.",
@@ -208,7 +208,7 @@ internal actual fun SettingsScreenLayout(
                         target = SettingsMenuRowTarget.SubPage(onClick = navigateToWhatsNew),
                     )
                 }
-                row {
+                DividedRow {
                     SettingsMenuRow(
                         title = "Roadmap",
                         gloss = "What's coming next, in the order it's planned",

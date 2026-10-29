@@ -37,8 +37,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 @Composable
 fun Banner(
     model: BannerUiModel,
-    onEvent: (BannerEvent) -> Unit = {},
     modifier: Modifier = Modifier,
+    onEvent: (BannerEvent) -> Unit = {},
     windowInsets: WindowInsets = WindowInsets(0),
 ) {
     val scheme = MaterialTheme.colorScheme

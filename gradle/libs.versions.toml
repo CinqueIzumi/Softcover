@@ -13,6 +13,7 @@ okio = "3.9.1"
 junit = "4.13.2"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.12.0"
+composeRuntimeLint = "1.11.3"
 composeBom = "2026.01.01"
 apollo = "5.0.0"
 # Apollo's normalized cache moved to a separately-versioned library in Apollo Kotlin 5.0; the built-in

@@ -32,8 +32,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 @Composable
 fun EmptyState(
     model: EmptyStateUiModel,
-    onEvent: (EmptyStateEvent) -> Unit = {},
     modifier: Modifier = Modifier,
+    onEvent: (EmptyStateEvent) -> Unit = {},
 ) {
     when (val variant = model.variant) {
         is EmptyStateVariant.Centered -> CenteredEmptyState(

@@ -76,7 +76,7 @@ internal fun WidgetsSettingsScreenLayout(
             } else {
                 SettingsRowGroup {
                     state.placedRows.forEach { rowModel ->
-                        row {
+                        DividedRow {
                             SettingsMenuRow(
                                 title = rowModel.title,
                                 gloss = rowModel.gloss,
@@ -103,7 +103,7 @@ internal fun WidgetsSettingsScreenLayout(
             if (state.canPin) {
                 SettingsRowGroup {
                     state.addRows.forEach { rowModel ->
-                        row {
+                        DividedRow {
                             SettingsMenuRow(
                                 title = rowModel.title,
                                 gloss = rowModel.gloss,

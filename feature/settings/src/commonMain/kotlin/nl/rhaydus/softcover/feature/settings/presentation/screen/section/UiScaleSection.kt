@@ -27,7 +27,7 @@ internal fun UiScaleSection(
 
         SettingsRowGroup(selectableGroup = true) {
             state.uiScaleRows.forEach { uiScaleRow ->
-                row {
+                DividedRow {
                     SettingsSelectableRow(
                         model = uiScaleRow,
                         onClick = { runAction(OnUiScaleSelectedAction(scale = uiScaleRow.key)) },

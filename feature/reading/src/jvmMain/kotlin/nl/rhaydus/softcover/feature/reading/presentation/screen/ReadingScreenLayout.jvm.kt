@@ -186,7 +186,7 @@ private fun DesktopReadingContent(
                                         coordinator = entry,
                                         index = index,
                                     )
-                                    .then(controller.slideModifier(bookId)),
+                                    .markAsReadSlide(controller, bookId),
                             )
                         }
                     }

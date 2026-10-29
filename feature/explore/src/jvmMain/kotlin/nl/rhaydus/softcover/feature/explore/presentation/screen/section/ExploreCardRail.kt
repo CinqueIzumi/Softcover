@@ -62,7 +62,7 @@ internal fun ExploreCardRail(
                     items = set.cards,
                     keyOf = { it.key.lazyKey },
                     animatesExit = { it.isLoading.not() },
-                    itemModifier = Modifier.animateBounds(
+                    modifier = Modifier.animateBounds(
                         lookaheadScope = this@LookaheadScope,
                         boundsTransform = { _, _ -> placementSpec },
                     ),

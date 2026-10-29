@@ -63,8 +63,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHi
 @Composable
 fun Chip(
     model: ChipUiModel,
-    onEvent: (ChipEvent) -> Unit = {},
     modifier: Modifier = Modifier,
+    onEvent: (ChipEvent) -> Unit = {},
 ) {
     ChipScaffold(
         model = model,

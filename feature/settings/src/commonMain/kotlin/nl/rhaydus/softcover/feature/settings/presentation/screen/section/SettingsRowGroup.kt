@@ -27,7 +27,7 @@ internal fun SettingsRowGroup(
         val scope = remember {
             object : SettingsRowGroupScope {
                 @Composable
-                override fun row(content: @Composable () -> Unit) {
+                override fun DividedRow(content: @Composable () -> Unit) {
                     Divider()
                     content()
                 }
@@ -39,9 +39,9 @@ internal fun SettingsRowGroup(
 
 /**
  * Receiver [SettingsRowGroup] passes to its `content` block, so a row's divider is drawn by
- * [row] rather than left to each call site to repeat.
+ * [DividedRow] rather than left to each call site to repeat.
  */
 internal interface SettingsRowGroupScope {
     @Composable
-    fun row(content: @Composable () -> Unit)
+    fun DividedRow(content: @Composable () -> Unit)
 }

@@ -12,6 +12,8 @@ internal class WidgetTimeChangedReceiver : BroadcastReceiver(), KoinComponent {
         context: Context,
         intent: Intent,
     ) {
+        if (intent.action != Intent.ACTION_TIME_CHANGED && intent.action != Intent.ACTION_TIMEZONE_CHANGED) return
+
         get<WidgetMaintenanceScheduler>().requestRepaint()
     }
 }

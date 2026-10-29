@@ -138,9 +138,9 @@ fun ShareCard(
 private fun PaperShareCard(
     surfaceColor: Color,
     contentColor: Color,
+    modifier: Modifier,
     sizeModifier: Modifier,
     contentPadding: Dp,
-    modifier: Modifier,
     content: @Composable () -> Unit,
 ) {
     Surface(

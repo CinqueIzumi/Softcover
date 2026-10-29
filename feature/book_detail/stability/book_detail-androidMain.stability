@@ -159,7 +159,7 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.FullSc
     - onNavigateUp: STABLE (function type)
 
 @Composable
-internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.FullScreenCoverViewer(model: nl.rhaydus.softcover.core.component.cover.CoverUiModel, scale: kotlin.Float, offset: androidx.compose.ui.geometry.Offset, onSizeChanged: kotlin.Function1<androidx.compose.ui.unit.IntSize, kotlin.Unit>, onNavigateUp: kotlin.Function0<kotlin.Unit>, imageGestureModifier: androidx.compose.ui.Modifier): kotlin.Unit
+internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.FullScreenCoverViewer(model: nl.rhaydus.softcover.core.component.cover.CoverUiModel, scale: kotlin.Float, offset: androidx.compose.ui.geometry.Offset, onSizeChanged: kotlin.Function1<androidx.compose.ui.unit.IntSize, kotlin.Unit>, onNavigateUp: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, imageGestureModifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true
   params:
@@ -168,6 +168,7 @@ internal fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.FullSc
     - offset: STABLE (marked @Stable or @Immutable)
     - onSizeChanged: STABLE (function type)
     - onNavigateUp: STABLE (function type)
+    - modifier: STABLE (marked @Stable or @Immutable)
     - imageGestureModifier: STABLE (marked @Stable or @Immutable)
 
 @Composable

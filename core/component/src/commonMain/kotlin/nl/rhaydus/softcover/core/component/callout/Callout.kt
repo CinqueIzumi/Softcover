@@ -43,8 +43,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 @Composable
 fun Callout(
     model: CalloutUiModel,
-    onEvent: (CalloutEvent) -> Unit = {},
     modifier: Modifier = Modifier,
+    onEvent: (CalloutEvent) -> Unit = {},
 ) {
     Surface(
         modifier = modifier,

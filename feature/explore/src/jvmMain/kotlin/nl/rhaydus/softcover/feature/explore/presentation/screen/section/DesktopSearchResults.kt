@@ -90,7 +90,7 @@ internal fun DesktopSearchResults(
                         BookCard(
                             model = card,
                             onEvent = onSearchResultEvent,
-                            modifier = searchResultItemModifier(),
+                            modifier = Modifier.searchResultItem(this),
                         )
                     }
 

@@ -185,22 +185,26 @@ internal fun Modifier.dimWhileRefreshing(refreshing: Boolean): Modifier {
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun LazyItemScope.searchResultItemModifier(): Modifier {
-    return Modifier.animateItem(
-        fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
-        placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
-        fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
-    )
+internal fun Modifier.searchResultItem(scope: LazyItemScope): Modifier {
+    return with(scope) {
+        animateItem(
+            fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+            placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+            fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun LazyGridItemScope.searchResultItemModifier(): Modifier {
-    return Modifier.animateItem(
-        fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
-        placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
-        fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
-    )
+internal fun Modifier.searchResultItem(scope: LazyGridItemScope): Modifier {
+    return with(scope) {
+        animateItem(
+            fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+            placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+            fadeOutSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

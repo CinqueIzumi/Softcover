@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTod
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.screen.MarkAsReadController
+import nl.rhaydus.softcover.feature.reading.presentation.screen.markAsReadSlide
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import org.koin.compose.koinInject
 
@@ -45,7 +46,10 @@ internal fun ReadingFeaturedSection(
         onStartSession = {
             sessionController.start(book = featured)
         },
-        modifier = modifier.then(controller.slideModifier(featured.id)),
+        modifier = modifier.markAsReadSlide(
+            controller,
+            featured.id,
+        ),
         isLoading = state.isLoadingFeatured,
     )
 }

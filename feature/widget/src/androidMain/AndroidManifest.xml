@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <application>
+    <application android:supportsRtl="true">
         <receiver
             android:name="nl.rhaydus.softcover.feature.widget.presentation.glance.CurrentlyReadingWidgetReceiver"
             android:exported="true"
@@ -88,11 +89,14 @@
             android:taskAffinity=""
             android:theme="@style/Theme.Softcover.UpdateProgress" />
 
+        <!-- Exported: the launcher reads widget images from its own process, and holds no permission
+             or URI grant from this app. -->
         <provider
             android:name="nl.rhaydus.softcover.feature.widget.presentation.image.WidgetImageProvider"
             android:authorities="${applicationId}.widgetimages"
             android:exported="true"
-            android:grantUriPermissions="false" />
+            android:grantUriPermissions="false"
+            tools:ignore="ExportedContentProvider" />
     </application>
 
 </manifest>

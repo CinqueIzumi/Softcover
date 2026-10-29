@@ -15,20 +15,17 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** the build-logic adoption is done. `rhaydus.module-graph` gained `allowedProjects`,
-  `bannedEdges`, `bannedExternalGroups`, `ignoredExternalCoordinates` and snapshots edges at configuration
-  time; the new root-applied `rhaydus.dependency-analysis` carries the shared buildHealth policy;
-  `rhaydus.kmp.compose` uses `navigationevent-compose`. Softcover applies both gates, its library modules
-  apply `rhaydus.kmp.library`, and `softcover.kmp.compose` is `rhaydus.kmp.compose` + the stability gate.
-  Injected violations proved module-graph, DA and stability still fail; lint did not (see Next).
-- **Next:** step 3, last box: library modules (`com.android.kotlin.multiplatform.library`) get no
-  main-source lint task, so a warning in `core/book/src/androidMain` passes everything, `:app:lintDebug`
-  with `checkDependencies = true` included. Find how that plugin enables main-source lint, wire it in
-  `rhaydus.kmp.library` and `check`, prove it with an injected `SdCardPath`, fix what it surfaces.
+- **State:** step 3 is done. `rhaydus.kmp.library` applies `com.android.lint` (AGP creates main-source
+  lint tasks for KMP libraries only then) with the shared policy, and pins the Compose runtime lint-check
+  jar so a transitive old runtime cannot crash lint. Every finding the first run surfaced is fixed in code;
+  the suppressions are generated Room code, one `DesktopApp` false positive, widget-info `targetApi`,
+  preview `VectorRaster`, and the exported `WidgetImageProvider` (user decision).
+- **Next:** step 4, first box: bump the foundation version for everything since 0.3.1.
 - **Open questions:** none.
-- **Verification:** Softcover and foundation `check buildHealth` green, foundation build-logic tests green.
-- **Uncommitted:** nothing. Not pushed: foundation since `398f68c`, and Softcover's commits since
-  `68dd22e4e`; push the foundation first.
+- **Verification:** Softcover `check buildHealth styleCheck` and foundation `check buildHealth` green;
+  injected lint warning fails `check`; reviewer findings applied; test audit clean.
+- **Uncommitted:** the lint box, in both repos (foundation first). Not pushed: foundation since
+  `398f68c`, Softcover since `68dd22e4e`; push the foundation first.
 
 ## How to run a step
 
@@ -44,7 +41,7 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 |---|---|---|
 | 1 | Audit Softcover's agent setup against the plugin | [x] |
 | 2 | A generic agent layer in `rhaydus-kotlin`, adopted in Softcover | [ ] |
-| 3 | Fix what the foundation already ships | [ ] |
+| 3 | Fix what the foundation already ships | [x] |
 | 4 | Ship: push, tag, move the pointer | [ ] |
 
 ### 1 — Audit
@@ -84,7 +81,7 @@ Bugs and gaps in shared code only; new components, design tokens and house-style
 - [x] Tooling: F33, F37, F54, F60; wire `detektCheck` into the foundation's `check`.
 - [x] Data: F55.
 - [x] Adopt F18, F20, F21 through `includeBuild("foundation/build-logic")`; delete the Softcover copies.
-- [ ] Lint the main sources of KMP library modules through `rhaydus.kmp.library`, gated by `check`.
+- [x] Lint the main sources of KMP library modules through `rhaydus.kmp.library`, gated by `check`.
 
 ### 4 — Ship
 

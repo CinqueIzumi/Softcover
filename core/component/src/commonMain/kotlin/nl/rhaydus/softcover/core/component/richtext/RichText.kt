@@ -46,8 +46,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover
 @Composable
 fun RichText(
     model: RichTextUiModel,
-    onEvent: (RichTextEvent) -> Unit = {},
     modifier: Modifier = Modifier,
+    onEvent: (RichTextEvent) -> Unit = {},
 ) {
     if (model.variant == RichTextVariant.CommunityReview) {
         CollapsibleRichText(
