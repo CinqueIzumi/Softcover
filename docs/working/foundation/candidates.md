@@ -113,15 +113,17 @@ Filed but not yet implemented in the foundation.
 
 ### F34 — Import ban with a per-file allowlist (text-leaf gate)
 
-- **Type:** gate
-- **Home:** `nl.rhaydus:ktlint-rules` or `nl.rhaydus:detekt-rules`
+- **Type:** gate (Konsist assertion)
+- **Home:** `nl.rhaydus:konsist-rules` (F67)
 - **Status:** **Open — blocks Softcover's text-leaf gate.** Softcover routes every text through one leaf
   (`SoftcoverText`) and needs `androidx.compose.material3.Text` banned everywhere except that leaf's file.
   detekt's `ForbiddenImport` allows one instance per config and is already scoped to the leaf modules.
-- **What to build:** a configurable rule taking `(import, allowed file globs, reason)` entries, with a
-  fully-qualified-call check alongside the import check; release, then enable it in Softcover with one
-  entry: `androidx.compose.material3.Text`, allowed only in `SoftcoverText.kt`. The swap itself is done,
-  so the gate passes on enable.
+- **What to build:** an assertion taking `(import, allowed file globs, reason)` entries, also matching
+  fully-qualified references; Softcover enables it with `androidx.compose.material3.Text` allowed only in
+  `SoftcoverText.kt` (the swap is done, so it passes on enable). The same assertion takes the prose-only
+  import rules: Material `Button`, `kotlinx.datetime.Instant` (use `kotlin.time.Instant`) and
+  `rememberHaptics`, which retires Softcover's `RememberHapticsOutsideTheme`. A layering assertion alongside
+  it: data and domain packages never import presentation.
 
 ### F38 — `designsystem-core` describes a spacing scale but ships none
 
@@ -165,11 +167,13 @@ Filed but not yet implemented in the foundation.
 - **Impact in the app:** the default spring settles 0 to 24,092 in about 250 ms, too fast to read as a count.
 - **What to build:** a named slow, no-bounce value-change spring alongside the scheme's specs. Once adopted, drop the app-local one.
 
-### F57 — detekt rule: a `UiState` getter that builds a UI model
+### F57 — Gate: a `UiState` getter that builds a UI model
 
-- **Type:** gate (detekt rule)
-- **Home:** `nl.rhaydus:detekt-rules`
-- **Status:** **Open.** Caught by review only, and the reviewer has it in agent memory.
+- **Type:** gate (Konsist assertion for the getter; detekt rule for the composable case)
+- **Home:** `nl.rhaydus:konsist-rules` (F67), `nl.rhaydus:detekt-rules`
+- **Status:** **Open — implemented locally.** Softcover's `UiModelBuiltInRender` flags the getter case as well
+  as a UI model built in a composable; the reviewer memory on it is now redundant. The getter case is a
+  declaration and moves to Konsist; the composable case inspects call sites and moves upstream as a detekt rule.
 - **The trap:** `val header: FooUiModel get() = FooUiModel(...)` on a `UiState` looks like a stored field but
   runs the constructor on every render read, the same as building the model in the composable.
 - **What to build:** flag a `get()`-bodied property on a `*UiState` class that constructs a `*UiModel`. The fix is
@@ -198,6 +202,81 @@ Filed but not yet implemented in the foundation.
   - `toad-architecture.md`: a composable embedded in another Screen receives its ScreenModel from the owning
     `Screen`; `koinNavigatorScreenModel` widens the scope to the Navigator's lifetime.
 
+### F61 — A style convention plugin owns the detekt and ktlint wiring
+
+- **Type:** gate (convention plugin)
+- **Home:** `build-logic`
+- **Status:** **Open — implemented locally.** Softcover's root `build.gradle.kts` holds the generic wiring:
+  extracting the baseline config from the `detekt-rules` jar, the type-resolved task set, source repointing,
+  the vacuous-pass guard, the ktlint tasks and `styleCheck`. The foundation scans itself in light mode only,
+  so `UnguardedFlowTerminalRead` never runs on its own modules.
+- **What to build:** one convention plugin that applies detekt (full analysis) and ktlint with the shared
+  config layered under an optional project file, creates the Konsist test module (F67), and registers
+  `styleCheck`. The foundation applies it to
+  itself. Softcover keeps only its config deltas; its `:detekt-rules` module, `softcover-rules.yml` and the
+  in-jar `config.yml` go once its rules move upstream.
+
+### F62 — The ktlint ruleset formats; its semantic rules move out
+
+- **Type:** gate
+- **Home:** `nl.rhaydus:ktlint-rules`, `nl.rhaydus:detekt-rules`, `nl.rhaydus:konsist-rules` (F67)
+- **Status:** **Open.** ktlint carries six report-only semantic rules with scoping hardcoded in the rules.
+- **What to build:** delete them from ktlint, which then only formats with auto-fix. Inline mockk stub,
+  `runCatchingLogged` in use cases, raw logging and inline fully-qualified references inspect function
+  bodies and become detekt rules with config-driven scoping. One type per file and the visibility of
+  internal plumbing are declaration rules and become Konsist assertions.
+
+### F63 — `MultiArgWrappingRule` wraps 2+-argument `Modifier` calls too
+
+- **Type:** bug (formatter)
+- **Home:** `nl.rhaydus:ktlint-rules` (`multi-arg-wrapping`)
+- **Status:** **Open.** The rule exempts `Modifier` chains while the code-style guide has no such carve-out;
+  review catches `.padding(horizontal = …, vertical = …)` by hand.
+- **What to build:** drop the exemption so the auto-fix wraps them, then delete the review-only line.
+
+### F64 — Gate: `@Nested` grouping and Arrange / Act / Assert markers in tests
+
+- **Type:** gate (Konsist assertion for the grouping; detekt rule for the markers)
+- **Home:** `nl.rhaydus:konsist-rules` (F67), `nl.rhaydus:detekt-rules`
+- **Status:** **Open.** Enforced by a close-out grep, four agent-prompt copies and agent memory.
+- **What to build:** a Konsist assertion that every `@Test` function sits in a `@Nested inner class`, and a
+  detekt rule over test sources that each `@Test` body carries the three markers in order, reported at the
+  line. Then drop the grep from the close-out gates and the prose copies.
+
+### F65 — Suppressing a contract rule is itself a finding
+
+- **Type:** gate (detekt config)
+- **Home:** the shared detekt baseline config
+- **Status:** **Open.** "No `@Suppress`" is prose only; 13 suppressions exist in Softcover.
+- **What to build:** enable the built-in `ForbiddenSuppress` for the contract rules (`NoReflection`,
+  `ScreenConstructorProperty`, `UnguardedFlowTerminalRead`, `UnsafeCallOnNullableType`) and audit the existing
+  suppressions.
+
+### F66 — Pure-AST rules for the remaining review-only layout and naming rules
+
+- **Type:** gate (detekt rules)
+- **Home:** `nl.rhaydus:detekt-rules`
+- **Status:** **Open.** Review or agent prose only: every multi-line construct is its own paragraph,
+  guard-clause spacing, no `/*` inside KDoc, a `*UiModel` field never named `action`, and blank lines between
+  sibling composables inside nested layout scopes.
+- **What to build:** the `action` field name as a Konsist assertion (F67); the four layout rules as detekt
+  rules. Then shrink the review-only list in the code-style docs to the rules that need judgement.
+
+
+### F67 — A Konsist layer for declaration and architecture rules
+
+- **Type:** gate (library + convention plugin)
+- **Home:** new `nl.rhaydus:konsist-rules`, `build-logic` (F61)
+- **Status:** **Open.** Declaration rules (imports, layering, naming, placement) live in detekt rules,
+  ktlint rules or agent prose; detekt makes each one a visitor class, and its built-in import ban takes
+  one entry.
+- **What to build:** first verify Konsist on Softcover: it reads every KMP source set, parses the
+  Kotlin 2.4.21 sources without errors, one real assertion (F34) passes and fails correctly, and its run
+  time inside `check` is acceptable. If any of these fails, the Konsist-homed rules go to detekt instead.
+  Then a published library of assertion functions taking project facts (package prefix, allowlists, bans)
+  as parameters, and a `:konsist` JVM test module created by F61's plugin and wired into `check`. Its
+  assertions: F34, the F57 getter, one type per file and plumbing visibility (F62), `@Nested` grouping
+  (F64), the `action` field name (F66), and serializable Screen arguments (F52).
 
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
@@ -249,6 +328,7 @@ Filed but not yet implemented in the foundation.
   `NoReflection` and `ScreenConstructorProperty` detekt rules, and the `keepRules/` convention are described in
   `docs/reference/r8.md`.
 - **What to build:** move the plugin and the two rules into the foundation, with the project package prefix
-  and the supertypes to check as configuration, and ship `TransientNavArg` with the navigation contract.
+  and the supertypes to check as configuration (`NoReflection` as a detekt rule, `ScreenConstructorProperty`
+  as a Konsist assertion, F67), and ship `TransientNavArg` with the navigation contract.
   Document `keepRules/` as the consumer-rule convention. No Softcover build file registers these directories, so the foundation's
   convention plugins only need to keep AGP's default pickup intact.

@@ -1,6 +1,6 @@
 # Foundation — Implementation Plan
 
-> **Lifecycle.** Delete this README and `agent-layer.md` in the PR that finishes step 4; `candidates.md` stays. The roadmap lives in GitHub Issues (see
+> **Lifecycle.** Delete this README and `agent-layer.md` in the PR that finishes step 5; `candidates.md` stays. The roadmap lives in GitHub Issues (see
 > `CLAUDE.md` § Roadmap); this is a working plan for one rollout.
 
 **Goal:** the foundation is finished before any other app adopts it. Softcover builds it from the git submodule at
@@ -15,17 +15,20 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** step 4, first box done. The foundation is 0.4.0 (user decision: the release breaks
-  consumers through the renamed plugin agents, detekt 2 and `RhaydusTheme` owning motion and haptics) in
-  `gradle.properties`, `plugin.json` and the foundation README, whose Kotlin badge now reads 2.4.21.
-- **Next:** step 4, second box: push the foundation branch, merge it, and tag `v0.4.0`. The third box also
-  moves Softcover's `README.md` foundation line and the managed `CLAUDE.md` block (re-run `rhaydus-adopt`)
-  from 0.3.2 to 0.4.0.
-- **Open questions:** none. The user's Medium_Phone pass (widget repaint on a time-zone change; Explore,
-  Reading mark-as-read swipe, Settings rows) is pending but does not block step 4.
-- **Verification:** foundation `verifyPluginVersion` green; no `0.3.2` left in the foundation.
-- **Uncommitted:** the version bump in the foundation; this `## Now` block. Not pushed: foundation since
-  `398f68c` (head `1a32715`), Softcover since `68dd22e4e` (head `e71a9869b`); push the foundation first.
+- **State:** steps 1-3 done. The foundation reads 0.4.0 (user decision: the release breaks consumers
+  through the renamed plugin agents, detekt 2 and `RhaydusTheme` owning motion and haptics); the tag waits
+  for step 4, which now ships every open `candidates.md` entry in the same release (user decision).
+- **Next:** step 4 in § 4 below: plan the nine boxes, starting with the Konsist verification, running those on disjoint modules as parallel agents.
+  Step 5's pointer box also moves Softcover's `README.md` foundation line and the managed `CLAUDE.md` block
+  (re-run `rhaydus-adopt`) from 0.3.2 to 0.4.0.
+- **Open questions:** none. The rules audit is folded into step 4 as F61-F67 (ktlint / detekt / Konsist split). The user's
+  Medium_Phone pass (widget repaint on a time-zone change; Explore, Reading mark-as-read swipe, Settings
+  rows) is pending but does not block step 4.
+- **Verification:** foundation `verifyPluginVersion` green; no `0.3.2` left in the foundation. Close-out
+  gates not run: no `*.kt` changed this session.
+- **Uncommitted:** nothing. The bump is committed (foundation `cf44890`) and Softcover's
+  pointer records it (`39347097a`). Not pushed: foundation since `398f68c`, Softcover since `68dd22e4e`;
+  push the foundation first.
 
 ## How to run a step
 
@@ -40,9 +43,10 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 | Step | Scope | Status |
 |---|---|---|
 | 1 | Audit Softcover's agent setup against the plugin | [x] |
-| 2 | A generic agent layer in `rhaydus-kotlin`, adopted in Softcover | [ ] |
+| 2 | A generic agent layer in `rhaydus-kotlin`, adopted in Softcover | [x] |
 | 3 | Fix what the foundation already ships | [x] |
-| 4 | Ship: push, tag, move the pointer | [ ] |
+| 4 | Clear the candidates backlog | [ ] |
+| 5 | Ship: push, tag, move the pointer | [ ] |
 
 ### 1 — Audit
 
@@ -73,7 +77,7 @@ Read-only. The output is a decision per item, recorded in `agent-layer.md` and u
 
 ### 3 — Fix what the foundation already ships
 
-Bugs and gaps in shared code only; new components, design tokens and house-style lint rules wait for a second app.
+Bugs and gaps in shared code only; new components, tokens and gates are step 4.
 
 - [x] Component bugs: F26, F27, F31 + F46, F36, F45, F47, F48, F49, F51; delete Softcover's forks and the
       detekt bans on the foundation versions.
@@ -83,7 +87,23 @@ Bugs and gaps in shared code only; new components, design tokens and house-style
 - [x] Adopt F18, F20, F21 through `includeBuild("foundation/build-logic")`; delete the Softcover copies.
 - [x] Lint the main sources of KMP library modules through `rhaydus.kmp.library`, gated by `check`.
 
-### 4 — Ship
+### 4 — Clear the candidates backlog
+
+Every open entry in `candidates.md` ships in 0.4.0. A box moves any Softcover-local copy into the foundation,
+deletes it from Softcover, and prunes its entries. Boxes on disjoint modules run as parallel agents.
+
+- [ ] Components: F28, F32.
+- [ ] Design tokens: F38, F40, F43.
+- [ ] Verify Konsist on Softcover (F67's checks), before the rule boxes; a failure re-homes its rules to detekt.
+- [ ] Style wiring: F61 and F67's library and test module, before the rule boxes.
+- [ ] ktlint formats only: F24, F25, F58, F63; F62 moves the semantic rules out.
+- [ ] detekt rules: F29, F39, F41, F65, and the detekt halves of F57, F62, F64 and F66.
+- [ ] Konsist assertions: F34, and the Konsist halves of F52, F57, F62, F64 and F66.
+- [ ] Build tooling: F30, F50, F52.
+- [ ] Docs and memory: F59; the review-only rules in both code-style docs shrink to what the gates leave;
+      prune agent memories the new gates make stale.
+
+### 5 — Ship
 
 - [x] Bump the foundation version for everything since 0.3.1 (`gradle.properties` and `plugin.json`).
 - [ ] Push the foundation branch, merge it, and tag the release (a `v*` tag publishes to Maven Central).
@@ -96,8 +116,6 @@ Bugs and gaps in shared code only; new components, design tokens and house-style
 - The second app adopts the submodule, once the foundation is finished.
 - Retire Maven Central publishing and the GitHub install instructions, after the second app builds from the
   submodule.
-- Softcover-specific components, design tokens and house-style lint rules in `candidates.md`, extracted when a
-  second app wants them.
 
 ## Decisions
 
@@ -108,6 +126,9 @@ Bugs and gaps in shared code only; new components, design tokens and house-style
 - One plugin, `rhaydus-kotlin`, loaded per project from its own `foundation/` checkout; no user-scope install.
 - The plugin ships process; project facts live in the project; personal preferences stay with the user.
 - Maven Central publishing stays live until the second app builds from the submodule.
+- 0.4.0 ships the whole candidates backlog; nothing waits for a second app.
+- ktlint formats, detekt judges calls, Konsist judges declarations; gates replace agent or grep checks lacking judgement.
+- 2+-argument `Modifier` calls wrap one argument per line, like every other call.
 - Project facts reach the plugin agents through an `## Agent parameters` table in the managed `CLAUDE.md` block.
 - Plugin hooks register in the plugin `hooks.json`; the quiet-Gradle script ships in the plugin, not via adopt.
 - The plugin agents drop the `softcover-` prefix; Softcover uses the plugin names after step 2.
