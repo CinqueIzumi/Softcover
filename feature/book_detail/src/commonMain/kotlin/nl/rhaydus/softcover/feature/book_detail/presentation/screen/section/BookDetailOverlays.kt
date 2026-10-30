@@ -3,8 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
-import nl.rhaydus.softcover.core.component.dialog.DatePickerEvent
-import nl.rhaydus.softcover.core.component.dialog.SoftcoverDatePickerDialog
+import nl.rhaydus.designsystem.component.RhaydusDatePickerDialog
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.lists.ListMembership
@@ -241,17 +240,14 @@ internal fun BookDetailOverlays(
         )
     }
 
-    val deadlinePicker = state.deadlinePicker
-    if (deadlinePicker != null) {
-        SoftcoverDatePickerDialog(
-            model = deadlinePicker,
-            onEvent = { event ->
-                when (event) {
-                    is DatePickerEvent.Confirmed -> runAction(OnDeadlinePickedAction(date = event.date))
-
-                    DatePickerEvent.Dismissed -> runAction(OnDismissDeadlinePickerAction())
-                }
-            },
+    val deadlinePickerDate = state.deadlinePickerDate
+    if (deadlinePickerDate != null) {
+        RhaydusDatePickerDialog(
+            initialDate = deadlinePickerDate,
+            onDismiss = { runAction(OnDismissDeadlinePickerAction()) },
+            onConfirm = { date -> runAction(OnDeadlinePickedAction(date = date)) },
+            confirmLabel = "Confirm",
+            dismissLabel = "Cancel",
         )
     }
 

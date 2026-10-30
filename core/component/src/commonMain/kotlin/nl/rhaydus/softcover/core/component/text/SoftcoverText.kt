@@ -13,7 +13,8 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.designsystem.modifier.skeletonMask
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 
 /**
  * The app's text leaf. A null [text] means the value is unknown, so it masks like [isLoading]. While
@@ -78,7 +79,10 @@ fun SoftcoverText(
 
     Text(
         text = if (isMasked || text == null) standInText else text,
-        modifier = modifier.skeletonMask(visible = isMasked),
+        modifier = modifier.skeletonMask(
+            visible = isMasked,
+            shape = Corners.xs,
+        ),
         style = style,
         color = color,
         textAlign = textAlign,

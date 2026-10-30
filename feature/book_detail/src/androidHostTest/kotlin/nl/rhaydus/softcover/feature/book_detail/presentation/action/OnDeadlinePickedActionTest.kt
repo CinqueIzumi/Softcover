@@ -12,7 +12,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -117,12 +116,10 @@ class OnDeadlinePickedActionTest {
         }
     }
 
-    private val openPicker = DatePickerUiModel(
-        initialDate = LocalDate(
-            2026,
-            6,
-            15,
-        ),
+    private val openPicker = LocalDate(
+        2026,
+        6,
+        15,
     )
 
     @Nested
@@ -267,7 +264,7 @@ class OnDeadlinePickedActionTest {
         }
 
         @Test
-        fun `clears deadlinePicker after calling use case`() = runTest {
+        fun `clears deadlinePickerDate after calling use case`() = runTest {
             // ----- Arrange -----
             val book = stubBook(
                 id = 5,
@@ -276,7 +273,7 @@ class OnDeadlinePickedActionTest {
             )
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
-                deadlinePicker = openPicker,
+                deadlinePickerDate = openPicker,
             )
             dependencies = stubDependencies(this)
             val date = LocalDate(
@@ -304,13 +301,13 @@ class OnDeadlinePickedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlinePicker shouldBe null
+            stateFlow.value.deadlinePickerDate shouldBe null
             val sentEvent = eventChannel.tryReceive().getOrNull()
             sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
         }
 
         @Test
-        fun `sends MutationFailedEvent and still clears deadlinePicker when use case fails`() = runTest {
+        fun `sends MutationFailedEvent and still clears deadlinePickerDate when use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(
                 id = 5,
@@ -319,7 +316,7 @@ class OnDeadlinePickedActionTest {
             )
             stateFlow.value = buildBookDetailUiState().copy(
                 book = book,
-                deadlinePicker = openPicker,
+                deadlinePickerDate = openPicker,
             )
             dependencies = stubDependencies(this)
             val date = LocalDate(
@@ -349,7 +346,7 @@ class OnDeadlinePickedActionTest {
             // ----- Assert -----
             val sentEvent = eventChannel.tryReceive().getOrNull()
             sentEvent.shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
-            stateFlow.value.deadlinePicker shouldBe null
+            stateFlow.value.deadlinePickerDate shouldBe null
         }
 
         @Test
@@ -357,7 +354,7 @@ class OnDeadlinePickedActionTest {
             // ----- Arrange -----
             stateFlow.value = buildBookDetailUiState().copy(
                 book = null,
-                deadlinePicker = openPicker,
+                deadlinePickerDate = openPicker,
             )
             dependencies = stubDependencies(this)
             val date = LocalDate(
@@ -374,7 +371,7 @@ class OnDeadlinePickedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlinePicker shouldBe openPicker
+            stateFlow.value.deadlinePickerDate shouldBe openPicker
             coVerify(exactly = 0) {
                 setBookDeadlineUseCase(
                     bookId = any(),

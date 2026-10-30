@@ -88,7 +88,7 @@ class OnOpenDeadlinePickerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlinePicker?.initialDate shouldBe today
+            stateFlow.value.deadlinePickerDate shouldBe today
         }
 
         @Test
@@ -131,7 +131,7 @@ class OnOpenDeadlinePickerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlinePicker?.initialDate shouldBe deadlineDate
+            stateFlow.value.deadlinePickerDate shouldBe deadlineDate
         }
 
         @Test
@@ -150,7 +150,7 @@ class OnOpenDeadlinePickerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlinePicker shouldBe null
+            stateFlow.value.deadlinePickerDate shouldBe null
         }
 
         @Test

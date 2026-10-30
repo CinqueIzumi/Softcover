@@ -26,6 +26,7 @@ import nl.rhaydus.common.currentLocalDateTime
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.designsystem.modifier.skeletonMask
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
@@ -34,11 +35,11 @@ import nl.rhaydus.softcover.core.component.cover.rememberCoverImageRequest
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.state.RevealedWhenPresent
-import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.supportsBlur
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.reading.presentation.collector.greetingForNow
@@ -82,7 +83,10 @@ internal fun FeaturedBackdropCard(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .skeletonMask(visible = isLoading)
+                .skeletonMask(
+                    visible = isLoading,
+                    shape = Corners.xs,
+                )
                 .background(veil),
         ) {
             if (isInspection) {
@@ -187,7 +191,10 @@ internal fun FeaturedBackdropCard(
                 enabled = isLoading.not(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .skeletonMask(visible = isLoading),
+                    .skeletonMask(
+                        visible = isLoading,
+                        shape = Corners.xs,
+                    ),
             )
 
             FeaturedSessionButton(
@@ -206,7 +213,10 @@ internal fun FeaturedBackdropCard(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .skeletonMask(visible = isLoading),
+                    .skeletonMask(
+                        visible = isLoading,
+                        shape = Corners.xs,
+                    ),
             )
         }
     }
@@ -224,7 +234,10 @@ private fun FeaturedCover(
             model = cover,
             modifier = Modifier
                 .width(120.dp)
-                .skeletonMask(visible = isLoading),
+                .skeletonMask(
+                    visible = isLoading,
+                    shape = Corners.xs,
+                ),
         )
     }
 }

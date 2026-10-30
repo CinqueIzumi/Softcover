@@ -722,14 +722,6 @@ public fun nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine(mode
     - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.dialog.SoftcoverDatePickerDialog(model: nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.dialog.DatePickerEvent, kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - model: STABLE (marked @Stable or @Immutable)
-    - onEvent: STABLE (function type)
-
-@Composable
 public fun nl.rhaydus.softcover.core.component.divider.Divider(modifier: androidx.compose.ui.Modifier, ink: nl.rhaydus.softcover.core.component.divider.DividerInk, center: nl.rhaydus.softcover.core.component.divider.DividerCenter?): kotlin.Unit
   skippable: true
   restartable: true
@@ -896,14 +888,6 @@ internal fun nl.rhaydus.softcover.core.component.field.TextFieldPlaceholder(text
     - enabled: STABLE (primitive type)
     - modifier: STABLE (marked @Stable or @Immutable)
     - style: STABLE (marked @Stable or @Immutable)
-
-@Composable
-private fun nl.rhaydus.softcover.core.component.gallery.GalleryDatePicker(model: nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel, modifier: androidx.compose.ui.Modifier): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - model: STABLE (marked @Stable or @Immutable)
-    - modifier: STABLE (marked @Stable or @Immutable)
 
 @Composable
 internal fun nl.rhaydus.softcover.core.component.gallery.GallerySheetFrame(scaffold: nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel, modifier: androidx.compose.ui.Modifier, lazyBody: kotlin.Boolean, content: @[Composable] @[ExtensionFunctionType] androidx.compose.runtime.internal.ComposableFunction1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>): kotlin.Unit
@@ -1801,36 +1785,6 @@ public fun nl.rhaydus.softcover.core.component.state.RevealedWhenPresent(value: 
     - value: RUNTIME (requires runtime check)
     - modifier: STABLE (marked @Stable or @Immutable)
     - content: STABLE (composable function type)
-
-@Composable
-public fun nl.rhaydus.softcover.core.component.state.SkeletonRevealGroup(content: @[Composable] androidx.compose.runtime.internal.ComposableFunction0<kotlin.Unit>): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - content: STABLE (composable function type)
-
-@Composable
-public fun nl.rhaydus.softcover.core.component.state.clippedSkeletonMask(visible: kotlin.Boolean, shape: androidx.compose.ui.graphics.Shape): androidx.compose.ui.Modifier
-  skippable: true
-  restartable: true
-  params:
-    - visible: STABLE (primitive type)
-    - shape: STABLE (marked @Stable or @Immutable)
-
-@Composable
-private fun nl.rhaydus.softcover.core.component.state.rememberShimmerSweep(): androidx.compose.runtime.State<kotlin.Float>
-  skippable: true
-  restartable: true
-  params:
-
-@Composable
-public fun nl.rhaydus.softcover.core.component.state.skeletonMask(visible: kotlin.Boolean, shape: androidx.compose.ui.graphics.Shape, revealsImmediately: kotlin.Boolean): androidx.compose.ui.Modifier
-  skippable: true
-  restartable: true
-  params:
-    - visible: STABLE (primitive type)
-    - shape: STABLE (marked @Stable or @Immutable)
-    - revealsImmediately: STABLE (primitive type)
 
 @Composable
 private fun nl.rhaydus.softcover.core.component.statistic.CompactTile(model: nl.rhaydus.softcover.core.component.statistic.StatTileUiModel, variant: nl.rhaydus.softcover.core.component.statistic.StatTileVariant.Compact, modifier: androidx.compose.ui.Modifier): kotlin.Unit

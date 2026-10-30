@@ -35,11 +35,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
+import nl.rhaydus.designsystem.modifier.clippedSkeletonMask
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.nav.rememberPulseScaleProvider
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.state.clippedSkeletonMask
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon

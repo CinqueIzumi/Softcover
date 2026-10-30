@@ -27,7 +27,6 @@ kotlin {
             implementation(libs.rhaydus.designsystemImage)
 
             api(libs.coil3)
-            api(libs.kotlinx.datetime)
         }
 
         jvmMain.dependencies {

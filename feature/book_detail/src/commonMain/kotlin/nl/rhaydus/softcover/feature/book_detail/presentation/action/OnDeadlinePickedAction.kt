@@ -19,7 +19,7 @@ internal class OnDeadlinePickedAction(
     ) {
         val book = scope.currentState.book ?: return
         val edition = book.currentEdition ?: run {
-            scope.setState { it.copy(deadlinePicker = null) }
+            scope.setState { it.copy(deadlinePickerDate = null) }
             return
         }
         val isAudiobook = edition.isAudiobook
@@ -47,6 +47,6 @@ internal class OnDeadlinePickedAction(
                 scope.sendEvent(BookDetailEvent.MutationFailedEvent())
             }
 
-        scope.setState { it.copy(deadlinePicker = null) }
+        scope.setState { it.copy(deadlinePickerDate = null) }
     }
 }

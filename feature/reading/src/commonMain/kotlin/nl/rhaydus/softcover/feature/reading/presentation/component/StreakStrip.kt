@@ -28,12 +28,13 @@ import kotlinx.datetime.plus
 import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.modifier.skeletonMask
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
-import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -75,7 +76,10 @@ internal fun StreakStrip(
                 )
                 .horizontalScroll(rememberScrollState())
                 .height(18.dp)
-                .skeletonMask(visible = model.isLoading),
+                .skeletonMask(
+                    visible = model.isLoading,
+                    shape = Corners.xs,
+                ),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -127,7 +131,10 @@ internal fun StreakStrip(
             // accurate however far the user scrolls into the past.
             SoftcoverText(
                 text = "Most recent first".uppercase(),
-                modifier = Modifier.skeletonMask(visible = model.isLoading),
+                modifier = Modifier.skeletonMask(
+                    visible = model.isLoading,
+                    shape = Corners.xs,
+                ),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

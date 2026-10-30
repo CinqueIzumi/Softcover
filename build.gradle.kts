@@ -1,7 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
-import dev.detekt.gradle.Detekt
-import dev.detekt.gradle.extensions.DetektExtension
 import org.jetbrains.compose.resources.ResourcesExtension
 
 plugins {
@@ -21,6 +19,7 @@ plugins {
     id("rhaydus.doc-budgets")
     id("rhaydus.module-graph")
     id("rhaydus.dependency-analysis")
+    id("rhaydus.style")
 }
 
 // Code coverage. Kover is applied to every shipped module (below) and aggregated into a single XML
@@ -32,173 +31,25 @@ dependencies {
         .forEach { kover(it) }
 }
 
-// The foundation's shared detekt baseline (F19) ships INSIDE the `nl.rhaydus:detekt-rules` jar as
-// `config/detekt.yml`, so it has to be unpacked before detekt can point `config.setFrom(...)` at it.
-val rhaydusDetektConfig by configurations.creating { isTransitive = false }
-
-dependencies {
-    add("rhaydusDetektConfig", libs.rhaydus.detektRules)
+rhaydusStyle {
+    detektRules = libs.rhaydus.detektRules
+    ktlintRules = libs.rhaydus.ktlintRules
+    detektConfigFiles = listOf(file("config/detekt/detekt.yml"))
+    // Softcover's own rules; :detekt-rules cannot analyse itself with the jar it produces.
+    appDetektConfigFiles = listOf(file("config/detekt/softcover-rules.yml"))
+    detektRuleProjects = setOf(":detekt-rules")
+    extraStyleTasks = setOf("androidMainStabilityCheck")
 }
 
-val extractRhaydusDetektConfig = tasks.register<Sync>("extractRhaydusDetektConfig") {
-    group = "verification"
-    description = "Unpacks the shared nl.rhaydus detekt baseline from the detekt-rules jar."
-
-    // Derive the file tree from `configuration.elements`, not from `.singleFile` inside a bare
-    // `provider { }`. The Provider that `elements` returns carries the task dependencies that BUILD the
-    // jar, so editing the baseline in the included foundation rebuilds it and re-runs this Sync.
-    // Resolving `.singleFile` eagerly severs that link and silently extracts a stale config — a gate
-    // that quietly ignores upstream changes is worse than no gate.
-    from(rhaydusDetektConfig.elements.map { jars -> jars.map { zipTree(it.asFile) } }) {
-        include("config/detekt.yml")
-    }
-    into(layout.buildDirectory.dir("rhaydus-detekt"))
-}
-
-// The detekt tasks that carry TYPE RESOLUTION, by module shape: KMP libraries get one task per compilation
-// (`detektMainAndroid`, `detektMainJvm`, and `detektHostTestAndroid` for the unit tests), the Android
-// application and the minified test module get a `detektMain` lifecycle over their variants, and the desktop
-// JVM app gets the `main` compilation's `detektMain`. Only these can run the foundation's
-// `rhaydus:UnguardedFlowTerminalRead` rule, which resolves `Flow.first()` apart from `Collection.first()`
-// through the Analysis API; the source-only `detekt` and `detekt<SourceSet>SourceSet` tasks never run it.
-val typeResolvedDetektTasks = setOf(
-    "detektMainAndroid",
-    "detektMainJvm",
-    "detektMain",
-    "detektHostTestAndroid",
-)
-
-// Captured here because the generated `libs` accessor is scoped to this script's project and is not
-// resolvable from inside the `subprojects { }` block below.
-val rhaydusDetektRules = libs.rhaydus.detektRules
-
-// Apply detekt uniformly to every Kotlin module (no baseline - gates from zero on the shared config).
-// Wired centrally here, alongside the ktlint/styleCheck gates, rather than per module.
+// Coverage instrumentation for every shipped module; the merged report is wired at the root above.
 subprojects {
-    apply(plugin = "dev.detekt")
-
-    // Coverage instrumentation for every shipped module; the merged report is wired at the root above.
     if (path != ":detekt-rules") {
         apply(plugin = "org.jetbrains.kotlinx.kover")
     }
-
-    dependencies {
-        // The custom `rhaydus` ruleset, discovered via its META-INF/services entry.
-        add("detektPlugins", rhaydusDetektRules)
-
-        // Softcover's own rules; the module cannot analyse itself with the jar it produces.
-        if (path != ":detekt-rules") {
-            add("detektPlugins", project(":detekt-rules"))
-        }
-    }
-
-    configure<DetektExtension> {
-        buildUponDefaultConfig.set(true)
-        // Layered, later wins: the shared foundation baseline, then Softcover's own deltas on top.
-        config.setFrom(
-            listOfNotNull(
-                rootProject.layout.buildDirectory.file("rhaydus-detekt/config/detekt.yml"),
-                rootProject.file("config/detekt/detekt.yml"),
-                rootProject.file("config/detekt/softcover-rules.yml").takeIf { path != ":detekt-rules" },
-            ),
-        )
-        parallel.set(true)
-    }
-
-    tasks.withType<Detekt>().configureEach {
-        dependsOn(extractRhaydusDetektConfig)
-        reports {
-            html.required.set(true)
-            checkstyle.required.set(true)
-            markdown.required.set(false)
-            sarif.required.set(false)
-        }
-    }
-
-    // Point each KMP compilation task at the HAND-WRITTEN sources it belongs to, keeping the compilation's
-    // classpath (which is what type resolution needs) untouched. The compilation's source sets also carry
-    // GENERATED code - KSP/Room DAO impls, Apollo operations, Compose resource accessors - which we neither
-    // own nor can fix. `commonMain` is analysed once per compilation: a platform file referencing a
-    // `commonMain` declaration needs it in scope for the receiver type to resolve. Duplicate findings are
-    // visible only while a violation exists; the steady state is zero.
-    afterEvaluate {
-        tasks.withType<Detekt>().configureEach {
-            when (name) {
-                "detektMainAndroid" -> setSource(
-                    project.files(
-                        "src/commonMain/kotlin",
-                        "src/mobileMain/kotlin",
-                        "src/androidMain/kotlin",
-                    ),
-                )
-
-                "detektMainJvm" -> setSource(project.files("src/commonMain/kotlin", "src/jvmMain/kotlin"))
-
-                "detektHostTestAndroid" -> setSource(
-                    project.files(
-                        "src/commonTest/kotlin",
-                        "src/androidHostTest/kotlin",
-                    ),
-                )
-            }
-        }
-    }
-
-    // A lifecycle `detektMain` that fans out to nothing would pass green with nothing scanned, so a
-    // detekt/AGP change that stops registering the variant tasks must fail here instead.
-    tasks.matching { it.name == "detektMain" && it !is Detekt }.configureEach {
-        doFirst {
-            val variantTasks = taskDependencies.getDependencies(this).filterIsInstance<Detekt>()
-            check(variantTasks.isNotEmpty()) {
-                "No type-resolved detekt<Variant> task is registered for $path; the detekt gate would pass vacuously."
-            }
-        }
-    }
-
-    // The source-only `detekt` task parses without a classpath, so every type-resolved rule is inert on it
-    // and its remaining findings are a strict subset of what the type-resolved tasks report. Disabled so it
-    // neither double-reports nor lends a false sense of coverage.
-    tasks.matching { it.name == "detekt" }.configureEach {
-        enabled = false
-    }
-
-    tasks.matching { it.name == "check" }.configureEach {
-        dependsOn(tasks.matching { it.name in typeResolvedDetektTasks })
-    }
-}
-
-// Wire the custom ktlint ruleset into the build so style is enforced for every developer with zero
-// setup: `./gradlew ktlintCheck` (the gate, also run by `check`) and `./gradlew ktlintFormat` (autofix).
-// The rules run via ktlint's rule-engine directly from the published `nl.rhaydus:ktlint-rules` jar
-// (resolved on the `ktlintRules` configuration), so there is no Spotless/plugin version coupling.
-// `-Pktlint.root=<dir>` scopes the scan (used for testing a rule on a throwaway dir); defaults to the repo.
-val ktlintRules by configurations.creating
-
-dependencies {
-    add("ktlintRules", libs.rhaydus.ktlintRules)
-}
-
-val ktlintScanRoot = (project.findProperty("ktlint.root") as String?) ?: rootDir.absolutePath
-
-tasks.register<JavaExec>("ktlintFormat") {
-    group = "formatting"
-    description = "Auto-wraps multi-arg calls/declarations across the repo (custom ktlint ruleset)."
-    classpath = ktlintRules
-    mainClass.set("nl.rhaydus.ktlint.MainKt")
-    args("format", ktlintScanRoot)
-}
-
-tasks.register<JavaExec>("ktlintCheck") {
-    group = "verification"
-    description = "Fails the build on custom-ruleset violations (multi-arg one-per-line wrapping)."
-    classpath = ktlintRules
-    mainClass.set("nl.rhaydus.ktlint.MainKt")
-    args("check", ktlintScanRoot)
 }
 
 subprojects {
     tasks.matching { it.name == "check" }.configureEach {
-        dependsOn(rootProject.tasks.named("ktlintCheck"))
         dependsOn(":checkResourcePackaging")
         dependsOn(":checkPresentationFileSize")
         dependsOn(":checkDocBudgets")
@@ -504,21 +355,3 @@ tasks.register("checkPresentationFileSize") {
         )
     }
 }
-
-// The per-change style gate: `ktlintCheck` plus type-resolved detekt across every module — the shared
-// nl.rhaydus baseline plus the custom `rhaydus` ruleset, gating from zero with no baseline file.
-//
-// detekt's own tasks are wired into the heavy `check` lifecycle, but the gate developers actually run
-// per change is `styleCheck` — so without this, findings would only surface in a rarely-run full build
-// and silently accumulate. It runs the TYPE-RESOLVED tasks, which is what makes the crash-safety rule
-// (`rhaydus:UnguardedFlowTerminalRead`) fire at all; the cost is that it compiles Android + JVM rather
-// than merely parsing source. That cost is the point: an inert gate is not a gate.
-tasks.register("styleCheck") {
-    group = "verification"
-    description = "Runs ktlintCheck, type-resolved detekt (shared baseline + rhaydus crash-safety ruleset) and the Compose stability check across all modules."
-
-    dependsOn(tasks.named("ktlintCheck"))
-    dependsOn(subprojects.map { sp -> sp.tasks.matching { it.name in typeResolvedDetektTasks } })
-    dependsOn(subprojects.map { sp -> sp.tasks.matching { it.name == "androidMainStabilityCheck" } })
-}
-

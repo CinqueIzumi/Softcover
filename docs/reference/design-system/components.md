@@ -45,7 +45,6 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **Callout** — `callout` — in-flow card for one condition, optionally with one next step.
 - **EmptyState** — `state` — placeholder when a surface has nothing to draw.
 - **OfflineEmptyStatePlaceholder** — `state` — the full-pane `EmptyState` for content that cannot load offline.
-- **SkeletonMask** — `state` — `Modifier.skeletonMask` shimmers a leaf while loading.
 - **RevealedWhenPresent** — `state` — expands a row while its value is non-null.
 - **Divider** — `divider` — hairline rule, bare, centred or vertical.
 - **Badge** — `badge` — short status or release label in six tones.
@@ -63,7 +62,6 @@ rules all components follow are in [component-contract.md](component-contract.md
 - **SheetRowGroup** — `sheet` — hairline-divided single-choice rows that dismiss the sheet on selection.
 - **SheetActionRow** — `sheet` — a plain tappable menu row that acts at once.
 - **LoadingSheet** — `sheet` — full-screen blocking wait.
-- **SoftcoverDatePickerDialog** — `dialog` — single-day calendar dialog.
 - **UpdateProgressBottomSheet** — `progress` — pages, percentage or time reading-progress editor.
 - **QuoteSheet** — `quote` — the add-a-quote editor: passage, position, privacy and backdate.
 - **ProgressBar** — `progress` — determinate wavy bar.
@@ -106,6 +104,7 @@ The app's own usage rules:
 
 - `Cover` for book covers; `RhaydusShimmerImage` for every other image.
 - `RhaydusButton`: one filled button per region.
+- `RhaydusDatePickerDialog` for every date pick; `skeletonMask` for every loading leaf. Both take `shape = Corners.xs`.
 - `InlineErrorState` takes the editorial `bodySmall` face through `textStyle`.
 - `DropCapText` takes `dropCapFontFamily = displayFontFamily()`.
 - `StarRatingInput` and every rating glyph fill with `RatingGold`.

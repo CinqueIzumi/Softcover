@@ -15,20 +15,25 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** steps 1-3 done. The foundation reads 0.4.0 (user decision: the release breaks consumers
-  through the renamed plugin agents, detekt 2 and `RhaydusTheme` owning motion and haptics); the tag waits
-  for step 4, which now ships every open `candidates.md` entry in the same release (user decision).
-- **Next:** step 4 in § 4 below: plan the nine boxes, starting with the Konsist verification, running those on disjoint modules as parallel agents.
+- **State:** steps 1-3 done; the foundation reads 0.4.0 and ships every open `candidates.md` entry (user
+  decisions). Step 4 wave 1 done: Konsist verified (0.18.1, go), components and style wiring moved upstream.
+  `rememberShareCardCapture` takes a required `ioDispatcher` (user decision), which Softcover supplies through
+  `LocalShareCardIoDispatcher` / `ProvideShareCardIoDispatcher`, mounted in `App.kt`.
+- **Next:** step 4 waves, one per session, each wave's boxes as parallel agents. Now: wave 2, design tokens ∥
+  build tooling. Then 3: ktlint ∥ detekt ∥ Konsist rules (foundation only; F62's halves go to the detekt and
+  Konsist agents; the Konsist agent first swaps the five files still on Material `Text`: `MorphingButton`,
+  `MastheadRefreshAction`, `RichText`, `SheetScaffold`, `ReviewsSection`). 4: sweeps in sequence:
+  `ktlintFormat`, F29 inlining, F65 suppression audit. 5: docs and memory.
   Step 5's pointer box also moves Softcover's `README.md` foundation line and the managed `CLAUDE.md` block
   (re-run `rhaydus-adopt`) from 0.3.2 to 0.4.0.
 - **Open questions:** none. The rules audit is folded into step 4 as F61-F67 (ktlint / detekt / Konsist split). The user's
   Medium_Phone pass (widget repaint on a time-zone change; Explore, Reading mark-as-read swipe, Settings
-  rows) is pending but does not block step 4.
-- **Verification:** foundation `verifyPluginVersion` green; no `0.3.2` left in the foundation. Close-out
-  gates not run: no `*.kt` changed this session.
-- **Uncommitted:** nothing. The bump is committed (foundation `cf44890`) and Softcover's
-  pointer records it (`39347097a`). Not pushed: foundation since `398f68c`, Softcover since `68dd22e4e`;
-  push the foundation first.
+  rows) is pending but does not block step 4. Wave 1 adds the deadline date picker and the skeleton
+  loading states to that pass.
+- **Verification:** wave 1: foundation `check` and Softcover `check -x lint` green; reviewer findings fixed;
+  moved tests pass. ktlint misses `),)` until F58 lands, so grep for it after each round.
+- **Uncommitted:** wave 1 in both repos (the user approves the commits). Not pushed: foundation since
+  `398f68c`, Softcover since `68dd22e4e`; push the foundation first.
 
 ## How to run a step
 
@@ -92,10 +97,10 @@ Bugs and gaps in shared code only; new components, tokens and gates are step 4.
 Every open entry in `candidates.md` ships in 0.4.0. A box moves any Softcover-local copy into the foundation,
 deletes it from Softcover, and prunes its entries. Boxes on disjoint modules run as parallel agents.
 
-- [ ] Components: F28, F32.
+- [x] Components: F28, F32.
 - [ ] Design tokens: F38, F40, F43.
-- [ ] Verify Konsist on Softcover (F67's checks), before the rule boxes; a failure re-homes its rules to detekt.
-- [ ] Style wiring: F61 and F67's library and test module, before the rule boxes.
+- [x] Verify Konsist on Softcover (F67's checks), before the rule boxes; a failure re-homes its rules to detekt.
+- [x] Style wiring: F61 and F67's test module, before the rule boxes.
 - [ ] ktlint formats only: F24, F25, F58, F63; F62 moves the semantic rules out.
 - [ ] detekt rules: F29, F39, F41, F65, and the detekt halves of F57, F62, F64 and F66.
 - [ ] Konsist assertions: F34, and the Konsist halves of F52, F57, F62, F64 and F66.

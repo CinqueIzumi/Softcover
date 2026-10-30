@@ -91,7 +91,7 @@ When a component seems to need a domain type, give it a library-owned model of t
 events takes a generic key: `ColorPalettePreviewTileUiModel<K>` is built by `feature:settings` as
 `ColorPalettePreviewTileUiModel<ColorPalette>`, and the component only forwards the key (R9).
 `kotlinx.datetime.LocalDate` is an allowed value type: a plain calendar day carries no domain vocabulary
-(`DatePickerUiModel.initialDate`).
+(`BookDetailUiState.deadlinePickerDate`).
 
 **R5 — A UI model that is rendered or tested ships preview fixtures.**
 
@@ -206,7 +206,7 @@ RichText(model = state.review)          // model.variant decides the face and th
 **R12 — Loading is the component's own state, never a separate skeleton.** A component that renders data
 the screen may not have yet takes `isLoading` (on the model, or as a parameter on a data-free primitive)
 and keeps its real layout while loading. Unknown text renders through `SoftcoverText` with a stand-in;
-other unknown leaves sit under `Modifier.skeletonMask(isLoading)` at their real size. A list of unknown
+other unknown leaves sit under the foundation's `Modifier.skeletonMask(isLoading)` at their real size. A list of unknown
 length renders a fixed count of its real items, each loading: the UiState carries that list of loading
 models, built by the feature's mapper / collector, and the render iterates it like the loaded list.
 No per-surface skeleton composable, no skeleton variant, no `SkeletonCrossfade` from a skeleton layout to

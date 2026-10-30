@@ -16,29 +16,6 @@ context for whoever picks it up. Adopted items are pruned from this doc.
 
 Filed but not yet implemented in the foundation.
 
-### F28 — A `LocalDate`-in/`LocalDate`-out date picker dialog
-
-- **Type:** component
-- **Home:** `nl.rhaydus:designsystem-core` (`component/`)
-- **Status:** **Open.** `designsystem-core` ships no date picker, so every consumer wires Material 3's
-  `DatePickerDialog` itself — and Material 3's `DatePickerState` exposes the selection as **UTC** epoch
-  millis (`initialSelectedDateMillis` / `selectedDateMillis`, canonicalised to start-of-day UTC). Passing
-  those through the device timezone is the obvious-looking thing to write and is wrong: west of UTC the
-  confirmed date lands a **day early**, east of it the dialog opens on the day (and at a month boundary,
-  the month) *before* the one it was handed. Softcover shipped exactly that bug in its deadline picker —
-  a user west of UTC reported having to pick the following day to get the day they wanted, and it was
-  invisible to a developer at UTC+2, where only the initial highlight is wrong. The trap is generic to
-  Material 3, not to Softcover, and it is silent: it compiles, reads naturally, and only misbehaves at
-  certain offsets.
-- **What to build:** `RhaydusDatePickerDialog(initialDate: LocalDate?, onDismiss, onConfirm: (LocalDate) -> Unit)`,
-  hosting `rememberDatePickerState` + `DatePickerDialog` and keeping the UTC millis conversion `internal`
-  so no consumer can reach it. Confirm/dismiss labels as params (Softcover's are hardcoded "Confirm" /
-  "Cancel" today). Optionally a `selectableDates` pass-through for surfaces that must exclude past days.
-- **Scope note:** Softcover's implementation is `SoftcoverDatePickerDialog` +
-  `presentation/util/PickerDates.kt` in `:core:designsystem`, catalogued in
-  `docs/reference/design-system/components/sheets.md`. It is app-generic already — lifting it upstream is a
-  move, not a rewrite, and the app component would then become a thin alias or be dropped.
-
 ### F24 — import ordering follows the IDE layout, enforced by ktlint
 
 - **Type:** gate (lint rule) + doc
@@ -96,21 +73,6 @@ Filed but not yet implemented in the foundation.
 - **Scope note:** Softcover inlines its existing 66 sites (30 files) as a tracked migration step. The rule
   then gates them at zero, with no baseline.
 
-### F32 — A skeleton mask modifier that shimmers over real content
-
-- **Type:** enhancement
-- **Home:** `nl.rhaydus:designsystem-core` (`modifier/`, beside `shimmer`)
-- **Status:** **Open — built locally first.** `designsystem-core` ships `shimmer` and `SkeletonCrossfade`,
-  which only support a separate hand-sized skeleton layout swapped for the real one. That layout drifts
-  from the real one and the screen jumps when data lands (Softcover's book detail: the shelve card's 42dp
-  bars against taller real rows). Softcover now has a local mask in `:core:component`: it draws the
-  shimmer over a leaf's real bounds and hides the content, so a screen renders its normal layout from a
-  placeholder model while loading.
-- **What to build:** move the local mask into `designsystem-core` unchanged in behaviour (shimmer over
-  the measured bounds, content hidden, semantics cleared while masked, a 150ms grace period before the
-  shimmer and a 300ms minimum once shown), release, and switch Softcover's call sites to it. Then delete
-  the local copy.
-
 ### F34 — Import ban with a per-file allowlist (text-leaf gate)
 
 - **Type:** gate (Konsist assertion)
@@ -120,7 +82,7 @@ Filed but not yet implemented in the foundation.
   detekt's `ForbiddenImport` allows one instance per config and is already scoped to the leaf modules.
 - **What to build:** an assertion taking `(import, allowed file globs, reason)` entries, also matching
   fully-qualified references; Softcover enables it with `androidx.compose.material3.Text` allowed only in
-  `SoftcoverText.kt` (the swap is done, so it passes on enable). The same assertion takes the prose-only
+  `SoftcoverText.kt`, after swapping the six files that still use Material `Text`. The same assertion takes the prose-only
   import rules: Material `Button`, `kotlinx.datetime.Instant` (use `kotlin.time.Instant`) and
   `rememberHaptics`, which retires Softcover's `RememberHapticsOutsideTheme`. A layering assertion alongside
   it: data and domain packages never import presentation.
@@ -202,20 +164,6 @@ Filed but not yet implemented in the foundation.
   - `toad-architecture.md`: a composable embedded in another Screen receives its ScreenModel from the owning
     `Screen`; `koinNavigatorScreenModel` widens the scope to the Navigator's lifetime.
 
-### F61 — A style convention plugin owns the detekt and ktlint wiring
-
-- **Type:** gate (convention plugin)
-- **Home:** `build-logic`
-- **Status:** **Open — implemented locally.** Softcover's root `build.gradle.kts` holds the generic wiring:
-  extracting the baseline config from the `detekt-rules` jar, the type-resolved task set, source repointing,
-  the vacuous-pass guard, the ktlint tasks and `styleCheck`. The foundation scans itself in light mode only,
-  so `UnguardedFlowTerminalRead` never runs on its own modules.
-- **What to build:** one convention plugin that applies detekt (full analysis) and ktlint with the shared
-  config layered under an optional project file, creates the Konsist test module (F67), and registers
-  `styleCheck`. The foundation applies it to
-  itself. Softcover keeps only its config deltas; its `:detekt-rules` module, `softcover-rules.yml` and the
-  in-jar `config.yml` go once its rules move upstream.
-
 ### F62 — The ktlint ruleset formats; its semantic rules move out
 
 - **Type:** gate
@@ -267,16 +215,13 @@ Filed but not yet implemented in the foundation.
 
 - **Type:** gate (library + convention plugin)
 - **Home:** new `nl.rhaydus:konsist-rules`, `build-logic` (F61)
-- **Status:** **Open.** Declaration rules (imports, layering, naming, placement) live in detekt rules,
-  ktlint rules or agent prose; detekt makes each one a visitor class, and its built-in import ban takes
-  one entry.
-- **What to build:** first verify Konsist on Softcover: it reads every KMP source set, parses the
-  Kotlin 2.4.21 sources without errors, one real assertion (F34) passes and fails correctly, and its run
-  time inside `check` is acceptable. If any of these fails, the Konsist-homed rules go to detekt instead.
-  Then a published library of assertion functions taking project facts (package prefix, allowlists, bans)
-  as parameters, and a `:konsist` JVM test module created by F61's plugin and wired into `check`. Its
-  assertions: F34, the F57 getter, one type per file and plumbing visibility (F62), `@Nested` grouping
-  (F64), the `action` field name (F66), and serializable Screen arguments (F52).
+- **Status:** **Open: the module is done, the library is not.** Konsist 0.18.1 is verified on Softcover, and
+  `rhaydus.konsist` makes a JVM test module that `check` reaches. `scopeFromProject()` includes `foundation/`,
+  so every assertion filters it out.
+- **What to build:** a published library of assertion functions that take project facts (package prefix,
+  allowlists, bans) as parameters. Its assertions: F34, the F57 getter, one type per file and plumbing
+  visibility (F62), `@Nested` grouping (F64), the `action` field name (F66), and serializable Screen
+  arguments (F52).
 
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 

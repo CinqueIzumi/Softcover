@@ -40,6 +40,7 @@ import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.grayscale
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.modifier.skeletonMask
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
@@ -48,7 +49,6 @@ import nl.rhaydus.softcover.core.component.cover.shape
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.modifier.navSharedBounds
-import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.transition.BookTransitionKey
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -322,7 +322,10 @@ internal fun GeneralBookInfoSection(
                                         tint = RatingGold,
                                         modifier = Modifier
                                             .size(16.dp)
-                                            .skeletonMask(visible = ratingUnknown),
+                                            .skeletonMask(
+                                                visible = ratingUnknown,
+                                                shape = Corners.xs,
+                                            ),
                                     )
                                 }
                             }

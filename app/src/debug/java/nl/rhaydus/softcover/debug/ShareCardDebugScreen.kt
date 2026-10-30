@@ -42,6 +42,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.LocalShareCardIoDispatcher
 import nl.rhaydus.softcover.core.component.share.QuoteShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
@@ -85,10 +86,24 @@ object ShareCardDebugScreen : Screen {
 
         val scope = rememberCoroutineScope()
 
-        val bookCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
-        val statCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
-        val quoteCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
-        val recapCapture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
+        val ioDispatcher = LocalShareCardIoDispatcher.current
+
+        val bookCapture = rememberShareCardCapture(
+            config = softcoverShareCardCaptureConfig,
+            ioDispatcher = ioDispatcher,
+        )
+        val statCapture = rememberShareCardCapture(
+            config = softcoverShareCardCaptureConfig,
+            ioDispatcher = ioDispatcher,
+        )
+        val quoteCapture = rememberShareCardCapture(
+            config = softcoverShareCardCaptureConfig,
+            ioDispatcher = ioDispatcher,
+        )
+        val recapCapture = rememberShareCardCapture(
+            config = softcoverShareCardCaptureConfig,
+            ioDispatcher = ioDispatcher,
+        )
 
         var pendingSave by remember { mutableStateOf<(suspend () -> Unit)?>(null) }
 

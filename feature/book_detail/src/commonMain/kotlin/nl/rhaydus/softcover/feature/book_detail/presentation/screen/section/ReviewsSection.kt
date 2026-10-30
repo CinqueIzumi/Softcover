@@ -20,11 +20,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
+import nl.rhaydus.designsystem.modifier.clippedSkeletonMask
+import nl.rhaydus.designsystem.modifier.skeletonMask
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.RichText
-import nl.rhaydus.softcover.core.component.state.clippedSkeletonMask
-import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -138,7 +138,10 @@ private fun ReviewCard(
                 } else {
                     RichText(
                         model = review.body,
-                        modifier = Modifier.skeletonMask(visible = review.isLoading),
+                        modifier = Modifier.skeletonMask(
+                            visible = review.isLoading,
+                            shape = Corners.xs,
+                        ),
                     )
                 }
 

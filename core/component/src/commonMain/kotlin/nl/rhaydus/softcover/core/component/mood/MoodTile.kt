@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
-import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.designsystem.modifier.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -126,7 +126,10 @@ fun MoodTile(
                 tint = foreground.copy(alpha = 0.75f),
                 modifier = Modifier
                     .size(16.dp)
-                    .skeletonMask(visible = isLoading),
+                    .skeletonMask(
+                        visible = isLoading,
+                        shape = Corners.xs,
+                    ),
             )
         }
 

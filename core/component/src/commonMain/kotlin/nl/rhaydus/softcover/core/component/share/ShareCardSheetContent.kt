@@ -53,7 +53,10 @@ fun ShareCardSheetContent(
     aboveCard: @Composable ColumnScope.() -> Unit = {},
     belowCard: @Composable ColumnScope.() -> Unit = {},
 ) {
-    val capture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
+    val capture = rememberShareCardCapture(
+        config = softcoverShareCardCaptureConfig,
+        ioDispatcher = LocalShareCardIoDispatcher.current,
+    )
     val coroutineScope = rememberCoroutineScope()
     val currentOnEvent by rememberUpdatedState(onEvent)
     val haptics = LocalHaptics.current
