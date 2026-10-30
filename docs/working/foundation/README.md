@@ -32,7 +32,7 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
   loading states to that pass.
 - **Verification:** wave 1: foundation `check` and Softcover `check -x lint` green; reviewer findings fixed;
   moved tests pass. ktlint misses `),)` until F58 lands, so grep for it after each round.
-- **Uncommitted:** wave 1 in both repos (the user approves the commits). Not pushed: foundation since
+- **Uncommitted:** nothing. Wave 1 is foundation `a520684`, Softcover `c34839ae7`. Not pushed: foundation since
   `398f68c`, Softcover since `68dd22e4e`; push the foundation first.
 
 ## How to run a step
