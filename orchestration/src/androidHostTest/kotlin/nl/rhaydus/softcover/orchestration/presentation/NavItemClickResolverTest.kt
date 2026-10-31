@@ -37,7 +37,10 @@ class NavItemClickResolverTest {
         selected: Boolean,
     ) = NavItemUi(
         tab = tab,
-        icon = drawableIconResource(contentDescription = "icon", icon = SoftcoverIcon.Explore),
+        icon = drawableIconResource(
+            contentDescription = "icon",
+            icon = SoftcoverIcon.Explore,
+        ),
         selected = selected,
         showBadge = false,
         iconScale = 1f,

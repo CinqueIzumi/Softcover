@@ -15,28 +15,33 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** steps 1-3 are done, and so are step 4 waves 1-3. ktlint now only formats. The detekt and
-  Konsist rules (`nl.rhaydus:konsist-rules`, wired into Softcover's `:konsist`) carry the semantic checks, and
-  Softcover's local `:detekt-rules` module is gone. Wave 4 box 1 (F68) is built and reviewed:
-  `RhaydusMorphingButton` / `MorphingButtonTone` live in `designsystem-core`, and Softcover's copy, its
-  gallery entry and the Material `Button` allowlist are gone. It waits on the user's commit approval.
-- **Next:** in sequence: enable ktlint's `indent` rule; run Softcover's `ktlintFormat` sweep; run the F65
-  suppression audit. Wave 5 is docs and memory, plus marking F66 as split. Step 5's pointer box moves
-  Softcover's `README.md` foundation line and the managed `CLAUDE.md` block (re-run `rhaydus-adopt`) from
-  0.3.2 to 0.4.0.
-- **Icon stability (built with F68):** `RhaydusIconResource.Custom(Painter)` is gone and the type is
-  `@Immutable`, so icon-taking foundation buttons are skippable. The nav chrome reads `NavItemUi.icon` from
-  `navIconFor`; the tabs set no `TabOptions.icon`.
-- **Open questions:** none. The user's Medium_Phone pass is still pending and does not block step 4. It covers
-  the widget repaint on a time-zone change, the Explore, Reading mark-as-read swipe and Settings rows, the
-  deadline date picker and skeleton loading states, and the count-up and chart motion.
-- **Verification:** close-out gates. `styleCheck` fails only on Softcover `ktlintCheck`, which waits for wave
-  4's `ktlintFormat` sweep; detekt is green. The `) }` grep is clean: the only hits are inside the ktlint test
-  fixtures. The AAA markers are clean, per the test audit. Foundation `check` is green after F68. Softcover
-  F68 verify: `:core:component`, `:feature:*` and `:orchestration` compile; `:konsist:test`,
-  `:orchestration:detektMainJvm` / `stabilityCheck` and `NavItemClickResolverTest` green.
-- **Uncommitted:** F68 in both repos (two new untracked foundation files) and this tracker doc. Wave 3 is foundation `f63a8aa`, Softcover `a0559d90e`. Not pushed:
-  the foundation since `398f68c`, Softcover since `68dd22e4e`; push the foundation first.
+- **State:** steps 1-3 and step 4 waves 1-3 are done, and so is wave 4 box 1 (F68: `RhaydusMorphingButton`
+  in `designsystem-core`, foundation `d310a3a`, Softcover `fcf93c084`). The same commits make
+  `RhaydusIconResource` `@Immutable` (its `Custom(Painter)` variant is gone; nav icons come from
+  `navIconFor` in `orchestration/.../NavDestinations.kt`), so icon-taking foundation buttons are skippable.
+  The ktlint `indent` sweep prerequisite is built: `rhaydusKtLintEngine()` (`ktlint-rules`) adds ktlint's
+  standard `IndentationRule`, force-enabled through `editorConfigOverride` so a tree's
+  `ktlint_standard = disabled` cannot switch it off; `RhaydusKtLintEngineTest` covers it. The new
+  `ExpressionOnEqualsLineRule` (`rhaydus:expression-on-equals-line`) joins a multi-line right-hand side onto
+  its `=` line (properties, expression bodies, named args, assignments, default params, accessors); the
+  foundation is reformatted by it and `ExpressionOnEqualsLineRuleTest` covers it.
+- **Next:** Softcover's `ktlintFormat` sweep (which also clears the pending `statement-paragraph` /
+  `multi-arg-wrapping` hits), then the F65 suppression audit, then the step 4 "Docs and memory" box plus
+  marking F66 as split. Step 5's pointer box moves Softcover's `README.md` foundation line and the managed
+  `CLAUDE.md` block (re-run `rhaydus-adopt`) from 0.3.2 to 0.4.0.
+- **Open questions:** the formatter wraps a call inside an `if` condition into a glommed
+  `if (foo(` … `)) {`. The sweep must hoist such calls into a named `val`, as the foundation's
+  `SnackBarManager` / `CheckDocBudgetsTask` now do. The user's Medium_Phone pass is pending and does not
+  block step 4. It covers the widget repaint on a time-zone change, the Explore, Reading mark-as-read swipe
+  and Settings rows, the deadline date picker and skeleton loading states, the count-up and chart motion,
+  and the nav icons (bars, rail, sidebar) after the `navIconFor` change.
+- **Verification:** foundation `ktlintFormat` converges and `check` is green, including
+  `RhaydusKtLintEngineTest` (4 tests) and `ExpressionOnEqualsLineRuleTest`. Both review rounds' findings are
+  fixed. Softcover `ktlintCheck` still fails until the sweep; the sweep also clears its 68 dangling-`=` sites.
+- **Uncommitted:** in the foundation, the indent rule and `ExpressionOnEqualsLineRule` (new `ktlint-rules`
+  files, about 20 reformatted sources, docs). In Softcover, the two F68 close-out fixes (staged), the `.editorconfig` comment and this
+  tracker doc. Not pushed: the foundation since `398f68c`, Softcover since `68dd22e4e`; push the
+  foundation first.
 
 ## How to run a step
 
