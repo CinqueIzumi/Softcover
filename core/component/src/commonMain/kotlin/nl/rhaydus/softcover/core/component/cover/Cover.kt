@@ -41,8 +41,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.modifier.skeletonMask
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.designsystem.theme.Corners
 import nl.rhaydus.softcover.core.component.modifier.navSharedBounds
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 
 private const val COVER_ASPECT_RATIO = 2f / 3f
 

@@ -8,12 +8,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.component.InlineErrorState
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.document.MarkdownDocument
 import nl.rhaydus.softcover.core.component.document.MarkdownDocumentEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.action.DocumentPageAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.RefreshDocumentPageAction

@@ -40,8 +40,8 @@ import androidx.glance.text.FontFamily
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.CornerRadius
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.designsystem.theme.CornerRadius
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.R
 import nl.rhaydus.softcover.feature.widget.domain.util.TRENDING_PAGE_SIZE
 import nl.rhaydus.softcover.feature.widget.presentation.callback.TrendingPageCallback

@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
+import nl.rhaydus.designsystem.theme.motion
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.min

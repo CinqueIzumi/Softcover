@@ -24,7 +24,6 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.presentation.navigation.TransientNavArg
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnConfirmedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnDismissedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnChangedAction
@@ -38,6 +37,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.permission.rememberCameraP
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanScreenModel
 import nl.rhaydus.softcover.feature.scan.presentation.state.IsbnOrigin
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
+import nl.rhaydus.toad.navigation.TransientNavArg
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 

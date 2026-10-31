@@ -1,6 +1,6 @@
 plugins {
     id("rhaydus.kmp.library")
-    id("softcover.kmp.compose")
+    id("rhaydus.kmp.compose")
 }
 
 // `Res` stays internal: a consumer reaches a component's copy through the component, never through

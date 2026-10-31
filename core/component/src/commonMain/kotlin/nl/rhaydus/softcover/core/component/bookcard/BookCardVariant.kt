@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.core.component.bookcard
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /** A `null` [Column.cover] still reserves the cover's 2:3 footprint. */
 @Immutable

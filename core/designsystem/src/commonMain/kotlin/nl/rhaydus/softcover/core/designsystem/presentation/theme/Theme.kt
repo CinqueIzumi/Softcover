@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import nl.rhaydus.designsystem.editorial.EditorialTheme
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.RhaydusTheme
 
 /**
@@ -199,8 +198,6 @@ fun SoftcoverTheme(
     // EditorialTheme (designsystem-editorial) nests inside RhaydusTheme so that foundation editorial
     // components resolve the shared 9-role contract; Softcover's richer 15-role scale is provided in
     // parallel so app-specific screens that read editorialTypography directly are unaffected.
-    val playMotion = playDecorativeMotion()
-
     RhaydusTheme(
         colorScheme = colorScheme,
         typography = appTypography(),
@@ -209,7 +206,6 @@ fun SoftcoverTheme(
             CompositionLocalProvider(
                 LocalEditorialTypography provides defaultEditorialTypography(),
                 LocalSchemeBrightness provides brightness,
-                LocalMotion provides if (playMotion) Motion.Full else Motion.Reduced,
                 content = content,
             )
         }

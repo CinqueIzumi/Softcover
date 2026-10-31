@@ -21,7 +21,6 @@ import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailOverlayN
 import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPaneCloseHandler
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.presentation.navigation.TransientNavArg
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
@@ -34,6 +33,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleList
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.toad.navigation.TransientNavArg
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 

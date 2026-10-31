@@ -19,9 +19,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pressScaleToggleable
+import nl.rhaydus.designsystem.theme.Corners
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 
 /** A two-state glyph control reporting through one [ToggleEvent] lambda; the caller's [modifier] places it. */
 @Composable

@@ -24,7 +24,7 @@ import androidx.glance.layout.width
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.feature.widget.presentation.model.BookArtworkUiModel
 import nl.rhaydus.softcover.feature.widget.presentation.util.TALL_HEIGHT_DP
 import nl.rhaydus.softcover.feature.widget.presentation.util.isSideBySide

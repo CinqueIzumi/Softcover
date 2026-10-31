@@ -10,7 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.delay
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
+import nl.rhaydus.designsystem.theme.motion
 import kotlin.time.Duration.Companion.seconds
 
 /**

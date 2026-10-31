@@ -12,7 +12,7 @@ paths:
   literal coordinate or version.
 - A module that ships Compose Multiplatform resources sets `androidResources.enable = true` in its own
   `androidLibrary { }` block (see `core/designsystem/build.gradle.kts`). The convention plugins deliberately
-  leave it to the module build file. Gated by `./gradlew checkResourcePackaging` (wired into `check`).
+  leave it to the module build file. Gated by the foundation's `rhaydus.resource-packaging`: `./gradlew checkResourcePackaging` (wired into `check`).
 - Presentation and `:core:component` main sources stay at or under 600 lines. Gated by
   `./gradlew checkPresentationFileSize` (wired into `check`), with no baseline.
 - Apply the smallest set of `rhaydus.*` / `softcover.*` convention plugins and do not re-declare what they

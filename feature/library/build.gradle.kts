@@ -1,6 +1,6 @@
 plugins {
     id("rhaydus.kmp.library")
-    id("softcover.kmp.compose")
+    id("rhaydus.kmp.compose")
 }
 
 kotlin {

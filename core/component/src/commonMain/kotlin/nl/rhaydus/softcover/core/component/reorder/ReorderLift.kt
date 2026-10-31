@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
+import nl.rhaydus.designsystem.theme.Corners
 
 private const val LIFTED_SCALE = 1.04f
 

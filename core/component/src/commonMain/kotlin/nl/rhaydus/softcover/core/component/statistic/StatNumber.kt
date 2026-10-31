@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.common.secondsToHm
+import nl.rhaydus.designsystem.theme.motion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.motion
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.tabularFigures
 
 /**

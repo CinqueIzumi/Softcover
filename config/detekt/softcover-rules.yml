@@ -10,9 +10,11 @@ softcover:
   UiModelBuiltInRender:
     active: true
     excludes: ['**/*Previews.kt', '**/gallery/**', '**/src/debug/**', '**/*Test/**', '**/test/**']
-  NoReflection:
+  ScreenConstructorProperty:
     active: true
     excludes: ['**/smoketest/**', '**/src/debug/**', '**/*Test/**', '**/test/**']
-  ScreenConstructorProperty:
+# The foundation's `rhaydus` ruleset; `NoReflection` restates its excludes with Softcover's extra source sets.
+rhaydus:
+  NoReflection:
     active: true
     excludes: ['**/smoketest/**', '**/src/debug/**', '**/*Test/**', '**/test/**']

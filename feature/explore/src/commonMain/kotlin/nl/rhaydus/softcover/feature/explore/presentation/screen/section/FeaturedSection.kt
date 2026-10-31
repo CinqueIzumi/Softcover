@@ -3,7 +3,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.designsystem.theme.Spacing
 import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardEvent
 import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardUiModel
 

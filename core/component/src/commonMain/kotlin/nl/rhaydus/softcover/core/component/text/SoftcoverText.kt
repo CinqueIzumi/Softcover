@@ -14,7 +14,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import nl.rhaydus.designsystem.modifier.skeletonMask
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
+import nl.rhaydus.designsystem.theme.Corners
 
 /**
  * The app's text leaf. A null [text] means the value is unknown, so it masks like [isLoading]. While
