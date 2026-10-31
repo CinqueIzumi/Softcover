@@ -20,7 +20,7 @@ paths:
 - `ktlintCheck`, `ktlintFormat` and `checkDocBudgets` are root-only tasks, so `:<module>:ktlintCheck` does not
   exist. Run the bare task, which always scans the whole repo (`-Pktlint.root=<dir>` narrows ktlint).
   `detekt*` and compile tasks are per-module.
-- After changing a `:detekt-rules` rule, run `./gradlew --stop` and then the detekt tasks with
+- After changing a rule in the foundation's `detekt-rules`, run `./gradlew --stop` and then the detekt tasks with
   `--rerun-tasks`. Otherwise detekt stays UP-TO-DATE and runs the old rule jar. With the build cache on, a
   stale-daemon result is also stored in the local build cache; `--rerun-tasks` bypasses cache reads, so the
   recipe holds.

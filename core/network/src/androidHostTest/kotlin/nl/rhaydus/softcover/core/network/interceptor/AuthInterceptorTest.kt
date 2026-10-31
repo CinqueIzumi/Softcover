@@ -153,7 +153,8 @@ class AuthInterceptorTest {
                 chain.proceed(capture(captured1))
             } returns emptyFlow()
 
-            // ----- Act — first intercept reads "first-key" -----
+            // ----- Act -----
+            // first intercept reads "first-key"
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -166,7 +167,8 @@ class AuthInterceptorTest {
                 chain.proceed(capture(captured2))
             } returns emptyFlow()
 
-            // ----- Act — second intercept reads "second-key" fresh from the provider -----
+            // ----- Act -----
+            // second intercept reads "second-key" fresh from the provider
             interceptor.intercept(
                 baseRequest,
                 chain,

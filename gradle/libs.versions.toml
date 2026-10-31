@@ -79,10 +79,7 @@ rhaydus-designsystemEditorial = { group = "nl.rhaydus", name = "designsystem-edi
 rhaydus-designsystemImage = { group = "nl.rhaydus", name = "designsystem-image" }
 rhaydus-ktlintRules = { group = "nl.rhaydus", name = "ktlint-rules" }
 rhaydus-detektRules = { group = "nl.rhaydus", name = "detekt-rules" }
-
-# detekt rule API — consumed by the app-local :detekt-rules module
-detekt-api = { group = "dev.detekt", name = "detekt-api", version.ref = "detekt" }
-detekt-test = { group = "dev.detekt", name = "detekt-test", version.ref = "detekt" }
+rhaydus-konsistRules = { group = "nl.rhaydus", name = "konsist-rules" }
 
 # ktlint rule-engine — consumed by the :ktlint-rules module to drive the custom autofix ruleset
 ktlint-ruleEngine = { group = "com.pinterest.ktlint", name = "ktlint-rule-engine", version.ref = "ktlint" }

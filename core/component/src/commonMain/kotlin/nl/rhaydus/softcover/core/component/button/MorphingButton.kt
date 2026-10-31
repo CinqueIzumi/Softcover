@@ -19,7 +19,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -30,6 +29,7 @@ import androidx.compose.ui.semantics.contentDescription
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.modifier.pressScale
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
 /**
  * A [nl.rhaydus.designsystem.component.RhaydusButton] that animates when [tone] changes: container and
@@ -114,7 +114,7 @@ fun MorphingButton(
                     Spacer(modifier = Modifier.width(size.iconSpacing))
                 }
 
-                Text(
+                SoftcoverText(
                     text = text,
                     style = size.textStyle,
                 )

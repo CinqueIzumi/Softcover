@@ -245,7 +245,7 @@ class UserBookWriteReplayTest {
             val rejection = RuntimeException("rejected")
             stubReplayProgressThrowing(error = rejection)
 
-            // ----- Act & Assert -----
+            // ----- Act -----
             val thrown = shouldThrow<RuntimeException> { replay(payload = payload) }
 
             thrown shouldBe rejection
@@ -270,7 +270,7 @@ class UserBookWriteReplayTest {
             val transient = ServerUnavailableException(message = "down")
             stubReplayProgressThrowing(error = transient)
 
-            // ----- Act & Assert -----
+            // ----- Act -----
             val thrown = shouldThrow<ServerUnavailableException> { replay(payload = payload) }
 
             thrown shouldBe transient
@@ -443,7 +443,7 @@ class UserBookWriteReplayTest {
                 booksRemoteDataSource.fetchLatestUnfinishedRead(userBookId = any())
             } throws transient
 
-            // ----- Act & Assert -----
+            // ----- Act -----
             val thrown = shouldThrow<ServerUnavailableException> { replay(payload = payload) }
 
             thrown shouldBe transient

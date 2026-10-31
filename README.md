@@ -149,8 +149,9 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | `nl.rhaydus:designsystem-core` | Brand-agnostic Compose skeleton — theme scaffold (`RhaydusTheme`), layout primitives, modifiers, the button family, adaptive/desktop components, the `RhaydusIconResource` token |
 | `nl.rhaydus:designsystem-editorial` | Editorial design language — the typography role contract + editorial components |
 | `nl.rhaydus:designsystem-image` | Coil-based async image components |
-| `nl.rhaydus:ktlint-rules` | Custom ktlint ruleset (the mechanizable layout rules + gate) |
+| `nl.rhaydus:ktlint-rules` | Custom ktlint formatter (the auto-fixing layout rules) |
 | `nl.rhaydus:detekt-rules` | Custom type-resolved detekt ruleset + the shared detekt baseline config |
+| `nl.rhaydus:konsist-rules` | Konsist assertions for declaration and architecture rules |
 
 Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `Cover`) on top. See [`foundation/docs/CAPABILITIES.md`](foundation/docs/CAPABILITIES.md).
 
@@ -243,7 +244,7 @@ git submodule update --init      # existing clone
 ```bash
 ./gradlew assembleDebug          # Build a debug APK
 ./gradlew assembleRelease        # Build a release APK
-./gradlew test                   # Run :app / :desktopApp / :detekt-rules unit tests only
+./gradlew test                   # Run :app / :desktopApp / :konsist unit tests only
 ./gradlew testAndroidHostTest --continue   # Run the KMP module unit tests
 ./gradlew :app:test              # Run unit tests for the app module
 ./gradlew :smoketest:pixelApi36MinifiedAndroidTest   # Device suite on the R8-minified app (managed emulator; needs HARDCOVER_SMOKE_TOKEN or hardcover.apiToken in local.properties)

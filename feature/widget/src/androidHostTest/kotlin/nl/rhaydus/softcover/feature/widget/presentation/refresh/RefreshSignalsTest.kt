@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -64,118 +65,127 @@ class RefreshSignalsTest {
         )
     }
 
-    @Test
-    fun `does not collect changes or emit while no widget is placed`() = runTest {
-        // ----- Arrange -----
-        val harness = harness()
+    @Nested
+    inner class NoPlacedWidget {
+        @Test
+        fun `does not collect changes or emit while no widget is placed`() = runTest {
+            // ----- Arrange -----
+            val harness = harness()
 
-        // ----- Act -----
-        harness.upstream.emit(Unit)
-        advanceTimeBy(debounce * 3)
-        runCurrent()
-
-        // ----- Assert -----
-        harness.starts() shouldBe 0
-        harness.signals.size shouldBe 0
-    }
-
-    @Test
-    fun `emits one signal for a burst of changes within the debounce window`() = runTest {
-        // ----- Arrange -----
-        val harness = harness()
-        harness.placed.value = setOf("1")
-        runCurrent()
-
-        // ----- Act -----
-        repeat(3) {
+            // ----- Act -----
             harness.upstream.emit(Unit)
-            advanceTimeBy(debounce / 2)
-        }
-        advanceTimeBy(debounce * 2)
-        runCurrent()
+            advanceTimeBy(debounce * 3)
+            runCurrent()
 
-        // ----- Assert -----
-        harness.signals.size shouldBe 1
+            // ----- Assert -----
+            harness.starts() shouldBe 0
+            harness.signals.size shouldBe 0
+        }
     }
 
-    @Test
-    fun `emits one signal per change when changes are separated by more than the debounce window`() = runTest {
-        // ----- Arrange -----
-        val harness = harness()
-        harness.placed.value = setOf("1")
-        runCurrent()
+    @Nested
+    inner class Debouncing {
+        @Test
+        fun `emits one signal for a burst of changes within the debounce window`() = runTest {
+            // ----- Arrange -----
+            val harness = harness()
+            harness.placed.value = setOf("1")
+            runCurrent()
 
-        // ----- Act -----
-        repeat(3) {
+            // ----- Act -----
+            repeat(3) {
+                harness.upstream.emit(Unit)
+                advanceTimeBy(debounce / 2)
+            }
+            advanceTimeBy(debounce * 2)
+            runCurrent()
+
+            // ----- Assert -----
+            harness.signals.size shouldBe 1
+        }
+
+        @Test
+        fun `emits one signal per change when changes are separated by more than the debounce window`() = runTest {
+            // ----- Arrange -----
+            val harness = harness()
+            harness.placed.value = setOf("1")
+            runCurrent()
+
+            // ----- Act -----
+            repeat(3) {
+                harness.upstream.emit(Unit)
+                advanceTimeBy(debounce * 2)
+                runCurrent()
+            }
+
+            // ----- Assert -----
+            harness.signals.size shouldBe 3
+        }
+    }
+
+    @Nested
+    inner class PlacedSetChanges {
+        @Test
+        fun `stops collecting changes and emits nothing once the placed set empties`() = runTest {
+            // ----- Arrange -----
+            val harness = harness()
+            harness.placed.value = setOf("1")
+            runCurrent()
+
+            // ----- Act -----
+            harness.placed.value = emptySet()
+            runCurrent()
+            harness.upstream.emit(Unit)
+            advanceTimeBy(debounce * 3)
+            runCurrent()
+
+            // ----- Assert -----
+            harness.starts() shouldBe 1
+            harness.collecting() shouldBe 0
+            harness.signals.size shouldBe 0
+        }
+
+        @Test
+        fun `does not restart collection when the placed set changes but stays non-empty`() = runTest {
+            // ----- Arrange -----
+            val harness = harness()
+            harness.placed.value = setOf("1")
+            runCurrent()
+
+            // ----- Act -----
+            harness.placed.value = setOf("1", "2")
+            runCurrent()
+
+            // ----- Assert -----
+            harness.starts() shouldBe 1
+        }
+
+        @Test
+        fun `emits again after an upstream failure once the set empties and refills`() = runTest {
+            // ----- Arrange -----
+            var failNext = true
+            val harness = harness { upstream ->
+                if (failNext) {
+                    failNext = false
+                    flow { throw IllegalStateException("boom") }
+                } else {
+                    upstream
+                }
+            }
+            harness.placed.value = setOf("1")
+            runCurrent()
+            harness.placed.value = emptySet()
+            runCurrent()
+
+            // ----- Act -----
+            harness.placed.value = setOf("1")
+            runCurrent()
             harness.upstream.emit(Unit)
             advanceTimeBy(debounce * 2)
             runCurrent()
+
+            // ----- Assert -----
+            harness.signals.size shouldBe 1
         }
-
-        // ----- Assert -----
-        harness.signals.size shouldBe 3
-    }
-
-    @Test
-    fun `stops collecting changes and emits nothing once the placed set empties`() = runTest {
-        // ----- Arrange -----
-        val harness = harness()
-        harness.placed.value = setOf("1")
-        runCurrent()
-
-        // ----- Act -----
-        harness.placed.value = emptySet()
-        runCurrent()
-        harness.upstream.emit(Unit)
-        advanceTimeBy(debounce * 3)
-        runCurrent()
-
-        // ----- Assert -----
-        harness.starts() shouldBe 1
-        harness.collecting() shouldBe 0
-        harness.signals.size shouldBe 0
-    }
-
-    @Test
-    fun `does not restart collection when the placed set changes but stays non-empty`() = runTest {
-        // ----- Arrange -----
-        val harness = harness()
-        harness.placed.value = setOf("1")
-        runCurrent()
-
-        // ----- Act -----
-        harness.placed.value = setOf("1", "2")
-        runCurrent()
-
-        // ----- Assert -----
-        harness.starts() shouldBe 1
-    }
-
-    @Test
-    fun `emits again after an upstream failure once the set empties and refills`() = runTest {
-        // ----- Arrange -----
-        var failNext = true
-        val harness = harness { upstream ->
-            if (failNext) {
-                failNext = false
-                flow { throw IllegalStateException("boom") }
-            } else {
-                upstream
-            }
-        }
-        harness.placed.value = setOf("1")
-        runCurrent()
-        harness.placed.value = emptySet()
-        runCurrent()
-
-        // ----- Act -----
-        harness.placed.value = setOf("1")
-        runCurrent()
-        harness.upstream.emit(Unit)
-        advanceTimeBy(debounce * 2)
-        runCurrent()
-
-        // ----- Assert -----
-        harness.signals.size shouldBe 1
     }
 }

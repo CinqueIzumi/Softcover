@@ -149,3 +149,12 @@ exceptions:
     # docs/reference/architecture.md mandates wrapping Apollo / data errors in RuntimeException with a
     # descriptive message; throwing RuntimeException is therefore an intentional, documented convention.
     active: false
+
+# The foundation's `rhaydus` ruleset. An `excludes` list replaces the baseline's rather than merging, so each
+# override restates the test source sets and adds Softcover's own.
+rhaydus:
+  NoReflection:
+    excludes: ['**/smoketest/**', '**/src/debug/**', '**/*Test/**', '**/test/**']
+  UiModelBuiltInComposable:
+    # Previews, the component gallery and debug tooling build models from fixtures by design.
+    excludes: ['**/*Previews.kt', '**/gallery/**', '**/src/debug/**', '**/*Test/**', '**/test/**']

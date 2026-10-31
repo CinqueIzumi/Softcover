@@ -19,21 +19,19 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
   decisions). Step 4 waves 1-2 done: Konsist verified (0.18.1, go); components, style wiring, design tokens
   and build tooling moved upstream. `RhaydusTheme` provides `Motion`; `TransientNavArg` lives in `toad`.
   F52 is down to its Konsist half (`ScreenConstructorProperty`, still a Softcover detekt rule).
-- **Next:** step 4 waves, one per session, each wave's boxes as parallel agents. Now: wave 3, ktlint ∥ detekt ∥
-  Konsist rules (foundation only; F62's halves go to the detekt and
-  Konsist agents; the Konsist agent first swaps the five files still on Material `Text`: `MorphingButton`,
-  `MastheadRefreshAction`, `RichText`, `SheetScaffold`, `ReviewsSection`). 4: sweeps in sequence:
-  `ktlintFormat`, F29 inlining, F65 suppression audit. 5: docs and memory.
+- **Next:** wave 3 is built, reviewed, tested, audited and documented; it waits on the user's commit approval.
+  Wave 4: the F68 morphing button, then the sweeps in sequence: enable ktlint `indent`, then Softcover
+  `ktlintFormat`, then the F65 suppression audit. Wave 5: docs and memory, then mark F66 as split.
   Step 5's pointer box also moves Softcover's `README.md` foundation line and the managed `CLAUDE.md` block
   (re-run `rhaydus-adopt`) from 0.3.2 to 0.4.0.
 - **Open questions:** none. The rules audit is folded into step 4 as F61-F67 (ktlint / detekt / Konsist split). The user's
   Medium_Phone pass (widget repaint on a time-zone change; Explore, Reading mark-as-read swipe, Settings
   rows) is pending but does not block step 4. Wave 1 adds the deadline date picker and the skeleton
-  loading states to that pass.
-- **Verification:** wave 2: foundation `check` and Softcover `check -x lint` green (covers `styleCheck`,
-  `stabilityCheck`, `checkR8KeepContract`); reviewer findings fixed; closer grep clean; the 44 moved tests
-  carry AAA markers. ktlint misses `),)` until F58 lands, so grep for it after each round.
-- **Uncommitted:** nothing. Wave 2 is foundation `7c7077d`, Softcover `6535391b6`. Not pushed: foundation since
+  loading states to that pass; wave 2 adds count-up and chart motion (now theme-provided by `RhaydusTheme`).
+- **Verification:** wave 3: foundation `check` green, with 144 detekt, 64 ktlint and 43 Konsist tests. Softcover
+  `check -x lint` is green except `ktlintCheck`, which waits for wave 4's sweep. Reviewer findings are fixed,
+  and the test audit's verdicts are applied.
+- **Uncommitted:** all of wave 3, in both repos (the foundation's new `konsist-rules/` is untracked). Wave 2 is foundation `7c7077d`, Softcover `6535391b6`. Not pushed: foundation since
   `398f68c`, Softcover since `68dd22e4e`; push the foundation first.
 
 ## How to run a step
@@ -99,6 +97,7 @@ Every open entry in `candidates.md` ships in 0.4.0. A box moves any Softcover-lo
 deletes it from Softcover, and prunes its entries. Boxes on disjoint modules run as parallel agents.
 
 - [x] Components: F28, F32.
+- [ ] Components: F68.
 - [x] Design tokens: F38, F40, F43.
 - [x] Verify Konsist on Softcover (F67's checks), before the rule boxes; a failure re-homes its rules to detekt.
 - [x] Style wiring: F61 and F67's test module, before the rule boxes.
@@ -140,6 +139,9 @@ deletes it from Softcover, and prunes its entries. Boxes on disjoint modules run
 - The plugin agents drop the `softcover-` prefix; Softcover uses the plugin names after step 2.
 - Commit style and engineering principles move to user scope, not into the plugin.
 - Plugin hooks read project facts from `.claude/rhaydus.json`; a missing key means a default or the hook off.
+- Both builds run the Gradle daemon on JDK 17 (`gradle/gradle-daemon-jvm.properties`), like CI.
+- Design-system modules are exempt from `RawSpacingDp` / `RawCornerDp`, but not from `FileLevelDpProperty`.
+- Blank-line layout rules auto-fix in ktlint; only non-fixable judgements go to detekt.
 
 ## Baseline
 

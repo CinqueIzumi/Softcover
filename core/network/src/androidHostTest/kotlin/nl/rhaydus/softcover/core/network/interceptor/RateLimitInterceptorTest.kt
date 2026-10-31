@@ -297,7 +297,8 @@ class RateLimitInterceptorTest {
                 "apply",
             )
 
-            // ----- Act — under the old per-request accounting all three calls would pass free -----
+            // ----- Act -----
+            // under the old per-request accounting all three calls would pass free
             interceptor.intercept(
                 clearAndApply,
                 chain,
@@ -379,7 +380,8 @@ class RateLimitInterceptorTest {
                 "apply",
             )
 
-            // ----- Act — zero tokens available, a cost-2 call must wait ~3s (cost 2 + the reserve), not ~2s -----
+            // ----- Act -----
+            // zero tokens available, a cost-2 call must wait ~3s (cost 2 + the reserve), not ~2s
             interceptor.intercept(
                 twoRootFields,
                 chain,
@@ -407,7 +409,8 @@ class RateLimitInterceptorTest {
                 "books",
             )
 
-            // ----- Act — three cost-1 calls fit in four tokens only if __typename is free -----
+            // ----- Act -----
+            // three cost-1 calls fit in four tokens only if __typename is free
             interceptor.intercept(
                 typenameAndOneRealField,
                 chain,
@@ -453,7 +456,8 @@ class RateLimitInterceptorTest {
                 )
                 val timeAfterSeeding = testScheduler.currentTime
 
-                // ----- Act — clamped cost is 2, exactly the ceiling, so this proceeds immediately -----
+                // ----- Act -----
+                // clamped cost is 2, exactly the ceiling, so this proceeds immediately
                 interceptor.intercept(
                     fiveRootFields,
                     chain,
@@ -482,7 +486,8 @@ class RateLimitInterceptorTest {
                 chain,
             ).collect {}
 
-            // ----- Act — the first call must have spent one of the two available tokens, not zero -----
+            // ----- Act -----
+            // the first call must have spent one of the two available tokens, not zero
             interceptor.intercept(
                 typenameOnly,
                 chain,
@@ -525,7 +530,8 @@ class RateLimitInterceptorTest {
             } returns emptyFlow()
             val timeAfterAdoption = testScheduler.currentTime
 
-            // ----- Act — exactly 3 more single-cost calls fit in 4 adopted tokens, a 4th must wait -----
+            // ----- Act -----
+            // exactly 3 more single-cost calls fit in 4 adopted tokens, a 4th must wait
             repeat(3) {
                 interceptor.intercept(
                     baseRequest,
@@ -583,7 +589,8 @@ class RateLimitInterceptorTest {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
                 } returnsMany listOf(responseA, responseB)
 
-                // ----- Act — both acquire instantly (avail 4 -> 2) and go in flight together -----
+                // ----- Act -----
+                // both acquire instantly (avail 4 -> 2) and go in flight together
                 val jobA = launch {
                     interceptor.intercept(
                         baseRequest,
@@ -604,7 +611,8 @@ class RateLimitInterceptorTest {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
                 } returns emptyFlow()
 
-                // ----- Act — 2 cost-1 probes: only 1 passes free if availableTokens stayed at 2, not 3 -----
+                // ----- Act -----
+                // 2 cost-1 probes: only 1 passes free if availableTokens stayed at 2, not 3
                 interceptor.intercept(
                     baseRequest,
                     chain,
@@ -651,8 +659,9 @@ class RateLimitInterceptorTest {
                 } returns emptyFlow()
                 val baselineTime = testScheduler.currentTime
 
-                // ----- Act — a follow-up request must proceed without waiting for refill, proving
-                // ----- availableTokens rose to 8, not the pre-adoption 1 -----
+                // ----- Act -----
+                // a follow-up request must proceed without waiting for refill, proving
+                // availableTokens rose to 8, not the pre-adoption 1
                 interceptor.intercept(
                     baseRequest,
                     chain,
@@ -698,7 +707,8 @@ class RateLimitInterceptorTest {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returnsMany listOf(responseA, responseB)
 
-            // ----- Act — both acquire instantly (avail 8 -> 6) and go in flight together -----
+            // ----- Act -----
+            // both acquire instantly (avail 8 -> 6) and go in flight together
             val jobA = launch {
                 interceptor.intercept(
                     baseRequest,
@@ -719,7 +729,8 @@ class RateLimitInterceptorTest {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
 
-            // ----- Act — a cost-1 probe must wait, proving availableTokens dropped to 1, not stayed at 6 -----
+            // ----- Act -----
+            // a cost-1 probe must wait, proving availableTokens dropped to 1, not stayed at 6
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -754,7 +765,8 @@ class RateLimitInterceptorTest {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
                 } returns failingResponse
 
-                // ----- Act — the response flow fails; inFlight must still be decremented back to 0 -----
+                // ----- Act -----
+                // the response flow fails; inFlight must still be decremented back to 0
                 runCatching {
                     interceptor.intercept(
                         baseRequest,
@@ -762,9 +774,10 @@ class RateLimitInterceptorTest {
                     ).collect {}
                 }
 
-                // ----- Act — a solo request with a higher reported remaining must still be trusted
-                // ----- upward; if the earlier failure had leaked inFlight, this would wrongly stay
-                // ----- untrusted -----
+                // ----- Act -----
+                // a solo request with a higher reported remaining must still be trusted
+                // upward; if the earlier failure had leaked inFlight, this would wrongly stay
+                // untrusted
                 every {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
                 } returns flowOf(
@@ -781,7 +794,8 @@ class RateLimitInterceptorTest {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
                 } returns emptyFlow()
 
-                // ----- Act — two more cost-1 probes: only possible free if availableTokens rose to 4 -----
+                // ----- Act -----
+                // two more cost-1 probes: only possible free if availableTokens rose to 4
                 interceptor.intercept(
                     baseRequest,
                     chain,
@@ -791,7 +805,8 @@ class RateLimitInterceptorTest {
                     chain,
                 ).collect {}
 
-                // ----- Assert — nothing above ever needed to wait -----
+                // ----- Assert -----
+                // nothing above ever needed to wait
                 testScheduler.currentTime shouldBe baselineTime
             }
 
@@ -817,7 +832,8 @@ class RateLimitInterceptorTest {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
                 } returns neverCompletingResponse
 
-                // ----- Act — acquire a token and go in flight, then cancel before any response arrives -----
+                // ----- Act -----
+                // acquire a token and go in flight, then cancel before any response arrives
                 val job = launch {
                     interceptor.intercept(
                         baseRequest,
@@ -827,8 +843,9 @@ class RateLimitInterceptorTest {
                 runCurrent()
                 job.cancelAndJoin()
 
-                // ----- Act — a solo request with a higher reported remaining must still be trusted
-                // ----- upward; if cancellation had leaked inFlight, this would wrongly stay untrusted -----
+                // ----- Act -----
+                // a solo request with a higher reported remaining must still be trusted
+                // upward; if cancellation had leaked inFlight, this would wrongly stay untrusted
                 every {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
                 } returns flowOf(
@@ -845,7 +862,8 @@ class RateLimitInterceptorTest {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
                 } returns emptyFlow()
 
-                // ----- Act — two more cost-1 probes: only possible free if availableTokens rose to 4 -----
+                // ----- Act -----
+                // two more cost-1 probes: only possible free if availableTokens rose to 4
                 interceptor.intercept(
                     baseRequest,
                     chain,
@@ -855,7 +873,8 @@ class RateLimitInterceptorTest {
                     chain,
                 ).collect {}
 
-                // ----- Assert — nothing above ever needed to wait -----
+                // ----- Assert -----
+                // nothing above ever needed to wait
                 testScheduler.currentTime shouldBe baselineTime
             }
 
@@ -879,7 +898,8 @@ class RateLimitInterceptorTest {
             } returns emptyFlow()
             advanceTimeBy(20.seconds)
 
-            // ----- Act — refill saturates at the new ceiling of 10, well past the fallback of 5 -----
+            // ----- Act -----
+            // refill saturates at the new ceiling of 10, well past the fallback of 5
             repeat(9) {
                 interceptor.intercept(
                     baseRequest,
@@ -928,7 +948,8 @@ class RateLimitInterceptorTest {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
 
-            // ----- Act — a hold would block this for 5s; it must instead proceed immediately -----
+            // ----- Act -----
+            // a hold would block this for 5s; it must instead proceed immediately
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -968,7 +989,8 @@ class RateLimitInterceptorTest {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
 
-            // ----- Act — with 8 tokens left over unzeroed this would pass free; it must instead wait for refill -----
+            // ----- Act -----
+            // with 8 tokens left over unzeroed this would pass free; it must instead wait for refill
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -996,7 +1018,8 @@ class RateLimitInterceptorTest {
                 ),
             )
 
-            // ----- Act — the first call is the one that receives the 429 and its hold -----
+            // ----- Act -----
+            // the first call is the one that receives the 429 and its hold
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -1005,7 +1028,8 @@ class RateLimitInterceptorTest {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
 
-            // ----- Act — the very next acquisition must sit out the full Retry-After before proceeding -----
+            // ----- Act -----
+            // the very next acquisition must sit out the full Retry-After before proceeding
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -1077,14 +1101,16 @@ class RateLimitInterceptorTest {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
                 } returns emptyFlow()
 
-                // ----- Act — cost(1) + RESERVED_TOKENS(1) can never fit under a ceiling of 1, so the reserve
-                // ----- must be dropped, or this would wait forever -----
+                // ----- Act -----
+                // cost(1) + RESERVED_TOKENS(1) can never fit under a ceiling of 1, so the reserve
+                // must be dropped, or this would wait forever
                 interceptor.intercept(
                     baseRequest,
                     chain,
                 ).collect {}
 
-                // ----- Assert — it completes, not just "is delayed" -----
+                // ----- Assert -----
+                // it completes, not just "is delayed"
                 testScheduler.currentTime shouldBe 1_000L
             }
 
@@ -1109,13 +1135,15 @@ class RateLimitInterceptorTest {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns emptyFlow()
 
-            // ----- Act — must complete, not hang, exactly as with a reported ceiling of 1 -----
+            // ----- Act -----
+            // must complete, not hang, exactly as with a reported ceiling of 1
             interceptor.intercept(
                 baseRequest,
                 chain,
             ).collect {}
 
-            // ----- Assert — it completes, not just "is delayed" -----
+            // ----- Assert -----
+            // it completes, not just "is delayed"
             testScheduler.currentTime shouldBe 1_000L
         }
 
@@ -1129,16 +1157,18 @@ class RateLimitInterceptorTest {
                     scheduler = testScheduler,
                 )
 
-                // ----- Act — no response has arrived yet, so this is pure cold-start local accounting -----
+                // ----- Act -----
+                // no response has arrived yet, so this is pure cold-start local accounting
                 interceptor.intercept(
                     baseRequest,
                     chain,
                 ).collect {}
                 val timeAfterOneFreeCall = testScheduler.currentTime
 
-                // ----- Act — a second call must wait: fallbackBucketSize (10) was never the free
-                // ----- allowance, and UNCONFIRMED_TOKEN_ALLOWANCE (2) net of RESERVED_TOKENS (1) only
-                // ----- ever covers exactly one request before the server has said anything -----
+                // ----- Act -----
+                // a second call must wait: fallbackBucketSize (10) was never the free
+                // allowance, and UNCONFIRMED_TOKEN_ALLOWANCE (2) net of RESERVED_TOKENS (1) only
+                // ever covers exactly one request before the server has said anything
                 interceptor.intercept(
                     baseRequest,
                     chain,

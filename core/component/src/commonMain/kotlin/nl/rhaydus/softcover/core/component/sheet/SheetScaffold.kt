@@ -24,7 +24,6 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -56,6 +55,7 @@ import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
 /** A list body belongs in [LazySheetScaffold]; a `LazyColumn` inside this scaffold's scrolling body crashes. */
@@ -446,7 +446,7 @@ private fun FooterButton(
             enabled = button.enabled && chrome.busy.not() && chrome.unlocked,
             size = ButtonSize.M,
         ) {
-            Text(text = button.label)
+            SoftcoverText(text = button.label)
 
             button.count?.let { count ->
                 StatNumber(

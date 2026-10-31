@@ -71,19 +71,8 @@ unwrap with Kotest `shouldNotBeNull()`. detekt `UnsafeCallOnNullableType` gates 
 No tool gates these, so review checks them by hand in every touched file. The reviewer does not run
 `styleCheck`; the brief states the gate result.
 
-- **Blank line between sibling composables, `Spacer` included** ([foundation §Compose](../../foundation/docs/code-style.md#compose)) — tooling misses it inside nested `Column` / `Row` / `Box` / `LazyColumn` scopes.
-- **Every multi-line construct is its own paragraph** ([§Paragraph rule](../../foundation/docs/code-style.md#paragraph-rule-for-multi-line-constructs)) — ktlint only handles the blank lines next to braces.
-- **Guard-clause spacing** ([§Guard clauses](../../foundation/docs/code-style.md#guard-clauses)) — blank line after the extraction, between guards, and after the last guard, so each guard reads as one step.
-- **No `) }` on a multi-line trailing-lambda body** ([above](#trailing-lambda-over-a-multi-line-body--no-brace-glomming)) — grep touched files for `^\s*\)\s*\}`, since ktlint's wrapping produces the glommed form itself.
-- **A 2+-argument `Modifier` call wraps one-per-line too**, e.g. `.padding(horizontal = …, vertical = …)` ([§Argument and Property Layout](../../foundation/docs/code-style.md#argument-and-property-layout)) — the ktlint rule exempts `Modifier` chains, but the guide has no such carve-out.
-- **Spacing reads a `Spacing` token** — the dp passed to `padding`, `PaddingValues`, `contentPadding`, `Arrangement.spacedBy`, `offset` or a `Spacer`'s `height` / `width` / `size` (0, 64 and 96 stay literal); the `RawSpacingDp` detekt rule gates it once the sweep enables it. Component sizes, strokes and borders stay inline `.dp` at the use site and are never hoisted into file-level `private val` constants.
-- **Corners read a `Corners` token** — the radius of a corner shape (`RoundedCornerShape`, `CutCornerShape`, their `Absolute*` forms) or a `CornerSize`, including `percent = 50` pills (`0.dp` stays literal); true circles keep `CircleShape`, partial corners derive from a step via `.copy(...)`; the `RawCornerDp` detekt rule gates it. Sizes stay inline `.dp`.
-- **Haptics read `LocalHaptics.current`** — the foundation `RhaydusTheme` provides it; the `RememberHapticsOutsideTheme` detekt rule gates importing `rememberHaptics()` anywhere in the app.
-- **Imports follow the IDE layout `*,java.**,javax.**,kotlin.**,^`** (pinned as `ij_kotlin_imports_layout` in `.editorconfig`; replaces [§Import Ordering](../../foundation/docs/code-style.md#import-ordering)'s groups) — one ASCII-sorted block, then `java.*`, `javax.*`, `kotlin.*`, aliases last, no blank lines. ktlint only sorts `nl.rhaydus.*` among themselves; run Optimize Imports after a bulk import rewrite.
-- **Every `@Test` sits in a `@Nested inner class`, one per function under test** ([§Test Class Organization](../../foundation/docs/code-style.md#test-class-organization)) — keeps a test file navigable by function.
-- **AAA markers are exactly `// ----- Arrange -----` / `Act` / `Assert`** ([§Unit Test Structure](../../foundation/docs/code-style.md#unit-test-structure)) — every test then splits into its three phases at the same markers.
-- **`kotlin.time.Instant`, never `kotlinx.datetime.Instant`.** The latter is a deprecated typealias; no
-  gate catches the import, since both resolve and compile.
+- **One `@Nested inner class` per function under test** ([§Test Class Organization](../../foundation/docs/code-style.md#test-class-organization)) — Konsist gates the nesting, not what each class groups.
+- **A true circle keeps `CircleShape`; a partial corner derives from a `Corners` step via `.copy(...)`** — `RawCornerDp` gates raw radii, not which shape is the right one.
 - **A KDoc link to a symbol the file does not import is `[Symbol][fully.qualified.Name]`, never
   downgraded to backticks.** After a file split or rename, grep the repo for the old filename — no gate
   catches a stale link.

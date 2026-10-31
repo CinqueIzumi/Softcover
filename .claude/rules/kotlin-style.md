@@ -8,16 +8,21 @@ paths:
 `kotlin.code.style=official`. The mechanical rules are gated by tooling through `check`; the review-only rules
 are in `docs/reference/code-style.md` § Review-only rules.
 
-- **ktlint** (`nl.rhaydus:ktlint-rules`): `./gradlew ktlintFormat` auto-fixes, `ktlintCheck` gates. It covers
-  one-per-line wrapping of 2+ args/params, trailing commas, unused imports, blank lines after `super.*()` / `AppLog.e(...)`,
-  flush `// region`, no blank line after `{` / before `}`, and a blank line between sibling composables.
-  Gate-only, fixed by hand: `!` → `.not()`, inline fully-qualified references, one type per file, project-import
-  ordering, inline mockk stubs (`coEvery` / `every` open onto their own line), and bare `runCatching` in a use
-  case (use `runCatchingLogged`).
+- **ktlint** (`nl.rhaydus:ktlint-rules`) only formats: `./gradlew ktlintFormat` fixes everything it reports,
+  `ktlintCheck` gates. It covers one-per-line wrapping of 2+ args/params (`Modifier` calls included),
+  trailing-lambda braces over a multi-line body, trailing commas, statement paragraphs and guard-clause spacing,
+  brace blank lines, flush `// region`, sibling-composable spacing, `!` → `.not()`, unused imports, and the
+  `ij_kotlin_imports_layout` import order.
 - **detekt** is type-resolved and gates from zero, with no baseline. The shared foundation config
   (`config/detekt.yml`, unpacked by `extractRhaydusDetektConfig`) sits under Softcover's deltas in
-  `config/detekt/detekt.yml`; the Softcover rules are configured in `config/detekt/softcover-rules.yml`. Type
-  resolution is what lets `rhaydus: UnguardedFlowTerminalRead` tell `Flow.first()` from `Collection.first()`.
+  `config/detekt/detekt.yml`. The `rhaydus` ruleset judges call sites and bodies: raw spacing and corner dp,
+  file-level dp, UI models built in composition, inline mockk stubs, bare `runCatching` in a use case, raw
+  logging, inline fully-qualified references, `/*` in KDoc, and the AAA markers. Type resolution is what lets
+  `rhaydus: UnguardedFlowTerminalRead` tell `Flow.first()` from `Collection.first()`.
+- **Konsist** (`nl.rhaydus:konsist-rules`, run by `:konsist:test`) judges declarations: the import bans
+  (Material `Text` and `Button`, `kotlinx.datetime.Instant`, `rememberHaptics`), layering, one type per file,
+  plumbing visibility, `@Nested` tests, the `action` field name, `UiState` getters that build a UI model, and
+  serializable Screen arguments.
 - `./gradlew styleCheck` runs `detektMainAndroid` / `detektMainJvm` / `detektMain` / `detektHostTestAndroid`
   across every module: `commonMain`, the platform source sets **and the unit tests**, excluding generated code.
   `iosMain` is not covered (detekt has no type resolution for native targets).

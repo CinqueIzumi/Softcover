@@ -175,9 +175,10 @@ TopBar(model = state.topBar)
   implementation, bound once in `presentationModule` (`:core:component` itself uses no DI). A collector
   reads it from its `Dependencies` and puts the result on the `UiState`, so the render never builds the
   model and a collector test can substitute the copy.
-- **Gated by `softcover:UiModelBuiltInRender`.** Preview fixtures, the gallery and debug screens are excluded
-  by path. A `*UiState` member may look up models the collectors stored but never builds one; a constructor,
-  `.copy` or model-returning call in a member or getter that returns a model is reported. A reducer that
+- **Gated by detekt `rhaydus:UiModelBuiltInComposable` and Konsist `assertNoUiModelBuiltInStateMember`.**
+  Preview fixtures, the gallery and debug screens are excluded by path. A `*UiState` member may look up models
+  the collectors stored but never builds one; a constructor, `.copy` or model-returning call in a member or
+  getter that returns a model is reported. A reducer that
   returns the `UiState` itself (`withName`) is not. A recorded § 7.4a exception carries
   `@ModelBuiltInComposition(reason)`, never `@Suppress`.
 
@@ -244,7 +245,8 @@ pans it); never add a "gallery mode" parameter.
 
 ### 7.4 What the build enforces
 
-- **detekt `softcover:UiModelBuiltInRender`** (R10) fails on a UI model built in composition.
+- **detekt `rhaydus:UiModelBuiltInComposable`** (R10) fails on a UI model built in composition, and Konsist
+  `assertNoUiModelBuiltInStateMember` on one built by a `*UiState` member.
 - **`checkModuleGraph`** fails if `:core:component` declares a dependency on anything but
   `:core:designsystem`, or on Koin / Voyager / Apollo coordinates.
 - **detekt `ForbiddenImport`**, scoped to `**/core/component/**`, fails on an import of `org.koin.**`,

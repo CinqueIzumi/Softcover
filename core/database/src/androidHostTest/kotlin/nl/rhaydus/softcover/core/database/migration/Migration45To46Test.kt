@@ -78,13 +78,16 @@ class Migration45To46Test {
         }
     }
 
-    @Test
-    fun `migration runs cleanly from a real v45 database`() {
-        // ----- Arrange -----
-        val db = connection
+    @Nested
+    inner class CleanMigration {
+        @Test
+        fun `migration runs cleanly from a real v45 database`() {
+            // ----- Arrange -----
+            val db = connection
 
-        // ----- Act & Assert -----
-        migration.migrate(db)
+            // ----- Act & Assert -----
+            migration.migrate(db)
+        }
     }
 
     @Nested

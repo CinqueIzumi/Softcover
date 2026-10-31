@@ -199,6 +199,18 @@ Filed but not yet implemented in the foundation.
   visibility (F62), `@Nested` grouping (F64), the `action` field name (F66), and serializable Screen
   arguments (F52).
 
+### F68 — A button that morphs between filled and tonal
+
+- **Type:** enhancement (component)
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Open: implemented locally.** Softcover's `MorphingButton` keeps one Material `Button` and
+  animates its container and content colour, crossfades label and icon, and animates its width when the tone
+  flips. `RhaydusButton` renders a different Material composable per `ButtonStyle`, so a style change there
+  pops. Softcover's Konsist ban on Material `Button` allowlists the local copy until this lands.
+- **What to build:** the morphing button in `designsystem-core`, built from the same `ButtonDefaults` and
+  `ButtonSize` values as `RhaydusButton` so both resting states match it, with the press scale on the filled
+  state only. Then delete Softcover's copy and its allowlist entry.
+
 ### F52 — Screen-argument rule as a Konsist assertion
 
 - **Type:** gate
