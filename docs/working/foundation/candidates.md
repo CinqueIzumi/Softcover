@@ -87,14 +87,6 @@ Filed but not yet implemented in the foundation.
   `rememberHaptics`, which retires Softcover's `RememberHapticsOutsideTheme`. A layering assertion alongside
   it: data and domain packages never import presentation.
 
-### F38 — `designsystem-core` describes a spacing scale but ships none
-
-- **Type:** enhancement
-- **Home:** `nl.rhaydus:designsystem-core`
-- **Status:** **Open.** § 5.1 describes a small recurring spacing set; no token object backs it.
-- **Impact in the app:** Softcover defines `Spacing` itself (2dp hairline plus a 4dp grid up to 48dp).
-- **What to build:** a `Spacing` object in designsystem-core. Once adopted, drop the app-local one.
-
 ### F39 — No gate keeps raw dp literals out of spacing calls
 
 - **Type:** gate (lint rule)
@@ -104,14 +96,6 @@ Filed but not yet implemented in the foundation.
 - **Impact in the app:** without it, spacing drifts back to per-screen numbers after the token sweep.
 - **What to build:** the rule in the shared ruleset, with the allowed literals configurable.
 
-### F40 — `designsystem-core` ships no corner scale and `RhaydusTheme` has no `shapes` parameter
-
-- **Type:** enhancement
-- **Home:** `nl.rhaydus:designsystem-core`
-- **Status:** **Open.** `RhaydusTheme` cannot take app shapes and no token object backs corner radii.
-- **Impact in the app:** Softcover defines `Corners` itself (2dp hairline, Material 3 Expressive radii up to 28dp, a pill).
-- **What to build:** a `Corners` object and a `shapes` parameter on `RhaydusTheme`. Once adopted, drop the app-local one.
-
 ### F41 — No gate keeps raw radii out of corner shapes
 
 - **Type:** gate (lint rule)
@@ -120,14 +104,6 @@ Filed but not yet implemented in the foundation.
   `RoundedCornerShape` or `CutCornerShape`.
 - **Impact in the app:** without it, corner radii drift back to per-screen numbers after the token sweep.
 - **What to build:** the rule in the shared ruleset.
-
-### F43 — The expressive `MotionScheme` has no readable value-change spec
-
-- **Type:** enhancement
-- **Home:** `nl.rhaydus:designsystem-core`
-- **Status:** **Open.** Softcover defines `Motion.valueChange` itself: a slow, no-bounce spring (critically damped, `StiffnessVeryLow`) that count-ups and chart geometry share. `Motion` is theme-provided: `SoftcoverTheme` supplies a full and a snapping instance, read through `MaterialTheme.motion`.
-- **Impact in the app:** the default spring settles 0 to 24,092 in about 250 ms, too fast to read as a count.
-- **What to build:** a named slow, no-bounce value-change spring alongside the scheme's specs. Once adopted, drop the app-local one.
 
 ### F57 — Gate: a `UiState` getter that builds a UI model
 
@@ -223,57 +199,11 @@ Filed but not yet implemented in the foundation.
   visibility (F62), `@Nested` grouping (F64), the `action` field name (F66), and serializable Screen
   arguments (F52).
 
-### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
-
-- **Type:** gate (custom Gradle task)
-- **Home:** `build-logic` convention plugins (alongside `rhaydus.module-graph`, F18)
-- **Status:** **Open.** Implemented inline in Softcover's root `build.gradle.kts` as
-  `checkResourcePackaging`, wired into every module's `check`. Generic — nothing in it is Softcover-specific.
-- **The trap.** A KMP module that declares `compose.resources { packageOfResClass = … }` gets its generated
-  `Res` accessor and compiles perfectly whether or not its resources are ever packaged. On Android, CMP
-  resources ship as **assets**, and `com.android.kotlin.multiplatform.library` keeps Android resources off by
-  default — so without `androidResources.enable = true` in the module's `androidLibrary` block the resources
-  silently never reach the APK, and the first `Res` read throws `MissingResourceException` **at runtime**.
-  Nothing in the source or the dependency graph is wrong, so no compile, lint, detekt, `projectHealth` or
-  `checkModuleGraph` failure is possible. The one-line omission is invisible until a device executes the read.
-- **Why it is worth upstreaming rather than remembering.** It bit Softcover **twice**, and neither was found
-  by a check. `:core:component` gained its own copy in S4-5a and crashed the app on launch three commits
-  later, the first time it ran on a device with no network (the offline banner is the only reader). The
-  second, `:feature:settings`' bundled `ROADMAP.md` fallback, had **never worked on Android** since it
-  landed — it is read only before the first live fetch, so any machine with a warm cache never touches it,
-  and it would have surfaced on a fresh install after release. Both are the same line. Any foundation app
-  that gives a module its own `composeResources` inherits the same trap, and the failure mode — latent,
-  runtime-only, device-dependent — is the worst kind to leave to review.
-- **What to build.** A task iterating subprojects: for each whose Compose `ResourcesExtension` has a
-  non-empty `packageOfResClass`, resolve its `KotlinMultiplatformAndroidLibraryExtension` and fail when
-  `androidResources.enable` is false. `packageOfResClass` is the right discriminator rather than a
-  `composeResources/` directory on disk — declaring a resource package *is* the claim to own resources, and
-  it is the only signal that covers a `customDirectory` module, which has no such directory (Softcover's
-  `:feature:settings` is exactly that case). Verified by flipping a real module's flag and watching it fail.
-
-### F50 — Compose stability gate in the convention plugins
+### F52 — Screen-argument rule as a Konsist assertion
 
 - **Type:** gate
-- **Home:** `build-logic` Compose convention plugins (Android and KMP)
-- **Status:** **Open — implemented locally.** Softcover's two Compose convention plugins apply the skydoves
-  Compose Stability Analyzer through one shared helper (`includeTests = false`, `failOnStabilityChange = true`),
-  and `stabilityCheck` compares each module with its checked-in `<module>/stability/*.stability` baseline in CI.
-  The foundation's convention plugins should adopt it so every consumer gets the gate.
-- **What to build:** apply the plugin from the shared Compose convention helper. The plugin version must track the
-  Kotlin version (Softcover runs analyzer 0.9.0 on Kotlin 2.4.21). On the AGP
-  KMP Android target the analyzer's per-variant tasks look for `compile<Variant>Kotlin` output and find none, so
-  repoint their `stabilityInputFiles` at `stability/compileAndroidMain/stability-info.json` once the task graph is
-  ready (see `StabilityGate.kt`), or fix it upstream in the analyzer.
-
-### F52 — R8 keep-contract plugin, reflection and Screen-argument rules, and the `keepRules/` convention
-
-- **Type:** gate
-- **Home:** `build-logic` convention plugins, `nl.rhaydus:detekt-rules`, and the module convention plugins
-- **Status:** **Open — implemented locally.** The `softcover.android.r8-keep-contract` plugin, the
-  `NoReflection` and `ScreenConstructorProperty` detekt rules, and the `keepRules/` convention are described in
-  `docs/reference/r8.md`.
-- **What to build:** move the plugin and the two rules into the foundation, with the project package prefix
-  and the supertypes to check as configuration (`NoReflection` as a detekt rule, `ScreenConstructorProperty`
-  as a Konsist assertion, F67), and ship `TransientNavArg` with the navigation contract.
-  Document `keepRules/` as the consumer-rule convention. No Softcover build file registers these directories, so the foundation's
-  convention plugins only need to keep AGP's default pickup intact.
+- **Home:** `nl.rhaydus:konsist-rules` (F67)
+- **Status:** **Open — implemented locally.** The R8 keep-contract plugin, `NoReflection`, `TransientNavArg`
+  and the `keepRules/` convention are in the foundation; Softcover's `ScreenConstructorProperty` detekt rule is not.
+- **What to build:** `ScreenConstructorProperty` as a Konsist assertion (a `Screen` constructor property is
+  serializable or `@TransientNavArg`), with the supertypes as parameters. Then delete the Softcover rule.
