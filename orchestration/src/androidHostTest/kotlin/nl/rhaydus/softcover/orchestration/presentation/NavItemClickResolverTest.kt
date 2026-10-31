@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.orchestration.presentation
 import cafe.adriel.voyager.navigator.tab.Tab
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.presentation.util.LibraryNavPulseKey
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
@@ -35,6 +37,7 @@ class NavItemClickResolverTest {
         selected: Boolean,
     ) = NavItemUi(
         tab = tab,
+        icon = drawableIconResource(contentDescription = "icon", icon = SoftcoverIcon.Explore),
         selected = selected,
         showBadge = false,
         iconScale = 1f,

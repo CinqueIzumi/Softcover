@@ -9,13 +9,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.nav.NavPulse
 import nl.rhaydus.designsystem.nav.NavPulseKey
 import nl.rhaydus.designsystem.nav.rememberPulseScale
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.LibraryNavPulseKey
 import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
@@ -65,6 +66,17 @@ internal expect val wideGridTabsUseDetailPane: Boolean
 internal fun navPulseKeyFor(tab: Tab): NavPulseKey = if (tab == LibraryTab) LibraryNavPulseKey else TabNavPulseKey(tab)
 
 /**
+ * The catalog icon [tab] shows in the navigation chrome.
+ */
+internal fun navIconFor(tab: Tab): SoftcoverIcon = when (tab) {
+    ReadingTab -> SoftcoverIcon.Reading
+    LibraryTab -> SoftcoverIcon.Shelf
+    ExploreTab -> SoftcoverIcon.Explore
+    SettingsTab -> SoftcoverIcon.Settings
+    else -> error("No navigation icon for $tab")
+}
+
+/**
  * Resolves [appNavTabs] into render-ready [NavItemUi]s: current selection (from the tab navigator),
  * the settings app-update badge, and each tab's per-frame icon pulse scale. Every chrome renderer calls
  * this so the bars/rail/sidebar share one selection/badge/pulse implementation.
@@ -83,6 +95,10 @@ internal fun rememberNavItems(): List<NavItemUi> {
 
         NavItemUi(
             tab = tab,
+            icon = drawableIconResource(
+                icon = navIconFor(tab),
+                contentDescription = tab.options.title,
+            ),
             selected = tabNavigator.current == tab,
             showBadge = tab == SettingsTab && showSettingsBadge,
             iconScale = pulseScale,
@@ -138,7 +154,6 @@ internal fun rememberNavItemClick(): (NavItemUi) -> Unit {
 @Composable
 internal fun NavItemIcon(
     item: NavItemUi,
-    painter: Painter,
 ) {
     BadgedBox(
         badge = {
@@ -148,7 +163,7 @@ internal fun NavItemIcon(
         },
     ) {
         Icon(
-            painter = painter,
+            painter = item.icon.getIconPainter(),
             contentDescription = item.tab.options.title,
             modifier = Modifier.graphicsLayer {
                 scaleX = item.iconScale

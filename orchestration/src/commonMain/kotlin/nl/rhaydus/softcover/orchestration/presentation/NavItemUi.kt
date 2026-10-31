@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
 import cafe.adriel.voyager.navigator.tab.Tab
+import nl.rhaydus.designsystem.icon.RhaydusIconResource
 
 /**
  * The render-ready state of a single navigation destination, resolved once by [rememberNavItems]
@@ -9,6 +10,7 @@ import cafe.adriel.voyager.navigator.tab.Tab
  */
 internal data class NavItemUi(
     val tab: Tab,
+    val icon: RhaydusIconResource,
     val selected: Boolean,
     val showBadge: Boolean,
     val iconScale: Float,

@@ -15,24 +15,28 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** steps 1-3 done; the foundation reads 0.4.0 and ships every open `candidates.md` entry (user
-  decisions). Step 4 waves 1-2 done: Konsist verified (0.18.1, go); components, style wiring, design tokens
-  and build tooling moved upstream. `RhaydusTheme` provides `Motion`; `TransientNavArg` lives in `toad`.
-  F52 is down to its Konsist half (`ScreenConstructorProperty`, still a Softcover detekt rule).
-- **Next:** wave 3 is built, reviewed, tested, audited and documented; it waits on the user's commit approval.
-  Wave 4: the F68 morphing button, then the sweeps in sequence: enable ktlint `indent`, then Softcover
-  `ktlintFormat`, then the F65 suppression audit. Wave 5: docs and memory, then mark F66 as split.
-  Step 5's pointer box also moves Softcover's `README.md` foundation line and the managed `CLAUDE.md` block
-  (re-run `rhaydus-adopt`) from 0.3.2 to 0.4.0.
-- **Open questions:** none. The rules audit is folded into step 4 as F61-F67 (ktlint / detekt / Konsist split). The user's
-  Medium_Phone pass (widget repaint on a time-zone change; Explore, Reading mark-as-read swipe, Settings
-  rows) is pending but does not block step 4. Wave 1 adds the deadline date picker and the skeleton
-  loading states to that pass; wave 2 adds count-up and chart motion (now theme-provided by `RhaydusTheme`).
-- **Verification:** wave 3: foundation `check` green, with 144 detekt, 64 ktlint and 43 Konsist tests. Softcover
-  `check -x lint` is green except `ktlintCheck`, which waits for wave 4's sweep. Reviewer findings are fixed,
-  and the test audit's verdicts are applied.
-- **Uncommitted:** all of wave 3, in both repos (the foundation's new `konsist-rules/` is untracked). Wave 2 is foundation `7c7077d`, Softcover `6535391b6`. Not pushed: foundation since
-  `398f68c`, Softcover since `68dd22e4e`; push the foundation first.
+- **State:** steps 1-3 are done, and so are step 4 waves 1-3. ktlint now only formats. The detekt and
+  Konsist rules (`nl.rhaydus:konsist-rules`, wired into Softcover's `:konsist`) carry the semantic checks, and
+  Softcover's local `:detekt-rules` module is gone. Wave 4 box 1 (F68) is built and reviewed:
+  `RhaydusMorphingButton` / `MorphingButtonTone` live in `designsystem-core`, and Softcover's copy, its
+  gallery entry and the Material `Button` allowlist are gone. It waits on the user's commit approval.
+- **Next:** in sequence: enable ktlint's `indent` rule; run Softcover's `ktlintFormat` sweep; run the F65
+  suppression audit. Wave 5 is docs and memory, plus marking F66 as split. Step 5's pointer box moves
+  Softcover's `README.md` foundation line and the managed `CLAUDE.md` block (re-run `rhaydus-adopt`) from
+  0.3.2 to 0.4.0.
+- **Icon stability (built with F68):** `RhaydusIconResource.Custom(Painter)` is gone and the type is
+  `@Immutable`, so icon-taking foundation buttons are skippable. The nav chrome reads `NavItemUi.icon` from
+  `navIconFor`; the tabs set no `TabOptions.icon`.
+- **Open questions:** none. The user's Medium_Phone pass is still pending and does not block step 4. It covers
+  the widget repaint on a time-zone change, the Explore, Reading mark-as-read swipe and Settings rows, the
+  deadline date picker and skeleton loading states, and the count-up and chart motion.
+- **Verification:** close-out gates. `styleCheck` fails only on Softcover `ktlintCheck`, which waits for wave
+  4's `ktlintFormat` sweep; detekt is green. The `) }` grep is clean: the only hits are inside the ktlint test
+  fixtures. The AAA markers are clean, per the test audit. Foundation `check` is green after F68. Softcover
+  F68 verify: `:core:component`, `:feature:*` and `:orchestration` compile; `:konsist:test`,
+  `:orchestration:detektMainJvm` / `stabilityCheck` and `NavItemClickResolverTest` green.
+- **Uncommitted:** F68 in both repos (two new untracked foundation files) and this tracker doc. Wave 3 is foundation `f63a8aa`, Softcover `a0559d90e`. Not pushed:
+  the foundation since `398f68c`, Softcover since `68dd22e4e`; push the foundation first.
 
 ## How to run a step
 
@@ -97,13 +101,13 @@ Every open entry in `candidates.md` ships in 0.4.0. A box moves any Softcover-lo
 deletes it from Softcover, and prunes its entries. Boxes on disjoint modules run as parallel agents.
 
 - [x] Components: F28, F32.
-- [ ] Components: F68.
+- [x] Components: F68.
 - [x] Design tokens: F38, F40, F43.
 - [x] Verify Konsist on Softcover (F67's checks), before the rule boxes; a failure re-homes its rules to detekt.
 - [x] Style wiring: F61 and F67's test module, before the rule boxes.
-- [ ] ktlint formats only: F24, F25, F58, F63; F62 moves the semantic rules out.
-- [ ] detekt rules: F29, F39, F41, F65, and the detekt halves of F57, F62, F64 and F66.
-- [ ] Konsist assertions: F34, and the Konsist halves of F52, F57, F62, F64 and F66.
+- [x] ktlint formats only: F24, F25, F58, F63; F62 moves the semantic rules out.
+- [x] detekt rules: F29, F39, F41, F65, and the detekt halves of F57, F62, F64 and F66.
+- [x] Konsist assertions: F34, and the Konsist halves of F52, F57, F62, F64 and F66.
 - [x] Build tooling: F30, F50, F52 (the Konsist half of F52 rides with the Konsist box).
 - [ ] Docs and memory: F59; the review-only rules in both code-style docs shrink to what the gates leave;
       prune agent memories the new gates make stale.

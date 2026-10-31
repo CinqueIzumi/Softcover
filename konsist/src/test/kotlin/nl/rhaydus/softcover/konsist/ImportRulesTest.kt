@@ -23,7 +23,6 @@ class ImportRulesTest {
                 ),
                 ForbiddenImport(
                     import = "androidx.compose.material3.Button",
-                    allowedFiles = listOf("**/MorphingButton.kt"),
                     reason = "Use the RhaydusButton family",
                 ),
                 ForbiddenImport(

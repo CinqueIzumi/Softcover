@@ -341,7 +341,7 @@ private fun nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
   restartable: true
   params:
     - label: STABLE (String is immutable)
-    - iconRes: STABLE (class with no mutable properties)
+    - iconRes: STABLE (marked @Stable or @Immutable)
     - selected: STABLE (primitive type)
     - isLoading: STABLE (primitive type)
     - onClick: STABLE (function type)

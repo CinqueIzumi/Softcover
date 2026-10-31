@@ -255,18 +255,6 @@ internal fun nl.rhaydus.softcover.core.component.bookcard.rememberHeldMark(markS
     - markSelected: STABLE (class with no mutable properties)
 
 @Composable
-public fun nl.rhaydus.softcover.core.component.button.MorphingButton(label: kotlin.String, tone: nl.rhaydus.softcover.core.component.button.MorphingButtonTone, onClick: kotlin.Function0<kotlin.Unit>, modifier: androidx.compose.ui.Modifier, enabled: kotlin.Boolean, icon: nl.rhaydus.designsystem.icon.RhaydusIconResource?): kotlin.Unit
-  skippable: true
-  restartable: true
-  params:
-    - label: STABLE (String is immutable)
-    - tone: STABLE (class with no mutable properties)
-    - onClick: STABLE (function type)
-    - modifier: STABLE (marked @Stable or @Immutable)
-    - enabled: STABLE (primitive type)
-    - icon: STABLE (class with no mutable properties)
-
-@Composable
 public fun nl.rhaydus.softcover.core.component.button.PillButton(model: nl.rhaydus.softcover.core.component.button.PillButtonUiModel, onEvent: kotlin.Function1<nl.rhaydus.softcover.core.component.button.PillButtonEvent, kotlin.Unit>, modifier: androidx.compose.ui.Modifier): kotlin.Unit
   skippable: true
   restartable: true

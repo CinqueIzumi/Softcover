@@ -18,7 +18,6 @@ rules all components follow are in [component-contract.md](component-contract.md
 ## Buttons & controls
 
 - **PillButton** — `button` — action pill or icon-only circle in five tones.
-- **MorphingButton** — `button` — text button that animates between the filled and tonal styles.
 - **Toggle** — `control` — filled or bare icon toggle, or a display-only switch inside a row that owns the tap.
 - **ToggleRow** — `control` — a title over an optional gloss with a trailing switch; the row is the tap target.
 - **TextField** — `field` — pill, outlined, multi-line, hero or numeral input, with an optional error state.
