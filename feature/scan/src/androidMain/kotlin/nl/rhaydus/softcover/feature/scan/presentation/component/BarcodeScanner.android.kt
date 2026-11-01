@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.scan.presentation.component
 
-import android.annotation.SuppressLint
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
@@ -52,10 +51,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanner as MlKitBarcodeScanner
  * (no Google Play Services). Constrained to EAN-13 / EAN-8 and emits the first raw value exactly
  * once via [onIsbnDetected], then stops analysing.
  */
-@SuppressLint("MissingPermission")
 @OptIn(markerClass = [ExperimentalGetImage::class])
-// Camera binding can throw a variety of vendor/IllegalState/IllegalArgument exceptions; we log and must not crash the UI.
-@Suppress("TooGenericExceptionCaught")
 @Composable
 actual fun BarcodeScanner(
     onIsbnDetected: (String) -> Unit,
@@ -111,6 +107,8 @@ actual fun BarcodeScanner(
                         }
                     }
 
+                // Camera binding can throw a variety of vendor/IllegalState/IllegalArgument exceptions; we log and must not crash the UI.
+                @Suppress("TooGenericExceptionCaught")
                 try {
                     cameraProvider.unbindAll()
 

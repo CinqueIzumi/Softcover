@@ -130,11 +130,11 @@ style:
       - value: '\bS[0-9]{1,2}-[0-9A-Z]'
         reason: 'Plans are deleted when they finish; cite nothing from docs/working. The reason goes in the PR description.'
   LoopWithTooManyJumpStatements:
-    # Two jumps in a filtering/iteration loop is readable; the default of one is too strict. The one
-    # outlier (the HTML parser's single-pass loop) carries a justified per-site @Suppress instead.
+    # Two jumps in a filtering/iteration loop is readable; the default of one is too strict.
     maxJumpCount: 2
   ThrowsCount:
-    # requireData() validates several response invariants up-front with descriptive throws.
+    # Response validators throw one descriptive exception per broken invariant, and failure handlers
+    # rethrow cancellation separately from the error, so the default of two is too strict.
     max: 4
 
 potential-bugs:

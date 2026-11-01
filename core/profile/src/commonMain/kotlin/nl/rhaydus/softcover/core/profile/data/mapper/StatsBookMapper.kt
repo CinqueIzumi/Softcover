@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.profile.data.mapper
 
+import kotlinx.datetime.number
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.data.model.StatsAuthor
 import nl.rhaydus.softcover.core.profile.data.model.StatsBook
@@ -73,8 +74,7 @@ internal fun List<StatsBook>.toPagesByMonth(currentYear: Int): List<MonthCount> 
 
         if (date.year != currentYear) return@forEach
 
-        @Suppress("DEPRECATION")
-        val month = date.monthNumber
+        val month = date.month.number
 
         pagesByMonth[month] = (pagesByMonth[month] ?: 0) + book.pages
     }

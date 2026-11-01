@@ -58,7 +58,6 @@ class SafeQueryFlowTest {
     fun setUp() {
         apolloClient = mockk()
 
-        @Suppress("UNCHECKED_CAST")
         apolloCall = mockk<ApolloCall<GetUserIdQuery.Data>>()
 
         mockkObject(SessionExpiredNotifier)

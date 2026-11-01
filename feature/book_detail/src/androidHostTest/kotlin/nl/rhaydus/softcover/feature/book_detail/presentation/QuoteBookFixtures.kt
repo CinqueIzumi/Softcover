@@ -8,7 +8,6 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 
 /** A shelved book with the edition and read facts the quote sheet's rules look at. */
-@Suppress("LongParameterList")
 internal fun buildQuoteBook(
     id: Int = 7,
     title: String = "Piranesi",

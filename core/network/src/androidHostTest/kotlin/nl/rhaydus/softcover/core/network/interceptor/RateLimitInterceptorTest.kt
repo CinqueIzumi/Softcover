@@ -51,7 +51,6 @@ class RateLimitInterceptorTest {
     fun setUp() {
         chain = mockk()
 
-        @Suppress("UNCHECKED_CAST")
         every {
             chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
         } returns emptyFlow()

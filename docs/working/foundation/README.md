@@ -15,23 +15,26 @@ filed before step 4. Every step boundary leaves both builds green. Sibling files
 
 ## Now
 
-- **State:** steps 1-3 and step 4 waves 1-3 are done, plus wave 4 box 1 (F68), the ktlint prerequisites
-  (foundation `08c6a86` + `de57ab2`, Softcover `17bcc1421`) and Softcover's `ktlintFormat` sweep under the
-  `indent` and `expression-on-equals-line` rules (935 files). The sweep converged in one pass; the one glommed
-  `if (isRangeMarked(` site (`RichTextEditing.kt`) is hoisted into `val rangeMarked`, and the
-  `if (run.x) put(` sites in `ReviewSlateMapper.kt` are braced.
-- **Next:** the F65 suppression audit. After it, in sequence: the step 4 "Docs and memory" box plus marking F66
-  as split, and step 5 (pointer box moves Softcover's `README.md` foundation line and the managed `CLAUDE.md`
-  block from 0.3.2 to 0.4.0).
-- **Open questions:** none. The user's Medium_Phone pass is pending and does not block step 4. It covers the
-  widget repaint on a time-zone change, the Explore, Reading mark-as-read swipe and Settings rows, the deadline
-  date picker and skeleton loading states, the count-up and chart motion, and the nav icons (bars, rail,
-  sidebar) after the `navIconFor` change.
-- **Verification:** Softcover `styleCheck` and `compileKotlinJvm` are green after the sweep. The reviewer found
-  no behaviour change, no stacked closers and no dangling `=` before a multi-line call (the single-call
-  `val userBookEntry =` / `mockk<...>()` wrap in `BooksRemoteDataSourceImplTest` stays; the rule allows it).
-- **Uncommitted:** the sweep (935 Kotlin files) and this tracker doc. Not pushed: the foundation since
-  `398f68c`, Softcover since `68dd22e4e`; push the foundation first.
+- **State:** steps 1-3 and step 4 waves 1-4 are done, including the ktlint `indent` /
+  `expression-on-equals-line` sweep (Softcover `ace154fe1`) and the F65 suppression audit. The audit found no
+  suppression of a contract rule. It fixed `StatsBookMapper` (`month.number`), folded `requireData`'s exception
+  branch into one throw via `apiExceptionFor`, dropped `BarcodeScanner`'s `MissingPermission` and moved its
+  generic-catch suppression onto the `try`, removed 10 dead test suppressions, and corrected the stale
+  `ThrowsCount` and `LoopWithTooManyJumpStatements` comments in `config/detekt/detekt.yml`. 15 suppressions
+  stay, each a platform limit, a crash boundary or an unavoidable generic cast.
+- **Next:** the step 4 "Docs and memory" box plus marking F66 as split, then step 5 (pointer box moves
+  Softcover's `README.md` foundation line and the managed `CLAUDE.md` block from 0.3.2 to 0.4.0).
+- **Open questions:** `BookDao` has 123 functions against the 100 Softcover's `TooManyFunctions` override
+  allows, hidden by `@Suppress`; the recommendation is to split it by concern as its own step (Room, Koin, every
+  caller). Awaiting the user's call. The user's Medium_Phone pass is pending and does not block step 4. It
+  covers the widget repaint on a time-zone change, the Explore, Reading mark-as-read swipe and Settings rows,
+  the deadline date picker and skeleton loading states, the count-up and chart motion, and the nav icons (bars,
+  rail, sidebar) after the `navIconFor` change.
+- **Verification:** after the audit, `styleCheck`, `testAndroidHostTest` on `:core:network`, `:core:profile`
+  and `:feature:book_detail`, `:feature:scan:lint` and `:core:network:compileKotlinJvm` are green; the reviewer
+  found no behaviour change and no review-only rule breaks.
+- **Uncommitted:** the F65 audit (8 files) and this tracker doc. Not pushed: the foundation since `398f68c`,
+  Softcover since `68dd22e4e`; push the foundation first.
 
 ## How to run a step
 

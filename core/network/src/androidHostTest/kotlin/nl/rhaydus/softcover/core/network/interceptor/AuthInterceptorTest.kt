@@ -28,7 +28,6 @@ class AuthInterceptorTest {
         authTokenProvider = mockk()
         chain = mockk()
 
-        @Suppress("UNCHECKED_CAST")
         every {
             chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
         } returns emptyFlow()
@@ -50,7 +49,6 @@ class AuthInterceptorTest {
             val interceptor = buildInterceptor("my-secret-key")
             val capturedRequest = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
-            @Suppress("UNCHECKED_CAST")
             every {
                 chain.proceed(capture(capturedRequest))
             } returns emptyFlow()
@@ -74,7 +72,6 @@ class AuthInterceptorTest {
             val interceptor = buildInterceptor(null)
             val capturedRequest = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
-            @Suppress("UNCHECKED_CAST")
             every {
                 chain.proceed(capture(capturedRequest))
             } returns emptyFlow()
@@ -98,7 +95,6 @@ class AuthInterceptorTest {
             val interceptor = buildInterceptor("   ")
             val capturedRequest = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
-            @Suppress("UNCHECKED_CAST")
             every {
                 chain.proceed(capture(capturedRequest))
             } returns emptyFlow()
@@ -122,7 +118,6 @@ class AuthInterceptorTest {
             val interceptor = buildInterceptor("")
             val capturedRequest = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
-            @Suppress("UNCHECKED_CAST")
             every {
                 chain.proceed(capture(capturedRequest))
             } returns emptyFlow()
@@ -154,7 +149,6 @@ class AuthInterceptorTest {
 
             val captured1 = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
-            @Suppress("UNCHECKED_CAST")
             every {
                 chain.proceed(capture(captured1))
             } returns emptyFlow()
@@ -168,7 +162,6 @@ class AuthInterceptorTest {
 
             val captured2 = slot<ApolloRequest<GetUserBookListsQuery.Data>>()
 
-            @Suppress("UNCHECKED_CAST")
             every {
                 chain.proceed(capture(captured2))
             } returns emptyFlow()

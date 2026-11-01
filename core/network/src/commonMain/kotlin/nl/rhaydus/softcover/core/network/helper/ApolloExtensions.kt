@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import nl.rhaydus.platform.NetworkAvailability
+import nl.rhaydus.softcover.core.domain.exception.ApiException
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
@@ -123,28 +124,16 @@ private fun retryDelayFor(
 private fun ServerUnavailableException.retryAfterDurationOrNull(): Duration? =
     (cause as? ApolloHttpException)?.retryAfterOrNull()
 
-// Each throw is a distinct, deliberate failure path mapped to the sealed `ApiException` hierarchy
-// (retryable transport, auth-rejected, and unexpected/GraphQL), so the count is over the threshold by
-// design. Suppressed rather than gated.
-@Suppress("ThrowsCount")
-private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
-    response.exception?.let { exception ->
-        // A transient transport/server failure is retryable: the write is applied optimistically and
-        // will sync later. Everything else is a genuine failure.
-        retryableTransportFailureOrNull(exception)?.let { throw it }
-
-        // A rejected token drives the re-auth dialog rather than a generic error.
-        authFailureOrNull(exception)?.let {
-            SessionExpiredNotifier.notifySessionExpired()
-
-            throw it
-        }
-
-        throw UnexpectedApiException(
+private fun apiExceptionFor(exception: Throwable): ApiException =
+    retryableTransportFailureOrNull(exception)
+        ?: authFailureOrNull(exception)?.also { SessionExpiredNotifier.notifySessionExpired() }
+        ?: UnexpectedApiException(
             "Apollo error: ${exception.message}",
             exception,
         )
-    }
+
+private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
+    response.exception?.let { throw apiExceptionFor(it) }
 
     if (response.errors.isNullOrEmpty().not()) {
         val message = response.errors?.joinToString { error ->
